@@ -23,6 +23,13 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 
 // ============================================================================
+// PRODUCTION LOGGER
+// ============================================================================
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('VideoStudio')
+
+// ============================================================================
 // A+++ UTILITIES
 // ============================================================================
 import { DashboardSkeleton, CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
@@ -183,28 +190,23 @@ export default function VideoStudioPage() {
 
   // Handlers - New comprehensive implementations
   const handleCreateFirstProject = () => {
-    console.log('➕ VIDEO STUDIO: Create first project initiated')
-    console.log('📋 VIDEO STUDIO: Opening project creation modal')
-    console.log('📊 VIDEO STUDIO: Next steps available:')
-    console.log('  • Enter project name and description')
-    console.log('  • Choose video format and resolution')
-    console.log('  • Select templates or start from scratch')
-    console.log('  • Add collaborators to your project')
-    console.log('  • Access Universal Pinpoint System for feedback')
-    console.log('  • Use AI-powered editing tools')
-    console.log('  • Render and export your video')
+    logger.info('Project creation initiated')
     toast.info('Opening project creation...')
     setIsCreateModalOpen(true)
   }
 
   const handleNewProject = () => {
-    console.log('➕ NEW PROJECT')
+    logger.info('New project creation started')
     toast.info('Creating new video project...')
     handleCreateFirstProject()
   }
 
   const handleCreateNewProject = async () => {
-    console.log('➕ CREATE NEW PROJECT - SUBMIT')
+    logger.info('Project submission started', {
+      title: newProject.title,
+      resolution: newProject.resolution,
+      format: newProject.format
+    })
 
     if (!newProject.title.trim()) {
       toast.error('Please enter a project name')
@@ -218,15 +220,10 @@ export default function VideoStudioPage() {
       // Note: In production, this would POST to /api/video/projects
       const projectId = `proj_${Date.now()}`
 
-      console.log('✅ VIDEO STUDIO: Project created successfully')
-      console.log('🆔 VIDEO STUDIO: Project ID:', projectId)
-      console.log('📋 VIDEO STUDIO: Next steps:')
-      console.log('  • Open the video editor')
-      console.log('  • Import your media files')
-      console.log('  • Start editing with AI tools')
-      console.log('  • Add team members for collaboration')
-      console.log('  • Use Universal Pinpoint System for feedback')
-      console.log('  • Render and export when ready')
+      logger.info('Project created successfully', {
+        projectId,
+        title: newProject.title
+      })
       toast.success('Video project created successfully!')
 
       // Navigate to UPS after 2 seconds
@@ -246,7 +243,7 @@ export default function VideoStudioPage() {
         client: ''
       })
     } catch (error: any) {
-      console.error('Create Project Error:', error)
+      logger.error('Failed to create project', { error, title: newProject.title })
       toast.error('Failed to create project', {
         description: error.message || 'Please try again later'
       })
@@ -256,133 +253,88 @@ export default function VideoStudioPage() {
   }
 
   const handleRecord = () => {
-    console.log('🎬 VIDEO STUDIO: Record initiated')
-    console.log('📊 VIDEO STUDIO: Next steps:')
-    console.log('  • Connect your camera and microphone')
-    console.log('  • Choose recording quality (1080p, 4K)')
-    console.log('  • Start/stop recording with spacebar')
-    console.log('  • Add real-time filters and effects')
-    console.log('  • Review and trim your recording')
-    console.log('  • Save directly to your project')
+    logger.info('Video recorder opened')
     toast.info('Opening video recorder...')
   }
 
   const handleAITools = () => {
-    console.log('🤖 VIDEO STUDIO: AI Tools opened')
-    console.log('📊 VIDEO STUDIO: Features available:')
-    console.log('  • AI Auto-Edit: Smart scene detection (94.5% accuracy)')
-    console.log('  • Script Generator: Create engaging scripts')
-    console.log('  • Auto Captions: Generate subtitles automatically')
-    console.log('  • Color Correction: Professional color grading')
-    console.log('  • Smart Transitions: AI-suggested scene transitions')
-    console.log('  • Voice Enhancement: Noise reduction and clarity boost')
+    logger.info('AI Tools panel opened')
     toast.info('Opening AI Tools panel...')
     setIsAIToolsOpen(true)
   }
 
   const handleOpenEditor = () => {
-    console.log('🎨 VIDEO STUDIO: Editor opened')
-    console.log('📊 VIDEO STUDIO: Next steps:')
-    console.log('  • Import video clips and media')
-    console.log('  • Arrange clips on timeline')
-    console.log('  • Add transitions, effects, and filters')
-    console.log('  • Use AI auto-cut for smart scene detection')
-    console.log('  • Apply color correction and grading')
-    console.log('  • Add text overlays and lower thirds')
-    console.log('  • Export in 4K resolution')
+    logger.info('Video editor opened')
     toast.info('Loading video editor...')
   }
 
   const handleUploadAssets = () => {
-    console.log('📤 VIDEO STUDIO: Upload assets initiated')
-    console.log('📊 VIDEO STUDIO: Next steps:')
-    console.log('  • Select video files (MP4, MOV, AVI)')
-    console.log('  • Upload audio tracks (MP3, WAV, AAC)')
-    console.log('  • Add images and graphics (PNG, JPG, SVG)')
-    console.log('  • Import stock footage from library')
-    console.log('  • Organize assets into folders')
-    console.log('  • Tag assets for easy searching')
-    console.log('  • Access 234+ professional assets')
+    logger.info('Asset uploader opened')
     toast.info('Opening asset uploader...')
   }
 
   const handleStartRender = () => {
-    console.log('🎬 VIDEO STUDIO: Render started')
-    console.log('📊 VIDEO STUDIO: Render settings:')
-    console.log('  • Choose output resolution (1080p, 4K)')
-    console.log('  • Select video codec (H.264, H.265)')
-    console.log('  • Set quality level (High, Medium, Low)')
-    console.log('  • Estimated render time: 12.5 minutes')
-    console.log('  • Monitor render progress in real-time')
-    console.log('  • Download rendered video when complete')
-    console.log('  • Success rate: 94.2%')
+    logger.info('Video render started')
     toast.info('Starting video render...')
   }
 
   const handleViewAnalytics = () => {
-    console.log('📊 VIDEO STUDIO: Analytics opened')
-    console.log('📊 VIDEO STUDIO: Metrics available:')
-    console.log('  • View project performance metrics')
-    console.log('  • Track render times and success rates')
-    console.log('  • Monitor storage usage (1.2TB used)')
-    console.log('  • Analyze team collaboration scores')
-    console.log('  • Check client satisfaction ratings (9.1/10)')
-    console.log('  • Review efficiency scores (92%)')
-    console.log('  • Export analytics reports')
+    logger.info('Video analytics opened')
     toast.info('Loading video analytics...')
   }
 
   const handleOpenProject = (projectId: string) => {
     const project = mockProjects.find(p => p.id === projectId)
-    console.log('📂 VIDEO STUDIO: Open project initiated')
-    console.log('📊 VIDEO STUDIO: Project ID:', projectId)
-    console.log('📝 VIDEO STUDIO: Title:', project?.title)
-    console.log('⏱️ VIDEO STUDIO: Duration:', project?.duration + 's')
-    console.log('📐 VIDEO STUDIO: Resolution:', project?.resolution)
-    console.log('📊 VIDEO STUDIO: Status:', project?.status)
-    console.log('✅ VIDEO STUDIO: Loading video editor...')
+    logger.info('Project opened', {
+      projectId,
+      title: project?.title,
+      duration: project?.duration,
+      resolution: project?.resolution,
+      status: project?.status
+    })
     // TODO: Navigate to video editor with project loaded
     router.push(`/dashboard/video-studio/editor?project=${projectId}`)
   }
 
   const handleDeleteProject = (projectId: string) => {
     const project = mockProjects.find(p => p.id === projectId)
-    console.log('🗑️ VIDEO STUDIO: Delete project initiated')
-    console.log('📊 VIDEO STUDIO: Project:', project?.title)
-    console.log('📊 VIDEO STUDIO: Views:', project?.views)
+    logger.info('Project deletion initiated', {
+      projectId,
+      title: project?.title,
+      views: project?.views
+    })
 
     if (confirm(`Delete "${project?.title}"?\n\nThis action cannot be undone.`)) {
-      console.log('✅ VIDEO STUDIO: Project deleted successfully')
-      console.log('📊 VIDEO STUDIO: Deleted project:', project?.title)
+      logger.info('Project deleted', { projectId, title: project?.title })
       toast.success(`Project "${project?.title}" deleted`)
       // TODO: Remove from state/database
     } else {
-      console.log('❌ VIDEO STUDIO: Deletion cancelled')
+      logger.debug('Project deletion cancelled')
     }
   }
 
   const handleDuplicateProject = (projectId: string) => {
     const project = mockProjects.find(p => p.id === projectId)
-    console.log('📋 VIDEO STUDIO: Duplicate project initiated')
-    console.log('📊 VIDEO STUDIO: Original project:', project?.title)
-    console.log('📊 VIDEO STUDIO: Duration:', project?.duration + 's')
-    console.log('📊 VIDEO STUDIO: Size:', project?.size)
-    console.log('⚙️ VIDEO STUDIO: Creating duplicate...')
-    console.log('✅ VIDEO STUDIO: Project duplicated successfully')
-    console.log('📝 VIDEO STUDIO: New title:', project?.title + ' (Copy)')
+    logger.info('Project duplicated', {
+      projectId,
+      originalTitle: project?.title,
+      newTitle: project?.title + ' (Copy)',
+      duration: project?.duration,
+      size: project?.size
+    })
     toast.success(`Project duplicated: ${project?.title} (Copy)`)
     // TODO: Create duplicate in state/database
   }
 
   const handleExportVideo = (format: string) => {
-    console.log('💾 VIDEO STUDIO: Export video initiated')
-    console.log('📊 VIDEO STUDIO: Export format:', format)
-    console.log('📊 VIDEO STUDIO: Current resolution:', '1080p')
-    console.log('📊 VIDEO STUDIO: Estimated size:', format === 'MP4' ? '~150MB' : format === 'MOV' ? '~300MB' : '~500MB')
-    console.log('⚙️ VIDEO STUDIO: Starting export process...')
-    console.log('📊 VIDEO STUDIO: Encoding settings: H.264, AAC audio')
-    console.log('⏱️ VIDEO STUDIO: Estimated time: 2-5 minutes')
-    console.log('✅ VIDEO STUDIO: Export queued successfully')
+    const estimatedSize = format === 'MP4' ? '~150MB' : format === 'MOV' ? '~300MB' : '~500MB'
+    logger.info('Video export queued', {
+      format,
+      resolution: '1080p',
+      estimatedSize,
+      codec: 'H.264',
+      audio: 'AAC'
+    })
     toast.success(`Exporting to ${format}...`, {
       description: 'Processing will complete in 2-5 minutes'
     })
@@ -391,14 +343,12 @@ export default function VideoStudioPage() {
 
   const handlePublishVideo = (projectId: string) => {
     const project = mockProjects.find(p => p.id === projectId)
-    console.log('🚀 VIDEO STUDIO: Publish video initiated')
-    console.log('📊 VIDEO STUDIO: Project:', project?.title)
-    console.log('📊 VIDEO STUDIO: Duration:', project?.duration + 's')
-    console.log('🎯 VIDEO STUDIO: Publishing to: Platform, YouTube, Vimeo')
-    console.log('⚙️ VIDEO STUDIO: Uploading video...')
-    console.log('📊 VIDEO STUDIO: Generating thumbnail...')
-    console.log('📊 VIDEO STUDIO: Creating metadata...')
-    console.log('✅ VIDEO STUDIO: Video published successfully')
+    logger.info('Video published', {
+      projectId,
+      title: project?.title,
+      duration: project?.duration,
+      platforms: ['Platform', 'YouTube', 'Vimeo']
+    })
     toast.success(`"${project?.title}" published!`, {
       description: 'Video is now live on platform'
     })
@@ -408,11 +358,11 @@ export default function VideoStudioPage() {
   const handleShareVideo = (projectId: string) => {
     const project = mockProjects.find(p => p.id === projectId)
     const shareLink = `https://kazi.app/video/${projectId}`
-    console.log('🔗 VIDEO STUDIO: Share video initiated')
-    console.log('📊 VIDEO STUDIO: Project:', project?.title)
-    console.log('📎 VIDEO STUDIO: Share link:', shareLink)
-    console.log('📊 VIDEO STUDIO: Share options:', ['Link', 'Email', 'Social Media', 'Embed Code'])
-    console.log('✅ VIDEO STUDIO: Share link generated')
+    logger.info('Share link generated', {
+      projectId,
+      title: project?.title,
+      shareLink
+    })
     toast.success('Share link created', {
       description: 'Link copied to clipboard'
     })
@@ -423,102 +373,86 @@ export default function VideoStudioPage() {
   const handleToggleMute = () => {
     const newMuted = !isMuted
     setIsMuted(newMuted)
-    console.log(newMuted ? '🔇 VIDEO STUDIO: Muted' : '🔊 VIDEO STUDIO: Unmuted')
-    console.log('📊 VIDEO STUDIO: Volume:', volume[0] + '%')
+    logger.debug('Volume toggled', { muted: newMuted, volume: volume[0] })
   }
 
   const handleToggleFullscreen = () => {
     const newFullscreen = !isFullscreen
     setIsFullscreen(newFullscreen)
-    console.log(newFullscreen ? '⛶ VIDEO STUDIO: Fullscreen enabled' : '🪟 VIDEO STUDIO: Fullscreen disabled')
-    console.log('📊 VIDEO STUDIO: Player mode:', newFullscreen ? 'Fullscreen' : 'Normal')
+    logger.debug('Fullscreen toggled', { fullscreen: newFullscreen })
   }
 
   const handleAddMedia = (type: string) => {
-    console.log('➕ VIDEO STUDIO: Add media initiated')
-    console.log('📊 VIDEO STUDIO: Media type:', type)
-    console.log('📂 VIDEO STUDIO: Options:', ['Browse Library', 'Upload New', 'Record', 'Stock Media'])
-    console.log('📊 VIDEO STUDIO: Supported formats:', type === 'video' ? 'MP4, MOV, AVI, MKV' : type === 'image' ? 'JPG, PNG, GIF, SVG' : 'MP3, WAV, AAC, OGG')
-    console.log('✅ VIDEO STUDIO: Media browser opened')
+    const formats = type === 'video' ? 'MP4, MOV, AVI, MKV' : type === 'image' ? 'JPG, PNG, GIF, SVG' : 'MP3, WAV, AAC, OGG'
+    logger.info('Media browser opened', { mediaType: type, supportedFormats: formats })
     setIsUploadDialogOpen(true)
     // TODO: Open media library/upload modal
   }
 
   const handleAddTransition = () => {
-    console.log('✨ VIDEO STUDIO: Add transition initiated')
-    console.log('📊 VIDEO STUDIO: Available transitions:', ['Fade', 'Dissolve', 'Wipe', 'Slide', 'Zoom', '3D Flip'])
-    console.log('📊 VIDEO STUDIO: Default duration: 1s')
-    console.log('🎯 VIDEO STUDIO: Position: Between current clips')
-    console.log('✅ VIDEO STUDIO: Transition browser opened')
+    logger.info('Transition browser opened', {
+      transitions: ['Fade', 'Dissolve', 'Wipe', 'Slide', 'Zoom', '3D Flip'],
+      defaultDuration: '1s'
+    })
     // TODO: Open transition picker modal
   }
 
   const handleAddEffect = () => {
-    console.log('🎨 VIDEO STUDIO: Add effect initiated')
-    console.log('📊 VIDEO STUDIO: Effect categories:', ['Color', 'Blur', 'Distort', 'Stylize', 'Time'])
-    console.log('📊 VIDEO STUDIO: Popular effects:', ['Blur', 'Sharpen', 'Color Correction', 'Vignette', 'Glow'])
-    console.log('🎯 VIDEO STUDIO: Apply to: Current clip')
-    console.log('✅ VIDEO STUDIO: Effect library opened')
+    logger.info('Effect library opened', {
+      categories: ['Color', 'Blur', 'Distort', 'Stylize', 'Time'],
+      popular: ['Blur', 'Sharpen', 'Color Correction', 'Vignette', 'Glow']
+    })
     // TODO: Open effects library modal
   }
 
   const handleAddText = () => {
-    console.log('📝 VIDEO STUDIO: Add text initiated')
-    console.log('📊 VIDEO STUDIO: Text options:', ['Title', 'Subtitle', 'Lower Third', 'Credits'])
-    console.log('🎨 VIDEO STUDIO: Customization:', ['Font', 'Size', 'Color', 'Animation', 'Position'])
-    console.log('⏱️ VIDEO STUDIO: Default duration: 5s')
-    console.log('✅ VIDEO STUDIO: Text editor opened')
+    logger.info('Text editor opened', {
+      options: ['Title', 'Subtitle', 'Lower Third', 'Credits'],
+      defaultDuration: '5s'
+    })
     // TODO: Open text editor modal
   }
 
   const handleAddAudio = () => {
-    console.log('🎵 VIDEO STUDIO: Add audio initiated')
-    console.log('📊 VIDEO STUDIO: Audio sources:', ['Music Library', 'Upload File', 'Record Voiceover', 'AI Voiceover'])
-    console.log('📊 VIDEO STUDIO: Supported formats: MP3, WAV, AAC, OGG')
-    console.log('🎚️ VIDEO STUDIO: Audio tools:', ['Volume', 'Fade In/Out', 'EQ', 'Noise Reduction'])
-    console.log('✅ VIDEO STUDIO: Audio library opened')
+    logger.info('Audio library opened', {
+      sources: ['Music Library', 'Upload File', 'Record Voiceover', 'AI Voiceover'],
+      formats: 'MP3, WAV, AAC, OGG'
+    })
     // TODO: Open audio library/recorder modal
   }
 
   const handleTrimClip = () => {
-    console.log('✂️ VIDEO STUDIO: Trim clip initiated')
-    console.log('📊 VIDEO STUDIO: Current clip duration:', currentTime + 's')
-    console.log('🎯 VIDEO STUDIO: Trim mode: Drag handles to adjust')
-    console.log('📊 VIDEO STUDIO: Precision: Frame-by-frame')
-    console.log('✅ VIDEO STUDIO: Trim mode activated')
+    logger.info('Trim mode activated', {
+      clipDuration: currentTime,
+      precision: 'frame-by-frame'
+    })
     // TODO: Enable trim mode on timeline
   }
 
   const handleSplitClip = () => {
-    console.log('✂️ VIDEO STUDIO: Split clip initiated')
-    console.log('⏱️ VIDEO STUDIO: Split at:', currentTime + 's')
-    console.log('📊 VIDEO STUDIO: Creating two clips from one')
-    console.log('✅ VIDEO STUDIO: Clip split successfully')
+    logger.info('Clip split', { splitTime: currentTime })
     toast.success('Clip split at playhead position')
     // TODO: Split clip in timeline
   }
 
   const handleUseTemplate = (templateId: string) => {
     const template = mockTemplates.find(t => t.id === templateId)
-    console.log('📋 VIDEO STUDIO: Use template initiated')
-    console.log('📊 VIDEO STUDIO: Template ID:', templateId)
-    console.log('📝 VIDEO STUDIO: Template name:', template?.name)
-    console.log('⏱️ VIDEO STUDIO: Duration:', template?.duration + 's')
-    console.log('🎯 VIDEO STUDIO: Category:', template?.category)
-    console.log('⚙️ VIDEO STUDIO: Applying template...')
-    console.log('✅ VIDEO STUDIO: Template applied successfully')
+    logger.info('Template applied', {
+      templateId,
+      name: template?.name,
+      duration: template?.duration,
+      category: template?.category
+    })
     setSelectedTemplate(template || null)
     toast.success(`Template "${template?.name}" applied`)
     // TODO: Load template into project
   }
 
   const handleSaveProject = () => {
-    console.log('💾 VIDEO STUDIO: Save project initiated')
-    console.log('📊 VIDEO STUDIO: Project:', selectedProject?.title || 'Current Project')
-    console.log('📊 VIDEO STUDIO: Changes:', 'Timeline, effects, transitions')
-    console.log('⚙️ VIDEO STUDIO: Saving to cloud...')
-    console.log('✅ VIDEO STUDIO: Project saved successfully')
-    console.log('⏱️ VIDEO STUDIO: Auto-save enabled')
+    logger.info('Project saved', {
+      project: selectedProject?.title || 'Current Project',
+      changes: 'Timeline, effects, transitions'
+    })
     toast.success('Project saved', {
       description: 'All changes synced to cloud'
     })
@@ -526,22 +460,16 @@ export default function VideoStudioPage() {
   }
 
   const handleUndo = () => {
-    console.log('↩️ VIDEO STUDIO: Undo action')
-    console.log('📊 VIDEO STUDIO: Reverting last change')
-    console.log('📋 VIDEO STUDIO: History available: Yes')
-    console.log('✅ VIDEO STUDIO: Undo complete')
+    logger.debug('Undo action')
     // TODO: Implement undo stack
   }
 
   const handleRedo = () => {
-    console.log('↪️ VIDEO STUDIO: Redo action')
-    console.log('📊 VIDEO STUDIO: Reapplying last undone change')
-    console.log('📋 VIDEO STUDIO: Redo available: Yes')
-    console.log('✅ VIDEO STUDIO: Redo complete')
+    logger.debug('Redo action')
     // TODO: Implement redo stack
   }
   const handleGenerateSubtitles = async () => {
-    console.log('📝 GENERATE SUBTITLES')
+    logger.info('Subtitle generation started')
 
     try {
       const response = await fetch('/api/ai/video-tools', {
@@ -564,19 +492,20 @@ export default function VideoStudioPage() {
       const result = await response.json()
 
       if (result.success) {
+        logger.info('Subtitles generated successfully')
         toast.success('📝 Subtitles generated!', {
           description: 'AI-powered captions have been created for your video'
         })
       }
     } catch (error: any) {
-      console.error('Generate Subtitles Error:', error)
+      logger.error('Failed to generate subtitles', { error })
       toast.error('Failed to generate subtitles', {
         description: error.message || 'Please try again later'
       })
     }
   }
   const handleAIEnhancement = async () => {
-    console.log('✨ AI ENHANCEMENT')
+    logger.info('AI enhancement started')
 
     try {
       const response = await fetch('/api/ai/video-tools', {
@@ -599,29 +528,24 @@ export default function VideoStudioPage() {
       const result = await response.json()
 
       if (result.success) {
-        console.log('✅ VIDEO STUDIO: AI Enhancement complete')
-        console.log('📊 VIDEO STUDIO: Applied:')
-        console.log('  • Auto color correction')
-        console.log('  • Noise reduction')
-        console.log('  • Video stabilization')
-        console.log('  • Quality optimization')
+        logger.info('AI enhancement completed', {
+          applied: ['Color correction', 'Noise reduction', 'Stabilization', 'Quality optimization']
+        })
         toast.success('✨ AI Enhancement complete!', {
           description: 'Color correction, noise reduction, and stabilization applied'
         })
       }
     } catch (error: any) {
-      console.error('AI Enhancement Error:', error)
+      logger.error('Failed to enhance video', { error })
       toast.error('Failed to enhance video', {
         description: error.message || 'Please try again later'
       })
     }
   }
   const handleCollaborate = () => {
-    console.log('👥 VIDEO STUDIO: Collaborate initiated')
-    console.log('📊 VIDEO STUDIO: Collaboration features:', ['Share Project', 'Real-time Editing', 'Comments', 'Version Control'])
-    console.log('📧 VIDEO STUDIO: Invite options:', ['Email', 'Link', 'Team Members'])
-    console.log('🔐 VIDEO STUDIO: Permissions:', ['View Only', 'Comment', 'Edit', 'Admin'])
-    console.log('✅ VIDEO STUDIO: Collaboration panel opened')
+    logger.info('Collaboration panel opened', {
+      features: ['Share Project', 'Real-time Editing', 'Comments', 'Version Control']
+    })
     toast.success('Collaboration enabled', {
       description: 'Invite team members to edit together'
     })
@@ -629,11 +553,11 @@ export default function VideoStudioPage() {
   }
 
   const handleRenderPreview = () => {
-    console.log('👁️ VIDEO STUDIO: Render preview initiated')
-    console.log('📊 VIDEO STUDIO: Preview settings:', ['Resolution: 1080p', 'Quality: High', 'Duration: Full'])
-    console.log('⚙️ VIDEO STUDIO: Rendering preview...')
-    console.log('⏱️ VIDEO STUDIO: Estimated time: 30-60 seconds')
-    console.log('✅ VIDEO STUDIO: Preview rendering started')
+    logger.info('Preview rendering started', {
+      resolution: '1080p',
+      quality: 'High',
+      estimatedTime: '30-60s'
+    })
     toast.success('Rendering preview...', {
       description: 'Will be ready in 30-60 seconds'
     })
@@ -641,39 +565,32 @@ export default function VideoStudioPage() {
   }
 
   const handleApplyColorGrade = () => {
-    console.log('🎨 VIDEO STUDIO: Apply color grade initiated')
-    console.log('📊 VIDEO STUDIO: Color tools:', ['Brightness', 'Contrast', 'Saturation', 'Hue', 'Temperature'])
-    console.log('🎨 VIDEO STUDIO: Presets:', ['Natural', 'Cinematic', 'Vibrant', 'Vintage', 'B&W'])
-    console.log('📊 VIDEO STUDIO: Advanced:', ['LUTs', 'Curves', 'Color Wheels'])
-    console.log('✅ VIDEO STUDIO: Color grading panel opened')
+    logger.info('Color grading panel opened', {
+      presets: ['Natural', 'Cinematic', 'Vibrant', 'Vintage', 'B&W']
+    })
     // TODO: Open color grading panel
   }
 
   const handleAnalytics = (projectId: string) => {
     const project = mockProjects.find(p => p.id === projectId)
-    console.log('📊 VIDEO STUDIO: Analytics opened')
-    console.log('📊 VIDEO STUDIO: Project:', project?.title)
-    console.log('📈 VIDEO STUDIO: Metrics:', {
+    logger.info('Analytics dashboard opened', {
+      projectId,
+      title: project?.title,
       views: project?.views,
       likes: project?.likes,
-      comments: project?.comments,
-      'watch time': '~75%',
-      'avg duration': '2m 45s'
+      comments: project?.comments
     })
-    console.log('🎯 VIDEO STUDIO: Insights:', ['Peak viewing times', 'Audience demographics', 'Traffic sources'])
-    console.log('✅ VIDEO STUDIO: Analytics dashboard loaded')
     // TODO: Navigate to analytics page
     router.push(`/dashboard/video-studio/analytics?project=${projectId}`)
   }
 
   const handleVersionHistory = (projectId: string) => {
     const project = mockProjects.find(p => p.id === projectId)
-    console.log('📜 VIDEO STUDIO: Version history opened')
-    console.log('📊 VIDEO STUDIO: Project:', project?.title)
-    console.log('📊 VIDEO STUDIO: Total versions: 12')
-    console.log('📅 VIDEO STUDIO: Latest:', new Date().toLocaleString())
-    console.log('🔄 VIDEO STUDIO: Actions:', ['View', 'Restore', 'Compare', 'Download'])
-    console.log('✅ VIDEO STUDIO: Version history loaded')
+    logger.info('Version history loaded', {
+      projectId,
+      title: project?.title,
+      totalVersions: 12
+    })
     toast.success('Version history loaded', {
       description: '12 versions available'
     })
@@ -897,9 +814,9 @@ export default function VideoStudioPage() {
     try {
       setIsRecording(true)
       // In a real implementation, you would start actual recording here
-      console.log('Recording started with type:', recordingType)
+      logger.info('Recording started', { type: recordingType })
     } catch (error) {
-      console.error('Failed to start recording:', error)
+      logger.error('Failed to start recording', { error })
       setIsRecording(false)
     }
   }
@@ -908,9 +825,9 @@ export default function VideoStudioPage() {
     try {
       setIsRecording(false)
       // In a real implementation, you would stop recording and save the file
-      console.log('Recording stopped and processing...')
+      logger.info('Recording stopped and processing')
     } catch (error) {
-      console.error('Failed to stop recording:', error)
+      logger.error('Failed to stop recording', { error })
     }
   }
 
@@ -920,7 +837,7 @@ export default function VideoStudioPage() {
 
   const handleCreateProject = async () => {
     if (!newProject.title.trim()) {
-      console.error('Project title is required')
+      logger.warn('Project title is required')
       return
     }
 
@@ -943,10 +860,15 @@ export default function VideoStudioPage() {
         client: newProject.client,
         tags: []
       }
-      
+
       // In a real app, this would be saved to the backend
-      console.log('Creating project:', project)
-      
+      logger.info('Project created', {
+        id: project.id,
+        title: project.title,
+        resolution: project.resolution,
+        format: project.format
+      })
+
       setIsCreateModalOpen(false)
       setNewProject({
         title: '',
@@ -956,7 +878,7 @@ export default function VideoStudioPage() {
         client: ''
       })
     } catch (error) {
-      console.error('Failed to create project:', error)
+      logger.error('Failed to create project', { error })
     }
   }
 
@@ -1379,7 +1301,7 @@ export default function VideoStudioPage() {
                       size="sm"
                       onClick={() => {
                           // Open video studio settings
-                          console.log('ℹ️', 'Video Studio settings - Feature coming soon!')
+                          logger.info('Video Studio settings opened')
                         }}
                     >
                       <Settings className="w-4 h-4" />
@@ -1523,7 +1445,7 @@ export default function VideoStudioPage() {
                         size="sm"
                         className="flex-1"
                         onClick={() => {
-                          console.log('✅', `Share link copied for: ${project.title}`)
+                          logger.info('Share link copied', { projectId: project.id, title: project.title })
                           // Copy share link to clipboard
                           navigator.clipboard.writeText(`${window.location.origin}/share/${project.id}`)
                         }}
@@ -1584,7 +1506,7 @@ export default function VideoStudioPage() {
                         size="sm"
                         className="flex-1"
                         onClick={() => {
-                          console.log('✅', `Applied template: ${template.name}`)
+                          logger.info('Template applied', { templateId: template.id, name: template.name })
                           // Apply template to new project
                         }}
                       >
@@ -1718,7 +1640,7 @@ onClick={() => {
                         size="sm"
                         className="flex-1 text-xs"
                         onClick={() => {
-                          console.log('ℹ️', `Downloading ${asset.name}...`)
+                          logger.info('Asset download started', { assetId: asset.id, name: asset.name })
                           // Download asset file
                           const link = document.createElement('a')
                           link.href = asset.url
@@ -1881,11 +1803,11 @@ onClick={() => {
           <div className="overflow-y-auto max-h-[80vh] pr-2">
             <VideoTemplates
               onSelectTemplate={(template) => {
-                console.log('✅', `Applied template: ${template.name}`)
+                logger.info('Template applied', { name: template.name })
                 setIsTemplateDialogOpen(false)
               }}
               onPreviewTemplate={(template) => {
-                console.log('ℹ️', `Previewing: ${template.name}`)
+                logger.info('Template preview opened', { name: template.name })
               }}
             />
           </div>
@@ -1901,7 +1823,7 @@ onClick={() => {
             <EnhancedFileUpload
               acceptedTypes="all"
               onUploadComplete={(files) => {
-                console.log('✅', `Uploaded ${files.length} file(s) successfully!`)
+                logger.info('Files uploaded successfully', { fileCount: files.length })
                 setIsUploadDialogOpen(false)
               }}
               maxFiles={20}
@@ -1919,10 +1841,10 @@ onClick={() => {
           setSelectedAsset(null)
         }}
         onAddToProject={(asset) => {
-          console.log('✅', `Added ${asset.name} to project`)
+          logger.info('Asset added to project', { assetId: asset.id, name: asset.name })
         }}
         onDownload={(asset) => {
-          console.log('✅', `Downloading ${asset.name}`)
+          logger.info('Asset download started', { assetId: asset.id, name: asset.name })
         }}
       />
     </div>

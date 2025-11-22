@@ -35,6 +35,13 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 
+// ============================================================================
+// PRODUCTION LOGGER
+// ============================================================================
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ProjectsHub')
+
 // A+++ Utilities
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
@@ -139,37 +146,40 @@ export default function ProjectsHubPage() {
 
   // Enhanced Handlers with Full Implementations
   const handleViewProject = (project: Project) => {
-    console.log('👁️ VIEW PROJECT')
-    console.log('📁 Project:', project.title)
-    console.log('👤 Client:', project.client_name)
-    console.log('📊 Status:', project.status)
-    console.log('💰 Budget:', `$${project.budget.toLocaleString()}`)
-    console.log('📈 Progress:', `${project.progress}%`)
+    logger.info('Project view opened', {
+      projectId: project.id,
+      title: project.title,
+      client: project.client_name,
+      status: project.status,
+      budget: project.budget,
+      progress: project.progress
+    })
     setSelectedProject(project)
     setIsViewModalOpen(true)
   }
 
   const handleEditProject = (project: Project) => {
-    console.log('✏️ EDIT PROJECT')
-    console.log('📁 Project ID:', project.id)
-    console.log('📝 Title:', project.title)
+    logger.info('Project edit opened', {
+      projectId: project.id,
+      title: project.title
+    })
     setSelectedProject(project)
     setIsEditModalOpen(true)
   }
 
   const handleDeleteProject = async (id: string) => {
     const project = projects.find(p => p.id === id)
-    console.log('🗑️ DELETE PROJECT')
-    console.log('📁 Project:', project?.title || id)
-    console.log('⚠️ Impact: This will permanently delete the project')
+    logger.info('Project deletion initiated', {
+      projectId: id,
+      title: project?.title
+    })
 
     if (!confirm(`Delete project "${project?.title}"?\n\nThis action cannot be undone.`)) {
-      console.log('❌ DELETE CANCELLED BY USER')
+      logger.debug('Project deletion cancelled')
       return
     }
 
     try {
-      console.log('🔄 SENDING DELETE REQUEST')
       const response = await fetch('/api/projects/manage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -181,12 +191,12 @@ export default function ProjectsHubPage() {
       const result = await response.json()
 
       if (result.success) {
-        console.log('✅ PROJECT DELETED SUCCESSFULLY')
+        logger.info('Project deleted successfully', { projectId: id, title: project?.title })
         setProjects(projects.filter(p => p.id !== id))
         toast.success(`Project "${project?.title}" deleted successfully`)
       }
     } catch (error: any) {
-      console.error('❌ DELETE PROJECT ERROR:', error)
+      logger.error('Failed to delete project', { error, projectId: id })
       toast.error('Failed to delete project', {
         description: error.message || 'Please try again later'
       })
@@ -195,8 +205,6 @@ export default function ProjectsHubPage() {
 
   const handleDuplicateProject = (id: string) => {
     const project = projects.find(p => p.id === id)
-    console.log('📋 DUPLICATE PROJECT')
-    console.log('📁 Source Project:', project?.title)
 
     if (!project) return
 
@@ -211,22 +219,22 @@ export default function ProjectsHubPage() {
       comments_count: 0
     }
 
-    console.log('➕ CREATING DUPLICATE')
-    console.log('🆔 New ID:', duplicated.id)
-    console.log('📝 New Title:', duplicated.title)
+    logger.info('Project duplicated', {
+      sourceId: id,
+      sourceTitle: project.title,
+      newId: duplicated.id,
+      newTitle: duplicated.title
+    })
 
     setProjects([...projects, duplicated])
     toast.success(`Project duplicated: ${duplicated.title}`)
-    console.log('✅ DUPLICATE CREATED SUCCESSFULLY')
   }
 
   const handleArchiveProject = async (id: string) => {
     const project = projects.find(p => p.id === id)
-    console.log('📦 ARCHIVE PROJECT')
-    console.log('📁 Project:', project?.title || id)
+    logger.info('Project archive initiated', { projectId: id, title: project?.title })
 
     try {
-      console.log('🔄 ARCHIVING PROJECT')
       const response = await fetch('/api/projects/manage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -238,12 +246,12 @@ export default function ProjectsHubPage() {
       const result = await response.json()
 
       if (result.success) {
-        console.log('✅ PROJECT ARCHIVED SUCCESSFULLY')
+        logger.info('Project archived successfully', { projectId: id, title: project?.title })
         setProjects(projects.filter(p => p.id !== id))
         toast.success(`Project "${project?.title}" archived`)
       }
     } catch (error: any) {
-      console.error('❌ ARCHIVE PROJECT ERROR:', error)
+      logger.error('Failed to archive project', { error, projectId: id })
       toast.error('Failed to archive project', {
         description: error.message || 'Please try again later'
       })
@@ -251,9 +259,10 @@ export default function ProjectsHubPage() {
   }
 
   const handleExportProjects = () => {
-    console.log('💾 EXPORT PROJECTS')
-    console.log('📊 Total projects:', projects.length)
-    console.log('📁 Format: JSON')
+    logger.info('Projects export started', {
+      totalProjects: projects.length,
+      format: 'JSON'
+    })
 
     const data = projects.map(p => ({
       title: p.title,
@@ -276,22 +285,19 @@ export default function ProjectsHubPage() {
     a.click()
     URL.revokeObjectURL(url)
 
-    console.log('✅ EXPORT COMPLETED')
-    console.log('📄 File: projects-export.json')
+    logger.info('Projects export completed', { fileName: 'projects-export.json' })
     toast.success(`Exported ${projects.length} projects`)
   }
 
   const handleShareProject = (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('🔗 PROJECTS HUB: Share project initiated')
-    console.log('📁 PROJECTS HUB: Project - ' + (project?.title || projectId))
-    console.log('👥 PROJECTS HUB: Share options available - Email, Link, Team, Client Portal')
-    console.log('🔐 PROJECTS HUB: Permissions - View, Comment, Edit')
-
     const shareLink = 'https://kazi.app/share/project/' + projectId
-    console.log('📎 PROJECTS HUB: Share link generated - ' + shareLink)
-    console.log('✅ PROJECTS HUB: Link copied to clipboard')
-    console.log('📧 PROJECTS HUB: Share options - Send via email, Copy link, Set permissions, Track views, Revoke access')
+
+    logger.info('Project share link generated', {
+      projectId,
+      title: project?.title,
+      shareLink
+    })
 
     toast.success('🔗 Project shared successfully!', {
       description: 'Share link created for "' + (project?.title || 'project') + '" - Link copied to clipboard'
@@ -300,11 +306,6 @@ export default function ProjectsHubPage() {
 
   const handleAddTeamMember = (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('👥 ADD TEAM MEMBER')
-    console.log('📁 Project:', project?.title || projectId)
-    console.log('📧 Enter team member email or select from team')
-    console.log('🎯 Assign role: Developer, Designer, PM, QA')
-    console.log('⚙️ Set permissions: View, Edit, Admin')
 
     const newMember = {
       id: `member-${Date.now()}`,
@@ -314,8 +315,12 @@ export default function ProjectsHubPage() {
       addedDate: new Date().toISOString()
     }
 
-    console.log('✅ TEAM MEMBER ADDED:', newMember.name)
-    console.log('📧 Invitation email sent')
+    logger.info('Team member added', {
+      projectId,
+      projectTitle: project?.title,
+      memberName: newMember.name,
+      role: newMember.role
+    })
 
     if (project) {
       setProjects(projects.map(p =>
@@ -334,13 +339,8 @@ export default function ProjectsHubPage() {
     const project = projects.find(p => p.id === projectId)
     const member = project?.team_members.find(m => m.id === memberId)
 
-    console.log('👋 REMOVE TEAM MEMBER')
-    console.log('📁 Project:', project?.title || projectId)
-    console.log('👤 Member:', member?.name || memberId)
-    console.log('⚠️ Impact: Member loses access to project')
-
     if (!confirm(`Remove ${member?.name} from this project?\n\nThey will lose access to all project files and updates.`)) {
-      console.log('❌ REMOVAL CANCELLED')
+      logger.debug('Team member removal cancelled')
       return
     }
 
@@ -352,16 +352,16 @@ export default function ProjectsHubPage() {
       ))
     }
 
-    console.log('✅ TEAM MEMBER REMOVED')
+    logger.info('Team member removed', {
+      projectId,
+      projectTitle: project?.title,
+      memberName: member?.name
+    })
     toast.success(`${member?.name} removed from project`)
   }
 
   const handleAddMilestone = (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('🎯 ADD MILESTONE')
-    console.log('📁 Project:', project?.title || projectId)
-    console.log('📝 Creating new milestone...')
-    console.log('📅 Set due date, deliverables, and payment trigger')
 
     const milestone = {
       id: `milestone-${Date.now()}`,
@@ -372,8 +372,12 @@ export default function ProjectsHubPage() {
       deliverables: []
     }
 
-    console.log('✅ MILESTONE CREATED:', milestone.title)
-    console.log('📅 Due Date:', formatDate(milestone.dueDate))
+    logger.info('Milestone created', {
+      projectId,
+      projectTitle: project?.title,
+      milestoneTitle: milestone.title,
+      dueDate: milestone.dueDate
+    })
 
     toast.success('Milestone added to project timeline', {
       description: 'Set deliverables and payment schedule'
@@ -382,14 +386,12 @@ export default function ProjectsHubPage() {
 
   const handleUpdateMilestone = (projectId: string, milestoneId: string) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('🔄 UPDATE MILESTONE')
-    console.log('📁 Project:', project?.title || projectId)
-    console.log('🎯 Milestone ID:', milestoneId)
-    console.log('✏️ Update: Status, Due Date, Deliverables, Payment')
-    console.log('📊 Mark as: Pending → In Progress → Completed')
 
-    console.log('✅ MILESTONE UPDATED')
-    console.log('📧 Client notification sent')
+    logger.info('Milestone updated', {
+      projectId,
+      projectTitle: project?.title,
+      milestoneId
+    })
 
     toast.success('Milestone updated successfully', {
       description: 'Client has been notified'
@@ -398,20 +400,14 @@ export default function ProjectsHubPage() {
 
   const handleViewTimeline = (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('📅 PROJECTS HUB: View project timeline')
-    console.log('📁 PROJECTS HUB: Project - ' + (project?.title || projectId))
-    console.log('🎯 PROJECTS HUB: Milestones - 5 total (2 completed, 2 in-progress, 1 upcoming)')
-    console.log('📊 PROJECTS HUB: Timeline view - Gantt Chart')
-    console.log('🔄 PROJECTS HUB: Dependencies - 3 task dependencies mapped')
-    console.log('⏱️ PROJECTS HUB: Critical path - 45 days')
-    console.log('✅ PROJECTS HUB: Timeline loaded successfully')
-    console.log('📈 PROJECTS HUB: Project on track for ' + formatDate(project?.end_date || new Date().toISOString()))
-    console.log('📋 PROJECTS HUB: Phase 1 Requirements - Completed')
-    console.log('📋 PROJECTS HUB: Phase 2 Design - Completed')
-    console.log('📋 PROJECTS HUB: Phase 3 Development - In Progress (60%)')
-    console.log('📋 PROJECTS HUB: Phase 4 Testing - In Progress (30%)')
-    console.log('📋 PROJECTS HUB: Phase 5 Deployment - Upcoming')
-    console.log('🎯 PROJECTS HUB: Next milestone - Development completion in 12 days')
+
+    logger.info('Project timeline viewed', {
+      projectId,
+      projectTitle: project?.title,
+      milestones: '5 total',
+      criticalPath: '45 days',
+      endDate: project?.end_date
+    })
 
     toast.success('📅 Timeline view loaded', {
       description: 'Viewing Gantt chart with 5 milestones - Project on track'
@@ -420,11 +416,6 @@ export default function ProjectsHubPage() {
 
   const handleAddFile = (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('📎 ADD FILE ATTACHMENT')
-    console.log('📁 Project:', project?.title || projectId)
-    console.log('📂 Opening file picker...')
-    console.log('✅ Supported: PDF, Images, Documents, Design Files, Code')
-    console.log('💾 Max Size: 100 MB per file')
 
     const newFile = {
       id: `file-${Date.now()}`,
@@ -442,9 +433,12 @@ export default function ProjectsHubPage() {
       ))
     }
 
-    console.log('✅ FILE UPLOADED:', newFile.name)
-    console.log('☁️ Syncing to cloud storage...')
-    console.log('✅ FILE ATTACHED TO PROJECT')
+    logger.info('File uploaded to project', {
+      projectId,
+      projectTitle: project?.title,
+      fileName: newFile.name,
+      fileSize: newFile.size
+    })
 
     toast.success('File uploaded successfully', {
       description: newFile.name
@@ -453,12 +447,9 @@ export default function ProjectsHubPage() {
 
   const handleRemoveFile = (projectId: string, fileName: string) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('🗑️ REMOVE FILE')
-    console.log('📁 Project:', project?.title || projectId)
-    console.log('📄 File:', fileName)
 
     if (!confirm(`Remove file "${fileName}" from project?\n\nThis action cannot be undone.`)) {
-      console.log('❌ REMOVAL CANCELLED')
+      logger.debug('File removal cancelled')
       return
     }
 
@@ -470,17 +461,16 @@ export default function ProjectsHubPage() {
       ))
     }
 
-    console.log('✅ FILE REMOVED FROM PROJECT')
+    logger.info('File removed from project', {
+      projectId,
+      projectTitle: project?.title,
+      fileName
+    })
     toast.success(`File "${fileName}" removed`)
   }
 
   const handleAddComment = (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('💬 ADD COMMENT')
-    console.log('📁 Project:', project?.title || projectId)
-    console.log('✏️ Comment thread opened')
-    console.log('👥 @mention team members')
-    console.log('📎 Attach files or images')
 
     const newComment = {
       id: `comment-${Date.now()}`,
@@ -499,32 +489,29 @@ export default function ProjectsHubPage() {
       ))
     }
 
-    console.log('✅ COMMENT POSTED')
-    console.log('📧 Notifications sent to mentioned users')
+    logger.info('Comment added to project', {
+      projectId,
+      projectTitle: project?.title,
+      author: newComment.author
+    })
 
     toast.success('Comment added to project')
   }
 
   const handleReplyComment = (projectId: string, commentId: string) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('↩️ REPLY TO COMMENT')
-    console.log('📁 Project:', project?.title || projectId)
-    console.log('💬 Comment ID:', commentId)
-    console.log('✏️ Reply thread opened')
 
-    console.log('✅ REPLY POSTED')
-    console.log('📧 Original commenter notified')
+    logger.info('Comment reply posted', {
+      projectId,
+      projectTitle: project?.title,
+      commentId
+    })
 
     toast.success('Reply posted successfully')
   }
 
   const handleAddReminder = (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('⏰ ADD REMINDER')
-    console.log('📁 Project:', project?.title || projectId)
-    console.log('📅 Set reminder date and time')
-    console.log('📧 Notification method: Email, Push, SMS')
-    console.log('🔔 Reminder type: Deadline, Meeting, Milestone, Custom')
 
     const reminder = {
       id: `reminder-${Date.now()}`,
@@ -534,9 +521,12 @@ export default function ProjectsHubPage() {
       notifyVia: ['email', 'push']
     }
 
-    console.log('✅ REMINDER CREATED')
-    console.log('📅 Reminder scheduled for:', formatDate(reminder.date))
-    console.log('📧 Notification will be sent via:', reminder.notifyVia.join(', '))
+    logger.info('Reminder created', {
+      projectId,
+      projectTitle: project?.title,
+      reminderDate: reminder.date,
+      notifyVia: reminder.notifyVia
+    })
 
     toast.success('Reminder set successfully', {
       description: `Scheduled for ${formatDate(reminder.date)}`
@@ -545,30 +535,24 @@ export default function ProjectsHubPage() {
 
   const handleGenerateReport = (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('📊 PROJECTS HUB: Generate project report')
-    console.log('📁 PROJECTS HUB: Project - ' + (project?.title || projectId))
-    console.log('📈 PROJECTS HUB: Report type - Comprehensive Project Summary')
-    console.log('📊 PROJECTS HUB: Including - Progress, Budget, Timeline, Team, Milestones')
-    console.log('🎨 PROJECTS HUB: Format - PDF with charts and graphs')
 
-    console.log('⚙️ PROJECTS HUB: Generating report...')
-    console.log('📊 PROJECTS HUB: Calculating metrics...')
-    console.log('📈 PROJECTS HUB: Creating visualizations...')
-    console.log('📄 PROJECTS HUB: Building PDF document...')
+    logger.info('Project report generation started', {
+      projectId,
+      projectTitle: project?.title,
+      format: 'PDF'
+    })
 
     setTimeout(() => {
       const fileName = (project?.title || 'project') + '-report.pdf'
-      console.log('✅ PROJECTS HUB: Report generated successfully')
-      console.log('📄 PROJECTS HUB: File - ' + fileName)
-      console.log('💾 PROJECTS HUB: Size - 1.2 MB')
-      console.log('📧 PROJECTS HUB: Report ready for download and sharing')
-      console.log('📋 PROJECTS HUB: Executive Summary included')
-      console.log('📈 PROJECTS HUB: Progress Overview - ' + (project?.progress || 0) + '%')
-      console.log('💰 PROJECTS HUB: Budget Analysis - $' + (project?.spent || 0).toLocaleString() + ' spent of $' + (project?.budget || 0).toLocaleString())
-      console.log('📅 PROJECTS HUB: Timeline & Milestones included')
-      console.log('👥 PROJECTS HUB: Team Performance included')
-      console.log('⚠️ PROJECTS HUB: Risk Assessment included')
-      console.log('🎯 PROJECTS HUB: Next Steps outlined')
+
+      logger.info('Project report generated', {
+        projectId,
+        fileName,
+        size: '1.2 MB',
+        progress: project?.progress,
+        budget: project?.budget,
+        spent: project?.spent
+      })
 
       toast.success('📊 Project report generated!', {
         description: 'Comprehensive summary PDF ready for download (1.2 MB)'
@@ -577,47 +561,36 @@ export default function ProjectsHubPage() {
   }
 
   const handleBulkAction = (action: string, selectedIds: string[]) => {
-    console.log('📦 BULK ACTION')
-    console.log('⚡ Action:', action)
-    console.log('📊 Selected Projects:', selectedIds.length)
-    console.log('📁 Project IDs:', selectedIds.join(', '))
+    logger.info('Bulk action initiated', {
+      action,
+      selectedCount: selectedIds.length,
+      projectIds: selectedIds
+    })
 
     switch (action) {
       case 'archive':
-        console.log('📦 BULK ARCHIVE')
-        console.log('⚠️ Archiving', selectedIds.length, 'projects')
         toast.success(`${selectedIds.length} projects archived`)
         break
       case 'export':
-        console.log('💾 BULK EXPORT')
-        console.log('📊 Exporting', selectedIds.length, 'projects to JSON')
         toast.success(`Exported ${selectedIds.length} projects`)
         break
       case 'status':
-        console.log('🔄 BULK STATUS UPDATE')
-        console.log('📊 Updating status for', selectedIds.length, 'projects')
         toast.success(`Status updated for ${selectedIds.length} projects`)
         break
       case 'delete':
-        console.log('🗑️ BULK DELETE')
         if (confirm(`Delete ${selectedIds.length} projects?\n\nThis action cannot be undone.`)) {
-          console.log('⚠️ DELETING', selectedIds.length, 'projects')
+          logger.info('Bulk delete confirmed', { count: selectedIds.length })
           toast.success(`${selectedIds.length} projects deleted`)
         }
         break
       default:
-        console.log('⚠️ Unknown bulk action:', action)
+        logger.warn('Unknown bulk action', { action })
     }
 
-    console.log('✅ BULK ACTION COMPLETED')
+    logger.info('Bulk action completed', { action })
   }
 
   const handleAdvancedSort = (sortBy: string, direction: 'asc' | 'desc') => {
-    console.log('🔀 ADVANCED SORT')
-    console.log('📊 Sort By:', sortBy)
-    console.log('🔼/🔽 Direction:', direction)
-    console.log('🎯 Options: Date, Budget, Progress, Priority, Client, Status')
-
     let sorted = [...filteredProjects]
 
     switch (sortBy) {
@@ -640,18 +613,11 @@ export default function ProjectsHubPage() {
     }
 
     setFilteredProjects(sorted)
-    console.log('✅ PROJECTS SORTED BY', sortBy, direction)
+    logger.info('Projects sorted', { sortBy, direction })
     toast.success(`Sorted by ${sortBy} (${direction})`)
   }
 
   const handleAdvancedFilter = (filters: any) => {
-    console.log('🔍 ADVANCED FILTER')
-    console.log('📊 Filter Criteria:', filters)
-    console.log('🎯 Budget Range:', filters.budgetMin, '-', filters.budgetMax)
-    console.log('📅 Date Range:', filters.startDate, '-', filters.endDate)
-    console.log('👥 Team Size:', filters.teamSize)
-    console.log('🏷️ Tags:', filters.tags?.join(', ') || 'none')
-
     const filtered = projects.filter(project => {
       let matches = true
 
@@ -666,7 +632,10 @@ export default function ProjectsHubPage() {
     })
 
     setFilteredProjects(filtered)
-    console.log('✅ FILTER APPLIED:', filtered.length, 'projects match criteria')
+    logger.info('Advanced filter applied', {
+      matchCount: filtered.length,
+      filters
+    })
     toast.success(`${filtered.length} projects match filter criteria`)
   }
 
@@ -779,7 +748,7 @@ export default function ProjectsHubPage() {
   useEffect(() => {
     const loadProjects = async () => {
       try {
-        console.log('📂 LOADING PROJECTS...')
+        logger.info('Loading projects')
         setLoading(true)
         setError(null) // A+++ Reset error state
 
@@ -795,11 +764,15 @@ export default function ProjectsHubPage() {
           }, 1000)
         })
 
-        console.log('✅ PROJECTS LOADED:', mockProjects.length, 'projects')
-        console.log('📊 Active:', mockProjects.filter(p => p.status === 'active').length)
-        console.log('✔️ Completed:', mockProjects.filter(p => p.status === 'completed').length)
-        console.log('⏸️ Paused:', mockProjects.filter(p => p.status === 'paused').length)
-        console.log('📝 Draft:', mockProjects.filter(p => p.status === 'draft').length)
+        const stats = {
+          total: mockProjects.length,
+          active: mockProjects.filter(p => p.status === 'active').length,
+          completed: mockProjects.filter(p => p.status === 'completed').length,
+          paused: mockProjects.filter(p => p.status === 'paused').length,
+          draft: mockProjects.filter(p => p.status === 'draft').length
+        }
+
+        logger.info('Projects loaded', stats)
 
         setProjects(mockProjects)
         setFilteredProjects(mockProjects)
@@ -808,7 +781,7 @@ export default function ProjectsHubPage() {
         // A+++ Accessibility announcement
         announce(`${mockProjects.length} projects loaded successfully`, 'polite')
       } catch (err) {
-        console.error('❌ LOAD PROJECTS ERROR:', err)
+        logger.error('Failed to load projects', { error: err })
         setError(err instanceof Error ? err.message : 'Failed to load projects')
         setLoading(false)
         // A+++ Accessibility error announcement
@@ -820,11 +793,6 @@ export default function ProjectsHubPage() {
   }, [announce])
 
   useEffect(() => {
-    console.log('🔍 FILTERING PROJECTS')
-    console.log('🔎 Search Term:', searchTerm || '(none)')
-    console.log('📊 Status Filter:', statusFilter)
-    console.log('🎯 Priority Filter:', priorityFilter)
-
     const filtered = projects.filter(project => {
       const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            project.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -836,10 +804,13 @@ export default function ProjectsHubPage() {
       return matchesSearch && matchesStatus && matchesPriority
     })
 
-    console.log('✅ FILTERED RESULTS:', filtered.length, 'projects')
-    if (filtered.length < projects.length) {
-      console.log('📉 Filtered out:', projects.length - filtered.length, 'projects')
-    }
+    logger.debug('Projects filtered', {
+      searchTerm: searchTerm || 'none',
+      statusFilter,
+      priorityFilter,
+      resultCount: filtered.length,
+      filteredOut: projects.length - filtered.length
+    })
 
     setFilteredProjects(filtered)
   }, [projects, searchTerm, statusFilter, priorityFilter])
@@ -886,16 +857,15 @@ export default function ProjectsHubPage() {
       return
     }
 
-    console.log('➕ CREATING NEW PROJECT')
-    console.log('📝 Title:', newProject.title)
-    console.log('👤 Client:', newProject.client_name || '(not specified)')
-    console.log('💰 Budget:', newProject.budget ? `$${newProject.budget}` : '(not specified)')
-    console.log('🎯 Priority:', newProject.priority)
-    console.log('📁 Category:', newProject.category)
-    console.log('📅 End Date:', newProject.end_date || '(30 days from now)')
+    logger.info('Project creation started', {
+      title: newProject.title,
+      client: newProject.client_name,
+      budget: newProject.budget,
+      priority: newProject.priority,
+      category: newProject.category
+    })
 
     try {
-      console.log('🔄 SENDING CREATE REQUEST')
       const response = await fetch('/api/projects/manage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -920,8 +890,11 @@ export default function ProjectsHubPage() {
       const result = await response.json()
 
       if (result.success) {
-        console.log('✅ PROJECT CREATED SUCCESSFULLY:', result.project.title)
-        console.log('🆔 Project ID:', result.projectId)
+        logger.info('Project created successfully', {
+          projectId: result.projectId,
+          title: result.project.title
+        })
+
         // Add project to local state
         setProjects([...projects, result.project])
         setIsCreateModalOpen(false)
@@ -935,22 +908,14 @@ export default function ProjectsHubPage() {
           category: 'web-development'
         })
 
-        console.log('✅ PROJECTS HUB: Project created successfully - ' + result.project.title)
-        console.log('🆔 PROJECTS HUB: Project ID - ' + result.projectId)
-        console.log('📋 PROJECTS HUB: Next steps - Set up milestones and deliverables')
-        console.log('👥 PROJECTS HUB: Next steps - Assign team members to project')
-        console.log('✅ PROJECTS HUB: Next steps - Create initial tasks and timeline')
-        console.log('📅 PROJECTS HUB: Next steps - Schedule kickoff meeting with client')
-        console.log('📊 PROJECTS HUB: Next steps - Set up project tracking and reporting')
-
         toast.success('✅ Project created successfully!', {
           description: result.project.title + ' - Ready to add milestones and team members'
         })
       } else {
-        console.log('❌ PROJECT CREATION FAILED')
+        logger.warn('Project creation failed')
       }
     } catch (error: any) {
-      console.error('❌ PROJECT CREATION ERROR:', error)
+      logger.error('Failed to create project', { error, title: newProject.title })
       toast.error('Failed to create project', {
         description: error.message || 'Please try again later'
       })
@@ -959,13 +924,15 @@ export default function ProjectsHubPage() {
 
   const handleUpdateProjectStatus = async (projectId: string, newStatus: string) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('🔄 UPDATING PROJECT STATUS')
-    console.log('📁 Project:', project?.title || projectId)
-    console.log('📊 Current Status:', project?.status || 'unknown')
-    console.log('📊 New Status:', newStatus)
+
+    logger.info('Project status update started', {
+      projectId,
+      projectTitle: project?.title,
+      currentStatus: project?.status,
+      newStatus
+    })
 
     try {
-      console.log('🔄 SENDING STATUS UPDATE REQUEST')
       const response = await fetch('/api/projects/manage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -983,7 +950,10 @@ export default function ProjectsHubPage() {
       const result = await response.json()
 
       if (result.success) {
-        console.log('✅ PROJECT STATUS UPDATED SUCCESSFULLY')
+        logger.info('Project status updated successfully', {
+          projectId,
+          newStatus
+        })
 
         // Update local state
         setProjects(projects.map(p =>
@@ -992,56 +962,37 @@ export default function ProjectsHubPage() {
 
         // Show celebration for completed projects
         if (result.celebration) {
-          console.log('🎉 CELEBRATION TRIGGERED:', result.celebration.message)
+          logger.info('Project celebration triggered', {
+            projectId,
+            achievement: result.celebration.achievement,
+            points: result.celebration.points
+          })
           toast.success(`${result.message} ${result.celebration.message} +${result.celebration.points} points!`, {
             description: `Achievement: ${result.celebration.achievement}`
           })
         } else {
-          console.log('✅ STATUS UPDATE ACKNOWLEDGED')
           toast.success(result.message)
         }
 
         // Show next steps based on status change
         if (newStatus === 'completed') {
-          console.log('🏆 PROJECTS HUB: Project completed - ' + (project?.title || projectId))
-          console.log('📋 PROJECTS HUB: Next steps - Request final feedback from client')
-          console.log('📦 PROJECTS HUB: Next steps - Archive project files and documentation')
-          console.log('💰 PROJECTS HUB: Next steps - Send final invoice if applicable')
-          console.log('🎨 PROJECTS HUB: Next steps - Update portfolio with project showcase')
-          console.log('👥 PROJECTS HUB: Next steps - Schedule project retrospective with team')
-
           toast.info('🏆 Project completed!', {
             description: 'Ready for final client feedback and portfolio showcase'
           })
         } else if (newStatus === 'active') {
-          console.log('🚀 PROJECTS HUB: Project activated - ' + (project?.title || projectId))
-          console.log('📋 PROJECTS HUB: Next steps - Review project scope and requirements')
-          console.log('💬 PROJECTS HUB: Next steps - Set up communication channels with client')
-          console.log('✅ PROJECTS HUB: Next steps - Create task breakdown and assign responsibilities')
-          console.log('📅 PROJECTS HUB: Next steps - Schedule regular check-ins and updates')
-          console.log('⏱️ PROJECTS HUB: Next steps - Begin tracking time and progress')
-
           toast.info('🚀 Project started!', {
             description: 'Review scope and set up communication channels'
           })
         } else if (newStatus === 'paused') {
-          console.log('⏸️ PROJECTS HUB: Project paused - ' + (project?.title || projectId))
-          console.log('📋 PROJECTS HUB: Next steps - Document current progress and status')
-          console.log('📧 PROJECTS HUB: Next steps - Notify client and team members')
-          console.log('📅 PROJECTS HUB: Next steps - Set expected resume date')
-          console.log('💾 PROJECTS HUB: Next steps - Archive current work safely')
-          console.log('👥 PROJECTS HUB: Next steps - Plan resource reallocation if needed')
-
           toast.info('⏸️ Project on hold', {
             description: 'Document progress and notify team members'
           })
         }
       } else {
-        console.log('❌ STATUS UPDATE FAILED')
+        logger.warn('Project status update failed', { projectId })
       }
     } catch (error: any) {
-      console.error('❌ STATUS UPDATE ERROR:', error)
-      console.log('⚠️ UPDATING UI OPTIMISTICALLY')
+      logger.error('Failed to update project status', { error, projectId })
       toast.error('Failed to update project status', {
         description: error.message || 'Please try again later'
       })
@@ -1760,8 +1711,10 @@ export default function ProjectsHubPage() {
                     <Button
                       className="flex-1"
                       onClick={() => {
-                        console.log('💾 SAVE PROJECT EDITS')
-                        console.log('📁 Project:', selectedProject.title)
+                        logger.info('Project edits saved', {
+                          projectId: selectedProject.id,
+                          title: selectedProject.title
+                        })
                         setProjects(projects.map(p => p.id === selectedProject.id ? selectedProject : p))
                         toast.success(`Project "${selectedProject.title}" updated`)
                         setIsEditModalOpen(false)

@@ -49,6 +49,9 @@ import ClientZoneGallery from '@/components/client-zone-gallery'
 import { CardSkeleton, ListSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ClientZone')
 
 // ============================================================================
 // FRAMER MOTION COMPONENTS
@@ -294,14 +297,11 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleNotifications = () => {
-    console.log('🔔 OPENING NOTIFICATIONS')
-    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('👤 Contact:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
-    console.log('📧 Email:', KAZI_CLIENT_DATA.clientInfo.email)
-    console.log('📊 Active projects:', KAZI_CLIENT_DATA.clientInfo.activeProjects)
-    console.log('📅 Current tab:', activeTab)
-    console.log('✅ NOTIFICATIONS PANEL OPENED')
-    console.log('🏁 NOTIFICATION PROCESS COMPLETE')
+    logger.info('Notifications opened', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      activeProjects: KAZI_CLIENT_DATA.clientInfo.activeProjects,
+      tab: activeTab
+    })
 
     toast.success('Notifications center opened!', {
       description: 'View all your project updates and messages'
@@ -313,14 +313,11 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleContactTeam = () => {
-    console.log('💬 CONTACTING TEAM')
-    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('👤 Contact person:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
-    console.log('📊 Active projects:', KAZI_CLIENT_DATA.clientInfo.activeProjects)
-    console.log('📅 Current tab:', activeTab)
-    console.log('✉️ Opening team communication panel')
-    console.log('✅ TEAM CONTACT INITIATED')
-    console.log('🏁 CONTACT TEAM PROCESS COMPLETE')
+    logger.info('Team contact initiated', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      contactPerson: KAZI_CLIENT_DATA.clientInfo.contactPerson,
+      activeProjects: KAZI_CLIENT_DATA.clientInfo.activeProjects
+    })
 
     toast.success('Team communication opened!', {
       description: 'Send a message or schedule a call with your team'
@@ -334,23 +331,20 @@ export default function ClientZonePage() {
   const handleRequestRevision = async (id: number) => {
     const project = KAZI_CLIENT_DATA.projects.find(p => p.id === id)
 
-    console.log('✏️ REQUESTING REVISION')
-    console.log('📁 Project name:', project?.name || id)
-    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('👤 Requested by:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
-    console.log('📅 Current tab:', activeTab)
-    console.log('⏰ Expected response time: 24 hours')
+    logger.info('Revision request initiated', {
+      projectId: id,
+      projectName: project?.name,
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      requestedBy: KAZI_CLIENT_DATA.clientInfo.contactPerson
+    })
 
     const feedback = prompt('Please describe the changes needed:')
     if (!feedback) {
-      console.log('❌ REVISION REQUEST CANCELLED')
+      logger.debug('Revision request canceled')
       return
     }
 
-    console.log('📝 Revision notes:', feedback.substring(0, 50) + (feedback.length > 50 ? '...' : ''))
-
     try {
-      console.log('📡 SENDING REVISION REQUEST TO API')
       const response = await fetch('/api/projects/manage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -364,8 +358,6 @@ export default function ClientZonePage() {
         })
       })
 
-      console.log('📡 API RESPONSE STATUS:', response.status, response.statusText)
-
       if (!response.ok) {
         throw new Error('Failed to request revision')
       }
@@ -373,17 +365,14 @@ export default function ClientZonePage() {
       const result = await response.json()
 
       if (result.success) {
-        console.log('✅ REVISION REQUEST SUBMITTED')
-        console.log('📨 Team will be notified')
-        console.log('🏁 REVISION REQUEST PROCESS COMPLETE')
+        logger.info('Revision request submitted', { projectId: id })
 
         toast.success('Revision request submitted!', {
           description: 'Your team will review and respond within 24 hours'
         })
       }
     } catch (error: any) {
-      console.error('❌ REQUEST REVISION ERROR:', error)
-      console.log('📊 Error details:', error.message || 'Unknown error')
+      logger.error('Failed to request revision', { error, projectId: id })
       toast.error('Failed to request revision', {
         description: error.message || 'Please try again later'
       })
@@ -397,15 +386,13 @@ export default function ClientZonePage() {
   const handleApproveDeliverable = async (id: number) => {
     const project = KAZI_CLIENT_DATA.projects.find(p => p.id === id)
 
-    console.log('✅ APPROVING DELIVERABLE')
-    console.log('📦 Deliverable:', project?.name || id)
-    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('👤 Approved by:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
-    console.log('📅 Current tab:', activeTab)
-    console.log('💰 Milestone payment will be processed')
+    logger.info('Deliverable approval initiated', {
+      projectId: id,
+      projectName: project?.name,
+      approvedBy: KAZI_CLIENT_DATA.clientInfo.contactPerson
+    })
 
     try {
-      console.log('📡 SENDING APPROVAL TO API')
       const response = await fetch('/api/projects/manage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -416,8 +403,6 @@ export default function ClientZonePage() {
         })
       })
 
-      console.log('📡 API RESPONSE STATUS:', response.status, response.statusText)
-
       if (!response.ok) {
         throw new Error('Failed to approve deliverable')
       }
@@ -425,17 +410,14 @@ export default function ClientZonePage() {
       const result = await response.json()
 
       if (result.success) {
-        console.log('✅ DELIVERABLE APPROVED')
-        console.log('📨 Team will be notified')
-        console.log('🏁 APPROVAL PROCESS COMPLETE')
+        logger.info('Deliverable approved', { projectId: id })
 
         toast.success('Deliverable approved!', {
           description: 'Milestone payment will be processed automatically'
         })
       }
     } catch (error: any) {
-      console.error('❌ APPROVE DELIVERABLE ERROR:', error)
-      console.log('📊 Error details:', error.message || 'Unknown error')
+      logger.error('Failed to approve deliverable', { error, projectId: id })
       toast.error('Failed to approve deliverable', {
         description: error.message || 'Please try again later'
       })
@@ -449,14 +431,11 @@ export default function ClientZonePage() {
   const handleDownloadFiles = (id: number) => {
     const project = KAZI_CLIENT_DATA.projects.find(p => p.id === id)
 
-    console.log('📥 DOWNLOADING FILES')
-    console.log('📁 Project:', project?.name || id)
-    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('👤 Downloaded by:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
-    console.log('📅 Current tab:', activeTab)
-    console.log('📦 Preparing ZIP archive')
-    console.log('✅ DOWNLOAD INITIATED')
-    console.log('🏁 DOWNLOAD PROCESS COMPLETE')
+    logger.info('File download initiated', {
+      projectId: id,
+      projectName: project?.name,
+      client: KAZI_CLIENT_DATA.clientInfo.name
+    })
 
     toast.success('Preparing download...', {
       description: 'Files will download as a ZIP archive'
@@ -468,24 +447,17 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleSendMessage = () => {
-    console.log('💬 SENDING MESSAGE')
-    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('👤 Sender:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
-    console.log('📧 Email:', KAZI_CLIENT_DATA.clientInfo.email)
-
     if (!newMessage.trim()) {
-      console.log('⚠️ MESSAGE VALIDATION FAILED: Empty message')
+      logger.warn('Message validation failed', { reason: 'Empty message' })
       toast.error('Please enter a message')
       return
     }
 
-    console.log('📝 Message length:', newMessage.length, 'characters')
-    console.log('📅 Current tab:', activeTab)
-    console.log('💭 Message preview:', newMessage.substring(0, 45) + (newMessage.length > 45 ? '...' : ''))
-    console.log('✅ MESSAGE SENT SUCCESSFULLY')
-    console.log('📨 Team will respond within 4-6 hours')
-    console.log('🧹 Message input cleared')
-    console.log('🏁 SEND MESSAGE PROCESS COMPLETE')
+    logger.info('Message sent', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      sender: KAZI_CLIENT_DATA.clientInfo.contactPerson,
+      messageLength: newMessage.length
+    })
 
     toast.success('Message sent successfully!', {
       description: 'Your team will respond within 4-6 hours'
@@ -498,22 +470,18 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleSubmitFeedback = async () => {
-    console.log('⭐ SUBMITTING FEEDBACK')
-    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('👤 Submitted by:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
-
     if (!newFeedback.trim()) {
-      console.log('⚠️ FEEDBACK VALIDATION FAILED: Empty feedback')
+      logger.warn('Feedback validation failed', { reason: 'Empty feedback' })
       toast.error('Please enter your feedback')
       return
     }
 
-    console.log('📝 Feedback length:', newFeedback.length, 'characters')
-    console.log('📅 Current tab:', activeTab)
-    console.log('💭 Feedback preview:', newFeedback.substring(0, 45) + (newFeedback.length > 45 ? '...' : ''))
+    logger.info('Feedback submission initiated', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      feedbackLength: newFeedback.length
+    })
 
     try {
-      console.log('📡 SENDING FEEDBACK TO API')
       const response = await fetch('/api/collaboration/client-feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -524,24 +492,18 @@ export default function ClientZonePage() {
         })
       })
 
-      console.log('📡 API RESPONSE STATUS:', response.status, response.statusText)
-
       if (!response.ok) {
         throw new Error('Failed to submit feedback')
       }
 
-      console.log('✅ FEEDBACK SUBMITTED SUCCESSFULLY')
-      console.log('📨 Team will review and respond promptly')
-      console.log('🧹 Feedback input cleared')
-      console.log('🏁 SUBMIT FEEDBACK PROCESS COMPLETE')
+      logger.info('Feedback submitted successfully')
 
       toast.success('Feedback submitted!', {
         description: 'Your input helps us improve'
       })
       setNewFeedback('')
     } catch (error: any) {
-      console.error('❌ SUBMIT FEEDBACK ERROR:', error)
-      console.log('📊 Error details:', error.message || 'Unknown error')
+      logger.error('Failed to submit feedback', { error })
       toast.error('Failed to submit feedback', {
         description: error.message || 'Please try again later'
       })
@@ -553,16 +515,11 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handlePayInvoice = (invoiceNumber: string, amount: number) => {
-    console.log('💳 PAYING INVOICE')
-    console.log('🧾 Invoice number:', invoiceNumber)
-    console.log('💰 Amount:', formatCurrency(amount))
-    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('👤 Paid by:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
-    console.log('📧 Email:', KAZI_CLIENT_DATA.clientInfo.email)
-    console.log('📅 Current tab:', activeTab)
-    console.log('🔒 Redirecting to secure payment gateway')
-    console.log('✅ PAYMENT PROCESS INITIATED')
-    console.log('🏁 PAY INVOICE PROCESS COMPLETE')
+    logger.info('Payment initiated', {
+      invoiceNumber,
+      amount,
+      client: KAZI_CLIENT_DATA.clientInfo.name
+    })
 
     toast.success('Redirecting to secure payment...', {
       description: `Invoice ${invoiceNumber} - ${formatCurrency(amount)}`
@@ -574,14 +531,10 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleScheduleMeeting = () => {
-    console.log('📅 SCHEDULING MEETING')
-    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('👤 Scheduled by:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
-    console.log('📧 Email:', KAZI_CLIENT_DATA.clientInfo.email)
-    console.log('📅 Current tab:', activeTab)
-    console.log('🎥 Opening calendar interface')
-    console.log('✅ MEETING SCHEDULER OPENED')
-    console.log('🏁 SCHEDULE MEETING PROCESS COMPLETE')
+    logger.info('Meeting scheduler opened', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      email: KAZI_CLIENT_DATA.clientInfo.email
+    })
 
     toast.success('Opening calendar...', {
       description: 'Schedule a meeting with your team'
@@ -593,14 +546,10 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleViewInvoiceDetails = (invoiceNumber: string) => {
-    console.log('🧾 VIEWING INVOICE DETAILS')
-    console.log('📋 Invoice number:', invoiceNumber)
-    console.log('📊 Client:', KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('👤 Viewed by:', KAZI_CLIENT_DATA.clientInfo.contactPerson)
-    console.log('📅 Current tab:', activeTab)
-    console.log('📄 Loading invoice details')
-    console.log('✅ INVOICE DETAILS LOADED')
-    console.log('🏁 VIEW INVOICE PROCESS COMPLETE')
+    logger.info('Invoice details viewed', {
+      invoiceNumber,
+      client: KAZI_CLIENT_DATA.clientInfo.name
+    })
 
     toast.success('Loading invoice details...', {
       description: `Invoice ${invoiceNumber}`
@@ -612,14 +561,12 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleClientOnboarding = useCallback(() => {
-    console.log('🎯 CLIENT ZONE: STARTING CLIENT ONBOARDING WORKFLOW')
-    console.log('👤 CLIENT ZONE: Client Name: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('📧 CLIENT ZONE: Contact Person: ' + KAZI_CLIENT_DATA.clientInfo.contactPerson)
-    console.log('🏢 CLIENT ZONE: Industry: ' + KAZI_CLIENT_DATA.clientInfo.industry)
-    console.log('📅 CLIENT ZONE: Member Since: ' + KAZI_CLIENT_DATA.clientInfo.memberSince)
-    console.log('🎓 CLIENT ZONE: Initiating onboarding checklist')
-    console.log('📋 CLIENT ZONE: Setting up client preferences and communication channels')
-    console.log('✅ CLIENT ZONE: ONBOARDING WORKFLOW INITIALIZED')
+    logger.info('Client onboarding started', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      contactPerson: KAZI_CLIENT_DATA.clientInfo.contactPerson,
+      industry: KAZI_CLIENT_DATA.clientInfo.industry,
+      memberSince: KAZI_CLIENT_DATA.clientInfo.memberSince
+    })
 
     toast.success('Client onboarding started!', {
       description: 'Setting up your personalized workspace and preferences'
@@ -631,13 +578,11 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleProjectProposal = useCallback(async (projectId?: number) => {
-    console.log('📄 CLIENT ZONE: SENDING PROJECT PROPOSAL')
-    console.log('🎯 CLIENT ZONE: Project ID: ' + (projectId || 'New Proposal'))
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('📧 CLIENT ZONE: Contact Email: ' + KAZI_CLIENT_DATA.clientInfo.email)
-    console.log('💼 CLIENT ZONE: Account Manager: ' + KAZI_CLIENT_DATA.clientInfo.accountManager)
-    console.log('📊 CLIENT ZONE: Preparing detailed proposal document')
-    console.log('💰 CLIENT ZONE: Including pricing and timeline estimates')
+    logger.info('Project proposal initiated', {
+      projectId: projectId || 'New Proposal',
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      accountManager: KAZI_CLIENT_DATA.clientInfo.accountManager
+    })
 
     try {
       const response = await fetch('/api/proposals/send', {
@@ -650,16 +595,14 @@ export default function ClientZonePage() {
         })
       })
 
-      console.log('📡 CLIENT ZONE: API Response Status: ' + response.status)
-
       if (response.ok) {
-        console.log('✅ CLIENT ZONE: PROPOSAL SENT SUCCESSFULLY')
+        logger.info('Proposal sent successfully', { projectId })
         toast.success('Project proposal sent!', {
           description: 'Check your email for the detailed proposal document'
         })
       }
     } catch (error: any) {
-      console.error('❌ CLIENT ZONE: PROPOSAL ERROR: ' + error.message)
+      logger.error('Failed to send proposal', { error, projectId })
       toast.error('Failed to send proposal', {
         description: error.message || 'Please try again later'
       })
@@ -671,13 +614,11 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleContractManagement = useCallback(() => {
-    console.log('📜 CLIENT ZONE: ACCESSING CONTRACT MANAGEMENT')
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('📊 CLIENT ZONE: Total Projects: ' + KAZI_CLIENT_DATA.clientInfo.totalProjects)
-    console.log('✍️ CLIENT ZONE: Active Contracts: ' + KAZI_CLIENT_DATA.clientInfo.activeProjects)
-    console.log('📋 CLIENT ZONE: Loading contract documents and terms')
-    console.log('🔒 CLIENT ZONE: Secure contract storage accessed')
-    console.log('✅ CLIENT ZONE: CONTRACT MANAGEMENT OPENED')
+    logger.info('Contract management accessed', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      totalProjects: KAZI_CLIENT_DATA.clientInfo.totalProjects,
+      activeContracts: KAZI_CLIENT_DATA.clientInfo.activeProjects
+    })
 
     toast.info('Contract management loaded', {
       description: 'View and manage all your project contracts'
@@ -689,14 +630,12 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleMilestoneApproval = useCallback(async (milestoneId: number) => {
-    console.log('✅ CLIENT ZONE: APPROVING MILESTONE')
-    console.log('🎯 CLIENT ZONE: Milestone ID: ' + milestoneId)
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('💰 CLIENT ZONE: Milestone payment will be released from escrow')
-    console.log('📊 CLIENT ZONE: Updating project progress tracker')
+    logger.info('Milestone approval initiated', {
+      milestoneId,
+      client: KAZI_CLIENT_DATA.clientInfo.name
+    })
 
     try {
-      console.log('📡 CLIENT ZONE: Sending milestone approval to API')
       const response = await fetch('/api/milestones/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -707,17 +646,14 @@ export default function ClientZonePage() {
         })
       })
 
-      console.log('📡 CLIENT ZONE: API Response: ' + response.status)
-
       if (response.ok) {
-        console.log('✅ CLIENT ZONE: MILESTONE APPROVED SUCCESSFULLY')
-        console.log('💳 CLIENT ZONE: Payment released to freelancer')
+        logger.info('Milestone approved successfully', { milestoneId })
         toast.success('Milestone approved!', {
           description: 'Payment has been released from escrow'
         })
       }
     } catch (error: any) {
-      console.error('❌ CLIENT ZONE: MILESTONE APPROVAL ERROR: ' + error.message)
+      logger.error('Failed to approve milestone', { error, milestoneId })
       toast.error('Failed to approve milestone', {
         description: error.message || 'Please try again'
       })
@@ -729,13 +665,11 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleFeedbackRequest = useCallback(() => {
-    console.log('⭐ CLIENT ZONE: REQUESTING CLIENT FEEDBACK')
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('📊 CLIENT ZONE: Active Projects: ' + KAZI_CLIENT_DATA.clientInfo.activeProjects)
-    console.log('📧 CLIENT ZONE: Sending feedback request email')
-    console.log('🎯 CLIENT ZONE: Current satisfaction score: ' + KAZI_CLIENT_DATA.clientInfo.satisfaction)
-    console.log('📋 CLIENT ZONE: Opening feedback collection form')
-    console.log('✅ CLIENT ZONE: FEEDBACK REQUEST INITIATED')
+    logger.info('Feedback request initiated', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      activeProjects: KAZI_CLIENT_DATA.clientInfo.activeProjects,
+      currentSatisfaction: KAZI_CLIENT_DATA.clientInfo.satisfaction
+    })
 
     toast.info('Feedback request sent', {
       description: 'Help us improve your experience'
@@ -747,13 +681,11 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleFileSharing = useCallback((fileId?: number) => {
-    console.log('📤 CLIENT ZONE: INITIATING FILE SHARING')
-    console.log('📁 CLIENT ZONE: File ID: ' + (fileId || 'Multiple files'))
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('📊 CLIENT ZONE: Total files in library: ' + KAZI_CLIENT_DATA.analytics.filesShared)
-    console.log('🔒 CLIENT ZONE: Secure file transfer protocol enabled')
-    console.log('📧 CLIENT ZONE: Generating shareable download link')
-    console.log('✅ CLIENT ZONE: FILE SHARING PREPARED')
+    logger.info('File sharing initiated', {
+      fileId: fileId || 'Multiple files',
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      totalFiles: KAZI_CLIENT_DATA.analytics.filesShared
+    })
 
     toast.success('File sharing link generated', {
       description: 'Secure download link copied to clipboard'
@@ -765,13 +697,11 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleMeetingSchedule = useCallback(() => {
-    console.log('🗓️ CLIENT ZONE: OPENING MEETING SCHEDULER')
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('📅 CLIENT ZONE: Next Meeting: ' + KAZI_CLIENT_DATA.clientInfo.nextMeeting)
-    console.log('📊 CLIENT ZONE: Total meetings held: ' + KAZI_CLIENT_DATA.analytics.meetingsHeld)
-    console.log('🎥 CLIENT ZONE: Video conferencing integration available')
-    console.log('📧 CLIENT ZONE: Calendar invites will be sent')
-    console.log('✅ CLIENT ZONE: MEETING SCHEDULER OPENED')
+    logger.info('Meeting scheduler opened', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      nextMeeting: KAZI_CLIENT_DATA.clientInfo.nextMeeting,
+      totalMeetings: KAZI_CLIENT_DATA.analytics.meetingsHeld
+    })
 
     toast.info('Meeting scheduler opened', {
       description: 'Schedule a call with your project team'
@@ -783,22 +713,18 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleInvoiceDispute = useCallback(async (invoiceNumber: string) => {
-    console.log('⚠️ CLIENT ZONE: HANDLING INVOICE DISPUTE')
-    console.log('🧾 CLIENT ZONE: Invoice Number: ' + invoiceNumber)
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('📧 CLIENT ZONE: Email: ' + KAZI_CLIENT_DATA.clientInfo.email)
-    console.log('🎯 CLIENT ZONE: Opening dispute resolution process')
+    logger.info('Invoice dispute initiated', {
+      invoiceNumber,
+      client: KAZI_CLIENT_DATA.clientInfo.name
+    })
 
     const disputeReason = prompt('Please describe the dispute:')
     if (!disputeReason) {
-      console.log('❌ CLIENT ZONE: DISPUTE CANCELLED')
+      logger.debug('Dispute canceled')
       return
     }
 
-    console.log('📝 CLIENT ZONE: Dispute reason: ' + disputeReason.substring(0, 50))
-
     try {
-      console.log('📡 CLIENT ZONE: Submitting dispute to support team')
       const response = await fetch('/api/invoices/dispute', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -809,16 +735,14 @@ export default function ClientZonePage() {
         })
       })
 
-      console.log('📡 CLIENT ZONE: API Response: ' + response.status)
-
       if (response.ok) {
-        console.log('✅ CLIENT ZONE: DISPUTE SUBMITTED SUCCESSFULLY')
+        logger.info('Dispute submitted successfully', { invoiceNumber })
         toast.success('Dispute submitted', {
           description: 'Our team will review and respond within 24 hours'
         })
       }
     } catch (error: any) {
-      console.error('❌ CLIENT ZONE: DISPUTE ERROR: ' + error.message)
+      logger.error('Failed to submit dispute', { error, invoiceNumber })
       toast.error('Failed to submit dispute', {
         description: error.message
       })
@@ -830,13 +754,10 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handlePaymentReminder = useCallback(() => {
-    console.log('💳 CLIENT ZONE: SENDING PAYMENT REMINDER')
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('📧 CLIENT ZONE: Email: ' + KAZI_CLIENT_DATA.clientInfo.email)
-    console.log('💰 CLIENT ZONE: Checking pending invoices')
-    console.log('📊 CLIENT ZONE: Total Investment: ' + KAZI_CLIENT_DATA.clientInfo.totalInvestment)
-    console.log('📧 CLIENT ZONE: Sending friendly payment reminder email')
-    console.log('✅ CLIENT ZONE: PAYMENT REMINDER SENT')
+    logger.info('Payment reminder sent', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      totalInvestment: KAZI_CLIENT_DATA.clientInfo.totalInvestment
+    })
 
     toast.info('Payment reminder sent', {
       description: 'Gentle reminder email sent to client'
@@ -848,13 +769,10 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleClientSurvey = useCallback(() => {
-    console.log('📊 CLIENT ZONE: LAUNCHING CLIENT SATISFACTION SURVEY')
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('⭐ CLIENT ZONE: Current Satisfaction: ' + KAZI_CLIENT_DATA.clientInfo.satisfaction)
-    console.log('📋 CLIENT ZONE: Survey includes project quality, communication, and timeliness')
-    console.log('📧 CLIENT ZONE: Survey link sent to email')
-    console.log('🎯 CLIENT ZONE: Results will help improve service quality')
-    console.log('✅ CLIENT ZONE: SURVEY INITIATED')
+    logger.info('Client survey initiated', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      currentSatisfaction: KAZI_CLIENT_DATA.clientInfo.satisfaction
+    })
 
     toast.success('Satisfaction survey sent!', {
       description: 'Your feedback helps us serve you better'
@@ -866,13 +784,11 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleReferralRequest = useCallback(() => {
-    console.log('🤝 CLIENT ZONE: REQUESTING CLIENT REFERRAL')
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('⭐ CLIENT ZONE: Client Satisfaction: ' + KAZI_CLIENT_DATA.clientInfo.satisfaction)
-    console.log('🏆 CLIENT ZONE: Client Tier: ' + KAZI_CLIENT_DATA.clientInfo.tier)
-    console.log('💰 CLIENT ZONE: Referral rewards program information shared')
-    console.log('📧 CLIENT ZONE: Personalized referral link generated')
-    console.log('✅ CLIENT ZONE: REFERRAL REQUEST SENT')
+    logger.info('Referral request sent', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      satisfaction: KAZI_CLIENT_DATA.clientInfo.satisfaction,
+      tier: KAZI_CLIENT_DATA.clientInfo.tier
+    })
 
     toast.success('Referral program details sent!', {
       description: 'Earn rewards for referring new clients'
@@ -884,13 +800,11 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleClientRetention = useCallback(() => {
-    console.log('💼 CLIENT ZONE: LAUNCHING RETENTION CAMPAIGN')
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('📊 CLIENT ZONE: Total Projects: ' + KAZI_CLIENT_DATA.clientInfo.totalProjects)
-    console.log('💰 CLIENT ZONE: Total Investment: ' + KAZI_CLIENT_DATA.clientInfo.totalInvestment)
-    console.log('🎁 CLIENT ZONE: Checking for loyalty rewards and discounts')
-    console.log('📧 CLIENT ZONE: Personalized retention offer prepared')
-    console.log('✅ CLIENT ZONE: RETENTION CAMPAIGN INITIATED')
+    logger.info('Retention campaign initiated', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      totalProjects: KAZI_CLIENT_DATA.clientInfo.totalProjects,
+      totalInvestment: KAZI_CLIENT_DATA.clientInfo.totalInvestment
+    })
 
     toast.info('Exclusive offers available!', {
       description: 'Special discounts for valued clients'
@@ -902,14 +816,12 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleClientSegmentation = useCallback(() => {
-    console.log('🎯 CLIENT ZONE: ANALYZING CLIENT SEGMENTATION')
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('🏆 CLIENT ZONE: Current Tier: ' + KAZI_CLIENT_DATA.clientInfo.tier)
-    console.log('💰 CLIENT ZONE: Total Investment: ' + KAZI_CLIENT_DATA.clientInfo.totalInvestment)
-    console.log('📊 CLIENT ZONE: Project Count: ' + KAZI_CLIENT_DATA.clientInfo.totalProjects)
-    console.log('⭐ CLIENT ZONE: Satisfaction Score: ' + KAZI_CLIENT_DATA.clientInfo.satisfaction)
-    console.log('📈 CLIENT ZONE: Client categorized as high-value premium client')
-    console.log('✅ CLIENT ZONE: SEGMENTATION ANALYSIS COMPLETE')
+    logger.info('Client segmentation analyzed', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      tier: KAZI_CLIENT_DATA.clientInfo.tier,
+      totalInvestment: KAZI_CLIENT_DATA.clientInfo.totalInvestment,
+      satisfaction: KAZI_CLIENT_DATA.clientInfo.satisfaction
+    })
 
     toast.info('Client profile analyzed', {
       description: 'Premium tier benefits active'
@@ -921,13 +833,12 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleClientReports = useCallback(() => {
-    console.log('📊 CLIENT ZONE: GENERATING CLIENT REPORTS')
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('📈 CLIENT ZONE: On-Time Delivery: ' + KAZI_CLIENT_DATA.analytics.onTimeDelivery + '%')
-    console.log('✅ CLIENT ZONE: First-Time Approval: ' + KAZI_CLIENT_DATA.analytics.firstTimeApproval + '%')
-    console.log('⏱️ CLIENT ZONE: Avg Response Time: ' + KAZI_CLIENT_DATA.analytics.avgResponseTime + ' days')
-    console.log('📧 CLIENT ZONE: Comprehensive report will be emailed')
-    console.log('✅ CLIENT ZONE: CLIENT REPORTS GENERATED')
+    logger.info('Client reports generated', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      onTimeDelivery: KAZI_CLIENT_DATA.analytics.onTimeDelivery,
+      firstTimeApproval: KAZI_CLIENT_DATA.analytics.firstTimeApproval,
+      avgResponseTime: KAZI_CLIENT_DATA.analytics.avgResponseTime
+    })
 
     toast.success('Client reports generated!', {
       description: 'Detailed analytics and insights ready to view'
@@ -939,13 +850,12 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleClientAnalytics = useCallback(() => {
-    console.log('📈 CLIENT ZONE: VIEWING CLIENT ANALYTICS DASHBOARD')
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('💬 CLIENT ZONE: Messages Exchanged: ' + KAZI_CLIENT_DATA.analytics.messagesExchanged)
-    console.log('🤝 CLIENT ZONE: Meetings Held: ' + KAZI_CLIENT_DATA.analytics.meetingsHeld)
-    console.log('📁 CLIENT ZONE: Files Shared: ' + KAZI_CLIENT_DATA.analytics.filesShared)
-    console.log('📊 CLIENT ZONE: Loading interactive analytics dashboard')
-    console.log('✅ CLIENT ZONE: ANALYTICS DASHBOARD OPENED')
+    logger.info('Analytics dashboard opened', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      messagesExchanged: KAZI_CLIENT_DATA.analytics.messagesExchanged,
+      meetingsHeld: KAZI_CLIENT_DATA.analytics.meetingsHeld,
+      filesShared: KAZI_CLIENT_DATA.analytics.filesShared
+    })
 
     toast.info('Analytics dashboard loaded', {
       description: 'Comprehensive project insights and metrics'
@@ -957,13 +867,10 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleClientExport = useCallback(() => {
-    console.log('📥 CLIENT ZONE: EXPORTING CLIENT DATA')
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('📊 CLIENT ZONE: Including all project data and communications')
-    console.log('📧 CLIENT ZONE: Email: ' + KAZI_CLIENT_DATA.clientInfo.email)
-    console.log('🔒 CLIENT ZONE: Secure data export in progress')
-    console.log('📦 CLIENT ZONE: Generating ZIP archive with all client files')
-    console.log('✅ CLIENT ZONE: CLIENT DATA EXPORT INITIATED')
+    logger.info('Client data export initiated', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      email: KAZI_CLIENT_DATA.clientInfo.email
+    })
 
     toast.success('Data export started', {
       description: 'Download link will be sent to your email'
@@ -975,13 +882,10 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleClientNotifications = useCallback(() => {
-    console.log('🔔 CLIENT ZONE: MANAGING CLIENT NOTIFICATIONS')
-    console.log('👤 CLIENT ZONE: Client: ' + KAZI_CLIENT_DATA.clientInfo.name)
-    console.log('📧 CLIENT ZONE: Email: ' + KAZI_CLIENT_DATA.clientInfo.email)
-    console.log('📊 CLIENT ZONE: Active Projects: ' + KAZI_CLIENT_DATA.clientInfo.activeProjects)
-    console.log('🎯 CLIENT ZONE: Loading notification preferences')
-    console.log('📱 CLIENT ZONE: Push notifications, email alerts, SMS options available')
-    console.log('✅ CLIENT ZONE: NOTIFICATION SETTINGS OPENED')
+    logger.info('Notification settings opened', {
+      client: KAZI_CLIENT_DATA.clientInfo.name,
+      activeProjects: KAZI_CLIENT_DATA.clientInfo.activeProjects
+    })
 
     toast.info('Notification settings loaded', {
       description: 'Manage your communication preferences'
@@ -993,7 +897,7 @@ export default function ClientZonePage() {
   // ============================================================================
 
   const handleUploadFile = () => {
-    console.log('📤 UPLOAD FILE')
+    logger.info('File upload initiated')
     const input = document.createElement('input')
     input.type = 'file'
     input.click()
