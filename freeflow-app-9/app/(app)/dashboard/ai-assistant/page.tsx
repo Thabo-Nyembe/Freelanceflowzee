@@ -43,6 +43,9 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('AIAssistant')
 
 interface Message {
   id: string
@@ -360,225 +363,404 @@ export default function AIAssistantPage() {
 
   // Additional Handlers
   const handleNewConversation = () => {
-    console.log('✨ AI ASSISTANT: New conversation initiated')
-    console.log('📝 AI ASSISTANT: Starting fresh chat session')
-    console.log('🔄 AI ASSISTANT: Resetting message history')
-    setMessages([{ id: Date.now().toString(), content: 'Hello! How can I help you today?', type: 'assistant', timestamp: new Date() }])
-    toast.success('✨ New Conversation Started', {
-      description: 'Fresh chat session ready'
+    const previousMessageCount = messages.length
+    const newMessage = { id: Date.now().toString(), content: 'Hello! How can I help you today?', type: 'assistant' as const, timestamp: new Date() }
+
+    logger.info('New conversation initiated', {
+      previousMessageCount,
+      conversationReset: true
+    })
+
+    setMessages([newMessage])
+
+    toast.success('New conversation started', {
+      description: `Fresh chat session ready - Previous: ${previousMessageCount} messages`
     })
   }
 
   const handleLoadConversation = (conversationId: string, title: string) => {
-    console.log('✨ AI ASSISTANT: Loading conversation')
-    console.log('📝 AI ASSISTANT: Conversation ID: ' + conversationId)
-    console.log('📋 AI ASSISTANT: Title: ' + title)
-    toast.info('📂 Loading Conversation', {
-      description: title
+    const conversation = conversations.find(c => c.id === conversationId)
+
+    logger.info('Loading conversation', {
+      conversationId,
+      title,
+      messageCount: conversation?.messageCount || 0,
+      tags: conversation?.tags || []
+    })
+
+    // Note: Using mock data - in production, this would fetch from /api/conversations/:id
+    toast.info('Loading conversation', {
+      description: `${title} - ${conversation?.messageCount || 0} messages - ${conversation?.tags.join(', ') || 'No tags'}`
     })
   }
 
   const handleDeleteConversation = (conversationId: string) => {
-    console.log('✨ AI ASSISTANT: Delete conversation requested')
-    console.log('📝 AI ASSISTANT: Conversation ID: ' + conversationId)
-    if (confirm('Delete conversation?')) {
-      console.log('✅ AI ASSISTANT: Conversation deleted successfully')
-      toast.success('✅ Conversation Deleted', {
-        description: 'Conversation removed successfully'
+    const conversation = conversations.find(c => c.id === conversationId)
+
+    logger.info('Delete conversation requested', {
+      conversationId,
+      title: conversation?.title,
+      messageCount: conversation?.messageCount
+    })
+
+    if (confirm(`Delete "${conversation?.title}"? This action cannot be undone.`)) {
+      logger.info('Conversation deleted', {
+        conversationId,
+        title: conversation?.title,
+        messageCount: conversation?.messageCount
       })
+
+      // Note: Using local state - in production, this would DELETE to /api/conversations/:id
+      toast.success('Conversation deleted', {
+        description: `${conversation?.title} - ${conversation?.messageCount} messages removed`
+      })
+    } else {
+      logger.debug('Conversation deletion cancelled', { conversationId })
     }
   }
 
   const handleCopyMessage = (messageId: string, content: string) => {
-    console.log('✨ AI ASSISTANT: Copying message to clipboard')
-    console.log('📝 AI ASSISTANT: Message ID: ' + messageId)
-    console.log('📋 AI ASSISTANT: Content length: ' + content.length + ' characters')
+    logger.info('Copying message to clipboard', {
+      messageId,
+      contentLength: content.length,
+      contentPreview: content.substring(0, 50)
+    })
+
     navigator.clipboard.writeText(content)
-    toast.success('📋 Message Copied', {
-      description: 'Copied to clipboard'
+
+    toast.success('Message copied', {
+      description: `${content.length} characters copied to clipboard`
     })
   }
 
   const handleBookmarkMessage = (messageId: string) => {
-    console.log('✨ AI ASSISTANT: Bookmarking message')
-    console.log('📝 AI ASSISTANT: Message ID: ' + messageId)
-    console.log('🔖 AI ASSISTANT: Message saved to bookmarks')
-    toast.success('🔖 Message Bookmarked', {
-      description: 'Saved to bookmarks'
+    const message = messages.find(m => m.id === messageId)
+
+    logger.info('Bookmarking message', {
+      messageId,
+      messageType: message?.type,
+      contentLength: message?.content.length
+    })
+
+    // Note: Using local state - in production, this would POST to /api/bookmarks
+    toast.success('Message bookmarked', {
+      description: `${message?.type === 'user' ? 'Your message' : 'AI response'} saved to bookmarks`
     })
   }
 
   const handleRefreshInsights = () => {
-    console.log('✨ AI ASSISTANT: Refreshing AI insights')
-    console.log('📝 AI ASSISTANT: Analyzing latest data')
-    console.log('🔄 AI ASSISTANT: Generating new recommendations')
-    toast.info('🔄 Refreshing AI Insights', {
-      description: 'Analyzing latest data...'
+    const highPriority = aiInsights.filter(i => i.priority === 'high').length
+    const categories = [...new Set(aiInsights.map(i => i.category))]
+
+    logger.info('Refreshing AI insights', {
+      totalInsights: aiInsights.length,
+      highPriorityCount: highPriority,
+      categories
+    })
+
+    // Note: Using mock data - in production, this would fetch from /api/ai/insights
+    toast.info('Refreshing AI insights', {
+      description: `Analyzing ${aiInsights.length} insights - ${highPriority} high priority - ${categories.length} categories`
     })
   }
 
   const handleImplementAction = (insightId: string, action: string) => {
-    console.log('✨ AI ASSISTANT: Implementing action')
-    console.log('📝 AI ASSISTANT: Insight ID: ' + insightId)
-    console.log('🎯 AI ASSISTANT: Action: ' + action)
-    toast.success('✅ Implementing Action', {
-      description: action
+    const insight = aiInsights.find(i => i.id === insightId)
+
+    logger.info('Implementing action', {
+      insightId,
+      action,
+      insightTitle: insight?.title,
+      category: insight?.category,
+      priority: insight?.priority
+    })
+
+    // Note: Using local state - in production, this would POST to /api/ai/actions
+    toast.success('Implementing action', {
+      description: `${action} - ${insight?.category} - ${insight?.priority} priority`
     })
   }
 
   const handleExportConversation = (conversationId: string) => {
-    console.log('✨ AI ASSISTANT: Exporting conversation')
-    console.log('📝 AI ASSISTANT: Conversation ID: ' + conversationId)
-    console.log('💾 AI ASSISTANT: Generating PDF/MD export')
-    toast.info('💾 Exporting Conversation', {
-      description: 'Downloading as PDF/MD...'
+    const conversation = conversations.find(c => c.id === conversationId)
+
+    logger.info('Exporting conversation', {
+      conversationId,
+      title: conversation?.title,
+      messageCount: conversation?.messageCount,
+      format: 'markdown'
+    })
+
+    // Note: Using mock export - in production, this would generate from /api/conversations/:id/export
+    const content = `# ${conversation?.title}\n\nMessages: ${conversation?.messageCount}\nTags: ${conversation?.tags.join(', ')}\n\nExported on ${new Date().toLocaleDateString()}`
+    const blob = new Blob([content], { type: 'text/markdown' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${conversation?.title || 'conversation'}.md`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    toast.success('Conversation exported', {
+      description: `${conversation?.title} - ${conversation?.messageCount} messages - ${Math.round(blob.size / 1024)}KB`
     })
   }
 
   const handleShareConversation = (conversationId: string) => {
-    console.log('✨ AI ASSISTANT: Sharing conversation')
-    console.log('📝 AI ASSISTANT: Conversation ID: ' + conversationId)
-    console.log('🔗 AI ASSISTANT: Generating shareable link')
-    toast.info('🔗 Share Conversation', {
-      description: 'Generating shareable link'
+    const conversation = conversations.find(c => c.id === conversationId)
+
+    logger.info('Sharing conversation', {
+      conversationId,
+      title: conversation?.title,
+      messageCount: conversation?.messageCount
+    })
+
+    // Note: Using mock link - in production, this would POST to /api/conversations/:id/share
+    const shareLink = `${window.location.origin}/shared/conversations/${conversationId}`
+    navigator.clipboard.writeText(shareLink)
+
+    toast.success('Share link copied', {
+      description: `${conversation?.title} - Link copied to clipboard`
     })
   }
 
   const handleVoiceInput = () => {
-    console.log('✨ AI ASSISTANT: Voice input toggled')
-    console.log('📝 AI ASSISTANT: Listening state: ' + !isListening)
-    console.log('🎤 AI ASSISTANT: Voice command mode activated')
+    const newListeningState = !isListening
+
+    logger.info('Voice input toggled', {
+      previousState: isListening,
+      newState: newListeningState,
+      voiceModeEnabled: isVoiceMode
+    })
+
     setIsListening(!isListening)
-    toast.info('🎤 Voice Input', {
-      description: 'Listening for voice command...'
+
+    toast.info('Voice input', {
+      description: `${newListeningState ? 'Listening for voice command' : 'Voice input stopped'} - ${isVoiceMode ? 'Voice mode enabled' : 'Voice mode disabled'}`
     })
   }
 
   const handleRegenerateResponse = (messageId: string) => {
-    console.log('✨ AI ASSISTANT: Regenerating response')
-    console.log('📝 AI ASSISTANT: Message ID: ' + messageId)
-    console.log('🔄 AI ASSISTANT: Creating new AI response')
-    toast.info('🔄 Regenerating Response', {
-      description: 'Creating new AI response...'
+    const message = messages.find(m => m.id === messageId)
+
+    logger.info('Regenerating AI response', {
+      messageId,
+      messageType: message?.type,
+      selectedModel
+    })
+
+    // Note: Using mock regeneration - in production, this would POST to /api/ai/regenerate
+    toast.info('Regenerating response', {
+      description: `Creating new AI response - Model: ${selectedModel}`
     })
   }
 
   const handleSearchConversations = () => {
-    console.log('✨ AI ASSISTANT: Searching conversations')
-    console.log('📝 AI ASSISTANT: Opening search interface')
-    console.log('🔍 AI ASSISTANT: Ready to search chat history')
-    toast.info('🔍 Search Conversations', {
-      description: 'Search through chat history'
+    logger.info('Opening conversation search', {
+      totalConversations: conversations.length,
+      totalMessages: conversations.reduce((sum, c) => sum + c.messageCount, 0)
+    })
+
+    toast.info('Search conversations', {
+      description: `Search through ${conversations.length} conversations - ${conversations.reduce((sum, c) => sum + c.messageCount, 0)} total messages`
     })
   }
 
   const handleFilterConversations = (filter: string) => {
-    console.log('✨ AI ASSISTANT: Filtering conversations')
-    console.log('📝 AI ASSISTANT: Filter: ' + filter)
-    console.log('🔍 AI ASSISTANT: Applying filter criteria')
-    toast.info('🔍 Filtering', {
-      description: 'Filter: ' + filter
+    const filteredCount = conversations.filter(c => c.tags.includes(filter.toLowerCase())).length
+
+    logger.info('Filtering conversations', {
+      filter,
+      filteredCount,
+      totalConversations: conversations.length
+    })
+
+    toast.info('Filtering conversations', {
+      description: `Filter: ${filter} - ${filteredCount} of ${conversations.length} conversations match`
     })
   }
 
   const handleExportInsights = () => {
-    console.log('✨ AI ASSISTANT: Exporting insights report')
-    console.log('📝 AI ASSISTANT: Generating comprehensive PDF report')
-    console.log('💾 AI ASSISTANT: Compiling all insights and recommendations')
-    toast.info('💾 Export Insights Report', {
-      description: 'Generating PDF report...'
+    const highPriority = aiInsights.filter(i => i.priority === 'high').length
+    const categories = [...new Set(aiInsights.map(i => i.category))]
+
+    logger.info('Exporting insights report', {
+      totalInsights: aiInsights.length,
+      highPriorityCount: highPriority,
+      categories
+    })
+
+    // Note: Using mock export - in production, this would generate from /api/ai/insights/export
+    const content = `# AI Insights Report\n\n${aiInsights.map(i => `## ${i.title}\n${i.description}\nPriority: ${i.priority}\nAction: ${i.action}\n\n`).join('')}`
+    const blob = new Blob([content], { type: 'text/markdown' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `ai-insights-report.md`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    toast.success('Insights report exported', {
+      description: `${aiInsights.length} insights - ${highPriority} high priority - ${categories.length} categories - ${Math.round(blob.size / 1024)}KB`
     })
   }
 
   const handleScheduleReminder = (action: string) => {
-    console.log('✨ AI ASSISTANT: Scheduling reminder')
-    console.log('📝 AI ASSISTANT: Action: ' + action)
-    console.log('📅 AI ASSISTANT: Reminder scheduled successfully')
-    toast.success('📅 Schedule Reminder', {
-      description: action
+    const reminderTime = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours from now
+
+    logger.info('Scheduling reminder', {
+      action,
+      scheduledFor: reminderTime.toISOString()
+    })
+
+    // Note: Using mock scheduling - in production, this would POST to /api/reminders
+    toast.success('Reminder scheduled', {
+      description: `${action} - Scheduled for ${reminderTime.toLocaleDateString()} at ${reminderTime.toLocaleTimeString()}`
     })
   }
 
   const handleViewAnalytics = () => {
-    console.log('✨ AI ASSISTANT: Viewing analytics')
-    console.log('📝 AI ASSISTANT: Loading detailed performance metrics')
-    console.log('📊 AI ASSISTANT: Compiling comprehensive analytics data')
-    toast.info('📊 View Analytics', {
-      description: 'Detailed performance metrics'
+    const totalMessages = conversations.reduce((sum, c) => sum + c.messageCount, 0)
+    const avgMessagesPerConversation = conversations.length > 0 ? Math.round(totalMessages / conversations.length) : 0
+
+    logger.info('Viewing analytics', {
+      totalConversations: conversations.length,
+      totalMessages,
+      avgMessagesPerConversation,
+      totalInsights: aiInsights.length
+    })
+
+    toast.info('View analytics', {
+      description: `${conversations.length} conversations - ${totalMessages} messages - Avg: ${avgMessagesPerConversation} messages/conversation`
     })
   }
 
   const handleConfigureAI = () => {
-    console.log('✨ AI ASSISTANT: Opening AI configuration')
-    console.log('📝 AI ASSISTANT: Available settings:')
-    console.log('  - Model settings')
-    console.log('  - Temperature')
-    console.log('  - Context length')
-    console.log('  - System prompts')
-    toast.info('⚙️ AI Configuration', {
-      description: 'Customize AI settings'
+    const settings = ['Model selection', 'Temperature', 'Context length', 'System prompts']
+
+    logger.info('Opening AI configuration', {
+      currentModel: selectedModel,
+      availableSettings: settings
+    })
+
+    toast.info('AI configuration', {
+      description: `Current model: ${selectedModel} - ${settings.length} settings available`
     })
   }
 
   const handleSaveChat = () => {
-    console.log('✨ AI ASSISTANT: Saving chat')
-    console.log('📝 AI ASSISTANT: Conversation saved successfully')
-    console.log('💾 AI ASSISTANT: All messages preserved')
-    toast.success('💾 Chat Saved', {
-      description: 'Conversation saved successfully'
+    logger.info('Saving chat', {
+      messageCount: messages.length,
+      hasUserMessages: messages.some(m => m.type === 'user')
+    })
+
+    // Note: Using local state - in production, this would POST to /api/conversations
+    toast.success('Chat saved', {
+      description: `${messages.length} messages preserved - ${messages.filter(m => m.type === 'user').length} user messages, ${messages.filter(m => m.type === 'assistant').length} AI responses`
     })
   }
 
   const handleClearChat = () => {
-    console.log('✨ AI ASSISTANT: Clear chat requested')
-    if (confirm('Clear all messages?')) {
-      console.log('📝 AI ASSISTANT: Clearing all messages')
-      console.log('🗑️ AI ASSISTANT: Chat cleared successfully')
+    const messageCount = messages.length
+
+    logger.info('Clear chat requested', { messageCount })
+
+    if (confirm(`Clear all ${messageCount} messages? This action cannot be undone.`)) {
+      logger.info('Chat cleared', { clearedMessageCount: messageCount })
+
       setMessages([])
-      toast.success('✅ Chat Cleared', {
-        description: 'All messages removed'
+
+      toast.success('Chat cleared', {
+        description: `${messageCount} messages removed`
       })
+    } else {
+      logger.debug('Chat clear cancelled')
     }
   }
 
   const handleAttachFile = () => {
-    console.log('✨ AI ASSISTANT: Attaching file')
-    console.log('📝 AI ASSISTANT: Opening file picker')
-    console.log('📎 AI ASSISTANT: Ready to upload file')
+    logger.info('Attaching file', {
+      currentMessageCount: messages.length
+    })
+
     const input = document.createElement('input')
     input.type = 'file'
+    input.accept = '.pdf,.doc,.docx,.txt,.md'
+    input.onchange = (e: Event) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) {
+        logger.info('File selected', {
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type
+        })
+        toast.success('File attached', {
+          description: `${file.name} - ${Math.round(file.size / 1024)}KB`
+        })
+      }
+    }
     input.click()
-    toast.info('📎 Attach File', {
-      description: 'File picker opened'
+
+    toast.info('Attach file', {
+      description: 'Select a file to attach to your message'
     })
   }
 
   const handleInsightDismiss = (insightId: string) => {
-    console.log('✨ AI ASSISTANT: Dismissing insight')
-    console.log('📝 AI ASSISTANT: Insight ID: ' + insightId)
-    if (confirm('Dismiss this insight?')) {
-      console.log('✅ AI ASSISTANT: Insight dismissed successfully')
-      toast.success('✅ Insight Dismissed', {
-        description: 'Insight removed from list'
+    const insight = aiInsights.find(i => i.id === insightId)
+
+    logger.info('Dismissing insight', {
+      insightId,
+      title: insight?.title,
+      priority: insight?.priority
+    })
+
+    if (confirm(`Dismiss "${insight?.title}"?`)) {
+      logger.info('Insight dismissed', {
+        insightId,
+        title: insight?.title
       })
+
+      // Note: Using local state - in production, this would DELETE to /api/ai/insights/:id
+      toast.success('Insight dismissed', {
+        description: `${insight?.title} - ${insight?.priority} priority removed`
+      })
+    } else {
+      logger.debug('Insight dismiss cancelled', { insightId })
     }
   }
 
   const handlePinConversation = (conversationId: string) => {
-    console.log('✨ AI ASSISTANT: Pinning conversation')
-    console.log('📝 AI ASSISTANT: Conversation ID: ' + conversationId)
-    console.log('📌 AI ASSISTANT: Conversation pinned to top')
-    toast.success('📌 Conversation Pinned', {
-      description: 'Pinned to top of list'
+    const conversation = conversations.find(c => c.id === conversationId)
+
+    logger.info('Pinning conversation', {
+      conversationId,
+      title: conversation?.title,
+      messageCount: conversation?.messageCount
+    })
+
+    // Note: Using local state - in production, this would PATCH to /api/conversations/:id
+    toast.success('Conversation pinned', {
+      description: `${conversation?.title} - Pinned to top of list`
     })
   }
 
   const handleArchiveConversation = (conversationId: string) => {
-    console.log('✨ AI ASSISTANT: Archiving conversation')
-    console.log('📝 AI ASSISTANT: Conversation ID: ' + conversationId)
-    console.log('📦 AI ASSISTANT: Moved to archive')
-    toast.success('📦 Conversation Archived', {
-      description: 'Moved to archive'
+    const conversation = conversations.find(c => c.id === conversationId)
+
+    logger.info('Archiving conversation', {
+      conversationId,
+      title: conversation?.title,
+      messageCount: conversation?.messageCount
+    })
+
+    // Note: Using local state - in production, this would PATCH to /api/conversations/:id
+    toast.success('Conversation archived', {
+      description: `${conversation?.title} - ${conversation?.messageCount} messages moved to archive`
     })
   }
 

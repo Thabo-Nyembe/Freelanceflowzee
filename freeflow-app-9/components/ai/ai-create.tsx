@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
+import { createFeatureLogger } from '@/lib/logger'
 import {
   Brain,
   Sparkles,
@@ -213,6 +214,8 @@ const INITIAL_MOCK_GENERATIONS: Generation[] = [
 interface AICreateProps {
   onSaveKeys?: (keys: Record<string, string>) => void
 }
+
+const logger = createFeatureLogger('AICreate')
 
 export function AICreate({ onSaveKeys }: AICreateProps) {
   // Core State (existing)
@@ -512,7 +515,12 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
       toast.success('Content generated successfully!')
 
     } catch (error: any) {
-      console.error('Generation error:', error)
+      logger.error('Content generation failed', {
+        error,
+        model: selectedModel,
+        promptLength: prompt.length,
+        errorMessage: error.message
+      })
 
       // A++++ Phase 2: Track failed generation
       trackGeneration({

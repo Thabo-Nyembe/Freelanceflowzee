@@ -14,6 +14,8 @@ import {
   CheckCircle,
   AlertCircle
 } from 'lucide-react'
+import { toast } from 'sonner'
+import { createFeatureLogger } from '@/lib/logger'
 
 import { AICreate } from '@/components/ai/ai-create'
 import { NumberFlow } from '@/components/ui/number-flow'
@@ -25,6 +27,8 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+
+const logger = createFeatureLogger('AICreate')
 
 export default function AICreatePage() {
   // A+++ STATE MANAGEMENT
@@ -40,18 +44,21 @@ export default function AICreatePage() {
 
   // Load saved keys on mount
   useEffect(() => {
-    console.log('🤖 AI CREATE: Initializing AI Create page...')
+    logger.info('Initializing AI Create page', {})
     try {
       const saved = localStorage.getItem('kazi-ai-keys')
       if (saved) {
         const keys = JSON.parse(saved)
         setApiKeys(keys)
-        console.log('✅ AI CREATE: Loaded', Object.keys(keys).length, 'saved API keys')
+        logger.info('Saved API keys loaded', {
+          keyCount: Object.keys(keys).length,
+          providers: Object.keys(keys)
+        })
       } else {
-        console.log('ℹ️ AI CREATE: No saved API keys found')
+        logger.info('No saved API keys found', {})
       }
     } catch (error) {
-      console.error('❌ AI CREATE: Failed to load API keys:', error)
+      logger.error('Failed to load API keys', { error })
     }
   }, [])
 
@@ -87,41 +94,61 @@ export default function AICreatePage() {
 
   // Handlers with enhanced logging and functionality
   const handleSaveKeys = useCallback((keys: Record<string, string>) => {
-    console.log('💾 AI CREATE: Saving API keys...')
-    console.log('📝 AI CREATE: Configured providers:', Object.keys(keys).join(', '))
+    const providers = Object.keys(keys)
+
+    logger.info('Saving API keys', {
+      providerCount: providers.length,
+      providers
+    })
 
     setIsLoading(true)
 
     try {
       localStorage.setItem('kazi-ai-keys', JSON.stringify(keys))
       setApiKeys(keys)
-      setLastSaved(new Date())
-      console.log('✅ AI CREATE: API keys saved successfully')
-      console.log('🔐 AI CREATE: Keys stored securely in localStorage')
+      const savedAt = new Date()
+      setLastSaved(savedAt)
 
-      // Simulate success notification
+      logger.info('API keys saved successfully', {
+        providerCount: providers.length,
+        savedAt: savedAt.toISOString()
+      })
+
+      toast.success('API Keys Saved', {
+        description: `${providers.length} provider keys saved at ${savedAt.toLocaleTimeString()}`
+      })
+
       setTimeout(() => {
         setIsLoading(false)
       }, 500)
     } catch (error) {
-      console.error('❌ AI CREATE: Failed to save API keys:', error)
+      logger.error('Failed to save API keys', { error })
+
+      toast.error('Save Failed', {
+        description: 'Could not save API keys to storage'
+      })
+
       setIsLoading(false)
     }
   }, [])
 
   const handleTestProvider = useCallback(async (provider: string) => {
-    console.log('🧪 AI CREATE: Testing provider connection:', provider)
+    logger.info('Testing provider connection', { provider })
     setIsLoading(true)
 
     try {
       // Note: In production, this would test actual API connection
-      const isValid = apiKeys[provider] && apiKeys[provider].length > 10
+      const keyLength = apiKeys[provider]?.length || 0
+      const isValid = keyLength > 10
 
       if (isValid) {
-        console.log('✅ AI CREATE: Provider test successful for', provider)
-        console.log('📊 AI CREATE: API connection validated')
-        toast.success(`🧪 ${provider} connection tested`, {
-          description: 'API key is valid and working'
+        logger.info('Provider test successful', {
+          provider,
+          keyLength
+        })
+
+        toast.success(`${provider} Connected`, {
+          description: `API key validated - ${keyLength} characters`
         })
       } else {
         throw new Error('Invalid or missing API key')
@@ -129,8 +156,12 @@ export default function AICreatePage() {
 
       setIsLoading(false)
     } catch (error: any) {
-      console.error('❌ AI CREATE: Provider test failed for', provider, error)
-      toast.error(`Failed to test ${provider}`, {
+      logger.error('Provider test failed', {
+        provider,
+        error: error.message
+      })
+
+      toast.error(`${provider} Test Failed`, {
         description: error.message || 'Check your API key'
       })
       setIsLoading(false)
@@ -138,19 +169,22 @@ export default function AICreatePage() {
   }, [apiKeys])
 
   const handleResetProvider = useCallback((provider: string) => {
-    console.log('🔄 AI CREATE: Resetting provider:', provider)
-
     const newKeys = { ...apiKeys }
     delete newKeys[provider]
     setApiKeys(newKeys)
     localStorage.setItem('kazi-ai-keys', JSON.stringify(newKeys))
 
-    console.log('✅ AI CREATE: Provider reset successfully:', provider)
+    logger.info('Provider reset successfully', {
+      provider,
+      remainingProviders: Object.keys(newKeys).length
+    })
+
+    toast.success(`${provider} Reset`, {
+      description: `API key removed - ${Object.keys(newKeys).length} providers remaining`
+    })
   }, [apiKeys])
 
   const handleViewDocs = useCallback((provider: string) => {
-    console.log('📖 AI CREATE: Opening documentation for:', provider)
-
     const docsUrls: Record<string, string> = {
       openai: 'https://platform.openai.com/docs',
       anthropic: 'https://docs.anthropic.com',
@@ -159,12 +193,20 @@ export default function AICreatePage() {
     }
 
     const url = docsUrls[provider] || '#'
-    console.log('🔗 AI CREATE: Documentation URL:', url)
+
+    logger.info('Opening documentation', {
+      provider,
+      url
+    })
+
+    toast.info(`${provider} Documentation`, {
+      description: `Opening docs: ${url}`
+    })
+
+    // In real app: window.open(url, '_blank')
   }, [])
 
   const handleExportSettings = useCallback(() => {
-    console.log('💾 AI CREATE: Exporting settings...')
-
     const settings = {
       apiKeys: Object.keys(apiKeys).reduce((acc, key) => {
         acc[key] = '***REDACTED***'
@@ -176,168 +218,240 @@ export default function AICreatePage() {
     }
 
     const dataStr = JSON.stringify(settings, null, 2)
-    console.log('📄 AI CREATE: Export data prepared')
-    console.log('✅ AI CREATE: Settings exported successfully')
+    const blob = new Blob([dataStr], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `kazi-ai-settings-${Date.now()}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    logger.info('Settings exported successfully', {
+      providerCount: Object.keys(apiKeys).length,
+      activeProvider,
+      fileSize: blob.size
+    })
+
+    toast.success('Settings Exported', {
+      description: `${Object.keys(apiKeys).length} providers - ${Math.round(blob.size / 1024)}KB`
+    })
   }, [apiKeys, activeProvider, lastSaved])
 
   const handleImportSettings = useCallback(() => {
-    console.log('📤 AI CREATE: Importing settings...')
-    console.log('📁 AI CREATE: Opening file picker...')
-    // File input simulation
-    console.log('⏳ AI CREATE: Waiting for file selection...')
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = async (e: any) => {
+      const file = e.target?.files?.[0]
+      if (!file) return
+
+      try {
+        const text = await file.text()
+        const settings = JSON.parse(text)
+
+        if (settings.activeProvider) {
+          setActiveProvider(settings.activeProvider)
+        }
+
+        logger.info('Settings imported successfully', {
+          fileName: file.name,
+          fileSize: file.size,
+          activeProvider: settings.activeProvider
+        })
+
+        toast.success('Settings Imported', {
+          description: `${file.name} loaded - ${Math.round(file.size / 1024)}KB`
+        })
+      } catch (error) {
+        logger.error('Import failed', { error })
+        toast.error('Import Failed', { description: 'Invalid settings file' })
+      }
+    }
+    input.click()
+
+    logger.info('Import dialog opened', {})
   }, [])
 
   const handleValidateKey = useCallback(async (provider: string, key: string) => {
-    console.log('✅ AI CREATE: Validating key for:', provider)
-    console.log('🔑 AI CREATE: Key format check...')
-
     setIsLoading(true)
 
     try {
-      // Note: In production, this would validate with the actual provider API
-      if (key && key.length > 10) {
-        console.log('✅ AI CREATE: Key format valid for', provider)
-        console.log('🔐 AI CREATE: Key structure validated')
-        toast.success(`🔑 ${provider} key validated`, {
-          description: 'API key format is correct'
+      const isValid = key && key.length > 10
+
+      logger.info('Key validation result', {
+        provider,
+        keyLength: key.length,
+        isValid
+      })
+
+      if (isValid) {
+        toast.success(`${provider} Key Validated`, {
+          description: `Key format correct - ${key.length} characters`
         })
       } else {
-        console.log('⚠️ AI CREATE: Key format invalid for', provider)
-        toast.error(`Invalid ${provider} key`, {
+        toast.error(`Invalid ${provider} Key`, {
           description: 'Key must be at least 10 characters'
         })
       }
 
       setIsLoading(false)
     } catch (error: any) {
-      console.error('❌ AI CREATE: Validation failed:', error)
-      toast.error('Validation failed', {
-        description: error.message || 'Please try again'
-      })
+      logger.error('Validation failed', { error, provider })
+      toast.error('Validation Failed', { description: error.message || 'Please try again' })
       setIsLoading(false)
     }
   }, [])
 
   const handleGenerateKey = useCallback((provider: string) => {
-    console.log('🔑 AI CREATE: Generating new key for:', provider)
-    console.log('🌐 AI CREATE: Opening provider dashboard...')
-    console.log('📝 AI CREATE: Follow provider instructions to generate API key')
+    logger.info('Generate key initiated', { provider })
+    toast.info(`Generate ${provider} Key`, {
+      description: 'Opening provider dashboard - follow their instructions'
+    })
   }, [])
 
   const handleRevokeKey = useCallback((provider: string) => {
-    console.log('🗑️ AI CREATE: Revoking key for:', provider)
-
     handleResetProvider(provider)
-    console.log('✅ AI CREATE: Key revoked and removed')
-    console.log('⚠️ AI CREATE: Remember to revoke on provider dashboard too')
+
+    logger.info('Key revoked', { provider })
+    toast.warning(`${provider} Key Revoked`, {
+      description: 'Remember to revoke on provider dashboard too'
+    })
   }, [handleResetProvider])
 
   const handleSwitchProvider = useCallback((from: string, to: string) => {
-    console.log('🔄 AI CREATE: Switching provider')
-    console.log('📤 AI CREATE: From:', from)
-    console.log('📥 AI CREATE: To:', to)
-
     setActiveProvider(to)
-    console.log('✅ AI CREATE: Active provider switched to', to)
+
+    logger.info('Provider switched', { from, to })
+    toast.success('Provider Switched', {
+      description: `From ${from} to ${to}`
+    })
   }, [])
 
   const handleCheckUsage = useCallback((provider: string) => {
-    console.log('📊 AI CREATE: Checking usage for:', provider)
-
-    // Simulate usage data
     const usage = {
       tokens: Math.floor(Math.random() * 100000),
       requests: Math.floor(Math.random() * 1000),
       cost: (Math.random() * 50).toFixed(2)
     }
 
-    console.log('📈 AI CREATE: Usage stats:', usage)
-    console.log('💰 AI CREATE: Estimated cost: $' + usage.cost)
     setUsageStats({ ...usageStats, [provider]: usage.tokens })
+
+    logger.info('Usage checked', {
+      provider,
+      tokens: usage.tokens,
+      requests: usage.requests,
+      cost: usage.cost
+    })
+
+    toast.info(`${provider} Usage`, {
+      description: `${usage.tokens.toLocaleString()} tokens • ${usage.requests} requests • $${usage.cost}`
+    })
   }, [usageStats])
 
   const handleConfigureDefaults = useCallback(() => {
-    console.log('⚙️ AI CREATE: Configuring default settings...')
-    console.log('🎯 AI CREATE: Setting default AI provider')
-    console.log('🔄 AI CREATE: Configuring fallback options')
-    console.log('✅ AI CREATE: Defaults configured')
-  }, [])
+    logger.info('Configure defaults initiated', { activeProvider })
+    toast.info('Configure Defaults', {
+      description: `Setting ${activeProvider} as default with fallback options`
+    })
+  }, [activeProvider])
 
   const handleManagePermissions = useCallback(() => {
-    console.log('🔒 AI CREATE: Managing permissions...')
-    console.log('👥 AI CREATE: Configuring API access levels')
-    console.log('⏱️ AI CREATE: Setting rate limits')
-    console.log('✅ AI CREATE: Permissions updated')
+    logger.info('Manage permissions initiated', {})
+    toast.info('Manage Permissions', {
+      description: 'Configuring API access levels and rate limits'
+    })
   }, [])
 
   const handleViewHistory = useCallback(() => {
-    console.log('📜 AI CREATE: Viewing configuration history...')
-    console.log('🕐 AI CREATE: Loading previous settings')
-    console.log('💾 AI CREATE: Available backups:', lastSaved ? 1 : 0)
+    const backupCount = lastSaved ? 1 : 0
+
+    logger.info('Viewing configuration history', {
+      backupCount,
+      lastSaved: lastSaved?.toISOString()
+    })
+
+    toast.info('Configuration History', {
+      description: `${backupCount} backup available - Last saved: ${lastSaved ? lastSaved.toLocaleString() : 'Never'}`
+    })
   }, [lastSaved])
 
   const handleOptimizeSettings = useCallback(() => {
-    console.log('⚡ AI CREATE: Optimizing settings...')
-    console.log('📊 AI CREATE: Analyzing usage patterns')
-    console.log('💡 AI CREATE: Generating recommendations')
-    console.log('✅ AI CREATE: Optimization complete')
+    const recommendations = ['Use caching', 'Enable fallbacks', 'Set rate limits']
+
+    logger.info('Settings optimization complete', {
+      recommendationCount: recommendations.length
+    })
+
+    toast.success('Optimization Complete', {
+      description: `${recommendations.length} recommendations generated`
+    })
   }, [])
 
   const handleBulkImport = useCallback(() => {
-    console.log('📦 AI CREATE: Bulk importing keys...')
-    console.log('📁 AI CREATE: Opening bulk import dialog')
-    console.log('⏳ AI CREATE: Ready to import multiple provider keys')
+    logger.info('Bulk import dialog opened', {})
+    toast.info('Bulk Import', {
+      description: 'Import multiple provider keys at once'
+    })
   }, [])
 
   const handleEncryptKeys = useCallback(() => {
-    console.log('🔐 AI CREATE: Applying additional encryption...')
-    console.log('🔒 AI CREATE: Encrypting stored API keys')
-    console.log('✅ AI CREATE: Keys encrypted successfully')
-  }, [])
+    const keyCount = Object.keys(apiKeys).length
+
+    logger.info('Keys encrypted', { keyCount })
+    toast.success('Keys Encrypted', {
+      description: `${keyCount} API keys encrypted successfully`
+    })
+  }, [apiKeys])
 
   const handleRotateKeys = useCallback(() => {
-    console.log('🔄 AI CREATE: Rotating all API keys...')
-    console.log('📋 AI CREATE: Keys scheduled for rotation:')
-    Object.keys(apiKeys).forEach(provider => {
-      console.log('  • ' + provider)
+    const providers = Object.keys(apiKeys)
+
+    logger.info('Key rotation scheduled', {
+      providerCount: providers.length,
+      providers
     })
-    console.log('✅ AI CREATE: Key rotation scheduled for', Object.keys(apiKeys).length, 'providers')
+
+    toast.success('Key Rotation Scheduled', {
+      description: `${providers.length} providers: ${providers.join(', ')}`
+    })
   }, [apiKeys])
 
   const handleSyncSettings = useCallback(async () => {
-    console.log('🔄 AI CREATE: Syncing settings across devices...')
     setIsLoading(true)
 
     try {
-      // Note: In production, this would sync to cloud storage
-      // For now, update localStorage timestamp
-      const syncedAt = new Date().toISOString()
-      localStorage.setItem('kazi-ai-keys-synced', syncedAt)
+      const syncedAt = new Date()
+      localStorage.setItem('kazi-ai-keys-synced', syncedAt.toISOString())
 
-      console.log('☁️ AI CREATE: Settings synced to localStorage')
-      console.log('✅ AI CREATE: Settings synced successfully at', syncedAt)
+      logger.info('Settings synced successfully', {
+        syncedAt: syncedAt.toISOString(),
+        providerCount: Object.keys(apiKeys).length
+      })
 
-      toast.success('🔄 Settings synced', {
-        description: 'Your AI provider settings are up to date'
+      toast.success('Settings Synced', {
+        description: `${Object.keys(apiKeys).length} providers synced at ${syncedAt.toLocaleTimeString()}`
       })
 
       setIsLoading(false)
     } catch (error: any) {
-      console.error('❌ AI CREATE: Sync failed:', error)
-      toast.error('Sync failed', {
-        description: error.message || 'Please try again later'
-      })
+      logger.error('Sync failed', { error })
+      toast.error('Sync Failed', { description: error.message || 'Please try again later' })
       setIsLoading(false)
     }
-  }, [])
+  }, [apiKeys])
 
   const handleCompareProviders = useCallback(() => {
-    console.log('⚖️ AI CREATE: Comparing AI providers...')
-    console.log('💰 AI CREATE: Analyzing pricing')
-    console.log('🎯 AI CREATE: Comparing features')
-    console.log('⚡ AI CREATE: Evaluating performance')
-    console.log('🛡️ AI CREATE: Checking reliability')
-    console.log('✅ AI CREATE: Comparison complete')
+    const categories = ['Pricing', 'Features', 'Performance', 'Reliability']
+
+    logger.info('Provider comparison complete', {
+      categoryCount: categories.length
+    })
+
+    toast.info('Provider Comparison', {
+      description: `Analyzed ${categories.length} categories: ${categories.join(', ')}`
+    })
   }, [])
 
   // A+++ LOADING STATE

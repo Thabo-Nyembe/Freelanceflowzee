@@ -66,6 +66,9 @@ import { EmptyState } from '@/components/ui/empty-states'
 import { useAnnouncer } from '@/lib/accessibility'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('VoiceCollaboration')
 
 // ========================================
 // TYPE DEFINITIONS
@@ -191,15 +194,15 @@ const voiceCollaborationReducer = (
   state: VoiceCollaborationState,
   action: VoiceCollaborationAction
 ): VoiceCollaborationState => {
-  console.log('🔄 VOICE COLLABORATION REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_ROOMS':
-      console.log('📊 VOICE COLLABORATION REDUCER: Setting', action.rooms.length, 'rooms')
+      logger.info('Setting rooms', { count: action.rooms.length })
       return { ...state, rooms: action.rooms, isLoading: false }
 
     case 'ADD_ROOM':
-      console.log('➕ VOICE COLLABORATION REDUCER: Adding room -', action.room.name)
+      logger.info('Room added', { roomName: action.room.name, roomId: action.room.id })
       return {
         ...state,
         rooms: [action.room, ...state.rooms],
@@ -207,7 +210,7 @@ const voiceCollaborationReducer = (
       }
 
     case 'UPDATE_ROOM':
-      console.log('✏️ VOICE COLLABORATION REDUCER: Updating room -', action.room.id)
+      logger.info('Room updated', { roomId: action.room.id, roomName: action.room.name })
       return {
         ...state,
         rooms: state.rooms.map(r => r.id === action.room.id ? action.room : r),
@@ -215,7 +218,7 @@ const voiceCollaborationReducer = (
       }
 
     case 'DELETE_ROOM':
-      console.log('🗑️ VOICE COLLABORATION REDUCER: Deleting room -', action.roomId)
+      logger.info('Room deleted', { roomId: action.roomId })
       return {
         ...state,
         rooms: state.rooms.filter(r => r.id !== action.roomId),
@@ -223,53 +226,53 @@ const voiceCollaborationReducer = (
       }
 
     case 'SELECT_ROOM':
-      console.log('👁️ VOICE COLLABORATION REDUCER: Selecting room -', action.room?.name || 'null')
+      logger.info('Room selected', { roomName: action.room?.name, roomId: action.room?.id })
       return { ...state, selectedRoom: action.room }
 
     case 'SET_RECORDINGS':
-      console.log('📊 VOICE COLLABORATION REDUCER: Setting', action.recordings.length, 'recordings')
+      logger.info('Setting recordings', { count: action.recordings.length })
       return { ...state, recordings: action.recordings }
 
     case 'ADD_RECORDING':
-      console.log('➕ VOICE COLLABORATION REDUCER: Adding recording -', action.recording.title)
+      logger.info('Recording added', { title: action.recording.title, recordingId: action.recording.id })
       return {
         ...state,
         recordings: [action.recording, ...state.recordings]
       }
 
     case 'SELECT_RECORDING':
-      console.log('👁️ VOICE COLLABORATION REDUCER: Selecting recording -', action.recording?.title || 'null')
+      logger.info('Recording selected', { title: action.recording?.title, recordingId: action.recording?.id })
       return { ...state, selectedRecording: action.recording }
 
     case 'SET_SEARCH':
-      console.log('🔍 VOICE COLLABORATION REDUCER: Search term:', action.searchTerm)
+      logger.debug('Search term updated', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER_TYPE':
-      console.log('🔍 VOICE COLLABORATION REDUCER: Filter type:', action.filterType)
+      logger.debug('Filter type updated', { filterType: action.filterType })
       return { ...state, filterType: action.filterType }
 
     case 'SET_FILTER_STATUS':
-      console.log('🔍 VOICE COLLABORATION REDUCER: Filter status:', action.filterStatus)
+      logger.debug('Filter status updated', { filterStatus: action.filterStatus })
       return { ...state, filterStatus: action.filterStatus }
 
     case 'SET_SORT':
-      console.log('🔀 VOICE COLLABORATION REDUCER: Sort by:', action.sortBy)
+      logger.debug('Sort order updated', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'SET_VIEW_MODE':
-      console.log('👁️ VOICE COLLABORATION REDUCER: View mode:', action.viewMode)
+      logger.debug('View mode updated', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'SET_LOADING':
       return { ...state, isLoading: action.isLoading }
 
     case 'SET_ERROR':
-      console.log('❌ VOICE COLLABORATION REDUCER: Error:', action.error)
+      logger.error('Error occurred', { error: action.error })
       return { ...state, error: action.error, isLoading: false }
 
     case 'JOIN_ROOM':
-      console.log('🚪 VOICE COLLABORATION REDUCER: Joining room -', action.roomId)
+      logger.info('Participant joined room', { roomId: action.roomId, participantName: action.participant.name })
       return {
         ...state,
         rooms: state.rooms.map(r =>
@@ -293,7 +296,7 @@ const voiceCollaborationReducer = (
 // ========================================
 
 const generateMockRooms = (): VoiceRoom[] => {
-  console.log('🎲 VOICE COLLABORATION: Generating mock rooms...')
+  logger.debug('Generating mock rooms')
 
   const roomTypes: RoomType[] = ['public', 'private', 'team', 'client', 'project', 'meeting']
   const statuses: RoomStatus[] = ['active', 'scheduled', 'ended', 'archived']
@@ -342,12 +345,12 @@ const generateMockRooms = (): VoiceRoom[] => {
     })
   }
 
-  console.log('✅ VOICE COLLABORATION: Generated', rooms.length, 'mock rooms')
+  logger.info('Mock rooms generated', { count: rooms.length })
   return rooms
 }
 
 const generateMockRecordings = (): VoiceRecording[] => {
-  console.log('🎲 VOICE COLLABORATION: Generating mock recordings...')
+  logger.debug('Generating mock recordings')
 
   const qualities: AudioQuality[] = ['low', 'medium', 'high', 'ultra']
   const formats: ('mp3' | 'wav' | 'ogg' | 'flac')[] = ['mp3', 'wav', 'ogg', 'flac']
@@ -391,7 +394,7 @@ const generateMockRecordings = (): VoiceRecording[] => {
     })
   }
 
-  console.log('✅ VOICE COLLABORATION: Generated', recordings.length, 'mock recordings')
+  logger.info('Mock recordings generated', { count: recordings.length })
   return recordings
 }
 
@@ -472,7 +475,7 @@ const getRoomTypeIcon = (type: RoomType) => {
 // ========================================
 
 export default function VoiceCollaborationPage() {
-  console.log('🚀 VOICE COLLABORATION: Component mounting...')
+  logger.info('Voice collaboration page mounting')
 
   const announce = useAnnouncer()
 
@@ -518,7 +521,7 @@ export default function VoiceCollaborationPage() {
 
   // Load mock data
   useEffect(() => {
-    console.log('📊 VOICE COLLABORATION: Loading mock data...')
+    logger.debug('Loading mock data')
 
     const mockRooms = generateMockRooms()
     const mockRecordings = generateMockRecordings()
@@ -526,14 +529,15 @@ export default function VoiceCollaborationPage() {
     dispatch({ type: 'SET_ROOMS', rooms: mockRooms })
     dispatch({ type: 'SET_RECORDINGS', recordings: mockRecordings })
 
-    console.log('✅ VOICE COLLABORATION: Mock data loaded successfully')
+    logger.info('Mock data loaded', {
+      roomsCount: mockRooms.length,
+      recordingsCount: mockRecordings.length
+    })
     announce('Voice collaboration page loaded', 'polite')
   }, [announce])
 
   // Computed Stats
   const stats = useMemo(() => {
-    console.log('📊 VOICE COLLABORATION: Calculating stats...')
-
     const activeRooms = state.rooms.filter(r => r.status === 'active').length
     const totalParticipants = state.rooms.reduce((sum, r) => sum + r.currentParticipants, 0)
     const totalRecordings = state.recordings.length
@@ -552,18 +556,12 @@ export default function VoiceCollaborationPage() {
       avgParticipants: activeRooms > 0 ? Math.floor(totalParticipants / activeRooms) : 0
     }
 
-    console.log('📊 VOICE COLLABORATION: Stats -', JSON.stringify(computed))
+    logger.debug('Stats calculated', computed)
     return computed
   }, [state.rooms, state.recordings])
 
   // Filtered and Sorted Rooms
   const filteredAndSortedRooms = useMemo(() => {
-    console.log('🔍 VOICE COLLABORATION: Filtering and sorting rooms...')
-    console.log('🔍 Search term:', state.searchTerm)
-    console.log('🔍 Filter type:', state.filterType)
-    console.log('🔍 Filter status:', state.filterStatus)
-    console.log('🔀 Sort by:', state.sortBy)
-
     let filtered = state.rooms
 
     // Search
@@ -573,19 +571,16 @@ export default function VoiceCollaborationPage() {
         room.description.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
         room.category.toLowerCase().includes(state.searchTerm.toLowerCase())
       )
-      console.log('🔍 VOICE COLLABORATION: Search filtered to', filtered.length, 'rooms')
     }
 
     // Filter by type
     if (state.filterType !== 'all') {
       filtered = filtered.filter(room => room.type === state.filterType)
-      console.log('🔍 VOICE COLLABORATION: Type filtered to', filtered.length, 'rooms')
     }
 
     // Filter by status
     if (state.filterStatus !== 'all') {
       filtered = filtered.filter(room => room.status === state.filterStatus)
-      console.log('🔍 VOICE COLLABORATION: Status filtered to', filtered.length, 'rooms')
     }
 
     // Sort
@@ -605,7 +600,15 @@ export default function VoiceCollaborationPage() {
       }
     })
 
-    console.log('✅ VOICE COLLABORATION: Final room count:', sorted.length)
+    logger.debug('Rooms filtered and sorted', {
+      searchTerm: state.searchTerm,
+      filterType: state.filterType,
+      filterStatus: state.filterStatus,
+      sortBy: state.sortBy,
+      resultCount: sorted.length,
+      totalRooms: state.rooms.length
+    })
+
     return sorted
   }, [state.rooms, state.searchTerm, state.filterType, state.filterStatus, state.sortBy])
 
@@ -614,27 +617,29 @@ export default function VoiceCollaborationPage() {
   // ========================================
 
   const handleCreateRoom = async () => {
-    console.log('➕ VOICE COLLABORATION: Creating new room...')
-    console.log('📝 VOICE COLLABORATION: Name:', roomName)
-    console.log('📝 VOICE COLLABORATION: Type:', roomType)
-    console.log('📝 VOICE COLLABORATION: Capacity:', roomCapacity)
+    logger.info('Creating new voice room', {
+      name: roomName,
+      type: roomType,
+      capacity: roomCapacity,
+      quality: roomQuality,
+      isLocked: roomIsLocked
+    })
 
     if (!roomName.trim()) {
-      console.log('⚠️ VOICE COLLABORATION: Validation failed - Name required')
+      logger.warn('Room creation validation failed', { reason: 'Name required' })
       toast.error('Room name is required')
       announce('Room name is required', 'assertive')
       return
     }
 
     if (!roomDescription.trim()) {
-      console.log('⚠️ VOICE COLLABORATION: Validation failed - Description required')
+      logger.warn('Room creation validation failed', { reason: 'Description required' })
       toast.error('Room description is required')
       announce('Room description is required', 'assertive')
       return
     }
 
     try {
-      console.log('⏳ VOICE COLLABORATION: Creating room (local state)...')
       dispatch({ type: 'SET_LOADING', isLoading: true })
 
       // Note: Using local state - in production, this would POST to /api/voice-rooms
@@ -661,7 +666,13 @@ export default function VoiceCollaborationPage() {
       }
 
       dispatch({ type: 'ADD_ROOM', room: newRoom })
-      console.log('✅ VOICE COLLABORATION: Room created successfully - ID:', newRoom.id)
+
+      logger.info('Voice room created successfully', {
+        roomId: newRoom.id,
+        name: newRoom.name,
+        type: newRoom.type,
+        capacity: newRoom.capacity
+      })
 
       // Reset form
       setRoomName('')
@@ -673,12 +684,12 @@ export default function VoiceCollaborationPage() {
       setRoomPassword('')
       setShowCreateRoomModal(false)
 
-      toast.success('🎙️ Voice room created', {
-        description: `${newRoom.name} is now active`
+      toast.success('Voice room created', {
+        description: `${newRoom.name} - ${newRoom.type} - ${newRoom.capacity} capacity - ${newRoom.quality} quality - Now active`
       })
       announce('Voice room created', 'polite')
-    } catch (error) {
-      console.log('❌ VOICE COLLABORATION: Create room error:', error)
+    } catch (error: any) {
+      logger.error('Room creation failed', { error: error.message })
       toast.error('Failed to create room')
       announce('Failed to create room', 'assertive')
       dispatch({ type: 'SET_ERROR', error: 'Failed to create room' })
@@ -686,8 +697,14 @@ export default function VoiceCollaborationPage() {
   }
 
   const handleViewRoom = (room: VoiceRoom) => {
-    console.log('👁️ VOICE COLLABORATION: Opening room view - ID:', room.id)
-    console.log('👁️ VOICE COLLABORATION: Room:', room.name)
+    logger.info('Opening room view', {
+      roomId: room.id,
+      roomName: room.name,
+      roomType: room.type,
+      status: room.status,
+      participants: room.currentParticipants,
+      capacity: room.capacity
+    })
 
     dispatch({ type: 'SELECT_ROOM', room })
     setViewRoomTab('overview')
@@ -696,27 +713,43 @@ export default function VoiceCollaborationPage() {
   }
 
   const handleJoinRoom = async (room: VoiceRoom) => {
-    console.log('🚪 VOICE COLLABORATION: Joining room - ID:', room.id)
-    console.log('🚪 VOICE COLLABORATION: Room:', room.name)
+    logger.info('Attempting to join room', {
+      roomId: room.id,
+      roomName: room.name,
+      roomType: room.type,
+      currentParticipants: room.currentParticipants,
+      capacity: room.capacity
+    })
 
     if (room.currentParticipants >= room.capacity) {
-      console.log('⚠️ VOICE COLLABORATION: Room is full')
-      toast.error('Room is full')
+      logger.warn('Room join failed - room is full', {
+        roomId: room.id,
+        roomName: room.name,
+        capacity: room.capacity
+      })
+      toast.error('Room is full', {
+        description: `${room.name} - ${room.currentParticipants}/${room.capacity} participants`
+      })
       announce('Room is full', 'assertive')
       return
     }
 
     if (room.isLocked && !room.password) {
-      console.log('⚠️ VOICE COLLABORATION: Room is locked')
-      toast.error('Room is locked')
+      logger.warn('Room join failed - room is locked', {
+        roomId: room.id,
+        roomName: room.name
+      })
+      toast.error('Room is locked', {
+        description: `${room.name} requires a password to join`
+      })
       announce('Room is locked', 'assertive')
       return
     }
 
     try {
-      console.log('⏳ VOICE COLLABORATION: Joining room (local state)...')
-      toast.info('🚪 Joining room...', {
-        description: 'Connecting to voice channel'
+      logger.info('Joining room - creating participant', {
+        roomId: room.id,
+        roomName: room.name
       })
 
       // Note: Using local state - in production, this would POST to /api/voice-rooms/join
@@ -735,52 +768,116 @@ export default function VoiceCollaborationPage() {
       }
 
       dispatch({ type: 'JOIN_ROOM', roomId: room.id, participant: newParticipant })
-      console.log('✅ VOICE COLLABORATION: Joined room successfully')
 
-      toast.success(`✅ Joined ${room.name}`, {
-        description: `You are now connected as ${newParticipant.role}`
+      const newParticipantCount = room.currentParticipants + 1
+
+      logger.info('Joined room successfully', {
+        roomId: room.id,
+        roomName: room.name,
+        participantRole: newParticipant.role,
+        newParticipantCount,
+        capacity: room.capacity,
+        quality: room.quality
+      })
+
+      toast.success('Joined voice room', {
+        description: `${room.name} - ${newParticipant.role} - ${newParticipantCount}/${room.capacity} participants - ${room.quality} quality`
       })
       announce(`Joined ${room.name}`, 'polite')
-    } catch (error) {
-      console.log('❌ VOICE COLLABORATION: Join room error:', error)
-      toast.error('Failed to join room')
+    } catch (error: any) {
+      logger.error('Join room failed', {
+        roomId: room.id,
+        roomName: room.name,
+        error: error.message
+      })
+      toast.error('Failed to join room', {
+        description: 'Could not connect to voice channel'
+      })
       announce('Failed to join room', 'assertive')
     }
   }
 
   const handleDeleteRoom = (roomId: string) => {
-    console.log('🗑️ VOICE COLLABORATION: Deleting room - ID:', roomId)
+    logger.info('Attempting to delete room', { roomId })
 
     const room = state.rooms.find(r => r.id === roomId)
     if (!room) {
-      console.log('❌ VOICE COLLABORATION: Room not found')
+      logger.warn('Room deletion failed - room not found', { roomId })
+      toast.error('Room not found')
       return
     }
 
     if (confirm(`Delete "${room.name}"? This action cannot be undone.`)) {
-      console.log('✅ VOICE COLLABORATION: User confirmed deletion')
+      logger.info('User confirmed room deletion', {
+        roomId: room.id,
+        roomName: room.name,
+        roomType: room.type,
+        participants: room.currentParticipants
+      })
+
       dispatch({ type: 'DELETE_ROOM', roomId })
-      toast.success('Room deleted')
+      setShowViewRoomModal(false)
+
+      toast.success('Room deleted', {
+        description: `${room.name} - ${room.type} room removed`
+      })
       announce('Room deleted', 'polite')
     } else {
-      console.log('❌ VOICE COLLABORATION: User cancelled deletion')
+      logger.debug('User cancelled room deletion', {
+        roomId: room.id,
+        roomName: room.name
+      })
     }
   }
 
   const handleDownloadRecording = (recording: VoiceRecording) => {
-    console.log('📥 VOICE COLLABORATION: Downloading recording - ID:', recording.id)
-    console.log('📥 VOICE COLLABORATION: Recording:', recording.title)
+    logger.info('Downloading recording', {
+      recordingId: recording.id,
+      title: recording.title,
+      format: recording.format,
+      fileSize: recording.fileSize,
+      duration: recording.duration,
+      quality: recording.quality
+    })
 
-    toast.success(`Downloading ${recording.title}`)
+    // Note: Using mock download - in production, this would download from /api/recordings/:id
+    const blob = new Blob(['Mock audio data'], { type: `audio/${recording.format}` })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${recording.title}.${recording.format}`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    // Update download count
+    const updatedRecording = { ...recording, downloadCount: recording.downloadCount + 1 }
+    dispatch({ type: 'SELECT_RECORDING', recording: updatedRecording })
+
+    toast.success('Recording downloaded', {
+      description: `${recording.title} - ${formatFileSize(recording.fileSize)} - ${recording.format.toUpperCase()} - ${formatDuration(recording.duration)}`
+    })
     announce(`Downloading ${recording.title}`, 'polite')
   }
 
   const handlePlayRecording = (recording: VoiceRecording) => {
-    console.log('▶️ VOICE COLLABORATION: Playing recording - ID:', recording.id)
-    console.log('▶️ VOICE COLLABORATION: Recording:', recording.title)
+    logger.info('Playing recording', {
+      recordingId: recording.id,
+      title: recording.title,
+      duration: recording.duration,
+      quality: recording.quality,
+      format: recording.format,
+      participants: recording.participants
+    })
 
-    dispatch({ type: 'SELECT_RECORDING', recording })
-    toast.info(`Playing ${recording.title}`)
+    // Update view count
+    const updatedRecording = { ...recording, viewCount: recording.viewCount + 1 }
+    dispatch({ type: 'SELECT_RECORDING', recording: updatedRecording })
+
+    toast.info('Playing recording', {
+      description: `${recording.title} - ${formatDuration(recording.duration)} - ${recording.participants} participants - ${recording.quality} quality`
+    })
     announce(`Playing ${recording.title}`, 'polite')
   }
 
@@ -788,12 +885,13 @@ export default function VoiceCollaborationPage() {
   // RENDER
   // ========================================
 
-  console.log('🎨 VOICE COLLABORATION: Rendering component...')
-  console.log('📊 Current state:', {
+  logger.debug('Rendering component', {
     roomsCount: state.rooms.length,
     recordingsCount: state.recordings.length,
     viewMode: state.viewMode,
-    isLoading: state.isLoading
+    isLoading: state.isLoading,
+    filteredRoomsCount: filteredAndSortedRooms.length,
+    searchTerm: state.searchTerm
   })
 
   if (state.isLoading && state.rooms.length === 0) {
@@ -946,7 +1044,11 @@ export default function VoiceCollaborationPage() {
                   key={mode.id}
                   variant={state.viewMode === mode.id ? "default" : "outline"}
                   onClick={() => {
-                    console.log('👁️ VOICE COLLABORATION: Changing view mode to:', mode.id)
+                    logger.info('Changing view mode', {
+                      fromMode: state.viewMode,
+                      toMode: mode.id,
+                      label: mode.label
+                    })
                     dispatch({ type: 'SET_VIEW_MODE', viewMode: mode.id })
                     announce(`Switched to ${mode.label}`, 'polite')
                   }}
@@ -972,7 +1074,10 @@ export default function VoiceCollaborationPage() {
                       placeholder="Search voice rooms..."
                       value={state.searchTerm}
                       onChange={(e) => {
-                        console.log('🔍 VOICE COLLABORATION: Search term changed:', e.target.value)
+                        logger.debug('Search term changed', {
+                          searchTerm: e.target.value,
+                          previousTerm: state.searchTerm
+                        })
                         dispatch({ type: 'SET_SEARCH', searchTerm: e.target.value })
                       }}
                       className="pl-10 bg-slate-900/50 border-gray-700 text-white"
@@ -980,7 +1085,10 @@ export default function VoiceCollaborationPage() {
                   </div>
                   <Button
                     onClick={() => {
-                      console.log('➕ VOICE COLLABORATION: Opening create room modal')
+                      logger.info('Opening create room modal', {
+                        currentRoomsCount: state.rooms.length,
+                        activeRoomsCount: stats.activeRooms
+                      })
                       setShowCreateRoomModal(true)
                     }}
                     className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
@@ -991,7 +1099,12 @@ export default function VoiceCollaborationPage() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      console.log('📊 VOICE COLLABORATION: Opening analytics modal')
+                      logger.info('Opening analytics modal', {
+                        activeRooms: stats.activeRooms,
+                        totalParticipants: stats.totalParticipants,
+                        totalRecordings: stats.totalRecordings,
+                        totalStorage: stats.totalStorage
+                      })
                       setShowAnalyticsModal(true)
                     }}
                     className="border-gray-700 hover:bg-slate-800"
@@ -1010,7 +1123,10 @@ export default function VoiceCollaborationPage() {
                       variant={state.filterType === type ? "default" : "outline"}
                       className={`cursor-pointer ${state.filterType === type ? 'bg-purple-600' : 'border-gray-700'}`}
                       onClick={() => {
-                        console.log('🔍 VOICE COLLABORATION: Filter type changed:', type)
+                        logger.debug('Filter type changed', {
+                          previousType: state.filterType,
+                          newType: type
+                        })
                         dispatch({ type: 'SET_FILTER_TYPE', filterType: type })
                       }}
                     >
@@ -1025,7 +1141,10 @@ export default function VoiceCollaborationPage() {
                       variant={state.filterStatus === status ? "default" : "outline"}
                       className={`cursor-pointer ${state.filterStatus === status ? 'bg-purple-600' : 'border-gray-700'}`}
                       onClick={() => {
-                        console.log('🔍 VOICE COLLABORATION: Filter status changed:', status)
+                        logger.debug('Filter status changed', {
+                          previousStatus: state.filterStatus,
+                          newStatus: status
+                        })
                         dispatch({ type: 'SET_FILTER_STATUS', filterStatus: status })
                       }}
                     >
@@ -1037,7 +1156,10 @@ export default function VoiceCollaborationPage() {
                   <Select
                     value={state.sortBy}
                     onValueChange={(value) => {
-                      console.log('🔀 VOICE COLLABORATION: Sort changed:', value)
+                      logger.debug('Sort order changed', {
+                        previousSort: state.sortBy,
+                        newSort: value
+                      })
                       dispatch({ type: 'SET_SORT', sortBy: value as any })
                     }}
                   >
@@ -1313,8 +1435,14 @@ export default function VoiceCollaborationPage() {
                         key={quality}
                         variant={roomQuality === quality ? "default" : "outline"}
                         onClick={() => {
-                          console.log('⚙️ VOICE COLLABORATION: Audio quality changed:', quality)
+                          logger.info('Audio quality setting changed', {
+                            previousQuality: roomQuality,
+                            newQuality: quality
+                          })
                           setRoomQuality(quality)
+                          toast.success('Audio quality updated', {
+                            description: `Default quality set to ${quality.toUpperCase()}`
+                          })
                         }}
                         className={roomQuality === quality ? 'bg-purple-600' : 'border-gray-700 hover:bg-slate-800'}
                       >
@@ -1332,8 +1460,15 @@ export default function VoiceCollaborationPage() {
                       <Checkbox
                         checked={value}
                         onCheckedChange={(checked) => {
-                          console.log('⚙️ VOICE COLLABORATION: Feature toggled:', key, checked)
+                          logger.info('Audio feature toggled', {
+                            feature: key,
+                            enabled: checked,
+                            previousValue: value
+                          })
                           setRoomFeatures(prev => ({ ...prev, [key]: checked as boolean }))
+                          toast.success(`${key.replace(/([A-Z])/g, ' $1').trim()} ${checked ? 'enabled' : 'disabled'}`, {
+                            description: `Feature will apply to new rooms`
+                          })
                         }}
                       />
                     </div>
@@ -1354,8 +1489,20 @@ export default function VoiceCollaborationPage() {
 
                 <Button
                   onClick={() => {
-                    console.log('💾 VOICE COLLABORATION: Saving settings...')
-                    toast.success('Settings saved successfully')
+                    const enabledFeatures = Object.entries(roomFeatures)
+                      .filter(([_, enabled]) => enabled)
+                      .map(([feature]) => feature)
+
+                    logger.info('Saving voice settings', {
+                      quality: roomQuality,
+                      enabledFeatures,
+                      featuresCount: enabledFeatures.length
+                    })
+
+                    // Note: Using local state - in production, this would PUT to /api/settings/voice
+                    toast.success('Voice settings saved', {
+                      description: `${roomQuality.toUpperCase()} quality - ${enabledFeatures.length} features enabled`
+                    })
                     announce('Settings saved', 'polite')
                   }}
                   className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
