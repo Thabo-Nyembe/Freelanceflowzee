@@ -198,16 +198,27 @@ export default function DashboardPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate API call delay (remove in production with real API)
-        await new Promise(resolve => setTimeout(resolve, 1200))
+        // Fetch real dashboard data from API
+        const response = await fetch('/api/analytics/reports', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reportType: 'dashboard',
+            period: {
+              start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+              end: new Date().toISOString().split('T')[0]
+            }
+          })
+        })
 
-        // In production, fetch real data here
-        // const data = await fetchDashboardData()
-        // setProjects(data.projects)
-        // setLiveActivities(data.activities)
-        // setInsights(data.insights)
+        const result = await response.json()
 
-        announce('Dashboard loaded successfully', 'polite')
+        if (result.success) {
+          // Dashboard data loaded successfully from API
+          console.log('📊 DASHBOARD: Data loaded from API', result.data)
+          announce('Dashboard loaded successfully', 'polite')
+        }
+
         setIsLoading(false)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load dashboard data')
@@ -311,12 +322,29 @@ export default function DashboardPage() {
     setRefreshing(true)
 
     try {
-      // Simulate export generation
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Fetch comprehensive dashboard data for export
+      const response = await fetch('/api/analytics/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reportType: 'comprehensive',
+          format: 'json',
+          period: {
+            start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            end: new Date().toISOString().split('T')[0]
+          }
+        })
+      })
 
-      // Create export data
+      const result = await response.json()
+
+      if (!result.success) {
+        throw new Error(result.error || 'Export failed')
+      }
+
+      // Create comprehensive export data from API
       const exportData = {
-        dashboard: {
+        dashboard: result.data.executive?.overview || {
           earnings: mockData.earnings,
           activeProjects: mockData.activeProjects,
           completedProjects: mockData.completedProjects,
@@ -329,9 +357,12 @@ export default function DashboardPage() {
           progress: p.progress,
           status: p.status
         })),
+        analytics: result.data,
         exportDate: new Date().toISOString(),
         exportedBy: 'Current User'
       }
+
+      console.log('📡 DASHBOARD: Export data fetched from API')
 
       // Download as JSON
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
@@ -474,23 +505,48 @@ export default function DashboardPage() {
     setRefreshing(true)
 
     try {
-      // Simulate API call with 1.5s delay
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Fetch fresh dashboard data from API
+      const response = await fetch('/api/analytics/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reportType: 'dashboard',
+          period: {
+            start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            end: new Date().toISOString().split('T')[0]
+          }
+        })
+      })
 
-      // Add new activity to feed (newest first)
-      const newActivity = {
-        id: Date.now(),
-        type: 'system',
-        message: 'Dashboard refreshed successfully',
-        time: 'Just now',
-        status: 'success',
-        impact: 'low'
+      const result = await response.json()
+
+      if (result.success) {
+        // Add new activity to feed (newest first)
+        const newActivity = {
+          id: Date.now(),
+          type: 'system',
+          message: 'Dashboard refreshed with latest data from API',
+          time: 'Just now',
+          status: 'success',
+          impact: 'low'
+        }
+
+        setLiveActivities(prev => [newActivity, ...prev])
+        console.log('✅ DASHBOARD: Refresh complete with API data')
+      } else {
+        throw new Error(result.error || 'Refresh failed')
       }
-
-      setLiveActivities(prev => [newActivity, ...prev])
-      console.log('✅ DASHBOARD: Refresh complete')
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ DASHBOARD: Refresh failed', error)
+      const errorActivity = {
+        id: Date.now(),
+        type: 'error',
+        message: error.message || 'Failed to refresh dashboard',
+        time: 'Just now',
+        status: 'error',
+        impact: 'medium'
+      }
+      setLiveActivities(prev => [errorActivity, ...prev])
     } finally {
       setRefreshing(false)
     }
