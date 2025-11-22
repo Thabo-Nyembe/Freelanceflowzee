@@ -10,6 +10,13 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 
 // ============================================================================
+// PRODUCTION LOGGER
+// ============================================================================
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('AIDesign')
+
+// ============================================================================
 // A+++ UTILITIES
 // ============================================================================
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
@@ -126,18 +133,19 @@ export default function AIDesignStudioPage() {
 
   // Handler 1: Generate Logo
   const handleGenerateLogo = () => {
-    console.log('🎯 AI DESIGN: Logo generation initiated')
-    console.log('📊 AI DESIGN: Parameters - GPT-4 Vision + DALL-E 3, 8 variations')
-    console.log('⚙️ AI DESIGN: Processing AI logo generation...')
+    logger.info('Logo generation started', {
+      model: 'GPT-4 Vision + DALL-E 3',
+      variations: 8
+    })
     setGenerationInProgress(true)
     setActiveAITool('logo-ai')
     setTimeout(() => {
       setGenerationInProgress(false)
-      console.log('✅ AI DESIGN: Logo generation complete')
-      console.log('📋 AI DESIGN: 8 unique logo variations created')
-      console.log('🤖 AI DESIGN: Powered by GPT-4 Vision + DALL-E 3')
-      console.log('📐 AI DESIGN: Resolution: 2048x2048px vector-ready')
-      console.log('📦 AI DESIGN: Formats: SVG, PNG, PDF available')
+      logger.info('Logo generation completed', {
+        variations: 8,
+        resolution: '2048x2048px',
+        formats: ['SVG', 'PNG', 'PDF']
+      })
       toast.success('AI Logo Generation Complete!', {
         description: '8 unique logo variations created with GPT-4 Vision + DALL-E 3'
       })
@@ -146,13 +154,11 @@ export default function AIDesignStudioPage() {
 
   // Handler 2: Generate Color Palette
   const handleGenerateColorPalette = () => {
-    console.log('🎯 AI DESIGN: Color palette generation initiated')
-    console.log('📊 AI DESIGN: Parameters - GPT-4 Vision, 6 palettes')
-    console.log('⚙️ AI DESIGN: Processing AI color generation...')
-    console.log('✅ AI DESIGN: Color palette generation complete')
-    console.log('🎨 AI DESIGN: 6 harmonious color palettes created')
-    console.log('📈 AI DESIGN: Based on color theory and trends')
-    console.log('♿ AI DESIGN: Accessibility-tested combinations, WCAG AAA compliance included')
+    logger.info('Color palette generation completed', {
+      palettes: 6,
+      model: 'GPT-4 Vision',
+      wcagCompliance: 'AAA'
+    })
     toast.success('AI Color Palette Generated!', {
       description: '6 harmonious color palettes with WCAG AAA compliance'
     })
@@ -160,13 +166,11 @@ export default function AIDesignStudioPage() {
 
   // Handler 3: AI Style Transfer
   const handleAIStyleTransfer = () => {
-    console.log('🎯 AI DESIGN: Style transfer initiated')
-    console.log('📊 AI DESIGN: Parameters - Midjourney V6 + DALL-E 3')
-    console.log('⚙️ AI DESIGN: Processing style transfer...')
-    console.log('✅ AI DESIGN: Style transfer complete')
-    console.log('🎨 AI DESIGN: 12 artistic style variations created')
-    console.log('🤖 AI DESIGN: Powered by Midjourney V6 + DALL-E 3')
-    console.log('🖼️ AI DESIGN: Styles - Watercolor, Oil Painting, Abstract, Minimalist, 3D Rendered, Vintage, Cyberpunk, Sketch, Pop Art, Art Deco, Manga, Photorealistic')
+    logger.info('Style transfer completed', {
+      variations: 12,
+      model: 'Midjourney V6 + DALL-E 3',
+      styles: ['Watercolor', 'Oil Painting', 'Abstract', 'Minimalist', '3D Rendered', 'Vintage', 'Cyberpunk', 'Sketch', 'Pop Art', 'Art Deco', 'Manga', 'Photorealistic']
+    })
     toast.success('AI Style Transfer Applied!', {
       description: '12 artistic style variations created with Midjourney V6'
     })
@@ -174,14 +178,12 @@ export default function AIDesignStudioPage() {
 
   // Handler 4: AI Image Enhancement
   const handleAIImageEnhancement = () => {
-    console.log('🎯 AI DESIGN: Image enhancement initiated')
-    console.log('📊 AI DESIGN: Enhancement - 4x upscale, denoise, sharpen')
-    console.log('⚙️ AI DESIGN: Processing AI enhancement...')
-    console.log('✅ AI DESIGN: Image enhancement complete')
-    console.log('📐 AI DESIGN: Resolution upscaled 4x')
-    console.log('🔧 AI DESIGN: AI denoise applied, smart sharpening, color correction')
-    console.log('🤖 AI DESIGN: Model - AI Upscaler Pro')
-    console.log('⭐ AI DESIGN: Quality score - 9.8/10')
+    logger.info('Image enhancement completed', {
+      upscale: '4x',
+      model: 'AI Upscaler Pro',
+      qualityScore: 9.8,
+      enhancements: ['denoise', 'sharpen', 'color correction']
+    })
     toast.success('AI Image Enhancement Complete!', {
       description: '4x upscale with AI denoise and sharpening - Quality 9.8/10'
     })
@@ -189,13 +191,11 @@ export default function AIDesignStudioPage() {
 
   // Handler 5: Auto Layout
   const handleAutoLayout = () => {
-    console.log('🎯 AI DESIGN: Auto layout initiated')
-    console.log('📊 AI DESIGN: Layout parameters - 8 elements, social-media format')
-    console.log('⚙️ AI DESIGN: Processing AI layout composition...')
-    console.log('✅ AI DESIGN: Auto layout complete')
-    console.log('📐 AI DESIGN: 8 design elements intelligently arranged')
-    console.log('✨ AI DESIGN: Golden ratio proportions applied')
-    console.log('🎯 AI DESIGN: Visual hierarchy optimized for social media')
+    logger.info('Auto layout completed', {
+      elements: 8,
+      proportions: 'golden ratio',
+      optimizedFor: 'social media'
+    })
     toast.success('Smart Auto Layout Applied!', {
       description: '8 elements arranged with golden ratio proportions'
     })
@@ -203,16 +203,14 @@ export default function AIDesignStudioPage() {
 
   // Handler 6: Use Template
   const handleUseTemplate = (templateId: string, templateName: string) => {
-    console.log('🎯 AI DESIGN: Use template initiated')
     const template = templates.find(t => t.id === templateId)
-    console.log('📊 AI DESIGN: Template -', templateName)
-    console.log('⚙️ AI DESIGN: Loading AI-ready template...')
-    console.log('✅ AI DESIGN: Template loaded successfully')
     if (template) {
-      console.log('📋 AI DESIGN: Template - ' + templateName)
-      console.log('🏷️ AI DESIGN: Category - ' + template.category)
-      console.log('⭐ AI DESIGN: Rating - ' + template.rating + ' stars')
-      console.log('🤖 AI DESIGN: AI Features - Auto-fill content, smart colors, intelligent placement, typography optimization')
+      logger.info('Template loaded', {
+        templateId,
+        name: templateName,
+        category: template.category,
+        rating: template.rating
+      })
       toast.success('AI Template Loaded!', {
         description: templateName + ' - ' + template.category + ' (' + template.rating + ' stars)'
       })
@@ -221,12 +219,7 @@ export default function AIDesignStudioPage() {
 
   // Handler 7: Customize Template
   const handleCustomizeTemplate = (templateId: string) => {
-    console.log('🎯 AI DESIGN: Customize template initiated')
-    console.log('📊 AI DESIGN: Customization mode - AI-assisted')
-    console.log('⚙️ AI DESIGN: Opening customization panel...')
-    console.log('✅ AI DESIGN: Customization panel ready')
-    console.log('🎨 AI DESIGN: AI Options - Smart color picker, typography pairing, layout variations')
-    console.log('📝 AI DESIGN: Content features - Placeholder auto-fill, GPT-4 copywriting assistance')
+    logger.info('Template customization opened', { templateId })
     toast.info('Template Customization Mode', {
       description: 'AI-assisted editing with smart suggestions and GPT-4 copywriting'
     })
@@ -234,14 +227,11 @@ export default function AIDesignStudioPage() {
 
   // Handler 8: Export Design
   const handleExportDesign = (format: string) => {
-    console.log('🎯 AI DESIGN: Export design initiated')
-    console.log('📊 AI DESIGN: Format - ' + format.toUpperCase())
-    console.log('⚙️ AI DESIGN: Processing export...')
-    console.log('✅ AI DESIGN: Export complete')
-    console.log('📐 AI DESIGN: Resolution - Production-ready (300 DPI)')
-    console.log('🔧 AI DESIGN: AI-optimized compression with format-specific best practices')
-    console.log('📦 AI DESIGN: Metadata embedding included')
-    console.log('⬇️ AI DESIGN: Download starting...')
+    logger.info('Design export completed', {
+      format: format.toUpperCase(),
+      resolution: '300 DPI',
+      optimization: 'AI-optimized'
+    })
     toast.success('Exporting Design - ' + format.toUpperCase(), {
       description: 'Production-ready export with AI-optimized compression'
     })
@@ -249,13 +239,11 @@ export default function AIDesignStudioPage() {
 
   // Handler 9: Save to Library
   const handleSaveToLibrary = (designId: string) => {
-    console.log('🎯 AI DESIGN: Save to library initiated')
-    console.log('📊 AI DESIGN: Design ID -', designId)
-    console.log('⚙️ AI DESIGN: Saving to design library...')
-    console.log('✅ AI DESIGN: Saved to library successfully')
-    console.log('🏷️ AI DESIGN: Auto-tagged with AI categories')
-    console.log('🔍 AI DESIGN: Searchable by content and style')
-    console.log('☁️ AI DESIGN: Cloud sync enabled, version history preserved')
+    logger.info('Design saved to library', {
+      designId,
+      autoTagged: true,
+      cloudSync: true
+    })
     toast.success('Saved to Design Library!', {
       description: 'Design ID: ' + designId + ' - Auto-tagged and cloud synced'
     })
@@ -263,13 +251,10 @@ export default function AIDesignStudioPage() {
 
   // Handler 10: Share with Team
   const handleShareWithTeam = (designId: string) => {
-    console.log('🎯 AI DESIGN: Share with team initiated')
-    console.log('📊 AI DESIGN: Design ID -', designId)
-    console.log('⚙️ AI DESIGN: Processing share...')
-    console.log('✅ AI DESIGN: Share complete')
-    console.log('👥 AI DESIGN: Real-time co-editing enabled')
-    console.log('💬 AI DESIGN: Comment and feedback tools, version control, change tracking')
-    console.log('🔔 AI DESIGN: Activity notifications sent, team members notified')
+    logger.info('Design shared with team', {
+      designId,
+      features: ['co-editing', 'comments', 'version control']
+    })
     toast.success('Design Shared with Team!', {
       description: 'Real-time co-editing enabled with comments and version control'
     })
@@ -277,12 +262,7 @@ export default function AIDesignStudioPage() {
 
   // Handler 11: Collaborate
   const handleCollaborate = () => {
-    console.log('🎯 AI DESIGN: Collaboration initiated')
-    console.log('📊 AI DESIGN: Real-time collaboration mode')
-    console.log('⚙️ AI DESIGN: Opening collaboration panel...')
-    console.log('✅ AI DESIGN: Collaboration ready')
-    console.log('👥 AI DESIGN: Features - Real-time co-editing, live cursors, comment threads, mentions, activity feed')
-    console.log('🤖 AI DESIGN: AI-Assisted - Smart conflict resolution, auto-merge suggestions, change summaries')
+    logger.info('Collaboration mode opened')
     toast.info('Start Collaboration', {
       description: 'Real-time co-editing with AI-assisted conflict resolution'
     })
@@ -290,14 +270,10 @@ export default function AIDesignStudioPage() {
 
   // Handler 12: Version History
   const handleVersionHistory = () => {
-    console.log('🎯 AI DESIGN: Version history initiated')
-    console.log('📊 AI DESIGN: Loading version timeline...')
-    console.log('⚙️ AI DESIGN: Processing version data...')
-    console.log('✅ AI DESIGN: Version history ready')
-    console.log('📚 AI DESIGN: 12 versions available with auto-save every 5 minutes')
-    console.log('🔖 AI DESIGN: Named checkpoints, side-by-side comparison, restore support')
-    console.log('🔀 AI DESIGN: Branch and merge support available')
-    console.log('🤖 AI DESIGN: AI Features - Smart change summaries, impact analysis')
+    logger.info('Version history opened', {
+      versions: 12,
+      autoSave: '5 minutes'
+    })
     toast.info('Version History', {
       description: '12 versions with AI-powered change summaries and impact analysis'
     })
@@ -305,15 +281,12 @@ export default function AIDesignStudioPage() {
 
   // Handler 13: Duplicate Project
   const handleDuplicateProject = (projectId: string) => {
-    console.log('🎯 AI DESIGN: Duplicate project initiated')
     const project = recentProjects.find(p => p.id === projectId)
-    console.log('📊 AI DESIGN: Project -', project?.name)
-    console.log('⚙️ AI DESIGN: Creating duplicate...')
-    console.log('✅ AI DESIGN: Project duplicated successfully')
     if (project) {
-      console.log('📋 AI DESIGN: Original - ' + project.name)
-      console.log('📦 AI DESIGN: Duplicate includes all design assets and version history')
-      console.log('⚙️ AI DESIGN: AI configurations and settings preserved')
+      logger.info('Project duplicated', {
+        projectId,
+        name: project.name
+      })
       toast.success('Project Duplicated!', {
         description: project.name + ' copied with all assets and settings'
       })
@@ -322,15 +295,12 @@ export default function AIDesignStudioPage() {
 
   // Handler 14: Archive Project
   const handleArchiveProject = (projectId: string) => {
-    console.log('🎯 AI DESIGN: Archive project initiated')
     const project = recentProjects.find(p => p.id === projectId)
-    console.log('📊 AI DESIGN: Project -', project?.name)
-    console.log('⚙️ AI DESIGN: Processing archive...')
-    console.log('✅ AI DESIGN: Project archived successfully')
     if (project) {
-      console.log('📋 AI DESIGN: Project - ' + project.name)
-      console.log('📦 AI DESIGN: Removed from active projects, preserved in archive storage')
-      console.log('💾 AI DESIGN: All versions maintained, restore anytime from Archives')
+      logger.info('Project archived', {
+        projectId,
+        name: project.name
+      })
       toast.success('Project Archived', {
         description: project.name + ' moved to archive - restore anytime'
       })
@@ -339,35 +309,38 @@ export default function AIDesignStudioPage() {
 
   // Handler 15: Delete Project
   const handleDeleteProject = (projectId: string) => {
-    console.log('🎯 AI DESIGN: Delete project initiated')
     const project = recentProjects.find(p => p.id === projectId)
-    console.log('📊 AI DESIGN: Delete confirmation requested')
     const confirmed = confirm('Delete Project?\n\nProject: ' + (project?.name || 'Unknown') + '\n\nThis action cannot be undone.\nAll versions will be deleted.\n\nContinue?')
     if (confirmed) {
-      console.log('⚙️ AI DESIGN: Processing deletion...')
-      console.log('✅ AI DESIGN: Project deleted')
-      console.log('🗑️ AI DESIGN: ' + (project?.name || 'Project') + ' permanently deleted')
+      logger.info('Project deleted', {
+        projectId,
+        name: project?.name
+      })
       toast.success('Project Deleted', {
         description: (project?.name || 'Project') + ' has been permanently deleted'
       })
     } else {
-      console.log('❌ AI DESIGN: Deletion cancelled by user')
+      logger.debug('Project deletion cancelled')
     }
   }
 
   // Handler 16: Batch Generate
   const handleBatchGenerate = () => {
-    console.log('🎯 AI DESIGN: Batch generation initiated')
-    console.log('📊 AI DESIGN: Batch parameters - 10 variations, DALL-E 3')
-    console.log('⚙️ AI DESIGN: Processing batch generation...')
+    logger.info('Batch generation started', {
+      variations: 10,
+      model: 'DALL-E 3'
+    })
     setGenerationInProgress(true)
     setTimeout(() => {
       setGenerationInProgress(false)
-      console.log('✅ AI DESIGN: Batch generation complete')
-      console.log('📋 AI DESIGN: 10 unique design variations created')
-      console.log('🎨 AI DESIGN: Brand consistency maintained across all variations')
-      console.log('🤖 AI DESIGN: Powered by DALL-E 3 Batch API - 12 seconds processing time')
-      console.log('📦 AI DESIGN: Variations - 3 color schemes, 3 layouts, 2 styles, 2 typography options')
+      logger.info('Batch generation completed', {
+        variations: 10,
+        processingTime: '12s',
+        colorSchemes: 3,
+        layouts: 3,
+        styles: 2,
+        typographyOptions: 2
+      })
       toast.success('Batch Generation Complete!', {
         description: '10 unique variations created in 12 seconds with DALL-E 3'
       })
@@ -376,12 +349,11 @@ export default function AIDesignStudioPage() {
 
   // Handler 17: Smart Resize
   const handleSmartResize = () => {
-    console.log('🎯 AI DESIGN: Smart resize initiated')
-    console.log('📊 AI DESIGN: Resize - 8 formats, AI-adaptive')
-    console.log('⚙️ AI DESIGN: Processing AI resize...')
-    console.log('✅ AI DESIGN: Smart resize complete')
-    console.log('📐 AI DESIGN: 8 formats generated - Instagram (Post & Story), Facebook, Twitter, LinkedIn, YouTube, Pinterest, Web Banner')
-    console.log('🤖 AI DESIGN: AI features - Focal point detection, layout adaptation, typography scaling')
+    logger.info('Smart resize completed', {
+      formats: 8,
+      platforms: ['Instagram Post', 'Instagram Story', 'Facebook', 'Twitter', 'LinkedIn', 'YouTube', 'Pinterest', 'Web Banner'],
+      features: ['Focal point detection', 'Layout adaptation', 'Typography scaling']
+    })
     toast.success('Smart Resize Complete!', {
       description: '8 social media formats with AI-adaptive layout and focal point detection'
     })
@@ -389,14 +361,17 @@ export default function AIDesignStudioPage() {
 
   // Handler 18: AI Feedback
   const handleAIFeedback = () => {
-    console.log('🎯 AI DESIGN: AI feedback initiated')
-    console.log('📊 AI DESIGN: Analyzing with GPT-4 Vision...')
-    console.log('⚙️ AI DESIGN: Processing AI analysis...')
-    console.log('✅ AI DESIGN: AI feedback generated')
-    console.log('💪 AI DESIGN: Strengths - Strong hierarchy, professional palette, good balance, clear focal point')
-    console.log('💡 AI DESIGN: Suggestions - Increase headline contrast, warmer accent, grid alignment, more white space')
-    console.log('♿ AI DESIGN: Accessibility - WCAG AA Pass, 4.8:1 contrast, 8.2/10 readability')
-    console.log('⭐ AI DESIGN: Overall score - 8.7/10')
+    logger.info('AI feedback generated', {
+      model: 'GPT-4 Vision',
+      overallScore: 8.7,
+      strengths: ['Strong hierarchy', 'Professional palette', 'Good balance', 'Clear focal point'],
+      suggestions: ['Increase headline contrast', 'Warmer accent', 'Grid alignment', 'More white space'],
+      accessibility: {
+        wcag: 'AA Pass',
+        contrast: '4.8:1',
+        readability: 8.2
+      }
+    })
     toast.info('AI Design Feedback', {
       description: 'GPT-4 Vision analysis complete - Overall score: 8.7/10'
     })
@@ -404,13 +379,12 @@ export default function AIDesignStudioPage() {
 
   // Handler 19: Background Removal
   const handleBackgroundRemoval = () => {
-    console.log('🎯 AI DESIGN: Background removal initiated')
-    console.log('📊 AI DESIGN: Processing with Remove.bg AI...')
-    console.log('⚙️ AI DESIGN: Analyzing and removing background...')
-    console.log('✅ AI DESIGN: Background removal complete')
-    console.log('🤖 AI DESIGN: Model - Remove.bg AI, 1.8 seconds processing')
-    console.log('🎯 AI DESIGN: Edge detection - 99.2% accurate, hair detail preserved')
-    console.log('✨ AI DESIGN: Results - Clean transparent background, crisp edges, fine details maintained')
+    logger.info('Background removal completed', {
+      model: 'Remove.bg AI',
+      processingTime: '1.8s',
+      accuracy: '99.2%',
+      features: ['Hair detail preserved', 'Clean transparent background', 'Crisp edges', 'Fine details maintained']
+    })
     toast.success('Background Removed Successfully!', {
       description: '99.2% accurate edge detection in 1.8 seconds - Ready for compositing'
     })
@@ -418,13 +392,13 @@ export default function AIDesignStudioPage() {
 
   // Handler 20: Smart Crop
   const handleSmartCrop = () => {
-    console.log('🎯 AI DESIGN: Smart crop initiated')
-    console.log('📊 AI DESIGN: AI analyzing focal points...')
-    console.log('⚙️ AI DESIGN: Processing intelligent crop...')
-    console.log('✅ AI DESIGN: Smart crop complete')
-    console.log('🎯 AI DESIGN: Analysis - 3 focal points, Person (95% confidence), rule of thirds optimal')
-    console.log('📐 AI DESIGN: Crop - Main subject centered, negative space balanced, 16:9 maintained')
-    console.log('📱 AI DESIGN: Alternatives - Square (1:1), Portrait (4:5), Landscape (16:9), Story (9:16)')
+    logger.info('Smart crop completed', {
+      focalPoints: 3,
+      confidence: '95%',
+      subject: 'Person',
+      composition: 'Rule of thirds optimal',
+      alternatives: ['Square (1:1)', 'Portrait (4:5)', 'Landscape (16:9)', 'Story (9:16)']
+    })
     toast.success('Smart Crop Applied!', {
       description: '3 focal points detected with 95% confidence - 4 crop variations ready'
     })
@@ -432,14 +406,18 @@ export default function AIDesignStudioPage() {
 
   // Handler 21: Upscale Image
   const handleUpscaleImage = () => {
-    console.log('🎯 AI DESIGN: Upscale image initiated')
-    console.log('📊 AI DESIGN: Upscale - 4x, AI Upscaler Pro')
-    console.log('⚙️ AI DESIGN: Processing AI upscale...')
-    console.log('✅ AI DESIGN: Upscale complete')
-    console.log('📐 AI DESIGN: Original 1024x1024px (1MP) -> Upscaled 4096x4096px (16MP)')
-    console.log('🤖 AI DESIGN: Super-resolution, detail reconstruction, noise reduction, sharpness optimization')
-    console.log('⭐ AI DESIGN: Quality - Sharpness +245%, Detail 9.6/10, Noise -87%')
-    console.log('⏱️ AI DESIGN: Processing time - 4.7 seconds')
+    logger.info('Image upscale completed', {
+      model: 'AI Upscaler Pro',
+      upscaleFactor: '4x',
+      original: '1024x1024px (1MP)',
+      upscaled: '4096x4096px (16MP)',
+      processingTime: '4.7s',
+      quality: {
+        sharpness: '+245%',
+        detail: 9.6,
+        noiseReduction: '-87%'
+      }
+    })
     toast.success('Image Upscaled 4x!', {
       description: '1MP to 16MP with 245% sharpness increase - 9.6/10 quality'
     })
@@ -447,13 +425,12 @@ export default function AIDesignStudioPage() {
 
   // Handler 22: Generate Variations
   const handleGenerateVariations = () => {
-    console.log('🎯 AI DESIGN: Generate variations initiated')
-    console.log('📊 AI DESIGN: Variation parameters - 6 designs, high diversity')
-    console.log('⚙️ AI DESIGN: Processing AI variations...')
-    console.log('✅ AI DESIGN: Variations generated')
-    console.log('🎨 AI DESIGN: Types - Cool colors, Warm colors, Minimal layout, Bold layout, Modern typography, Combined best')
-    console.log('📊 AI DESIGN: Diversity score - 8.9/10, quality maintained, A/B test ready')
-    console.log('🤖 AI DESIGN: User preference prediction included')
+    logger.info('Design variations generated', {
+      count: 6,
+      diversityScore: 8.9,
+      types: ['Cool colors', 'Warm colors', 'Minimal layout', 'Bold layout', 'Modern typography', 'Combined best'],
+      features: ['Quality maintained', 'A/B test ready', 'User preference prediction']
+    })
     toast.success('6 Design Variations Generated!', {
       description: 'High diversity score 8.9/10 - A/B test ready with AI predictions'
     })
@@ -461,13 +438,12 @@ export default function AIDesignStudioPage() {
 
   // Handler 23: Apply Brand Kit
   const handleApplyBrandKit = () => {
-    console.log('🎯 AI DESIGN: Apply brand kit initiated')
-    console.log('📊 AI DESIGN: Loading brand assets...')
-    console.log('⚙️ AI DESIGN: Applying brand guidelines...')
-    console.log('✅ AI DESIGN: Brand kit applied')
-    console.log('🎨 AI DESIGN: Elements - Primary/secondary colors, Montserrat/Open Sans, logo top left, 8px grid')
-    console.log('📐 AI DESIGN: Guidelines - 24px logo safe zone, 70/20/10 color rule, 3-level typography hierarchy')
-    console.log('✅ AI DESIGN: Consistency - 100% brand compliance, design system aligned, WCAG AA')
+    logger.info('Brand kit applied', {
+      elements: ['Primary/secondary colors', 'Montserrat/Open Sans', 'Logo top left', '8px grid'],
+      guidelines: ['24px logo safe zone', '70/20/10 color rule', '3-level typography hierarchy'],
+      compliance: '100%',
+      accessibility: 'WCAG AA'
+    })
     toast.success('Brand Kit Applied!', {
       description: '100% brand compliance with WCAG AA accessibility'
     })
@@ -475,33 +451,27 @@ export default function AIDesignStudioPage() {
 
   // Handler 24: View Analytics
   const handleViewAnalytics = () => {
-    console.log('🎯 AI DESIGN: View analytics initiated')
-    console.log('📊 AI DESIGN: Loading analytics dashboard...')
-    console.log('⚙️ AI DESIGN: Processing analytics data...')
-    console.log('✅ AI DESIGN: Analytics loaded')
+    logger.info('Analytics loaded', { tab: 'analytics' })
     setActiveTab('analytics')
   }
 
   // Handler 25: Manage Settings
   const handleManageSettings = () => {
-    console.log('🎯 AI DESIGN: Manage settings initiated')
-    console.log('📊 AI DESIGN: Loading settings panel...')
-    console.log('⚙️ AI DESIGN: Settings ready...')
-    console.log('✅ AI DESIGN: Settings panel opened')
+    logger.info('Settings panel opened', { tab: 'settings' })
     setActiveTab('settings')
   }
 
   // Handler 26: View AI Models
   const handleViewAIModels = () => {
-    console.log('🎯 AI DESIGN: View AI models initiated')
-    console.log('📊 AI DESIGN: Loading model information...')
-    console.log('⚙️ AI DESIGN: Processing model data...')
-    console.log('✅ AI DESIGN: AI models information ready')
-    console.log('🤖 AI DESIGN: GPT-4 Vision - Content analysis, color palettes, layout (1-2s, Excellent, Active)')
-    console.log('🤖 AI DESIGN: DALL-E 3 - Logo generation, image creation (3-5s, Outstanding, Active)')
-    console.log('🤖 AI DESIGN: Midjourney V6 - Style transfer, artistic effects (4-6s, Professional, Active)')
-    console.log('🤖 AI DESIGN: Remove.bg AI - Background removal (under 2s, Excellent, Active)')
-    console.log('🤖 AI DESIGN: AI Upscaler Pro - Image enhancement, upscaling (4-8s, Outstanding, Active)')
+    logger.info('AI models information loaded', {
+      models: [
+        { name: 'GPT-4 Vision', uses: 'Content analysis, color palettes, layout', speed: '1-2s', quality: 'Excellent', status: 'Active' },
+        { name: 'DALL-E 3', uses: 'Logo generation, image creation', speed: '3-5s', quality: 'Outstanding', status: 'Active' },
+        { name: 'Midjourney V6', uses: 'Style transfer, artistic effects', speed: '4-6s', quality: 'Professional', status: 'Active' },
+        { name: 'Remove.bg AI', uses: 'Background removal', speed: 'under 2s', quality: 'Excellent', status: 'Active' },
+        { name: 'AI Upscaler Pro', uses: 'Image enhancement, upscaling', speed: '4-8s', quality: 'Outstanding', status: 'Active' }
+      ]
+    })
     toast.info('AI Models Overview', {
       description: '5 AI models active - GPT-4 Vision, DALL-E 3, Midjourney V6, and more'
     })
@@ -509,21 +479,22 @@ export default function AIDesignStudioPage() {
 
   // Handler 27: Launch Tool
   const handleLaunchTool = (toolId: string, toolName: string) => {
-    console.log('🎯 AI DESIGN: Launch tool initiated')
-    console.log('📊 AI DESIGN: Tool -', toolName)
-    console.log('⚙️ AI DESIGN: Activating AI tool...')
     setActiveAITool(toolId)
-    console.log('✅ AI DESIGN: Tool launched')
     const tool = aiTools.find(t => t.id === toolId)
     if (tool) {
-      console.log('🤖 AI DESIGN: Model - ' + tool.model)
-      console.log('📊 AI DESIGN: Total uses - ' + tool.uses.toLocaleString())
-      console.log('⭐ AI DESIGN: Rating - ' + tool.rating + ' stars')
-      console.log('📝 AI DESIGN: Description - ' + tool.description)
-      console.log('🚀 AI DESIGN: Quick Start - Upload content, adjust parameters, generate, review, export')
+      logger.info('AI tool launched', {
+        toolId,
+        toolName,
+        model: tool.model,
+        uses: tool.uses,
+        rating: tool.rating,
+        description: tool.description
+      })
       toast.success(toolName + ' Activated!', {
         description: tool.model + ' - ' + tool.rating + ' stars (' + tool.uses.toLocaleString() + ' uses)'
       })
+    } else {
+      logger.info('AI tool launched', { toolId, toolName })
     }
   }
 
