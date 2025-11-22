@@ -1,105 +1,747 @@
 'use client'
 
 /**
- * World-Class ML Insights Dashboard
- * Complete implementation of machine learning insights and predictions
+ * A++++ ML INSIGHTS PAGE - WORLD-CLASS IMPLEMENTATION
+ * Enterprise-grade machine learning insights with complete CRUD operations
+ * Pattern: useReducer + Modals + Console Logging + Premium UI
  */
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useReducer, useMemo, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Brain, TrendingUp, AlertTriangle, Lightbulb, Zap, Target,
   BarChart3, Users, DollarSign, Shield, Star, CheckCircle,
   ArrowUp, ArrowDown, Minus, Info, Sparkles, Activity,
-  Clock, Eye, Filter, Download
+  Clock, Eye, Filter, Download, Plus, X, Settings,
+  Search, Trash2, Edit, MoreVertical, Play, Pause,
+  RefreshCw, Calendar, Tag, Database, Cpu, BarChart2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Checkbox } from '@/components/ui/checkbox'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
-import {
-  MLInsight,
-  TrendAnalysis,
-  AnomalyDetection,
-  RecommendationEngine,
-  ChurnPrediction
-} from '@/lib/ml-insights-types'
-import {
-  MOCK_INSIGHTS,
-  MOCK_TRENDS,
-  MOCK_ANOMALIES,
-  MOCK_RECOMMENDATIONS,
-  MOCK_CHURN_PREDICTIONS,
-  formatPercentage,
-  formatNumber,
-  getConfidenceColor,
-  getImpactColor,
-  getSeverityColor,
-  confidenceToPercentage,
-  getRiskColor
-} from '@/lib/ml-insights-utils'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { toast } from 'sonner'
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
-type ViewMode = 'insights' | 'trends' | 'predictions' | 'recommendations'
+console.log('🚀 ML INSIGHTS: Component module loaded')
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+type InsightType = 'trend' | 'anomaly' | 'forecast' | 'pattern' | 'recommendation' | 'alert'
+type InsightCategory = 'revenue' | 'engagement' | 'performance' | 'retention' | 'quality' | 'growth'
+type ConfidenceLevel = 'low' | 'medium' | 'high' | 'very-high'
+type ImpactLevel = 'low' | 'medium' | 'high' | 'critical'
+type SeverityLevel = 'info' | 'warning' | 'error' | 'critical'
+type ModelStatus = 'training' | 'ready' | 'updating' | 'error'
+
+interface MLInsight {
+  id: string
+  title: string
+  type: InsightType
+  category: InsightCategory
+  description: string
+  confidence: ConfidenceLevel
+  impact: ImpactLevel
+  severity: SeverityLevel
+  actionable: boolean
+  recommendations: string[]
+  dataSource: string
+  modelName: string
+  modelVersion: string
+  modelStatus: ModelStatus
+  createdAt: string
+  updatedAt: string
+  tags: string[]
+  metrics: {
+    accuracy: number
+    precision: number
+    recall: number
+    f1Score: number
+  }
+  affectedUsers?: number
+  potentialRevenue?: number
+  priority: number
+}
+
+interface MLInsightsState {
+  insights: MLInsight[]
+  selectedInsight: MLInsight | null
+  searchTerm: string
+  filterType: InsightType | 'all'
+  filterCategory: InsightCategory | 'all'
+  filterSeverity: SeverityLevel | 'all'
+  sortBy: 'priority' | 'confidence' | 'impact' | 'date' | 'type'
+  viewMode: 'insights' | 'models' | 'analytics' | 'settings'
+  selectedInsights: string[]
+}
+
+type MLInsightsAction =
+  | { type: 'SET_INSIGHTS'; insights: MLInsight[] }
+  | { type: 'ADD_INSIGHT'; insight: MLInsight }
+  | { type: 'UPDATE_INSIGHT'; insight: MLInsight }
+  | { type: 'DELETE_INSIGHT'; insightId: string }
+  | { type: 'SELECT_INSIGHT'; insight: MLInsight | null }
+  | { type: 'SET_SEARCH'; searchTerm: string }
+  | { type: 'SET_FILTER_TYPE'; filterType: InsightType | 'all' }
+  | { type: 'SET_FILTER_CATEGORY'; filterCategory: InsightCategory | 'all' }
+  | { type: 'SET_FILTER_SEVERITY'; filterSeverity: SeverityLevel | 'all' }
+  | { type: 'SET_SORT'; sortBy: 'priority' | 'confidence' | 'impact' | 'date' | 'type' }
+  | { type: 'SET_VIEW_MODE'; viewMode: 'insights' | 'models' | 'analytics' | 'settings' }
+  | { type: 'TOGGLE_SELECT_INSIGHT'; insightId: string }
+  | { type: 'CLEAR_SELECTED_INSIGHTS' }
+  | { type: 'RETRAIN_MODEL'; insightId: string }
+
+// ============================================================================
+// REDUCER
+// ============================================================================
+
+function mlInsightsReducer(state: MLInsightsState, action: MLInsightsAction): MLInsightsState {
+  console.log('🔄 ML INSIGHTS REDUCER: Action:', action.type)
+
+  switch (action.type) {
+    case 'SET_INSIGHTS':
+      console.log('📊 ML INSIGHTS REDUCER: Setting insights - Count:', action.insights.length)
+      return { ...state, insights: action.insights }
+
+    case 'ADD_INSIGHT':
+      console.log('➕ ML INSIGHTS REDUCER: Adding insight - ID:', action.insight.id)
+      return { ...state, insights: [action.insight, ...state.insights] }
+
+    case 'UPDATE_INSIGHT':
+      console.log('✏️ ML INSIGHTS REDUCER: Updating insight - ID:', action.insight.id)
+      return {
+        ...state,
+        insights: state.insights.map(i => i.id === action.insight.id ? action.insight : i),
+        selectedInsight: state.selectedInsight?.id === action.insight.id ? action.insight : state.selectedInsight
+      }
+
+    case 'DELETE_INSIGHT':
+      console.log('🗑️ ML INSIGHTS REDUCER: Deleting insight - ID:', action.insightId)
+      return {
+        ...state,
+        insights: state.insights.filter(i => i.id !== action.insightId),
+        selectedInsight: state.selectedInsight?.id === action.insightId ? null : state.selectedInsight,
+        selectedInsights: state.selectedInsights.filter(id => id !== action.insightId)
+      }
+
+    case 'SELECT_INSIGHT':
+      console.log('👁️ ML INSIGHTS REDUCER: Selecting insight - ID:', action.insight?.id)
+      return { ...state, selectedInsight: action.insight }
+
+    case 'SET_SEARCH':
+      console.log('🔍 ML INSIGHTS REDUCER: Search term:', action.searchTerm)
+      return { ...state, searchTerm: action.searchTerm }
+
+    case 'SET_FILTER_TYPE':
+      console.log('🏷️ ML INSIGHTS REDUCER: Filter type:', action.filterType)
+      return { ...state, filterType: action.filterType }
+
+    case 'SET_FILTER_CATEGORY':
+      console.log('📁 ML INSIGHTS REDUCER: Filter category:', action.filterCategory)
+      return { ...state, filterCategory: action.filterCategory }
+
+    case 'SET_FILTER_SEVERITY':
+      console.log('⚠️ ML INSIGHTS REDUCER: Filter severity:', action.filterSeverity)
+      return { ...state, filterSeverity: action.filterSeverity }
+
+    case 'SET_SORT':
+      console.log('🔀 ML INSIGHTS REDUCER: Sort by:', action.sortBy)
+      return { ...state, sortBy: action.sortBy }
+
+    case 'SET_VIEW_MODE':
+      console.log('👀 ML INSIGHTS REDUCER: View mode:', action.viewMode)
+      return { ...state, viewMode: action.viewMode }
+
+    case 'TOGGLE_SELECT_INSIGHT':
+      console.log('☑️ ML INSIGHTS REDUCER: Toggle select - ID:', action.insightId)
+      const isSelected = state.selectedInsights.includes(action.insightId)
+      return {
+        ...state,
+        selectedInsights: isSelected
+          ? state.selectedInsights.filter(id => id !== action.insightId)
+          : [...state.selectedInsights, action.insightId]
+      }
+
+    case 'CLEAR_SELECTED_INSIGHTS':
+      console.log('🔲 ML INSIGHTS REDUCER: Clearing selection')
+      return { ...state, selectedInsights: [] }
+
+    case 'RETRAIN_MODEL':
+      console.log('🔄 ML INSIGHTS REDUCER: Retraining model - ID:', action.insightId)
+      return {
+        ...state,
+        insights: state.insights.map(i =>
+          i.id === action.insightId
+            ? { ...i, modelStatus: 'training' as ModelStatus }
+            : i
+        )
+      }
+
+    default:
+      return state
+  }
+}
+
+// ============================================================================
+// MOCK DATA GENERATOR
+// ============================================================================
+
+function generateMockInsights(): MLInsight[] {
+  console.log('📦 ML INSIGHTS: Generating mock data...')
+
+  const types: InsightType[] = ['trend', 'anomaly', 'forecast', 'pattern', 'recommendation', 'alert']
+  const categories: InsightCategory[] = ['revenue', 'engagement', 'performance', 'retention', 'quality', 'growth']
+  const confidenceLevels: ConfidenceLevel[] = ['low', 'medium', 'high', 'very-high']
+  const impactLevels: ImpactLevel[] = ['low', 'medium', 'high', 'critical']
+  const severityLevels: SeverityLevel[] = ['info', 'warning', 'error', 'critical']
+  const modelStatuses: ModelStatus[] = ['ready', 'ready', 'ready', 'training', 'updating']
+
+  const insightTemplates = [
+    { title: 'Revenue Growth Acceleration', description: 'Revenue showing 23% month-over-month growth with strong customer acquisition', category: 'revenue', type: 'trend' },
+    { title: 'User Engagement Spike Detected', description: 'Unusual 45% increase in daily active users over past 7 days', category: 'engagement', type: 'anomaly' },
+    { title: 'Churn Risk Forecast', description: 'Predicted 8% increase in churn risk for premium subscribers next quarter', category: 'retention', type: 'forecast' },
+    { title: 'Weekend Usage Pattern Identified', description: 'Consistent 60% drop in engagement during weekends', category: 'engagement', type: 'pattern' },
+    { title: 'Optimize Pricing Strategy', description: 'A/B test suggests 15% conversion improvement with new pricing', category: 'revenue', type: 'recommendation' },
+    { title: 'API Response Time Critical', description: 'API latency exceeded 2s threshold, affecting user experience', category: 'performance', type: 'alert' },
+    { title: 'Conversion Rate Improving', description: 'Conversion funnel optimization resulted in 12% improvement', category: 'revenue', type: 'trend' },
+    { title: 'Payment Failure Anomaly', description: 'Payment failures up 35% in past 24 hours', category: 'revenue', type: 'anomaly' },
+    { title: 'Q4 Revenue Projection', description: 'Forecasting $2.4M revenue for Q4 based on current trends', category: 'revenue', type: 'forecast' },
+    { title: 'Mobile vs Desktop Patterns', description: 'Mobile users show 2x higher engagement than desktop', category: 'engagement', type: 'pattern' },
+    { title: 'Implement Push Notifications', description: 'Push notifications could increase retention by 18%', category: 'retention', type: 'recommendation' },
+    { title: 'Database Query Performance', description: 'Slow queries detected affecting load times', category: 'performance', type: 'alert' },
+    { title: 'Customer Lifetime Value Up', description: 'Average CLV increased from $450 to $580', category: 'revenue', type: 'trend' },
+    { title: 'Signup Flow Dropout Spike', description: 'Step 3 dropout rate increased from 15% to 28%', category: 'engagement', type: 'anomaly' },
+    { title: 'Feature Adoption Forecast', description: 'New feature projected to reach 40% adoption in 30 days', category: 'growth', type: 'forecast' },
+    { title: 'Geographic Usage Patterns', description: 'APAC region shows highest growth at 35% MoM', category: 'growth', type: 'pattern' },
+    { title: 'Add Onboarding Tutorial', description: 'Tutorial could reduce early churn by 22%', category: 'retention', type: 'recommendation' },
+    { title: 'Server Capacity Warning', description: 'Current capacity may be insufficient for projected growth', category: 'performance', type: 'alert' },
+    { title: 'Support Ticket Volume Rising', description: 'Support tickets up 40% indicating product issues', category: 'quality', type: 'trend' },
+    { title: 'Unusual Login Activity', description: 'Login attempts from new regions increased 120%', category: 'quality', type: 'anomaly' },
+    { title: 'User Growth Projection', description: 'Forecasting 10K new users by end of quarter', category: 'growth', type: 'forecast' },
+    { title: 'Power User Behavior Pattern', description: 'Top 10% of users generate 60% of engagement', category: 'engagement', type: 'pattern' },
+    { title: 'Optimize Email Campaigns', description: 'Personalized emails could improve open rates by 25%', category: 'engagement', type: 'recommendation' },
+    { title: 'Memory Usage Alert', description: 'Memory usage at 85% capacity, scaling recommended', category: 'performance', type: 'alert' },
+    { title: 'Trial Conversion Improving', description: 'Trial to paid conversion up from 18% to 24%', category: 'revenue', type: 'trend' },
+    { title: 'Feature Usage Anomaly', description: 'AI features showing unexpected 200% usage spike', category: 'engagement', type: 'anomaly' },
+    { title: 'Seasonal Demand Forecast', description: 'Holiday season expected to bring 50% traffic increase', category: 'growth', type: 'forecast' },
+    { title: 'Referral Source Patterns', description: 'Organic search drives 55% of high-value customers', category: 'growth', type: 'pattern' },
+    { title: 'Improve Search Functionality', description: 'Enhanced search could reduce bounce rate by 15%', category: 'engagement', type: 'recommendation' },
+    { title: 'SSL Certificate Expiring', description: 'SSL certificate expires in 14 days', category: 'quality', type: 'alert' },
+    { title: 'NPS Score Trending Up', description: 'Net Promoter Score improved from 42 to 58', category: 'quality', type: 'trend' },
+    { title: 'Refund Rate Spike Detected', description: 'Refund requests up 45% for enterprise plans', category: 'revenue', type: 'anomaly' },
+    { title: 'Market Expansion Forecast', description: 'European market could generate $800K ARR', category: 'growth', type: 'forecast' },
+    { title: 'Subscription Tier Patterns', description: 'Users upgrade to premium within 45 days on average', category: 'revenue', type: 'pattern' },
+    { title: 'Add Live Chat Support', description: 'Live chat could improve conversion by 20%', category: 'engagement', type: 'recommendation' },
+    { title: 'CDN Performance Issue', description: 'CDN latency increased in EMEA region', category: 'performance', type: 'alert' },
+    { title: 'Feature Engagement Rising', description: 'New dashboard feature at 65% adoption rate', category: 'engagement', type: 'trend' },
+    { title: 'Billing Error Anomaly', description: 'Billing failures increased 30% after latest update', category: 'revenue', type: 'anomaly' },
+    { title: 'Competitor Analysis Forecast', description: 'Competitive pricing could reduce churn by 12%', category: 'retention', type: 'forecast' },
+    { title: 'Support Response Patterns', description: 'Average response time under 2 hours drives 90% satisfaction', category: 'quality', type: 'pattern' }
+  ]
+
+  const insights: MLInsight[] = insightTemplates.map((template, index) => {
+    const randomConfidence = confidenceLevels[Math.floor(Math.random() * confidenceLevels.length)]
+    const randomImpact = impactLevels[Math.floor(Math.random() * impactLevels.length)]
+    const randomSeverity = severityLevels[Math.floor(Math.random() * severityLevels.length)]
+    const randomModelStatus = modelStatuses[Math.floor(Math.random() * modelStatuses.length)]
+
+    return {
+      id: `INS-${String(index + 1).padStart(3, '0')}`,
+      title: template.title,
+      type: template.type as InsightType,
+      category: template.category as InsightCategory,
+      description: template.description,
+      confidence: randomConfidence,
+      impact: randomImpact,
+      severity: randomSeverity,
+      actionable: Math.random() > 0.3,
+      recommendations: [
+        'Review historical data trends',
+        'Set up automated alerts',
+        'Schedule team review meeting',
+        'Update forecasting models',
+        'Implement recommended changes'
+      ].slice(0, Math.floor(Math.random() * 3) + 2),
+      dataSource: ['Analytics DB', 'User Events', 'Transaction Logs', 'API Metrics', 'Customer Data'][Math.floor(Math.random() * 5)],
+      modelName: ['Prophet', 'ARIMA', 'LSTM', 'Random Forest', 'XGBoost', 'Neural Network'][Math.floor(Math.random() * 6)],
+      modelVersion: `v${Math.floor(Math.random() * 5) + 1}.${Math.floor(Math.random() * 10)}`,
+      modelStatus: randomModelStatus,
+      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+      tags: ['ML', 'AI', 'Analytics', 'Predictive', 'Automated'].slice(0, Math.floor(Math.random() * 3) + 1),
+      metrics: {
+        accuracy: 0.7 + Math.random() * 0.28,
+        precision: 0.65 + Math.random() * 0.33,
+        recall: 0.6 + Math.random() * 0.38,
+        f1Score: 0.68 + Math.random() * 0.3
+      },
+      affectedUsers: Math.floor(Math.random() * 50000) + 1000,
+      potentialRevenue: Math.floor(Math.random() * 500000) + 10000,
+      priority: Math.floor(Math.random() * 10) + 1
+    }
+  })
+
+  console.log('✅ ML INSIGHTS: Generated', insights.length, 'insights')
+  return insights
+}
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+function getInsightIcon(type: InsightType) {
+  const icons: Record<InsightType, any> = {
+    trend: TrendingUp,
+    anomaly: AlertTriangle,
+    forecast: Activity,
+    pattern: Eye,
+    recommendation: Lightbulb,
+    alert: AlertTriangle
+  }
+  return icons[type] || Brain
+}
+
+function getConfidenceColor(confidence: ConfidenceLevel): string {
+  const colors: Record<ConfidenceLevel, string> = {
+    'low': 'red',
+    'medium': 'yellow',
+    'high': 'green',
+    'very-high': 'emerald'
+  }
+  return colors[confidence] || 'gray'
+}
+
+function getImpactColor(impact: ImpactLevel): string {
+  const colors: Record<ImpactLevel, string> = {
+    'low': 'blue',
+    'medium': 'yellow',
+    'high': 'orange',
+    'critical': 'red'
+  }
+  return colors[impact] || 'gray'
+}
+
+function getSeverityColor(severity: SeverityLevel): string {
+  const colors: Record<SeverityLevel, string> = {
+    'info': 'blue',
+    'warning': 'yellow',
+    'error': 'orange',
+    'critical': 'red'
+  }
+  return colors[severity] || 'gray'
+}
+
+function confidenceToPercentage(confidence: ConfidenceLevel): number {
+  const percentages: Record<ConfidenceLevel, number> = {
+    'low': 60,
+    'medium': 75,
+    'high': 90,
+    'very-high': 98
+  }
+  return percentages[confidence] || 50
+}
+
+function formatNumber(num: number): string {
+  if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
+  if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
+  return num.toString()
+}
+
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount)
+}
+
+function formatPercentage(value: number): string {
+  return `${(value * 100).toFixed(1)}%`
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 
 export default function MLInsightsPage() {
+  console.log('🚀 ML INSIGHTS: Component mounting...')
+
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
 
-  const [viewMode, setViewMode] = useState<ViewMode>('insights')
-  const [selectedTimeRange, setSelectedTimeRange] = useState('30d')
+  // REDUCER STATE
+  const [state, dispatch] = useReducer(mlInsightsReducer, {
+    insights: [],
+    selectedInsight: null,
+    searchTerm: '',
+    filterType: 'all',
+    filterCategory: 'all',
+    filterSeverity: 'all',
+    sortBy: 'priority',
+    viewMode: 'insights',
+    selectedInsights: []
+  })
 
-  // A+++ LOAD ML INSIGHTS DATA
+  // MODAL STATES
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showViewModal, setShowViewModal] = useState(false)
+  const [showConfigureModal, setShowConfigureModal] = useState(false)
+  const [showExportModal, setShowExportModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // FORM STATES
+  const [insightTitle, setInsightTitle] = useState('')
+  const [insightType, setInsightType] = useState<InsightType>('trend')
+  const [insightCategory, setInsightCategory] = useState<InsightCategory>('revenue')
+  const [insightDescription, setInsightDescription] = useState('')
+  const [insightConfidence, setInsightConfidence] = useState<ConfidenceLevel>('high')
+  const [insightImpact, setInsightImpact] = useState<ImpactLevel>('medium')
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'pdf'>('json')
+
+  // ============================================================================
+  // LOAD DATA
+  // ============================================================================
+
   useEffect(() => {
-    const loadMLInsightsData = async () => {
+    console.log('🔄 ML INSIGHTS: Loading data...')
+    const loadData = async () => {
       try {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load ML insights'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        await new Promise(resolve => setTimeout(resolve, 1000))
+
+        const mockInsights = generateMockInsights()
+        dispatch({ type: 'SET_INSIGHTS', insights: mockInsights })
 
         setIsLoading(false)
         announce('ML insights loaded successfully', 'polite')
+        console.log('✅ ML INSIGHTS: Data loaded successfully')
       } catch (err) {
+        console.error('❌ ML INSIGHTS: Load error:', err)
         setError(err instanceof Error ? err.message : 'Failed to load ML insights')
         setIsLoading(false)
         announce('Error loading ML insights', 'assertive')
       }
     }
 
-    loadMLInsightsData()
+    loadData()
   }, [announce])
 
-  const getInsightIcon = (type: string) => {
-    const icons: Record<string, any> = {
-      trend: TrendingUp,
-      anomaly: AlertTriangle,
-      forecast: Activity,
-      pattern: Eye,
-      recommendation: Lightbulb,
-      alert: AlertTriangle
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
+
+  const stats = useMemo(() => {
+    console.log('📊 ML INSIGHTS: Computing stats...')
+    const total = state.insights.length
+    const critical = state.insights.filter(i => i.impact === 'critical').length
+    const highConfidence = state.insights.filter(i => i.confidence === 'high' || i.confidence === 'very-high').length
+    const actionable = state.insights.filter(i => i.actionable).length
+    const avgAccuracy = state.insights.reduce((sum, i) => sum + i.metrics.accuracy, 0) / total
+    const totalAffectedUsers = state.insights.reduce((sum, i) => sum + (i.affectedUsers || 0), 0)
+
+    const result = {
+      total,
+      critical,
+      highConfidence,
+      actionable,
+      avgAccuracy: (avgAccuracy * 100).toFixed(1),
+      totalAffectedUsers
     }
-    return icons[type] || Brain
+
+    console.log('📊 ML INSIGHTS: Stats -', JSON.stringify(result))
+    return result
+  }, [state.insights])
+
+  const filteredAndSortedInsights = useMemo(() => {
+    console.log('🔍 ML INSIGHTS: Filtering and sorting...')
+    console.log('🔍 ML INSIGHTS: Search term:', state.searchTerm)
+    console.log('🔍 ML INSIGHTS: Filter type:', state.filterType)
+    console.log('🔍 ML INSIGHTS: Filter category:', state.filterCategory)
+    console.log('🔍 ML INSIGHTS: Filter severity:', state.filterSeverity)
+    console.log('🔀 ML INSIGHTS: Sort by:', state.sortBy)
+
+    let filtered = state.insights
+
+    // Search
+    if (state.searchTerm) {
+      filtered = filtered.filter(insight =>
+        insight.title.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        insight.description.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        insight.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()))
+      )
+      console.log('🔍 ML INSIGHTS: Search filtered to', filtered.length, 'insights')
+    }
+
+    // Filter by type
+    if (state.filterType !== 'all') {
+      filtered = filtered.filter(insight => insight.type === state.filterType)
+      console.log('🏷️ ML INSIGHTS: Type filtered to', filtered.length, 'insights')
+    }
+
+    // Filter by category
+    if (state.filterCategory !== 'all') {
+      filtered = filtered.filter(insight => insight.category === state.filterCategory)
+      console.log('📁 ML INSIGHTS: Category filtered to', filtered.length, 'insights')
+    }
+
+    // Filter by severity
+    if (state.filterSeverity !== 'all') {
+      filtered = filtered.filter(insight => insight.severity === state.filterSeverity)
+      console.log('⚠️ ML INSIGHTS: Severity filtered to', filtered.length, 'insights')
+    }
+
+    // Sort
+    const sorted = [...filtered].sort((a, b) => {
+      switch (state.sortBy) {
+        case 'priority':
+          return b.priority - a.priority
+        case 'confidence':
+          const confidenceOrder = { 'very-high': 4, 'high': 3, 'medium': 2, 'low': 1 }
+          return confidenceOrder[b.confidence] - confidenceOrder[a.confidence]
+        case 'impact':
+          const impactOrder = { 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 }
+          return impactOrder[b.impact] - impactOrder[a.impact]
+        case 'date':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        case 'type':
+          return a.type.localeCompare(b.type)
+        default:
+          return 0
+      }
+    })
+
+    console.log('✅ ML INSIGHTS: Final result:', sorted.length, 'insights')
+    return sorted
+  }, [state.insights, state.searchTerm, state.filterType, state.filterCategory, state.filterSeverity, state.sortBy])
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+
+  const handleCreateInsight = async () => {
+    console.log('➕ ML INSIGHTS: Creating insight...')
+    console.log('📝 ML INSIGHTS: Title:', insightTitle)
+    console.log('📝 ML INSIGHTS: Type:', insightType)
+    console.log('📝 ML INSIGHTS: Category:', insightCategory)
+
+    if (!insightTitle || !insightDescription) {
+      console.warn('⚠️ ML INSIGHTS: Missing required fields')
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    try {
+      setIsSaving(true)
+
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      const newInsight: MLInsight = {
+        id: `INS-${String(state.insights.length + 1).padStart(3, '0')}`,
+        title: insightTitle,
+        type: insightType,
+        category: insightCategory,
+        description: insightDescription,
+        confidence: insightConfidence,
+        impact: insightImpact,
+        severity: 'info',
+        actionable: true,
+        recommendations: ['Review and implement', 'Monitor performance', 'Set up alerts'],
+        dataSource: 'Manual Entry',
+        modelName: 'Custom Model',
+        modelVersion: 'v1.0',
+        modelStatus: 'ready',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        tags: ['Custom', 'Manual'],
+        metrics: {
+          accuracy: 0.85,
+          precision: 0.82,
+          recall: 0.78,
+          f1Score: 0.80
+        },
+        affectedUsers: 0,
+        potentialRevenue: 0,
+        priority: 5
+      }
+
+      dispatch({ type: 'ADD_INSIGHT', insight: newInsight })
+
+      toast.success('Insight created successfully')
+      console.log('✅ ML INSIGHTS: Insight created - ID:', newInsight.id)
+
+      setShowCreateModal(false)
+      setInsightTitle('')
+      setInsightDescription('')
+    } catch (error) {
+      console.error('❌ ML INSIGHTS: Create error:', error)
+      toast.error('Failed to create insight')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  // A+++ LOADING STATE
+  const handleViewInsight = (insight: MLInsight) => {
+    console.log('👁️ ML INSIGHTS: Opening insight view - ID:', insight.id, 'Title:', insight.title)
+    dispatch({ type: 'SELECT_INSIGHT', insight })
+    setShowViewModal(true)
+  }
+
+  const handleDeleteInsight = async (insightId: string) => {
+    console.log('🗑️ ML INSIGHTS: Deleting insight - ID:', insightId)
+
+    try {
+      setIsSaving(true)
+
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      dispatch({ type: 'DELETE_INSIGHT', insightId })
+
+      toast.success('Insight deleted successfully')
+      console.log('✅ ML INSIGHTS: Insight deleted')
+
+      setShowDeleteModal(false)
+      setShowViewModal(false)
+    } catch (error) {
+      console.error('❌ ML INSIGHTS: Delete error:', error)
+      toast.error('Failed to delete insight')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    console.log('🗑️ ML INSIGHTS: Bulk delete - Count:', state.selectedInsights.length)
+    console.log('🗑️ ML INSIGHTS: IDs:', state.selectedInsights)
+
+    try {
+      setIsSaving(true)
+
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      state.selectedInsights.forEach(id => {
+        dispatch({ type: 'DELETE_INSIGHT', insightId: id })
+      })
+
+      toast.success(`Deleted ${state.selectedInsights.length} insight(s)`)
+      console.log('✅ ML INSIGHTS: Bulk delete complete')
+
+      dispatch({ type: 'CLEAR_SELECTED_INSIGHTS' })
+    } catch (error) {
+      console.error('❌ ML INSIGHTS: Bulk delete error:', error)
+      toast.error('Failed to delete insights')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleRetrainModel = async (insightId: string) => {
+    console.log('🔄 ML INSIGHTS: Retraining model - ID:', insightId)
+
+    try {
+      dispatch({ type: 'RETRAIN_MODEL', insightId })
+      toast.info('Model retraining started...')
+
+      await new Promise(resolve => setTimeout(resolve, 3000))
+
+      const insight = state.insights.find(i => i.id === insightId)
+      if (insight) {
+        const updatedInsight = {
+          ...insight,
+          modelStatus: 'ready' as ModelStatus,
+          modelVersion: `v${parseInt(insight.modelVersion.slice(1)) + 1}.0`,
+          metrics: {
+            accuracy: Math.min(0.99, insight.metrics.accuracy + 0.05),
+            precision: Math.min(0.99, insight.metrics.precision + 0.04),
+            recall: Math.min(0.99, insight.metrics.recall + 0.03),
+            f1Score: Math.min(0.99, insight.metrics.f1Score + 0.04)
+          }
+        }
+        dispatch({ type: 'UPDATE_INSIGHT', insight: updatedInsight })
+      }
+
+      toast.success('Model retrained successfully')
+      console.log('✅ ML INSIGHTS: Model retrained')
+    } catch (error) {
+      console.error('❌ ML INSIGHTS: Retrain error:', error)
+      toast.error('Failed to retrain model')
+    }
+  }
+
+  const handleExport = async () => {
+    console.log('📤 ML INSIGHTS: Exporting data...')
+    console.log('📄 ML INSIGHTS: Format:', exportFormat)
+    console.log('📊 ML INSIGHTS: Count:', filteredAndSortedInsights.length, 'insights')
+
+    try {
+      setIsSaving(true)
+
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      const dataStr = JSON.stringify(filteredAndSortedInsights, null, 2)
+      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(dataBlob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `ml-insights-${new Date().toISOString().split('T')[0]}.${exportFormat}`
+      link.click()
+
+      toast.success(`Exported ${filteredAndSortedInsights.length} insights as ${exportFormat.toUpperCase()}`)
+      console.log('✅ ML INSIGHTS: Export complete')
+
+      setShowExportModal(false)
+    } catch (error) {
+      console.error('❌ ML INSIGHTS: Export error:', error)
+      toast.error('Failed to export insights')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // ============================================================================
+  // LOADING STATE
+  // ============================================================================
+
   if (isLoading) {
+    console.log('⏳ ML INSIGHTS: Rendering loading state')
     return (
       <div className="min-h-screen relative overflow-hidden">
         <div className="fixed inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
@@ -107,19 +749,15 @@ export default function MLInsightsPage() {
           <div className="max-w-7xl mx-auto">
             <div className="space-y-6">
               <CardSkeleton />
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 <CardSkeleton />
                 <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <CardSkeleton />
                 <CardSkeleton />
                 <CardSkeleton />
                 <CardSkeleton />
               </div>
-              <ListSkeleton items={3} />
+              <ListSkeleton items={5} />
             </div>
           </div>
         </div>
@@ -127,8 +765,12 @@ export default function MLInsightsPage() {
     )
   }
 
-  // A+++ ERROR STATE
+  // ============================================================================
+  // ERROR STATE
+  // ============================================================================
+
   if (error) {
+    console.log('❌ ML INSIGHTS: Rendering error state')
     return (
       <div className="min-h-screen relative overflow-hidden">
         <div className="fixed inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
@@ -142,16 +784,22 @@ export default function MLInsightsPage() {
     )
   }
 
+  // ============================================================================
+  // MAIN RENDER
+  // ============================================================================
+
+  console.log('🎨 ML INSIGHTS: Rendering main view')
+
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Premium Background */}
       <div className="fixed inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-transparent to-transparent opacity-50" />
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent opacity-50" />
 
       {/* Animated Gradient Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-blue-500/30 to-cyan-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 -right-4 w-96 h-96 bg-gradient-to-r from-cyan-500/30 to-teal-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700"></div>
+        <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 -right-4 w-96 h-96 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700"></div>
       </div>
 
       <div className="container mx-auto px-4 py-12 relative z-10">
@@ -163,7 +811,7 @@ export default function MLInsightsPage() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: "spring", duration: 0.6 }}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 text-blue-300 rounded-full text-sm font-medium mb-6 border border-blue-500/30"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 rounded-full text-sm font-medium mb-6 border border-purple-500/30"
               >
                 <Brain className="w-4 h-4" />
                 ML Insights
@@ -183,365 +831,737 @@ export default function MLInsightsPage() {
             </div>
           </ScrollReveal>
 
-          {/* View Mode Tabs */}
+          {/* Stats Cards */}
           <ScrollReveal variant="scale" duration={0.6} delay={0.2}>
-            <div className="flex items-center justify-center gap-2 mb-8">
-              {[
-                { id: 'insights' as ViewMode, label: 'Insights', icon: Brain },
-                { id: 'trends' as ViewMode, label: 'Trends', icon: TrendingUp },
-                { id: 'predictions' as ViewMode, label: 'Predictions', icon: Activity },
-                { id: 'recommendations' as ViewMode, label: 'Actions', icon: Lightbulb }
-              ].map((mode) => (
-                <Button
-                  key={mode.id}
-                  variant={viewMode === mode.id ? "default" : "outline"}
-                  onClick={() => setViewMode(mode.id)}
-                  className={viewMode === mode.id ? "bg-gradient-to-r from-blue-600 to-cyan-600" : "border-gray-700 hover:bg-slate-800"}
-                >
-                  <mode.icon className="w-4 h-4 mr-2" />
-                  {mode.label}
-                </Button>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+              <LiquidGlassCard className="p-4">
+                
+                <div className="flex items-center gap-3 mb-2">
+                  <Brain className="w-5 h-5 text-purple-400" />
+                  <span className="text-sm text-gray-400">Total Insights</span>
+                </div>
+                <p className="text-2xl font-bold text-white">
+                  <NumberFlow value={stats.total} />
+                </p>
+              </LiquidGlassCard>
+
+              <LiquidGlassCard className="p-4">
+                
+                <div className="flex items-center gap-3 mb-2">
+                  <AlertTriangle className="w-5 h-5 text-red-400" />
+                  <span className="text-sm text-gray-400">Critical</span>
+                </div>
+                <p className="text-2xl font-bold text-white">
+                  <NumberFlow value={stats.critical} />
+                </p>
+              </LiquidGlassCard>
+
+              <LiquidGlassCard className="p-4">
+                
+                <div className="flex items-center gap-3 mb-2">
+                  <Target className="w-5 h-5 text-green-400" />
+                  <span className="text-sm text-gray-400">High Confidence</span>
+                </div>
+                <p className="text-2xl font-bold text-white">
+                  <NumberFlow value={stats.highConfidence} />
+                </p>
+              </LiquidGlassCard>
+
+              <LiquidGlassCard className="p-4">
+                
+                <div className="flex items-center gap-3 mb-2">
+                  <Zap className="w-5 h-5 text-blue-400" />
+                  <span className="text-sm text-gray-400">Actionable</span>
+                </div>
+                <p className="text-2xl font-bold text-white">
+                  <NumberFlow value={stats.actionable} />
+                </p>
+              </LiquidGlassCard>
+
+              <LiquidGlassCard className="p-4">
+                
+                <div className="flex items-center gap-3 mb-2">
+                  <BarChart3 className="w-5 h-5 text-cyan-400" />
+                  <span className="text-sm text-gray-400">Avg Accuracy</span>
+                </div>
+                <p className="text-2xl font-bold text-white">{stats.avgAccuracy}%</p>
+              </LiquidGlassCard>
+
+              <LiquidGlassCard className="p-4">
+                
+                <div className="flex items-center gap-3 mb-2">
+                  <Users className="w-5 h-5 text-orange-400" />
+                  <span className="text-sm text-gray-400">Affected Users</span>
+                </div>
+                <p className="text-2xl font-bold text-white">{formatNumber(stats.totalAffectedUsers)}</p>
+              </LiquidGlassCard>
             </div>
           </ScrollReveal>
 
-          {/* Insights View */}
-          {viewMode === 'insights' && (
-            <div className="space-y-6">
-              {/* Key Metrics */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {[
-                  { label: 'Active Models', value: '8', change: '+2', icon: Brain, color: 'blue' },
-                  { label: 'Accuracy', value: '94.2%', change: '+2.1%', icon: Target, color: 'green' },
-                  { label: 'Predictions', value: '1.2K', change: '+156', icon: Activity, color: 'purple' },
-                  { label: 'Insights', value: '24', change: '+8', icon: Lightbulb, color: 'orange' }
-                ].map((metric, index) => (
-                  <LiquidGlassCard key={index} className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <metric.icon className={`w-5 h-5 text-${metric.color}-400`} />
-                      <Badge className={`bg-green-500/20 text-green-300 border-green-500/30 text-xs`}>
-                        {metric.change}
-                      </Badge>
-                    </div>
-                    <p className="text-2xl font-bold text-white">{metric.value}</p>
-                    <p className="text-sm text-gray-400">{metric.label}</p>
-                  </LiquidGlassCard>
-                ))}
+          {/* Controls */}
+          <div className="flex flex-col md:flex-row gap-4 mb-8">
+            {/* Search */}
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Input
+                  placeholder="Search insights..."
+                  value={state.searchTerm}
+                  onChange={(e) => dispatch({ type: 'SET_SEARCH', searchTerm: e.target.value })}
+                  className="pl-10 bg-slate-900/50 border-gray-700"
+                />
               </div>
-
-              {/* Insights Cards */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {MOCK_INSIGHTS.map((insight) => {
-                  const Icon = getInsightIcon(insight.type)
-                  return (
-                    <motion.div key={insight.id} whileHover={{ scale: 1.02 }}>
-                      <LiquidGlassCard className="p-6">
-                        <div className="space-y-4">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-start gap-3">
-                              <div className={`w-12 h-12 rounded-lg bg-gradient-to-br from-${getImpactColor(insight.impact)}-500/20 to-${getImpactColor(insight.impact)}-600/20 flex items-center justify-center shrink-0`}>
-                                <Icon className={`w-6 h-6 text-${getImpactColor(insight.impact)}-400`} />
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="font-semibold text-white mb-1">{insight.title}</h3>
-                                <p className="text-sm text-gray-400">{insight.description}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <Badge className={`bg-${getImpactColor(insight.impact)}-500/20 text-${getImpactColor(insight.impact)}-300 border-${getImpactColor(insight.impact)}-500/30 text-xs`}>
-                              {insight.impact} impact
-                            </Badge>
-                            <Badge className={`bg-${getConfidenceColor(insight.confidence)}-500/20 text-${getConfidenceColor(insight.confidence)}-300 border-${getConfidenceColor(insight.confidence)}-500/30 text-xs`}>
-                              {confidenceToPercentage(insight.confidence)}% confidence
-                            </Badge>
-                            <Badge variant="secondary" className="text-xs">
-                              {insight.category}
-                            </Badge>
-                          </div>
-
-                          {insight.actionable && insight.recommendations.length > 0 && (
-                            <div className="pt-3 border-t border-gray-700">
-                              <p className="text-xs font-medium text-gray-400 mb-2">Recommendations:</p>
-                              <ul className="space-y-1">
-                                {insight.recommendations.slice(0, 2).map((rec, idx) => (
-                                  <li key={idx} className="flex items-start gap-2 text-xs text-gray-300">
-                                    <CheckCircle className="w-3 h-3 text-green-400 mt-0.5 shrink-0" />
-                                    <span>{rec}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      </LiquidGlassCard>
-                    </motion.div>
-                  )
-                })}
-              </div>
-
-              {/* Anomalies */}
-              {MOCK_ANOMALIES.length > 0 && (
-                <LiquidGlassCard className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <AlertTriangle className="w-5 h-5 text-red-400" />
-                    <h3 className="font-semibold text-white">Active Anomalies</h3>
-                    <Badge className="bg-red-500/20 text-red-300 border-red-500/30">
-                      {MOCK_ANOMALIES.length}
-                    </Badge>
-                  </div>
-
-                  <div className="space-y-3">
-                    {MOCK_ANOMALIES.map((anomaly) => (
-                      <div key={anomaly.id} className="p-4 bg-slate-900/50 rounded-lg border border-gray-700">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <h4 className="font-medium text-white">{anomaly.metric}</h4>
-                            <p className="text-sm text-gray-400">{anomaly.description}</p>
-                          </div>
-                          <Badge className={`bg-${getSeverityColor(anomaly.severity)}-500/20 text-${getSeverityColor(anomaly.severity)}-300 border-${getSeverityColor(anomaly.severity)}-500/30`}>
-                            {anomaly.severity}
-                          </Badge>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4 text-sm mt-3">
-                          <div>
-                            <span className="text-gray-400 block">Expected</span>
-                            <span className="text-white font-medium">{anomaly.expectedValue}</span>
-                          </div>
-                          <div>
-                            <span className="text-gray-400 block">Actual</span>
-                            <span className="text-white font-medium">{anomaly.actualValue}</span>
-                          </div>
-                          <div>
-                            <span className="text-gray-400 block">Deviation</span>
-                            <span className="text-red-400 font-medium">+{anomaly.deviation}%</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </LiquidGlassCard>
-              )}
             </div>
+
+            {/* Filters */}
+            <Select value={state.filterType} onValueChange={(value: any) => dispatch({ type: 'SET_FILTER_TYPE', filterType: value })}>
+              <SelectTrigger className="w-[180px] bg-slate-900/50 border-gray-700">
+                <SelectValue placeholder="Filter by type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="trend">Trend</SelectItem>
+                <SelectItem value="anomaly">Anomaly</SelectItem>
+                <SelectItem value="forecast">Forecast</SelectItem>
+                <SelectItem value="pattern">Pattern</SelectItem>
+                <SelectItem value="recommendation">Recommendation</SelectItem>
+                <SelectItem value="alert">Alert</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={state.filterCategory} onValueChange={(value: any) => dispatch({ type: 'SET_FILTER_CATEGORY', filterCategory: value })}>
+              <SelectTrigger className="w-[180px] bg-slate-900/50 border-gray-700">
+                <SelectValue placeholder="Filter by category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="revenue">Revenue</SelectItem>
+                <SelectItem value="engagement">Engagement</SelectItem>
+                <SelectItem value="performance">Performance</SelectItem>
+                <SelectItem value="retention">Retention</SelectItem>
+                <SelectItem value="quality">Quality</SelectItem>
+                <SelectItem value="growth">Growth</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={state.sortBy} onValueChange={(value: any) => dispatch({ type: 'SET_SORT', sortBy: value })}>
+              <SelectTrigger className="w-[180px] bg-slate-900/50 border-gray-700">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="priority">Priority</SelectItem>
+                <SelectItem value="confidence">Confidence</SelectItem>
+                <SelectItem value="impact">Impact</SelectItem>
+                <SelectItem value="date">Date</SelectItem>
+                <SelectItem value="type">Type</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Actions */}
+            <Button onClick={() => setShowCreateModal(true)} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Insight
+            </Button>
+
+            <Button variant="outline" onClick={() => setShowExportModal(true)} className="border-gray-700 hover:bg-slate-800">
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+          </div>
+
+          {/* Bulk Actions */}
+          {state.selectedInsights.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center justify-between p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg mb-6"
+            >
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  checked={state.selectedInsights.length === filteredAndSortedInsights.length}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      filteredAndSortedInsights.forEach(insight => {
+                        if (!state.selectedInsights.includes(insight.id)) {
+                          dispatch({ type: 'TOGGLE_SELECT_INSIGHT', insightId: insight.id })
+                        }
+                      })
+                    } else {
+                      dispatch({ type: 'CLEAR_SELECTED_INSIGHTS' })
+                    }
+                  }}
+                />
+                <span className="text-sm text-white">
+                  {state.selectedInsights.length} insight{state.selectedInsights.length !== 1 ? 's' : ''} selected
+                </span>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBulkDelete}
+                  disabled={isSaving}
+                  className="border-gray-700 hover:bg-slate-800"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Selected
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => dispatch({ type: 'CLEAR_SELECTED_INSIGHTS' })}
+                  className="border-gray-700 hover:bg-slate-800"
+                >
+                  Clear Selection
+                </Button>
+              </div>
+            </motion.div>
           )}
 
-          {/* Trends View */}
-          {viewMode === 'trends' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-6">
-                {MOCK_TRENDS.map((trend, index) => (
-                  <LiquidGlassCard key={index} className="p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-semibold text-white">{trend.metric}</h3>
-                          <p className="text-sm text-gray-400">{trend.category}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {trend.direction === 'up' ? (
-                            <ArrowUp className="w-5 h-5 text-green-400" />
-                          ) : trend.direction === 'down' ? (
-                            <ArrowDown className="w-5 h-5 text-red-400" />
-                          ) : (
-                            <Minus className="w-5 h-5 text-gray-400" />
-                          )}
-                          <span className={`font-bold ${trend.direction === 'up' ? 'text-green-400' : trend.direction === 'down' ? 'text-red-400' : 'text-gray-400'}`}>
-                            {formatPercentage(trend.velocity)}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Simple Trend Visualization */}
-                      <div className="h-32 flex items-end gap-1">
-                        {trend.dataPoints.slice(-20).map((point, idx) => {
-                          const maxValue = Math.max(...trend.dataPoints.map(p => p.value))
-                          const height = (point.value / maxValue) * 100
-                          return (
-                            <div
-                              key={idx}
-                              className="flex-1 bg-gradient-to-t from-blue-500/50 to-cyan-500/50 rounded-t"
-                              style={{ height: `${height}%` }}
+          {/* Insights Grid */}
+          {filteredAndSortedInsights.length === 0 ? (
+            <NoDataEmptyState
+              title="No insights found"
+              description="Try adjusting your filters or create a new insight"
+            />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {filteredAndSortedInsights.map((insight, index) => {
+                const Icon = getInsightIcon(insight.type)
+                return (
+                  <motion.div
+                    key={insight.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <LiquidGlassCard className="p-6 hover:border-purple-500/50 transition-colors">
+                      <div className="space-y-4">
+                        {/* Header */}
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-3 flex-1">
+                            <Checkbox
+                              checked={state.selectedInsights.includes(insight.id)}
+                              onCheckedChange={() => dispatch({ type: 'TOGGLE_SELECT_INSIGHT', insightId: insight.id })}
                             />
-                          )
-                        })}
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-700 text-sm">
-                        <div>
-                          <span className="text-gray-400 block">Next 7 Days</span>
-                          <span className="text-white font-medium">{formatNumber(trend.forecast.next7Days)}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-400 block">Next 30 Days</span>
-                          <span className="text-white font-medium">{formatNumber(trend.forecast.next30Days)}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-400 block">Confidence</span>
-                          <Badge className={`bg-${getConfidenceColor(trend.forecast.confidence)}-500/20 text-${getConfidenceColor(trend.forecast.confidence)}-300 border-${getConfidenceColor(trend.forecast.confidence)}-500/30`}>
-                            {trend.forecast.confidence}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </LiquidGlassCard>
-                ))}
-              </div>
-
-              {/* Trend Stats */}
-              <div className="space-y-6">
-                <LiquidGlassCard className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Activity className="w-5 h-5 text-blue-400" />
-                    <h3 className="font-semibold text-white">Trend Summary</h3>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-400">Positive Trends</span>
-                      <span className="font-semibold text-green-400">75%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-400">Avg Growth</span>
-                      <span className="font-semibold text-white">+10.4%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-400">Confidence</span>
-                      <span className="font-semibold text-white">High</span>
-                    </div>
-                  </div>
-                </LiquidGlassCard>
-
-                <LiquidGlassCard className="p-6 bg-gradient-to-br from-blue-900/20 to-cyan-900/20 border-blue-500/30">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center">
-                      <Info className="w-4 h-4 text-blue-400" />
-                    </div>
-                    <h4 className="font-semibold text-blue-400">Insight</h4>
-                  </div>
-                  <p className="text-xs text-gray-300">
-                    All key metrics show positive momentum. Consider increasing investment in growth initiatives.
-                  </p>
-                </LiquidGlassCard>
-              </div>
-            </div>
-          )}
-
-          {/* Predictions View */}
-          {viewMode === 'predictions' && (
-            <div className="space-y-6">
-              <LiquidGlassCard className="p-6">
-                <div className="flex items-center gap-2 mb-6">
-                  <Shield className="w-5 h-5 text-purple-400" />
-                  <h3 className="font-semibold text-white">Churn Risk Predictions</h3>
-                  <Badge className="bg-red-500/20 text-red-300 border-red-500/30">
-                    {MOCK_CHURN_PREDICTIONS.filter(p => p.risk === 'critical' || p.risk === 'high').length} At Risk
-                  </Badge>
-                </div>
-
-                <div className="space-y-4">
-                  {MOCK_CHURN_PREDICTIONS.map((prediction) => (
-                    <div key={prediction.userId} className="p-4 bg-slate-900/50 rounded-lg border border-gray-700">
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h4 className="font-medium text-white">{prediction.userName}</h4>
-                          <p className="text-sm text-gray-400">Churn Probability: {(prediction.churnProbability * 100).toFixed(0)}%</p>
-                        </div>
-                        <Badge className={`bg-${getRiskColor(prediction.risk)}-500/20 text-${getRiskColor(prediction.risk)}-300 border-${getRiskColor(prediction.risk)}-500/30`}>
-                          {prediction.risk} risk
-                        </Badge>
-                      </div>
-
-                      <div className="space-y-2 mb-3">
-                        <p className="text-xs font-medium text-gray-400">Key Factors:</p>
-                        {prediction.factors.map((factor, idx) => (
-                          <div key={idx} className="flex items-center gap-2">
-                            <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-gradient-to-r from-red-500 to-orange-500"
-                                style={{ width: `${factor.impact * 100}%` }}
-                              />
+                            <div className={`w-12 h-12 rounded-lg bg-gradient-to-br from-${getImpactColor(insight.impact)}-500/20 to-${getImpactColor(insight.impact)}-600/20 flex items-center justify-center shrink-0`}>
+                              <Icon className={`w-6 h-6 text-${getImpactColor(insight.impact)}-400`} />
                             </div>
-                            <span className="text-xs text-gray-400 w-32">{factor.factor}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="flex gap-2">
-                        {prediction.recommendations.slice(0, 2).map((rec, idx) => (
-                          <Badge key={idx} variant="outline" className="text-xs border-gray-700">
-                            {rec}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </LiquidGlassCard>
-            </div>
-          )}
-
-          {/* Recommendations View */}
-          {viewMode === 'recommendations' && (
-            <div className="space-y-6">
-              {MOCK_RECOMMENDATIONS.map((recommendation) => (
-                <LiquidGlassCard key={recommendation.id} className="p-6">
-                  <div className="space-y-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center">
-                          <Lightbulb className="w-6 h-6 text-purple-400" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-white mb-1">{recommendation.title}</h3>
-                          <p className="text-sm text-gray-400">{recommendation.description}</p>
-                        </div>
-                      </div>
-                      <Badge className={`bg-${getImpactColor(recommendation.priority === 'critical' ? 'high' : recommendation.priority as any)}-500/20 text-${getImpactColor(recommendation.priority === 'critical' ? 'high' : recommendation.priority as any)}-300 border-${getImpactColor(recommendation.priority === 'critical' ? 'high' : recommendation.priority as any)}-500/30`}>
-                        {recommendation.priority}
-                      </Badge>
-                    </div>
-
-                    <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                      <div className="flex items-center gap-2 mb-1">
-                        <TrendingUp className="w-4 h-4 text-green-400" />
-                        <span className="text-sm font-medium text-green-300">Expected Impact</span>
-                      </div>
-                      <p className="text-xs text-green-400">
-                        {recommendation.expectedImpact.improvement}% improvement in {recommendation.expectedImpact.metric} within {recommendation.expectedImpact.timeframe}
-                      </p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <p className="text-xs font-medium text-gray-400">Action Items:</p>
-                      {recommendation.actions.map((action) => (
-                        <div key={action.id} className="flex items-center justify-between p-3 bg-slate-900/50 rounded-lg border border-gray-700">
-                          <div className="flex items-center gap-3">
-                            <CheckCircle className={`w-4 h-4 ${action.status === 'completed' ? 'text-green-400' : 'text-gray-500'}`} />
-                            <div>
-                              <p className="text-sm font-medium text-white">{action.title}</p>
-                              <p className="text-xs text-gray-400">{action.description}</p>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-white mb-1 line-clamp-1">{insight.title}</h3>
+                              <p className="text-sm text-gray-400 line-clamp-2">{insight.description}</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs border-gray-700">
-                              {action.effort} effort
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="bg-slate-900 border-gray-700">
+                              <DropdownMenuItem onClick={() => handleViewInsight(insight)}>
+                                <Eye className="w-4 h-4 mr-2" />
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleRetrainModel(insight.id)}>
+                                <RefreshCw className="w-4 h-4 mr-2" />
+                                Retrain Model
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  dispatch({ type: 'SELECT_INSIGHT', insight })
+                                  setShowDeleteModal(true)
+                                }}
+                                className="text-red-400"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+
+                        {/* Badges */}
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge className={`bg-${getImpactColor(insight.impact)}-500/20 text-${getImpactColor(insight.impact)}-300 border-${getImpactColor(insight.impact)}-500/30 text-xs`}>
+                            {insight.impact} impact
+                          </Badge>
+                          <Badge className={`bg-${getConfidenceColor(insight.confidence)}-500/20 text-${getConfidenceColor(insight.confidence)}-300 border-${getConfidenceColor(insight.confidence)}-500/30 text-xs`}>
+                            {confidenceToPercentage(insight.confidence)}% confidence
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            {insight.type}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs border-gray-700">
+                            {insight.category}
+                          </Badge>
+                          {insight.modelStatus !== 'ready' && (
+                            <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30 text-xs">
+                              {insight.modelStatus}
                             </Badge>
-                            <Badge variant="outline" className="text-xs border-gray-700">
-                              {action.impact} impact
-                            </Badge>
+                          )}
+                        </div>
+
+                        {/* Metrics */}
+                        <div className="grid grid-cols-4 gap-3 pt-3 border-t border-gray-700">
+                          <div>
+                            <p className="text-xs text-gray-400">Accuracy</p>
+                            <p className="text-sm font-semibold text-white">{(insight.metrics.accuracy * 100).toFixed(0)}%</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-400">Precision</p>
+                            <p className="text-sm font-semibold text-white">{(insight.metrics.precision * 100).toFixed(0)}%</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-400">Users</p>
+                            <p className="text-sm font-semibold text-white">{formatNumber(insight.affectedUsers || 0)}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-400">Revenue</p>
+                            <p className="text-sm font-semibold text-white">{formatCurrency(insight.potentialRevenue || 0)}</p>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                </LiquidGlassCard>
-              ))}
+
+                        {/* Model Info */}
+                        <div className="flex items-center justify-between pt-3 border-t border-gray-700">
+                          <div className="flex items-center gap-2 text-xs text-gray-400">
+                            <Cpu className="w-3 h-3" />
+                            <span>{insight.modelName} {insight.modelVersion}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {insight.tags.map((tag, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs border-gray-700">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </LiquidGlassCard>
+                  </motion.div>
+                )
+              })}
             </div>
           )}
         </div>
       </div>
+
+      {/* CREATE MODAL */}
+      <AnimatePresence>
+        {showCreateModal && (
+          <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+            <DialogContent className="max-w-2xl bg-slate-900 border-gray-700">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-white">
+                  <Plus className="w-5 h-5 text-purple-400" />
+                  Create New Insight
+                </DialogTitle>
+                <DialogDescription>
+                  Add a new machine learning insight to your dashboard
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label htmlFor="title" className="text-white">Title *</Label>
+                  <Input
+                    id="title"
+                    value={insightTitle}
+                    onChange={(e) => setInsightTitle(e.target.value)}
+                    placeholder="Insight title..."
+                    className="bg-slate-800 border-gray-700 text-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="type" className="text-white">Type *</Label>
+                    <Select value={insightType} onValueChange={(value: InsightType) => setInsightType(value)}>
+                      <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="trend">Trend</SelectItem>
+                        <SelectItem value="anomaly">Anomaly</SelectItem>
+                        <SelectItem value="forecast">Forecast</SelectItem>
+                        <SelectItem value="pattern">Pattern</SelectItem>
+                        <SelectItem value="recommendation">Recommendation</SelectItem>
+                        <SelectItem value="alert">Alert</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="category" className="text-white">Category *</Label>
+                    <Select value={insightCategory} onValueChange={(value: InsightCategory) => setInsightCategory(value)}>
+                      <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="revenue">Revenue</SelectItem>
+                        <SelectItem value="engagement">Engagement</SelectItem>
+                        <SelectItem value="performance">Performance</SelectItem>
+                        <SelectItem value="retention">Retention</SelectItem>
+                        <SelectItem value="quality">Quality</SelectItem>
+                        <SelectItem value="growth">Growth</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="description" className="text-white">Description *</Label>
+                  <Textarea
+                    id="description"
+                    value={insightDescription}
+                    onChange={(e) => setInsightDescription(e.target.value)}
+                    placeholder="Describe the insight..."
+                    rows={4}
+                    className="bg-slate-800 border-gray-700 text-white"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="confidence" className="text-white">Confidence Level</Label>
+                    <Select value={insightConfidence} onValueChange={(value: ConfidenceLevel) => setInsightConfidence(value)}>
+                      <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low (60%)</SelectItem>
+                        <SelectItem value="medium">Medium (75%)</SelectItem>
+                        <SelectItem value="high">High (90%)</SelectItem>
+                        <SelectItem value="very-high">Very High (98%)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="impact" className="text-white">Impact Level</Label>
+                    <Select value={insightImpact} onValueChange={(value: ImpactLevel) => setInsightImpact(value)}>
+                      <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="critical">Critical</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowCreateModal(false)} className="border-gray-700">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleCreateInsight}
+                  disabled={isSaving}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                >
+                  {isSaving ? 'Creating...' : 'Create Insight'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
+
+      {/* VIEW MODAL */}
+      <AnimatePresence>
+        {showViewModal && state.selectedInsight && (
+          <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-900 border-gray-700">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-white">
+                  <Brain className="w-5 h-5 text-purple-400" />
+                  {state.selectedInsight.title}
+                </DialogTitle>
+                <DialogDescription>
+                  Detailed view of ML insight #{state.selectedInsight.id}
+                </DialogDescription>
+              </DialogHeader>
+
+              <Tabs defaultValue="overview" className="w-full">
+                <TabsList className="grid w-full grid-cols-3 bg-slate-800">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="model">Model</TabsTrigger>
+                  <TabsTrigger value="recommendations">Actions</TabsTrigger>
+                </TabsList>
+
+                {/* Overview Tab */}
+                <TabsContent value="overview" className="space-y-4 pt-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-400 mb-2">Description</h4>
+                    <p className="text-white">{state.selectedInsight.description}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-400 mb-2">Type</h4>
+                      <Badge>{state.selectedInsight.type}</Badge>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-400 mb-2">Category</h4>
+                      <Badge variant="outline">{state.selectedInsight.category}</Badge>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-400 mb-2">Confidence</h4>
+                      <Badge className={`bg-${getConfidenceColor(state.selectedInsight.confidence)}-500/20 text-${getConfidenceColor(state.selectedInsight.confidence)}-300 border-${getConfidenceColor(state.selectedInsight.confidence)}-500/30`}>
+                        {confidenceToPercentage(state.selectedInsight.confidence)}%
+                      </Badge>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-400 mb-2">Impact</h4>
+                      <Badge className={`bg-${getImpactColor(state.selectedInsight.impact)}-500/20 text-${getImpactColor(state.selectedInsight.impact)}-300 border-${getImpactColor(state.selectedInsight.impact)}-500/30`}>
+                        {state.selectedInsight.impact}
+                      </Badge>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-400 mb-2">Severity</h4>
+                      <Badge className={`bg-${getSeverityColor(state.selectedInsight.severity)}-500/20 text-${getSeverityColor(state.selectedInsight.severity)}-300 border-${getSeverityColor(state.selectedInsight.severity)}-500/30`}>
+                        {state.selectedInsight.severity}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-400 mb-2">Impact Metrics</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 bg-slate-800 rounded-lg">
+                        <p className="text-sm text-gray-400">Affected Users</p>
+                        <p className="text-2xl font-bold text-white">{formatNumber(state.selectedInsight.affectedUsers || 0)}</p>
+                      </div>
+                      <div className="p-4 bg-slate-800 rounded-lg">
+                        <p className="text-sm text-gray-400">Potential Revenue</p>
+                        <p className="text-2xl font-bold text-white">{formatCurrency(state.selectedInsight.potentialRevenue || 0)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-400 mb-2">Tags</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {state.selectedInsight.tags.map((tag, idx) => (
+                        <Badge key={idx} variant="outline">{tag}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Model Tab */}
+                <TabsContent value="model" className="space-y-4 pt-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-400 mb-2">Model Information</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 bg-slate-800 rounded-lg">
+                        <p className="text-sm text-gray-400">Model Name</p>
+                        <p className="text-white font-semibold">{state.selectedInsight.modelName}</p>
+                      </div>
+                      <div className="p-4 bg-slate-800 rounded-lg">
+                        <p className="text-sm text-gray-400">Version</p>
+                        <p className="text-white font-semibold">{state.selectedInsight.modelVersion}</p>
+                      </div>
+                      <div className="p-4 bg-slate-800 rounded-lg">
+                        <p className="text-sm text-gray-400">Status</p>
+                        <Badge className={state.selectedInsight.modelStatus === 'ready' ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'}>
+                          {state.selectedInsight.modelStatus}
+                        </Badge>
+                      </div>
+                      <div className="p-4 bg-slate-800 rounded-lg">
+                        <p className="text-sm text-gray-400">Data Source</p>
+                        <p className="text-white font-semibold">{state.selectedInsight.dataSource}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-400 mb-2">Performance Metrics</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 bg-slate-800 rounded-lg">
+                        <p className="text-sm text-gray-400">Accuracy</p>
+                        <p className="text-2xl font-bold text-white">{(state.selectedInsight.metrics.accuracy * 100).toFixed(1)}%</p>
+                      </div>
+                      <div className="p-4 bg-slate-800 rounded-lg">
+                        <p className="text-sm text-gray-400">Precision</p>
+                        <p className="text-2xl font-bold text-white">{(state.selectedInsight.metrics.precision * 100).toFixed(1)}%</p>
+                      </div>
+                      <div className="p-4 bg-slate-800 rounded-lg">
+                        <p className="text-sm text-gray-400">Recall</p>
+                        <p className="text-2xl font-bold text-white">{(state.selectedInsight.metrics.recall * 100).toFixed(1)}%</p>
+                      </div>
+                      <div className="p-4 bg-slate-800 rounded-lg">
+                        <p className="text-sm text-gray-400">F1 Score</p>
+                        <p className="text-2xl font-bold text-white">{(state.selectedInsight.metrics.f1Score * 100).toFixed(1)}%</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => handleRetrainModel(state.selectedInsight!.id)}
+                      className="bg-gradient-to-r from-purple-600 to-pink-600"
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Retrain Model
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                {/* Recommendations Tab */}
+                <TabsContent value="recommendations" className="space-y-4 pt-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-400 mb-2">Recommended Actions</h4>
+                    <div className="space-y-3">
+                      {state.selectedInsight.recommendations.map((rec, idx) => (
+                        <div key={idx} className="flex items-start gap-3 p-3 bg-slate-800 rounded-lg">
+                          <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 shrink-0" />
+                          <p className="text-white">{rec}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {state.selectedInsight.actionable && (
+                    <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Zap className="w-5 h-5 text-green-400" />
+                        <h4 className="text-sm font-medium text-green-300">Actionable Insight</h4>
+                      </div>
+                      <p className="text-xs text-green-400">
+                        This insight has specific actions that can be implemented immediately for maximum impact.
+                      </p>
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-700">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowViewModal(false)
+                    setShowDeleteModal(true)
+                  }}
+                  className="border-gray-700 text-red-400 hover:bg-red-500/10"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
+                <Button variant="outline" onClick={() => setShowViewModal(false)} className="border-gray-700">
+                  Close
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
+
+      {/* EXPORT MODAL */}
+      <AnimatePresence>
+        {showExportModal && (
+          <Dialog open={showExportModal} onOpenChange={setShowExportModal}>
+            <DialogContent className="bg-slate-900 border-gray-700">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-white">
+                  <Download className="w-5 h-5 text-purple-400" />
+                  Export Insights
+                </DialogTitle>
+                <DialogDescription>
+                  Download {filteredAndSortedInsights.length} insight(s) in your preferred format
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label htmlFor="format" className="text-white">Export Format</Label>
+                  <Select value={exportFormat} onValueChange={(value: any) => setExportFormat(value)}>
+                    <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="json">JSON</SelectItem>
+                      <SelectItem value="csv">CSV</SelectItem>
+                      <SelectItem value="pdf">PDF</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="p-4 bg-slate-800 rounded-lg">
+                  <p className="text-sm text-gray-400">Export will include:</p>
+                  <ul className="mt-2 space-y-1 text-sm text-white">
+                    <li>• {filteredAndSortedInsights.length} insights</li>
+                    <li>• All metadata and metrics</li>
+                    <li>• Model information</li>
+                    <li>• Recommendations</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowExportModal(false)} className="border-gray-700">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleExport}
+                  disabled={isSaving}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                >
+                  {isSaving ? 'Exporting...' : 'Export'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
+
+      {/* DELETE MODAL */}
+      <AnimatePresence>
+        {showDeleteModal && state.selectedInsight && (
+          <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+            <DialogContent className="bg-slate-900 border-gray-700">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-white">
+                  <AlertTriangle className="w-5 h-5 text-red-400" />
+                  Delete Insight
+                </DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete this insight? This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="py-4">
+                <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                  <p className="text-sm text-white font-medium">{state.selectedInsight.title}</p>
+                  <p className="text-xs text-gray-400 mt-1">ID: {state.selectedInsight.id}</p>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowDeleteModal(false)} className="border-gray-700">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => handleDeleteInsight(state.selectedInsight!.id)}
+                  disabled={isSaving}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  {isSaving ? 'Deleting...' : 'Delete Insight'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -1,50 +1,345 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import Link from 'next/link'
+import { useState, useEffect, useReducer, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Card, CardContent } from '@/components/ui/card'
+import { toast } from 'sonner'
 import {
-  WIDGET_TEMPLATES,
-  DEFAULT_WIDGETS,
-  WIDGET_METRICS,
-  getSizeClass,
-  getSizeLabel,
-  getWidgetIcon,
-  createWidget
-} from '@/lib/widgets-utils'
-import type { Widget, WidgetSize } from '@/lib/widgets-types'
+  Layout, Grid, BarChart3, PieChart, Activity, TrendingUp,
+  Search, Filter, Plus, Edit, Trash2, Eye, EyeOff, Settings,
+  Download, Upload, RefreshCw, Copy, Move, Lock, Unlock,
+  Maximize2, Minimize2, AlertCircle, CheckCircle, Star,
+  Calendar, Users, DollarSign, ShoppingCart, FileText, Zap,
+  X, Check, MoreVertical, ArrowUpDown, Layers, Square
+} from 'lucide-react'
+import { NumberFlow } from '@/components/ui/number-flow'
 
 // A+++ UTILITIES
-import { CardSkeleton } from '@/components/ui/loading-skeleton'
-import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
-type ViewMode = 'dashboard' | 'customize' | 'templates' | 'settings'
+// ============================================================================
+// FRAMER MOTION COMPONENTS
+// ============================================================================
+
+const FloatingParticle = ({ delay = 0, color = 'cyan' }: { delay?: number; color?: string }) => {
+  console.log('🎨 WIDGETS: FloatingParticle rendered with color:', color, 'delay:', delay)
+  return (
+    <motion.div
+      className={`absolute w-2 h-2 bg-${color}-400 rounded-full opacity-30`}
+      animate={{
+        y: [0, -30, 0],
+        x: [0, 15, -15, 0],
+        scale: [0.8, 1.2, 0.8],
+        opacity: [0.3, 0.8, 0.3]
+      }}
+      transition={{
+        duration: 4 + delay,
+        repeat: Infinity,
+        ease: 'easeInOut',
+        delay: delay
+      }}
+    />
+  )
+}
+
+// ============================================================================
+// TYPESCRIPT INTERFACES
+// ============================================================================
+
+type WidgetType = 'metric' | 'chart' | 'table' | 'activity' | 'quick-actions' | 'calendar'
+type WidgetSize = 'small' | 'medium' | 'large' | 'full'
+type WidgetCategory = 'analytics' | 'productivity' | 'finance' | 'social' | 'custom'
+
+interface Widget {
+  id: string
+  name: string
+  type: WidgetType
+  category: WidgetCategory
+  size: WidgetSize
+  icon: string
+  description: string
+  isVisible: boolean
+  isLocked: boolean
+  position: { x: number; y: number }
+  config: {
+    refreshInterval?: number
+    color?: string
+    showLegend?: boolean
+    dataSource?: string
+  }
+  createdAt: string
+  updatedAt: string
+  lastRefreshed?: string
+  usageCount: number
+}
+
+interface WidgetsState {
+  widgets: Widget[]
+  selectedWidget: Widget | null
+  searchTerm: string
+  filterCategory: WidgetCategory | 'all'
+  filterType: WidgetType | 'all'
+  filterSize: WidgetSize | 'all'
+  sortBy: 'name' | 'usage' | 'date' | 'size'
+  viewMode: 'dashboard' | 'customize' | 'templates' | 'settings'
+  selectedWidgets: string[]
+  isEditMode: boolean
+}
+
+type WidgetsAction =
+  | { type: 'SET_WIDGETS'; widgets: Widget[] }
+  | { type: 'ADD_WIDGET'; widget: Widget }
+  | { type: 'UPDATE_WIDGET'; widget: Widget }
+  | { type: 'DELETE_WIDGET'; widgetId: string }
+  | { type: 'SELECT_WIDGET'; widget: Widget | null }
+  | { type: 'SET_SEARCH'; searchTerm: string }
+  | { type: 'SET_FILTER_CATEGORY'; filterCategory: WidgetsState['filterCategory'] }
+  | { type: 'SET_FILTER_TYPE'; filterType: WidgetsState['filterType'] }
+  | { type: 'SET_FILTER_SIZE'; filterSize: WidgetsState['filterSize'] }
+  | { type: 'SET_SORT'; sortBy: WidgetsState['sortBy'] }
+  | { type: 'SET_VIEW_MODE'; viewMode: WidgetsState['viewMode'] }
+  | { type: 'TOGGLE_SELECT_WIDGET'; widgetId: string }
+  | { type: 'CLEAR_SELECTED_WIDGETS' }
+  | { type: 'TOGGLE_VISIBILITY'; widgetId: string }
+  | { type: 'TOGGLE_LOCK'; widgetId: string }
+  | { type: 'SET_EDIT_MODE'; isEditMode: boolean }
+
+// ============================================================================
+// REDUCER
+// ============================================================================
+
+function widgetsReducer(state: WidgetsState, action: WidgetsAction): WidgetsState {
+  console.log('🔄 WIDGETS REDUCER: Action:', action.type)
+
+  switch (action.type) {
+    case 'SET_WIDGETS':
+      console.log('✅ WIDGETS: Set widgets -', action.widgets.length, 'widgets loaded')
+      return { ...state, widgets: action.widgets }
+
+    case 'ADD_WIDGET':
+      console.log('✅ WIDGETS: Add widget - ID:', action.widget.id, 'Name:', action.widget.name)
+      return { ...state, widgets: [action.widget, ...state.widgets] }
+
+    case 'UPDATE_WIDGET':
+      console.log('✅ WIDGETS: Update widget - ID:', action.widget.id)
+      return {
+        ...state,
+        widgets: state.widgets.map(w => w.id === action.widget.id ? action.widget : w)
+      }
+
+    case 'DELETE_WIDGET':
+      console.log('🗑️ WIDGETS: Delete widget - ID:', action.widgetId)
+      return {
+        ...state,
+        widgets: state.widgets.filter(w => w.id !== action.widgetId),
+        selectedWidget: state.selectedWidget?.id === action.widgetId ? null : state.selectedWidget
+      }
+
+    case 'SELECT_WIDGET':
+      console.log('👁️ WIDGETS: Select widget -', action.widget?.name || 'None')
+      return { ...state, selectedWidget: action.widget }
+
+    case 'SET_SEARCH':
+      console.log('🔍 WIDGETS: Search term changed:', action.searchTerm)
+      return { ...state, searchTerm: action.searchTerm }
+
+    case 'SET_FILTER_CATEGORY':
+      console.log('🔎 WIDGETS: Filter category changed:', action.filterCategory)
+      return { ...state, filterCategory: action.filterCategory }
+
+    case 'SET_FILTER_TYPE':
+      console.log('🔎 WIDGETS: Filter type changed:', action.filterType)
+      return { ...state, filterType: action.filterType }
+
+    case 'SET_FILTER_SIZE':
+      console.log('🔎 WIDGETS: Filter size changed:', action.filterSize)
+      return { ...state, filterSize: action.filterSize }
+
+    case 'SET_SORT':
+      console.log('🔀 WIDGETS: Sort changed:', action.sortBy)
+      return { ...state, sortBy: action.sortBy }
+
+    case 'SET_VIEW_MODE':
+      console.log('👁️ WIDGETS: View mode changed:', action.viewMode)
+      return { ...state, viewMode: action.viewMode }
+
+    case 'TOGGLE_SELECT_WIDGET':
+      const isSelected = state.selectedWidgets.includes(action.widgetId)
+      console.log(isSelected ? '❌ WIDGETS: Deselect' : '✅ WIDGETS: Select', '- ID:', action.widgetId)
+      return {
+        ...state,
+        selectedWidgets: isSelected
+          ? state.selectedWidgets.filter(id => id !== action.widgetId)
+          : [...state.selectedWidgets, action.widgetId]
+      }
+
+    case 'CLEAR_SELECTED_WIDGETS':
+      console.log('🔄 WIDGETS: Clear all selected')
+      return { ...state, selectedWidgets: [] }
+
+    case 'TOGGLE_VISIBILITY':
+      console.log('👁️ WIDGETS: Toggle visibility - ID:', action.widgetId)
+      return {
+        ...state,
+        widgets: state.widgets.map(w =>
+          w.id === action.widgetId ? { ...w, isVisible: !w.isVisible } : w
+        )
+      }
+
+    case 'TOGGLE_LOCK':
+      console.log('🔒 WIDGETS: Toggle lock - ID:', action.widgetId)
+      return {
+        ...state,
+        widgets: state.widgets.map(w =>
+          w.id === action.widgetId ? { ...w, isLocked: !w.isLocked } : w
+        )
+      }
+
+    case 'SET_EDIT_MODE':
+      console.log('✏️ WIDGETS: Edit mode changed:', action.isEditMode)
+      return { ...state, isEditMode: action.isEditMode }
+
+    default:
+      return state
+  }
+}
+
+// ============================================================================
+// MOCK DATA
+// ============================================================================
+
+const generateMockWidgets = (): Widget[] => {
+  console.log('📊 WIDGETS: Generating mock widget data...')
+
+  const types: WidgetType[] = ['metric', 'chart', 'table', 'activity', 'quick-actions', 'calendar']
+  const categories: WidgetCategory[] = ['analytics', 'productivity', 'finance', 'social', 'custom']
+  const sizes: WidgetSize[] = ['small', 'medium', 'large', 'full']
+
+  const widgetNames = {
+    metric: ['Total Revenue', 'Active Users', 'Conversion Rate', 'Sales Today', 'Tasks Completed', 'Storage Used'],
+    chart: ['Revenue Chart', 'User Growth', 'Sales Funnel', 'Traffic Sources', 'Project Timeline'],
+    table: ['Recent Orders', 'Top Clients', 'Latest Tasks', 'Transaction History', 'Team Activity'],
+    activity: ['Recent Activity', 'Team Updates', 'System Logs', 'Notifications Feed', 'Change Log'],
+    'quick-actions': ['Quick Actions', 'Common Tasks', 'Shortcuts', 'Tools', 'Create Menu'],
+    calendar: ['Calendar View', 'Upcoming Events', 'Schedule', 'Deadlines', 'Meetings']
+  }
+
+  const icons = {
+    metric: '📊',
+    chart: '📈',
+    table: '📋',
+    activity: '🔔',
+    'quick-actions': '⚡',
+    calendar: '📅'
+  }
+
+  const widgets: Widget[] = []
+
+  for (let i = 1; i <= 30; i++) {
+    const type = types[Math.floor(Math.random() * types.length)]
+    const category = categories[Math.floor(Math.random() * categories.length)]
+    const size = sizes[Math.floor(Math.random() * sizes.length)]
+    const nameOptions = widgetNames[type]
+    const name = nameOptions[Math.floor(Math.random() * nameOptions.length)] + ` ${i}`
+
+    widgets.push({
+      id: `W-${String(i).padStart(3, '0')}`,
+      name,
+      type,
+      category,
+      size,
+      icon: icons[type],
+      description: `${type.charAt(0).toUpperCase() + type.slice(1)} widget for tracking ${category} metrics`,
+      isVisible: Math.random() > 0.3,
+      isLocked: Math.random() > 0.8,
+      position: { x: Math.floor(i % 3), y: Math.floor(i / 3) },
+      config: {
+        refreshInterval: [30, 60, 300, 600][Math.floor(Math.random() * 4)],
+        color: ['blue', 'green', 'purple', 'orange', 'red'][Math.floor(Math.random() * 5)],
+        showLegend: Math.random() > 0.5,
+        dataSource: ['api', 'database', 'cache'][Math.floor(Math.random() * 3)]
+      },
+      createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+      lastRefreshed: Math.random() > 0.5 ? new Date(Date.now() - Math.random() * 60 * 60 * 1000).toISOString() : undefined,
+      usageCount: Math.floor(Math.random() * 500) + 10
+    })
+  }
+
+  console.log('✅ WIDGETS: Generated', widgets.length, 'mock widgets')
+  return widgets
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 
 export default function WidgetsPage() {
-  // A+++ STATE MANAGEMENT
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  console.log('🚀 WIDGETS: Component mounting...')
+
+  // A+++ ANNOUNCER
   const { announce } = useAnnouncer()
 
-  const [viewMode, setViewMode] = useState<ViewMode>('dashboard')
-  const [widgets, setWidgets] = useState<Widget[]>(DEFAULT_WIDGETS)
-  const [isEditMode, setIsEditMode] = useState(false)
+  // REDUCER STATE
+  const [state, dispatch] = useReducer(widgetsReducer, {
+    widgets: [],
+    selectedWidget: null,
+    searchTerm: '',
+    filterCategory: 'all',
+    filterType: 'all',
+    filterSize: 'all',
+    sortBy: 'name',
+    viewMode: 'dashboard',
+    selectedWidgets: [],
+    isEditMode: false
+  })
 
-  // A+++ LOAD WIDGETS DATA
+  // LOCAL STATE
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // MODAL STATES
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isConfigureModalOpen, setIsConfigureModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+
+  // FORM DATA
+  const [widgetName, setWidgetName] = useState('')
+  const [widgetType, setWidgetType] = useState<WidgetType>('metric')
+  const [widgetCategory, setWidgetCategory] = useState<WidgetCategory>('analytics')
+  const [widgetSize, setWidgetSize] = useState<WidgetSize>('medium')
+  const [widgetDescription, setWidgetDescription] = useState('')
+
+  // ============================================================================
+  // LOAD DATA
+  // ============================================================================
+
   useEffect(() => {
     const loadWidgetsData = async () => {
+      console.log('🔄 WIDGETS: Loading widgets data...')
       try {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with 5% error rate
         await new Promise((resolve, reject) => {
           setTimeout(() => {
-            if (Math.random() > 0.95) {
+            if (Math.random() > 0.98) {
               reject(new Error('Failed to load widgets'))
             } else {
               resolve(null)
@@ -52,56 +347,247 @@ export default function WidgetsPage() {
           }, 1000)
         })
 
+        const mockWidgets = generateMockWidgets()
+        dispatch({ type: 'SET_WIDGETS', widgets: mockWidgets })
+
         setIsLoading(false)
-        announce('Widgets dashboard loaded successfully', 'polite')
+        announce('Widgets loaded successfully', 'polite')
+        console.log('✅ WIDGETS: Data loaded successfully')
       } catch (err) {
+        console.error('❌ WIDGETS: Load error:', err)
         setError(err instanceof Error ? err.message : 'Failed to load widgets')
         setIsLoading(false)
-        announce('Error loading widgets dashboard', 'assertive')
+        announce('Error loading widgets', 'assertive')
       }
     }
 
     loadWidgetsData()
   }, [announce])
 
-  const viewTabs = [
-    { id: 'dashboard' as ViewMode, label: 'Dashboard', icon: '📊' },
-    { id: 'customize' as ViewMode, label: 'Customize', icon: '🎨' },
-    { id: 'templates' as ViewMode, label: 'Templates', icon: '📋' },
-    { id: 'settings' as ViewMode, label: 'Settings', icon: '⚙️' }
-  ]
+  // ============================================================================
+  // COMPUTED STATS
+  // ============================================================================
 
-  const handleAddWidget = (templateId: string) => {
-    const template = WIDGET_TEMPLATES.find(t => t.id === templateId)
-    if (!template) return
+  const stats = useMemo(() => {
+    const s = {
+      total: state.widgets.length,
+      visible: state.widgets.filter(w => w.isVisible).length,
+      hidden: state.widgets.filter(w => !w.isVisible).length,
+      locked: state.widgets.filter(w => w.isLocked).length,
+      totalUsage: state.widgets.reduce((sum, w) => sum + w.usageCount, 0),
+      avgUsage: state.widgets.length > 0
+        ? Math.floor(state.widgets.reduce((sum, w) => sum + w.usageCount, 0) / state.widgets.length)
+        : 0
+    }
+    console.log('📊 WIDGETS: Stats calculated -', JSON.stringify(s))
+    return s
+  }, [state.widgets])
 
-    const newWidget = createWidget(template, { x: 0, y: widgets.length })
-    setWidgets([...widgets, newWidget])
-    setViewMode('dashboard')
+  // ============================================================================
+  // FILTERING AND SORTING
+  // ============================================================================
+
+  const filteredAndSortedWidgets = useMemo(() => {
+    console.log('🔍 WIDGETS: Filtering and sorting...')
+    console.log('📋 WIDGETS: Search term:', state.searchTerm)
+    console.log('🔎 WIDGETS: Filter category:', state.filterCategory)
+    console.log('🔎 WIDGETS: Filter type:', state.filterType)
+    console.log('🔀 WIDGETS: Sort by:', state.sortBy)
+
+    let filtered = state.widgets
+
+    // Filter by search
+    if (state.searchTerm) {
+      filtered = filtered.filter(w =>
+        w.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        w.description.toLowerCase().includes(state.searchTerm.toLowerCase())
+      )
+      console.log('🔍 WIDGETS: Search filtered to', filtered.length, 'widgets')
+    }
+
+    // Filter by category
+    if (state.filterCategory !== 'all') {
+      filtered = filtered.filter(w => w.category === state.filterCategory)
+      console.log('🔎 WIDGETS: Category filtered to', filtered.length, 'widgets')
+    }
+
+    // Filter by type
+    if (state.filterType !== 'all') {
+      filtered = filtered.filter(w => w.type === state.filterType)
+      console.log('🔎 WIDGETS: Type filtered to', filtered.length, 'widgets')
+    }
+
+    // Filter by size
+    if (state.filterSize !== 'all') {
+      filtered = filtered.filter(w => w.size === state.filterSize)
+      console.log('🔎 WIDGETS: Size filtered to', filtered.length, 'widgets')
+    }
+
+    // Sort
+    const sorted = [...filtered].sort((a, b) => {
+      switch (state.sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name)
+        case 'usage':
+          return b.usageCount - a.usageCount
+        case 'date':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        case 'size':
+          const sizeOrder = { small: 1, medium: 2, large: 3, full: 4 }
+          return sizeOrder[b.size] - sizeOrder[a.size]
+        default:
+          return 0
+      }
+    })
+
+    console.log('✅ WIDGETS: Filtered and sorted to', sorted.length, 'widgets')
+    return sorted
+  }, [state.widgets, state.searchTerm, state.filterCategory, state.filterType, state.filterSize, state.sortBy])
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+
+  const handleCreateWidget = async () => {
+    if (!widgetName) {
+      console.log('⚠️ WIDGETS: Widget name required')
+      toast.error('Widget name required')
+      return
+    }
+
+    console.log('➕ WIDGETS: Creating widget:', widgetName)
+
+    try {
+      setIsSaving(true)
+
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      const icons = {
+        metric: '📊',
+        chart: '📈',
+        table: '📋',
+        activity: '🔔',
+        'quick-actions': '⚡',
+        calendar: '📅'
+      }
+
+      const newWidget: Widget = {
+        id: `W-${String(state.widgets.length + 1).padStart(3, '0')}`,
+        name: widgetName,
+        type: widgetType,
+        category: widgetCategory,
+        size: widgetSize,
+        icon: icons[widgetType],
+        description: widgetDescription || `Custom ${widgetType} widget`,
+        isVisible: true,
+        isLocked: false,
+        position: { x: 0, y: 0 },
+        config: {
+          refreshInterval: 60,
+          color: 'blue',
+          showLegend: true,
+          dataSource: 'api'
+        },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        usageCount: 0
+      }
+
+      dispatch({ type: 'ADD_WIDGET', widget: newWidget })
+      setIsCreateModalOpen(false)
+      setWidgetName('')
+      setWidgetDescription('')
+      console.log('✅ WIDGETS: Widget created successfully')
+
+      toast.success('Widget created', {
+        description: `${newWidget.name} has been added to your dashboard`
+      })
+    } catch (error) {
+      console.error('❌ WIDGETS: Create error:', error)
+      toast.error('Failed to create widget')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  const handleRemoveWidget = (widgetId: string) => {
-    setWidgets(widgets.filter(w => w.id !== widgetId))
+  const handleDeleteWidget = async () => {
+    if (!state.selectedWidget) return
+
+    console.log('🗑️ WIDGETS: Deleting widget:', state.selectedWidget.name)
+
+    try {
+      setIsSaving(true)
+
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      dispatch({ type: 'DELETE_WIDGET', widgetId: state.selectedWidget.id })
+      setIsDeleteModalOpen(false)
+      console.log('✅ WIDGETS: Widget deleted successfully')
+
+      toast.success('Widget deleted')
+    } catch (error) {
+      console.error('❌ WIDGETS: Delete error:', error)
+      toast.error('Failed to delete widget')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  const handleToggleWidget = (widgetId: string) => {
-    setWidgets(widgets.map(w =>
-      w.id === widgetId ? { ...w, isVisible: !w.isVisible } : w
-    ))
+  const handleBulkDelete = async () => {
+    console.log('🗑️ WIDGETS: Bulk deleting', state.selectedWidgets.length, 'widgets')
+
+    if (state.selectedWidgets.length === 0) {
+      toast.error('No widgets selected')
+      return
+    }
+
+    try {
+      setIsSaving(true)
+
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      state.selectedWidgets.forEach(widgetId => {
+        dispatch({ type: 'DELETE_WIDGET', widgetId })
+      })
+
+      dispatch({ type: 'CLEAR_SELECTED_WIDGETS' })
+      toast.success(`${state.selectedWidgets.length} widget(s) deleted`)
+    } catch (error) {
+      console.error('❌ WIDGETS: Bulk delete error:', error)
+      toast.error('Failed to delete widgets')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  const handleChangeSize = (widgetId: string, size: WidgetSize) => {
-    setWidgets(widgets.map(w =>
-      w.id === widgetId ? { ...w, size } : w
-    ))
+  const handleExportConfig = () => {
+    console.log('📤 WIDGETS: Exporting widget configuration')
+
+    const config = {
+      widgets: state.widgets,
+      exportedAt: new Date().toISOString(),
+      version: '1.0'
+    }
+
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `widgets-config-${Date.now()}.json`
+    a.click()
+
+    console.log('✅ WIDGETS: Configuration exported')
+    toast.success('Configuration exported')
   }
 
-  const visibleWidgets = widgets.filter(w => w.isVisible)
+  // ============================================================================
+  // LOADING STATE
+  // ============================================================================
 
-  // A+++ LOADING STATE
   if (isLoading) {
+    console.log('⏳ WIDGETS: Rendering loading state...')
     return (
-      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen p-8">
         <div className="max-w-[1800px] mx-auto space-y-8">
           <CardSkeleton />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -109,30 +595,40 @@ export default function WidgetsPage() {
             <CardSkeleton />
             <CardSkeleton />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <CardSkeleton />
-            <CardSkeleton />
-          </div>
+          <ListSkeleton items={6} />
         </div>
       </div>
     )
   }
 
-  // A+++ ERROR STATE
+  // ============================================================================
+  // ERROR STATE
+  // ============================================================================
+
   if (error) {
+    console.log('❌ WIDGETS: Rendering error state...')
     return (
-      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen p-8">
         <div className="max-w-[1800px] mx-auto">
-          <div className="max-w-2xl mx-auto mt-20">
-            <ErrorEmptyState
-              error={error}
-              onRetry={() => window.location.reload()}
-            />
-          </div>
+          <ErrorEmptyState
+            error={error}
+            onRetry={() => window.location.reload()}
+          />
         </div>
       </div>
     )
   }
+
+  // ============================================================================
+  // MAIN RENDER
+  // ============================================================================
+
+  console.log('🎨 WIDGETS: Rendering main UI...')
+  console.log('📊 WIDGETS: Total widgets:', state.widgets.length)
+  console.log('📋 WIDGETS: Filtered widgets:', filteredAndSortedWidgets.length)
+  console.log('👁️ WIDGETS: View mode:', state.viewMode)
+
+  const visibleWidgets = state.viewMode === 'dashboard' ? state.widgets.filter(w => w.isVisible) : filteredAndSortedWidgets
 
   return (
     <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -141,30 +637,32 @@ export default function WidgetsPage() {
         <ScrollReveal>
           <div className="flex items-center justify-between">
             <div>
-              <TextShimmer className="text-4xl font-bold mb-2">
-                Dashboard Widgets
-              </TextShimmer>
-              <p className="text-muted-foreground">
-                Customize your dashboard with draggable widgets
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+                <TextShimmer>Dashboard Widgets</TextShimmer>
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                Customize your dashboard with powerful widgets
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsEditMode(!isEditMode)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isEditMode
-                    ? 'bg-red-500 hover:bg-red-600 text-white'
-                    : 'bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white'
-                }`}
+            <div className="flex gap-2">
+              <Button
+                variant={state.isEditMode ? 'destructive' : 'default'}
+                size="sm"
+                onClick={() => dispatch({ type: 'SET_EDIT_MODE', isEditMode: !state.isEditMode })}
               >
-                {isEditMode ? 'Done Editing' : 'Edit Layout'}
-              </button>
-              <button
-                onClick={() => setViewMode('customize')}
-                className="px-4 py-2 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-lg text-sm font-medium transition-colors"
-              >
-                + Add Widget
-              </button>
+                {state.isEditMode ? <X className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
+                {state.isEditMode ? 'Done Editing' : 'Edit Layout'}
+              </Button>
+              <Button size="sm" onClick={() => setIsCreateModalOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Widget
+              </Button>
+              {state.selectedWidgets.length > 0 && (
+                <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete ({state.selectedWidgets.length})
+                </Button>
+              )}
             </div>
           </div>
         </ScrollReveal>
@@ -172,340 +670,506 @@ export default function WidgetsPage() {
         {/* View Tabs */}
         <ScrollReveal delay={0.1}>
           <div className="flex items-center gap-2 overflow-x-auto pb-2">
-            {viewTabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setViewMode(tab.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                  viewMode === tab.id
-                    ? 'bg-cyan-500 text-white shadow-lg'
-                    : 'bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800'
-                }`}
+            {(['dashboard', 'customize', 'templates', 'settings'] as const).map((view) => (
+              <Button
+                key={view}
+                onClick={() => dispatch({ type: 'SET_VIEW_MODE', viewMode: view })}
+                variant={state.viewMode === view ? 'default' : 'outline'}
+                size="sm"
               >
-                <span className="mr-2">{tab.icon}</span>
-                {tab.label}
-              </button>
+                {view.charAt(0).toUpperCase() + view.slice(1)}
+              </Button>
             ))}
           </div>
         </ScrollReveal>
 
-        {/* Dashboard View */}
-        {viewMode === 'dashboard' && (
-          <>
-            {isEditMode && (
-              <ScrollReveal delay={0.2}>
-                <LiquidGlassCard>
-                  <div className="p-4 bg-blue-50 dark:bg-blue-950/30">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">✏️</span>
-                      <div className="flex-1">
-                        <div className="font-semibold">Edit Mode Active</div>
-                        <div className="text-sm text-muted-foreground">
-                          Click widgets to resize or remove them
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setIsEditMode(false)}
-                        className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm font-medium transition-colors"
-                      >
-                        Done
-                      </button>
-                    </div>
-                  </div>
-                </LiquidGlassCard>
-              </ScrollReveal>
-            )}
-
-            <ScrollReveal delay={0.3}>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {visibleWidgets.map((widget, index) => (
-                  <motion.div
-                    key={widget.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className={getSizeClass(widget.size)}
-                  >
-                    <LiquidGlassCard>
-                      <div className="p-6 relative">
-                        {/* Widget Header */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <span className="text-3xl">{widget.icon}</span>
-                            <div>
-                              <h3 className="font-bold">{widget.title}</h3>
-                              <p className="text-xs text-muted-foreground">{widget.description}</p>
-                            </div>
-                          </div>
-                          {isEditMode && (
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => handleRemoveWidget(widget.id)}
-                                className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded transition-colors"
-                              >
-                                <span className="text-red-500">🗑️</span>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Widget Content */}
-                        <div>
-                          {widget.type === 'metric-card' && widget.config.metric && (
-                            <div className="text-center">
-                              <div className="text-4xl font-bold mb-2" style={{ color: widget.config.metric.color }}>
-                                {typeof widget.config.metric.value === 'number'
-                                  ? widget.config.metric.value.toLocaleString()
-                                  : widget.config.metric.value}
-                              </div>
-                              {widget.config.metric.trend && widget.config.metric.changePercent !== undefined && (
-                                <div className={`text-sm ${
-                                  widget.config.metric.trend === 'up' ? 'text-green-500' :
-                                  widget.config.metric.trend === 'down' ? 'text-red-500' :
-                                  'text-gray-500'
-                                }`}>
-                                  {widget.config.metric.trend === 'up' ? '↗' : widget.config.metric.trend === 'down' ? '↘' : '→'}
-                                  {' '}{Math.abs(widget.config.metric.changePercent).toFixed(1)}%
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {widget.type === 'chart' && widget.config.chart && (
-                            <div className="h-48 flex items-end justify-between gap-2">
-                              {widget.config.chart.data.map((item, idx) => {
-                                const maxValue = Math.max(...widget.config.chart!.data.map(d => d.value))
-                                const height = (item.value / maxValue) * 100
-                                return (
-                                  <div key={idx} className="flex-1 flex flex-col items-center gap-2">
-                                    <motion.div
-                                      initial={{ height: 0 }}
-                                      animate={{ height: `${height}%` }}
-                                      transition={{ delay: idx * 0.1 }}
-                                      className="w-full rounded-t-lg bg-gradient-to-t from-cyan-600 to-cyan-400"
-                                    />
-                                    <div className="text-xs text-muted-foreground font-medium">{item.label}</div>
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          )}
-
-                          {widget.type === 'quick-actions' && widget.config.quickActions && (
-                            <div className="grid grid-cols-2 gap-3">
-                              {widget.config.quickActions.actions.map((action) => (
-                                <Link
-                                  key={action.id}
-                                  href={action.action}
-                                  className="p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors flex flex-col items-center gap-2 text-center"
-                                >
-                                  <span className="text-3xl">{action.icon}</span>
-                                  <span className="text-sm font-medium">{action.label}</span>
-                                </Link>
-                              ))}
-                            </div>
-                          )}
-
-                          {widget.type === 'activity-feed' && (
-                            <div className="space-y-3">
-                              {[
-                                { icon: '💰', text: 'New payment received', time: '5 min ago' },
-                                { icon: '👤', text: 'Client added', time: '1 hour ago' },
-                                { icon: '📧', text: 'Email campaign sent', time: '2 hours ago' },
-                                { icon: '📁', text: 'Project updated', time: '3 hours ago' }
-                              ].map((item, idx) => (
-                                <div key={idx} className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/30 transition-colors">
-                                  <span className="text-xl">{item.icon}</span>
-                                  <div className="flex-1">
-                                    <div className="text-sm font-medium">{item.text}</div>
-                                    <div className="text-xs text-muted-foreground">{item.time}</div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Size Selector in Edit Mode */}
-                        {isEditMode && (
-                          <div className="mt-4 pt-4 border-t">
-                            <div className="text-xs font-medium mb-2">Widget Size:</div>
-                            <div className="flex gap-2">
-                              {(['small', 'medium', 'large'] as WidgetSize[]).map((size) => (
-                                <button
-                                  key={size}
-                                  onClick={() => handleChangeSize(widget.id, size)}
-                                  className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                                    widget.size === size
-                                      ? 'bg-cyan-500 text-white'
-                                      : 'bg-muted hover:bg-muted/80'
-                                  }`}
-                                >
-                                  {size}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </LiquidGlassCard>
-                  </motion.div>
-                ))}
-              </div>
-            </ScrollReveal>
-          </>
-        )}
-
-        {/* Customize View */}
-        {viewMode === 'customize' && (
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <ScrollReveal delay={0.2}>
-            <div className="space-y-6">
-              <LiquidGlassCard>
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Active Widgets</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {widgets.map((widget) => (
-                      <div
-                        key={widget.id}
-                        className={`p-4 rounded-lg border-2 transition-all ${
-                          widget.isVisible
-                            ? 'border-green-500 bg-green-50 dark:bg-green-950/30'
-                            : 'border-gray-300 dark:border-gray-700 bg-muted/30'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl">{widget.icon}</span>
-                            <div>
-                              <div className="font-semibold text-sm">{widget.title}</div>
-                              <div className="text-xs text-muted-foreground capitalize">{widget.size}</div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => handleToggleWidget(widget.id)}
-                              className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
-                            >
-                              {widget.isVisible ? '👁️' : '👁️‍🗨️'}
-                            </button>
-                            <button
-                              onClick={() => handleRemoveWidget(widget.id)}
-                              className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/20 rounded transition-colors"
-                            >
-                              <span className="text-red-500 text-sm">🗑️</span>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+            <LiquidGlassCard className="p-6 relative overflow-hidden">
+              
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Widgets</p>
+                  <p className="text-3xl font-bold mt-1">
+                    <NumberFlow value={stats.total} />
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">{stats.visible} visible</p>
+                </div>
+                <Layout className="h-8 w-8 text-cyan-500" />
+              </div>
+            </LiquidGlassCard>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.3}>
+            <LiquidGlassCard className="p-6 relative overflow-hidden">
+              
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Active</p>
+                  <p className="text-3xl font-bold mt-1">
+                    <NumberFlow value={stats.visible} />
+                  </p>
+                  <p className="text-xs text-green-500 mt-1">showing on dashboard</p>
+                </div>
+                <Eye className="h-8 w-8 text-green-500" />
+              </div>
+            </LiquidGlassCard>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.4}>
+            <LiquidGlassCard className="p-6 relative overflow-hidden">
+              
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Usage</p>
+                  <p className="text-3xl font-bold mt-1">
+                    <NumberFlow value={stats.totalUsage} />
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">views this month</p>
+                </div>
+                <Activity className="h-8 w-8 text-orange-500" />
+              </div>
+            </LiquidGlassCard>
+          </ScrollReveal>
+
+          <ScrollReveal delay={0.5}>
+            <LiquidGlassCard className="p-6 relative overflow-hidden">
+              
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Avg Usage</p>
+                  <p className="text-3xl font-bold mt-1">
+                    <NumberFlow value={stats.avgUsage} />
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">per widget</p>
+                </div>
+                <TrendingUp className="h-8 w-8 text-purple-500" />
+              </div>
+            </LiquidGlassCard>
+          </ScrollReveal>
+        </div>
+
+        {/* Filters */}
+        {state.viewMode === 'customize' && (
+          <ScrollReveal>
+            <LiquidGlassCard className="p-4">
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search widgets..."
+                      value={state.searchTerm}
+                      onChange={(e) => dispatch({ type: 'SET_SEARCH', searchTerm: e.target.value })}
+                      className="pl-9"
+                    />
                   </div>
                 </div>
-              </LiquidGlassCard>
-            </div>
+
+                <Select value={state.filterCategory} onValueChange={(value: any) => dispatch({ type: 'SET_FILTER_CATEGORY', filterCategory: value })}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    <SelectItem value="analytics">Analytics</SelectItem>
+                    <SelectItem value="productivity">Productivity</SelectItem>
+                    <SelectItem value="finance">Finance</SelectItem>
+                    <SelectItem value="social">Social</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={state.filterType} onValueChange={(value: any) => dispatch({ type: 'SET_FILTER_TYPE', filterType: value })}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="metric">Metric</SelectItem>
+                    <SelectItem value="chart">Chart</SelectItem>
+                    <SelectItem value="table">Table</SelectItem>
+                    <SelectItem value="activity">Activity</SelectItem>
+                    <SelectItem value="quick-actions">Quick Actions</SelectItem>
+                    <SelectItem value="calendar">Calendar</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={state.sortBy} onValueChange={(value: any) => dispatch({ type: 'SET_SORT', sortBy: value })}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">Name</SelectItem>
+                    <SelectItem value="usage">Usage</SelectItem>
+                    <SelectItem value="date">Date</SelectItem>
+                    <SelectItem value="size">Size</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </LiquidGlassCard>
           </ScrollReveal>
         )}
 
-        {/* Templates View */}
-        {viewMode === 'templates' && (
-          <ScrollReveal delay={0.2}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {WIDGET_TEMPLATES.map((template) => (
-                <LiquidGlassCard key={template.id}>
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <span className="text-5xl">{template.icon}</span>
-                      {template.isPremium && (
-                        <span className="text-xs px-2 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded">
-                          Pro
-                        </span>
+        {/* Edit Mode Banner */}
+        {state.isEditMode && (
+          <ScrollReveal>
+            <LiquidGlassCard className="p-4 bg-blue-50 dark:bg-blue-950/30">
+              <div className="flex items-center gap-3">
+                <Edit className="h-5 w-5 text-blue-500" />
+                <div className="flex-1">
+                  <p className="font-semibold">Edit Mode Active</p>
+                  <p className="text-sm text-muted-foreground">
+                    Click widgets to configure, lock, or remove them
+                  </p>
+                </div>
+                <Button size="sm" onClick={() => dispatch({ type: 'SET_EDIT_MODE', isEditMode: false })}>
+                  Done
+                </Button>
+              </div>
+            </LiquidGlassCard>
+          </ScrollReveal>
+        )}
+
+        {/* Widgets Grid */}
+        <ScrollReveal>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {visibleWidgets.map((widget, index) => (
+              <motion.div
+                key={widget.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className={widget.size === 'large' ? 'md:col-span-2' : widget.size === 'full' ? 'md:col-span-3' : ''}
+              >
+                <LiquidGlassCard className="p-6 hover:shadow-lg transition-all">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      {state.isEditMode && (
+                        <Checkbox
+                          checked={state.selectedWidgets.includes(widget.id)}
+                          onCheckedChange={() => dispatch({ type: 'TOGGLE_SELECT_WIDGET', widgetId: widget.id })}
+                        />
+                      )}
+                      <span className="text-4xl">{widget.icon}</span>
+                      <div>
+                        <h3 className="font-bold">{widget.name}</h3>
+                        <p className="text-xs text-muted-foreground">{widget.description}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {widget.isLocked && <Lock className="h-4 w-4 text-orange-500" />}
+                      {state.isEditMode && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            dispatch({ type: 'SELECT_WIDGET', widget })
+                            setIsEditModalOpen(true)
+                          }}
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Button>
                       )}
                     </div>
-                    <h3 className="text-lg font-bold mb-2">{template.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-4">{template.description}</p>
-
-                    <div className="mb-4 space-y-2 text-xs">
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Type:</span>
-                        <span className="font-medium capitalize">{template.type.replace('-', ' ')}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Size:</span>
-                        <span className="font-medium capitalize">{template.defaultSize}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Category:</span>
-                        <span className="font-medium capitalize">{template.category}</span>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => handleAddWidget(template.id)}
-                      className="w-full px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
-                    >
-                      Add to Dashboard
-                    </button>
                   </div>
-                </LiquidGlassCard>
-              ))}
-            </div>
-          </ScrollReveal>
-        )}
 
-        {/* Settings View */}
-        {viewMode === 'settings' && (
-          <ScrollReveal delay={0.2}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <LiquidGlassCard>
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold mb-6">Widget Statistics</h3>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30">
-                      <span className="text-sm font-medium">Total Widgets</span>
-                      <span className="text-2xl font-bold text-blue-500">{WIDGET_METRICS.totalWidgets}</span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30">
-                      <span className="text-sm font-medium">Active Widgets</span>
-                      <span className="text-2xl font-bold text-green-500">{widgets.filter(w => w.isVisible).length}</span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30">
-                      <span className="text-sm font-medium">Favorite Widget</span>
-                      <span className="text-sm font-bold text-purple-500">{WIDGET_METRICS.favoriteWidget}</span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30">
-                      <span className="text-sm font-medium">Most Used Category</span>
-                      <span className="text-sm font-bold text-orange-500 capitalize">{WIDGET_METRICS.mostUsedCategory}</span>
-                    </div>
-                  </div>
-                </div>
-              </LiquidGlassCard>
-
-              <LiquidGlassCard>
-                <div className="p-6">
-                  <h3 className="text-lg font-semibold mb-6">Dashboard Actions</h3>
                   <div className="space-y-3">
-                    <button className="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
-                      <span>💾</span>
-                      <span>Save Layout</span>
-                    </button>
-                    <button className="w-full px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
-                      <span>📤</span>
-                      <span>Export Configuration</span>
-                    </button>
-                    <button className="w-full px-4 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
-                      <span>📥</span>
-                      <span>Import Configuration</span>
-                    </button>
-                    <button className="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
-                      <span>🔄</span>
-                      <span>Reset to Default</span>
-                    </button>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Type:</span>
+                      <Badge variant="outline" className="capitalize">{widget.type}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Category:</span>
+                      <Badge variant="outline" className="capitalize">{widget.category}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Size:</span>
+                      <Badge variant="outline" className="capitalize">{widget.size}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Usage:</span>
+                      <span className="font-medium">{widget.usageCount} views</span>
+                    </div>
                   </div>
-                </div>
-              </LiquidGlassCard>
-            </div>
-          </ScrollReveal>
+
+                  {state.isEditMode && (
+                    <div className="flex gap-2 mt-4 pt-4 border-t">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => dispatch({ type: 'TOGGLE_VISIBILITY', widgetId: widget.id })}
+                      >
+                        {widget.isVisible ? <EyeOff className="h-3 w-3 mr-1" /> : <Eye className="h-3 w-3 mr-1" />}
+                        {widget.isVisible ? 'Hide' : 'Show'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => dispatch({ type: 'TOGGLE_LOCK', widgetId: widget.id })}
+                      >
+                        {widget.isLocked ? <Unlock className="h-3 w-3 mr-1" /> : <Lock className="h-3 w-3 mr-1" />}
+                        {widget.isLocked ? 'Unlock' : 'Lock'}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          dispatch({ type: 'SELECT_WIDGET', widget })
+                          setIsDeleteModalOpen(true)
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </LiquidGlassCard>
+              </motion.div>
+            ))}
+          </div>
+        </ScrollReveal>
+
+        {/* Empty State */}
+        {visibleWidgets.length === 0 && (
+          <NoDataEmptyState
+            entityName="widgets"
+            description={state.viewMode === 'dashboard' ? "No widgets visible. Add widgets to your dashboard to get started." : "No widgets match your filters"}
+            action={{
+              label: 'Create Widget',
+              onClick: () => setIsCreateModalOpen(true)
+            }}
+          />
         )}
       </div>
+
+      {/* MODALS */}
+
+      {/* Create Modal */}
+      <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Widget</DialogTitle>
+            <DialogDescription>
+              Add a new widget to your dashboard
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label>Widget Name</Label>
+              <Input
+                placeholder="Enter widget name"
+                value={widgetName}
+                onChange={(e) => setWidgetName(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+
+            <div>
+              <Label>Type</Label>
+              <Select value={widgetType} onValueChange={(value: any) => setWidgetType(value)}>
+                <SelectTrigger className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="metric">Metric</SelectItem>
+                  <SelectItem value="chart">Chart</SelectItem>
+                  <SelectItem value="table">Table</SelectItem>
+                  <SelectItem value="activity">Activity</SelectItem>
+                  <SelectItem value="quick-actions">Quick Actions</SelectItem>
+                  <SelectItem value="calendar">Calendar</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Category</Label>
+              <Select value={widgetCategory} onValueChange={(value: any) => setWidgetCategory(value)}>
+                <SelectTrigger className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="analytics">Analytics</SelectItem>
+                  <SelectItem value="productivity">Productivity</SelectItem>
+                  <SelectItem value="finance">Finance</SelectItem>
+                  <SelectItem value="social">Social</SelectItem>
+                  <SelectItem value="custom">Custom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Size</Label>
+              <Select value={widgetSize} onValueChange={(value: any) => setWidgetSize(value)}>
+                <SelectTrigger className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="small">Small</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="large">Large</SelectItem>
+                  <SelectItem value="full">Full Width</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Description (optional)</Label>
+              <Textarea
+                placeholder="Enter widget description"
+                value={widgetDescription}
+                onChange={(e) => setWidgetDescription(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateWidget} disabled={isSaving}>
+              {isSaving ? 'Creating...' : 'Create Widget'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit {state.selectedWidget?.name}</DialogTitle>
+            <DialogDescription>
+              Modify widget settings and configuration
+            </DialogDescription>
+          </DialogHeader>
+
+          {state.selectedWidget && (
+            <div className="space-y-4">
+              <div>
+                <Label>Refresh Interval</Label>
+                <Select defaultValue={String(state.selectedWidget.config.refreshInterval || 60)}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="30">30 seconds</SelectItem>
+                    <SelectItem value="60">1 minute</SelectItem>
+                    <SelectItem value="300">5 minutes</SelectItem>
+                    <SelectItem value="600">10 minutes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Size</Label>
+                <Select defaultValue={state.selectedWidget.size}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="small">Small</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="large">Large</SelectItem>
+                    <SelectItem value="full">Full Width</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Checkbox defaultChecked={state.selectedWidget.config.showLegend} />
+                <Label>Show Legend</Label>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Widget updated')
+              setIsEditModalOpen(false)
+            }}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete {state.selectedWidget?.name}?</DialogTitle>
+            <DialogDescription>
+              This will remove the widget from your dashboard
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+              <div className="text-sm">
+                <p className="font-medium text-red-900 dark:text-red-200">Warning</p>
+                <p className="text-red-700 dark:text-red-300">
+                  This action cannot be undone. You'll need to recreate the widget.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteWidget} disabled={isSaving}>
+              {isSaving ? 'Deleting...' : 'Delete Widget'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Modal */}
+      <Dialog open={isExportModalOpen} onOpenChange={setIsExportModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Configuration</DialogTitle>
+            <DialogDescription>
+              Download your widget configuration as JSON
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4 text-center">
+            <Download className="h-16 w-16 mx-auto text-green-500 mb-4" />
+            <p className="text-lg font-medium mb-2">Ready to Export</p>
+            <p className="text-sm text-muted-foreground">
+              Your widget configuration will be downloaded as a JSON file
+            </p>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsExportModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              handleExportConfig()
+              setIsExportModalOpen(false)
+            }}>
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

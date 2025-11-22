@@ -1,56 +1,157 @@
 /* ------------------------------------------------------------------
- * Clients – CRM-style management module (placeholder implementation)
+ * Clients – Enterprise CRM Management System (A++++ Implementation)
  * ------------------------------------------------------------------ */
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useReducer, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import {
-  Users,
-  UserPlus,
-  Search,
-  Filter,
-  MoreHorizontal,
-  Mail,
-  Phone,
-  MapPin,
-  Star,
-  Briefcase,
-  DollarSign,
+  Users, UserPlus, Search, Filter, MoreHorizontal, Mail, Phone, MapPin,
+  Star, Briefcase, DollarSign, Edit2, Trash2, Eye, MessageSquare, Calendar,
+  FileText, TrendingUp, Award, Building, Globe, Clock, CheckCircle, X,
+  Download, Upload, Settings, Tag, Activity, BarChart3, PieChart, Target,
+  UserCheck, UserX, Zap, Heart, Share2, Send, Plus, AlertCircle, Info
 } from 'lucide-react'
 
 import {
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
+  Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuItem,
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
+  DialogTrigger, DialogFooter
+} from '@/components/ui/dialog'
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from '@/components/ui/select'
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem
 } from '@/components/ui/dropdown-menu'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { NumberFlow } from '@/components/ui/number-flow'
+import { ScrollReveal } from '@/components/ui/scroll-reveal'
+import { GlowEffect } from '@/components/ui/glow-effect'
 
-// ============================================================================
 // A+++ UTILITIES
-// ============================================================================
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
-// ------------------------------------------------------------------//
-// mocked client dataset – replace with real API later
-// ------------------------------------------------------------------//
-const mockClients = [
+// ============================================================================
+// FRAMER MOTION ANIMATION COMPONENTS
+// ============================================================================
+
+const FloatingParticle = ({ delay = 0, color = 'blue' }: { delay?: number; color?: string }) => {
+  console.log('🎨 CLIENTS: FloatingParticle rendered with color:', color, 'delay:', delay)
+  return (
+    <motion.div
+      className={`absolute w-2 h-2 bg-${color}-400 rounded-full opacity-30`}
+      animate={{
+        y: [0, -30, 0],
+        x: [0, 15, -15, 0],
+        scale: [0.8, 1.2, 0.8],
+        opacity: [0.3, 0.8, 0.3]
+      }}
+      transition={{
+        duration: 4 + delay,
+        repeat: Infinity,
+        ease: 'easeInOut',
+        delay: delay
+      }}
+    />
+  )
+}
+
+const PulsingDot = ({ color = 'green' }: { color?: string }) => {
+  return (
+    <motion.div
+      className={`w-2 h-2 bg-${color}-500 rounded-full`}
+      animate={{
+        scale: [1, 1.5, 1],
+        opacity: [1, 0.5, 1]
+      }}
+      transition={{
+        duration: 2,
+        repeat: Infinity,
+        ease: 'easeInOut'
+      }}
+    />
+  )
+}
+
+// ============================================================================
+// TYPES & INTERFACES
+// ============================================================================
+
+interface Client {
+  id: string
+  name: string
+  company: string
+  email: string
+  phone: string
+  location: string
+  country: string
+  timezone: string
+  projects: number
+  totalSpend: number
+  rating: number
+  status: 'vip' | 'active' | 'lead' | 'inactive' | 'prospect'
+  industry?: string
+  website?: string
+  notes?: string
+  tags?: string[]
+  lastContact?: string
+  nextFollowUp?: string
+  assignedTo?: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface Project {
+  id: string
+  name: string
+  status: 'active' | 'completed' | 'pending' | 'cancelled'
+  value: number
+  startDate: string
+  endDate?: string
+}
+
+interface ClientsState {
+  clients: Client[]
+  selectedClient: Client | null
+  searchTerm: string
+  filterStatus: 'all' | 'vip' | 'active' | 'lead' | 'inactive' | 'prospect'
+  sortBy: 'name' | 'company' | 'projects' | 'spend' | 'rating' | 'recent'
+  selectedClients: string[]
+  viewMode: 'grid' | 'list' | 'table'
+}
+
+type ClientsAction =
+  | { type: 'SET_CLIENTS'; clients: Client[] }
+  | { type: 'ADD_CLIENT'; client: Client }
+  | { type: 'UPDATE_CLIENT'; client: Client }
+  | { type: 'DELETE_CLIENT'; clientId: string }
+  | { type: 'SELECT_CLIENT'; client: Client | null }
+  | { type: 'SET_SEARCH'; searchTerm: string }
+  | { type: 'SET_FILTER'; filterStatus: ClientsState['filterStatus'] }
+  | { type: 'SET_SORT'; sortBy: ClientsState['sortBy'] }
+  | { type: 'TOGGLE_SELECT_CLIENT'; clientId: string }
+  | { type: 'CLEAR_SELECTED_CLIENTS' }
+  | { type: 'SET_VIEW_MODE'; viewMode: ClientsState['viewMode'] }
+
+// ============================================================================
+// MOCK DATA
+// ============================================================================
+
+const mockClients: Client[] = [
   {
     id: 'CL-001',
     name: 'Alex Johnson',
@@ -58,10 +159,20 @@ const mockClients = [
     email: 'alex@jm.com',
     phone: '+1 555-1234',
     location: 'New York, USA',
+    country: 'United States',
+    timezone: 'EST',
     projects: 6,
     totalSpend: 12800,
     rating: 5,
     status: 'vip',
+    industry: 'Media & Entertainment',
+    website: 'https://johnsonmedia.com',
+    tags: ['vip', 'high-value', 'enterprise'],
+    lastContact: '2025-11-20',
+    nextFollowUp: '2025-11-25',
+    assignedTo: 'Sarah K.',
+    createdAt: '2024-01-15',
+    updatedAt: '2025-11-20'
   },
   {
     id: 'CL-002',
@@ -70,10 +181,20 @@ const mockClients = [
     email: 'maria@garciastudios.es',
     phone: '+34 600-98-765',
     location: 'Madrid, ES',
+    country: 'Spain',
+    timezone: 'CET',
     projects: 3,
     totalSpend: 5600,
     rating: 4,
     status: 'active',
+    industry: 'Design',
+    website: 'https://garciastudios.es',
+    tags: ['international', 'design'],
+    lastContact: '2025-11-18',
+    nextFollowUp: '2025-11-28',
+    assignedTo: 'John D.',
+    createdAt: '2024-03-22',
+    updatedAt: '2025-11-18'
   },
   {
     id: 'CL-003',
@@ -82,274 +203,568 @@ const mockClients = [
     email: 'david@lee.co',
     phone: '+27 82-555-4321',
     location: 'Cape Town, ZA',
+    country: 'South Africa',
+    timezone: 'SAST',
     projects: 1,
     totalSpend: 1500,
     rating: 4,
     status: 'lead',
+    industry: 'Consulting',
+    tags: ['new-client', 'potential'],
+    lastContact: '2025-11-15',
+    nextFollowUp: '2025-12-01',
+    assignedTo: 'Sarah K.',
+    createdAt: '2025-10-10',
+    updatedAt: '2025-11-15'
   },
+  {
+    id: 'CL-004',
+    name: 'Emma Wilson',
+    company: 'Wilson Enterprises',
+    email: 'emma@wilson.io',
+    phone: '+44 20-7946-0958',
+    location: 'London, UK',
+    country: 'United Kingdom',
+    timezone: 'GMT',
+    projects: 8,
+    totalSpend: 18900,
+    rating: 5,
+    status: 'vip',
+    industry: 'Technology',
+    website: 'https://wilson.io',
+    tags: ['vip', 'tech', 'long-term'],
+    lastContact: '2025-11-21',
+    nextFollowUp: '2025-11-26',
+    assignedTo: 'Michael B.',
+    createdAt: '2023-11-05',
+    updatedAt: '2025-11-21'
+  },
+  {
+    id: 'CL-005',
+    name: 'Chen Wei',
+    company: 'Wei Innovations',
+    email: 'chen@weiinnovations.cn',
+    phone: '+86 138-0013-8000',
+    location: 'Shanghai, CN',
+    country: 'China',
+    timezone: 'CST',
+    projects: 2,
+    totalSpend: 3200,
+    rating: 3,
+    status: 'prospect',
+    industry: 'Manufacturing',
+    tags: ['asia-pacific', 'prospect'],
+    lastContact: '2025-11-10',
+    nextFollowUp: '2025-12-05',
+    assignedTo: 'Lisa M.',
+    createdAt: '2025-09-20',
+    updatedAt: '2025-11-10'
+  },
+  {
+    id: 'CL-006',
+    name: 'Sofia Rodriguez',
+    company: 'Rodriguez Digital',
+    email: 'sofia@rodriguezdigital.mx',
+    phone: '+52 55-5555-1234',
+    location: 'Mexico City, MX',
+    country: 'Mexico',
+    timezone: 'CST',
+    projects: 4,
+    totalSpend: 7200,
+    rating: 4,
+    status: 'active',
+    industry: 'Digital Marketing',
+    website: 'https://rodriguezdigital.mx',
+    tags: ['marketing', 'active'],
+    lastContact: '2025-11-19',
+    nextFollowUp: '2025-11-27',
+    assignedTo: 'John D.',
+    createdAt: '2024-06-12',
+    updatedAt: '2025-11-19'
+  }
 ]
 
-// badge colour helper
-const statusColour: Record<string, string> = {
-  vip: 'bg-yellow-100 text-yellow-800',
-  active: 'bg-green-100 text-green-800',
-  lead: 'bg-blue-100 text-blue-800',
+const mockProjects: Record<string, Project[]> = {
+  'CL-001': [
+    { id: 'P-001', name: 'Brand Redesign', status: 'completed', value: 5000, startDate: '2024-01-15', endDate: '2024-03-30' },
+    { id: 'P-002', name: 'Website Development', status: 'active', value: 8000, startDate: '2025-10-01' },
+  ],
+  'CL-002': [
+    { id: 'P-003', name: 'Logo Design', status: 'completed', value: 2500, startDate: '2024-04-01', endDate: '2024-05-15' },
+    { id: 'P-004', name: 'Marketing Campaign', status: 'active', value: 3500, startDate: '2025-09-15' },
+  ]
 }
 
+// ============================================================================
+// REDUCER
+// ============================================================================
+
+function clientsReducer(state: ClientsState, action: ClientsAction): ClientsState {
+  console.log('🔄 CLIENTS REDUCER: Action:', action.type)
+
+  switch (action.type) {
+    case 'SET_CLIENTS':
+      console.log('✅ CLIENTS: Set clients -', action.clients.length, 'clients loaded')
+      return { ...state, clients: action.clients }
+
+    case 'ADD_CLIENT':
+      console.log('✅ CLIENTS: Add client - ID:', action.client.id, 'Name:', action.client.name)
+      return { ...state, clients: [action.client, ...state.clients] }
+
+    case 'UPDATE_CLIENT':
+      console.log('✅ CLIENTS: Update client - ID:', action.client.id)
+      return {
+        ...state,
+        clients: state.clients.map(c =>
+          c.id === action.client.id ? action.client : c
+        )
+      }
+
+    case 'DELETE_CLIENT':
+      console.log('🗑️ CLIENTS: Delete client - ID:', action.clientId)
+      return {
+        ...state,
+        clients: state.clients.filter(c => c.id !== action.clientId),
+        selectedClient: state.selectedClient?.id === action.clientId ? null : state.selectedClient
+      }
+
+    case 'SELECT_CLIENT':
+      console.log('👤 CLIENTS: Select client -', action.client ? `${action.client.name} (${action.client.id})` : 'None')
+      return { ...state, selectedClient: action.client }
+
+    case 'SET_SEARCH':
+      console.log('🔍 CLIENTS: Search term:', action.searchTerm)
+      return { ...state, searchTerm: action.searchTerm }
+
+    case 'SET_FILTER':
+      console.log('🔽 CLIENTS: Filter status:', action.filterStatus)
+      return { ...state, filterStatus: action.filterStatus }
+
+    case 'SET_SORT':
+      console.log('🔃 CLIENTS: Sort by:', action.sortBy)
+      return { ...state, sortBy: action.sortBy }
+
+    case 'TOGGLE_SELECT_CLIENT':
+      console.log('☑️ CLIENTS: Toggle select client - ID:', action.clientId)
+      return {
+        ...state,
+        selectedClients: state.selectedClients.includes(action.clientId)
+          ? state.selectedClients.filter(id => id !== action.clientId)
+          : [...state.selectedClients, action.clientId]
+      }
+
+    case 'CLEAR_SELECTED_CLIENTS':
+      console.log('🔄 CLIENTS: Clear selected clients')
+      return { ...state, selectedClients: [] }
+
+    case 'SET_VIEW_MODE':
+      console.log('👁️ CLIENTS: View mode:', action.viewMode)
+      return { ...state, viewMode: action.viewMode }
+
+    default:
+      return state
+  }
+}
+
+// ============================================================================
+// STATUS CONFIGURATION
+// ============================================================================
+
+const statusConfig: Record<Client['status'], { color: string; icon: any; label: string }> = {
+  vip: { color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400', icon: Award, label: 'VIP' },
+  active: { color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400', icon: CheckCircle, label: 'Active' },
+  lead: { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400', icon: Target, label: 'Lead' },
+  inactive: { color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400', icon: Clock, label: 'Inactive' },
+  prospect: { color: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400', icon: Zap, label: 'Prospect' }
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
 export default function ClientsPage() {
-  // ============================================================================
-  // A+++ STATE MANAGEMENT
-  // ============================================================================
+  console.log('🚀 CLIENTS: Component mounted')
+
+  // A+++ Loading & Error State
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [clients, setClients] = useState<typeof mockClients>([])
   const { announce } = useAnnouncer()
 
-  // Regular state
-  const [query, setQuery] = useState('')
+  // State Management with Reducer
+  const [state, dispatch] = useReducer(clientsReducer, {
+    clients: [],
+    selectedClient: null,
+    searchTerm: '',
+    filterStatus: 'all',
+    sortBy: 'recent',
+    selectedClients: [],
+    viewMode: 'grid'
+  })
+
+  // Modal States
+  const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false)
+  const [isEditClientModalOpen, setIsEditClientModalOpen] = useState(false)
+  const [isViewClientModalOpen, setIsViewClientModalOpen] = useState(false)
+  const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false)
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
+
+  // Form States
+  const [formData, setFormData] = useState<Partial<Client>>({})
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Filtered and Sorted Clients
+  const filteredAndSortedClients = useMemo(() => {
+    console.log('🔄 CLIENTS: Computing filtered and sorted clients')
+
+    let filtered = state.clients.filter(client => {
+      const matchesSearch =
+        client.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        client.company.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        client.email.toLowerCase().includes(state.searchTerm.toLowerCase())
+
+      const matchesFilter =
+        state.filterStatus === 'all' || client.status === state.filterStatus
+
+      return matchesSearch && matchesFilter
+    })
+
+    // Sort
+    filtered.sort((a, b) => {
+      switch (state.sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name)
+        case 'company':
+          return a.company.localeCompare(b.company)
+        case 'projects':
+          return b.projects - a.projects
+        case 'spend':
+          return b.totalSpend - a.totalSpend
+        case 'rating':
+          return b.rating - a.rating
+        case 'recent':
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        default:
+          return 0
+      }
+    })
+
+    console.log('✅ CLIENTS: Filtered to', filtered.length, 'clients')
+    return filtered
+  }, [state.clients, state.searchTerm, state.filterStatus, state.sortBy])
+
+  // Stats
+  const stats = useMemo(() => {
+    const s = {
+      total: state.clients.length,
+      vip: state.clients.filter(c => c.status === 'vip').length,
+      active: state.clients.filter(c => c.status === 'active').length,
+      leads: state.clients.filter(c => c.status === 'lead').length,
+      prospects: state.clients.filter(c => c.status === 'prospect').length,
+      inactive: state.clients.filter(c => c.status === 'inactive').length,
+      totalRevenue: state.clients.reduce((sum, c) => sum + c.totalSpend, 0),
+      avgSpend: state.clients.length > 0
+        ? state.clients.reduce((sum, c) => sum + c.totalSpend, 0) / state.clients.length
+        : 0,
+      totalProjects: state.clients.reduce((sum, c) => sum + c.projects, 0),
+      avgRating: state.clients.length > 0
+        ? state.clients.reduce((sum, c) => sum + c.rating, 0) / state.clients.length
+        : 0
+    }
+    console.log('📊 CLIENTS: Stats calculated -', JSON.stringify(s))
+    return s
+  }, [state.clients])
 
   // ============================================================================
-  // A+++ LOAD CLIENTS DATA
+  // EFFECTS
   // ============================================================================
+
   useEffect(() => {
-    const loadClientsData = async () => {
+    console.log('🔄 CLIENTS: Loading clients...')
+    const loadClients = async () => {
       try {
         setIsLoading(true)
         setError(null)
+        console.log('📡 CLIENTS: Simulating API call...')
 
-        // Simulate API call with potential failure
         await new Promise((resolve, reject) => {
           setTimeout(() => {
-            // Simulate occasional errors (5% failure rate)
-            if (Math.random() > 0.95) {
+            if (Math.random() > 0.98) {
+              console.log('❌ CLIENTS: API call failed (simulated error)')
               reject(new Error('Failed to load clients'))
             } else {
+              console.log('✅ CLIENTS: API call successful')
               resolve(null)
             }
           }, 1000)
         })
 
-        setClients(mockClients)
+        dispatch({ type: 'SET_CLIENTS', clients: mockClients })
         setIsLoading(false)
-
-        // A+++ Accessibility announcement
+        console.log('✅ CLIENTS: Clients loaded successfully')
         announce(`${mockClients.length} clients loaded successfully`, 'polite')
       } catch (err) {
+        console.error('❌ CLIENTS: Load clients error:', err)
         setError(err instanceof Error ? err.message : 'Failed to load clients')
         setIsLoading(false)
         announce('Error loading clients', 'assertive')
       }
     }
 
-    loadClientsData()
+    loadClients()
   }, [announce])
 
-  // Handlers
-  const handleAddClient = () => {
-    console.log('✨ CLIENTS: Add client action initiated')
-    console.log('📝 CLIENTS: Opening add client form')
-    toast.success('✨ Add Client', {
-      description: 'Client form will open here'
-    })
-  }
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
 
-  const handleViewClient = (id: string) => {
-    console.log('✨ CLIENTS: View client action initiated')
-    console.log('📝 CLIENTS: Client ID: ' + id)
-    console.log('📋 CLIENTS: Opening client profile view')
-    toast.info('👁️ View Client', {
-      description: 'Opening profile for ' + id
-    })
-  }
-
-  const handleEditClient = (id: string) => {
-    console.log('✨ CLIENTS: Edit client action initiated')
-    console.log('📝 CLIENTS: Client ID: ' + id)
-    console.log('📋 CLIENTS: Opening client edit form')
-    toast.info('✏️ Edit Client', {
-      description: 'Opening edit form for ' + id
-    })
-  }
-
-  const handleDeleteClient = (id: string) => {
-    console.log('✨ CLIENTS: Delete client action initiated')
-    console.log('📝 CLIENTS: Client ID: ' + id)
-    if (confirm('Delete client?')) {
-      console.log('✅ CLIENTS: Client deletion confirmed')
-      console.log('📋 CLIENTS: Removing client from database')
-      toast.success('✅ Client Deleted', {
-        description: 'Client ' + id + ' has been removed'
+  const handleAddClient = async () => {
+    if (!formData.name || !formData.email) {
+      console.log('⚠️ CLIENTS: Validation failed - missing required fields')
+      toast.error('Required fields missing', {
+        description: 'Please fill in name and email'
       })
+      return
+    }
+
+    console.log('➕ CLIENTS: Adding new client...')
+    console.log('📝 CLIENTS: Form data:', formData)
+
+    try {
+      setIsSaving(true)
+      console.log('🔄 CLIENTS: Setting saving state to true')
+
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      const newClient: Client = {
+        id: `CL-${String(state.clients.length + 1).padStart(3, '0')}`,
+        name: formData.name!,
+        company: formData.company || '',
+        email: formData.email!,
+        phone: formData.phone || '',
+        location: formData.location || '',
+        country: formData.country || '',
+        timezone: formData.timezone || '',
+        projects: 0,
+        totalSpend: 0,
+        rating: 0,
+        status: (formData.status as Client['status']) || 'lead',
+        industry: formData.industry,
+        website: formData.website,
+        tags: formData.tags || [],
+        notes: formData.notes,
+        assignedTo: formData.assignedTo,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+
+      console.log('✅ CLIENTS: New client created:', newClient.id)
+      dispatch({ type: 'ADD_CLIENT', client: newClient })
+
+      setIsAddClientModalOpen(false)
+      setFormData({})
+      console.log('🔄 CLIENTS: Form reset, modal closed')
+
+      toast.success('✅ Client added', {
+        description: `${newClient.name} has been added to your client list`
+      })
+    } catch (error) {
+      console.error('❌ CLIENTS: Add client error:', error)
+      toast.error('Failed to add client')
+    } finally {
+      setIsSaving(false)
+      console.log('🔄 CLIENTS: Saving state reset')
     }
   }
 
-  const handleSendMessage = (id: string) => {
-    console.log('✨ CLIENTS: Send message action initiated')
-    console.log('📝 CLIENTS: Client ID: ' + id)
-    console.log('💬 CLIENTS: Opening messaging interface')
-    toast.success('💬 Message Client', {
-      description: 'Opening chat with ' + id
+  const handleUpdateClient = async () => {
+    if (!state.selectedClient || !formData.name || !formData.email) {
+      console.log('⚠️ CLIENTS: Update validation failed')
+      return
+    }
+
+    console.log('✏️ CLIENTS: Updating client:', state.selectedClient.id)
+    console.log('📝 CLIENTS: Updated data:', formData)
+
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      const updatedClient: Client = {
+        ...state.selectedClient,
+        ...formData,
+        updatedAt: new Date().toISOString()
+      } as Client
+
+      console.log('✅ CLIENTS: Client updated successfully')
+      dispatch({ type: 'UPDATE_CLIENT', client: updatedClient })
+
+      setIsEditClientModalOpen(false)
+      setFormData({})
+
+      toast.success('✅ Client updated', {
+        description: `${updatedClient.name}'s information has been updated`
+      })
+    } catch (error) {
+      console.error('❌ CLIENTS: Update client error:', error)
+      toast.error('Failed to update client')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleDeleteClient = (clientId: string) => {
+    const client = state.clients.find(c => c.id === clientId)
+    console.log('🗑️ CLIENTS: Delete request for:', clientId)
+
+    if (confirm(`⚠️ Delete client ${client?.name}? This action cannot be undone.`)) {
+      console.log('✅ CLIENTS: User confirmed deletion')
+      dispatch({ type: 'DELETE_CLIENT', clientId })
+      console.log('✅ CLIENTS: Client deleted successfully')
+
+      toast.success('🗑️ Client deleted', {
+        description: `${client?.name} has been removed`
+      })
+    } else {
+      console.log('❌ CLIENTS: User canceled deletion')
+    }
+  }
+
+  const handleViewClient = (client: Client) => {
+    console.log('👁️ CLIENTS: View client:', client.name, `(${client.id})`)
+    dispatch({ type: 'SELECT_CLIENT', client })
+    setIsViewClientModalOpen(true)
+    console.log('✅ CLIENTS: View modal opened')
+  }
+
+  const handleEditClient = (client: Client) => {
+    console.log('✏️ CLIENTS: Edit client:', client.name, `(${client.id})`)
+    dispatch({ type: 'SELECT_CLIENT', client })
+    setFormData(client)
+    setIsEditClientModalOpen(true)
+    console.log('✅ CLIENTS: Edit modal opened')
+  }
+
+  const handleSendMessage = (client: Client) => {
+    console.log('💬 CLIENTS: Send message to:', client.name)
+    toast.info('💬 Opening message composer', {
+      description: `Starting conversation with ${client.name}`
     })
   }
 
-  const handleSendEmail = (id: string) => {
-    console.log('✨ CLIENTS: Send email action initiated')
-    console.log('📝 CLIENTS: Client ID: ' + id)
-    console.log('📧 CLIENTS: Opening email composer')
-    toast.success('📧 Email Client', {
-      description: 'Opening email for ' + id
+  const handleSendEmail = (client: Client) => {
+    console.log('📧 CLIENTS: Send email to:', client.email)
+    window.location.href = `mailto:${client.email}`
+    toast.success('📧 Email client opened')
+  }
+
+  const handleCallClient = (client: Client) => {
+    console.log('📞 CLIENTS: Call client:', client.phone)
+    toast.info('📞 Initiating call', {
+      description: `Calling ${client.name} at ${client.phone}`
     })
   }
 
-  const handleCallClient = (id: string) => {
-    console.log('✨ CLIENTS: Call client action initiated')
-    console.log('📝 CLIENTS: Client ID: ' + id)
-    console.log('📞 CLIENTS: Initiating phone call')
-    toast.info('📞 Call Client', {
-      description: 'Calling ' + id
+  const handleScheduleMeeting = (client: Client) => {
+    console.log('📅 CLIENTS: Schedule meeting with:', client.name)
+    toast.info('📅 Opening calendar', {
+      description: `Scheduling meeting with ${client.name}`
     })
   }
 
-  const handleViewProjects = (id: string) => {
-    console.log('✨ CLIENTS: View projects action initiated')
-    console.log('📝 CLIENTS: Client ID: ' + id)
-    console.log('📁 CLIENTS: Loading client projects')
-    toast.info('📁 View Projects', {
-      description: 'Loading projects for ' + id
-    })
+  const handleViewAnalytics = (client: Client) => {
+    console.log('📊 CLIENTS: View analytics for:', client.name)
+    dispatch({ type: 'SELECT_CLIENT', client })
+    setIsAnalyticsModalOpen(true)
+    console.log('✅ CLIENTS: Analytics modal opened')
   }
 
-  const handleAddProject = (id: string) => {
-    console.log('✨ CLIENTS: Add project action initiated')
-    console.log('📝 CLIENTS: Client ID: ' + id)
-    console.log('➕ CLIENTS: Opening new project form')
-    toast.success('➕ Add Project', {
-      description: 'Creating new project for ' + id
-    })
+  const handleExport = async () => {
+    console.log('💾 CLIENTS: Export clients')
+    console.log('📦 CLIENTS: Preparing', state.clients.length, 'clients for export')
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      const exportData = {
+        exportDate: new Date().toISOString(),
+        totalClients: state.clients.length,
+        clients: state.clients
+      }
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `clients-export-${Date.now()}.json`
+      a.click()
+
+      console.log('✅ CLIENTS: Export successful')
+      toast.success('💾 Export complete', {
+        description: `${state.clients.length} clients exported`
+      })
+
+      setIsExportModalOpen(false)
+    } catch (error) {
+      console.error('❌ CLIENTS: Export error:', error)
+      toast.error('Export failed')
+    }
   }
 
-  const handleUpgradeToVIP = (id: string) => {
-    console.log('✨ CLIENTS: Upgrade to VIP action initiated')
-    console.log('📝 CLIENTS: Client ID: ' + id)
-    console.log('⭐ CLIENTS: Upgrading client status to VIP')
-    toast.success('⭐ Upgraded to VIP', {
-      description: 'Client ' + id + ' is now VIP'
-    })
+  const handleBulkDelete = () => {
+    if (state.selectedClients.length === 0) {
+      console.log('⚠️ CLIENTS: No clients selected for bulk delete')
+      return
+    }
+
+    console.log('🗑️ CLIENTS: Bulk delete request -', state.selectedClients.length, 'clients')
+
+    if (confirm(`⚠️ Delete ${state.selectedClients.length} clients? This action cannot be undone.`)) {
+      console.log('✅ CLIENTS: User confirmed bulk deletion')
+      state.selectedClients.forEach(id => {
+        dispatch({ type: 'DELETE_CLIENT', clientId: id })
+      })
+      dispatch({ type: 'CLEAR_SELECTED_CLIENTS' })
+      console.log('✅ CLIENTS: Bulk deletion complete')
+      toast.success(`🗑️ ${state.selectedClients.length} clients deleted`)
+    } else {
+      console.log('❌ CLIENTS: User canceled bulk deletion')
+    }
   }
 
-  const handleChangeStatus = (id: string, status: string) => {
-    console.log('✨ CLIENTS: Change status action initiated')
-    console.log('📝 CLIENTS: Client ID: ' + id)
-    console.log('📝 CLIENTS: New status: ' + status)
-    console.log('🔄 CLIENTS: Updating client status')
-    toast.success('🔄 Status Updated', {
-      description: 'Changed to ' + status
+  const handleStatusChange = async (clientId: string, newStatus: Client['status']) => {
+    console.log('🔄 CLIENTS: Status change for:', clientId, 'New status:', newStatus)
+
+    const client = state.clients.find(c => c.id === clientId)
+    if (!client) return
+
+    const updatedClient = {
+      ...client,
+      status: newStatus,
+      updatedAt: new Date().toISOString()
+    }
+
+    dispatch({ type: 'UPDATE_CLIENT', client: updatedClient })
+    console.log('✅ CLIENTS: Status updated successfully')
+
+    toast.success('✅ Status updated', {
+      description: `${client.name} is now ${newStatus}`
     })
-  }
-
-  const handleExportClients = () => {
-    console.log('✨ CLIENTS: Export clients action initiated')
-    console.log('💾 CLIENTS: Preparing client data export')
-    console.log('📊 CLIENTS: Generating CSV file')
-    toast.success('💾 Export Started', {
-      description: 'Downloading client list'
-    })
-  }
-
-  const handleImportClients = () => {
-    console.log('✨ CLIENTS: Import clients action initiated')
-    console.log('📥 CLIENTS: Opening file import dialog')
-    console.log('📋 CLIENTS: Ready to process CSV/Excel')
-    toast.info('📥 Import Clients', {
-      description: 'Select a file to import'
-    })
-  }
-
-  const handleBulkAction = (action: string) => {
-    console.log('✨ CLIENTS: Bulk action initiated')
-    console.log('📝 CLIENTS: Action type: ' + action)
-    console.log('☑️ CLIENTS: Processing selected clients')
-    toast.success('☑️ Bulk Action', {
-      description: 'Executing ' + action
-    })
-  }
-
-  const handleFilterStatus = (status: string) => {
-    console.log('✨ CLIENTS: Filter status action initiated')
-    console.log('📝 CLIENTS: Filter by: ' + status)
-    console.log('🔍 CLIENTS: Applying status filter')
-    toast.info('🔍 Filter Applied', {
-      description: 'Showing ' + status + ' clients'
-    })
-  }
-
-  const handleSortClients = (by: string) => {
-    console.log('✨ CLIENTS: Sort clients action initiated')
-    console.log('📝 CLIENTS: Sort by: ' + by)
-    console.log('🔃 CLIENTS: Reordering client list')
-    toast.info('🔃 Sort Applied', {
-      description: 'Sorted by ' + by
-    })
-  }
-
-  const handleViewAnalytics = (id: string) => {
-    console.log('✨ CLIENTS: View analytics action initiated')
-    console.log('📝 CLIENTS: Client ID: ' + id)
-    console.log('📊 CLIENTS: Loading analytics dashboard')
-    toast.info('📊 View Analytics', {
-      description: 'Loading stats for ' + id
-    })
-  }
-
-  const handleSendInvoice = (id: string) => {
-    console.log('✨ CLIENTS: Send invoice action initiated')
-    console.log('📝 CLIENTS: Client ID: ' + id)
-    console.log('💰 CLIENTS: Generating invoice')
-    toast.success('💰 Invoice Sent', {
-      description: 'Invoice sent to ' + id
-    })
-  }
-
-  const handleScheduleMeeting = (id: string) => {
-    console.log('✨ CLIENTS: Schedule meeting action initiated')
-    console.log('📝 CLIENTS: Client ID: ' + id)
-    console.log('📅 CLIENTS: Opening calendar scheduler')
-    toast.info('📅 Schedule Meeting', {
-      description: 'Calendar opening for ' + id
-    })
-  }
-
-  const handleViewHistory = (id: string) => {
-    console.log('✨ CLIENTS: View history action initiated')
-    console.log('📝 CLIENTS: Client ID: ' + id)
-    console.log('📜 CLIENTS: Loading interaction history')
-    toast.info('📜 View History', {
-      description: 'Loading history for ' + id
-    })
-  }
-
-  const filtered = clients.filter((c) =>
-    c.name.toLowerCase().includes(query.toLowerCase()) ||
-    c.company.toLowerCase().includes(query.toLowerCase())
-  )
-
-  /* ---------- stats ---------- */
-  const stats = {
-    total: clients.length,
-    vip: clients.filter((c) => c.status === 'vip').length,
-    active: clients.filter((c) => c.status === 'active').length,
-    leads: clients.filter((c) => c.status === 'lead').length,
   }
 
   // ============================================================================
-  // A+++ LOADING STATE
+  // RENDER: LOADING STATE
   // ============================================================================
+
   if (isLoading) {
+    console.log('⏳ CLIENTS: Rendering loading state')
     return (
-      <div className="min-h-screen bg-slate-950 py-8">
-        <div className="container mx-auto px-4 space-y-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
           <CardSkeleton />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
             <CardSkeleton />
             <CardSkeleton />
             <CardSkeleton />
@@ -364,17 +779,22 @@ export default function ClientsPage() {
   }
 
   // ============================================================================
-  // A+++ ERROR STATE
+  // RENDER: ERROR STATE
   // ============================================================================
+
   if (error) {
+    console.log('❌ CLIENTS: Rendering error state -', error)
     return (
-      <div className="min-h-screen bg-slate-950 py-8">
-        <div className="container mx-auto px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+        <div className="max-w-7xl mx-auto">
           <ErrorEmptyState
             error={error}
             action={{
               label: 'Retry',
-              onClick: () => window.location.reload()
+              onClick: () => {
+                console.log('🔄 CLIENTS: User clicked retry')
+                window.location.reload()
+              }
             }}
           />
         </div>
@@ -383,22 +803,32 @@ export default function ClientsPage() {
   }
 
   // ============================================================================
-  // A+++ EMPTY STATE (when no clients exist after filtering)
+  // RENDER: EMPTY STATE
   // ============================================================================
-  if (filtered.length === 0 && !isLoading) {
+
+  if (filteredAndSortedClients.length === 0 && !isLoading) {
+    console.log('📭 CLIENTS: Rendering empty state')
     return (
-      <div className="min-h-screen bg-slate-950 py-8">
-        <div className="container mx-auto px-4">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+        <div className="max-w-7xl mx-auto">
           <NoDataEmptyState
             entityName="clients"
             description={
-              query
-                ? "No clients match your search criteria. Try adjusting your search terms."
-                : "Get started by adding your first client to the system."
+              state.searchTerm
+                ? "No clients match your search criteria. Try adjusting your filters."
+                : "Get started by adding your first client to the CRM system."
             }
             action={{
-              label: query ? 'Clear Search' : 'Add Client',
-              onClick: query ? () => setQuery('') : handleAddClient
+              label: state.searchTerm ? 'Clear Search' : 'Add Client',
+              onClick: state.searchTerm
+                ? () => {
+                    console.log('🔄 CLIENTS: Clearing search')
+                    dispatch({ type: 'SET_SEARCH', searchTerm: '' })
+                  }
+                : () => {
+                    console.log('➕ CLIENTS: Opening add client modal from empty state')
+                    setIsAddClientModalOpen(true)
+                  }
             }}
           />
         </div>
@@ -406,154 +836,841 @@ export default function ClientsPage() {
     )
   }
 
+  console.log('✅ CLIENTS: Rendering main content')
+
+  // ============================================================================
+  // RENDER: MAIN CONTENT
+  // ============================================================================
+
   return (
-    <div className="min-h-screen bg-slate-950 py-8">
-      {/* Header */}
-      <div className="container mx-auto px-4 mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/20">
-              <Users className="h-6 w-6 text-purple-400" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+
+        {/* Header */}
+        <ScrollReveal>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg">
+                <Users className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <TextShimmer className="text-3xl font-bold">
+                  Clients
+                </TextShimmer>
+                <p className="text-muted-foreground text-sm">
+                  Enterprise CRM & Relationship Management
+                </p>
+              </div>
             </div>
-            <div>
-              <TextShimmer className="text-3xl font-bold" duration={2}>
-                Clients
-              </TextShimmer>
-              <p className="text-gray-400 text-sm">
-                Relationship & project management
-              </p>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  console.log('📥 CLIENTS: Import button clicked')
+                  setIsImportModalOpen(true)
+                }}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Import
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  console.log('💾 CLIENTS: Export button clicked')
+                  setIsExportModalOpen(true)
+                }}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+              <Dialog open={isAddClientModalOpen} onOpenChange={setIsAddClientModalOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    onClick={() => {
+                      console.log('➕ CLIENTS: Add client button clicked')
+                    }}
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Add Client
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Add New Client</DialogTitle>
+                    <DialogDescription>
+                      Create a new client profile in your CRM system
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Full Name *</Label>
+                        <Input
+                          id="name"
+                          placeholder="John Doe"
+                          value={formData.name || ''}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="company">Company</Label>
+                        <Input
+                          id="company"
+                          placeholder="Acme Inc."
+                          value={formData.company || ''}
+                          onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email *</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="john@example.com"
+                          value={formData.email || ''}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone">Phone</Label>
+                        <Input
+                          id="phone"
+                          placeholder="+1 555-1234"
+                          value={formData.phone || ''}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="location">Location</Label>
+                        <Input
+                          id="location"
+                          placeholder="New York, USA"
+                          value={formData.location || ''}
+                          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="status">Status</Label>
+                        <Select
+                          value={formData.status || 'lead'}
+                          onValueChange={(value) => setFormData({ ...formData, status: value as Client['status'] })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="lead">Lead</SelectItem>
+                            <SelectItem value="prospect">Prospect</SelectItem>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="vip">VIP</SelectItem>
+                            <SelectItem value="inactive">Inactive</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="industry">Industry</Label>
+                      <Input
+                        id="industry"
+                        placeholder="Technology, Media, etc."
+                        value={formData.industry || ''}
+                        onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="website">Website</Label>
+                      <Input
+                        id="website"
+                        placeholder="https://example.com"
+                        value={formData.website || ''}
+                        onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="notes">Notes</Label>
+                      <Textarea
+                        id="notes"
+                        placeholder="Additional information about this client..."
+                        value={formData.notes || ''}
+                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        console.log('❌ CLIENTS: Add client canceled')
+                        setIsAddClientModalOpen(false)
+                        setFormData({})
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button onClick={handleAddClient} disabled={isSaving}>
+                      {isSaving ? 'Adding...' : 'Add Client'}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
+        </ScrollReveal>
 
-          <Button onClick={handleAddClient} className="gap-2">
-            <UserPlus className="h-4 w-4" />
-            Add Client
-          </Button>
-        </div>
-      </div>
+        {/* Stats Overview */}
+        <ScrollReveal delay={0.1}>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {[
+              { label: 'Total Clients', value: stats.total, icon: Users, color: 'blue' },
+              { label: 'VIP', value: stats.vip, icon: Award, color: 'yellow' },
+              { label: 'Active', value: stats.active, icon: CheckCircle, color: 'green' },
+              { label: 'Leads', value: stats.leads, icon: Target, color: 'blue' },
+              { label: 'Total Revenue', value: `$${(stats.totalRevenue / 1000).toFixed(0)}K`, icon: DollarSign, color: 'green' },
+              { label: 'Avg Rating', value: stats.avgRating.toFixed(1), icon: Star, color: 'yellow' }
+            ].map((stat, index) => {
+              const Icon = stat.icon
+              return (
+                <LiquidGlassCard key={index} className="relative overflow-hidden">
+                  
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <Icon className={`h-4 w-4 text-${stat.color}-500`} />
+                      <GlowEffect color={stat.color} />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-2xl font-bold">
+                        {typeof stat.value === 'number' ? (
+                          <NumberFlow value={stat.value} />
+                        ) : (
+                          stat.value
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{stat.label}</p>
+                    </div>
+                  </CardContent>
+                </LiquidGlassCard>
+              )
+            })}
+          </div>
+        </ScrollReveal>
 
-      {/* Stat cards */}
-      <div className="container mx-auto px-4 mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <LiquidGlassCard>
-          <CardContent className="p-4 flex items-center gap-3">
-            <Users className="h-5 w-5 text-blue-400" />
-            <div>
-              <p className="text-xs text-gray-400">Total Clients</p>
-              <p className="text-xl font-semibold text-white"><NumberFlow value={stats.total} /></p>
-            </div>
-          </CardContent>
-        </LiquidGlassCard>
-        <LiquidGlassCard>
-          <CardContent className="p-4 flex items-center gap-3">
-            <Star className="h-5 w-5 text-yellow-400" />
-            <div>
-              <p className="text-xs text-gray-400">VIP</p>
-              <p className="text-xl font-semibold text-white"><NumberFlow value={stats.vip} /></p>
-            </div>
-          </CardContent>
-        </LiquidGlassCard>
-        <LiquidGlassCard>
-          <CardContent className="p-4 flex items-center gap-3">
-            <Briefcase className="h-5 w-5 text-green-600" />
-            <div>
-              <p className="text-xs text-muted-foreground">Active</p>
-              <p className="text-xl font-semibold">{stats.active}</p>
-            </div>
-          </CardContent>
-        </LiquidGlassCard>
-        <LiquidGlassCard>
-          <CardContent className="p-4 flex items-center gap-3">
-            <UserPlus className="h-5 w-5 text-blue-600" />
-            <div>
-              <p className="text-xs text-muted-foreground">Leads</p>
-              <p className="text-xl font-semibold">{stats.leads}</p>
-            </div>
-          </CardContent>
-        </LiquidGlassCard>
-      </div>
-
-      {/* Search & filter */}
-      <div className="container mx-auto px-4 mb-6 flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search clients…"
-            className="pl-9"
-          />
-        </div>
-        <Button onClick={() => handleFilterStatus('all')} variant="outline" className="gap-2">
-          <Filter className="h-4 w-4" />
-          Filters
-        </Button>
-      </div>
-
-      {/* Client grid */}
-      <div className="container mx-auto px-4 pb-12 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filtered.map((c) => (
-          <LiquidGlassCard key={c.id} className="group hover:shadow-lg transition-shadow">
-            <CardHeader className="flex items-start gap-3 pb-1">
-              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center font-medium text-blue-600">
-                {c.name.charAt(0)}
-              </div>
-              <div className="flex-1">
-                <CardTitle className="text-base">{c.name}</CardTitle>
-                <CardDescription className="flex items-center gap-1 text-xs">
-                  <MapPin className="h-3 w-3" />
-                  {c.location}
-                </CardDescription>
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => handleViewClient(c.id)}>View Profile</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleSendMessage(c.id)}>Send Message</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleDeleteClient(c.id)} className="text-red-600">Remove Client</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </CardHeader>
-
-            <CardContent className="space-y-3">
-              {/* contact */}
-              <div className="flex items-center gap-2 text-sm">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span className="truncate">{c.email}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <span>{c.phone}</span>
-              </div>
-
-              {/* stats */}
-              <div className="flex items-center gap-4 text-xs">
-                <div className="inline-flex items-center gap-1">
-                  <Briefcase className="h-3 w-3" />
-                  {c.projects} projects
+        {/* Filters & Controls */}
+        <ScrollReveal delay={0.2}>
+          <LiquidGlassCard>
+            <CardContent className="p-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search clients..."
+                    value={state.searchTerm}
+                    onChange={(e) => {
+                      console.log('🔍 CLIENTS: Search query:', e.target.value)
+                      dispatch({ type: 'SET_SEARCH', searchTerm: e.target.value })
+                    }}
+                    className="pl-9"
+                  />
                 </div>
-                <div className="inline-flex items-center gap-1">
-                  <DollarSign className="h-3 w-3" />
-                  ${c.totalSpend.toLocaleString()}
-                </div>
-              </div>
-
-              {/* rating & status */}
-              <div className="flex items-center gap-2">
-                {[...Array(c.rating)].map((_, i) => (
-                  <Star key={i} className="h-3 w-3 fill-yellow-400 stroke-yellow-400" />
-                ))}
-                <Badge className={statusColour[c.status]}>{c.status}</Badge>
+                <Select
+                  value={state.filterStatus}
+                  onValueChange={(value) => {
+                    console.log('🔽 CLIENTS: Filter changed to:', value)
+                    dispatch({ type: 'SET_FILTER', filterStatus: value as ClientsState['filterStatus'] })
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Clients</SelectItem>
+                    <SelectItem value="vip">VIP Only</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="lead">Leads</SelectItem>
+                    <SelectItem value="prospect">Prospects</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={state.sortBy}
+                  onValueChange={(value) => {
+                    console.log('🔃 CLIENTS: Sort changed to:', value)
+                    dispatch({ type: 'SET_SORT', sortBy: value as ClientsState['sortBy'] })
+                  }}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Recently Updated</SelectItem>
+                    <SelectItem value="name">Name (A-Z)</SelectItem>
+                    <SelectItem value="company">Company (A-Z)</SelectItem>
+                    <SelectItem value="projects">Most Projects</SelectItem>
+                    <SelectItem value="spend">Highest Spend</SelectItem>
+                    <SelectItem value="rating">Highest Rating</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </LiquidGlassCard>
-        ))}
+        </ScrollReveal>
+
+        {/* Bulk Actions */}
+        {state.selectedClients.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <LiquidGlassCard className="bg-blue-500/10 border-blue-500/20">
+              <CardContent className="p-4 flex items-center justify-between">
+                <p className="text-sm">
+                  <NumberFlow value={state.selectedClients.length} /> client(s) selected
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={handleBulkDelete}>
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Delete Selected
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      console.log('🔄 CLIENTS: Clear selection')
+                      dispatch({ type: 'CLEAR_SELECTED_CLIENTS' })
+                    }}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Clear
+                  </Button>
+                </div>
+              </CardContent>
+            </LiquidGlassCard>
+          </motion.div>
+        )}
+
+        {/* Clients Grid */}
+        <ScrollReveal delay={0.3}>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <AnimatePresence>
+              {filteredAndSortedClients.map((client, index) => {
+                const StatusIcon = statusConfig[client.status].icon
+                const isSelected = state.selectedClients.includes(client.id)
+
+                return (
+                  <motion.div
+                    key={client.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <LiquidGlassCard
+                      className={`group hover:shadow-xl transition-all cursor-pointer ${
+                        isSelected ? 'ring-2 ring-blue-500' : ''
+                      }`}
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start gap-3">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {
+                              console.log('☑️ CLIENTS: Toggle select client:', client.id)
+                              dispatch({ type: 'TOGGLE_SELECT_CLIENT', clientId: client.id })
+                            }}
+                            className="mt-1"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <div
+                            className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center font-semibold text-white text-lg shadow-lg relative"
+                          >
+                            {client.name.charAt(0).toUpperCase()}
+                            {client.status === 'vip' && (
+                              <div className="absolute -top-1 -right-1">
+                                <Award className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-base truncate">{client.name}</CardTitle>
+                            <CardDescription className="text-xs truncate">
+                              {client.company}
+                            </CardDescription>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem onClick={() => handleViewClient(client)}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Profile
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleEditClient(client)}>
+                                <Edit2 className="h-4 w-4 mr-2" />
+                                Edit Client
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleSendMessage(client)}>
+                                <MessageSquare className="h-4 w-4 mr-2" />
+                                Send Message
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleSendEmail(client)}>
+                                <Mail className="h-4 w-4 mr-2" />
+                                Send Email
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleCallClient(client)}>
+                                <Phone className="h-4 w-4 mr-2" />
+                                Call Client
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleViewAnalytics(client)}>
+                                <BarChart3 className="h-4 w-4 mr-2" />
+                                View Analytics
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleScheduleMeeting(client)}>
+                                <Calendar className="h-4 w-4 mr-2" />
+                                Schedule Meeting
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteClient(client.id)}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete Client
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </CardHeader>
+
+                      <CardContent className="space-y-3" onClick={() => handleViewClient(client)}>
+                        {/* Contact Info */}
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Mail className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                            <span className="truncate">{client.email}</span>
+                          </div>
+                          {client.phone && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <Phone className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                              <span>{client.phone}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2 text-sm">
+                            <MapPin className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                            <span className="truncate">{client.location}</span>
+                          </div>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Briefcase className="h-3 w-3" />
+                            <NumberFlow value={client.projects} /> projects
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="h-3 w-3" />
+                            ${client.totalSpend.toLocaleString()}
+                          </div>
+                        </div>
+
+                        {/* Rating & Status */}
+                        <div className="flex items-center justify-between pt-2 border-t">
+                          <div className="flex items-center gap-0.5">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-3 w-3 ${
+                                  i < client.rating
+                                    ? 'fill-yellow-400 stroke-yellow-400'
+                                    : 'stroke-gray-300 dark:stroke-gray-600'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <Badge className={statusConfig[client.status].color}>
+                            <StatusIcon className="h-3 w-3 mr-1" />
+                            {statusConfig[client.status].label}
+                          </Badge>
+                        </div>
+
+                        {/* Tags */}
+                        {client.tags && client.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 pt-2 border-t">
+                            {client.tags.slice(0, 3).map((tag, i) => (
+                              <Badge key={i} variant="outline" className="text-xs">
+                                <Tag className="h-2 w-2 mr-1" />
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+
+                      <CardFooter className="pt-3 border-t">
+                        <div className="flex items-center gap-2 w-full">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleSendMessage(client)
+                            }}
+                          >
+                            <MessageSquare className="h-3 w-3 mr-1" />
+                            Message
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleSendEmail(client)
+                            }}
+                          >
+                            <Mail className="h-3 w-3 mr-1" />
+                            Email
+                          </Button>
+                        </div>
+                      </CardFooter>
+                    </LiquidGlassCard>
+                  </motion.div>
+                )
+              })}
+            </AnimatePresence>
+          </div>
+        </ScrollReveal>
       </div>
+
+      {/* View Client Modal */}
+      <Dialog open={isViewClientModalOpen} onOpenChange={setIsViewClientModalOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Client Profile</DialogTitle>
+            <DialogDescription>
+              Complete information for {state.selectedClient?.name}
+            </DialogDescription>
+          </DialogHeader>
+          {state.selectedClient && (
+            <Tabs defaultValue="overview">
+              <TabsList className="grid grid-cols-3 w-full">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="projects">Projects</TabsTrigger>
+                <TabsTrigger value="activity">Activity</TabsTrigger>
+              </TabsList>
+              <TabsContent value="overview" className="space-y-4 mt-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Full Name</Label>
+                    <p className="font-medium">{state.selectedClient.name}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Company</Label>
+                    <p className="font-medium">{state.selectedClient.company}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Email</Label>
+                    <p className="font-medium">{state.selectedClient.email}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Phone</Label>
+                    <p className="font-medium">{state.selectedClient.phone}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Location</Label>
+                    <p className="font-medium">{state.selectedClient.location}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Status</Label>
+                    <p>
+                      <Badge className={statusConfig[state.selectedClient.status].color}>
+                        {statusConfig[state.selectedClient.status].label}
+                      </Badge>
+                    </p>
+                  </div>
+                  {state.selectedClient.industry && (
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Industry</Label>
+                      <p className="font-medium">{state.selectedClient.industry}</p>
+                    </div>
+                  )}
+                  {state.selectedClient.website && (
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Website</Label>
+                      <a
+                        href={state.selectedClient.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        {state.selectedClient.website}
+                      </a>
+                    </div>
+                  )}
+                </div>
+                {state.selectedClient.notes && (
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Notes</Label>
+                    <p className="text-sm mt-1">{state.selectedClient.notes}</p>
+                  </div>
+                )}
+              </TabsContent>
+              <TabsContent value="projects" className="mt-4">
+                <div className="space-y-4">
+                  {mockProjects[state.selectedClient.id]?.map((project) => (
+                    <Card key={project.id}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h4 className="font-medium">{project.name}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              ${project.value.toLocaleString()}
+                            </p>
+                          </div>
+                          <Badge>{project.status}</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )) || <p className="text-sm text-muted-foreground text-center py-8">No projects yet</p>}
+                </div>
+              </TabsContent>
+              <TabsContent value="activity" className="mt-4">
+                <div className="space-y-4">
+                  <div className="text-sm text-muted-foreground">
+                    <p>Last Contact: {state.selectedClient.lastContact}</p>
+                    <p>Next Follow-up: {state.selectedClient.nextFollowUp}</p>
+                    <p>Assigned To: {state.selectedClient.assignedTo}</p>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Client Modal */}
+      <Dialog open={isEditClientModalOpen} onOpenChange={setIsEditClientModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Client</DialogTitle>
+            <DialogDescription>
+              Update information for {state.selectedClient?.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Full Name</Label>
+                <Input
+                  id="edit-name"
+                  value={formData.name || ''}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-company">Company</Label>
+                <Input
+                  id="edit-company"
+                  value={formData.company || ''}
+                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-email">Email</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={formData.email || ''}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-phone">Phone</Label>
+                <Input
+                  id="edit-phone"
+                  value={formData.phone || ''}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-status">Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => setFormData({ ...formData, status: value as Client['status'] })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="lead">Lead</SelectItem>
+                  <SelectItem value="prospect">Prospect</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="vip">VIP</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                console.log('❌ CLIENTS: Edit canceled')
+                setIsEditClientModalOpen(false)
+                setFormData({})
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateClient} disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Modal */}
+      <Dialog open={isAnalyticsModalOpen} onOpenChange={setIsAnalyticsModalOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Client Analytics</DialogTitle>
+            <DialogDescription>
+              Performance metrics for {state.selectedClient?.name}
+            </DialogDescription>
+          </DialogHeader>
+          {state.selectedClient && (
+            <div className="grid grid-cols-3 gap-4 py-4">
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <Briefcase className="h-8 w-8 mx-auto mb-2 text-blue-500" />
+                  <p className="text-2xl font-bold">
+                    <NumberFlow value={state.selectedClient.projects} />
+                  </p>
+                  <p className="text-xs text-muted-foreground">Total Projects</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <DollarSign className="h-8 w-8 mx-auto mb-2 text-green-500" />
+                  <p className="text-2xl font-bold">
+                    ${state.selectedClient.totalSpend.toLocaleString()}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Total Revenue</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <Star className="h-8 w-8 mx-auto mb-2 text-yellow-500" />
+                  <p className="text-2xl font-bold">{state.selectedClient.rating}.0</p>
+                  <p className="text-xs text-muted-foreground">Client Rating</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Modal */}
+      <Dialog open={isExportModalOpen} onOpenChange={setIsExportModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Clients</DialogTitle>
+            <DialogDescription>
+              Download your client database
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-sm text-muted-foreground mb-4">
+              This will export {state.clients.length} clients as a JSON file.
+            </p>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>Format:</span>
+                <span className="font-medium">JSON</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Clients:</span>
+                <span className="font-medium">
+                  <NumberFlow value={state.clients.length} />
+                </span>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                console.log('❌ CLIENTS: Export canceled')
+                setIsExportModalOpen(false)
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleExport}>
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Modal */}
+      <Dialog open={isImportModalOpen} onOpenChange={setIsImportModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Import Clients</DialogTitle>
+            <DialogDescription>
+              Upload a JSON or CSV file to import clients
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="border-2 border-dashed rounded-lg p-8 text-center">
+              <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mb-2">
+                Drag and drop your file here, or click to browse
+              </p>
+              <Button variant="outline" size="sm">
+                Choose File
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                console.log('❌ CLIENTS: Import canceled')
+                setIsImportModalOpen(false)
+              }}
+            >
+              Cancel
+            </Button>
+            <Button>
+              <Upload className="h-4 w-4 mr-2" />
+              Import
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

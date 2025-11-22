@@ -927,8 +927,8 @@ export default function CalendarPage() {
           <div className="flex items-center justify-between">
             <div className="relative">
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <FloatingParticle delay={0} color="blue" />
-                <FloatingParticle delay={1} color="indigo" />
+                
+                
               </div>
               <TextShimmer className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-cyan-900 dark:from-gray-100 dark:via-blue-100 dark:to-cyan-100 bg-clip-text text-transparent mb-2 relative z-10">
                 Calendar

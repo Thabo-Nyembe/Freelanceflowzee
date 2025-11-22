@@ -1,276 +1,981 @@
 'use client'
 
-/**
- * World-Class Plugin Marketplace
- * Complete implementation of plugin ecosystem and marketplace
- */
-
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import {
-  Package, Download, Star, Search, Filter, Grid3x3, List,
-  Zap, Shield, TrendingUp, Award, Share2, ExternalLink,
-  CheckCircle, AlertCircle, DollarSign, Settings, Eye,
-  Users, Clock, BarChart3, Play, RefreshCw, Info,
-  Sparkles, Heart, MessageSquare, ChevronDown, Plus,
-  Book, Code, Globe, Lock, Check, X
-} from 'lucide-react'
+import { useState, useEffect, useReducer, useMemo } from 'react'
+import { PageHeader } from '@/components/ui/page-header'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Checkbox } from '@/components/ui/checkbox'
+import { toast } from 'sonner'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
-import { Input } from '@/components/ui/input'
-import {
-  Plugin,
-  PluginCategory,
-  InstalledPlugin,
-  PluginCollection
-} from '@/lib/plugin-marketplace-types'
-import {
-  PLUGIN_CATEGORIES,
-  MOCK_PLUGINS,
-  MOCK_INSTALLED_PLUGINS,
-  MOCK_COLLECTIONS,
-  MOCK_MARKETPLACE_STATS,
-  MOCK_PLUGIN_REVIEWS,
-  formatInstalls,
-  formatPrice,
-  getRatingColor,
-  getCompatibilityBadge,
-  formatFileSize,
-  formatDate,
-  getRatingStars,
-  isPluginInstalled,
-  filterPlugins,
-  sortPlugins
-} from '@/lib/plugin-marketplace-utils'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { motion, AnimatePresence } from 'framer-motion'
 
-type ViewMode = 'browse' | 'installed' | 'collections' | 'developer'
-type LayoutMode = 'grid' | 'list'
+// ============================================================================
+// A+++ UTILITIES
+// ============================================================================
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+import {
+  Package,
+  Download,
+  Star,
+  Search,
+  Filter,
+  Grid,
+  List,
+  Zap,
+  Shield,
+  TrendingUp,
+  Award,
+  Share2,
+  ExternalLink,
+  CheckCircle,
+  AlertCircle,
+  DollarSign,
+  Settings,
+  Eye,
+  Users,
+  Clock,
+  BarChart3,
+  Play,
+  RefreshCw,
+  Info,
+  Sparkles,
+  Heart,
+  MessageSquare,
+  ChevronDown,
+  Plus,
+  Book,
+  Code,
+  Globe,
+  Lock,
+  Check,
+  X,
+  MoreVertical,
+  FileCode,
+  Palette,
+  Database,
+  Bell,
+  Briefcase,
+  Target,
+  Rocket,
+  Monitor
+} from 'lucide-react'
+
+// ============================================================================
+// A++++ TYPES
+// ============================================================================
+
+type PluginCategory = 'productivity' | 'creative' | 'analytics' | 'communication' | 'integration' | 'automation' | 'ai' | 'security' | 'finance' | 'marketing'
+type PricingType = 'free' | 'one-time' | 'subscription' | 'freemium'
+type PluginStatus = 'published' | 'beta' | 'coming-soon' | 'deprecated'
+type ViewMode = 'grid' | 'list'
+
+interface PluginAuthor {
+  id: string
+  name: string
+  avatar: string
+  verified: boolean
+}
+
+interface Plugin {
+  id: string
+  name: string
+  description: string
+  longDescription: string
+  category: PluginCategory
+  icon: string
+  author: PluginAuthor
+  version: string
+  rating: number
+  reviewCount: number
+  installCount: number
+  price: number
+  pricingType: PricingType
+  status: PluginStatus
+  fileSize: number // in bytes
+  lastUpdated: string
+  createdAt: string
+  isVerified: boolean
+  isFeatured: boolean
+  isTrending: boolean
+  isPopular: boolean
+  tags: string[]
+  screenshots: string[]
+  compatibility: string[]
+  requirements: string[]
+  changelog: string[]
+}
+
+interface InstalledPlugin {
+  pluginId: string
+  installedAt: string
+  installedVersion: string
+  isActive: boolean
+  settings: Record<string, any>
+}
+
+interface PluginState {
+  plugins: Plugin[]
+  selectedPlugin: Plugin | null
+  installedPlugins: InstalledPlugin[]
+  searchTerm: string
+  filterCategory: 'all' | PluginCategory
+  filterPricing: 'all' | PricingType
+  sortBy: 'popular' | 'recent' | 'rating' | 'name' | 'price'
+  viewMode: ViewMode
+  selectedPlugins: string[]
+  showInstalledOnly: boolean
+}
+
+type PluginAction =
+  | { type: 'SET_PLUGINS'; plugins: Plugin[] }
+  | { type: 'ADD_PLUGIN'; plugin: Plugin }
+  | { type: 'UPDATE_PLUGIN'; plugin: Plugin }
+  | { type: 'DELETE_PLUGIN'; pluginId: string }
+  | { type: 'SELECT_PLUGIN'; plugin: Plugin | null }
+  | { type: 'SET_SEARCH'; searchTerm: string }
+  | { type: 'SET_FILTER_CATEGORY'; filterCategory: 'all' | PluginCategory }
+  | { type: 'SET_FILTER_PRICING'; filterPricing: 'all' | PricingType }
+  | { type: 'SET_SORT'; sortBy: PluginState['sortBy'] }
+  | { type: 'SET_VIEW_MODE'; viewMode: ViewMode }
+  | { type: 'TOGGLE_SELECT_PLUGIN'; pluginId: string }
+  | { type: 'CLEAR_SELECTED_PLUGINS' }
+  | { type: 'INSTALL_PLUGIN'; plugin: Plugin }
+  | { type: 'UNINSTALL_PLUGIN'; pluginId: string }
+  | { type: 'TOGGLE_PLUGIN_ACTIVE'; pluginId: string }
+  | { type: 'TOGGLE_INSTALLED_ONLY' }
+
+// ============================================================================
+// A++++ REDUCER
+// ============================================================================
+
+function pluginReducer(state: PluginState, action: PluginAction): PluginState {
+  console.log('🔄 PLUGIN REDUCER: Action:', action.type)
+
+  switch (action.type) {
+    case 'SET_PLUGINS':
+      console.log('📊 PLUGIN REDUCER: Setting plugins - Count:', action.plugins.length)
+      return { ...state, plugins: action.plugins }
+
+    case 'ADD_PLUGIN':
+      console.log('➕ PLUGIN REDUCER: Adding plugin - ID:', action.plugin.id)
+      return { ...state, plugins: [action.plugin, ...state.plugins] }
+
+    case 'UPDATE_PLUGIN':
+      console.log('✏️ PLUGIN REDUCER: Updating plugin - ID:', action.plugin.id)
+      return {
+        ...state,
+        plugins: state.plugins.map(p => p.id === action.plugin.id ? action.plugin : p),
+        selectedPlugin: state.selectedPlugin?.id === action.plugin.id ? action.plugin : state.selectedPlugin
+      }
+
+    case 'DELETE_PLUGIN':
+      console.log('🗑️ PLUGIN REDUCER: Deleting plugin - ID:', action.pluginId)
+      return {
+        ...state,
+        plugins: state.plugins.filter(p => p.id !== action.pluginId),
+        selectedPlugin: state.selectedPlugin?.id === action.pluginId ? null : state.selectedPlugin
+      }
+
+    case 'SELECT_PLUGIN':
+      console.log('👁️ PLUGIN REDUCER: Selecting plugin - ID:', action.plugin?.id)
+      return { ...state, selectedPlugin: action.plugin }
+
+    case 'SET_SEARCH':
+      console.log('🔍 PLUGIN REDUCER: Search term:', action.searchTerm)
+      return { ...state, searchTerm: action.searchTerm }
+
+    case 'SET_FILTER_CATEGORY':
+      console.log('🎯 PLUGIN REDUCER: Filter category:', action.filterCategory)
+      return { ...state, filterCategory: action.filterCategory }
+
+    case 'SET_FILTER_PRICING':
+      console.log('💰 PLUGIN REDUCER: Filter pricing:', action.filterPricing)
+      return { ...state, filterPricing: action.filterPricing }
+
+    case 'SET_SORT':
+      console.log('🔀 PLUGIN REDUCER: Sort by:', action.sortBy)
+      return { ...state, sortBy: action.sortBy }
+
+    case 'SET_VIEW_MODE':
+      console.log('👁️ PLUGIN REDUCER: View mode:', action.viewMode)
+      return { ...state, viewMode: action.viewMode }
+
+    case 'TOGGLE_SELECT_PLUGIN':
+      console.log('☑️ PLUGIN REDUCER: Toggle select plugin - ID:', action.pluginId)
+      return {
+        ...state,
+        selectedPlugins: state.selectedPlugins.includes(action.pluginId)
+          ? state.selectedPlugins.filter(id => id !== action.pluginId)
+          : [...state.selectedPlugins, action.pluginId]
+      }
+
+    case 'CLEAR_SELECTED_PLUGINS':
+      console.log('🧹 PLUGIN REDUCER: Clearing selected plugins')
+      return { ...state, selectedPlugins: [] }
+
+    case 'INSTALL_PLUGIN':
+      console.log('📥 PLUGIN REDUCER: Installing plugin - ID:', action.plugin.id)
+      const newInstallation: InstalledPlugin = {
+        pluginId: action.plugin.id,
+        installedAt: new Date().toISOString(),
+        installedVersion: action.plugin.version,
+        isActive: true,
+        settings: {}
+      }
+      return {
+        ...state,
+        installedPlugins: [...state.installedPlugins, newInstallation],
+        plugins: state.plugins.map(p =>
+          p.id === action.plugin.id ? { ...p, installCount: p.installCount + 1 } : p
+        )
+      }
+
+    case 'UNINSTALL_PLUGIN':
+      console.log('🗑️ PLUGIN REDUCER: Uninstalling plugin - ID:', action.pluginId)
+      return {
+        ...state,
+        installedPlugins: state.installedPlugins.filter(p => p.pluginId !== action.pluginId)
+      }
+
+    case 'TOGGLE_PLUGIN_ACTIVE':
+      console.log('🔄 PLUGIN REDUCER: Toggling plugin active - ID:', action.pluginId)
+      return {
+        ...state,
+        installedPlugins: state.installedPlugins.map(p =>
+          p.pluginId === action.pluginId ? { ...p, isActive: !p.isActive } : p
+        )
+      }
+
+    case 'TOGGLE_INSTALLED_ONLY':
+      console.log('🔧 PLUGIN REDUCER: Toggle installed only - Current:', state.showInstalledOnly)
+      return { ...state, showInstalledOnly: !state.showInstalledOnly }
+
+    default:
+      return state
+  }
+}
+
+// ============================================================================
+// A++++ MOCK DATA
+// ============================================================================
+
+function generateMockPlugins(): Plugin[] {
+  console.log('🎨 PLUGIN: Generating mock plugins...')
+
+  const categories: PluginCategory[] = ['productivity', 'creative', 'analytics', 'communication', 'integration', 'automation', 'ai', 'security', 'finance', 'marketing']
+  const pricingTypes: PricingType[] = ['free', 'one-time', 'subscription', 'freemium']
+  const statuses: PluginStatus[] = ['published', 'beta', 'coming-soon']
+
+  const pluginNames = [
+    'Slack Integration', 'Google Drive Sync', 'Advanced Analytics', 'AI Assistant Pro',
+    'Email Automation', 'PDF Generator', 'Video Conferencing', 'Time Tracker Plus',
+    'CRM Connect', 'Social Media Manager', 'Task Automator', 'Code Snippets',
+    'Design Tools', 'Invoice Generator', 'SEO Optimizer', 'Content Calendar',
+    'Live Chat Widget', 'Form Builder Pro', 'Database Manager', 'API Gateway',
+    'Webhook Handler', 'Payment Gateway', 'Email Templates', 'Backup Manager',
+    'Security Scanner', 'Performance Monitor', 'A/B Testing', 'User Feedback',
+    'Translation Tool', 'Image Optimizer', 'Video Editor', 'Audio Processor',
+    'Chart Builder', 'Data Exporter', 'Report Generator', 'Calendar Sync',
+    'Notification Center', 'File Uploader', 'QR Generator', 'Barcode Scanner',
+    'Weather Widget', 'Map Integration', 'Search Engine', 'Text Editor',
+    'Color Picker', 'Icon Library', 'Font Manager', 'Theme Switcher',
+    'Dark Mode Pro', 'Responsive Helper', 'Grid System', 'Animation Studio',
+    'Drag and Drop', 'Keyboard Shortcuts', 'Screen Recorder', 'Screenshot Tool',
+    'Version Control', 'Team Collaboration', 'Project Templates', 'Workflow Builder'
+  ]
+
+  const authors = [
+    { id: 'AU-001', name: 'TechCorp', avatar: '🏢', verified: true },
+    { id: 'AU-002', name: 'DevTools Inc', avatar: '👨‍💻', verified: true },
+    { id: 'AU-003', name: 'CreativeStudio', avatar: '🎨', verified: false },
+    { id: 'AU-004', name: 'AutomationPro', avatar: '🤖', verified: true },
+    { id: 'AU-005', name: 'DataViz Labs', avatar: '📊', verified: false }
+  ]
+
+  const plugins: Plugin[] = pluginNames.map((name, index) => {
+    const category = categories[index % categories.length]
+    const pricingType = pricingTypes[index % pricingTypes.length]
+    const status = statuses[index % statuses.length]
+    const author = authors[index % authors.length]
+
+    return {
+      id: `PLG-${String(index + 1).padStart(3, '0')}`,
+      name,
+      description: `Professional ${name} plugin with advanced features and seamless integration`,
+      longDescription: `${name} is a powerful plugin that helps you ${name.toLowerCase()} with ease. Features include automated workflows, real-time sync, advanced analytics, and comprehensive reporting. Perfect for teams of all sizes.`,
+      category,
+      icon: ['🔌', '⚡', '🚀', '🎯', '💡', '🔥'][index % 6],
+      author,
+      version: `${Math.floor(Math.random() * 3) + 1}.${Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 10)}`,
+      rating: parseFloat((Math.random() * 2 + 3).toFixed(1)), // 3.0 - 5.0
+      reviewCount: Math.floor(Math.random() * 500) + 50,
+      installCount: Math.floor(Math.random() * 100000) + 1000,
+      price: pricingType === 'free' ? 0 : Math.floor(Math.random() * 100) + 10,
+      pricingType,
+      status,
+      fileSize: Math.floor(Math.random() * 10000000) + 100000, // 100KB - 10MB
+      lastUpdated: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+      createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+      isVerified: author.verified,
+      isFeatured: Math.random() > 0.8,
+      isTrending: Math.random() > 0.7,
+      isPopular: Math.random() > 0.6,
+      tags: [
+        category,
+        pricingType,
+        ['integration', 'automation', 'productivity', 'analytics'][Math.floor(Math.random() * 4)]
+      ],
+      screenshots: Array.from({ length: 3 }, (_, i) => `https://picsum.photos/seed/${index + i}/800/600`),
+      compatibility: ['v1.0+', 'Chrome', 'Firefox', 'Safari'],
+      requirements: ['Min 2GB RAM', 'Storage: 100MB', 'Internet connection'],
+      changelog: [
+        'v2.0.0: Major redesign and performance improvements',
+        'v1.5.0: Added new features and bug fixes',
+        'v1.0.0: Initial release'
+      ]
+    }
+  })
+
+  console.log('✅ PLUGIN: Generated', plugins.length, 'mock plugins')
+  return plugins
+}
+
+// ============================================================================
+// A++++ CATEGORIES
+// ============================================================================
+
+interface CategoryOption {
+  id: PluginCategory
+  name: string
+  icon: any
+  color: string
+}
+
+const categoryOptions: CategoryOption[] = [
+  { id: 'productivity', name: 'Productivity', icon: Zap, color: 'blue' },
+  { id: 'creative', name: 'Creative', icon: Palette, color: 'purple' },
+  { id: 'analytics', name: 'Analytics', icon: BarChart3, color: 'green' },
+  { id: 'communication', name: 'Communication', icon: MessageSquare, color: 'cyan' },
+  { id: 'integration', name: 'Integration', icon: Share2, color: 'orange' },
+  { id: 'automation', name: 'Automation', icon: Rocket, color: 'pink' },
+  { id: 'ai', name: 'AI & ML', icon: Sparkles, color: 'violet' },
+  { id: 'security', name: 'Security', icon: Shield, color: 'red' },
+  { id: 'finance', name: 'Finance', icon: DollarSign, color: 'emerald' },
+  { id: 'marketing', name: 'Marketing', icon: TrendingUp, color: 'amber' }
+]
+
+// ============================================================================
+// A++++ MAIN COMPONENT
+// ============================================================================
 
 export default function PluginMarketplacePage() {
-  const [viewMode, setViewMode] = useState<ViewMode>('browse')
-  const [layoutMode, setLayoutMode] = useState<LayoutMode>('grid')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<PluginCategory | 'all'>('all')
-  const [sortBy, setSortBy] = useState<'popular' | 'recent' | 'rating' | 'name'>('popular')
-  const [selectedPlugin, setSelectedPlugin] = useState<Plugin | null>(null)
+  console.log('🚀 PLUGIN: Component mounting...')
 
-  const filteredPlugins = filterPlugins(
-    MOCK_PLUGINS,
-    {
-      category: selectedCategory !== 'all' ? selectedCategory : undefined,
-      search: searchQuery
+  // ============================================================================
+  // A++++ STATE MANAGEMENT
+  // ============================================================================
+  const [state, dispatch] = useReducer(pluginReducer, {
+    plugins: [],
+    selectedPlugin: null,
+    installedPlugins: [],
+    searchTerm: '',
+    filterCategory: 'all',
+    filterPricing: 'all',
+    sortBy: 'popular',
+    viewMode: 'grid',
+    selectedPlugins: [],
+    showInstalledOnly: false
+  })
+
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
+  // Modal states
+  const [showViewModal, setShowViewModal] = useState(false)
+  const [showInstallModal, setShowInstallModal] = useState(false)
+
+  // ============================================================================
+  // A++++ LOAD DATA
+  // ============================================================================
+  useEffect(() => {
+    const loadPlugins = async () => {
+      console.log('📊 PLUGIN: Loading plugins...')
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        await new Promise(resolve => setTimeout(resolve, 1000))
+
+        const mockPlugins = generateMockPlugins()
+        dispatch({ type: 'SET_PLUGINS', plugins: mockPlugins })
+
+        // Pre-install some plugins for demo
+        const preInstalled = mockPlugins.slice(0, 5).map(plugin => ({
+          pluginId: plugin.id,
+          installedAt: new Date().toISOString(),
+          installedVersion: plugin.version,
+          isActive: true,
+          settings: {}
+        }))
+
+        preInstalled.forEach(install => {
+          const plugin = mockPlugins.find(p => p.id === install.pluginId)!
+          dispatch({ type: 'INSTALL_PLUGIN', plugin })
+        })
+
+        console.log('✅ PLUGIN: Plugins loaded successfully - Count:', mockPlugins.length)
+        setIsLoading(false)
+        announce('Plugins loaded successfully', 'polite')
+      } catch (err) {
+        console.log('❌ PLUGIN: Load error:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load plugins')
+        setIsLoading(false)
+        announce('Error loading plugins', 'assertive')
+      }
     }
-  )
 
-  const sortedPlugins = sortPlugins(filteredPlugins, sortBy)
+    loadPlugins()
+  }, [announce])
 
-  return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Premium Background */}
-      <div className="fixed inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-transparent to-transparent opacity-50" />
+  // ============================================================================
+  // A++++ COMPUTED VALUES
+  // ============================================================================
+  const stats = useMemo(() => {
+    console.log('📊 PLUGIN: Computing stats...')
+    const total = state.plugins.length
+    const installed = state.installedPlugins.length
+    const active = state.installedPlugins.filter(p => p.isActive).length
+    const totalInstalls = state.plugins.reduce((sum, p) => sum + p.installCount, 0)
+    const avgRating = state.plugins.reduce((sum, p) => sum + p.rating, 0) / Math.max(state.plugins.length, 1)
+    const verified = state.plugins.filter(p => p.isVerified).length
+    const featured = state.plugins.filter(p => p.isFeatured).length
+    const trending = state.plugins.filter(p => p.isTrending).length
 
-      {/* Animated Gradient Orbs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-emerald-500/30 to-teal-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 -right-4 w-96 h-96 bg-gradient-to-r from-teal-500/30 to-cyan-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-700"></div>
+    const computedStats = {
+      total,
+      installed,
+      active,
+      totalInstalls,
+      avgRating,
+      verified,
+      featured,
+      trending
+    }
+
+    console.log('📊 PLUGIN: Stats computed -', JSON.stringify(computedStats))
+    return computedStats
+  }, [state.plugins, state.installedPlugins])
+
+  const filteredAndSortedPlugins = useMemo(() => {
+    console.log('🔍 PLUGIN: Filtering and sorting plugins...')
+    let filtered = state.plugins
+
+    // Search
+    if (state.searchTerm) {
+      filtered = filtered.filter(plugin =>
+        plugin.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        plugin.description.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        plugin.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()))
+      )
+      console.log('🔍 PLUGIN: Search filtered to', filtered.length, 'plugins')
+    }
+
+    // Filter by category
+    if (state.filterCategory !== 'all') {
+      filtered = filtered.filter(plugin => plugin.category === state.filterCategory)
+      console.log('🎯 PLUGIN: Category filtered to', filtered.length, 'plugins')
+    }
+
+    // Filter by pricing
+    if (state.filterPricing !== 'all') {
+      filtered = filtered.filter(plugin => plugin.pricingType === state.filterPricing)
+      console.log('💰 PLUGIN: Pricing filtered to', filtered.length, 'plugins')
+    }
+
+    // Filter installed only
+    if (state.showInstalledOnly) {
+      filtered = filtered.filter(plugin =>
+        state.installedPlugins.some(ip => ip.pluginId === plugin.id)
+      )
+      console.log('🔧 PLUGIN: Installed-only filtered to', filtered.length, 'plugins')
+    }
+
+    // Sort
+    const sorted = [...filtered].sort((a, b) => {
+      switch (state.sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name)
+        case 'popular':
+          return b.installCount - a.installCount
+        case 'recent':
+          return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime()
+        case 'rating':
+          return b.rating - a.rating
+        case 'price':
+          return a.price - b.price
+        default:
+          return 0
+      }
+    })
+
+    console.log('🔀 PLUGIN: Sorted by', state.sortBy, '- Final count:', sorted.length)
+    return sorted
+  }, [state.plugins, state.searchTerm, state.filterCategory, state.filterPricing, state.sortBy, state.showInstalledOnly, state.installedPlugins])
+
+  // ============================================================================
+  // A++++ HANDLERS
+  // ============================================================================
+
+  const handleViewPlugin = (plugin: Plugin) => {
+    console.log('👁️ PLUGIN: Opening plugin view - ID:', plugin.id)
+    console.log('📊 PLUGIN: Plugin details:', {
+      name: plugin.name,
+      category: plugin.category,
+      installs: plugin.installCount
+    })
+
+    dispatch({ type: 'SELECT_PLUGIN', plugin })
+    setShowViewModal(true)
+  }
+
+  const handleInstallPlugin = async (plugin: Plugin) => {
+    console.log('📥 PLUGIN: Installing plugin - ID:', plugin.id)
+    console.log('📥 PLUGIN: Plugin:', plugin.name)
+
+    const isInstalled = state.installedPlugins.some(p => p.pluginId === plugin.id)
+
+    if (isInstalled) {
+      console.log('⚠️ PLUGIN: Plugin already installed')
+      toast.error('Plugin is already installed')
+      return
+    }
+
+    toast.info(`Installing ${plugin.name}...`)
+
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    dispatch({ type: 'INSTALL_PLUGIN', plugin })
+
+    console.log('✅ PLUGIN: Plugin installed successfully')
+    toast.success(`${plugin.name} installed successfully`)
+    announce(`${plugin.name} installed`, 'polite')
+  }
+
+  const handleUninstallPlugin = (pluginId: string) => {
+    console.log('🗑️ PLUGIN: Uninstalling plugin - ID:', pluginId)
+    const plugin = state.plugins.find(p => p.id === pluginId)
+
+    if (!plugin) {
+      console.log('❌ PLUGIN: Plugin not found')
+      return
+    }
+
+    console.log('🗑️ PLUGIN: Plugin to uninstall:', plugin.name)
+
+    if (confirm(`Uninstall "${plugin.name}"?`)) {
+      console.log('✅ PLUGIN: User confirmed uninstallation')
+      dispatch({ type: 'UNINSTALL_PLUGIN', pluginId })
+      toast.success(`${plugin.name} uninstalled`)
+      announce('Plugin uninstalled', 'polite')
+    } else {
+      console.log('❌ PLUGIN: User cancelled uninstallation')
+    }
+  }
+
+  const handleTogglePluginActive = (pluginId: string) => {
+    console.log('🔄 PLUGIN: Toggling plugin active - ID:', pluginId)
+    const installed = state.installedPlugins.find(p => p.pluginId === pluginId)
+    const plugin = state.plugins.find(p => p.id === pluginId)
+
+    if (installed && plugin) {
+      console.log('🔄 PLUGIN: Current active state:', installed.isActive)
+      dispatch({ type: 'TOGGLE_PLUGIN_ACTIVE', pluginId })
+      toast.success(`${plugin.name} ${installed.isActive ? 'deactivated' : 'activated'}`)
+    }
+  }
+
+  function formatPrice(plugin: Plugin): string {
+    if (plugin.pricingType === 'free') return 'Free'
+    if (plugin.pricingType === 'freemium') return 'Freemium'
+    if (plugin.pricingType === 'one-time') return `$${plugin.price}`
+    if (plugin.pricingType === 'subscription') return `$${plugin.price}/mo`
+    return `$${plugin.price}`
+  }
+
+  function formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+
+  function isInstalled(pluginId: string): boolean {
+    return state.installedPlugins.some(p => p.pluginId === pluginId)
+  }
+
+  function getCategoryIcon(category: PluginCategory) {
+    const option = categoryOptions.find(c => c.id === category)
+    return option?.icon || Package
+  }
+
+  // ============================================================================
+  // A++++ LOADING STATE
+  // ============================================================================
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6 min-h-screen relative">
+        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+        <div className="max-w-[1920px] mx-auto space-y-6">
+          <CardSkeleton />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+        </div>
       </div>
+    )
+  }
 
-      <div className="container mx-auto px-4 py-12 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <ScrollReveal variant="slide-up" duration={0.6}>
-            <div className="text-center mb-12">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", duration: 0.6 }}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 rounded-full text-sm font-medium mb-6 border border-emerald-500/30"
-              >
-                <Package className="w-4 h-4" />
-                Plugin Marketplace
-                <Badge className="bg-teal-500/20 text-teal-300 border-teal-500/30">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  {MOCK_MARKETPLACE_STATS.totalPlugins}+ Plugins
-                </Badge>
-              </motion.div>
+  // ============================================================================
+  // A++++ ERROR STATE
+  // ============================================================================
+  if (error) {
+    return (
+      <div className="p-6 space-y-6 min-h-screen relative">
+        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+        <div className="max-w-[1920px] mx-auto">
+          <ErrorEmptyState
+            error={error}
+            action={{
+              label: 'Retry',
+              onClick: () => window.location.reload()
+            }}
+          />
+        </div>
+      </div>
+    )
+  }
 
-              <TextShimmer className="text-5xl md:text-6xl font-bold mb-6" duration={2}>
-                Extend Your Platform
-              </TextShimmer>
+  // ============================================================================
+  // A++++ MAIN RENDER
+  // ============================================================================
+  return (
+    <div className="p-6 space-y-6 min-h-screen relative">
+      {/* Background */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+      <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
+      <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
 
-              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                Discover powerful plugins to enhance your workflow, automate tasks, and unlock new capabilities
-              </p>
-            </div>
-          </ScrollReveal>
+      <PageHeader
+        title="Plugin Marketplace"
+        description="Discover and install powerful plugins to extend your platform capabilities"
+        icon={Package}
+        breadcrumbs={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Plugin Marketplace' }
+        ]}
+      />
 
-          {/* Stats Row */}
-          <ScrollReveal variant="scale" duration={0.6} delay={0.1}>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              {[
-                { label: 'Total Plugins', value: MOCK_MARKETPLACE_STATS.totalPlugins, icon: Package, color: 'emerald' },
-                { label: 'Total Installs', value: formatInstalls(MOCK_MARKETPLACE_STATS.totalInstalls), icon: Download, color: 'teal' },
-                { label: 'Developers', value: MOCK_MARKETPLACE_STATS.totalDevelopers, icon: Users, color: 'cyan' },
-                { label: 'Avg Rating', value: MOCK_MARKETPLACE_STATS.avgRating.toFixed(1), icon: Star, color: 'yellow' }
-              ].map((stat, index) => (
-                <LiquidGlassCard key={index} className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-br from-${stat.color}-500/20 to-${stat.color}-600/20 flex items-center justify-center shrink-0`}>
-                      <stat.icon className={`w-5 h-5 text-${stat.color}-400`} />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold text-white">{stat.value}</p>
-                      <p className="text-xs text-gray-400">{stat.label}</p>
-                    </div>
+      {/* Stats Cards */}
+      <ScrollReveal>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Total Plugins</p>
+                  <NumberFlow value={stats.total} className="text-2xl font-bold text-white" />
+                </div>
+                <FloatingParticle color="emerald" size="sm">
+                  <div className="p-3 bg-emerald-500/20 rounded-xl">
+                    <Package className="h-6 w-6 text-emerald-400" />
                   </div>
-                </LiquidGlassCard>
-              ))}
-            </div>
-          </ScrollReveal>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
 
-          {/* View Mode Tabs */}
-          <ScrollReveal variant="scale" duration={0.6} delay={0.2}>
-            <div className="flex items-center justify-center gap-2 mb-8 flex-wrap">
-              {[
-                { id: 'browse' as ViewMode, label: 'Browse', icon: Package },
-                { id: 'installed' as ViewMode, label: 'Installed', icon: CheckCircle },
-                { id: 'collections' as ViewMode, label: 'Collections', icon: Grid3x3 },
-                { id: 'developer' as ViewMode, label: 'Developer', icon: Code }
-              ].map((mode) => (
-                <Button
-                  key={mode.id}
-                  variant={viewMode === mode.id ? "default" : "outline"}
-                  onClick={() => setViewMode(mode.id)}
-                  className={viewMode === mode.id ? "bg-gradient-to-r from-emerald-600 to-teal-600" : "border-gray-700 hover:bg-slate-800"}
-                >
-                  <mode.icon className="w-4 h-4 mr-2" />
-                  {mode.label}
-                </Button>
-              ))}
-            </div>
-          </ScrollReveal>
-
-          {/* Browse View */}
-          {viewMode === 'browse' && (
-            <div className="space-y-6">
-              {/* Search and Filters */}
-              <LiquidGlassCard className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <div className="flex-1 min-w-[200px]">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <Input
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Search plugins..."
-                          className="pl-10 bg-slate-900/50 border-gray-700"
-                        />
-                      </div>
-                    </div>
-
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as any)}
-                      className="px-4 py-2 bg-slate-900/50 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    >
-                      <option value="popular">Most Popular</option>
-                      <option value="recent">Recently Updated</option>
-                      <option value="rating">Highest Rated</option>
-                      <option value="name">Name A-Z</option>
-                    </select>
-
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant={layoutMode === 'grid' ? 'default' : 'outline'}
-                        size="icon"
-                        onClick={() => setLayoutMode('grid')}
-                        className={layoutMode === 'grid' ? 'bg-emerald-600' : 'border-gray-700'}
-                      >
-                        <Grid3x3 className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant={layoutMode === 'list' ? 'default' : 'outline'}
-                        size="icon"
-                        onClick={() => setLayoutMode('list')}
-                        className={layoutMode === 'list' ? 'bg-emerald-600' : 'border-gray-700'}
-                      >
-                        <List className="w-4 h-4" />
-                      </Button>
-                    </div>
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Installed</p>
+                  <NumberFlow value={stats.installed} className="text-2xl font-bold text-white" />
+                </div>
+                <FloatingParticle color="green" size="sm">
+                  <div className="p-3 bg-green-500/20 rounded-xl">
+                    <CheckCircle className="h-6 w-6 text-green-400" />
                   </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
 
-                  {/* Category Pills */}
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant={selectedCategory === 'all' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setSelectedCategory('all')}
-                      className={selectedCategory === 'all' ? 'bg-emerald-600' : 'border-gray-700'}
-                    >
-                      All
-                    </Button>
-                    {PLUGIN_CATEGORIES.map((category) => (
-                      <Button
-                        key={category.id}
-                        variant={selectedCategory === category.id ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setSelectedCategory(category.id)}
-                        className={selectedCategory === category.id ? 'bg-emerald-600' : 'border-gray-700'}
-                      >
-                        <span className="mr-1">{category.icon}</span>
-                        {category.name}
-                      </Button>
-                    ))}
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Total Installs</p>
+                  <div className="text-2xl font-bold text-white">
+                    {(stats.totalInstalls / 1000000).toFixed(1)}M
                   </div>
                 </div>
-              </LiquidGlassCard>
+                <FloatingParticle color="cyan" size="sm">
+                  <div className="p-3 bg-cyan-500/20 rounded-xl">
+                    <Download className="h-6 w-6 text-cyan-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
 
-              {/* Plugins Grid/List */}
-              <div className={layoutMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}>
-                {sortedPlugins.map((plugin) => {
-                  const installed = isPluginInstalled(plugin.id, MOCK_INSTALLED_PLUGINS)
-                  const compatibility = getCompatibilityBadge(plugin.compatibility)
-                  const ratingStars = getRatingStars(plugin.rating)
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Avg Rating</p>
+                  <div className="text-2xl font-bold text-white">
+                    {stats.avgRating.toFixed(1)} ⭐
+                  </div>
+                </div>
+                <FloatingParticle color="amber" size="sm">
+                  <div className="p-3 bg-amber-500/20 rounded-xl">
+                    <Star className="h-6 w-6 text-amber-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
 
-                  return (
-                    <motion.div key={plugin.id} whileHover={{ scale: 1.02 }}>
-                      <LiquidGlassCard className="p-6 h-full">
-                        <div className="space-y-4">
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Verified</p>
+                  <NumberFlow value={stats.verified} className="text-2xl font-bold text-white" />
+                </div>
+                <FloatingParticle color="blue" size="sm">
+                  <div className="p-3 bg-blue-500/20 rounded-xl">
+                    <Shield className="h-6 w-6 text-blue-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
+
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Featured</p>
+                  <NumberFlow value={stats.featured} className="text-2xl font-bold text-white" />
+                </div>
+                <FloatingParticle color="purple" size="sm">
+                  <div className="p-3 bg-purple-500/20 rounded-xl">
+                    <Award className="h-6 w-6 text-purple-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
+      </ScrollReveal>
+
+      {/* Category Pills */}
+      <ScrollReveal delay={0.1}>
+        <LiquidGlassCard>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3 overflow-x-auto pb-2">
+              <button
+                onClick={() => dispatch({ type: 'SET_FILTER_CATEGORY', filterCategory: 'all' })}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
+                  state.filterCategory === 'all'
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white'
+                    : 'bg-slate-800/50 text-gray-400 hover:bg-slate-700/50'
+                }`}
+              >
+                <Sparkles className="h-4 w-4" />
+                All Plugins
+              </button>
+              {categoryOptions.map((category) => {
+                const Icon = category.icon
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => dispatch({ type: 'SET_FILTER_CATEGORY', filterCategory: category.id })}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
+                      state.filterCategory === category.id
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white'
+                        : 'bg-slate-800/50 text-gray-400 hover:bg-slate-700/50'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {category.name}
+                  </button>
+                )
+              })}
+            </div>
+          </CardContent>
+        </LiquidGlassCard>
+      </ScrollReveal>
+
+      {/* Actions Bar */}
+      <ScrollReveal delay={0.2}>
+        <LiquidGlassCard>
+          <CardContent className="p-4">
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Search */}
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search plugins..."
+                    value={state.searchTerm}
+                    onChange={(e) => dispatch({ type: 'SET_SEARCH', searchTerm: e.target.value })}
+                    className="pl-10 bg-slate-900/50 border-slate-700"
+                  />
+                </div>
+              </div>
+
+              {/* Filters */}
+              <div className="flex gap-2 flex-wrap">
+                <Select
+                  value={state.filterPricing}
+                  onValueChange={(value) => dispatch({ type: 'SET_FILTER_PRICING', filterPricing: value as any })}
+                >
+                  <SelectTrigger className="w-[140px] bg-slate-900/50 border-slate-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Pricing</SelectItem>
+                    <SelectItem value="free">Free</SelectItem>
+                    <SelectItem value="one-time">One-time</SelectItem>
+                    <SelectItem value="subscription">Subscription</SelectItem>
+                    <SelectItem value="freemium">Freemium</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={state.sortBy}
+                  onValueChange={(value) => dispatch({ type: 'SET_SORT', sortBy: value as any })}
+                >
+                  <SelectTrigger className="w-[140px] bg-slate-900/50 border-slate-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="popular">Popular</SelectItem>
+                    <SelectItem value="name">Name</SelectItem>
+                    <SelectItem value="recent">Recent</SelectItem>
+                    <SelectItem value="rating">Rating</SelectItem>
+                    <SelectItem value="price">Price</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  variant={state.showInstalledOnly ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => dispatch({ type: 'TOGGLE_INSTALLED_ONLY' })}
+                  className={state.showInstalledOnly ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : ''}
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Installed
+                </Button>
+
+                <div className="flex gap-1 bg-slate-800/50 rounded-lg p-1">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => dispatch({ type: 'SET_VIEW_MODE', viewMode: 'grid' })}
+                    className={state.viewMode === 'grid' ? 'bg-slate-700' : ''}
+                  >
+                    <Grid className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => dispatch({ type: 'SET_VIEW_MODE', viewMode: 'list' })}
+                    className={state.viewMode === 'list' ? 'bg-slate-700' : ''}
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </LiquidGlassCard>
+      </ScrollReveal>
+
+      {/* Plugins Grid */}
+      <ScrollReveal delay={0.3}>
+        <div className={`grid gap-4 ${
+          state.viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'
+        }`}>
+          <AnimatePresence mode="popLayout">
+            {filteredAndSortedPlugins.map((plugin, index) => {
+              const Icon = getCategoryIcon(plugin.category)
+              const installed = isInstalled(plugin.id)
+              const installedPlugin = state.installedPlugins.find(p => p.pluginId === plugin.id)
+
+              return (
+                <motion.div
+                  key={plugin.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ delay: index * 0.02 }}
+                >
+                  <LiquidGlassCard className="group cursor-pointer hover:shadow-xl transition-all duration-300">
+                    <CardContent className="p-0">
+                      {state.viewMode === 'grid' && (
+                        <div className="p-4 space-y-3">
                           {/* Header */}
-                          <div className="flex items-start gap-4">
-                            <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center text-3xl shrink-0">
-                              {plugin.category === 'ai' && '🧠'}
-                              {plugin.category === 'productivity' && '⚡'}
-                              {plugin.category === 'integration' && '🔗'}
-                              {plugin.category === 'automation' && '🤖'}
-                              {plugin.category === 'analytics' && '📊'}
-                              {plugin.category === 'creative' && '🎨'}
-                            </div>
-
+                          <div className="flex items-start gap-3">
+                            <div className="text-3xl">{plugin.icon}</div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2 mb-1">
+                              <div className="flex items-start justify-between gap-2">
                                 <h3 className="font-semibold text-white truncate">{plugin.name}</h3>
                                 {plugin.isVerified && (
-                                  <Shield className="w-4 h-4 text-emerald-400 shrink-0" />
+                                  <Shield className="h-4 w-4 text-emerald-400 shrink-0" />
                                 )}
                               </div>
-                              <p className="text-xs text-gray-400 mb-1">{plugin.author.name}</p>
-                              <div className="flex items-center gap-1">
-                                {Array.from({ length: ratingStars.full }).map((_, i) => (
-                                  <Star key={`full-${i}`} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                                ))}
-                                {ratingStars.half && (
-                                  <Star className="w-3 h-3 fill-yellow-400 text-yellow-400 opacity-50" />
-                                )}
-                                <span className="text-xs text-gray-400 ml-1">
-                                  {plugin.rating} ({plugin.reviewCount})
-                                </span>
-                              </div>
+                              <p className="text-xs text-gray-400">{plugin.author.name}</p>
                             </div>
                           </div>
 
@@ -278,222 +983,282 @@ export default function PluginMarketplacePage() {
                           <p className="text-sm text-gray-400 line-clamp-2">{plugin.description}</p>
 
                           {/* Badges */}
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex flex-wrap gap-1">
                             {plugin.isFeatured && (
-                              <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30 text-xs">
-                                <Award className="w-3 h-3 mr-1" />
+                              <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/30 text-xs">
+                                <Award className="h-3 w-3 mr-1" />
                                 Featured
                               </Badge>
                             )}
                             {plugin.isTrending && (
                               <Badge className="bg-pink-500/20 text-pink-300 border-pink-500/30 text-xs">
-                                <TrendingUp className="w-3 h-3 mr-1" />
+                                <TrendingUp className="h-3 w-3 mr-1" />
                                 Trending
                               </Badge>
                             )}
-                            {plugin.isNew && (
-                              <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
-                                <Sparkles className="w-3 h-3 mr-1" />
-                                New
+                            {installed && (
+                              <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Installed
                               </Badge>
                             )}
-                            <Badge className={`bg-${compatibility.color}-500/20 text-${compatibility.color}-300 border-${compatibility.color}-500/30 text-xs`}>
-                              {compatibility.label}
-                            </Badge>
                           </div>
 
-                          {/* Stats */}
-                          <div className="grid grid-cols-3 gap-2 text-xs">
-                            <div>
-                              <span className="text-gray-400 block">Installs</span>
-                              <span className="text-white font-medium">{formatInstalls(plugin.installCount)}</span>
+                          {/* Rating & Stats */}
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-1">
+                              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                              <span className="text-white font-medium">{plugin.rating}</span>
+                              <span className="text-gray-500">({plugin.reviewCount})</span>
                             </div>
-                            <div>
-                              <span className="text-gray-400 block">Version</span>
-                              <span className="text-white font-medium">{plugin.version}</span>
-                            </div>
-                            <div>
-                              <span className="text-gray-400 block">Size</span>
-                              <span className="text-white font-medium">{formatFileSize(plugin.fileSize)}</span>
+                            <div className="text-gray-400">
+                              {(plugin.installCount / 1000).toFixed(1)}k installs
                             </div>
                           </div>
 
-                          {/* Price & Install */}
-                          <div className="pt-4 border-t border-gray-700 flex items-center justify-between gap-2">
+                          {/* Price & Actions */}
+                          <div className="pt-3 border-t border-slate-700/50 flex items-center justify-between gap-2">
                             <div className="text-lg font-bold text-white">
-                              {formatPrice(plugin.pricing)}
+                              {formatPrice(plugin)}
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex gap-1">
                               {installed ? (
-                                <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
-                                  <CheckCircle className="w-3 h-3 mr-1" />
-                                  Installed
-                                </Badge>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button size="sm" variant="outline" className="h-8">
+                                      <Settings className="h-3 w-3 mr-1" />
+                                      Manage
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => handleTogglePluginActive(plugin.id)}>
+                                      {installedPlugin?.isActive ? 'Deactivate' : 'Activate'}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleViewPlugin(plugin)}>
+                                      <Eye className="h-4 w-4 mr-2" />
+                                      View Details
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => handleUninstallPlugin(plugin.id)}
+                                      className="text-red-400"
+                                    >
+                                      <X className="h-4 w-4 mr-2" />
+                                      Uninstall
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               ) : (
-                                <Button size="sm" className="bg-gradient-to-r from-emerald-600 to-teal-600">
-                                  <Download className="w-3 h-3 mr-1" />
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleInstallPlugin(plugin)}
+                                  className="bg-gradient-to-r from-emerald-500 to-teal-600 h-8"
+                                >
+                                  <Download className="h-3 w-3 mr-1" />
                                   Install
                                 </Button>
                               )}
-                              <Button variant="outline" size="icon" className="h-8 w-8 border-gray-700 hover:bg-slate-800">
-                                <Eye className="w-3 h-3" />
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleViewPlugin(plugin)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Eye className="h-3 w-3" />
                               </Button>
                             </div>
                           </div>
                         </div>
-                      </LiquidGlassCard>
-                    </motion.div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
+                      )}
 
-          {/* Installed View */}
-          {viewMode === 'installed' && (
-            <div className="space-y-6">
-              {MOCK_INSTALLED_PLUGINS.length === 0 ? (
-                <LiquidGlassCard className="p-12 text-center">
-                  <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-white mb-2">No Plugins Installed</h3>
-                  <p className="text-gray-400 mb-6">Start by browsing the marketplace</p>
-                  <Button onClick={() => setViewMode('browse')} className="bg-gradient-to-r from-emerald-600 to-teal-600">
-                    Browse Plugins
-                  </Button>
-                </LiquidGlassCard>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {MOCK_INSTALLED_PLUGINS.map((installed) => {
-                    const plugin = MOCK_PLUGINS.find(p => p.id === installed.pluginId)
-                    if (!plugin) return null
-
-                    return (
-                      <LiquidGlassCard key={installed.pluginId} className="p-6">
-                        <div className="space-y-4">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="font-semibold text-white mb-1">{plugin.name}</h3>
-                              <p className="text-sm text-gray-400">v{installed.installedVersion}</p>
-                            </div>
-                            <Badge className={`bg-${installed.status === 'active' ? 'green' : 'yellow'}-500/20 text-${installed.status === 'active' ? 'green' : 'yellow'}-300 border-${installed.status === 'active' ? 'green' : 'yellow'}-500/30`}>
-                              {installed.status}
-                            </Badge>
-                          </div>
-
-                          {installed.usageStats && (
-                            <div className="grid grid-cols-2 gap-4 text-sm">
+                      {state.viewMode === 'list' && (
+                        <div className="p-4 flex items-center gap-4">
+                          <div className="text-3xl">{plugin.icon}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2 mb-2">
                               <div>
-                                <span className="text-gray-400 block">Activations</span>
-                                <span className="text-white font-medium">{installed.usageStats.activations}</span>
+                                <div className="flex items-center gap-2">
+                                  <h3 className="font-semibold text-white">{plugin.name}</h3>
+                                  {plugin.isVerified && (
+                                    <Shield className="h-4 w-4 text-emerald-400" />
+                                  )}
+                                </div>
+                                <p className="text-xs text-gray-400">{plugin.description}</p>
                               </div>
-                              <div>
-                                <span className="text-gray-400 block">Last Used</span>
-                                <span className="text-white font-medium">{formatDate(installed.lastUsed!)}</span>
+                              <div className="text-lg font-bold text-white whitespace-nowrap">
+                                {formatPrice(plugin)}
                               </div>
                             </div>
-                          )}
-
-                          <div className="pt-4 border-t border-gray-700 flex gap-2">
-                            <Button variant="outline" size="sm" className="flex-1 border-gray-700 hover:bg-slate-800">
-                              <Settings className="w-3 h-3 mr-1" />
-                              Settings
-                            </Button>
-                            <Button variant="outline" size="sm" className="border-gray-700 hover:bg-slate-800">
-                              <RefreshCw className="w-3 h-3" />
-                            </Button>
-                            <Button variant="outline" size="sm" className="border-gray-700 hover:bg-red-800">
-                              <X className="w-3 h-3" />
-                            </Button>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4 text-xs text-gray-400">
+                                <div className="flex items-center gap-1">
+                                  <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                                  {plugin.rating}
+                                </div>
+                                <div>{(plugin.installCount / 1000).toFixed(1)}k installs</div>
+                                <Badge variant="outline" className="text-xs">
+                                  {plugin.category}
+                                </Badge>
+                              </div>
+                              <div className="flex gap-2">
+                                {installed ? (
+                                  <Button size="sm" variant="outline">
+                                    <Settings className="h-3 w-3 mr-1" />
+                                    Manage
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleInstallPlugin(plugin)}
+                                    className="bg-gradient-to-r from-emerald-500 to-teal-600"
+                                  >
+                                    <Download className="h-3 w-3 mr-1" />
+                                    Install
+                                  </Button>
+                                )}
+                                <Button size="sm" variant="outline" onClick={() => handleViewPlugin(plugin)}>
+                                  <Eye className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </LiquidGlassCard>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Collections View */}
-          {viewMode === 'collections' && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {MOCK_COLLECTIONS.map((collection) => (
-                  <motion.div key={collection.id} whileHover={{ scale: 1.02 }}>
-                    <LiquidGlassCard className="p-6 h-full">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center text-2xl">
-                            {collection.icon}
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-white">{collection.name}</h3>
-                            <p className="text-xs text-gray-400">by {collection.curatedBy}</p>
-                          </div>
-                        </div>
-
-                        <p className="text-sm text-gray-400">{collection.description}</p>
-
-                        <div className="flex items-center justify-between pt-4 border-t border-gray-700">
-                          <span className="text-sm text-gray-400">{collection.plugins.length} plugins</span>
-                          <Button size="sm" variant="outline" className="border-gray-700 hover:bg-slate-800">
-                            <Eye className="w-3 h-3 mr-1" />
-                            View
-                          </Button>
-                        </div>
-                      </div>
-                    </LiquidGlassCard>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Developer View */}
-          {viewMode === 'developer' && (
-            <div className="space-y-6">
-              <LiquidGlassCard className="p-8 text-center">
-                <Code className="w-16 h-16 text-emerald-400 mx-auto mb-4" />
-                <h3 className="text-2xl font-bold text-white mb-2">Developer Portal</h3>
-                <p className="text-gray-400 mb-6">
-                  Build and publish plugins for the KAZI marketplace
-                </p>
-                <div className="flex items-center justify-center gap-4">
-                  <Button className="bg-gradient-to-r from-emerald-600 to-teal-600">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Plugin
-                  </Button>
-                  <Button variant="outline" className="border-gray-700 hover:bg-slate-800">
-                    <Book className="w-4 h-4 mr-2" />
-                    Documentation
-                  </Button>
-                </div>
-              </LiquidGlassCard>
-
-              {/* Developer Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                  { label: 'Your Plugins', value: '3', icon: Package },
-                  { label: 'Total Installs', value: '1.2K', icon: Download },
-                  { label: 'Avg Rating', value: '4.7', icon: Star }
-                ].map((stat, index) => (
-                  <LiquidGlassCard key={index} className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center">
-                        <stat.icon className="w-6 h-6 text-emerald-400" />
-                      </div>
-                      <div>
-                        <p className="text-3xl font-bold text-white">{stat.value}</p>
-                        <p className="text-sm text-gray-400">{stat.label}</p>
-                      </div>
-                    </div>
+                      )}
+                    </CardContent>
                   </LiquidGlassCard>
-                ))}
-              </div>
-            </div>
-          )}
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
         </div>
-      </div>
+
+        {filteredAndSortedPlugins.length === 0 && (
+          <NoDataEmptyState message="No plugins found" />
+        )}
+      </ScrollReveal>
+
+      {/* View Plugin Modal */}
+      <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <span className="text-3xl">{state.selectedPlugin?.icon}</span>
+              {state.selectedPlugin?.name}
+              {state.selectedPlugin?.isVerified && (
+                <Shield className="h-5 w-5 text-emerald-400" />
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              by {state.selectedPlugin?.author.name}
+            </DialogDescription>
+          </DialogHeader>
+
+          {state.selectedPlugin && (
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                <TabsTrigger value="changelog">Changelog</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="overview" className="space-y-4">
+                {/* Screenshots */}
+                <div className="grid grid-cols-3 gap-2">
+                  {state.selectedPlugin.screenshots.map((screenshot, i) => (
+                    <img
+                      key={i}
+                      src={screenshot}
+                      alt={`Screenshot ${i + 1}`}
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                  ))}
+                </div>
+
+                <div>
+                  <Label className="text-gray-400">Description</Label>
+                  <p className="text-white mt-2">{state.selectedPlugin.longDescription}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-gray-400">Category</Label>
+                    <p className="text-white capitalize">{state.selectedPlugin.category}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Version</Label>
+                    <p className="text-white">{state.selectedPlugin.version}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">File Size</Label>
+                    <p className="text-white">{formatFileSize(state.selectedPlugin.fileSize)}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Installs</Label>
+                    <p className="text-white">{(state.selectedPlugin.installCount / 1000).toFixed(1)}k</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Rating</Label>
+                    <p className="text-white">{state.selectedPlugin.rating} ⭐ ({state.selectedPlugin.reviewCount} reviews)</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Pricing</Label>
+                    <p className="text-white">{formatPrice(state.selectedPlugin)}</p>
+                  </div>
+                </div>
+
+                {state.selectedPlugin.tags.length > 0 && (
+                  <div>
+                    <Label className="text-gray-400">Tags</Label>
+                    <div className="flex gap-2 flex-wrap mt-2">
+                      {state.selectedPlugin.tags.map((tag, i) => (
+                        <Badge key={i} variant="outline">{tag}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="reviews" className="space-y-4">
+                <div className="text-center py-8 text-gray-400">
+                  <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>Reviews coming soon</p>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="changelog" className="space-y-4">
+                <div className="space-y-3">
+                  {state.selectedPlugin.changelog.map((entry, i) => (
+                    <div key={i} className="p-3 bg-slate-800/50 rounded-lg">
+                      <p className="text-white text-sm">{entry}</p>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          )}
+
+          <DialogFooter>
+            {state.selectedPlugin && isInstalled(state.selectedPlugin.id) ? (
+              <Button
+                variant="outline"
+                onClick={() => handleUninstallPlugin(state.selectedPlugin!.id)}
+                className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Uninstall
+              </Button>
+            ) : (
+              <Button
+                onClick={() => state.selectedPlugin && handleInstallPlugin(state.selectedPlugin)}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Install Plugin
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

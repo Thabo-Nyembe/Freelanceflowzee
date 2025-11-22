@@ -1,481 +1,1500 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import React, { useState, useEffect, useReducer, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  Users,
+  Building2,
+  FolderKanban,
+  MessageSquare,
+  FileText,
+  Plus,
+  Search,
+  Filter,
+  Eye,
+  Edit,
+  Trash2,
+  MoreVertical,
+  Mail,
+  Phone,
+  Calendar,
+  DollarSign,
+  TrendingUp,
+  Award,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  Download,
+  Upload,
+  Send,
+  X,
+  Check
+} from 'lucide-react'
+import { toast } from 'sonner'
+import { NumberFlow } from '@/components/ui/number-flow'
+
+// UI Components
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Textarea } from '@/components/ui/textarea'
+
+// Premium Components
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 
 // A+++ UTILITIES
-import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
-import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { CardSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
-import {
-  MOCK_CLIENTS,
-  MOCK_PROJECTS,
-  MOCK_COMMUNICATIONS,
-  MOCK_FILES,
-  MOCK_CLIENT_STATS,
-  getClientStatusColor,
-  getClientTierColor,
-  getProjectStatusColor,
-  getCommunicationIcon,
-  getFileCategoryIcon,
-  formatFileSize,
-  calculateHealthScore,
-  getHealthScoreColor,
-  getActiveProjects,
-  getProjectBudgetStatus,
-  isProjectOverdue
-} from '@/lib/client-portal-utils'
-import {
-  Client,
-  ClientStatus,
-  ClientTier
-} from '@/lib/client-portal-types'
 
+// ============================================================================
+// TYPES & INTERFACES
+// ============================================================================
+
+type ClientStatus = 'active' | 'onboarding' | 'inactive' | 'churned'
+type ClientTier = 'basic' | 'standard' | 'premium' | 'enterprise'
+type ProjectStatus = 'planning' | 'active' | 'on-hold' | 'completed' | 'cancelled'
+type CommunicationType = 'email' | 'call' | 'meeting' | 'message' | 'note'
 type ViewMode = 'overview' | 'clients' | 'projects' | 'communications' | 'files'
 
+interface Client {
+  id: string
+  companyName: string
+  contactPerson: string
+  email: string
+  phone: string
+  status: ClientStatus
+  tier: ClientTier
+  activeProjects: number
+  totalRevenue: number
+  healthScore: number
+  lastContact: string
+  nextFollowUp: string
+  tags: string[]
+  createdAt: string
+}
+
+interface Project {
+  id: string
+  clientId: string
+  name: string
+  description: string
+  status: ProjectStatus
+  budget: number
+  spent: number
+  progress: number
+  startDate: string
+  endDate: string
+  team: string[]
+}
+
+interface Communication {
+  id: string
+  clientId: string
+  type: CommunicationType
+  subject: string
+  content: string
+  createdAt: string
+  createdBy: string
+}
+
+interface PortalFile {
+  id: string
+  clientId: string
+  name: string
+  category: 'contract' | 'invoice' | 'proposal' | 'report' | 'other'
+  size: number
+  uploadedAt: string
+  uploadedBy: string
+  version: number
+}
+
+interface PortalState {
+  clients: Client[]
+  projects: Project[]
+  communications: Communication[]
+  files: PortalFile[]
+  selectedClient: Client | null
+  selectedProject: Project | null
+  viewMode: ViewMode
+  searchTerm: string
+  filterStatus: ClientStatus | 'all'
+  filterTier: ClientTier | 'all'
+  sortBy: 'name' | 'revenue' | 'health' | 'recent'
+}
+
+type PortalAction =
+  | { type: 'SET_CLIENTS'; clients: Client[] }
+  | { type: 'SET_PROJECTS'; projects: Project[] }
+  | { type: 'SET_COMMUNICATIONS'; communications: Communication[] }
+  | { type: 'SET_FILES'; files: PortalFile[] }
+  | { type: 'ADD_CLIENT'; client: Client }
+  | { type: 'UPDATE_CLIENT'; client: Client }
+  | { type: 'DELETE_CLIENT'; clientId: string }
+  | { type: 'ADD_PROJECT'; project: Project }
+  | { type: 'ADD_COMMUNICATION'; communication: Communication }
+  | { type: 'SELECT_CLIENT'; client: Client | null }
+  | { type: 'SELECT_PROJECT'; project: Project | null }
+  | { type: 'SET_VIEW_MODE'; viewMode: ViewMode }
+  | { type: 'SET_SEARCH'; searchTerm: string }
+  | { type: 'SET_FILTER_STATUS'; filterStatus: PortalState['filterStatus'] }
+  | { type: 'SET_FILTER_TIER'; filterTier: PortalState['filterTier'] }
+  | { type: 'SET_SORT'; sortBy: PortalState['sortBy'] }
+
+// ============================================================================
+// REDUCER
+// ============================================================================
+
+function portalReducer(state: PortalState, action: PortalAction): PortalState {
+  console.log('🔄 CLIENT PORTAL REDUCER: Action:', action.type)
+
+  switch (action.type) {
+    case 'SET_CLIENTS':
+      console.log('✅ CLIENT PORTAL: Set clients -', action.clients.length, 'clients loaded')
+      return { ...state, clients: action.clients }
+
+    case 'SET_PROJECTS':
+      console.log('✅ CLIENT PORTAL: Set projects -', action.projects.length, 'projects loaded')
+      return { ...state, projects: action.projects }
+
+    case 'SET_COMMUNICATIONS':
+      console.log('✅ CLIENT PORTAL: Set communications -', action.communications.length, 'items loaded')
+      return { ...state, communications: action.communications }
+
+    case 'SET_FILES':
+      console.log('✅ CLIENT PORTAL: Set files -', action.files.length, 'files loaded')
+      return { ...state, files: action.files }
+
+    case 'ADD_CLIENT':
+      console.log('✅ CLIENT PORTAL: Client added - ID:', action.client.id, 'Company:', action.client.companyName)
+      return { ...state, clients: [action.client, ...state.clients] }
+
+    case 'UPDATE_CLIENT':
+      console.log('✅ CLIENT PORTAL: Client updated - ID:', action.client.id)
+      return {
+        ...state,
+        clients: state.clients.map(c => c.id === action.client.id ? action.client : c)
+      }
+
+    case 'DELETE_CLIENT':
+      console.log('✅ CLIENT PORTAL: Client deleted - ID:', action.clientId)
+      return {
+        ...state,
+        clients: state.clients.filter(c => c.id !== action.clientId)
+      }
+
+    case 'ADD_PROJECT':
+      console.log('✅ CLIENT PORTAL: Project added - ID:', action.project.id, 'Name:', action.project.name)
+      return { ...state, projects: [action.project, ...state.projects] }
+
+    case 'ADD_COMMUNICATION':
+      console.log('✅ CLIENT PORTAL: Communication added - ID:', action.communication.id)
+      return { ...state, communications: [action.communication, ...state.communications] }
+
+    case 'SELECT_CLIENT':
+      console.log('👁️ CLIENT PORTAL: Client selected -', action.client ? action.client.companyName : 'None')
+      return { ...state, selectedClient: action.client }
+
+    case 'SELECT_PROJECT':
+      console.log('👁️ CLIENT PORTAL: Project selected -', action.project ? action.project.name : 'None')
+      return { ...state, selectedProject: action.project }
+
+    case 'SET_VIEW_MODE':
+      console.log('🖼️ CLIENT PORTAL: View mode:', action.viewMode)
+      return { ...state, viewMode: action.viewMode }
+
+    case 'SET_SEARCH':
+      console.log('🔍 CLIENT PORTAL: Search term:', action.searchTerm)
+      return { ...state, searchTerm: action.searchTerm }
+
+    case 'SET_FILTER_STATUS':
+      console.log('🔍 CLIENT PORTAL: Filter status:', action.filterStatus)
+      return { ...state, filterStatus: action.filterStatus }
+
+    case 'SET_FILTER_TIER':
+      console.log('🔍 CLIENT PORTAL: Filter tier:', action.filterTier)
+      return { ...state, filterTier: action.filterTier }
+
+    case 'SET_SORT':
+      console.log('🔀 CLIENT PORTAL: Sort by:', action.sortBy)
+      return { ...state, sortBy: action.sortBy }
+
+    default:
+      return state
+  }
+}
+
+// ============================================================================
+// MOCK DATA
+// ============================================================================
+
+const generateMockClients = (): Client[] => {
+  console.log('📊 CLIENT PORTAL: Generating mock clients...')
+
+  const companies = [
+    'TechCorp Solutions', 'Digital Innovators', 'Cloud Systems Inc', 'Data Dynamics',
+    'Smart Solutions Ltd', 'Future Technologies', 'Alpha Enterprises', 'Beta Industries',
+    'Gamma Corporation', 'Delta Group', 'Epsilon Systems', 'Zeta Innovations',
+    'Eta Digital', 'Theta Tech', 'Iota Solutions', 'Kappa Corporation',
+    'Lambda Industries', 'Mu Systems', 'Nu Enterprises', 'Xi Technologies'
+  ]
+
+  const contacts = [
+    'John Smith', 'Sarah Johnson', 'Michael Brown', 'Emily Davis',
+    'David Wilson', 'Jennifer Martinez', 'Robert Anderson', 'Lisa Taylor',
+    'James Thomas', 'Mary Jackson', 'Christopher White', 'Patricia Harris'
+  ]
+
+  const statuses: ClientStatus[] = ['active', 'onboarding', 'inactive', 'churned']
+  const tiers: ClientTier[] = ['basic', 'standard', 'premium', 'enterprise']
+
+  const clients: Client[] = companies.map((company, index) => ({
+    id: `CL-${String(index + 1).padStart(3, '0')}`,
+    companyName: company,
+    contactPerson: contacts[index % contacts.length],
+    email: `contact@${company.toLowerCase().replace(/\s+/g, '')}.com`,
+    phone: `+1 (555) ${String(Math.floor(Math.random() * 900) + 100)}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
+    status: statuses[Math.floor(Math.random() * statuses.length)],
+    tier: tiers[Math.floor(Math.random() * tiers.length)],
+    activeProjects: Math.floor(Math.random() * 5) + 1,
+    totalRevenue: Math.floor(Math.random() * 500000) + 50000,
+    healthScore: Math.floor(Math.random() * 30) + 70,
+    lastContact: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+    nextFollowUp: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+    tags: ['priority', 'enterprise', 'growth'].slice(0, Math.floor(Math.random() * 3) + 1),
+    createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
+  }))
+
+  console.log('✅ CLIENT PORTAL: Generated', clients.length, 'mock clients')
+  return clients
+}
+
+const generateMockProjects = (clients: Client[]): Project[] => {
+  console.log('📊 CLIENT PORTAL: Generating mock projects...')
+
+  const projectNames = [
+    'Website Redesign', 'Mobile App Development', 'Cloud Migration', 'API Integration',
+    'Data Analytics Platform', 'CRM Implementation', 'E-commerce Solution', 'Brand Identity',
+    'Marketing Campaign', 'Security Audit', 'Performance Optimization', 'DevOps Setup'
+  ]
+
+  const statuses: ProjectStatus[] = ['planning', 'active', 'on-hold', 'completed', 'cancelled']
+
+  const projects: Project[] = projectNames.map((name, index) => {
+    const client = clients[index % clients.length]
+    const budget = Math.floor(Math.random() * 200000) + 50000
+    const spent = Math.floor(budget * (Math.random() * 0.8))
+
+    return {
+      id: `PR-${String(index + 1).padStart(3, '0')}`,
+      clientId: client.id,
+      name,
+      description: `${name} project for ${client.companyName}`,
+      status: statuses[Math.floor(Math.random() * statuses.length)],
+      budget,
+      spent,
+      progress: Math.floor(Math.random() * 100),
+      startDate: new Date(Date.now() - Math.random() * 180 * 24 * 60 * 60 * 1000).toISOString(),
+      endDate: new Date(Date.now() + Math.random() * 180 * 24 * 60 * 60 * 1000).toISOString(),
+      team: ['John Doe', 'Jane Smith', 'Bob Johnson'].slice(0, Math.floor(Math.random() * 3) + 1)
+    }
+  })
+
+  console.log('✅ CLIENT PORTAL: Generated', projects.length, 'mock projects')
+  return projects
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
 export default function ClientPortalPage() {
-  // A+++ STATE MANAGEMENT
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  console.log('🚀 CLIENT PORTAL: Component mounting...')
+
+  // A+++ UTILITIES
   const { announce } = useAnnouncer()
 
-  const [viewMode, setViewMode] = useState<ViewMode>('overview')
-  const [filterStatus, setFilterStatus] = useState<ClientStatus | 'all'>('all')
-  const [filterTier, setFilterTier] = useState<ClientTier | 'all'>('all')
+  // STATE
+  const [state, dispatch] = useReducer(portalReducer, {
+    clients: [],
+    projects: [],
+    communications: [],
+    files: [],
+    selectedClient: null,
+    selectedProject: null,
+    viewMode: 'overview',
+    searchTerm: '',
+    filterStatus: 'all',
+    filterTier: 'all',
+    sortBy: 'recent'
+  })
 
-  // A+++ LOAD CLIENT PORTAL DATA
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // MODALS
+  const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false)
+  const [isViewClientModalOpen, setIsViewClientModalOpen] = useState(false)
+  const [isAddProjectModalOpen, setIsAddProjectModalOpen] = useState(false)
+  const [isAddCommunicationModalOpen, setIsAddCommunicationModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+
+  // FORM STATES
+  const [clientForm, setClientForm] = useState({
+    companyName: '',
+    contactPerson: '',
+    email: '',
+    phone: '',
+    tier: 'basic' as ClientTier
+  })
+
+  const [projectForm, setProjectForm] = useState({
+    name: '',
+    description: '',
+    budget: '',
+    clientId: ''
+  })
+
+  const [communicationForm, setCommunicationForm] = useState({
+    type: 'email' as CommunicationType,
+    subject: '',
+    content: ''
+  })
+
+  // ============================================================================
+  // LOAD DATA
+  // ============================================================================
+
   useEffect(() => {
-    const loadClientPortalData = async () => {
+    console.log('📊 CLIENT PORTAL: Loading portal data...')
+
+    const loadData = async () => {
       try {
         setIsLoading(true)
-        setError(null)
+        await new Promise(resolve => setTimeout(resolve, 1000))
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load client portal data'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        const clients = generateMockClients()
+        const projects = generateMockProjects(clients)
 
+        dispatch({ type: 'SET_CLIENTS', clients })
+        dispatch({ type: 'SET_PROJECTS', projects })
+
+        console.log('✅ CLIENT PORTAL: Data loaded successfully')
+        announce('Client portal loaded', 'polite')
+      } catch (error) {
+        console.error('❌ CLIENT PORTAL: Load error:', error)
+        toast.error('Failed to load client portal data')
+      } finally {
         setIsLoading(false)
-        announce('Client portal loaded successfully', 'polite')
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load client portal data')
-        setIsLoading(false)
-        announce('Error loading client portal', 'assertive')
       }
     }
 
-    loadClientPortalData()
+    loadData()
   }, [announce])
 
-  const viewModes = [
-    { id: 'overview', label: 'Overview', icon: '📊' },
-    { id: 'clients', label: 'Clients', icon: '👥' },
-    { id: 'projects', label: 'Projects', icon: '📁' },
-    { id: 'communications', label: 'Communications', icon: '💬' },
-    { id: 'files', label: 'Files', icon: '📄' }
-  ]
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
 
-  const filteredClients = MOCK_CLIENTS.filter(client => {
-    if (filterStatus !== 'all' && client.status !== filterStatus) return false
-    if (filterTier !== 'all' && client.tier !== filterTier) return false
-    return true
-  })
+  const stats = useMemo(() => {
+    console.log('📊 CLIENT PORTAL: Calculating stats...')
 
-  const renderOverview = () => (
-    <div className="space-y-6">
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <LiquidGlassCard>
-          <div className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <div className="text-sm text-muted-foreground mb-1">Total Clients</div>
-                <div className="text-3xl font-bold text-blue-500">
-                  {MOCK_CLIENT_STATS.totalClients}
-                </div>
-              </div>
-              <div className="text-2xl">👥</div>
-            </div>
-            <div className="text-xs text-green-500">
-              +{MOCK_CLIENT_STATS.newClientsThisMonth} this month
-            </div>
-          </div>
-        </LiquidGlassCard>
+    const totalClients = state.clients.length
+    const activeClients = state.clients.filter(c => c.status === 'active').length
+    const totalRevenue = state.clients.reduce((sum, c) => sum + c.totalRevenue, 0)
+    const avgHealthScore = state.clients.reduce((sum, c) => sum + c.healthScore, 0) / totalClients || 0
+    const totalProjects = state.projects.length
+    const activeProjects = state.projects.filter(p => p.status === 'active').length
 
-        <LiquidGlassCard>
-          <div className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <div className="text-sm text-muted-foreground mb-1">Active Clients</div>
-                <div className="text-3xl font-bold text-green-500">
-                  {MOCK_CLIENT_STATS.activeClients}
-                </div>
-              </div>
-              <div className="text-2xl">✅</div>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              {((MOCK_CLIENT_STATS.activeClients / MOCK_CLIENT_STATS.totalClients) * 100).toFixed(1)}% active rate
-            </div>
-          </div>
-        </LiquidGlassCard>
+    const result = {
+      totalClients,
+      activeClients,
+      totalRevenue,
+      avgHealthScore,
+      totalProjects,
+      activeProjects
+    }
 
-        <LiquidGlassCard>
-          <div className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <div className="text-sm text-muted-foreground mb-1">Total Revenue</div>
-                <div className="text-3xl font-bold text-purple-500">
-                  ${(MOCK_CLIENT_STATS.totalRevenue / 1000).toFixed(0)}K
-                </div>
-              </div>
-              <div className="text-2xl">💰</div>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Avg: ${(MOCK_CLIENT_STATS.averageClientValue / 1000).toFixed(1)}K per client
-            </div>
-          </div>
-        </LiquidGlassCard>
+    console.log('📊 CLIENT PORTAL: Stats calculated -', JSON.stringify(result))
+    return result
+  }, [state.clients, state.projects])
 
-        <LiquidGlassCard>
-          <div className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <div className="text-sm text-muted-foreground mb-1">Satisfaction</div>
-                <div className="text-3xl font-bold text-orange-500">
-                  {MOCK_CLIENT_STATS.clientSatisfaction.toFixed(1)}%
-                </div>
-              </div>
-              <div className="text-2xl">⭐</div>
-            </div>
-            <div className="text-xs text-green-500">
-              Above industry average
-            </div>
-          </div>
-        </LiquidGlassCard>
-      </div>
+  const filteredAndSortedClients = useMemo(() => {
+    console.log('🔍 CLIENT PORTAL: Filtering and sorting clients...')
 
-      {/* Top Clients */}
-      <LiquidGlassCard>
-        <div className="p-6">
-          <h3 className="text-lg font-semibold mb-6">Top Clients by Revenue</h3>
-          <div className="space-y-4">
-            {MOCK_CLIENT_STATS.topClients.map((client, index) => (
-              <div key={client.clientId} className="flex items-center gap-4">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
-                  {index + 1}
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold">{client.clientName}</div>
-                  <div className="text-sm text-muted-foreground">
-                    ${(client.revenue / 1000).toFixed(0)}K revenue
-                  </div>
-                </div>
-                <div className="w-32 h-2 bg-muted/30 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(client.revenue / MOCK_CLIENT_STATS.totalRevenue) * 100}%` }}
-                    transition={{ delay: index * 0.1 }}
-                    className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </LiquidGlassCard>
-    </div>
-  )
+    let filtered = [...state.clients]
 
-  const renderClients = () => (
-    <div className="space-y-6">
-      {/* Filters */}
-      <LiquidGlassCard>
-        <div className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as ClientStatus | 'all')}
-                className="px-4 py-2 rounded-lg border bg-background text-sm"
-              >
-                <option value="all">All Statuses</option>
-                <option value="active">Active</option>
-                <option value="onboarding">Onboarding</option>
-                <option value="inactive">Inactive</option>
-              </select>
+    // Search
+    if (state.searchTerm) {
+      filtered = filtered.filter(c =>
+        c.companyName.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        c.contactPerson.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        c.email.toLowerCase().includes(state.searchTerm.toLowerCase())
+      )
+    }
 
-              <select
-                value={filterTier}
-                onChange={(e) => setFilterTier(e.target.value as ClientTier | 'all')}
-                className="px-4 py-2 rounded-lg border bg-background text-sm"
-              >
-                <option value="all">All Tiers</option>
-                <option value="basic">Basic</option>
-                <option value="standard">Standard</option>
-                <option value="premium">Premium</option>
-                <option value="enterprise">Enterprise</option>
-              </select>
-            </div>
+    // Filter by status
+    if (state.filterStatus !== 'all') {
+      filtered = filtered.filter(c => c.status === state.filterStatus)
+    }
 
-            <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors">
-              + Add Client
-            </button>
-          </div>
-        </div>
-      </LiquidGlassCard>
+    // Filter by tier
+    if (state.filterTier !== 'all') {
+      filtered = filtered.filter(c => c.tier === state.filterTier)
+    }
 
-      {/* Clients Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredClients.map((client) => {
-          const healthScore = calculateHealthScore(client)
+    // Sort
+    filtered.sort((a, b) => {
+      switch (state.sortBy) {
+        case 'name':
+          return a.companyName.localeCompare(b.companyName)
+        case 'revenue':
+          return b.totalRevenue - a.totalRevenue
+        case 'health':
+          return b.healthScore - a.healthScore
+        case 'recent':
+          return new Date(b.lastContact).getTime() - new Date(a.lastContact).getTime()
+        default:
+          return 0
+      }
+    })
 
-          return (
-            <LiquidGlassCard key={client.id}>
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xl font-bold">
-                      {client.companyName.charAt(0)}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{client.companyName}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-xs px-2 py-0.5 rounded ${getClientStatusColor(client.status)}`}>
-                          {client.status}
-                        </span>
-                        <span className={`text-xs px-2 py-0.5 rounded ${getClientTierColor(client.tier)}`}>
-                          {client.tier}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+    console.log('✅ CLIENT PORTAL: Filtered to', filtered.length, 'clients')
+    return filtered
+  }, [state.clients, state.searchTerm, state.filterStatus, state.filterTier, state.sortBy])
 
-                <div className="space-y-2 mb-4 text-sm">
-                  <div><span className="text-muted-foreground">Contact:</span> <span className="font-medium">{client.contactPerson}</span></div>
-                  <div><span className="text-muted-foreground">Email:</span> <span className="font-medium text-xs">{client.email}</span></div>
-                </div>
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
 
-                <div className="border-t pt-4 mb-4">
-                  <div className="grid grid-cols-3 gap-2 text-center text-sm">
-                    <div>
-                      <div className="text-xl font-bold text-blue-500">{client.metadata.activeProjects}</div>
-                      <div className="text-xs text-muted-foreground">Active</div>
-                    </div>
-                    <div>
-                      <div className="text-xl font-bold text-green-500">
-                        ${(client.metadata.totalRevenue / 1000).toFixed(0)}K
-                      </div>
-                      <div className="text-xs text-muted-foreground">Revenue</div>
-                    </div>
-                    <div>
-                      <div className={`text-xl font-bold ${getHealthScoreColor(healthScore)}`}>
-                        {healthScore}%
-                      </div>
-                      <div className="text-xs text-muted-foreground">Health</div>
-                    </div>
-                  </div>
-                </div>
+  const handleAddClient = async () => {
+    if (!clientForm.companyName || !clientForm.contactPerson || !clientForm.email) {
+      console.log('⚠️ CLIENT PORTAL: Missing required fields')
+      toast.error('Please fill in all required fields')
+      return
+    }
 
-                <button className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">
-                  View Details
-                </button>
-              </div>
-            </LiquidGlassCard>
-          )
-        })}
-      </div>
-    </div>
-  )
+    console.log('➕ CLIENT PORTAL: Adding new client...')
+    console.log('📝 CLIENT PORTAL: Company:', clientForm.companyName)
 
-  const renderProjects = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Client Projects</h2>
-      <div className="space-y-4">
-        {MOCK_PROJECTS.map((project) => {
-          const client = MOCK_CLIENTS.find(c => c.id === project.clientId)
-          const budgetStatus = getProjectBudgetStatus(project)
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 1000))
 
-          return (
-            <LiquidGlassCard key={project.id}>
-              <div className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold mb-2">{project.name}</h3>
-                    <div className="text-sm text-muted-foreground mb-3">
-                      {client?.companyName} • {project.description}
-                    </div>
-                    <div className="flex items-center gap-4 text-sm">
-                      <span className={`px-2 py-1 rounded ${getProjectStatusColor(project.status)}`}>
-                        {project.status}
-                      </span>
-                      <span>Budget: ${(project.budget / 1000).toFixed(0)}K</span>
-                      <span className={budgetStatus === 'over' ? 'text-red-500' : budgetStatus === 'warning' ? 'text-yellow-500' : 'text-green-500'}>
-                        Spent: ${(project.spent / 1000).toFixed(0)}K
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-bold text-blue-500">{project.progress}%</div>
-                    <div className="text-sm text-muted-foreground">Complete</div>
-                  </div>
-                </div>
-              </div>
-            </LiquidGlassCard>
-          )
-        })}
-      </div>
-    </div>
-  )
+      const newClient: Client = {
+        id: `CL-${String(state.clients.length + 1).padStart(3, '0')}`,
+        companyName: clientForm.companyName,
+        contactPerson: clientForm.contactPerson,
+        email: clientForm.email,
+        phone: clientForm.phone,
+        status: 'onboarding',
+        tier: clientForm.tier,
+        activeProjects: 0,
+        totalRevenue: 0,
+        healthScore: 85,
+        lastContact: new Date().toISOString(),
+        nextFollowUp: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        tags: [],
+        createdAt: new Date().toISOString()
+      }
 
-  const renderCommunications = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Client Communications</h2>
-      <div className="space-y-4">
-        {MOCK_COMMUNICATIONS.map((comm) => {
-          const client = MOCK_CLIENTS.find(c => c.id === comm.clientId)
-          return (
-            <LiquidGlassCard key={comm.id}>
-              <div className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="text-2xl">{getCommunicationIcon(comm.type)}</div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold mb-1">{comm.subject}</h3>
-                    <div className="text-sm text-muted-foreground mb-2">
-                      {client?.companyName} • {new Date(comm.createdAt).toLocaleDateString()}
-                    </div>
-                    <p className="text-sm">{comm.content}</p>
-                  </div>
-                </div>
-              </div>
-            </LiquidGlassCard>
-          )
-        })}
-      </div>
-    </div>
-  )
-
-  const renderFiles = () => (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Client Files</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {MOCK_FILES.map((file) => {
-          const client = MOCK_CLIENTS.find(c => c.id === file.clientId)
-          return (
-            <LiquidGlassCard key={file.id}>
-              <div className="p-6">
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="text-2xl">{getFileCategoryIcon(file.category)}</div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold mb-1 text-sm truncate">{file.name}</h3>
-                    <div className="text-xs text-muted-foreground">{client?.companyName}</div>
-                  </div>
-                </div>
-                <div className="space-y-1 text-xs mb-4">
-                  <div className="flex justify-between"><span className="text-muted-foreground">Category:</span> <span className="capitalize">{file.category}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Size:</span> <span>{formatFileSize(file.size)}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Version:</span> <span>v{file.version}</span></div>
-                </div>
-                <button className="w-full px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">
-                  Download
-                </button>
-              </div>
-            </LiquidGlassCard>
-          )
-        })}
-      </div>
-    </div>
-  )
-
-  // A+++ LOADING STATE
-  if (isLoading) {
-    return (
-      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="max-w-7xl mx-auto space-y-8">
-          <CardSkeleton />
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <CardSkeleton />
-            <CardSkeleton />
-            <CardSkeleton />
-            <CardSkeleton />
-          </div>
-          <DashboardSkeleton />
-        </div>
-      </div>
-    )
+      dispatch({ type: 'ADD_CLIENT', client: newClient })
+      toast.success('Client added successfully')
+      setIsAddClientModalOpen(false)
+      setClientForm({ companyName: '', contactPerson: '', email: '', phone: '', tier: 'basic' })
+      console.log('✅ CLIENT PORTAL: Client added')
+    } catch (error) {
+      console.error('❌ CLIENT PORTAL: Add client error:', error)
+      toast.error('Failed to add client')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  // A+++ ERROR STATE
-  if (error) {
+  const handleDeleteClient = async (clientId: string) => {
+    const client = state.clients.find(c => c.id === clientId)
+    console.log('🗑️ CLIENT PORTAL: Deleting client - ID:', clientId, 'Company:', client?.companyName)
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      dispatch({ type: 'DELETE_CLIENT', clientId })
+      toast.success('Client deleted successfully')
+      setIsDeleteModalOpen(false)
+      console.log('✅ CLIENT PORTAL: Client deleted')
+    } catch (error) {
+      console.error('❌ CLIENT PORTAL: Delete error:', error)
+      toast.error('Failed to delete client')
+    }
+  }
+
+  const handleAddProject = async () => {
+    if (!projectForm.name || !projectForm.clientId) {
+      console.log('⚠️ CLIENT PORTAL: Missing required fields')
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    console.log('➕ CLIENT PORTAL: Adding new project...')
+    console.log('📝 CLIENT PORTAL: Project:', projectForm.name)
+
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      const budget = parseInt(projectForm.budget) || 50000
+
+      const newProject: Project = {
+        id: `PR-${String(state.projects.length + 1).padStart(3, '0')}`,
+        clientId: projectForm.clientId,
+        name: projectForm.name,
+        description: projectForm.description,
+        status: 'planning',
+        budget,
+        spent: 0,
+        progress: 0,
+        startDate: new Date().toISOString(),
+        endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+        team: []
+      }
+
+      dispatch({ type: 'ADD_PROJECT', project: newProject })
+      toast.success('Project added successfully')
+      setIsAddProjectModalOpen(false)
+      setProjectForm({ name: '', description: '', budget: '', clientId: '' })
+      console.log('✅ CLIENT PORTAL: Project added')
+    } catch (error) {
+      console.error('❌ CLIENT PORTAL: Add project error:', error)
+      toast.error('Failed to add project')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleAddCommunication = async () => {
+    if (!communicationForm.subject || !state.selectedClient) {
+      console.log('⚠️ CLIENT PORTAL: Missing required fields')
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    console.log('➕ CLIENT PORTAL: Adding communication...')
+    console.log('📝 CLIENT PORTAL: Subject:', communicationForm.subject)
+
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      const newComm: Communication = {
+        id: `CM-${String(state.communications.length + 1).padStart(3, '0')}`,
+        clientId: state.selectedClient.id,
+        type: communicationForm.type,
+        subject: communicationForm.subject,
+        content: communicationForm.content,
+        createdAt: new Date().toISOString(),
+        createdBy: 'Current User'
+      }
+
+      dispatch({ type: 'ADD_COMMUNICATION', communication: newComm })
+      toast.success('Communication logged successfully')
+      setIsAddCommunicationModalOpen(false)
+      setCommunicationForm({ type: 'email', subject: '', content: '' })
+      console.log('✅ CLIENT PORTAL: Communication added')
+    } catch (error) {
+      console.error('❌ CLIENT PORTAL: Add communication error:', error)
+      toast.error('Failed to log communication')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // ============================================================================
+  // HELPERS
+  // ============================================================================
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0
+    }).format(amount)
+  }
+
+  const getStatusColor = (status: ClientStatus) => {
+    switch (status) {
+      case 'active': return 'bg-green-500/10 text-green-500'
+      case 'onboarding': return 'bg-blue-500/10 text-blue-500'
+      case 'inactive': return 'bg-gray-500/10 text-gray-500'
+      case 'churned': return 'bg-red-500/10 text-red-500'
+      default: return 'bg-gray-500/10 text-gray-500'
+    }
+  }
+
+  const getTierColor = (tier: ClientTier) => {
+    switch (tier) {
+      case 'basic': return 'bg-gray-500/10 text-gray-500'
+      case 'standard': return 'bg-blue-500/10 text-blue-500'
+      case 'premium': return 'bg-purple-500/10 text-purple-500'
+      case 'enterprise': return 'bg-orange-500/10 text-orange-500'
+      default: return 'bg-gray-500/10 text-gray-500'
+    }
+  }
+
+  const getProjectStatusColor = (status: ProjectStatus) => {
+    switch (status) {
+      case 'planning': return 'bg-yellow-500/10 text-yellow-500'
+      case 'active': return 'bg-green-500/10 text-green-500'
+      case 'on-hold': return 'bg-orange-500/10 text-orange-500'
+      case 'completed': return 'bg-blue-500/10 text-blue-500'
+      case 'cancelled': return 'bg-red-500/10 text-red-500'
+      default: return 'bg-gray-500/10 text-gray-500'
+    }
+  }
+
+  const getHealthScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-500'
+    if (score >= 60) return 'text-yellow-500'
+    return 'text-red-500'
+  }
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="max-w-7xl mx-auto">
-          <div className="max-w-2xl mx-auto mt-20">
-            <ErrorEmptyState
-              error={error}
-              onRetry={() => window.location.reload()}
-            />
+      <div className="kazi-bg-light dark:kazi-bg-dark min-h-screen py-8">
+        <div className="container mx-auto px-4 space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
           </div>
+          <CardSkeleton />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="kazi-bg-light dark:kazi-bg-dark min-h-screen py-8">
+      <div className="container mx-auto px-4 space-y-6">
+        {/* Header */}
         <ScrollReveal>
           <div className="flex items-center justify-between">
-            <div>
-              <TextShimmer className="text-4xl font-bold mb-2">
-                Client Portal
-              </TextShimmer>
-              <p className="text-muted-foreground">
-                Comprehensive client management and collaboration
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 dark:bg-blue-500/20">
+                <Building2 className="h-6 w-6 text-blue-500" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold kazi-text-dark dark:kazi-text-light">
+                  <TextShimmer>Client Portal</TextShimmer>
+                </h1>
+                <p className="text-muted-foreground text-sm">
+                  Comprehensive client management and collaboration
+                </p>
+              </div>
             </div>
+            <Button onClick={() => setIsAddClientModalOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Client
+            </Button>
           </div>
         </ScrollReveal>
 
-        <ScrollReveal delay={0.1}>
-          <LiquidGlassCard>
-            <div className="p-2">
-              <div className="flex items-center gap-2">
-                {viewModes.map((mode) => (
-                  <button
-                    key={mode.id}
-                    onClick={() => setViewMode(mode.id as ViewMode)}
-                    className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
-                      viewMode === mode.id
-                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                        : 'hover:bg-muted/50'
-                    }`}
-                  >
-                    <span className="mr-2">{mode.icon}</span>
-                    {mode.label}
-                  </button>
-                ))}
-              </div>
+        {/* View Mode Tabs */}
+        <ScrollReveal>
+          <LiquidGlassCard className="p-2">
+            <div className="flex items-center gap-2">
+              <Button
+                variant={state.viewMode === 'overview' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => dispatch({ type: 'SET_VIEW_MODE', viewMode: 'overview' })}
+              >
+                <TrendingUp className="h-4 w-4 mr-2" />
+                Overview
+              </Button>
+              <Button
+                variant={state.viewMode === 'clients' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => dispatch({ type: 'SET_VIEW_MODE', viewMode: 'clients' })}
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Clients
+              </Button>
+              <Button
+                variant={state.viewMode === 'projects' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => dispatch({ type: 'SET_VIEW_MODE', viewMode: 'projects' })}
+              >
+                <FolderKanban className="h-4 w-4 mr-2" />
+                Projects
+              </Button>
+              <Button
+                variant={state.viewMode === 'communications' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => dispatch({ type: 'SET_VIEW_MODE', viewMode: 'communications' })}
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Communications
+              </Button>
             </div>
           </LiquidGlassCard>
         </ScrollReveal>
 
-        <ScrollReveal delay={0.2}>
-          {viewMode === 'overview' && renderOverview()}
-          {viewMode === 'clients' && renderClients()}
-          {viewMode === 'projects' && renderProjects()}
-          {viewMode === 'communications' && renderCommunications()}
-          {viewMode === 'files' && renderFiles()}
-        </ScrollReveal>
+        {/* Overview View */}
+        {state.viewMode === 'overview' && (
+          <>
+            {/* Stats Dashboard */}
+            <ScrollReveal>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <LiquidGlassCard className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Clients</p>
+                      <p className="text-2xl font-bold kazi-text-dark dark:kazi-text-light mt-1">
+                        <NumberFlow value={stats.totalClients} />
+                      </p>
+                    </div>
+                    <div className="relative">
+                      
+                      <Users className="h-8 w-8 text-blue-500" />
+                    </div>
+                  </div>
+                </LiquidGlassCard>
+
+                <LiquidGlassCard className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Active Clients</p>
+                      <p className="text-2xl font-bold kazi-text-dark dark:kazi-text-light mt-1">
+                        <NumberFlow value={stats.activeClients} />
+                      </p>
+                    </div>
+                    <div className="relative">
+                      
+                      <CheckCircle2 className="h-8 w-8 text-green-500" />
+                    </div>
+                  </div>
+                </LiquidGlassCard>
+
+                <LiquidGlassCard className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Revenue</p>
+                      <p className="text-2xl font-bold kazi-text-dark dark:kazi-text-light mt-1">
+                        {formatCurrency(stats.totalRevenue)}
+                      </p>
+                    </div>
+                    <div className="relative">
+                      
+                      <DollarSign className="h-8 w-8 text-purple-500" />
+                    </div>
+                  </div>
+                </LiquidGlassCard>
+
+                <LiquidGlassCard className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Avg Health Score</p>
+                      <p className="text-2xl font-bold kazi-text-dark dark:kazi-text-light mt-1">
+                        {stats.avgHealthScore.toFixed(0)}%
+                      </p>
+                    </div>
+                    <div className="relative">
+                      
+                      <Award className="h-8 w-8 text-orange-500" />
+                    </div>
+                  </div>
+                </LiquidGlassCard>
+              </div>
+            </ScrollReveal>
+
+            {/* Top Clients */}
+            <ScrollReveal>
+              <LiquidGlassCard className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Top Clients by Revenue</h3>
+                <div className="space-y-3">
+                  {filteredAndSortedClients.slice(0, 5).map((client, index) => (
+                    <div key={client.id} className="flex items-center gap-4">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">{client.companyName}</p>
+                        <p className="text-sm text-muted-foreground">{formatCurrency(client.totalRevenue)}</p>
+                      </div>
+                      <Badge className={getTierColor(client.tier)}>{client.tier}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </LiquidGlassCard>
+            </ScrollReveal>
+          </>
+        )}
+
+        {/* Clients View */}
+        {state.viewMode === 'clients' && (
+          <>
+            {/* Filters */}
+            <ScrollReveal>
+              <LiquidGlassCard className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search clients..."
+                      value={state.searchTerm}
+                      onChange={(e) => dispatch({ type: 'SET_SEARCH', searchTerm: e.target.value })}
+                      className="pl-9"
+                    />
+                  </div>
+
+                  <Select
+                    value={state.filterStatus}
+                    onValueChange={(value) => dispatch({ type: 'SET_FILTER_STATUS', filterStatus: value as any })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Statuses</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="onboarding">Onboarding</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="churned">Churned</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={state.filterTier}
+                    onValueChange={(value) => dispatch({ type: 'SET_FILTER_TIER', filterTier: value as any })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tier" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Tiers</SelectItem>
+                      <SelectItem value="basic">Basic</SelectItem>
+                      <SelectItem value="standard">Standard</SelectItem>
+                      <SelectItem value="premium">Premium</SelectItem>
+                      <SelectItem value="enterprise">Enterprise</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={state.sortBy}
+                    onValueChange={(value) => dispatch({ type: 'SET_SORT', sortBy: value as any })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sort" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="recent">Recent</SelectItem>
+                      <SelectItem value="name">Name</SelectItem>
+                      <SelectItem value="revenue">Revenue</SelectItem>
+                      <SelectItem value="health">Health Score</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </LiquidGlassCard>
+            </ScrollReveal>
+
+            {/* Clients Grid */}
+            {filteredAndSortedClients.length === 0 ? (
+              <ScrollReveal>
+                <NoDataEmptyState
+                  title="No clients found"
+                  message="Add clients or adjust your filters"
+                  action={{
+                    label: 'Add Client',
+                    onClick: () => setIsAddClientModalOpen(true)
+                  }}
+                />
+              </ScrollReveal>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredAndSortedClients.map((client, index) => (
+                  <ScrollReveal key={client.id} delay={index * 0.05}>
+                    <LiquidGlassCard className="p-6">
+                      <div className="space-y-4">
+                        {/* Header */}
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xl font-bold">
+                              {client.companyName.charAt(0)}
+                            </div>
+                            <div>
+                              <h3 className="font-semibold">{client.companyName}</h3>
+                              <p className="text-sm text-muted-foreground">{client.contactPerson}</p>
+                            </div>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => {
+                                dispatch({ type: 'SELECT_CLIENT', client })
+                                setIsViewClientModalOpen(true)
+                              }}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {
+                                dispatch({ type: 'SELECT_CLIENT', client })
+                                setIsAddCommunicationModalOpen(true)
+                              }}>
+                                <MessageSquare className="h-4 w-4 mr-2" />
+                                Add Communication
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  dispatch({ type: 'SELECT_CLIENT', client })
+                                  setIsDeleteModalOpen(true)
+                                }}
+                                className="text-red-500"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+
+                        {/* Badges */}
+                        <div className="flex gap-2">
+                          <Badge className={getStatusColor(client.status)}>
+                            {client.status}
+                          </Badge>
+                          <Badge className={getTierColor(client.tier)}>
+                            {client.tier}
+                          </Badge>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="grid grid-cols-3 gap-2 text-center">
+                          <div>
+                            <p className="text-xl font-bold text-blue-500">{client.activeProjects}</p>
+                            <p className="text-xs text-muted-foreground">Projects</p>
+                          </div>
+                          <div>
+                            <p className="text-xl font-bold text-green-500">
+                              {formatCurrency(client.totalRevenue).replace(/\.\d+$/, '')}
+                            </p>
+                            <p className="text-xs text-muted-foreground">Revenue</p>
+                          </div>
+                          <div>
+                            <p className={`text-xl font-bold ${getHealthScoreColor(client.healthScore)}`}>
+                              {client.healthScore}%
+                            </p>
+                            <p className="text-xs text-muted-foreground">Health</p>
+                          </div>
+                        </div>
+
+                        {/* Contact Info */}
+                        <div className="space-y-1 text-xs">
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Mail className="h-3 w-3" />
+                            <span className="truncate">{client.email}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-muted-foreground">
+                            <Phone className="h-3 w-3" />
+                            <span>{client.phone}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </LiquidGlassCard>
+                  </ScrollReveal>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Projects View */}
+        {state.viewMode === 'projects' && (
+          <>
+            <ScrollReveal>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold">Projects</h2>
+                <Button onClick={() => setIsAddProjectModalOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Project
+                </Button>
+              </div>
+            </ScrollReveal>
+
+            <div className="space-y-4">
+              {state.projects.map((project, index) => {
+                const client = state.clients.find(c => c.id === project.clientId)
+                const budgetUsed = (project.spent / project.budget) * 100
+
+                return (
+                  <ScrollReveal key={project.id} delay={index * 0.05}>
+                    <LiquidGlassCard className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold mb-2">{project.name}</h3>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            {client?.companyName} • {project.description}
+                          </p>
+                          <div className="flex items-center gap-4 text-sm mb-4">
+                            <Badge className={getProjectStatusColor(project.status)}>
+                              {project.status}
+                            </Badge>
+                            <span className="text-muted-foreground">
+                              Budget: {formatCurrency(project.budget)}
+                            </span>
+                            <span className={budgetUsed > 90 ? 'text-red-500' : budgetUsed > 70 ? 'text-yellow-500' : 'text-green-500'}>
+                              Spent: {formatCurrency(project.spent)} ({budgetUsed.toFixed(0)}%)
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
+                              style={{ width: `${project.progress}%` }}
+                            />
+                          </div>
+                        </div>
+                        <div className="text-right ml-6">
+                          <p className="text-3xl font-bold text-blue-500">{project.progress}%</p>
+                          <p className="text-sm text-muted-foreground">Complete</p>
+                        </div>
+                      </div>
+                    </LiquidGlassCard>
+                  </ScrollReveal>
+                )
+              })}
+            </div>
+          </>
+        )}
+
+        {/* Communications View */}
+        {state.viewMode === 'communications' && (
+          <>
+            <ScrollReveal>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold">Communications</h2>
+              </div>
+            </ScrollReveal>
+
+            {state.communications.length === 0 ? (
+              <NoDataEmptyState
+                title="No communications"
+                message="Communication logs will appear here"
+              />
+            ) : (
+              <div className="space-y-4">
+                {state.communications.map((comm, index) => {
+                  const client = state.clients.find(c => c.id === comm.clientId)
+
+                  return (
+                    <ScrollReveal key={comm.id} delay={index * 0.05}>
+                      <LiquidGlassCard className="p-6">
+                        <div className="flex items-start gap-4">
+                          <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                            <MessageSquare className="h-5 w-5 text-blue-500" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold mb-1">{comm.subject}</h3>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              {client?.companyName} • {formatDate(comm.createdAt)} • {comm.type}
+                            </p>
+                            <p className="text-sm">{comm.content}</p>
+                          </div>
+                        </div>
+                      </LiquidGlassCard>
+                    </ScrollReveal>
+                  )
+                })}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Add Client Modal */}
+        <Dialog open={isAddClientModalOpen} onOpenChange={setIsAddClientModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Client</DialogTitle>
+              <DialogDescription>
+                Add a new client to your portal
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Company Name *</Label>
+                <Input
+                  value={clientForm.companyName}
+                  onChange={(e) => setClientForm({ ...clientForm, companyName: e.target.value })}
+                  placeholder="Acme Corporation"
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label>Contact Person *</Label>
+                <Input
+                  value={clientForm.contactPerson}
+                  onChange={(e) => setClientForm({ ...clientForm, contactPerson: e.target.value })}
+                  placeholder="John Smith"
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label>Email *</Label>
+                <Input
+                  type="email"
+                  value={clientForm.email}
+                  onChange={(e) => setClientForm({ ...clientForm, email: e.target.value })}
+                  placeholder="john@acme.com"
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label>Phone</Label>
+                <Input
+                  type="tel"
+                  value={clientForm.phone}
+                  onChange={(e) => setClientForm({ ...clientForm, phone: e.target.value })}
+                  placeholder="+1 (555) 123-4567"
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label>Tier</Label>
+                <Select value={clientForm.tier} onValueChange={(v) => setClientForm({ ...clientForm, tier: v as ClientTier })}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="basic">Basic</SelectItem>
+                    <SelectItem value="standard">Standard</SelectItem>
+                    <SelectItem value="premium">Premium</SelectItem>
+                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddClientModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddClient} disabled={isSaving}>
+                {isSaving ? 'Adding...' : 'Add Client'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Client Modal */}
+        <Dialog open={isViewClientModalOpen} onOpenChange={setIsViewClientModalOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Client Details</DialogTitle>
+            </DialogHeader>
+
+            {state.selectedClient && (
+              <Tabs defaultValue="overview" className="mt-4">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="projects">Projects</TabsTrigger>
+                  <TabsTrigger value="activity">Activity</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="overview" className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Company</Label>
+                      <p className="text-sm font-medium mt-1">{state.selectedClient.companyName}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Contact</Label>
+                      <p className="text-sm font-medium mt-1">{state.selectedClient.contactPerson}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Email</Label>
+                      <p className="text-sm font-medium mt-1">{state.selectedClient.email}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Phone</Label>
+                      <p className="text-sm font-medium mt-1">{state.selectedClient.phone}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Status</Label>
+                      <Badge className={`${getStatusColor(state.selectedClient.status)} mt-1`}>
+                        {state.selectedClient.status}
+                      </Badge>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Tier</Label>
+                      <Badge className={`${getTierColor(state.selectedClient.tier)} mt-1`}>
+                        {state.selectedClient.tier}
+                      </Badge>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Active Projects</Label>
+                      <p className="text-sm font-medium mt-1">{state.selectedClient.activeProjects}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Total Revenue</Label>
+                      <p className="text-sm font-medium mt-1">{formatCurrency(state.selectedClient.totalRevenue)}</p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Health Score</Label>
+                      <p className={`text-sm font-medium mt-1 ${getHealthScoreColor(state.selectedClient.healthScore)}`}>
+                        {state.selectedClient.healthScore}%
+                      </p>
+                    </div>
+                    <div>
+                      <Label className="text-xs text-muted-foreground">Last Contact</Label>
+                      <p className="text-sm font-medium mt-1">{formatDate(state.selectedClient.lastContact)}</p>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="projects" className="space-y-3">
+                  {state.projects
+                    .filter(p => p.clientId === state.selectedClient?.id)
+                    .map(project => (
+                      <div key={project.id} className="p-3 bg-muted rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">{project.name}</p>
+                            <p className="text-sm text-muted-foreground">{project.description}</p>
+                          </div>
+                          <Badge className={getProjectStatusColor(project.status)}>
+                            {project.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                </TabsContent>
+
+                <TabsContent value="activity" className="space-y-3">
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3 p-3 bg-muted rounded">
+                      <Calendar className="h-4 w-4 mt-1 text-blue-500" />
+                      <div>
+                        <p className="text-sm font-medium">Client created</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(state.selectedClient.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3 p-3 bg-muted rounded">
+                      <MessageSquare className="h-4 w-4 mt-1 text-green-500" />
+                      <div>
+                        <p className="text-sm font-medium">Last contact</p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatDate(state.selectedClient.lastContact)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Project Modal */}
+        <Dialog open={isAddProjectModalOpen} onOpenChange={setIsAddProjectModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Project</DialogTitle>
+              <DialogDescription>
+                Create a new project for a client
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Client *</Label>
+                <Select value={projectForm.clientId} onValueChange={(v) => setProjectForm({ ...projectForm, clientId: v })}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Select client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {state.clients.map(client => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.companyName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Project Name *</Label>
+                <Input
+                  value={projectForm.name}
+                  onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })}
+                  placeholder="Website Redesign"
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  value={projectForm.description}
+                  onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
+                  placeholder="Project description..."
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label>Budget</Label>
+                <Input
+                  type="number"
+                  value={projectForm.budget}
+                  onChange={(e) => setProjectForm({ ...projectForm, budget: e.target.value })}
+                  placeholder="50000"
+                  className="mt-2"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddProjectModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddProject} disabled={isSaving}>
+                {isSaving ? 'Adding...' : 'Add Project'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Communication Modal */}
+        <Dialog open={isAddCommunicationModalOpen} onOpenChange={setIsAddCommunicationModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Log Communication</DialogTitle>
+              <DialogDescription>
+                Record communication with {state.selectedClient?.companyName}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Type</Label>
+                <Select
+                  value={communicationForm.type}
+                  onValueChange={(v) => setCommunicationForm({ ...communicationForm, type: v as CommunicationType })}
+                >
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="call">Phone Call</SelectItem>
+                    <SelectItem value="meeting">Meeting</SelectItem>
+                    <SelectItem value="message">Message</SelectItem>
+                    <SelectItem value="note">Note</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Subject *</Label>
+                <Input
+                  value={communicationForm.subject}
+                  onChange={(e) => setCommunicationForm({ ...communicationForm, subject: e.target.value })}
+                  placeholder="Follow-up call"
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label>Content</Label>
+                <Textarea
+                  value={communicationForm.content}
+                  onChange={(e) => setCommunicationForm({ ...communicationForm, content: e.target.value })}
+                  placeholder="Details of the communication..."
+                  className="mt-2"
+                  rows={4}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddCommunicationModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleAddCommunication} disabled={isSaving}>
+                {isSaving ? 'Saving...' : 'Log Communication'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Modal */}
+        <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Client</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete {state.selectedClient?.companyName}? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => state.selectedClient && handleDeleteClient(state.selectedClient.id)}
+              >
+                Delete Client
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

@@ -1,550 +1,1167 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { toast } from 'sonner'
-import { PageHeader } from '@/components/ui/page-header'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
-import { TextShimmer } from '@/components/ui/text-shimmer'
-import { NumberFlow } from '@/components/ui/number-flow'
-import { BorderTrail } from '@/components/ui/border-trail'
-import { GlowEffect } from '@/components/ui/glow-effect'
-import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-
-// A+++ UTILITIES
-import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
-import { ErrorEmptyState } from '@/components/ui/empty-state'
-import { useAnnouncer } from '@/lib/accessibility'
+import React, { useState, useEffect, useReducer, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   BarChart3,
   FileText,
   PieChart,
-  Calendar,
+  TrendingUp,
   Download,
-  Filter,
-  ArrowUpRight,
-  ArrowDownRight,
-  Users,
-  Clock,
-  DollarSign,
   Plus,
   Search,
+  Filter,
+  Calendar,
+  Users,
+  DollarSign,
+  Eye,
+  Edit,
+  Trash2,
+  MoreVertical,
+  Share2,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
   FileSpreadsheet,
   FilePdf,
   FileJson,
-  Bell,
-  Star,
-  Lightbulb,
-  Briefcase,
-  Building,
+  Mail,
   Repeat,
-  CheckCircle,
-  ChevronRight,
+  X,
+  Check,
   Sparkles,
-  HardDrive
+  Settings
 } from 'lucide-react'
-import { Progress } from '@/components/ui/progress'
-import { Badge } from '@/components/ui/badge'
-import { Switch } from '@/components/ui/switch'
+import { toast } from 'sonner'
+import { NumberFlow } from '@/components/ui/number-flow'
+
+// UI Components
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Card } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Textarea } from '@/components/ui/textarea'
+
+// Premium Components
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { ScrollReveal } from '@/components/ui/scroll-reveal'
+
+// A+++ UTILITIES
+import { CardSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+
+// ============================================================================
+// TYPES & INTERFACES
+// ============================================================================
+
+type ReportType = 'analytics' | 'financial' | 'performance' | 'sales' | 'custom'
+type ReportStatus = 'draft' | 'generating' | 'ready' | 'scheduled' | 'failed'
+type ReportFrequency = 'once' | 'daily' | 'weekly' | 'monthly' | 'quarterly'
+type ExportFormat = 'pdf' | 'excel' | 'csv' | 'json'
+
+interface Report {
+  id: string
+  name: string
+  type: ReportType
+  status: ReportStatus
+  description: string
+  createdAt: string
+  updatedAt: string
+  createdBy: string
+  dateRange: {
+    start: string
+    end: string
+  }
+  frequency: ReportFrequency
+  nextRun?: string
+  dataPoints: number
+  fileSize: number
+  recipients: string[]
+  tags: string[]
+}
+
+interface ReportsState {
+  reports: Report[]
+  selectedReport: Report | null
+  searchTerm: string
+  filterType: ReportType | 'all'
+  filterStatus: ReportStatus | 'all'
+  sortBy: 'name' | 'date' | 'type' | 'status'
+  viewMode: 'grid' | 'list'
+  selectedReports: string[]
+}
+
+type ReportsAction =
+  | { type: 'SET_REPORTS'; reports: Report[] }
+  | { type: 'ADD_REPORT'; report: Report }
+  | { type: 'UPDATE_REPORT'; report: Report }
+  | { type: 'DELETE_REPORT'; reportId: string }
+  | { type: 'SELECT_REPORT'; report: Report | null }
+  | { type: 'SET_SEARCH'; searchTerm: string }
+  | { type: 'SET_FILTER_TYPE'; filterType: ReportsState['filterType'] }
+  | { type: 'SET_FILTER_STATUS'; filterStatus: ReportsState['filterStatus'] }
+  | { type: 'SET_SORT'; sortBy: ReportsState['sortBy'] }
+  | { type: 'SET_VIEW_MODE'; viewMode: ReportsState['viewMode'] }
+  | { type: 'TOGGLE_SELECT_REPORT'; reportId: string }
+  | { type: 'CLEAR_SELECTED_REPORTS' }
+
+// ============================================================================
+// REDUCER
+// ============================================================================
+
+function reportsReducer(state: ReportsState, action: ReportsAction): ReportsState {
+  console.log('🔄 REPORTS REDUCER: Action:', action.type)
+
+  switch (action.type) {
+    case 'SET_REPORTS':
+      console.log('✅ REPORTS: Set reports -', action.reports.length, 'reports loaded')
+      return { ...state, reports: action.reports }
+
+    case 'ADD_REPORT':
+      console.log('✅ REPORTS: Report added - ID:', action.report.id, 'Name:', action.report.name)
+      return { ...state, reports: [action.report, ...state.reports] }
+
+    case 'UPDATE_REPORT':
+      console.log('✅ REPORTS: Report updated - ID:', action.report.id)
+      return {
+        ...state,
+        reports: state.reports.map(r => r.id === action.report.id ? action.report : r)
+      }
+
+    case 'DELETE_REPORT':
+      console.log('✅ REPORTS: Report deleted - ID:', action.reportId)
+      return {
+        ...state,
+        reports: state.reports.filter(r => r.id !== action.reportId),
+        selectedReport: state.selectedReport?.id === action.reportId ? null : state.selectedReport
+      }
+
+    case 'SELECT_REPORT':
+      console.log('👁️ REPORTS: Report selected -', action.report ? action.report.name : 'None')
+      return { ...state, selectedReport: action.report }
+
+    case 'SET_SEARCH':
+      console.log('🔍 REPORTS: Search term:', action.searchTerm)
+      return { ...state, searchTerm: action.searchTerm }
+
+    case 'SET_FILTER_TYPE':
+      console.log('🔍 REPORTS: Filter type:', action.filterType)
+      return { ...state, filterType: action.filterType }
+
+    case 'SET_FILTER_STATUS':
+      console.log('🔍 REPORTS: Filter status:', action.filterStatus)
+      return { ...state, filterStatus: action.filterStatus }
+
+    case 'SET_SORT':
+      console.log('🔀 REPORTS: Sort by:', action.sortBy)
+      return { ...state, sortBy: action.sortBy }
+
+    case 'SET_VIEW_MODE':
+      console.log('🖼️ REPORTS: View mode:', action.viewMode)
+      return { ...state, viewMode: action.viewMode }
+
+    case 'TOGGLE_SELECT_REPORT':
+      const isSelected = state.selectedReports.includes(action.reportId)
+      console.log('☑️ REPORTS: Toggle select report:', action.reportId, isSelected ? 'deselected' : 'selected')
+      return {
+        ...state,
+        selectedReports: isSelected
+          ? state.selectedReports.filter(id => id !== action.reportId)
+          : [...state.selectedReports, action.reportId]
+      }
+
+    case 'CLEAR_SELECTED_REPORTS':
+      console.log('✅ REPORTS: Cleared selected reports')
+      return { ...state, selectedReports: [] }
+
+    default:
+      return state
+  }
+}
+
+// ============================================================================
+// MOCK DATA
+// ============================================================================
+
+const generateMockReports = (): Report[] => {
+  console.log('📊 REPORTS: Generating mock reports...')
+
+  const types: ReportType[] = ['analytics', 'financial', 'performance', 'sales', 'custom']
+  const statuses: ReportStatus[] = ['draft', 'generating', 'ready', 'scheduled', 'failed']
+  const frequencies: ReportFrequency[] = ['once', 'daily', 'weekly', 'monthly', 'quarterly']
+
+  const reportNames = [
+    'Q4 2024 Financial Summary', 'Monthly Sales Performance', 'User Engagement Analytics',
+    'Revenue Growth Report', 'Customer Acquisition Report', 'Quarterly Performance Review',
+    'Annual Financial Statement', 'Marketing Campaign Analysis', 'Product Usage Statistics',
+    'Team Productivity Report', 'Client Satisfaction Survey', 'Website Traffic Analysis',
+    'Conversion Rate Optimization', 'Churn Analysis Report', 'Retention Metrics Dashboard',
+    'Sales Pipeline Report', 'Expense Analysis', 'ROI Performance Report',
+    'Social Media Analytics', 'Email Campaign Results'
+  ]
+
+  const reports: Report[] = reportNames.map((name, index) => ({
+    id: `RPT-${String(index + 1).padStart(3, '0')}`,
+    name,
+    type: types[Math.floor(Math.random() * types.length)],
+    status: statuses[Math.floor(Math.random() * statuses.length)],
+    description: `Comprehensive ${name.toLowerCase()} with detailed metrics and insights`,
+    createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+    createdBy: ['John Doe', 'Jane Smith', 'Bob Johnson'][Math.floor(Math.random() * 3)],
+    dateRange: {
+      start: new Date(Date.now() - Math.random() * 180 * 24 * 60 * 60 * 1000).toISOString(),
+      end: new Date().toISOString()
+    },
+    frequency: frequencies[Math.floor(Math.random() * frequencies.length)],
+    nextRun: Math.random() > 0.5 ? new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString() : undefined,
+    dataPoints: Math.floor(Math.random() * 10000) + 1000,
+    fileSize: Math.floor(Math.random() * 5000000) + 100000, // 100KB - 5MB
+    recipients: Math.random() > 0.5 ? ['team@example.com', 'manager@example.com'] : [],
+    tags: ['quarterly', 'important', 'automated'].slice(0, Math.floor(Math.random() * 3) + 1)
+  }))
+
+  console.log('✅ REPORTS: Generated', reports.length, 'mock reports')
+  return reports
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 
 export default function ReportsPage() {
-  // A+++ STATE MANAGEMENT
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  console.log('🚀 REPORTS: Component mounting...')
+
+  // A+++ UTILITIES
   const { announce } = useAnnouncer()
 
-  const [searchQuery, setSearchQuery] = useState('')
-  const [timeRange, setTimeRange] = useState('7d')
+  // STATE
+  const [state, dispatch] = useReducer(reportsReducer, {
+    reports: [],
+    selectedReport: null,
+    searchTerm: '',
+    filterType: 'all',
+    filterStatus: 'all',
+    sortBy: 'date',
+    viewMode: 'grid',
+    selectedReports: []
+  })
 
-  // A+++ LOAD REPORTS DATA
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // MODALS
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+
+  // FORM STATES
+  const [reportForm, setReportForm] = useState({
+    name: '',
+    type: 'analytics' as ReportType,
+    description: '',
+    frequency: 'once' as ReportFrequency
+  })
+
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('pdf')
+  const [scheduleTime, setScheduleTime] = useState('')
+
+  // ============================================================================
+  // LOAD DATA
+  // ============================================================================
+
   useEffect(() => {
-    const loadReportsData = async () => {
+    console.log('📊 REPORTS: Loading reports data...')
+
+    const loadData = async () => {
       try {
         setIsLoading(true)
-        setError(null)
+        await new Promise(resolve => setTimeout(resolve, 1000))
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load reports'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        const reports = generateMockReports()
+        dispatch({ type: 'SET_REPORTS', reports })
 
+        console.log('✅ REPORTS: Data loaded successfully')
+        announce('Reports dashboard loaded', 'polite')
+      } catch (error) {
+        console.error('❌ REPORTS: Load error:', error)
+        toast.error('Failed to load reports')
+      } finally {
         setIsLoading(false)
-        announce('Reports loaded successfully', 'polite')
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load reports')
-        setIsLoading(false)
-        announce('Error loading reports', 'assertive')
       }
     }
 
-    loadReportsData()
+    loadData()
   }, [announce])
 
-  // Handlers
-  const handleGenerateReport = (type: string) => {
-    console.log('✨ REPORTS: Initiating report generation')
-    console.log('📊 REPORTS: Report type - ' + type)
-    console.log('🔄 REPORTS: Compiling data from sources')
-    console.log('📈 REPORTS: Processing analytics and metrics')
-    console.log('✅ REPORTS: Report generation started successfully')
-    toast.success('📊 Report Generation Started', {
-      description: 'Generating ' + type + ' report with latest data'
+  // ============================================================================
+  // COMPUTED VALUES
+  // ============================================================================
+
+  const stats = useMemo(() => {
+    console.log('📊 REPORTS: Calculating stats...')
+
+    const totalReports = state.reports.length
+    const readyReports = state.reports.filter(r => r.status === 'ready').length
+    const scheduledReports = state.reports.filter(r => r.status === 'scheduled').length
+    const totalDataPoints = state.reports.reduce((sum, r) => sum + r.dataPoints, 0)
+
+    const result = {
+      totalReports,
+      readyReports,
+      scheduledReports,
+      totalDataPoints
+    }
+
+    console.log('📊 REPORTS: Stats calculated -', JSON.stringify(result))
+    return result
+  }, [state.reports])
+
+  const filteredAndSortedReports = useMemo(() => {
+    console.log('🔍 REPORTS: Filtering and sorting reports...')
+
+    let filtered = [...state.reports]
+
+    // Search
+    if (state.searchTerm) {
+      filtered = filtered.filter(r =>
+        r.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        r.description.toLowerCase().includes(state.searchTerm.toLowerCase())
+      )
+    }
+
+    // Filter by type
+    if (state.filterType !== 'all') {
+      filtered = filtered.filter(r => r.type === state.filterType)
+    }
+
+    // Filter by status
+    if (state.filterStatus !== 'all') {
+      filtered = filtered.filter(r => r.status === state.filterStatus)
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      switch (state.sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name)
+        case 'date':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        case 'type':
+          return a.type.localeCompare(b.type)
+        case 'status':
+          return a.status.localeCompare(b.status)
+        default:
+          return 0
+      }
     })
-  }
 
-  const handleExportReport = (format: string) => {
-    console.log('✨ REPORTS: Export functionality initiated')
-    console.log('💾 REPORTS: Export format - ' + format)
-    console.log('📦 REPORTS: Preparing data for export')
-    console.log('🔄 REPORTS: Converting report to ' + format + ' format')
-    console.log('✅ REPORTS: Export process started')
-    toast.success('💾 Export Started', {
-      description: 'Preparing your report in ' + format + ' format'
-    })
-  }
+    console.log('✅ REPORTS: Filtered to', filtered.length, 'reports')
+    return filtered
+  }, [state.reports, state.searchTerm, state.filterType, state.filterStatus, state.sortBy])
 
-  const handleScheduleReport = () => {
-    console.log('✨ REPORTS: Opening schedule configuration')
-    console.log('📅 REPORTS: Allowing user to set frequency and time')
-    console.log('⏰ REPORTS: Schedule options: daily, weekly, monthly')
-    console.log('📬 REPORTS: Delivery method: email or dashboard')
-    console.log('✅ REPORTS: Schedule dialog opened')
-    toast.info('📅 Schedule Report', {
-      description: 'Configure automated report delivery settings'
-    })
-  }
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
 
-  const handleShareReport = () => {
-    console.log('✨ REPORTS: Initiating report sharing')
-    console.log('🔗 REPORTS: Generating shareable link')
-    console.log('👥 REPORTS: Preparing collaboration options')
-    console.log('🔒 REPORTS: Setting access permissions')
-    console.log('✅ REPORTS: Share options ready')
-    toast.success('🔗 Share Report', {
-      description: 'Share this report with team members or stakeholders'
-    })
-  }
+  const handleCreateReport = async () => {
+    if (!reportForm.name) {
+      console.log('⚠️ REPORTS: Report name required')
+      toast.error('Please enter a report name')
+      return
+    }
 
-  const handleSaveReport = () => {
-    console.log('✨ REPORTS: Saving report configuration')
-    console.log('💾 REPORTS: Storing filters and settings')
-    console.log('📝 REPORTS: Creating report template')
-    console.log('🗂️ REPORTS: Adding to saved reports library')
-    console.log('✅ REPORTS: Report saved successfully')
-    toast.success('💾 Report Saved', {
-      description: 'Your report has been saved to your library'
-    })
-  }
+    console.log('➕ REPORTS: Creating new report...')
+    console.log('📝 REPORTS: Name:', reportForm.name)
 
-  const handlePrintReport = () => {
-    console.log('✨ REPORTS: Initiating print function')
-    console.log('🖨️ REPORTS: Preparing print-friendly layout')
-    console.log('📄 REPORTS: Formatting charts and tables')
-    console.log('✅ REPORTS: Opening print dialog')
-    window.print()
-  }
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 1000))
 
-  const handleFilterData = (filter: string) => {
-    console.log('✨ REPORTS: Applying data filter')
-    console.log('🔍 REPORTS: Filter type - ' + filter)
-    console.log('📊 REPORTS: Recalculating metrics with filter')
-    console.log('🔄 REPORTS: Updating visualizations')
-    console.log('✅ REPORTS: Filter applied successfully')
-    toast.info('🔍 Filter Applied', {
-      description: 'Showing data for: ' + filter
-    })
-  }
+      const newReport: Report = {
+        id: `RPT-${String(state.reports.length + 1).padStart(3, '0')}`,
+        name: reportForm.name,
+        type: reportForm.type,
+        status: 'draft',
+        description: reportForm.description,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        createdBy: 'Current User',
+        dateRange: {
+          start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+          end: new Date().toISOString()
+        },
+        frequency: reportForm.frequency,
+        dataPoints: 0,
+        fileSize: 0,
+        recipients: [],
+        tags: []
+      }
 
-  const handleDateRange = (range: string) => {
-    console.log('✨ REPORTS: Changing date range')
-    console.log('📅 REPORTS: New range - ' + range)
-    console.log('📊 REPORTS: Fetching data for selected period')
-    console.log('🔄 REPORTS: Updating all metrics and charts')
-    setTimeRange(range)
-    console.log('✅ REPORTS: Date range updated successfully')
-  }
-
-  const handleCustomReport = () => {
-    console.log('✨ REPORTS: Opening custom report builder')
-    console.log('🎨 REPORTS: Loading available data sources')
-    console.log('📊 REPORTS: Preparing customization options')
-    console.log('🔧 REPORTS: Metrics, dimensions, and visualizations')
-    console.log('✅ REPORTS: Custom builder ready')
-    toast.info('🎨 Custom Report Builder', {
-      description: 'Create a customized report with your preferred metrics'
-    })
-  }
-
-  const handleCompareReports = () => {
-    console.log('✨ REPORTS: Initiating report comparison')
-    console.log('⚖️ REPORTS: Loading comparison interface')
-    console.log('📊 REPORTS: Select reports to compare side-by-side')
-    console.log('📈 REPORTS: Identifying trends and differences')
-    console.log('✅ REPORTS: Comparison mode activated')
-    toast.info('⚖️ Compare Reports', {
-      description: 'Analyze multiple reports to identify trends and insights'
-    })
-  }
-
-  const handleEmailReport = () => {
-    console.log('✨ REPORTS: Opening email composer')
-    console.log('📧 REPORTS: Preparing report for email delivery')
-    console.log('👥 REPORTS: Loading contact list')
-    console.log('📎 REPORTS: Attaching report file')
-    console.log('✅ REPORTS: Email dialog ready')
-    toast.success('📧 Email Report', {
-      description: 'Compose and send this report via email'
-    })
-  }
-
-  const handleDashboardView = () => {
-    console.log('✨ REPORTS: Switching to dashboard view')
-    console.log('📊 REPORTS: Loading dashboard layout')
-    console.log('📈 REPORTS: Displaying key metrics and charts')
-    console.log('🎯 REPORTS: Overview mode with high-level insights')
-    console.log('✅ REPORTS: Dashboard view activated')
-    toast.info('📊 Dashboard View', {
-      description: 'Viewing reports in dashboard layout with key metrics'
-    })
-  }
-
-  const handleDetailedView = () => {
-    console.log('✨ REPORTS: Switching to detailed view')
-    console.log('🔍 REPORTS: Loading comprehensive data tables')
-    console.log('📊 REPORTS: Displaying granular metrics')
-    console.log('📋 REPORTS: Showing all data points and breakdowns')
-    console.log('✅ REPORTS: Detailed view activated')
-    toast.info('🔍 Detailed View', {
-      description: 'Viewing comprehensive report with all data points'
-    })
-  }
-
-  const handleSummaryView = () => {
-    console.log('✨ REPORTS: Switching to summary view')
-    console.log('📋 REPORTS: Loading executive summary')
-    console.log('📊 REPORTS: Highlighting key findings')
-    console.log('🎯 REPORTS: Condensed view for quick insights')
-    console.log('✅ REPORTS: Summary view activated')
-    toast.info('📋 Summary View', {
-      description: 'Viewing executive summary with key highlights'
-    })
-  }
-
-  const handleRefreshData = () => {
-    console.log('✨ REPORTS: Refreshing data from all sources')
-    console.log('🔄 REPORTS: Fetching latest updates')
-    console.log('📊 REPORTS: Recalculating metrics and analytics')
-    console.log('📈 REPORTS: Updating all visualizations')
-    console.log('✅ REPORTS: Data refresh initiated')
-    toast.success('🔄 Refreshing Data', {
-      description: 'Fetching the latest data from all sources'
-    })
-  }
-
-  const handleBenchmark = () => {
-    console.log('✨ REPORTS: Opening benchmark analysis')
-    console.log('📏 REPORTS: Loading industry standards')
-    console.log('📊 REPORTS: Comparing against benchmarks')
-    console.log('📈 REPORTS: Identifying performance gaps')
-    console.log('✅ REPORTS: Benchmark comparison ready')
-    toast.info('📏 Benchmark Analysis', {
-      description: 'Compare your metrics against industry standards'
-    })
-  }
-
-  const handleInsights = () => {
-    console.log('✨ REPORTS: Activating AI insights engine')
-    console.log('💡 REPORTS: Analyzing patterns and trends')
-    console.log('🤖 REPORTS: Generating intelligent recommendations')
-    console.log('📊 REPORTS: Identifying opportunities and risks')
-    console.log('✅ REPORTS: AI insights generated')
-    toast.success('💡 AI Insights', {
-      description: 'AI-powered analysis revealing key patterns and opportunities'
-    })
-  }
-
-  const handleAnnotate = () => {
-    console.log('✨ REPORTS: Opening annotation mode')
-    console.log('✏️ REPORTS: Enabling markup tools')
-    console.log('📝 REPORTS: Add notes and comments to report')
-    console.log('🎨 REPORTS: Highlight important data points')
-    console.log('✅ REPORTS: Annotation mode activated')
-    toast.info('✏️ Annotate Report', {
-      description: 'Add notes and highlights to your report'
-    })
-  }
-
-  const handleArchiveReport = () => {
-    console.log('✨ REPORTS: Initiating report archive')
-    console.log('📦 REPORTS: Moving report to archive')
-    console.log('🗄️ REPORTS: Preserving report for future reference')
-    console.log('💾 REPORTS: Updating report status')
-    console.log('✅ REPORTS: Report archived successfully')
-    toast.success('📦 Report Archived', {
-      description: 'Report has been moved to your archive'
-    })
-  }
-
-  const handleDeleteReport = () => {
-    console.log('⚠️ REPORTS: Delete action initiated')
-    console.log('🗑️ REPORTS: Requesting user confirmation')
-    if (confirm('Delete?')) {
-      console.log('✨ REPORTS: User confirmed deletion')
-      console.log('🗑️ REPORTS: Removing report from database')
-      console.log('🔄 REPORTS: Updating report list')
-      console.log('✅ REPORTS: Report deleted successfully')
-      toast.success('✅ Report Deleted', {
-        description: 'The report has been permanently removed'
-      })
-    } else {
-      console.log('❌ REPORTS: User cancelled deletion')
-      console.log('📊 REPORTS: Report preserved')
+      dispatch({ type: 'ADD_REPORT', report: newReport })
+      toast.success('Report created successfully')
+      setIsCreateModalOpen(false)
+      setReportForm({ name: '', type: 'analytics', description: '', frequency: 'once' })
+      console.log('✅ REPORTS: Report created')
+    } catch (error) {
+      console.error('❌ REPORTS: Create error:', error)
+      toast.error('Failed to create report')
+    } finally {
+      setIsSaving(false)
     }
   }
 
-  // A+++ LOADING STATE
-  if (isLoading) {
-    return (
-      <div className="min-h-screen relative">
-        {/* Pattern Craft Background */}
-        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
-        <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
-        <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
-        <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10" />
+  const handleGenerateReport = async (reportId: string) => {
+    const report = state.reports.find(r => r.id === reportId)
+    console.log('🔄 REPORTS: Generating report - ID:', reportId, 'Name:', report?.name)
 
-        <div className="p-6 space-y-6 min-h-screen relative">
-          <CardSkeleton />
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <CardSkeleton />
-            <CardSkeleton />
-            <CardSkeleton />
-            <CardSkeleton />
-          </div>
-          <DashboardSkeleton />
-        </div>
-      </div>
-    )
+    try {
+      const updatedReport = {
+        ...report!,
+        status: 'generating' as ReportStatus,
+        updatedAt: new Date().toISOString()
+      }
+
+      dispatch({ type: 'UPDATE_REPORT', report: updatedReport })
+      toast.info('Generating report...')
+
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      const readyReport = {
+        ...updatedReport,
+        status: 'ready' as ReportStatus,
+        dataPoints: Math.floor(Math.random() * 10000) + 1000,
+        fileSize: Math.floor(Math.random() * 5000000) + 100000
+      }
+
+      dispatch({ type: 'UPDATE_REPORT', report: readyReport })
+      toast.success('Report generated successfully')
+      console.log('✅ REPORTS: Report generated')
+    } catch (error) {
+      console.error('❌ REPORTS: Generation error:', error)
+      toast.error('Failed to generate report')
+    }
   }
 
-  // A+++ ERROR STATE
-  if (error) {
-    return (
-      <div className="min-h-screen relative">
-        {/* Pattern Craft Background */}
-        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
-        <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
-        <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
-        <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10" />
+  const handleDeleteReport = async (reportId: string) => {
+    const report = state.reports.find(r => r.id === reportId)
+    console.log('🗑️ REPORTS: Deleting report - ID:', reportId, 'Name:', report?.name)
 
-        <div className="p-6 space-y-6 min-h-screen relative">
-          <div className="max-w-2xl mx-auto mt-20">
-            <ErrorEmptyState
-              error={error}
-              onRetry={() => window.location.reload()}
-            />
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800))
+
+      dispatch({ type: 'DELETE_REPORT', reportId })
+      toast.success('Report deleted successfully')
+      setIsDeleteModalOpen(false)
+      console.log('✅ REPORTS: Report deleted')
+    } catch (error) {
+      console.error('❌ REPORTS: Delete error:', error)
+      toast.error('Failed to delete report')
+    }
+  }
+
+  const handleExportReport = async () => {
+    if (!state.selectedReport) return
+
+    console.log('📤 REPORTS: Exporting report:', state.selectedReport.name)
+    console.log('📄 REPORTS: Format:', exportFormat)
+
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      toast.success(`Report exported as ${exportFormat.toUpperCase()}`)
+      setIsExportModalOpen(false)
+      console.log('✅ REPORTS: Export complete')
+    } catch (error) {
+      console.error('❌ REPORTS: Export error:', error)
+      toast.error('Failed to export report')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleScheduleReport = async () => {
+    if (!state.selectedReport || !scheduleTime) {
+      console.log('⚠️ REPORTS: Missing schedule details')
+      toast.error('Please select a time')
+      return
+    }
+
+    console.log('⏰ REPORTS: Scheduling report:', state.selectedReport.name)
+    console.log('📅 REPORTS: Time:', scheduleTime)
+
+    try {
+      setIsSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      const updatedReport = {
+        ...state.selectedReport,
+        status: 'scheduled' as ReportStatus,
+        nextRun: new Date(scheduleTime).toISOString()
+      }
+
+      dispatch({ type: 'UPDATE_REPORT', report: updatedReport })
+      toast.success('Report scheduled successfully')
+      setIsScheduleModalOpen(false)
+      setScheduleTime('')
+      console.log('✅ REPORTS: Report scheduled')
+    } catch (error) {
+      console.error('❌ REPORTS: Schedule error:', error)
+      toast.error('Failed to schedule report')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // ============================================================================
+  // HELPERS
+  // ============================================================================
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+  }
+
+  const getTypeColor = (type: ReportType) => {
+    switch (type) {
+      case 'analytics': return 'bg-blue-500/10 text-blue-500'
+      case 'financial': return 'bg-green-500/10 text-green-500'
+      case 'performance': return 'bg-purple-500/10 text-purple-500'
+      case 'sales': return 'bg-orange-500/10 text-orange-500'
+      case 'custom': return 'bg-gray-500/10 text-gray-500'
+      default: return 'bg-gray-500/10 text-gray-500'
+    }
+  }
+
+  const getStatusColor = (status: ReportStatus) => {
+    switch (status) {
+      case 'draft': return 'bg-gray-500/10 text-gray-500'
+      case 'generating': return 'bg-blue-500/10 text-blue-500'
+      case 'ready': return 'bg-green-500/10 text-green-500'
+      case 'scheduled': return 'bg-purple-500/10 text-purple-500'
+      case 'failed': return 'bg-red-500/10 text-red-500'
+      default: return 'bg-gray-500/10 text-gray-500'
+    }
+  }
+
+  const getTypeIcon = (type: ReportType) => {
+    switch (type) {
+      case 'analytics': return BarChart3
+      case 'financial': return DollarSign
+      case 'performance': return TrendingUp
+      case 'sales': return Users
+      case 'custom': return Sparkles
+      default: return FileText
+    }
+  }
+
+  // ============================================================================
+  // RENDER
+  // ============================================================================
+
+  if (isLoading) {
+    return (
+      <div className="kazi-bg-light dark:kazi-bg-dark min-h-screen py-8">
+        <div className="container mx-auto px-4 space-y-6">
+          <CardSkeleton />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
           </div>
+          <CardSkeleton />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen relative">
-      {/* Pattern Craft Background */}
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
-      <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
-      <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
-      <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10" />
-
-      <div className="p-6 space-y-6 min-h-screen relative">
-        <PageHeader
-        title="Reports"
-        description="Comprehensive analytics and reporting dashboard"
-        icon={BarChart3}
-        breadcrumbs={[
-          { label: 'Dashboard', href: '/dashboard' },
-          { label: 'Reports' }
-        ]}
-      />
-
-      {/* Report Overview Metrics */}
-      <div className="grid gap-6 md:grid-cols-4">
-        <div className="relative group">
-          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
-          <LiquidGlassCard className="relative">
-            <BorderTrail className="bg-gradient-to-r from-blue-500 to-indigo-600" size={60} duration={6} />
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-400">Total Reports</p>
-                  <NumberFlow value={256} className="text-2xl font-bold text-blue-400" />
-                  <div className="flex items-center mt-1">
-                    <ArrowUpRight className="h-4 w-4 text-green-400 mr-1" />
-                    <span className="text-xs text-green-400">+12% from last period</span>
-                  </div>
-                </div>
-                <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full">
-                  <FileText className="h-5 w-5 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </LiquidGlassCard>
-        </div>
-        
-        <div className="relative group">
-          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
-          <LiquidGlassCard className="relative">
-            <BorderTrail className="bg-gradient-to-r from-green-500 to-emerald-600" size={60} duration={6} />
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-400">Scheduled Reports</p>
-                  <NumberFlow value={28} className="text-2xl font-bold text-green-400" />
-                  <div className="flex items-center mt-1">
-                    <ArrowUpRight className="h-4 w-4 text-green-400 mr-1" />
-                    <span className="text-xs text-green-400">+8% from last period</span>
-                  </div>
-                </div>
-                <div className="p-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full">
-                  <Calendar className="h-5 w-5 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </LiquidGlassCard>
-        </div>
-        
-        <div className="relative group">
-          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-purple-600/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
-          <LiquidGlassCard className="relative">
-            <BorderTrail className="bg-gradient-to-r from-purple-500 to-purple-700" size={60} duration={6} />
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-400">Report Exports</p>
-                  <NumberFlow value={1458} className="text-2xl font-bold text-purple-400" />
-                  <div className="flex items-center mt-1">
-                    <ArrowUpRight className="h-4 w-4 text-green-400 mr-1" />
-                    <span className="text-xs text-green-400">+15% from last period</span>
-                  </div>
-                </div>
-                <div className="p-2 bg-gradient-to-r from-purple-500 to-purple-700 rounded-full">
-                  <Download className="h-5 w-5 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </LiquidGlassCard>
-        </div>
-        
-        <div className="relative group">
-          <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500/20 to-amber-500/20 rounded-xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
-          <LiquidGlassCard className="relative">
-            <BorderTrail className="bg-gradient-to-r from-yellow-500 to-amber-600" size={60} duration={6} />
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-400">Data Sources</p>
-                  <NumberFlow value={12} className="text-2xl font-bold text-yellow-400" />
-                  <div className="flex items-center mt-1">
-                    <span className="text-xs text-gray-500">No change from last period</span>
-                  </div>
-                </div>
-                <div className="p-2 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-full">
-                  <HardDrive className="h-5 w-5 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </LiquidGlassCard>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <Card className="kazi-card">
-        <CardHeader>
+    <div className="kazi-bg-light dark:kazi-bg-dark min-h-screen py-8">
+      <div className="container mx-auto px-4 space-y-6">
+        {/* Header */}
+        <ScrollReveal>
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Reports</CardTitle>
-              <CardDescription>Create and manage your analytical reports</CardDescription>
+            <div className="flex items-center gap-3">
+              <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 dark:bg-purple-500/20">
+                <BarChart3 className="h-6 w-6 text-purple-500" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold kazi-text-dark dark:kazi-text-light">
+                  <TextShimmer>Reports & Analytics</TextShimmer>
+                </h1>
+                <p className="text-muted-foreground text-sm">
+                  Generate and manage comprehensive reports
+                </p>
+              </div>
             </div>
-            <Button>
+            <Button onClick={() => setIsCreateModalOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Create Report
             </Button>
           </div>
-          <div className="relative mt-2">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search reports..."
-              className="pl-8 bg-white"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-12">
-            <BarChart3 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No reports found</h3>
-            <p className="text-muted-foreground mb-4">
-              Get started by creating your first analytical report
-            </p>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Report
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        </ScrollReveal>
 
-      {/* Coming Soon Features */}
-      <Card className="kazi-card">
-        <CardHeader>
-          <CardTitle>Advanced Features Coming Soon</CardTitle>
-          <CardDescription>
-            We're working on powerful reporting tools to enhance your analytics experience
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 md:grid-cols-3">
-            <div className="flex flex-col items-center text-center p-4 border rounded-lg">
-              <div className="p-3 rounded-full bg-blue-100 mb-4">
-                <Sparkles className="h-6 w-6 text-blue-600" />
+        {/* Stats Dashboard */}
+        <ScrollReveal>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <LiquidGlassCard className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Reports</p>
+                  <p className="text-2xl font-bold kazi-text-dark dark:kazi-text-light mt-1">
+                    <NumberFlow value={stats.totalReports} />
+                  </p>
+                </div>
+                <div className="relative">
+                  
+                  <FileText className="h-8 w-8 text-purple-500" />
+                </div>
               </div>
-              <h3 className="font-medium mb-1">AI-Powered Insights</h3>
-              <p className="text-sm text-muted-foreground">
-                Intelligent analysis and automated reporting
-              </p>
-            </div>
-            <div className="flex flex-col items-center text-center p-4 border rounded-lg">
-              <div className="p-3 rounded-full bg-purple-100 mb-4">
-                <Lightbulb className="h-6 w-6 text-purple-600" />
+            </LiquidGlassCard>
+
+            <LiquidGlassCard className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Ready Reports</p>
+                  <p className="text-2xl font-bold kazi-text-dark dark:kazi-text-light mt-1">
+                    <NumberFlow value={stats.readyReports} />
+                  </p>
+                </div>
+                <div className="relative">
+                  
+                  <CheckCircle2 className="h-8 w-8 text-green-500" />
+                </div>
               </div>
-              <h3 className="font-medium mb-1">Custom Templates</h3>
-              <p className="text-sm text-muted-foreground">
-                Build and save custom report templates
-              </p>
-            </div>
-            <div className="flex flex-col items-center text-center p-4 border rounded-lg">
-              <div className="p-3 rounded-full bg-green-100 mb-4">
-                <ChevronRight className="h-6 w-6 text-green-600" />
+            </LiquidGlassCard>
+
+            <LiquidGlassCard className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Scheduled</p>
+                  <p className="text-2xl font-bold kazi-text-dark dark:kazi-text-light mt-1">
+                    <NumberFlow value={stats.scheduledReports} />
+                  </p>
+                </div>
+                <div className="relative">
+                  
+                  <Calendar className="h-8 w-8 text-blue-500" />
+                </div>
               </div>
-              <h3 className="font-medium mb-1">Advanced Exports</h3>
-              <p className="text-sm text-muted-foreground">
-                Export to multiple formats with scheduling
-              </p>
-            </div>
+            </LiquidGlassCard>
+
+            <LiquidGlassCard className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Data Points</p>
+                  <p className="text-2xl font-bold kazi-text-dark dark:kazi-text-light mt-1">
+                    <NumberFlow value={stats.totalDataPoints} />
+                  </p>
+                </div>
+                <div className="relative">
+                  
+                  <PieChart className="h-8 w-8 text-orange-500" />
+                </div>
+              </div>
+            </LiquidGlassCard>
           </div>
-        </CardContent>
-      </Card>
+        </ScrollReveal>
+
+        {/* Filters & Search */}
+        <ScrollReveal>
+          <LiquidGlassCard className="p-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              {/* Search */}
+              <div className="md:col-span-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search reports..."
+                    value={state.searchTerm}
+                    onChange={(e) => dispatch({ type: 'SET_SEARCH', searchTerm: e.target.value })}
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+
+              {/* Type Filter */}
+              <Select
+                value={state.filterType}
+                onValueChange={(value) => dispatch({ type: 'SET_FILTER_TYPE', filterType: value as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Types</SelectItem>
+                  <SelectItem value="analytics">Analytics</SelectItem>
+                  <SelectItem value="financial">Financial</SelectItem>
+                  <SelectItem value="performance">Performance</SelectItem>
+                  <SelectItem value="sales">Sales</SelectItem>
+                  <SelectItem value="custom">Custom</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Status Filter */}
+              <Select
+                value={state.filterStatus}
+                onValueChange={(value) => dispatch({ type: 'SET_FILTER_STATUS', filterStatus: value as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="generating">Generating</SelectItem>
+                  <SelectItem value="ready">Ready</SelectItem>
+                  <SelectItem value="scheduled">Scheduled</SelectItem>
+                  <SelectItem value="failed">Failed</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Sort */}
+              <Select
+                value={state.sortBy}
+                onValueChange={(value) => dispatch({ type: 'SET_SORT', sortBy: value as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sort" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date">Date</SelectItem>
+                  <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="type">Type</SelectItem>
+                  <SelectItem value="status">Status</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Bulk Actions */}
+            {state.selectedReports.length > 0 && (
+              <div className="mt-4 pt-4 border-t flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {state.selectedReports.length} report(s) selected
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => dispatch({ type: 'CLEAR_SELECTED_REPORTS' })}
+                  >
+                    Clear
+                  </Button>
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Selected
+                  </Button>
+                </div>
+              </div>
+            )}
+          </LiquidGlassCard>
+        </ScrollReveal>
+
+        {/* Reports Grid */}
+        {filteredAndSortedReports.length === 0 ? (
+          <ScrollReveal>
+            <NoDataEmptyState
+              title="No reports found"
+              message="Create reports or adjust your filters"
+              action={{
+                label: 'Create Report',
+                onClick: () => setIsCreateModalOpen(true)
+              }}
+            />
+          </ScrollReveal>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredAndSortedReports.map((report, index) => {
+              const TypeIcon = getTypeIcon(report.type)
+
+              return (
+                <ScrollReveal key={report.id} delay={index * 0.05}>
+                  <LiquidGlassCard className="p-6 hover:shadow-lg transition-shadow">
+                    <div className="space-y-4">
+                      {/* Header */}
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${getTypeColor(report.type)}`}>
+                            <TypeIcon className="h-5 w-5" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold line-clamp-1">{report.name}</h3>
+                            <p className="text-xs text-muted-foreground">{report.createdBy}</p>
+                          </div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => {
+                              dispatch({ type: 'SELECT_REPORT', report })
+                              setIsViewModalOpen(true)
+                            }}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Details
+                            </DropdownMenuItem>
+                            {report.status === 'draft' && (
+                              <DropdownMenuItem onClick={() => handleGenerateReport(report.id)}>
+                                <Settings className="h-4 w-4 mr-2" />
+                                Generate
+                              </DropdownMenuItem>
+                            )}
+                            {report.status === 'ready' && (
+                              <>
+                                <DropdownMenuItem onClick={() => {
+                                  dispatch({ type: 'SELECT_REPORT', report })
+                                  setIsExportModalOpen(true)
+                                }}>
+                                  <Download className="h-4 w-4 mr-2" />
+                                  Export
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                  dispatch({ type: 'SELECT_REPORT', report })
+                                  setIsScheduleModalOpen(true)
+                                }}>
+                                  <Calendar className="h-4 w-4 mr-2" />
+                                  Schedule
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                            <DropdownMenuItem
+                              onClick={() => {
+                                dispatch({ type: 'SELECT_REPORT', report })
+                                setIsDeleteModalOpen(true)
+                              }}
+                              className="text-red-500"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {report.description}
+                      </p>
+
+                      {/* Badges */}
+                      <div className="flex gap-2">
+                        <Badge className={getStatusColor(report.status)}>
+                          {report.status}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {report.frequency}
+                        </Badge>
+                      </div>
+
+                      {/* Stats */}
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <p className="text-muted-foreground">Data Points</p>
+                          <p className="font-medium">{report.dataPoints.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">File Size</p>
+                          <p className="font-medium">{formatFileSize(report.fileSize)}</p>
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div className="pt-3 border-t text-xs text-muted-foreground flex items-center justify-between">
+                        <span>Created {formatDate(report.createdAt)}</span>
+                        {report.recipients.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            <Mail className="h-3 w-3" />
+                            {report.recipients.length}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </LiquidGlassCard>
+                </ScrollReveal>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Create Report Modal */}
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Report</DialogTitle>
+              <DialogDescription>
+                Generate a new analytics or performance report
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Report Name *</Label>
+                <Input
+                  value={reportForm.name}
+                  onChange={(e) => setReportForm({ ...reportForm, name: e.target.value })}
+                  placeholder="Q4 Sales Report"
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label>Report Type</Label>
+                <Select value={reportForm.type} onValueChange={(v) => setReportForm({ ...reportForm, type: v as ReportType })}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="analytics">Analytics</SelectItem>
+                    <SelectItem value="financial">Financial</SelectItem>
+                    <SelectItem value="performance">Performance</SelectItem>
+                    <SelectItem value="sales">Sales</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  value={reportForm.description}
+                  onChange={(e) => setReportForm({ ...reportForm, description: e.target.value })}
+                  placeholder="Describe what this report will cover..."
+                  className="mt-2"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <Label>Frequency</Label>
+                <Select value={reportForm.frequency} onValueChange={(v) => setReportForm({ ...reportForm, frequency: v as ReportFrequency })}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="once">Once</SelectItem>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="quarterly">Quarterly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateReport} disabled={isSaving}>
+                {isSaving ? 'Creating...' : 'Create Report'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Report Modal */}
+        <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Report Details</DialogTitle>
+            </DialogHeader>
+
+            {state.selectedReport && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Name</Label>
+                    <p className="text-sm font-medium mt-1">{state.selectedReport.name}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Type</Label>
+                    <Badge className={`${getTypeColor(state.selectedReport.type)} mt-1`}>
+                      {state.selectedReport.type}
+                    </Badge>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Status</Label>
+                    <Badge className={`${getStatusColor(state.selectedReport.status)} mt-1`}>
+                      {state.selectedReport.status}
+                    </Badge>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Frequency</Label>
+                    <p className="text-sm font-medium mt-1 capitalize">{state.selectedReport.frequency}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Created By</Label>
+                    <p className="text-sm font-medium mt-1">{state.selectedReport.createdBy}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Created Date</Label>
+                    <p className="text-sm font-medium mt-1">{formatDate(state.selectedReport.createdAt)}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Data Points</Label>
+                    <p className="text-sm font-medium mt-1">{state.selectedReport.dataPoints.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">File Size</Label>
+                    <p className="text-sm font-medium mt-1">{formatFileSize(state.selectedReport.fileSize)}</p>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground">Description</Label>
+                  <p className="text-sm mt-1">{state.selectedReport.description}</p>
+                </div>
+                {state.selectedReport.recipients.length > 0 && (
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Recipients</Label>
+                    <div className="flex gap-2 mt-2">
+                      {state.selectedReport.recipients.map((email, i) => (
+                        <Badge key={i} variant="outline">{email}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Modal */}
+        <Dialog open={isExportModalOpen} onOpenChange={setIsExportModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Export Report</DialogTitle>
+              <DialogDescription>
+                Download {state.selectedReport?.name} in your preferred format
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Export Format</Label>
+                <Select value={exportFormat} onValueChange={(v) => setExportFormat(v as ExportFormat)}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF Document</SelectItem>
+                    <SelectItem value="excel">Excel Spreadsheet</SelectItem>
+                    <SelectItem value="csv">CSV File</SelectItem>
+                    <SelectItem value="json">JSON Data</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsExportModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleExportReport} disabled={isSaving}>
+                {isSaving ? 'Exporting...' : 'Export Report'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Modal */}
+        <Dialog open={isScheduleModalOpen} onOpenChange={setIsScheduleModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Schedule Report</DialogTitle>
+              <DialogDescription>
+                Set up automated delivery for {state.selectedReport?.name}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Next Run Date</Label>
+                <Input
+                  type="datetime-local"
+                  value={scheduleTime}
+                  onChange={(e) => setScheduleTime(e.target.value)}
+                  className="mt-2"
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsScheduleModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleScheduleReport} disabled={isSaving}>
+                {isSaving ? 'Scheduling...' : 'Schedule Report'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Modal */}
+        <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Report</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete {state.selectedReport?.name}? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => state.selectedReport && handleDeleteReport(state.selectedReport.id)}
+              >
+                Delete Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

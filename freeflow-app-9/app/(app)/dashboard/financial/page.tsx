@@ -923,8 +923,8 @@ export default function FinancialPage() {
         >
           <Card className="kazi-card relative overflow-hidden group hover:shadow-xl transition-shadow">
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <FloatingParticle delay={0} color="emerald" />
-              <FloatingParticle delay={1} color="teal" />
+              
+              
             </div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
               <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>

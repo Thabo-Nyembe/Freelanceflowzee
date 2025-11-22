@@ -1,551 +1,1187 @@
-/**
- * A+++ Utilities Showcase
- * Comprehensive demonstration of all A+++ grade utilities
- */
-
 'use client'
 
-import { useState } from 'react'
-import { Loader2, FileX, CheckCircle2, Keyboard as KeyboardIcon, Eye, Search, Lightbulb } from 'lucide-react'
+import { useState, useEffect, useReducer, useMemo } from 'react'
+import { PageHeader } from '@/components/ui/page-header'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Checkbox } from '@/components/ui/checkbox'
+import { toast } from 'sonner'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
-import { SimpleTooltip, InfoTooltip } from '@/components/ui/tooltip'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { motion, AnimatePresence } from 'framer-motion'
 
-// A+++ Utilities
+// ============================================================================
+// A+++ UTILITIES
+// ============================================================================
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
 import {
-  DashboardSkeleton,
-  CardSkeleton,
-  ListSkeleton,
-  FormSkeleton
-} from '@/components/ui/loading-skeleton'
-import {
-  NoDataEmptyState,
-  ErrorEmptyState,
-  SuccessEmptyState
-} from '@/components/ui/empty-state'
-import { FormValidator, ValidationSchemas } from '@/lib/validation'
-import { useAnnouncer, AriaHelpers } from '@/lib/accessibility'
-import { useKeyboardShortcuts } from '@/lib/keyboard-shortcuts'
-import { generateMetadata } from '@/lib/seo'
+  Box,
+  Code,
+  Copy,
+  Eye,
+  Star,
+  MoreVertical,
+  Search,
+  FileCode,
+  Layout,
+  Palette,
+  Zap,
+  Layers,
+  Database,
+  Bell,
+  Menu,
+  Grid,
+  List,
+  Play,
+  Download,
+  Share2,
+  Heart,
+  TrendingUp,
+  Award,
+  Sparkles,
+  Plus,
+  ChevronRight,
+  Check,
+  BookOpen,
+  Settings,
+  Filter,
+  SortAsc,
+  X,
+  Code2,
+  Component,
+  Briefcase,
+  Lightbulb,
+  Target,
+  Rocket
+} from 'lucide-react'
 
-type DemoSection = 'loading' | 'empty' | 'validation' | 'keyboard' | 'accessibility' | 'seo'
+// ============================================================================
+// A++++ TYPES
+// ============================================================================
 
-// Force dynamic rendering for this interactive page
-export const dynamic = 'force-dynamic'
+type ComponentCategory = 'ui' | 'layout' | 'animation' | 'data-display' | 'navigation' | 'feedback' | 'forms' | 'utilities'
+type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert'
+type ViewMode = 'grid' | 'list' | 'code'
+type CodeLanguage = 'typescript' | 'javascript' | 'tsx' | 'jsx' | 'css' | 'html'
 
-export default function APlusShowcase() {
-  const [activeSection, setActiveSection] = useState<DemoSection>('loading')
-  const [isLoading, setIsLoading] = useState(false)
-  const [showEmpty, setShowEmpty] = useState<'none' | 'nodata' | 'error' | 'success'>('none')
-  const [formData, setFormData] = useState({ email: '', password: '', name: '' })
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+interface ComponentShowcase {
+  id: string
+  name: string
+  description: string
+  category: ComponentCategory
+  difficulty: DifficultyLevel
+  code: string
+  preview: string
+  language: CodeLanguage
+  tags: string[]
+  popularity: number
+  examples: number
+  downloads: number
+  isFavorite: boolean
+  isPremium: boolean
+  createdAt: string
+  updatedAt: string
+  author: string
+  version: string
+  dependencies: string[]
+}
 
-  const { announce } = useAnnouncer()
+interface ShowcaseState {
+  components: ComponentShowcase[]
+  selectedComponent: ComponentShowcase | null
+  searchTerm: string
+  filterCategory: 'all' | ComponentCategory
+  filterDifficulty: 'all' | DifficultyLevel
+  sortBy: 'name' | 'popularity' | 'recent' | 'downloads' | 'examples'
+  viewMode: ViewMode
+  selectedComponents: string[]
+  showFavoritesOnly: boolean
+}
 
-  // Keyboard shortcuts for this page
-  useKeyboardShortcuts([
-    {
-      key: '1',
-      altKey: true,
-      description: 'Show Loading Section',
-      action: () => {
-        setActiveSection('loading')
-        announce('Switched to Loading Section')
+type ShowcaseAction =
+  | { type: 'SET_COMPONENTS'; components: ComponentShowcase[] }
+  | { type: 'ADD_COMPONENT'; component: ComponentShowcase }
+  | { type: 'UPDATE_COMPONENT'; component: ComponentShowcase }
+  | { type: 'DELETE_COMPONENT'; componentId: string }
+  | { type: 'SELECT_COMPONENT'; component: ComponentShowcase | null }
+  | { type: 'SET_SEARCH'; searchTerm: string }
+  | { type: 'SET_FILTER_CATEGORY'; filterCategory: 'all' | ComponentCategory }
+  | { type: 'SET_FILTER_DIFFICULTY'; filterDifficulty: 'all' | DifficultyLevel }
+  | { type: 'SET_SORT'; sortBy: ShowcaseState['sortBy'] }
+  | { type: 'SET_VIEW_MODE'; viewMode: ViewMode }
+  | { type: 'TOGGLE_SELECT_COMPONENT'; componentId: string }
+  | { type: 'CLEAR_SELECTED_COMPONENTS' }
+  | { type: 'TOGGLE_FAVORITE'; componentId: string }
+  | { type: 'TOGGLE_FAVORITES_ONLY' }
+
+// ============================================================================
+// A++++ REDUCER
+// ============================================================================
+
+function showcaseReducer(state: ShowcaseState, action: ShowcaseAction): ShowcaseState {
+  console.log('🔄 SHOWCASE REDUCER: Action:', action.type)
+
+  switch (action.type) {
+    case 'SET_COMPONENTS':
+      console.log('📊 SHOWCASE REDUCER: Setting components - Count:', action.components.length)
+      return { ...state, components: action.components }
+
+    case 'ADD_COMPONENT':
+      console.log('➕ SHOWCASE REDUCER: Adding component - ID:', action.component.id)
+      return { ...state, components: [action.component, ...state.components] }
+
+    case 'UPDATE_COMPONENT':
+      console.log('✏️ SHOWCASE REDUCER: Updating component - ID:', action.component.id)
+      return {
+        ...state,
+        components: state.components.map(c => c.id === action.component.id ? action.component : c),
+        selectedComponent: state.selectedComponent?.id === action.component.id ? action.component : state.selectedComponent
       }
-    },
-    {
-      key: '2',
-      altKey: true,
-      description: 'Show Empty States Section',
-      action: () => {
-        setActiveSection('empty')
-        announce('Switched to Empty States Section')
-      }
-    },
-    {
-      key: '3',
-      altKey: true,
-      description: 'Show Validation Section',
-      action: () => {
-        setActiveSection('validation')
-        announce('Switched to Validation Section')
-      }
-    }
-  ])
 
-  // Simulate loading
-  const triggerLoading = () => {
-    setIsLoading(true)
-    announce('Loading started', 'polite')
-    setTimeout(() => {
-      setIsLoading(false)
-      announce('Loading complete', 'polite')
-    }, 2000)
+    case 'DELETE_COMPONENT':
+      console.log('🗑️ SHOWCASE REDUCER: Deleting component - ID:', action.componentId)
+      return {
+        ...state,
+        components: state.components.filter(c => c.id !== action.componentId),
+        selectedComponent: state.selectedComponent?.id === action.componentId ? null : state.selectedComponent
+      }
+
+    case 'SELECT_COMPONENT':
+      console.log('👁️ SHOWCASE REDUCER: Selecting component - ID:', action.component?.id)
+      return { ...state, selectedComponent: action.component }
+
+    case 'SET_SEARCH':
+      console.log('🔍 SHOWCASE REDUCER: Search term:', action.searchTerm)
+      return { ...state, searchTerm: action.searchTerm }
+
+    case 'SET_FILTER_CATEGORY':
+      console.log('🎯 SHOWCASE REDUCER: Filter category:', action.filterCategory)
+      return { ...state, filterCategory: action.filterCategory }
+
+    case 'SET_FILTER_DIFFICULTY':
+      console.log('📈 SHOWCASE REDUCER: Filter difficulty:', action.filterDifficulty)
+      return { ...state, filterDifficulty: action.filterDifficulty }
+
+    case 'SET_SORT':
+      console.log('🔀 SHOWCASE REDUCER: Sort by:', action.sortBy)
+      return { ...state, sortBy: action.sortBy }
+
+    case 'SET_VIEW_MODE':
+      console.log('👁️ SHOWCASE REDUCER: View mode:', action.viewMode)
+      return { ...state, viewMode: action.viewMode }
+
+    case 'TOGGLE_SELECT_COMPONENT':
+      console.log('☑️ SHOWCASE REDUCER: Toggle select component - ID:', action.componentId)
+      return {
+        ...state,
+        selectedComponents: state.selectedComponents.includes(action.componentId)
+          ? state.selectedComponents.filter(id => id !== action.componentId)
+          : [...state.selectedComponents, action.componentId]
+      }
+
+    case 'CLEAR_SELECTED_COMPONENTS':
+      console.log('🧹 SHOWCASE REDUCER: Clearing selected components')
+      return { ...state, selectedComponents: [] }
+
+    case 'TOGGLE_FAVORITE':
+      console.log('⭐ SHOWCASE REDUCER: Toggle favorite - ID:', action.componentId)
+      return {
+        ...state,
+        components: state.components.map(c =>
+          c.id === action.componentId ? { ...c, isFavorite: !c.isFavorite } : c
+        )
+      }
+
+    case 'TOGGLE_FAVORITES_ONLY':
+      console.log('⭐ SHOWCASE REDUCER: Toggle favorites only - Current:', state.showFavoritesOnly)
+      return { ...state, showFavoritesOnly: !state.showFavoritesOnly }
+
+    default:
+      return state
   }
+}
 
-  // Validate form
-  const validateForm = () => {
-    const validator = new FormValidator()
+// ============================================================================
+// A++++ MOCK DATA
+// ============================================================================
 
-    validator
-      .validate('email', formData.email, ValidationSchemas.email)
-      .validate('password', formData.password, ValidationSchemas.password)
-      .validate('name', formData.name, ValidationSchemas.name)
+function generateMockComponents(): ComponentShowcase[] {
+  console.log('🎨 SHOWCASE: Generating mock components...')
 
-    const errors = validator.getErrors()
-    setFormErrors(errors)
+  const categories: ComponentCategory[] = ['ui', 'layout', 'animation', 'data-display', 'navigation', 'feedback', 'forms', 'utilities']
+  const difficulties: DifficultyLevel[] = ['beginner', 'intermediate', 'advanced', 'expert']
+  const languages: CodeLanguage[] = ['typescript', 'tsx', 'jsx', 'javascript']
 
-    if (!validator.hasErrors()) {
-      announce('Form validation passed', 'polite')
-      setShowEmpty('success')
-    } else {
-      announce(`Form has ${Object.keys(errors).length} errors`, 'assertive')
-    }
-  }
-
-  const sections: { id: DemoSection; label: string; Icon: any }[] = [
-    { id: 'loading', label: 'Loading States', Icon: Loader2 },
-    { id: 'empty', label: 'Empty States', Icon: FileX },
-    { id: 'validation', label: 'Validation', Icon: CheckCircle2 },
-    { id: 'keyboard', label: 'Keyboard Shortcuts', Icon: KeyboardIcon },
-    { id: 'accessibility', label: 'Accessibility', Icon: Eye },
-    { id: 'seo', label: 'SEO', Icon: Search }
+  const componentNames = [
+    'Gradient Button', 'Glass Card', 'Animated Modal', 'Data Table', 'Navbar Component',
+    'Toast Notification', 'Input Field', 'Custom Hook', 'Hero Section', 'Grid Layout',
+    'Loading Spinner', 'Dropdown Menu', 'Breadcrumb', 'Alert Box', 'Form Validator',
+    'Sidebar Navigation', 'Tabs Component', 'Tooltip', 'Badge', 'Avatar',
+    'Progress Bar', 'Carousel', 'Accordion', 'Pagination', 'Search Bar',
+    'Toggle Switch', 'Radio Group', 'Checkbox Group', 'Date Picker', 'Time Picker',
+    'Color Picker', 'File Upload', 'Image Gallery', 'Video Player', 'Audio Player',
+    'Chart Component', 'Graph Visualizer', 'Map Integration', 'Calendar', 'Scheduler',
+    'Rich Text Editor', 'Code Editor', 'Markdown Renderer', 'PDF Viewer', 'QR Generator',
+    'Barcode Scanner', 'Signature Pad', 'Drawing Canvas', 'Drag and Drop', 'Sortable List',
+    'Tree View', 'Timeline', 'Stepper', 'Rating', 'Star Rating',
+    'Like Button', 'Share Button', 'Comment Box', 'Chat Widget', 'Notification Center'
   ]
 
+  const authors = ['Sarah Johnson', 'Michael Chen', 'Emma Davis', 'Alex Rodriguez', 'David Kim']
+
+  const components: ComponentShowcase[] = componentNames.map((name, index) => {
+    const category = categories[index % categories.length]
+    const difficulty = difficulties[index % difficulties.length]
+    const language = languages[index % languages.length]
+
+    return {
+      id: `COMP-${String(index + 1).padStart(3, '0')}`,
+      name,
+      description: `Professional ${name} component with customizable props and modern design`,
+      category,
+      difficulty,
+      code: `// ${name} Component\nimport React from 'react'\n\nexport function ${name.replace(/\s+/g, '')}() {\n  return (\n    <div className="component">\n      {/* Component implementation */}\n    </div>\n  )\n}`,
+      preview: `https://picsum.photos/seed/${index}/600/400`,
+      language,
+      tags: [
+        category,
+        difficulty,
+        ['modern', 'responsive', 'accessible', 'customizable', 'animated'][Math.floor(Math.random() * 5)],
+        ['dark-mode', 'theme-support', 'mobile-friendly', 'interactive'][Math.floor(Math.random() * 4)]
+      ],
+      popularity: Math.floor(Math.random() * 10000) + 100,
+      examples: Math.floor(Math.random() * 20) + 1,
+      downloads: Math.floor(Math.random() * 50000) + 1000,
+      isFavorite: Math.random() > 0.8,
+      isPremium: Math.random() > 0.7,
+      createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
+      author: authors[index % authors.length],
+      version: `${Math.floor(Math.random() * 3) + 1}.${Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 10)}`,
+      dependencies: ['react', 'typescript', 'tailwindcss'].slice(0, Math.floor(Math.random() * 3) + 1)
+    }
+  })
+
+  console.log('✅ SHOWCASE: Generated', components.length, 'mock components')
+  return components
+}
+
+// ============================================================================
+// A++++ CATEGORIES
+// ============================================================================
+
+interface CategoryOption {
+  id: ComponentCategory
+  name: string
+  icon: any
+  color: string
+}
+
+const categoryOptions: CategoryOption[] = [
+  { id: 'ui', name: 'UI Components', icon: Box, color: 'blue' },
+  { id: 'layout', name: 'Layout', icon: Layout, color: 'green' },
+  { id: 'animation', name: 'Animations', icon: Zap, color: 'purple' },
+  { id: 'data-display', name: 'Data Display', icon: Database, color: 'cyan' },
+  { id: 'navigation', name: 'Navigation', icon: Menu, color: 'orange' },
+  { id: 'feedback', name: 'Feedback', icon: Bell, color: 'pink' },
+  { id: 'forms', name: 'Forms', icon: FileCode, color: 'yellow' },
+  { id: 'utilities', name: 'Utilities', icon: Settings, color: 'gray' }
+]
+
+// ============================================================================
+// A++++ MAIN COMPONENT
+// ============================================================================
+
+export default function APlusShowcasePage() {
+  console.log('🚀 SHOWCASE: Component mounting...')
+
+  // ============================================================================
+  // A++++ STATE MANAGEMENT
+  // ============================================================================
+  const [state, dispatch] = useReducer(showcaseReducer, {
+    components: [],
+    selectedComponent: null,
+    searchTerm: '',
+    filterCategory: 'all',
+    filterDifficulty: 'all',
+    sortBy: 'popularity',
+    viewMode: 'grid',
+    selectedComponents: [],
+    showFavoritesOnly: false
+  })
+
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
+  // Modal states
+  const [showViewModal, setShowViewModal] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
+
+  // Form states
+  const [componentName, setComponentName] = useState('')
+  const [componentDescription, setComponentDescription] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<ComponentCategory>('ui')
+  const [selectedDifficulty, setSelectedDifficulty] = useState<DifficultyLevel>('beginner')
+
+  // ============================================================================
+  // A++++ LOAD DATA
+  // ============================================================================
+  useEffect(() => {
+    const loadComponents = async () => {
+      console.log('📊 SHOWCASE: Loading components...')
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        await new Promise(resolve => setTimeout(resolve, 1000))
+
+        const mockComponents = generateMockComponents()
+        dispatch({ type: 'SET_COMPONENTS', components: mockComponents })
+
+        console.log('✅ SHOWCASE: Components loaded successfully - Count:', mockComponents.length)
+        setIsLoading(false)
+        announce('Components loaded successfully', 'polite')
+      } catch (err) {
+        console.log('❌ SHOWCASE: Load error:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load components')
+        setIsLoading(false)
+        announce('Error loading components', 'assertive')
+      }
+    }
+
+    loadComponents()
+  }, [announce])
+
+  // ============================================================================
+  // A++++ COMPUTED VALUES
+  // ============================================================================
+  const stats = useMemo(() => {
+    console.log('📊 SHOWCASE: Computing stats...')
+    const total = state.components.length
+    const categories = new Set(state.components.map(c => c.category)).size
+    const totalExamples = state.components.reduce((sum, c) => sum + c.examples, 0)
+    const totalDownloads = state.components.reduce((sum, c) => sum + c.downloads, 0)
+    const favorites = state.components.filter(c => c.isFavorite).length
+    const premium = state.components.filter(c => c.isPremium).length
+    const mostPopular = state.components.reduce((max, c) => c.popularity > max ? c.popularity : max, 0)
+
+    const computedStats = {
+      total,
+      categories,
+      totalExamples,
+      totalDownloads,
+      favorites,
+      premium,
+      mostPopular
+    }
+
+    console.log('📊 SHOWCASE: Stats computed -', JSON.stringify(computedStats))
+    return computedStats
+  }, [state.components])
+
+  const filteredAndSortedComponents = useMemo(() => {
+    console.log('🔍 SHOWCASE: Filtering and sorting components...')
+    let filtered = state.components
+
+    // Search
+    if (state.searchTerm) {
+      filtered = filtered.filter(component =>
+        component.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        component.description.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        component.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()))
+      )
+      console.log('🔍 SHOWCASE: Search filtered to', filtered.length, 'components')
+    }
+
+    // Filter by category
+    if (state.filterCategory !== 'all') {
+      filtered = filtered.filter(component => component.category === state.filterCategory)
+      console.log('🎯 SHOWCASE: Category filtered to', filtered.length, 'components')
+    }
+
+    // Filter by difficulty
+    if (state.filterDifficulty !== 'all') {
+      filtered = filtered.filter(component => component.difficulty === state.filterDifficulty)
+      console.log('📈 SHOWCASE: Difficulty filtered to', filtered.length, 'components')
+    }
+
+    // Filter favorites only
+    if (state.showFavoritesOnly) {
+      filtered = filtered.filter(component => component.isFavorite)
+      console.log('⭐ SHOWCASE: Favorites filtered to', filtered.length, 'components')
+    }
+
+    // Sort
+    const sorted = [...filtered].sort((a, b) => {
+      switch (state.sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name)
+        case 'popularity':
+          return b.popularity - a.popularity
+        case 'recent':
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        case 'downloads':
+          return b.downloads - a.downloads
+        case 'examples':
+          return b.examples - a.examples
+        default:
+          return 0
+      }
+    })
+
+    console.log('🔀 SHOWCASE: Sorted by', state.sortBy, '- Final count:', sorted.length)
+    return sorted
+  }, [state.components, state.searchTerm, state.filterCategory, state.filterDifficulty, state.sortBy, state.showFavoritesOnly])
+
+  // ============================================================================
+  // A++++ HANDLERS
+  // ============================================================================
+
+  const handleViewComponent = (component: ComponentShowcase) => {
+    console.log('👁️ SHOWCASE: Opening component view - ID:', component.id)
+    console.log('📊 SHOWCASE: Component details:', {
+      name: component.name,
+      category: component.category,
+      popularity: component.popularity
+    })
+
+    dispatch({ type: 'SELECT_COMPONENT', component })
+    setShowViewModal(true)
+  }
+
+  const handleCopyCode = async (code: string, componentName: string) => {
+    console.log('📋 SHOWCASE: Copying code for:', componentName)
+
+    try {
+      await navigator.clipboard.writeText(code)
+      console.log('✅ SHOWCASE: Code copied successfully')
+      toast.success('Code copied to clipboard')
+      announce('Code copied to clipboard', 'polite')
+    } catch (err) {
+      console.log('❌ SHOWCASE: Copy error:', err)
+      toast.error('Failed to copy code')
+    }
+  }
+
+  const handleDownloadComponent = (component: ComponentShowcase) => {
+    console.log('📥 SHOWCASE: Downloading component - ID:', component.id)
+    console.log('📥 SHOWCASE: Component:', component.name)
+
+    const updatedComponent = {
+      ...component,
+      downloads: component.downloads + 1
+    }
+
+    dispatch({ type: 'UPDATE_COMPONENT', component: updatedComponent })
+    toast.success(`Downloaded ${component.name}`)
+    announce(`Downloaded ${component.name}`, 'polite')
+  }
+
+  const handleToggleFavorite = (componentId: string) => {
+    console.log('⭐ SHOWCASE: Toggling favorite - ID:', componentId)
+    const component = state.components.find(c => c.id === componentId)
+
+    if (component) {
+      console.log('⭐ SHOWCASE: Current favorite state:', component.isFavorite)
+      dispatch({ type: 'TOGGLE_FAVORITE', componentId })
+      toast.success(component.isFavorite ? 'Removed from favorites' : 'Added to favorites')
+    }
+  }
+
+  const handleShareComponent = async (component: ComponentShowcase) => {
+    console.log('🔗 SHOWCASE: Sharing component - ID:', component.id)
+
+    const shareUrl = `https://kazi.com/components/${component.id}`
+
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      console.log('✅ SHOWCASE: Share link copied')
+      toast.success('Share link copied to clipboard')
+      announce('Share link copied', 'polite')
+    } catch (err) {
+      console.log('❌ SHOWCASE: Share error:', err)
+      toast.error('Failed to copy share link')
+    }
+  }
+
+  function getCategoryIcon(category: ComponentCategory) {
+    const option = categoryOptions.find(c => c.id === category)
+    return option?.icon || Box
+  }
+
+  function getDifficultyColor(difficulty: DifficultyLevel) {
+    const colors = {
+      beginner: 'green',
+      intermediate: 'blue',
+      advanced: 'orange',
+      expert: 'red'
+    }
+    return colors[difficulty] || 'gray'
+  }
+
+  // ============================================================================
+  // A++++ LOADING STATE
+  // ============================================================================
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6 min-h-screen relative">
+        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+        <div className="max-w-[1920px] mx-auto space-y-6">
+          <CardSkeleton />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // A++++ ERROR STATE
+  // ============================================================================
+  if (error) {
+    return (
+      <div className="p-6 space-y-6 min-h-screen relative">
+        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+        <div className="max-w-[1920px] mx-auto">
+          <ErrorEmptyState
+            error={error}
+            action={{
+              label: 'Retry',
+              onClick: () => window.location.reload()
+            }}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // A++++ MAIN RENDER
+  // ============================================================================
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="max-w-[1600px] mx-auto space-y-8">
-        {/* Header */}
-        <ScrollReveal>
-          <div className="flex items-center justify-between">
-            <div>
-              <TextShimmer className="text-4xl font-bold mb-2">
-                A+++ Utilities Showcase
-              </TextShimmer>
-              <p className="text-muted-foreground">
-                Professional-grade components and utilities demonstration
-              </p>
-            </div>
-            <InfoTooltip
-              content="This page demonstrates all A+++ grade utilities: loading states, empty states, validation, keyboard shortcuts, and accessibility features."
-              position="left"
-            />
-          </div>
-        </ScrollReveal>
+    <div className="p-6 space-y-6 min-h-screen relative">
+      {/* Background */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+      <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
+      <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
 
-        {/* Section Tabs */}
-        <ScrollReveal delay={0.1}>
-          <div className="flex items-center gap-2 overflow-x-auto pb-2">
-            {sections.map((section) => {
-              const Icon = section.Icon
-              return (
-                <SimpleTooltip key={section.id} content={`Alt + ${sections.indexOf(section) + 1}`} position="bottom">
+      <PageHeader
+        title="Component Showcase"
+        description="Professional component library with 60+ ready-to-use React components"
+        icon={Component}
+        breadcrumbs={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Component Showcase' }
+        ]}
+      />
+
+      {/* Stats Cards */}
+      <ScrollReveal>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Total Components</p>
+                  <NumberFlow value={stats.total} className="text-2xl font-bold text-white" />
+                </div>
+                <FloatingParticle color="purple" size="sm">
+                  <div className="p-3 bg-purple-500/20 rounded-xl">
+                    <Component className="h-6 w-6 text-purple-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
+
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Categories</p>
+                  <NumberFlow value={stats.categories} className="text-2xl font-bold text-white" />
+                </div>
+                <FloatingParticle color="blue" size="sm">
+                  <div className="p-3 bg-blue-500/20 rounded-xl">
+                    <Grid className="h-6 w-6 text-blue-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
+
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Code Snippets</p>
+                  <NumberFlow value={stats.total} className="text-2xl font-bold text-white" />
+                </div>
+                <FloatingParticle color="green" size="sm">
+                  <div className="p-3 bg-green-500/20 rounded-xl">
+                    <Code className="h-6 w-6 text-green-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
+
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Total Examples</p>
+                  <NumberFlow value={stats.totalExamples} className="text-2xl font-bold text-white" />
+                </div>
+                <FloatingParticle color="amber" size="sm">
+                  <div className="p-3 bg-amber-500/20 rounded-xl">
+                    <BookOpen className="h-6 w-6 text-amber-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
+
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Most Popular</p>
+                  <div className="text-2xl font-bold text-white">
+                    {(stats.mostPopular / 1000).toFixed(1)}k
+                  </div>
+                </div>
+                <FloatingParticle color="pink" size="sm">
+                  <div className="p-3 bg-pink-500/20 rounded-xl">
+                    <TrendingUp className="h-6 w-6 text-pink-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
+
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Your Favorites</p>
+                  <NumberFlow value={stats.favorites} className="text-2xl font-bold text-white" />
+                </div>
+                <FloatingParticle color="red" size="sm">
+                  <div className="p-3 bg-red-500/20 rounded-xl">
+                    <Heart className="h-6 w-6 text-red-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
+      </ScrollReveal>
+
+      {/* Category Pills */}
+      <ScrollReveal delay={0.1}>
+        <LiquidGlassCard>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3 overflow-x-auto pb-2">
+              <button
+                onClick={() => dispatch({ type: 'SET_FILTER_CATEGORY', filterCategory: 'all' })}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
+                  state.filterCategory === 'all'
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                    : 'bg-slate-800/50 text-gray-400 hover:bg-slate-700/50'
+                }`}
+              >
+                <Sparkles className="h-4 w-4" />
+                All Components
+              </button>
+              {categoryOptions.map((category) => {
+                const Icon = category.icon
+                return (
                   <button
-                    onClick={() => setActiveSection(section.id)}
+                    key={category.id}
+                    onClick={() => dispatch({ type: 'SET_FILTER_CATEGORY', filterCategory: category.id })}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
-                      activeSection === section.id
-                        ? 'bg-blue-500 text-white shadow-lg'
-                        : 'bg-white/50 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800'
+                      state.filterCategory === category.id
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                        : 'bg-slate-800/50 text-gray-400 hover:bg-slate-700/50'
                     }`}
-                    {...AriaHelpers.tab(activeSection === section.id, `panel-${section.id}`)}
                   >
-                    <Icon className="w-4 h-4" />
-                    {section.label}
+                    <Icon className="h-4 w-4" />
+                    {category.name}
                   </button>
-                </SimpleTooltip>
-              )
-            })}
-          </div>
-        </ScrollReveal>
+                )
+              })}
+            </div>
+          </CardContent>
+        </LiquidGlassCard>
+      </ScrollReveal>
 
-        {/* Loading States Section */}
-        {activeSection === 'loading' && (
-          <ScrollReveal delay={0.2}>
-            <LiquidGlassCard>
-              <div className="p-6 space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">Loading Skeletons</h2>
-                  <p className="text-muted-foreground">
-                    Professional skeleton loaders improve perceived performance
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <button
-                    onClick={triggerLoading}
-                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
-                    {...AriaHelpers.loading(isLoading)}
-                  >
-                    {isLoading ? 'Loading...' : 'Trigger Loading Demo'}
-                  </button>
-
-                  {isLoading ? (
-                    <div className="space-y-6">
-                      <div>
-                        <h3 className="text-lg font-semibold mb-4">Dashboard Skeleton</h3>
-                        <DashboardSkeleton />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <h3 className="text-lg font-semibold mb-4">Card Skeleton</h3>
-                        <CardSkeleton />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold mb-4">List Skeleton</h3>
-                        <ListSkeleton items={3} />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold mb-4">Form Skeleton</h3>
-                        <FormSkeleton fields={3} />
-                      </div>
-                    </div>
-                  )}
+      {/* Actions Bar */}
+      <ScrollReveal delay={0.2}>
+        <LiquidGlassCard>
+          <CardContent className="p-4">
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Search */}
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search components..."
+                    value={state.searchTerm}
+                    onChange={(e) => dispatch({ type: 'SET_SEARCH', searchTerm: e.target.value })}
+                    className="pl-10 bg-slate-900/50 border-slate-700"
+                  />
                 </div>
               </div>
-            </LiquidGlassCard>
-          </ScrollReveal>
-        )}
 
-        {/* Empty States Section */}
-        {activeSection === 'empty' && (
-          <ScrollReveal delay={0.2}>
-            <LiquidGlassCard>
-              <div className="p-6 space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">Empty State Components</h2>
-                  <p className="text-muted-foreground">
-                    Helpful empty states guide users when no data exists
-                  </p>
-                </div>
+              {/* Filters */}
+              <div className="flex gap-2 flex-wrap">
+                <Select
+                  value={state.filterDifficulty}
+                  onValueChange={(value) => dispatch({ type: 'SET_FILTER_DIFFICULTY', filterDifficulty: value as any })}
+                >
+                  <SelectTrigger className="w-[140px] bg-slate-900/50 border-slate-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                    <SelectItem value="expert">Expert</SelectItem>
+                  </SelectContent>
+                </Select>
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setShowEmpty('nodata')}
-                    className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors"
-                  >
-                    Show No Data
-                  </button>
-                  <button
-                    onClick={() => setShowEmpty('error')}
-                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors"
-                  >
-                    Show Error
-                  </button>
-                  <button
-                    onClick={() => setShowEmpty('success')}
-                    className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors"
-                  >
-                    Show Success
-                  </button>
-                  <button
-                    onClick={() => setShowEmpty('none')}
-                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
-                  >
-                    Hide All
-                  </button>
-                </div>
+                <Select
+                  value={state.sortBy}
+                  onValueChange={(value) => dispatch({ type: 'SET_SORT', sortBy: value as any })}
+                >
+                  <SelectTrigger className="w-[140px] bg-slate-900/50 border-slate-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="popularity">Popular</SelectItem>
+                    <SelectItem value="name">Name</SelectItem>
+                    <SelectItem value="recent">Recent</SelectItem>
+                    <SelectItem value="downloads">Downloads</SelectItem>
+                    <SelectItem value="examples">Examples</SelectItem>
+                  </SelectContent>
+                </Select>
 
-                <div className="min-h-[400px]">
-                  {showEmpty === 'nodata' && <NoDataEmptyState entityName="projects" />}
-                  {showEmpty === 'error' && <ErrorEmptyState error="Failed to load data. Please try again." />}
-                  {showEmpty === 'success' && <SuccessEmptyState title="Success!" description="Your form was validated successfully!" />}
-                  {showEmpty === 'none' && (
-                    <div className="flex items-center justify-center h-[400px] text-muted-foreground">
-                      Click a button above to see empty state examples
-                    </div>
-                  )}
+                <Button
+                  variant={state.showFavoritesOnly ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => dispatch({ type: 'TOGGLE_FAVORITES_ONLY' })}
+                  className={state.showFavoritesOnly ? 'bg-gradient-to-r from-purple-500 to-pink-500' : ''}
+                >
+                  <Heart className={`h-4 w-4 mr-2 ${state.showFavoritesOnly ? 'fill-current' : ''}`} />
+                  Favorites
+                </Button>
+
+                <div className="flex gap-1 bg-slate-800/50 rounded-lg p-1">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => dispatch({ type: 'SET_VIEW_MODE', viewMode: 'grid' })}
+                    className={state.viewMode === 'grid' ? 'bg-slate-700' : ''}
+                  >
+                    <Grid className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => dispatch({ type: 'SET_VIEW_MODE', viewMode: 'list' })}
+                    className={state.viewMode === 'list' ? 'bg-slate-700' : ''}
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => dispatch({ type: 'SET_VIEW_MODE', viewMode: 'code' })}
+                    className={state.viewMode === 'code' ? 'bg-slate-700' : ''}
+                  >
+                    <Code className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
-            </LiquidGlassCard>
-          </ScrollReveal>
-        )}
+            </div>
+          </CardContent>
+        </LiquidGlassCard>
+      </ScrollReveal>
 
-        {/* Validation Section */}
-        {activeSection === 'validation' && (
-          <ScrollReveal delay={0.2}>
-            <LiquidGlassCard>
-              <div className="p-6 space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">Form Validation</h2>
-                  <p className="text-muted-foreground">
-                    Comprehensive validation with helpful error messages
-                  </p>
-                </div>
-
-                <div className="space-y-4 max-w-md">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Email <InfoTooltip content="Must be a valid email address" />
-                    </label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        formErrors.email ? 'border-red-500' : 'border-gray-300'
-                      } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                      placeholder="your@email.com"
-                      aria-invalid={!!formErrors.email}
-                      aria-describedby={formErrors.email ? 'email-error' : undefined}
-                    />
-                    {formErrors.email && (
-                      <p id="email-error" className="text-red-500 text-sm mt-1" role="alert">
-                        {formErrors.email}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Password <InfoTooltip content="Min 8 chars, uppercase, lowercase, number, special char" />
-                    </label>
-                    <input
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        formErrors.password ? 'border-red-500' : 'border-gray-300'
-                      } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                      placeholder="********"
-                      aria-invalid={!!formErrors.password}
-                      aria-describedby={formErrors.password ? 'password-error' : undefined}
-                    />
-                    {formErrors.password && (
-                      <p id="password-error" className="text-red-500 text-sm mt-1" role="alert">
-                        {formErrors.password}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Name <InfoTooltip content="Min 2 chars, max 50 chars" />
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        formErrors.name ? 'border-red-500' : 'border-gray-300'
-                      } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                      placeholder="John Doe"
-                      aria-invalid={!!formErrors.name}
-                      aria-describedby={formErrors.name ? 'name-error' : undefined}
-                    />
-                    {formErrors.name && (
-                      <p id="name-error" className="text-red-500 text-sm mt-1" role="alert">
-                        {formErrors.name}
-                      </p>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={validateForm}
-                    className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
-                  >
-                    Validate Form
-                  </button>
-                </div>
-              </div>
-            </LiquidGlassCard>
-          </ScrollReveal>
-        )}
-
-        {/* Keyboard Shortcuts Section */}
-        {activeSection === 'keyboard' && (
-          <ScrollReveal delay={0.2}>
-            <LiquidGlassCard>
-              <div className="p-6 space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">Keyboard Shortcuts</h2>
-                  <p className="text-muted-foreground">
-                    Powerful keyboard navigation for efficient workflows
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">Global Shortcuts</h3>
-                    <div className="space-y-3">
-                      {[
-                        { keys: 'Alt + H', action: 'Go to Dashboard' },
-                        { keys: 'Alt + P', action: 'Go to Projects' },
-                        { keys: 'Alt + M', action: 'Go to Messages' },
-                        { keys: 'Alt + S', action: 'Go to Settings' },
-                        { keys: 'Ctrl + /', action: 'Focus Search' },
-                        { keys: '?', action: 'Show Shortcuts Help' }
-                      ].map((shortcut, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                          <span className="text-sm">{shortcut.action}</span>
-                          <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs font-mono">
-                            {shortcut.keys}
-                          </kbd>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">Page Shortcuts</h3>
-                    <div className="space-y-3">
-                      {[
-                        { keys: 'Alt + 1', action: 'Loading States Section' },
-                        { keys: 'Alt + 2', action: 'Empty States Section' },
-                        { keys: 'Alt + 3', action: 'Validation Section' },
-                        { keys: 'Escape', action: 'Close Modals' },
-                        { keys: 'Enter', action: 'Submit Forms' }
-                      ].map((shortcut, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-                          <span className="text-sm">{shortcut.action}</span>
-                          <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs font-mono">
-                            {shortcut.keys}
-                          </kbd>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800 flex items-start gap-3">
-                  <Lightbulb className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-blue-800 dark:text-blue-200">
-                    <strong>Tip:</strong> Press <kbd className="px-2 py-1 bg-blue-100 dark:bg-blue-900 rounded text-xs font-mono mx-1">?</kbd>
-                    to see all available keyboard shortcuts in any page.
-                  </p>
-                </div>
-              </div>
-            </LiquidGlassCard>
-          </ScrollReveal>
-        )}
-
-        {/* Accessibility Section */}
-        {activeSection === 'accessibility' && (
-          <ScrollReveal delay={0.2}>
-            <LiquidGlassCard>
-              <div className="p-6 space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">Accessibility Features</h2>
-                  <p className="text-muted-foreground">
-                    WCAG AA compliant utilities for inclusive design
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">Screen Reader Support</h3>
-                    <ul className="space-y-2 text-sm">
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5" />
-                        <span>ARIA live regions for announcements</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5" />
-                        <span>Semantic HTML throughout</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5" />
-                        <span>Proper heading hierarchy</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5" />
-                        <span>Alt text for images</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">Keyboard Navigation</h3>
-                    <ul className="space-y-2 text-sm">
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5" />
-                        <span>Focus trap in modals</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5" />
-                        <span>Skip to main content link</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5" />
-                        <span>Visible focus indicators</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5" />
-                        <span>Keyboard shortcuts</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Test Announcer</h3>
-                  <button
-                    onClick={() => announce('This is a test announcement for screen readers!', 'polite')}
-                    className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors"
-                  >
-                    Test Screen Reader Announcement
-                  </button>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    This will announce a message to screen readers (enable your screen reader to hear it)
-                  </p>
-                </div>
-              </div>
-            </LiquidGlassCard>
-          </ScrollReveal>
-        )}
-
-        {/* SEO Section */}
-        {activeSection === 'seo' && (
-          <ScrollReveal delay={0.2}>
-            <LiquidGlassCard>
-              <div className="p-6 space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">SEO Optimization</h2>
-                  <p className="text-muted-foreground">
-                    Dynamic metadata generation for optimal search engine visibility
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">Features</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {[
-                        { title: 'Dynamic Metadata', desc: 'Automatic title, description, keywords' },
-                        { title: 'Open Graph', desc: 'Social media preview optimization' },
-                        { title: 'Twitter Cards', desc: 'Twitter-specific metadata' },
-                        { title: 'Canonical URLs', desc: 'Prevent duplicate content' },
-                        { title: 'Structured Data', desc: 'JSON-LD for rich snippets' },
-                        { title: 'URL Slugs', desc: 'SEO-friendly URL generation' }
-                      ].map((feature, index) => (
-                        <div key={index} className="flex items-start gap-3 p-3 bg-muted/30 rounded-lg">
-                          <Search className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
-                          <div>
-                            <div className="font-semibold text-sm">{feature.title}</div>
-                            <div className="text-xs text-muted-foreground">{feature.desc}</div>
+      {/* Components Grid */}
+      <ScrollReveal delay={0.3}>
+        <div className={`grid gap-4 ${
+          state.viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' :
+          state.viewMode === 'list' ? 'grid-cols-1' :
+          'grid-cols-1'
+        }`}>
+          <AnimatePresence mode="popLayout">
+            {filteredAndSortedComponents.map((component, index) => (
+              <motion.div
+                key={component.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ delay: index * 0.02 }}
+              >
+                <LiquidGlassCard className="group cursor-pointer hover:shadow-xl transition-all duration-300">
+                  <CardContent className="p-0">
+                    {state.viewMode === 'grid' && (
+                      <>
+                        {/* Preview */}
+                        <div
+                          className="relative h-40 bg-slate-800 rounded-t-xl overflow-hidden"
+                          onClick={() => handleViewComponent(component)}
+                        >
+                          <img
+                            src={component.preview}
+                            alt={component.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <div className="absolute top-2 left-2 flex gap-1">
+                            {component.isPremium && (
+                              <Badge className="bg-amber-500/90 text-white">
+                                <Award className="h-3 w-3 mr-1" />
+                                Premium
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="absolute top-2 right-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleToggleFavorite(component.id)
+                              }}
+                              className="p-2 bg-slate-900/50 rounded-lg hover:bg-slate-900/70 transition-colors"
+                            >
+                              <Heart className={`h-4 w-4 ${component.isFavorite ? 'fill-red-500 text-red-500' : 'text-white'}`} />
+                            </button>
                           </div>
                         </div>
+
+                        {/* Content */}
+                        <div className="p-4 space-y-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-white truncate">{component.name}</h3>
+                              <p className="text-xs text-gray-400 line-clamp-2">{component.description}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 text-xs text-gray-400">
+                            <div className="flex items-center gap-1">
+                              <TrendingUp className="h-3 w-3" />
+                              {(component.popularity / 1000).toFixed(1)}k
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Download className="h-3 w-3" />
+                              {(component.downloads / 1000).toFixed(1)}k
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <BookOpen className="h-3 w-3" />
+                              {component.examples}
+                            </div>
+                          </div>
+
+                          <div className="flex gap-1 flex-wrap">
+                            <Badge
+                              variant="outline"
+                              className={`text-xs bg-${getDifficultyColor(component.difficulty)}-500/10 border-${getDifficultyColor(component.difficulty)}-500/30`}
+                            >
+                              {component.difficulty}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {component.language}
+                            </Badge>
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-2 border-t border-slate-700/50">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleViewComponent(component)}
+                              className="flex-1"
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              View
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleCopyCode(component.code, component.name)}
+                            >
+                              <Copy className="h-3 w-3" />
+                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button size="sm" variant="ghost">
+                                  <MoreVertical className="h-3 w-3" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleDownloadComponent(component)}>
+                                  <Download className="h-4 w-4 mr-2" />
+                                  Download
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleShareComponent(component)}>
+                                  <Share2 className="h-4 w-4 mr-2" />
+                                  Share
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {state.viewMode === 'list' && (
+                      <div className="p-4 flex items-center gap-4">
+                        <img
+                          src={component.preview}
+                          alt={component.name}
+                          className="w-24 h-24 object-cover rounded-lg"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div>
+                              <h3 className="font-semibold text-white">{component.name}</h3>
+                              <p className="text-xs text-gray-400">{component.description}</p>
+                            </div>
+                            <button
+                              onClick={() => handleToggleFavorite(component.id)}
+                              className="p-2 hover:bg-slate-800/50 rounded-lg transition-colors"
+                            >
+                              <Heart className={`h-4 w-4 ${component.isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
+                            </button>
+                          </div>
+                          <div className="flex items-center gap-4 text-xs text-gray-400 mb-2">
+                            <div className="flex items-center gap-1">
+                              <TrendingUp className="h-3 w-3" />
+                              {(component.popularity / 1000).toFixed(1)}k
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Download className="h-3 w-3" />
+                              {(component.downloads / 1000).toFixed(1)}k
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {component.difficulty}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" onClick={() => handleViewComponent(component)}>
+                              <Eye className="h-3 w-3 mr-1" />
+                              View
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleCopyCode(component.code, component.name)}
+                            >
+                              <Copy className="h-3 w-3 mr-1" />
+                              Copy
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {state.viewMode === 'code' && (
+                      <div className="p-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h3 className="font-semibold text-white">{component.name}</h3>
+                            <p className="text-xs text-gray-400">{component.description}</p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleCopyCode(component.code, component.name)}
+                          >
+                            <Copy className="h-3 w-3 mr-1" />
+                            Copy
+                          </Button>
+                        </div>
+                        <pre className="p-3 bg-slate-900 rounded-lg overflow-x-auto text-xs">
+                          <code className="text-gray-300">{component.code}</code>
+                        </pre>
+                      </div>
+                    )}
+                  </CardContent>
+                </LiquidGlassCard>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+
+        {filteredAndSortedComponents.length === 0 && (
+          <NoDataEmptyState message="No components found" />
+        )}
+      </ScrollReveal>
+
+      {/* View Component Modal */}
+      <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{state.selectedComponent?.name}</DialogTitle>
+            <DialogDescription>
+              {state.selectedComponent?.description}
+            </DialogDescription>
+          </DialogHeader>
+
+          {state.selectedComponent && (
+            <Tabs defaultValue="preview" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="preview">Preview</TabsTrigger>
+                <TabsTrigger value="code">Code</TabsTrigger>
+                <TabsTrigger value="details">Details</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="preview" className="space-y-4">
+                <div className="rounded-lg overflow-hidden">
+                  <img
+                    src={state.selectedComponent.preview}
+                    alt={state.selectedComponent.name}
+                    className="w-full h-auto"
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="code" className="space-y-4">
+                <div className="flex justify-end">
+                  <Button
+                    size="sm"
+                    onClick={() => handleCopyCode(state.selectedComponent.code, state.selectedComponent.name)}
+                  >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy Code
+                  </Button>
+                </div>
+                <pre className="p-4 bg-slate-900 rounded-lg overflow-x-auto">
+                  <code className="text-gray-300">{state.selectedComponent.code}</code>
+                </pre>
+              </TabsContent>
+
+              <TabsContent value="details" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-gray-400">Category</Label>
+                    <p className="text-white capitalize">{state.selectedComponent.category.replace('-', ' ')}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Difficulty</Label>
+                    <p className="text-white capitalize">{state.selectedComponent.difficulty}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Language</Label>
+                    <p className="text-white uppercase">{state.selectedComponent.language}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Version</Label>
+                    <p className="text-white">v{state.selectedComponent.version}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Popularity</Label>
+                    <p className="text-white">{(state.selectedComponent.popularity / 1000).toFixed(1)}k</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Downloads</Label>
+                    <p className="text-white">{(state.selectedComponent.downloads / 1000).toFixed(1)}k</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Examples</Label>
+                    <p className="text-white">{state.selectedComponent.examples}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Author</Label>
+                    <p className="text-white">{state.selectedComponent.author}</p>
+                  </div>
+                </div>
+
+                {state.selectedComponent.tags.length > 0 && (
+                  <div>
+                    <Label className="text-gray-400">Tags</Label>
+                    <div className="flex gap-2 flex-wrap mt-2">
+                      {state.selectedComponent.tags.map((tag, i) => (
+                        <Badge key={i} variant="outline">{tag}</Badge>
                       ))}
                     </div>
                   </div>
+                )}
 
-                  <div className="p-4 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
-                    <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">Page Metadata</h4>
-                    <code className="text-xs text-green-700 dark:text-green-300 block overflow-x-auto">
-                      {JSON.stringify(generateMetadata({
-                        title: 'A+++ Showcase - KAZI Platform',
-                        description: 'Professional utilities demonstration'
-                      }), null, 2)}
-                    </code>
+                {state.selectedComponent.dependencies.length > 0 && (
+                  <div>
+                    <Label className="text-gray-400">Dependencies</Label>
+                    <div className="flex gap-2 flex-wrap mt-2">
+                      {state.selectedComponent.dependencies.map((dep, i) => (
+                        <Badge key={i} variant="outline">{dep}</Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </div>
-            </LiquidGlassCard>
-          </ScrollReveal>
-        )}
-      </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => state.selectedComponent && handleDownloadComponent(state.selectedComponent)}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download
+            </Button>
+            <Button
+              onClick={() => state.selectedComponent && handleShareComponent(state.selectedComponent)}
+              className="bg-gradient-to-r from-purple-500 to-pink-500"
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

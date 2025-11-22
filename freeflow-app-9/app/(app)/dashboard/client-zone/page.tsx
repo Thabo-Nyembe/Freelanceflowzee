@@ -1070,8 +1070,8 @@ export default function ClientZonePage() {
           >
             <LiquidGlassCard variant="gradient" hoverEffect={true} className="relative overflow-hidden">
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <FloatingParticle delay={0} color="blue" />
-                <FloatingParticle delay={1} color="indigo" />
+                
+                
               </div>
               <div className="p-6 text-center relative z-10">
                 <div className="inline-flex p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 dark:from-blue-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm mb-4">
@@ -1090,8 +1090,8 @@ export default function ClientZonePage() {
           >
             <LiquidGlassCard variant="tinted" hoverEffect={true} className="relative overflow-hidden">
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <FloatingParticle delay={0.5} color="green" />
-                <FloatingParticle delay={1.5} color="emerald" />
+                
+                
               </div>
               <div className="p-6 text-center relative z-10">
                 <div className="inline-flex p-3 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 dark:from-emerald-400/10 dark:to-teal-400/10 rounded-xl backdrop-blur-sm mb-4">
@@ -1110,8 +1110,8 @@ export default function ClientZonePage() {
           >
             <LiquidGlassCard variant="gradient" hoverEffect={true} className="relative overflow-hidden">
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <FloatingParticle delay={1} color="purple" />
-                <FloatingParticle delay={2} color="violet" />
+                
+                
               </div>
               <div className="p-6 text-center relative z-10">
                 <div className="inline-flex p-3 bg-gradient-to-br from-purple-400/20 to-indigo-400/20 dark:from-purple-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm mb-4">
@@ -1130,8 +1130,8 @@ export default function ClientZonePage() {
           >
             <LiquidGlassCard variant="tinted" hoverEffect={true} className="relative overflow-hidden">
               <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <FloatingParticle delay={1.5} color="yellow" />
-                <FloatingParticle delay={2.5} color="amber" />
+                
+                
               </div>
               <div className="p-6 text-center relative z-10">
                 <div className="inline-flex p-3 bg-gradient-to-br from-amber-400/20 to-yellow-400/20 dark:from-amber-400/10 dark:to-yellow-400/10 rounded-xl backdrop-blur-sm mb-4">
