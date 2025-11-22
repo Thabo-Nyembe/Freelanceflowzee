@@ -67,6 +67,38 @@ import {
   executeWithRetry,
   type RetryState
 } from '@/lib/ai-create-retry'
+// A++++ Phase 2 Imports
+import {
+  simulateStreaming,
+  type StreamingController,
+  type StreamingMetrics
+} from '@/lib/ai-create-streaming'
+import {
+  saveVersion,
+  loadVersionTree,
+  enableAutoSave as enableVersionAutoSave,
+  disableAutoSave as disableVersionAutoSave,
+  type ContentVersion
+} from '@/lib/ai-create-versions'
+import {
+  trackGeneration,
+  trackExport,
+  trackTemplateUse,
+  getAnalyticsSummary,
+  type AnalyticsSummary
+} from '@/lib/ai-create-analytics'
+import {
+  createVoiceInput,
+  isSpeechRecognitionSupported,
+  type VoiceInputController
+} from '@/lib/ai-create-voice'
+import {
+  Mic,
+  MicOff,
+  GitBranch,
+  BarChart,
+  Radio
+} from 'lucide-react'
 
 // AI Models Configuration
 const AI_MODELS: Record<string, { name: string; description: string }> = {
@@ -205,6 +237,18 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
     lastError: null
   })
   const [autoSave, setAutoSave] = React.useState(true)
+
+  // A++++ Phase 2 State
+  const [streamingEnabled, setStreamingEnabled] = React.useState(false)
+  const [streamingMetrics, setStreamingMetrics] = React.useState<StreamingMetrics | null>(null)
+  const [streamController, setStreamController] = React.useState<StreamingController | null>(null)
+  const [currentGenerationId, setCurrentGenerationId] = React.useState<string | null>(null)
+  const [versionHistory, setVersionHistory] = React.useState<ContentVersion[]>([])
+  const [voiceInput, setVoiceInput] = React.useState<VoiceInputController | null>(null)
+  const [isListening, setIsListening] = React.useState(false)
+  const [voiceSupported] = React.useState(isSpeechRecognitionSupported())
+  const [analytics, setAnalytics] = React.useState<AnalyticsSummary | null>(null)
+  const [showAnalytics, setShowAnalytics] = React.useState(false)
 
   // Load data on mount
   React.useEffect(() => {
@@ -391,10 +435,44 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
       }
 
       setHistory(prev => [newGeneration, ...prev])
+
+      // A++++ Phase 2: Track analytics
+      const responseTime = Date.now() - parseInt(newGeneration.id)
+      trackGeneration({
+        model: selectedModel,
+        tokens: tokensUsed,
+        cost: newGeneration.cost,
+        responseTime,
+        success: true,
+        contentType: newGeneration.type,
+        promptLength: prompt.length
+      })
+
+      // A++++ Phase 2: Save initial version
+      setCurrentGenerationId(newGeneration.id)
+      saveVersion({
+        generationId: newGeneration.id,
+        content: generatedContent,
+        label: 'Initial generation',
+        isAutoSave: false
+      })
+
       toast.success('Content generated successfully!')
 
     } catch (error: any) {
       console.error('Generation error:', error)
+
+      // A++++ Phase 2: Track failed generation
+      trackGeneration({
+        model: selectedModel,
+        tokens: 0,
+        cost: 0,
+        responseTime: 0,
+        success: false,
+        errorType: error.message,
+        promptLength: prompt.length
+      })
+
       const errorMsg = `Error generating content: ${error.message}\n\nPlease check your API configuration and try again.`
       setResult(errorMsg)
       setTypingEffect(errorMsg)
@@ -418,6 +496,14 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
     setSelectedTemplate(template.id)
     setPrompt(template.prompt)
     setActiveTab('studio')
+
+    // A++++ Phase 2: Track template usage
+    trackTemplateUse({
+      templateId: template.id,
+      templateName: template.title,
+      category: template.category || 'custom'
+    })
+
     toast.success(`Template "${template.title}" selected`)
   }
 
@@ -454,6 +540,14 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
           timestamp: new Date()
         }
       })
+
+      // A++++ Phase 2: Track export
+      trackExport({
+        format: exportFormat,
+        size: result.length,
+        generationId: currentGenerationId || undefined
+      })
+
       toast.success(`Exported as ${exportFormat.toUpperCase()}!`)
     }
   }
@@ -481,6 +575,61 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
     setCustomTemplates(prev => prev.filter(t => t.id !== templateId))
     toast.success('Template deleted')
   }
+
+  // A++++ Phase 2: Voice Input Handlers
+  const startVoiceInput = () => {
+    if (!voiceSupported) {
+      toast.error('Voice input is not supported in your browser')
+      return
+    }
+
+    try {
+      const controller = createVoiceInput({
+        language: 'en-US',
+        continuous: true,
+        interimResults: true,
+        enableCommands: true,
+        onResult: (text, isFinal) => {
+          if (isFinal) {
+            setPrompt(prev => prev + text + ' ')
+          }
+        },
+        onStart: () => {
+          setIsListening(true)
+          toast.success('Voice input started')
+        },
+        onEnd: () => {
+          setIsListening(false)
+          toast.info('Voice input stopped')
+        },
+        onError: (error) => {
+          setIsListening(false)
+          toast.error(error.message)
+        }
+      })
+
+      setVoiceInput(controller)
+      controller.start()
+    } catch (error: any) {
+      toast.error(error.message)
+    }
+  }
+
+  const stopVoiceInput = () => {
+    if (voiceInput) {
+      voiceInput.stop()
+      setVoiceInput(null)
+      setIsListening(false)
+    }
+  }
+
+  // A++++ Phase 2: Load analytics
+  React.useEffect(() => {
+    if (showAnalytics) {
+      const summary = getAnalyticsSummary('week')
+      setAnalytics(summary)
+    }
+  }, [showAnalytics])
 
   // Search & Filter Handler
   const filteredHistory = React.useMemo(() => {
@@ -693,7 +842,29 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
               <TabsContent value="studio" className="space-y-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="prompt">Your Prompt</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="prompt">Your Prompt</Label>
+                      {voiceSupported && (
+                        <Button
+                          onClick={isListening ? stopVoiceInput : startVoiceInput}
+                          variant="ghost"
+                          size="sm"
+                          className={isListening ? 'text-red-500' : ''}
+                        >
+                          {isListening ? (
+                            <>
+                              <MicOff className="h-4 w-4 mr-1" />
+                              <span className="text-xs">Stop</span>
+                            </>
+                          ) : (
+                            <>
+                              <Mic className="h-4 w-4 mr-1" />
+                              <span className="text-xs">Voice</span>
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
                     <Textarea
                       id="prompt"
                       value={prompt}
