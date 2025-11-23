@@ -47,7 +47,8 @@ import {
   Trash2,
   AlertCircle,
   Info,
-  HelpCircle
+  HelpCircle,
+  Zap
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -474,15 +475,15 @@ If you lose access to your authenticator app, you can use these codes to sign in
   }
 
   const handleManageIntegrations = () => {
-    const integrations = ['Google Drive', 'Dropbox', 'Slack', 'GitHub', 'Figma', 'Adobe Creative Cloud']
+    // Navigate to integrations page
+    logger.info('Navigating to integrations page')
+    window.location.href = '/dashboard/integrations'
+  }
 
-    logger.info('Manage integrations opened', {
-      availableIntegrations: integrations
-    })
-
-    toast.info('Manage Integrations', {
-      description: `${integrations.length} available: ${integrations.slice(0, 3).join(', ')}...`
-    })
+  const handleQuickSetupIntegrations = () => {
+    // Navigate to easy setup page
+    logger.info('Navigating to easy integration setup')
+    window.location.href = '/dashboard/integrations/setup'
   }
 
   const handleExportUserData = async () => {
@@ -1626,15 +1627,27 @@ If you lose access to your authenticator app, you can use these codes to sign in
                     </Button>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border-blue-200 dark:border-blue-800">
                     <div>
-                      <h4 className="font-medium">Manage Integrations</h4>
-                      <p className="text-sm text-gray-500">Connect third-party tools</p>
+                      <h4 className="font-medium flex items-center gap-2">
+                        Manage Integrations
+                        <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">Easy Setup</Badge>
+                      </h4>
+                      <p className="text-sm text-gray-500">Connect Gmail, AI, Calendar & more in minutes</p>
                     </div>
-                    <Button variant="outline" onClick={handleManageIntegrations}>
-                      <Settings className="w-4 h-4 mr-2" />
-                      Manage
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button variant="outline" onClick={handleManageIntegrations}>
+                        <Settings className="w-4 h-4 mr-2" />
+                        Manage
+                      </Button>
+                      <Button
+                        className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                        onClick={handleQuickSetupIntegrations}
+                      >
+                        <Zap className="w-4 h-4 mr-2" />
+                        Quick Setup
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
