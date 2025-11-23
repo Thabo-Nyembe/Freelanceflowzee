@@ -50,7 +50,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-// import { toast } from 'sonner' // Removed - using for user feedback
+import { toast } from 'sonner'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Shadcn-Showcase')
 
 // Enhanced Components
 import { EnhancedShadcnForm } from '@/components/ui/enhanced-shadcn-form'
@@ -167,8 +170,20 @@ export default function ShadcnShowcasePage() {
   ]
 
   const handleFormSubmit = (data: any) => {
-    console.log('✅ Form submitted successfully!')
-    console.log('Form data:', data)
+    const fieldCount = Object.keys(data).length
+    const filledFields = Object.values(data).filter(v => v !== '' && v !== null && v !== undefined).length
+
+    logger.info('Form submitted successfully', {
+      fieldCount,
+      filledFields,
+      formData: data
+    })
+
+    const fieldsWithValues = Object.entries(data).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+
+    toast.success('Form submitted successfully', {
+      description: `${filledFields}/${fieldCount} fields completed - ${fieldsWithValues.map(([k]) => k).join(', ')}`
+    })
   }
 
   const simulateLoading = () => {
@@ -533,16 +548,36 @@ export default function ShadcnShowcasePage() {
                     <h3 className="text-lg font-semibold mb-3">Toast Notifications</h3>
                     <Separator className="mb-4" />
                     <div className="flex flex-wrap gap-2">
-                      <Button onClick={() => console.log('✅ Success toast!')}>
+                      <Button onClick={() => {
+                        logger.info('Success toast triggered', { type: 'success', component: 'shadcn-showcase' })
+                        toast.success('Operation completed successfully', {
+                          description: 'Shadcn UI components - Success notification demo - All systems operational'
+                        })
+                      }}>
                         Success Toast
                       </Button>
-                      <Button onClick={() => console.log('❌ Error toast!')}>
+                      <Button onClick={() => {
+                        logger.warn('Error toast triggered', { type: 'error', component: 'shadcn-showcase' })
+                        toast.error('An error occurred', {
+                          description: 'Shadcn UI components - Error notification demo - Please check your inputs'
+                        })
+                      }}>
                         Error Toast
                       </Button>
-                      <Button onClick={() => console.log('ℹ️ Info toast!')}>
+                      <Button onClick={() => {
+                        logger.info('Info toast triggered', { type: 'info', component: 'shadcn-showcase' })
+                        toast.info('Important information', {
+                          description: 'Shadcn UI components - Info notification demo - Review the documentation for details'
+                        })
+                      }}>
                         Info Toast
                       </Button>
-                      <Button onClick={() => {}}>
+                      <Button onClick={() => {
+                        logger.info('Default toast triggered', { type: 'default', component: 'shadcn-showcase' })
+                        toast('Default notification', {
+                          description: 'Shadcn UI components - Standard notification demo'
+                        })
+                      }}>
                         Default Toast
                       </Button>
                     </div>
