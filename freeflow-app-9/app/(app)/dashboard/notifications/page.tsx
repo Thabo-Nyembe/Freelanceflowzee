@@ -45,6 +45,9 @@ import {
   Share2,
   RefreshCw
 } from 'lucide-react'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Notifications')
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
@@ -272,12 +275,18 @@ export default function NotificationsPage() {
   }, [])
 
   // Handlers
-  const handleRefresh = () => { console.log('🔄 REFRESH'); dispatch({ type: 'SET_LOADING', payload: true }); window.location.reload() }
-  const handleSettings = () => { console.log('⚙️ SETTINGS'); setActiveTab('settings') }
-  const handleViewNotification = (id: string) => { console.log('NOTIFICATIONS: View notification:', id); dispatch({ type: 'MARK_AS_READ', payload: id }); toast.info('Viewing notification: ' + id) }
-  const handleMarkRead = (id: string) => { console.log('✅:', id); dispatch({ type: 'MARK_AS_READ', payload: id }) }
+  const handleRefresh = () => { logger.info('Refreshing notifications'); dispatch({ type: 'SET_LOADING', payload: true }); window.location.reload() }
+  const handleSettings = () => { logger.info('Opening notification settings'); setActiveTab('settings') }
+  const handleViewNotification = (id: string) => { logger.info('Viewing notification', { notificationId: id }); dispatch({ type: 'MARK_AS_READ', payload: id }); toast.info('Viewing notification: ' + id) }
+  const handleMarkRead = (id: string) => { logger.info('Marking notification as read', { notificationId: id }); dispatch({ type: 'MARK_AS_READ', payload: id }) }
   const handleMarkAllRead = async () => {
-    console.log('✅ ALL')
+    const unreadCount = state.notifications.filter(n => !n.read).length
+
+    logger.info('Marking all notifications as read', {
+      totalNotifications: state.notifications.length,
+      unreadCount,
+      filter: state.filter
+    })
 
     try {
       // Call API to mark all as read
@@ -300,8 +309,12 @@ export default function NotificationsPage() {
         // Update local state
         dispatch({ type: 'MARK_ALL_READ' })
 
+        logger.info('All notifications marked as read', { count: result.count || unreadCount })
+
         // Show success message
-        toast.success(result.message || `${result.count || 'All'} notifications marked as read`)
+        toast.success(`${result.count || unreadCount} notifications marked as read`, {
+          description: `${state.filter} filter - All caught up!`
+        })
 
         // Show achievement if present
         if (result.achievement) {
@@ -311,14 +324,20 @@ export default function NotificationsPage() {
         }
       }
     } catch (error: any) {
-      console.error('Error marking all as read:', error)
+      logger.error('Failed to mark all as read', { error: error instanceof Error ? error.message : String(error) })
       toast.error('Failed to mark all as read', {
         description: error.message || 'Please try again'
       })
     }
   }
   const handleArchive = async (id: string) => {
-    console.log('📦:', id)
+    const notification = state.notifications.find(n => n.id === id)
+
+    logger.info('Archiving notification', {
+      notificationId: id,
+      title: notification?.title,
+      type: notification?.type
+    })
 
     try {
       // Call API to archive notification
@@ -341,19 +360,33 @@ export default function NotificationsPage() {
         // Update local state
         dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: id })
 
+        logger.info('Notification archived successfully', { notificationId: id })
+
         // Show success message
-        toast.success(result.message || '1 notification archived')
+        toast.success(`${notification?.title || 'Notification'} archived`, {
+          description: `${notification?.type} - Moved to archive`
+        })
       }
     } catch (error: any) {
-      console.error('Error archiving notification:', error)
+      logger.error('Failed to archive notification', {
+        notificationId: id,
+        error: error instanceof Error ? error.message : String(error)
+      })
       toast.error('Failed to archive notification', {
         description: error.message || 'Please try again'
       })
     }
   }
-  const handleArchiveAll = () => { console.log('NOTIFICATIONS: Archive all notifications'); state.notifications.forEach(n => dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: n.id })); toast.success('All notifications archived') }
+  const handleArchiveAll = () => { const count = state.notifications.length; logger.info('Archiving all notifications', { count }); state.notifications.forEach(n => dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: n.id })); toast.success('All notifications archived') }
   const handleDelete = async (id: string) => {
-    console.log('🗑️:', id)
+    const notification = state.notifications.find(n => n.id === id)
+
+    logger.info('Deleting notification', {
+      notificationId: id,
+      title: notification?.title,
+      type: notification?.type,
+      permanent: false
+    })
 
     try {
       // Call API to delete notification
@@ -377,28 +410,35 @@ export default function NotificationsPage() {
         // Update local state
         dispatch({ type: 'DELETE_NOTIFICATION', payload: id })
 
+        logger.info('Notification deleted successfully', { notificationId: id })
+
         // Show success message
-        toast.success(result.message || '1 notification deleted')
+        toast.success(`${notification?.title || 'Notification'} deleted`, {
+          description: `${notification?.type} - Removed from inbox`
+        })
       }
     } catch (error: any) {
-      console.error('Error deleting notification:', error)
+      logger.error('Failed to delete notification', {
+        notificationId: id,
+        error: error instanceof Error ? error.message : String(error)
+      })
       toast.error('Failed to delete notification', {
         description: error.message || 'Please try again'
       })
     }
   }
-  const handleDeleteAll = () => { console.log('🗑️ ALL'); confirm('Delete all?') && state.notifications.forEach(n => dispatch({ type: 'DELETE_NOTIFICATION', payload: n.id })) }
-  const handleUnarchive = (id: string) => { console.log('NOTIFICATIONS: Unarchive notification:', id); toast.success('Notification unarchived') }
-  const handleFilterAll = () => { console.log('🔍 ALL'); dispatch({ type: 'SET_FILTER', payload: 'all' }) }
-  const handleFilterUnread = () => { console.log('🔍 UNREAD'); dispatch({ type: 'SET_FILTER', payload: 'unread' }) }
-  const handleFilterRead = () => { console.log('🔍 READ'); dispatch({ type: 'SET_FILTER', payload: 'read' }) }
-  const handleExportNotifications = () => { console.log('NOTIFICATIONS: Export notifications'); toast.success('Exporting notifications...') }
-  const handleClearAll = () => { console.log('🧹 CLEAR'); confirm('Clear all?') && dispatch({ type: 'SET_NOTIFICATIONS', payload: [] }) }
-  const handleToggleSound = () => { console.log('🔔 SOUND'); dispatch({ type: 'TOGGLE_SOUND' }) }
-  const handleTogglePreviews = () => { console.log('👁️ PREVIEW'); dispatch({ type: 'TOGGLE_PREVIEWS' }) }
-  const handleSavePreferences = () => { console.log('NOTIFICATIONS: Save preferences'); toast.success('Preferences saved successfully') }
-  const handleResetPreferences = () => { console.log('NOTIFICATIONS: Reset preferences'); confirm('Reset all preferences to defaults?') && toast.success('Preferences reset to defaults') }
-  const handleSnooze = (id: string) => { console.log('NOTIFICATIONS: Snooze notification:', id); toast.success('Notification snoozed for 1 hour') }
+  const handleDeleteAll = () => { const count = state.notifications.length; logger.info('Deleting all notifications', { count }); confirm('Delete all?') && state.notifications.forEach(n => dispatch({ type: 'DELETE_NOTIFICATION', payload: n.id })) }
+  const handleUnarchive = (id: string) => { logger.info('Unarchiving notification', { notificationId: id }); toast.success('Notification unarchived') }
+  const handleFilterAll = () => { logger.debug('Filtering all notifications'); dispatch({ type: 'SET_FILTER', payload: 'all' }) }
+  const handleFilterUnread = () => { logger.debug('Filtering unread notifications'); dispatch({ type: 'SET_FILTER', payload: 'unread' }) }
+  const handleFilterRead = () => { logger.debug('Filtering read notifications'); dispatch({ type: 'SET_FILTER', payload: 'read' }) }
+  const handleExportNotifications = () => { const count = state.notifications.length; logger.info('Exporting notifications', { count }); toast.success('Exporting notifications...') }
+  const handleClearAll = () => { const count = state.notifications.length; logger.info('Clearing all notifications', { count }); confirm('Clear all?') && dispatch({ type: 'SET_NOTIFICATIONS', payload: [] }) }
+  const handleToggleSound = () => { logger.info('Toggling notification sound', { currentState: state.soundEnabled }); dispatch({ type: 'TOGGLE_SOUND' }) }
+  const handleTogglePreviews = () => { logger.info('Toggling notification previews', { currentState: state.previewsEnabled }); dispatch({ type: 'TOGGLE_PREVIEWS' }) }
+  const handleSavePreferences = () => { logger.info('Saving notification preferences', { soundEnabled: state.soundEnabled, previewsEnabled: state.previewsEnabled }); toast.success('Preferences saved successfully') }
+  const handleResetPreferences = () => { logger.info('Resetting notification preferences to defaults'); confirm('Reset all preferences to defaults?') && toast.success('Preferences reset to defaults') }
+  const handleSnooze = (id: string) => { logger.info('Snoozing notification', { notificationId: id, duration: '1 hour' }); toast.success('Notification snoozed for 1 hour') }
 
   const filteredNotifications = state.notifications.filter(notification => {
     const matchesSearch = notification.title.toLowerCase().includes(state.search.toLowerCase()) ||
@@ -483,11 +523,11 @@ export default function NotificationsPage() {
       // Navigate to action URL if present
       if (notification.actionUrl) {
         // In a real app, use router.push()
-        console.log('NOTIFICATIONS: Navigate to:', notification.actionUrl)
+        logger.info('Navigating to notification action', { notificationId: notification.id, actionUrl: notification.actionUrl })
         toast.info('Navigating to: ' + notification.actionUrl)
       }
     } catch (error) {
-      console.error('Error marking notification as read:', error)
+      logger.error('Failed to mark notification as read', { error: error instanceof Error ? error.message : String(error) })
       // Graceful degradation - still update UI even if API fails
       dispatch({ type: 'MARK_AS_READ', payload: notification.id })
     }
