@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
-import { 
+import {
   PredictiveAnalyticsSystem,
   CostMetricType,
   PerformanceMetricType,
@@ -27,6 +27,9 @@ import { sanitizeInput } from '@/lib/security';
 import { logApiUsage, trackMetric } from '@/lib/analytics';
 import { z } from 'zod';
 import { v4 as uuidv4 } from 'uuid';
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-PredictiveAnalytics')
 
 // Environment configuration
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -95,7 +98,7 @@ const errorHandler = async (fn: Function, req: NextRequest) => {
   try {
     return await fn(req);
   } catch (error: any) {
-    console.error('API Error:', error);
+    logger.error('API Error', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     
     // Determine appropriate status code
     let status = 500;
@@ -316,7 +319,7 @@ async function handleDashboardMetrics(req: NextRequest) {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Error getting dashboard metrics:', error);
+    logger.error('Error getting dashboard metrics', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw error;
   }
 }
@@ -366,7 +369,7 @@ async function handleGetAnomalies(req: NextRequest) {
       count: anomalies.length
     });
   } catch (error) {
-    console.error('Error getting anomalies:', error);
+    logger.error('Error getting anomalies', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw error;
   }
 }
@@ -412,7 +415,7 @@ async function handleGetPerformance(req: NextRequest) {
       metricType
     });
   } catch (error) {
-    console.error('Error getting performance metrics:', error);
+    logger.error('Error getting performance metrics', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw error;
   }
 }
@@ -468,7 +471,7 @@ async function handleGetPredictions(req: NextRequest) {
       timeWindow
     });
   } catch (error) {
-    console.error('Error getting predictions:', error);
+    logger.error('Error getting predictions', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw error;
   }
 }
@@ -514,7 +517,7 @@ async function handleGetOptimizationHistory(req: NextRequest) {
       count: history.length
     });
   } catch (error) {
-    console.error('Error getting optimization history:', error);
+    logger.error('Error getting optimization history', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw error;
   }
 }
@@ -545,7 +548,7 @@ async function handleHealthCheck(req: NextRequest) {
       processingTime: Date.now() - startTime
     });
   } catch (error) {
-    console.error('Error getting system health metrics:', error);
+    logger.error('Error getting system health metrics', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw error;
   }
 }
@@ -575,7 +578,7 @@ async function handleGetConfig(req: NextRequest) {
       processingTime: Date.now() - startTime
     });
   } catch (error) {
-    console.error('Error getting configuration:', error);
+    logger.error('Error getting configuration', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw error;
   }
 }
@@ -697,7 +700,7 @@ async function handleDetectAnomalies(req: NextRequest, system: PredictiveAnalyti
       anomaliesDetected: anomalies.length
     });
   } catch (error) {
-    console.error('Error detecting anomalies:', error);
+    logger.error('Error detecting anomalies', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw error;
   }
 }
@@ -741,7 +744,7 @@ async function handleUpdatePerformance(req: NextRequest, system: PredictiveAnaly
       modelType
     });
   } catch (error) {
-    console.error('Error updating performance metrics:', error);
+    logger.error('Error updating performance metrics', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw error;
   }
 }
@@ -821,7 +824,7 @@ async function handlePredict(req: NextRequest, system: PredictiveAnalyticsSystem
       timeWindow
     });
   } catch (error) {
-    console.error('Error making prediction:', error);
+    logger.error('Error making prediction', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw error;
   }
 }
@@ -883,7 +886,7 @@ async function handleOptimize(req: NextRequest, system: PredictiveAnalyticsSyste
       optimizationId
     });
   } catch (error) {
-    console.error('Error running optimization:', error);
+    logger.error('Error running optimization', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw error;
   }
 }
@@ -947,7 +950,7 @@ async function handleUpdateConfig(req: NextRequest, system: PredictiveAnalyticsS
       updatedSections: Object.keys(body)
     });
   } catch (error) {
-    console.error('Error updating configuration:', error);
+    logger.error('Error updating configuration', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw error;
   }
 }

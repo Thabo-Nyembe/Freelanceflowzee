@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-AIGenerateImage')
 
 /**
  * AI Image Generation API
@@ -59,7 +62,13 @@ export async function POST(request: Request) {
 
         if (!response.ok) {
           const errorData = await response.text()
-          console.error('OpenRouter Image API error:', errorData)
+          logger.error('OpenRouter Image API error', {
+            error: errorData,
+            model: openRouterModel,
+            prompt: prompt.substring(0, 100),
+            size,
+            style
+          })
 
           // If OpenRouter image API doesn't work, fall back to chat completion with image description
           return await generateViaTextToImage(prompt, openRouterModel, size, style, OPENROUTER_API_KEY)
@@ -85,7 +94,12 @@ export async function POST(request: Request) {
         })
 
       } catch (error: any) {
-        console.error('DALL-E generation error:', error)
+        logger.error('DALL-E generation error', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          model: openRouterModel,
+          prompt: prompt.substring(0, 100)
+        })
         // Fallback to text-to-image approach
         return await generateViaTextToImage(prompt, openRouterModel, size, style, OPENROUTER_API_KEY)
       }
@@ -97,7 +111,10 @@ export async function POST(request: Request) {
     }
 
   } catch (error: any) {
-    console.error('AI Image Generation Error:', error)
+    logger.error('AI Image Generation error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       {
         success: false,
@@ -172,7 +189,12 @@ async function generateViaTextToImage(
     })
 
   } catch (error: any) {
-    console.error('Text-to-image generation error:', error)
+    logger.error('Text-to-image generation error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      model,
+      prompt: prompt.substring(0, 100)
+    })
 
     // Final fallback: return a basic demo image
     const [width, height] = size.split('x')
