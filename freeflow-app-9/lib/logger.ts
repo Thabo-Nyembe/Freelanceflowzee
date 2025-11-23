@@ -165,6 +165,9 @@ export class Logger {
 // Export singleton instance
 export const logger = new Logger()
 
+// Export as default for easier importing
+export default logger
+
 // Export factory for creating custom loggers
 export const createLogger = (config?: Partial<LoggerConfig>) => new Logger(config)
 
