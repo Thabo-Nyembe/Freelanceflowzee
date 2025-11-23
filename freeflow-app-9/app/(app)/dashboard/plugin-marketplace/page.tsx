@@ -38,6 +38,9 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { motion, AnimatePresence } from 'framer-motion'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Plugin-Marketplace')
 
 // ============================================================================
 // A+++ UTILITIES
@@ -181,19 +184,19 @@ type PluginAction =
 // ============================================================================
 
 function pluginReducer(state: PluginState, action: PluginAction): PluginState {
-  console.log('🔄 PLUGIN REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_PLUGINS':
-      console.log('📊 PLUGIN REDUCER: Setting plugins - Count:', action.plugins.length)
+      logger.info('Setting plugins', { count: action.plugins.length })
       return { ...state, plugins: action.plugins }
 
     case 'ADD_PLUGIN':
-      console.log('➕ PLUGIN REDUCER: Adding plugin - ID:', action.plugin.id)
+      logger.info('Adding plugin', { pluginId: action.plugin.id, name: action.plugin.name })
       return { ...state, plugins: [action.plugin, ...state.plugins] }
 
     case 'UPDATE_PLUGIN':
-      console.log('✏️ PLUGIN REDUCER: Updating plugin - ID:', action.plugin.id)
+      logger.info('Updating plugin', { pluginId: action.plugin.id, name: action.plugin.name })
       return {
         ...state,
         plugins: state.plugins.map(p => p.id === action.plugin.id ? action.plugin : p),
@@ -201,7 +204,7 @@ function pluginReducer(state: PluginState, action: PluginAction): PluginState {
       }
 
     case 'DELETE_PLUGIN':
-      console.log('🗑️ PLUGIN REDUCER: Deleting plugin - ID:', action.pluginId)
+      logger.info('Deleting plugin', { pluginId: action.pluginId })
       return {
         ...state,
         plugins: state.plugins.filter(p => p.id !== action.pluginId),
@@ -209,31 +212,31 @@ function pluginReducer(state: PluginState, action: PluginAction): PluginState {
       }
 
     case 'SELECT_PLUGIN':
-      console.log('👁️ PLUGIN REDUCER: Selecting plugin - ID:', action.plugin?.id)
+      logger.info('Selecting plugin', { pluginId: action.plugin?.id })
       return { ...state, selectedPlugin: action.plugin }
 
     case 'SET_SEARCH':
-      console.log('🔍 PLUGIN REDUCER: Search term:', action.searchTerm)
+      logger.debug('Search term updated', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER_CATEGORY':
-      console.log('🎯 PLUGIN REDUCER: Filter category:', action.filterCategory)
+      logger.debug('Filter category updated', { category: action.filterCategory })
       return { ...state, filterCategory: action.filterCategory }
 
     case 'SET_FILTER_PRICING':
-      console.log('💰 PLUGIN REDUCER: Filter pricing:', action.filterPricing)
+      logger.debug('Filter pricing updated', { pricing: action.filterPricing })
       return { ...state, filterPricing: action.filterPricing }
 
     case 'SET_SORT':
-      console.log('🔀 PLUGIN REDUCER: Sort by:', action.sortBy)
+      logger.debug('Sort updated', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'SET_VIEW_MODE':
-      console.log('👁️ PLUGIN REDUCER: View mode:', action.viewMode)
+      logger.debug('View mode updated', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'TOGGLE_SELECT_PLUGIN':
-      console.log('☑️ PLUGIN REDUCER: Toggle select plugin - ID:', action.pluginId)
+      logger.debug('Toggle select plugin', { pluginId: action.pluginId })
       return {
         ...state,
         selectedPlugins: state.selectedPlugins.includes(action.pluginId)
@@ -242,11 +245,11 @@ function pluginReducer(state: PluginState, action: PluginAction): PluginState {
       }
 
     case 'CLEAR_SELECTED_PLUGINS':
-      console.log('🧹 PLUGIN REDUCER: Clearing selected plugins')
+      logger.debug('Clearing selected plugins')
       return { ...state, selectedPlugins: [] }
 
     case 'INSTALL_PLUGIN':
-      console.log('📥 PLUGIN REDUCER: Installing plugin - ID:', action.plugin.id)
+      logger.info('Installing plugin via reducer', { pluginId: action.plugin.id, name: action.plugin.name })
       const newInstallation: InstalledPlugin = {
         pluginId: action.plugin.id,
         installedAt: new Date().toISOString(),
@@ -263,14 +266,14 @@ function pluginReducer(state: PluginState, action: PluginAction): PluginState {
       }
 
     case 'UNINSTALL_PLUGIN':
-      console.log('🗑️ PLUGIN REDUCER: Uninstalling plugin - ID:', action.pluginId)
+      logger.info('Uninstalling plugin via reducer', { pluginId: action.pluginId })
       return {
         ...state,
         installedPlugins: state.installedPlugins.filter(p => p.pluginId !== action.pluginId)
       }
 
     case 'TOGGLE_PLUGIN_ACTIVE':
-      console.log('🔄 PLUGIN REDUCER: Toggling plugin active - ID:', action.pluginId)
+      logger.info('Toggling plugin active state', { pluginId: action.pluginId })
       return {
         ...state,
         installedPlugins: state.installedPlugins.map(p =>
@@ -279,7 +282,7 @@ function pluginReducer(state: PluginState, action: PluginAction): PluginState {
       }
 
     case 'TOGGLE_INSTALLED_ONLY':
-      console.log('🔧 PLUGIN REDUCER: Toggle installed only - Current:', state.showInstalledOnly)
+      logger.debug('Toggle installed only filter', { currentState: state.showInstalledOnly })
       return { ...state, showInstalledOnly: !state.showInstalledOnly }
 
     default:
@@ -292,7 +295,7 @@ function pluginReducer(state: PluginState, action: PluginAction): PluginState {
 // ============================================================================
 
 function generateMockPlugins(): Plugin[] {
-  console.log('🎨 PLUGIN: Generating mock plugins...')
+  logger.debug('Generating mock plugins')
 
   const categories: PluginCategory[] = ['productivity', 'creative', 'analytics', 'communication', 'integration', 'automation', 'ai', 'security', 'finance', 'marketing']
   const pricingTypes: PricingType[] = ['free', 'one-time', 'subscription', 'freemium']
@@ -368,7 +371,7 @@ function generateMockPlugins(): Plugin[] {
     }
   })
 
-  console.log('✅ PLUGIN: Generated', plugins.length, 'mock plugins')
+  logger.info('Mock plugins generated', { count: plugins.length })
   return plugins
 }
 
@@ -397,11 +400,37 @@ const categoryOptions: CategoryOption[] = [
 ]
 
 // ============================================================================
+// A++++ FLOATING PARTICLE COMPONENT
+// ============================================================================
+
+const FloatingParticle: React.FC<{
+  children: React.ReactNode
+  color?: 'emerald' | 'green' | 'cyan' | 'amber' | 'blue' | 'purple'
+  size?: 'sm' | 'md' | 'lg'
+}> = ({ children, color = 'emerald', size = 'md' }) => {
+  return (
+    <motion.div
+      animate={{
+        y: [0, -10, 0],
+        rotate: [0, 5, 0, -5, 0]
+      }}
+      transition={{
+        duration: 3,
+        repeat: Infinity,
+        ease: 'easeInOut'
+      }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+// ============================================================================
 // A++++ MAIN COMPONENT
 // ============================================================================
 
 export default function PluginMarketplacePage() {
-  console.log('🚀 PLUGIN: Component mounting...')
+  logger.debug('Plugin marketplace component mounting')
 
   // ============================================================================
   // A++++ STATE MANAGEMENT
@@ -432,7 +461,7 @@ export default function PluginMarketplacePage() {
   // ============================================================================
   useEffect(() => {
     const loadPlugins = async () => {
-      console.log('📊 PLUGIN: Loading plugins (local state)...')
+      logger.info('Loading plugins from local state')
       try {
         setIsLoading(true)
         setError(null)
@@ -455,11 +484,11 @@ export default function PluginMarketplacePage() {
           dispatch({ type: 'INSTALL_PLUGIN', plugin })
         })
 
-        console.log('✅ PLUGIN: Plugins loaded successfully - Count:', mockPlugins.length)
+        logger.info('Plugins loaded successfully', { count: mockPlugins.length })
         setIsLoading(false)
         announce('Plugins loaded successfully', 'polite')
       } catch (err) {
-        console.log('❌ PLUGIN: Load error:', err)
+        logger.error('Failed to load plugins', { error: err instanceof Error ? err.message : String(err) })
         setError(err instanceof Error ? err.message : 'Failed to load plugins')
         setIsLoading(false)
         announce('Error loading plugins', 'assertive')
@@ -473,7 +502,7 @@ export default function PluginMarketplacePage() {
   // A++++ COMPUTED VALUES
   // ============================================================================
   const stats = useMemo(() => {
-    console.log('📊 PLUGIN: Computing stats...')
+    logger.debug('Computing plugin stats')
     const total = state.plugins.length
     const installed = state.installedPlugins.length
     const active = state.installedPlugins.filter(p => p.isActive).length
@@ -494,12 +523,12 @@ export default function PluginMarketplacePage() {
       trending
     }
 
-    console.log('📊 PLUGIN: Stats computed -', JSON.stringify(computedStats))
+    logger.debug('Plugin stats computed', computedStats)
     return computedStats
   }, [state.plugins, state.installedPlugins])
 
   const filteredAndSortedPlugins = useMemo(() => {
-    console.log('🔍 PLUGIN: Filtering and sorting plugins...')
+    logger.debug('Filtering and sorting plugins', { searchTerm: state.searchTerm, category: state.filterCategory, pricing: state.filterPricing, sortBy: state.sortBy })
     let filtered = state.plugins
 
     // Search
@@ -509,19 +538,19 @@ export default function PluginMarketplacePage() {
         plugin.description.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
         plugin.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()))
       )
-      console.log('🔍 PLUGIN: Search filtered to', filtered.length, 'plugins')
+      logger.debug('Search filter applied', { count: filtered.length, searchTerm: state.searchTerm })
     }
 
     // Filter by category
     if (state.filterCategory !== 'all') {
       filtered = filtered.filter(plugin => plugin.category === state.filterCategory)
-      console.log('🎯 PLUGIN: Category filtered to', filtered.length, 'plugins')
+      logger.debug('Category filter applied', { count: filtered.length, category: state.filterCategory })
     }
 
     // Filter by pricing
     if (state.filterPricing !== 'all') {
       filtered = filtered.filter(plugin => plugin.pricingType === state.filterPricing)
-      console.log('💰 PLUGIN: Pricing filtered to', filtered.length, 'plugins')
+      logger.debug('Pricing filter applied', { count: filtered.length, pricing: state.filterPricing })
     }
 
     // Filter installed only
@@ -529,7 +558,7 @@ export default function PluginMarketplacePage() {
       filtered = filtered.filter(plugin =>
         state.installedPlugins.some(ip => ip.pluginId === plugin.id)
       )
-      console.log('🔧 PLUGIN: Installed-only filtered to', filtered.length, 'plugins')
+      logger.debug('Installed-only filter applied', { count: filtered.length })
     }
 
     // Sort
@@ -550,7 +579,7 @@ export default function PluginMarketplacePage() {
       }
     })
 
-    console.log('🔀 PLUGIN: Sorted by', state.sortBy, '- Final count:', sorted.length)
+    logger.debug('Plugins sorted', { sortBy: state.sortBy, finalCount: sorted.length })
     return sorted
   }, [state.plugins, state.searchTerm, state.filterCategory, state.filterPricing, state.sortBy, state.showInstalledOnly, state.installedPlugins])
 
@@ -559,11 +588,14 @@ export default function PluginMarketplacePage() {
   // ============================================================================
 
   const handleViewPlugin = (plugin: Plugin) => {
-    console.log('👁️ PLUGIN: Opening plugin view - ID:', plugin.id)
-    console.log('📊 PLUGIN: Plugin details:', {
+    logger.info('Opening plugin view', {
+      pluginId: plugin.id,
       name: plugin.name,
       category: plugin.category,
-      installs: plugin.installCount
+      installs: plugin.installCount,
+      rating: plugin.rating,
+      price: plugin.price,
+      pricingType: plugin.pricingType
     })
 
     dispatch({ type: 'SELECT_PLUGIN', plugin })
@@ -571,61 +603,97 @@ export default function PluginMarketplacePage() {
   }
 
   const handleInstallPlugin = async (plugin: Plugin) => {
-    console.log('📥 PLUGIN: Installing plugin - ID:', plugin.id)
-    console.log('📥 PLUGIN: Plugin:', plugin.name)
+    logger.info('Installing plugin', {
+      pluginId: plugin.id,
+      name: plugin.name,
+      category: plugin.category,
+      version: plugin.version,
+      fileSize: plugin.fileSize,
+      pricingType: plugin.pricingType
+    })
 
     const isInstalled = state.installedPlugins.some(p => p.pluginId === plugin.id)
 
     if (isInstalled) {
-      console.log('⚠️ PLUGIN: Plugin already installed')
-      toast.error('Plugin is already installed')
+      logger.warn('Plugin installation failed', { reason: 'Already installed', pluginId: plugin.id })
+      toast.error('Plugin is already installed', {
+        description: `${plugin.name} is already active in your workspace`
+      })
       return
     }
 
-    toast.info(`🔌 Installing ${plugin.name}...`, {
-      description: 'Setting up plugin dependencies'
+    const fileSizeMB = (plugin.fileSize / (1024 * 1024)).toFixed(1)
+    const price = formatPrice(plugin)
+
+    toast.info(`Installing ${plugin.name}...`, {
+      description: `${plugin.category} plugin - ${plugin.version} - ${fileSizeMB} MB - Setting up dependencies`
     })
 
     // Note: Using local state - in production, this would POST to /api/plugins/install
     dispatch({ type: 'INSTALL_PLUGIN', plugin })
 
-    console.log('✅ PLUGIN: Plugin installed successfully')
-    toast.success(`🎉 ${plugin.name} installed`, {
-      description: 'Plugin is now active and ready to use'
+    const installsK = (plugin.installCount / 1000).toFixed(1)
+
+    logger.info('Plugin installed successfully', {
+      pluginId: plugin.id,
+      name: plugin.name,
+      version: plugin.version,
+      installedAt: new Date().toISOString()
+    })
+
+    toast.success(`${plugin.name} installed`, {
+      description: `${plugin.category} - ${plugin.version} - ${price} - ${plugin.rating}⭐ (${installsK}k installs) - Active and ready to use`
     })
     announce(`${plugin.name} installed`, 'polite')
   }
 
   const handleUninstallPlugin = (pluginId: string) => {
-    console.log('🗑️ PLUGIN: Uninstalling plugin - ID:', pluginId)
+    logger.info('Uninstalling plugin', { pluginId })
     const plugin = state.plugins.find(p => p.id === pluginId)
+    const installedPlugin = state.installedPlugins.find(p => p.pluginId === pluginId)
 
     if (!plugin) {
-      console.log('❌ PLUGIN: Plugin not found')
+      logger.warn('Plugin uninstallation failed', { reason: 'Plugin not found', pluginId })
       return
     }
 
-    console.log('🗑️ PLUGIN: Plugin to uninstall:', plugin.name)
+    const fileSizeMB = (plugin.fileSize / (1024 * 1024)).toFixed(1)
+    const installedDate = installedPlugin ? new Date(installedPlugin.installedAt).toLocaleDateString() : 'Unknown'
 
-    if (confirm(`Uninstall "${plugin.name}"?`)) {
-      console.log('✅ PLUGIN: User confirmed uninstallation')
+    logger.info('Prompting user for uninstallation confirmation', { pluginId, name: plugin.name })
+
+    if (confirm(`Uninstall "${plugin.name}"? This will remove all plugin data and settings.`)) {
+      logger.info('User confirmed uninstallation', { pluginId, name: plugin.name })
       dispatch({ type: 'UNINSTALL_PLUGIN', pluginId })
-      toast.success(`${plugin.name} uninstalled`)
+
+      toast.success(`${plugin.name} uninstalled`, {
+        description: `${plugin.category} plugin - ${plugin.version} - ${fileSizeMB} MB freed - Installed since ${installedDate}`
+      })
       announce('Plugin uninstalled', 'polite')
     } else {
-      console.log('❌ PLUGIN: User cancelled uninstallation')
+      logger.debug('User cancelled uninstallation', { pluginId })
     }
   }
 
   const handleTogglePluginActive = (pluginId: string) => {
-    console.log('🔄 PLUGIN: Toggling plugin active - ID:', pluginId)
     const installed = state.installedPlugins.find(p => p.pluginId === pluginId)
     const plugin = state.plugins.find(p => p.id === pluginId)
 
     if (installed && plugin) {
-      console.log('🔄 PLUGIN: Current active state:', installed.isActive)
+      const newState = !installed.isActive
+
+      logger.info('Toggling plugin active state', {
+        pluginId,
+        name: plugin.name,
+        currentState: installed.isActive,
+        newState
+      })
+
       dispatch({ type: 'TOGGLE_PLUGIN_ACTIVE', pluginId })
-      toast.success(`${plugin.name} ${installed.isActive ? 'deactivated' : 'activated'}`)
+
+      toast.success(`${plugin.name} ${installed.isActive ? 'deactivated' : 'activated'}`, {
+        description: `${plugin.category} plugin - ${plugin.version} - ${newState ? 'Now running' : 'Stopped'} - ${plugin.rating}⭐`
+      })
     }
   }
 
