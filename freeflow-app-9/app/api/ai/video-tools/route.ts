@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { openRouterService } from '@/lib/ai/openrouter-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-VideoTools')
 
 export async function POST(request: NextRequest) {
   try {
@@ -245,7 +248,11 @@ Recommend:
     })
 
   } catch (error: any) {
-    console.error('Video tools API error:', error)
+    logger.error('Video tools API error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      toolType: body?.toolType
+    });
 
     return NextResponse.json({
       success: false,

@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-AITest')
 
 export async function GET() {
   return NextResponse.json({
@@ -64,9 +67,12 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(testResults)
   } catch (error) {
-    console.error('AI test API error:', error)
+    logger.error('AI test API error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
-      { 
+      {
         error: 'Test failed',
         timestamp: new Date().toISOString(),
         details: error instanceof Error ? error.message : 'Unknown error'

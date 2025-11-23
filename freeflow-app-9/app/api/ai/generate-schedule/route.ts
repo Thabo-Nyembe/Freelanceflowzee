@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-GenerateSchedule')
 
 export async function POST(request: Request) {
   try {
@@ -72,7 +75,11 @@ Only return valid JSON, no markdown or explanations.`
       const cleanText = scheduleText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
       schedule = JSON.parse(cleanText)
     } catch (e) {
-      console.error('Failed to parse AI response:', e)
+      logger.error('Failed to parse AI response', {
+        error: e instanceof Error ? e.message : 'Unknown error',
+        stack: e instanceof Error ? e.stack : undefined,
+        responseText: scheduleText.substring(0, 200)
+      });
       schedule = []
     }
 
@@ -83,7 +90,10 @@ Only return valid JSON, no markdown or explanations.`
     })
 
   } catch (error: any) {
-    console.error('AI Schedule Generation Error:', error)
+    logger.error('AI Schedule Generation Error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
       {
         success: false,

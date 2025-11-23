@@ -599,7 +599,10 @@ export async function POST(request: NextRequest) {
       .single()
       
     if (error) {
-      console.error("Database error:", error)
+      logger.error("Database error creating comment", {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
       return NextResponse.json({ error: "Failed to create comment" }, { status: 500 })
     }
     
@@ -775,7 +778,11 @@ export async function PUT(request: NextRequest) {
       .single()
       
     if (error) {
-      console.error("Database error:", error)
+      logger.error("Database error updating comment", {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        commentId
+      });
       return NextResponse.json({ error: "Failed to update comment" }, { status: 500 })
     }
     

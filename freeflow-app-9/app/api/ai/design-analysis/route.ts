@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-DesignAnalysis')
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +23,10 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('AI Design Analysis Error:', error);
+    logger.error('AI Design Analysis Error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

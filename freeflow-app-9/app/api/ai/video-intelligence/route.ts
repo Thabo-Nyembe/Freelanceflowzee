@@ -28,6 +28,9 @@ import { authOptions } from '@/lib/auth';
 import { rateLimit } from '@/lib/rate-limit';
 import { getErrorMessage } from '@/lib/error-utils';
 import { getVideoMetadata } from '@/lib/video-utils';
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-VideoIntelligence')
 
 // Promisify fs functions
 const writeFileAsync = promisify(writeFile);
@@ -215,7 +218,7 @@ async function storeVideoFile(
     });
   
   if (error) {
-    console.error('Failed to upload to Supabase:', error);
+    logger.error('Failed to upload to Supabase', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     return filePath; // Fall back to local file
   }
   
@@ -252,7 +255,7 @@ async function processSceneDetection(
     
     return result.result;
   } catch (error) {
-    console.error('Scene detection failed:', error);
+    logger.error('Scene detection failed', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw new Error(`Scene detection failed: ${getErrorMessage(error)}`);
   }
 }
@@ -287,7 +290,7 @@ async function processEmotionAnalysis(
     
     return result.result;
   } catch (error) {
-    console.error('Emotion analysis failed:', error);
+    logger.error('Emotion analysis failed', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw new Error(`Emotion analysis failed: ${getErrorMessage(error)}`);
   }
 }
@@ -322,7 +325,7 @@ async function processVisualElements(
     
     return result.result;
   } catch (error) {
-    console.error('Visual element detection failed:', error);
+    logger.error('Visual element detection failed', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw new Error(`Visual element detection failed: ${getErrorMessage(error)}`);
   }
 }
@@ -357,7 +360,7 @@ async function processAudioQuality(
     
     return result.result;
   } catch (error) {
-    console.error('Audio quality analysis failed:', error);
+    logger.error('Audio quality analysis failed', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw new Error(`Audio quality analysis failed: ${getErrorMessage(error)}`);
   }
 }
@@ -392,7 +395,7 @@ async function processContentModeration(
     
     return result.result;
   } catch (error) {
-    console.error('Content moderation failed:', error);
+    logger.error('Content moderation failed', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw new Error(`Content moderation failed: ${getErrorMessage(error)}`);
   }
 }
@@ -428,7 +431,7 @@ async function processThumbnailsAndBRoll(
     
     return result.result;
   } catch (error) {
-    console.error('Thumbnail generation failed:', error);
+    logger.error('Thumbnail generation failed', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw new Error(`Thumbnail generation failed: ${getErrorMessage(error)}`);
   }
 }
@@ -466,11 +469,11 @@ async function saveResultsToDatabase(
       .select();
     
     if (error) {
-      console.error('Failed to save results to database:', error);
+      logger.error('Failed to save results to database', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
       throw error;
     }
   } catch (error) {
-    console.error('Failed to save results to database:', error);
+    logger.error('Failed to save results to database', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     throw new Error(`Failed to save results: ${getErrorMessage(error)}`);
   }
 }
@@ -505,10 +508,10 @@ async function trackPerformanceMetrics(
       });
     
     if (error) {
-      console.error('Failed to track performance metrics:', error);
+      logger.error('Failed to track performance metrics', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     }
   } catch (error) {
-    console.error('Failed to track performance metrics:', error);
+    logger.error('Failed to track performance metrics', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
   }
 }
 
@@ -705,7 +708,7 @@ async function checkUserQuota(userId: string, estimatedCost: number): Promise<bo
       .single();
     
     if (error || !data) {
-      console.error('Failed to get user quota:', error);
+      logger.error('Failed to get user quota', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
       return false;
     }
     
@@ -713,7 +716,7 @@ async function checkUserQuota(userId: string, estimatedCost: number): Promise<bo
     const remainingQuota = data.total_quota - data.used_quota;
     return remainingQuota >= estimatedCost;
   } catch (error) {
-    console.error('Failed to check user quota:', error);
+    logger.error('Failed to check user quota', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     return false;
   }
 }
@@ -730,10 +733,10 @@ async function updateUserQuota(userId: string, cost: number): Promise<void> {
     });
     
     if (error) {
-      console.error('Failed to update user quota:', error);
+      logger.error('Failed to update user quota', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
     }
   } catch (error) {
-    console.error('Failed to update user quota:', error);
+    logger.error('Failed to update user quota', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined });
   }
 }
 
@@ -811,7 +814,12 @@ async function handlePostRequest(req: NextRequest): Promise<NextResponse> {
     
     // Start processing in background
     processVideoIntelligence(jobId, userId, videoId, videoPath, options)
-      .catch(error => console.error('Video processing failed:', error));
+      .catch(error => logger.error('Video processing failed', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        jobId,
+        videoId
+      }));
     
     // Return job ID
     return NextResponse.json({ 
@@ -822,10 +830,13 @@ async function handlePostRequest(req: NextRequest): Promise<NextResponse> {
       message: 'Video processing started'
     });
   } catch (error) {
-    console.error('Error processing video:', error);
-    return NextResponse.json({ 
-      error: 'Failed to process video', 
-      details: getErrorMessage(error) 
+    logger.error('Error processing video', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    return NextResponse.json({
+      error: 'Failed to process video',
+      details: getErrorMessage(error)
     }, { status: 500 });
   }
 }
@@ -927,9 +938,12 @@ async function handleGetRequest(req: NextRequest): Promise<NextResponse> {
     
     return NextResponse.json({ jobs: userJobs });
   } catch (error) {
-    console.error('Error getting job status:', error);
-    return NextResponse.json({ 
-      error: 'Failed to get job status', 
+    logger.error('Error getting job status', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    return NextResponse.json({
+      error: 'Failed to get job status',
       details: getErrorMessage(error) 
     }, { status: 500 });
   }
@@ -980,9 +994,12 @@ async function handleDeleteRequest(req: NextRequest): Promise<NextResponse> {
       message: 'Job cancelled successfully' 
     });
   } catch (error) {
-    console.error('Error cancelling job:', error);
-    return NextResponse.json({ 
-      error: 'Failed to cancel job', 
+    logger.error('Error cancelling job', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    return NextResponse.json({
+      error: 'Failed to cancel job',
       details: getErrorMessage(error) 
     }, { status: 500 });
   }

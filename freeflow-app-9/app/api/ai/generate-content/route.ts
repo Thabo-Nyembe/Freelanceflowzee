@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-GenerateContent')
 
 export async function POST(request: Request) {
   try {
@@ -73,7 +76,10 @@ export async function POST(request: Request) {
     })
 
   } catch (error: any) {
-    console.error('AI Generate Content Error:', error)
+    logger.error('AI Generate Content Error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
       {
         success: false,

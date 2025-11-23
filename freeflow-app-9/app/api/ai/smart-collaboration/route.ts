@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-SmartCollaboration')
 import { SmartCollaborationAI, 
   SmartCollaborationFeatureType, 
   CollaborationContextType,
@@ -80,8 +83,12 @@ const errorHandler = async (fn: Function, req: NextRequest) => {
   try {
     return await fn(req);
   } catch (error: any) {
-    console.error('API Error:', error);
-    
+    logger.error('API Error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      endpoint: req.nextUrl.pathname
+    });
+
     // Determine appropriate status code
     let status = 500;
     if (error.message?.includes('not found')) status = 404;

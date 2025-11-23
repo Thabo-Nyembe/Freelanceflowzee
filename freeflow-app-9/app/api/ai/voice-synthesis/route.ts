@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-VoiceSynthesis')
 
 interface VoiceSynthesisRequest {
   provider: 'openai' | 'elevenlabs' | 'azure'
@@ -50,7 +53,10 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Voice synthesis API error:', error)
+    logger.error('Voice synthesis API error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -80,7 +86,12 @@ async function handleOpenAITTS(body: VoiceSynthesisRequest, apiKey: string) {
       }
     })
   } catch (error: any) {
-    console.error('OpenAI TTS error:', error)
+    logger.error('OpenAI TTS error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      voice: body.voice,
+      speed: body.speed
+    });
     return NextResponse.json(
       { error: `OpenAI TTS failed: ${error.message}` },
       { status: 500 }
@@ -126,7 +137,12 @@ async function handleElevenLabsTTS(body: VoiceSynthesisRequest, apiKey: string) 
       }
     })
   } catch (error: any) {
-    console.error('ElevenLabs TTS error:', error)
+    logger.error('ElevenLabs TTS error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      voiceId: body.voice_id || body.voice,
+      outputFormat: body.output_format
+    });
     return NextResponse.json(
       { error: `ElevenLabs TTS failed: ${error.message}` },
       { status: 500 }
@@ -181,7 +197,12 @@ async function handleAzureTTS(body: VoiceSynthesisRequest, apiKey: string) {
       }
     })
   } catch (error: any) {
-    console.error('Azure TTS error:', error)
+    logger.error('Azure TTS error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      voice: body.voice,
+      language: body.language
+    });
     return NextResponse.json(
       { error: `Azure TTS failed: ${error.message}` },
       { status: 500 }
