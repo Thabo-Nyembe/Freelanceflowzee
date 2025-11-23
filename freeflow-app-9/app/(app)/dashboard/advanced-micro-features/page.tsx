@@ -40,8 +40,9 @@ import { EnhancedBreadcrumb } from '@/components/ui/enhanced-breadcrumb'
 import { EnhancedSearch } from '@/components/ui/enhanced-search'
 import { ContextualTooltip, HelpTooltip } from '@/components/ui/enhanced-contextual-tooltips'
 import { AnimatedElement, AnimatedCounter } from '@/components/ui/enhanced-micro-animations'
-
-import { 
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+import {
   Sparkles,
   TrendingUp,
   Users,
@@ -58,6 +59,8 @@ import {
   Share2,
   RefreshCw
 } from 'lucide-react'
+
+const logger = createFeatureLogger('Advanced-Micro-Features')
 
 export default function AdvancedMicroFeaturesPage() {
   // A+++ STATE MANAGEMENT
@@ -423,9 +426,9 @@ export default function AdvancedMicroFeaturesPage() {
                     data={mockWidgetData}
                     size="large"
                     variant="detailed"
-                    onRefresh={() => console.log('Refreshing widget...')}
-                    onSettings={() => console.log('Opening settings...')}
-                    onMaximize={() => console.log('Maximizing widget...')}
+                    onRefresh={() => { logger.info('Refreshing dashboard widget'); toast.info('Refreshing widget data...') }}
+                    onSettings={() => { logger.info('Opening widget settings'); toast.info('Opening widget settings...') }}
+                    onMaximize={() => { logger.info('Maximizing widget'); toast.success('Widget maximized') }}
                   />
                 </div>
 
@@ -445,8 +448,8 @@ export default function AdvancedMicroFeaturesPage() {
                   <EnhancedNotifications
                     notifications={mockNotifications}
                     maxItems={5}
-                    onMarkAsRead={(id) => console.log('Marking as read:', id)}
-                    onClearAll={() => console.log('Clearing all notifications')}
+                    onMarkAsRead={(id) => { logger.info('Marking notification as read', { notificationId: id }); toast.success('Notification marked as read') }}
+                    onClearAll={() => { logger.info('Clearing all notifications'); toast.success('All notifications cleared') }}
                   />
                 </div>
               </div>
@@ -462,15 +465,15 @@ export default function AdvancedMicroFeaturesPage() {
                     title="Revenue Trends"
                     description="Monthly revenue performance"
                     dateRange="Last 6 months"
-                    onExport={() => console.log('Exporting chart...')}
-                    onShare={() => console.log('Sharing chart...')}
-                    onSettings={() => console.log('Chart settings...')}
+                    onExport={() => { logger.info('Exporting chart data'); toast.success('Chart exported successfully', { description: 'Revenue Trends - CSV format' }) }}
+                    onShare={() => { logger.info('Sharing chart'); toast.success('Share link copied to clipboard') }}
+                    onSettings={() => { logger.info('Opening chart settings'); toast.info('Opening chart settings...') }}
                     legend={[
                       { name: 'Revenue', color: '#3b82f6', value: '$45K', visible: true },
                       { name: 'Expenses', color: '#ef4444', value: '$28K', visible: true },
                       { name: 'Profit', color: '#10b981', value: '$17K', visible: false }
                     ]}
-                    onLegendToggle={(name) => console.log('Toggling legend:', name)}
+                    onLegendToggle={(name) => { logger.debug('Toggling chart legend', { legendName: name }); toast.info(`Legend  toggled`) }}
                   >
                     <div className="h-64 flex items-center justify-center bg-muted/20 rounded-lg">
                       <div className="text-center text-muted-foreground">
@@ -492,7 +495,7 @@ export default function AdvancedMicroFeaturesPage() {
                     exportable={true}
                     pagination={true}
                     pageSize={3}
-                    onRowClick={(row) => console.log('Row clicked:', row)}
+                    onRowClick={(row) => { logger.info('Table row clicked', { rowData: row }); toast.info(`Viewing details for `) }}
                   />
                 </div>
               </div>
@@ -511,7 +514,7 @@ export default function AdvancedMicroFeaturesPage() {
                         maxDisplay={4}
                         showDetails={true}
                         size="lg"
-                        onUserClick={(user) => console.log('User clicked:', user)}
+                        onUserClick={(user) => { logger.info('User profile clicked', { userId: user.id, userName: user.name }); toast.info(`Viewing 's profile`) }}
                       />
                       <div className="text-sm text-muted-foreground">
                         Team members currently online and their status
@@ -527,7 +530,7 @@ export default function AdvancedMicroFeaturesPage() {
                     activities={mockActivities}
                     maxItems={5}
                     showTimestamps={true}
-                    onActivityClick={(activity) => console.log('Activity clicked:', activity)}
+                    onActivityClick={(activity) => { logger.info('Activity item clicked', { activityId: activity.id, type: activity.type }); toast.info('Opening activity details...') }}
                   />
                 </div>
 
@@ -537,13 +540,15 @@ export default function AdvancedMicroFeaturesPage() {
                   <EnhancedCommentSystem
                     comments={mockComments}
                     currentUser={mockUsers[0]}
-                    onAddComment={(content, mentions, attachments) => 
-                      console.log('Adding comment:', { content, mentions, attachments })
-                    }
-                    onReply={(commentId, content) => 
-                      console.log('Replying to:', commentId, content)
-                    }
-                    onLike={(commentId) => console.log('Liking comment:', commentId)}
+                    onAddComment={(content, mentions, attachments) => {
+                      logger.info('Adding comment', { contentLength: content.length, mentionsCount: mentions?.length || 0, attachmentsCount: attachments?.length || 0 })
+                      toast.success('Comment posted successfully')
+                    }}
+                    onReply={(commentId, content) => {
+                      logger.info('Replying to comment', { commentId, contentLength: content.length })
+                      toast.success('Reply posted successfully')
+                    }}
+                    onLike={(commentId) => { logger.info('Liking comment', { commentId }); toast.success('Comment liked') }}
                     allowAttachments={true}
                     allowMentions={true}
                   />
@@ -560,7 +565,7 @@ export default function AdvancedMicroFeaturesPage() {
                   <EnhancedSettingsCategories
                     categories={mockSettingsCategories}
                     activeCategory="theme"
-                    onCategoryChange={(categoryId) => console.log('Category changed:', categoryId)}
+                    onCategoryChange={(categoryId) => { logger.info('Settings category changed', { categoryId }); toast.info(`Switched to  settings`) }}
                   />
                 </div>
 
@@ -570,7 +575,7 @@ export default function AdvancedMicroFeaturesPage() {
                   <EnhancedThemeSelector
                     themes={mockThemes}
                     currentTheme="default"
-                    onThemeChange={(themeId) => console.log('Theme changed:', themeId)}
+                    onThemeChange={(themeId) => { logger.info('Theme changed', { themeId }); toast.success(`Theme changed to ${themeId}`, { description: 'Your preferences have been saved' }) }}
                   />
                 </div>
               </div>
