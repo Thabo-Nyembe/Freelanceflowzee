@@ -48,7 +48,8 @@ import {
   AlertCircle,
   Info,
   HelpCircle,
-  Zap
+  Zap,
+  Key as KeyIcon
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -1648,6 +1649,23 @@ If you lose access to your authenticator app, you can use these codes to sign in
                         Quick Setup
                       </Button>
                     </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 border-purple-200 dark:border-purple-800">
+                    <div>
+                      <h4 className="font-medium flex items-center gap-2">
+                        API Keys (BYOK)
+                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">Your Own Keys</Badge>
+                      </h4>
+                      <p className="text-sm text-gray-500">Use your own API keys for full control & unlimited usage</p>
+                    </div>
+                    <Button
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                      onClick={() => window.location.href = '/dashboard/api-keys'}
+                    >
+                      <Key className="w-4 h-4 mr-2" />
+                      Manage API Keys
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
