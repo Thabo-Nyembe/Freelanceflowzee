@@ -18,6 +18,7 @@ import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 
 import { AICreate } from '@/components/ai/ai-create'
+import { ModelComparisonModal } from '@/components/ai-create/model-comparison-modal'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
@@ -41,6 +42,8 @@ export default function AICreatePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [usageStats, setUsageStats] = useState<Record<string, number>>({})
+  const [showComparisonModal, setShowComparisonModal] = useState(false)
+  const [comparisonPrompt, setComparisonPrompt] = useState('')
 
   // Load saved keys on mount
   useEffect(() => {
@@ -442,15 +445,15 @@ export default function AICreatePage() {
     }
   }, [apiKeys])
 
-  const handleCompareProviders = useCallback(() => {
-    const categories = ['Pricing', 'Features', 'Performance', 'Reliability']
+  const handleCompareProviders = useCallback((prompt?: string) => {
+    const testPrompt = prompt || 'Write a professional introduction for a freelance platform called KAZI that helps freelancers manage projects and get paid securely.'
 
-    logger.info('Provider comparison complete', {
-      categoryCount: categories.length
-    })
+    setComparisonPrompt(testPrompt)
+    setShowComparisonModal(true)
 
-    toast.info('Provider Comparison', {
-      description: `Analyzed ${categories.length} categories: ${categories.join(', ')}`
+    logger.info('Opening model comparison modal', {
+      promptLength: testPrompt.length,
+      hasCustomPrompt: !!prompt
     })
   }, [])
 
@@ -623,7 +626,7 @@ export default function AICreatePage() {
           </button>
 
           <button
-            onClick={handleCompareProviders}
+            onClick={() => handleCompareProviders()}
             className="flex items-center justify-center gap-2 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors"
             data-testid="compare-providers-btn"
           >
@@ -631,6 +634,13 @@ export default function AICreatePage() {
             Compare
           </button>
         </div>
+
+        {/* Model Comparison Modal */}
+        <ModelComparisonModal
+          open={showComparisonModal}
+          onOpenChange={setShowComparisonModal}
+          prompt={comparisonPrompt}
+        />
       </div>
     </div>
   )
