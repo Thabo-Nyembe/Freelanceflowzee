@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { CryptoPayment, CryptoPaymentIntent } from '@/lib/crypto-payment-types'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-CryptoPayment')
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,7 +29,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(paymentIntent, { status: 200 })
   } catch (error) {
-    console.error('Error creating payment intent:', error)
+    logger.error('Error creating payment intent', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { error: 'Failed to create payment intent' },
       { status: 500 }

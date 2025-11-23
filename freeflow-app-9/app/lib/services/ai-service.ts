@@ -3,6 +3,9 @@ import OpenAI from 'openai'
 import Anthropic from '@anthropic-ai/sdk'
 import Replicate from 'replicate'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('AI-Service')
 
 export interface AIGenerationSettings {
   creativity: number
@@ -111,7 +114,12 @@ export class AIService {
   }
 
   private handleError(error, context: string, provider?: string): never {
-    console.error(`${context} error:`, error)
+    logger.error(`${context} error`, {
+      context,
+      provider,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
 
     if (typeof error === 'object' && error !== null) {
       const err = error as Record<string, unknown>
@@ -443,8 +451,14 @@ export class AIService {
       }
       return updatedGeneration
     } catch (error) {
-      console.error('Error in AI generation: ', error)
-      
+      logger.error('Error in AI generation', {
+        generationId: generation.id,
+        type,
+        prompt: prompt.substring(0, 100),
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      })
+
       // Update record with error status
       await this.supabase
         .from('ai_generations')
@@ -727,8 +741,15 @@ Provide general analysis including:
       }
       return updatedAnalysis;
     } catch (error) {
-      console.error('Error in file analysis: ', error)
-      
+      logger.error('Error in file analysis', {
+        analysisId: analysis.id,
+        fileId,
+        fileType,
+        fileName,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      })
+
       // Update record with error status
       await this.supabase
         .from('file_analysis')

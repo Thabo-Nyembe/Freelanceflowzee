@@ -1,5 +1,8 @@
 import { tool } from 'ai';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('AI-Tools');
 
 // 1. Project Creation Tool
 export const createProjectTool = tool({
@@ -10,10 +13,17 @@ export const createProjectTool = tool({
   }),
   generate: async function*({ name, description }) {
     // TODO: Replace with real project creation logic
-    console.log(`Creating project: ${name} - ${description}`);
+    const projectId = 'prj-' + Date.now();
+
+    logger.info('AI tool: Creating project', {
+      name,
+      description,
+      projectId
+    });
+
     yield {
       success: true,
-      projectId: 'prj-' + Date.now(),
+      projectId,
     };
   },
 });
@@ -28,10 +38,19 @@ export const uploadFileTool = tool({
   }),
   generate: async function*({ fileName, fileType, fileSize }) {
     // TODO: Replace with real upload logic
-    console.log(`Uploading file: ${fileName} (${fileType}, ${fileSize} bytes)`);
+    const fileId = 'file-' + Date.now();
+
+    logger.info('AI tool: Uploading file', {
+      fileName,
+      fileType,
+      fileSize,
+      fileSizeKB: (fileSize / 1024).toFixed(2),
+      fileId
+    });
+
     yield {
       success: true,
-      fileId: 'file-' + Date.now(),
+      fileId,
     };
   },
 });
@@ -45,11 +64,21 @@ export const generateAIAssetTool = tool({
   }),
   generate: async function*({ assetType, prompt }) {
     // TODO: Replace with real AI asset generation logic
-    console.log(`Generating AI asset: ${assetType} with prompt "${prompt}"`);
+    const assetId = 'asset-' + Date.now();
+    const downloadUrl = 'https://example.com/download/' + Date.now();
+
+    logger.info('AI tool: Generating AI asset', {
+      assetType,
+      prompt,
+      promptLength: prompt.length,
+      assetId,
+      downloadUrl
+    });
+
     yield {
       success: true,
-      assetId: 'asset-' + Date.now(),
-      downloadUrl: 'https://example.com/download/' + Date.now(),
+      assetId,
+      downloadUrl,
     };
   },
 });
@@ -64,10 +93,19 @@ export const createEscrowDepositTool = tool({
   }),
   generate: async function*({ projectId, amount, milestone }) {
     // TODO: Replace with real escrow logic
-    console.log(`Creating escrow deposit of ${amount} for project ${projectId}. Milestone: ${milestone || 'N/A'}`);
+    const depositId = 'dep-' + Date.now();
+
+    logger.info('AI tool: Creating escrow deposit', {
+      projectId,
+      amount,
+      milestone: milestone || 'N/A',
+      depositId,
+      status: 'pending'
+    });
+
     yield {
       success: true,
-      depositId: 'dep-' + Date.now(),
+      depositId,
       status: 'pending',
     };
   },

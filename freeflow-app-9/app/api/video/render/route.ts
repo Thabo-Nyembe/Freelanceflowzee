@@ -1,3 +1,6 @@
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-VideoRender')
 import { NextRequest, NextResponse } from 'next/server'
 
 /**
@@ -60,7 +63,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Render API error:', error)
+    logger.error('Render API error', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined })
     return NextResponse.json(
       { error: 'Failed to queue render job' },
       { status: 500 }
@@ -96,7 +99,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(mockJob)
 
   } catch (error) {
-    console.error('Render status API error:', error)
+    logger.error('Render status API error', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined })
     return NextResponse.json(
       { error: 'Failed to get render status' },
       { status: 500 }
@@ -122,13 +125,11 @@ async function processRenderJob(job: any) {
   // In production, this would be handled by a background worker
   // For now, we'll simulate the process
 
-  console.log(`🎬 Starting render job: ${job.jobId}`)
-  console.log(`Format: ${job.format}, Quality: ${job.quality}`)
-  console.log(`Clips: ${job.clips.length}, Effects: ${job.effects.length}`)
+  logger.info('Starting render job', { jobId: job.jobId, format: job.format, quality: job.quality, clipsCount: job.clips.length, effectsCount: job.effects.length })
 
   // Simulate processing steps
   setTimeout(() => {
-    console.log(`✓ Render job ${job.jobId} completed (simulated)`)
+    logger.info('Render job completed', { jobId: job.jobId, status: 'simulated' })
     // In production: update job status in database/redis
     // job.status = 'completed'
     // job.progress = 100

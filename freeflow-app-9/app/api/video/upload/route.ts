@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { writeFile, mkdir } from 'fs/promises'
 import { existsSync } from 'fs'
 import path from 'path'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-VideoUpload')
 
 /**
  * Video Upload API
@@ -78,7 +81,15 @@ export async function POST(request: NextRequest) {
       status: 'ready'
     }
 
-    console.log('✅ Video uploaded successfully:', videoRecord)
+    logger.info('Video uploaded successfully', {
+      videoId: videoRecord.id,
+      filename: videoRecord.filename,
+      originalName: videoRecord.originalName,
+      size: videoRecord.size,
+      duration: videoRecord.duration,
+      resolution: `${videoRecord.width}x${videoRecord.height}`,
+      codec: videoRecord.codec
+    })
 
     return NextResponse.json({
       success: true,
@@ -87,7 +98,10 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Video upload error:', error)
+    logger.error('Video upload error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { error: 'Failed to upload video' },
       { status: 500 }
@@ -176,7 +190,10 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Video list error:', error)
+    logger.error('Video list error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { error: 'Failed to fetch videos' },
       { status: 500 }
