@@ -154,6 +154,15 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         items: [
           { id: 'user-management', name: 'User Management', href: '/dashboard/user-management', icon: UserPlus, description: 'Team & permissions', badge: 'New' }
         ]
+      },
+      {
+        id: 'admin-automation',
+        name: 'Business Automation',
+        visible: true,
+        items: [
+          { id: 'email-agent', name: 'Business Agent', href: '/dashboard/email-agent', icon: Zap, description: 'AI automation hub', badge: 'New' },
+          { id: 'email-agent-setup', name: 'Setup Integrations', href: '/dashboard/email-agent/setup', icon: Settings, description: '5-min setup' }
+        ]
       }
     ]
   },

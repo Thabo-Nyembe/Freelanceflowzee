@@ -24,7 +24,9 @@ import {
   Zap,
   Monitor,
   Wallet,
-  Receipt
+  Receipt,
+  Plug,
+  Key
 } from 'lucide-react'
 
 interface SidebarItem {
@@ -126,6 +128,20 @@ const sidebarItems: SidebarItem[] = [
     href: '/dashboard/cv-portfolio',
     icon: FileText,
     description: 'Professional portfolio showcase'
+  },
+  {
+    name: 'Integrations',
+    href: '/dashboard/integrations/setup',
+    icon: Plug,
+    description: 'Connect third-party services',
+    badge: 'New'
+  },
+  {
+    name: 'API Keys',
+    href: '/dashboard/api-keys',
+    icon: Key,
+    description: 'Manage your own API keys',
+    badge: 'BYOK'
   },
   {
     name: 'Settings',

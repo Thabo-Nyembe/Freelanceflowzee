@@ -51,6 +51,11 @@ import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 
+// NEW CLIENT VALUE COMPONENTS
+import { ClientOnboardingTour } from '@/components/onboarding/client-onboarding-tour'
+import { ClientValueDashboard } from '@/components/client-value-dashboard'
+import { ReferralLoyaltySystem } from '@/components/referral-loyalty-system'
+
 const logger = createFeatureLogger('ClientZone')
 
 // ============================================================================
@@ -1088,6 +1093,14 @@ export default function ClientZonePage() {
                 <BarChart3 className="h-4 w-4" />
                 Analytics
               </TabsTrigger>
+              <TabsTrigger value="value-dashboard" className="flex items-center gap-2 whitespace-nowrap">
+                <Target className="h-4 w-4" />
+                ROI & Value
+              </TabsTrigger>
+              <TabsTrigger value="referrals" className="flex items-center gap-2 whitespace-nowrap">
+                <Zap className="h-4 w-4" />
+                Rewards
+              </TabsTrigger>
               <TabsTrigger value="feedback" className="flex items-center gap-2 whitespace-nowrap">
                 <Star className="h-4 w-4" />
                 Feedback
@@ -1737,8 +1750,30 @@ export default function ClientZonePage() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Value Dashboard Tab - NEW */}
+          <TabsContent value="value-dashboard" className="space-y-6">
+            <ClientValueDashboard />
+          </TabsContent>
+
+          {/* Referrals & Rewards Tab - NEW */}
+          <TabsContent value="referrals" className="space-y-6">
+            <ReferralLoyaltySystem />
+          </TabsContent>
         </Tabs>
       </div>
+
+      {/* Client Onboarding Tour - NEW */}
+      <ClientOnboardingTour
+        userRole="client"
+        clientId={KAZI_CLIENT_DATA.clientInfo.email}
+        onComplete={(tourId) => {
+          logger.info('Onboarding tour completed', { tourId })
+          toast.success('Tour completed! 🎉', {
+            description: 'You earned XP and unlocked new features'
+          })
+        }}
+      />
     </div>
   )
 }

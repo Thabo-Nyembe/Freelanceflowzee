@@ -30,6 +30,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
+import { markOnboardingComplete } from '@/components/onboarding-check'
 
 const logger = createFeatureLogger('EasyOnboarding')
 
@@ -364,6 +365,10 @@ export function EasyOnboardingWizard({ onComplete, userId }: EasyOnboardingWizar
 
       if (result.success) {
         setCurrentStep('complete')
+
+        // Mark onboarding as complete in localStorage
+        markOnboardingComplete(result.data.userId || 'user_' + Date.now())
+
         toast.success('Welcome to KAZI!', {
           description: 'Your account is ready. Let\'s start automating your business!'
         })
