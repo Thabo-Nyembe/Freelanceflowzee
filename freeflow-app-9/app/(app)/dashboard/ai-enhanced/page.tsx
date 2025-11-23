@@ -52,8 +52,9 @@ import { toast } from 'sonner'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
 
-console.log('🚀 AI ENHANCED: Component module loaded')
+const logger = createFeatureLogger('AI-Enhanced')
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -121,19 +122,19 @@ type AIEnhancedAction =
 // ============================================================================
 
 function aiEnhancedReducer(state: AIEnhancedState, action: AIEnhancedAction): AIEnhancedState {
-  console.log('🔄 AI ENHANCED REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_TOOLS':
-      console.log('📊 AI ENHANCED REDUCER: Setting tools - Count:', action.tools.length)
+      logger.info('Setting tools', { count: action.tools.length })
       return { ...state, tools: action.tools }
 
     case 'ADD_TOOL':
-      console.log('➕ AI ENHANCED REDUCER: Adding tool - ID:', action.tool.id)
+      logger.info('Adding tool', { toolId: action.tool.id, name: action.tool.name })
       return { ...state, tools: [action.tool, ...state.tools] }
 
     case 'UPDATE_TOOL':
-      console.log('✏️ AI ENHANCED REDUCER: Updating tool - ID:', action.tool.id)
+      logger.info('Updating tool', { toolId: action.tool.id, name: action.tool.name })
       return {
         ...state,
         tools: state.tools.map(t => t.id === action.tool.id ? action.tool : t),
@@ -141,7 +142,7 @@ function aiEnhancedReducer(state: AIEnhancedState, action: AIEnhancedAction): AI
       }
 
     case 'DELETE_TOOL':
-      console.log('🗑️ AI ENHANCED REDUCER: Deleting tool - ID:', action.toolId)
+      logger.info('Deleting tool', { toolId: action.toolId })
       return {
         ...state,
         tools: state.tools.filter(t => t.id !== action.toolId),
@@ -150,35 +151,35 @@ function aiEnhancedReducer(state: AIEnhancedState, action: AIEnhancedAction): AI
       }
 
     case 'SELECT_TOOL':
-      console.log('👁️ AI ENHANCED REDUCER: Selecting tool - ID:', action.tool?.id)
+      logger.debug('Selecting tool', { toolId: action.tool?.id })
       return { ...state, selectedTool: action.tool }
 
     case 'SET_SEARCH':
-      console.log('🔍 AI ENHANCED REDUCER: Search term:', action.searchTerm)
+      logger.debug('Search term updated', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER_TYPE':
-      console.log('🏷️ AI ENHANCED REDUCER: Filter type:', action.filterType)
+      logger.debug('Filter type', { filterType: action.filterType })
       return { ...state, filterType: action.filterType }
 
     case 'SET_FILTER_CATEGORY':
-      console.log('📁 AI ENHANCED REDUCER: Filter category:', action.filterCategory)
+      logger.debug('Filter category', { filterCategory: action.filterCategory })
       return { ...state, filterCategory: action.filterCategory }
 
     case 'SET_FILTER_STATUS':
-      console.log('⚡ AI ENHANCED REDUCER: Filter status:', action.filterStatus)
+      logger.debug('Filter status', { filterStatus: action.filterStatus })
       return { ...state, filterStatus: action.filterStatus }
 
     case 'SET_SORT':
-      console.log('🔀 AI ENHANCED REDUCER: Sort by:', action.sortBy)
+      logger.debug('Sort by', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'SET_VIEW_MODE':
-      console.log('👀 AI ENHANCED REDUCER: View mode:', action.viewMode)
+      logger.debug('View mode', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'TOGGLE_SELECT_TOOL':
-      console.log('☑️ AI ENHANCED REDUCER: Toggle select - ID:', action.toolId)
+      logger.debug('Toggle select tool', { toolId: action.toolId })
       const isSelected = state.selectedTools.includes(action.toolId)
       return {
         ...state,
@@ -188,11 +189,11 @@ function aiEnhancedReducer(state: AIEnhancedState, action: AIEnhancedAction): AI
       }
 
     case 'CLEAR_SELECTED_TOOLS':
-      console.log('🔲 AI ENHANCED REDUCER: Clearing selection')
+      logger.debug('Clearing selection')
       return { ...state, selectedTools: [] }
 
     case 'TOGGLE_FAVORITE':
-      console.log('⭐ AI ENHANCED REDUCER: Toggle favorite - ID:', action.toolId)
+      logger.debug('Toggle favorite', { toolId: action.toolId })
       return {
         ...state,
         tools: state.tools.map(t =>
@@ -210,7 +211,7 @@ function aiEnhancedReducer(state: AIEnhancedState, action: AIEnhancedAction): AI
 // ============================================================================
 
 function generateMockAITools(): AITool[] {
-  console.log('📦 AI ENHANCED: Generating mock data...')
+  logger.debug('Generating mock AI tools data')
 
   const types: AIToolType[] = ['text', 'image', 'audio', 'video', 'code', 'data', 'assistant', 'automation']
   const categories: AIToolCategory[] = ['content', 'design', 'development', 'analytics', 'productivity', 'creative']
@@ -296,7 +297,7 @@ function generateMockAITools(): AITool[] {
     }
   })
 
-  console.log('✅ AI ENHANCED: Generated', tools.length, 'AI tools')
+  logger.info('Generated mock AI tools', { count: tools.length })
   return tools
 }
 
@@ -354,7 +355,7 @@ function formatTime(seconds: number): string {
 // ============================================================================
 
 export default function AIEnhancedPage() {
-  console.log('🚀 AI ENHANCED: Component mounting...')
+  logger.debug('Component mounting')
 
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
@@ -396,7 +397,7 @@ export default function AIEnhancedPage() {
   // ============================================================================
 
   useEffect(() => {
-    console.log('🔄 AI ENHANCED: Loading data from API...')
+    logger.info('Loading AI tools from API')
     const loadData = async () => {
       try {
         setIsLoading(true)
@@ -410,7 +411,7 @@ export default function AIEnhancedPage() {
           const mockTools = generateMockAITools()
           dispatch({ type: 'SET_TOOLS', tools: mockTools })
 
-          console.log('✅ AI ENHANCED: Data loaded from API -', result.tools?.length || 0, 'tools')
+          logger.info('AI tools loaded from API', { count: result.tools?.length || 0 })
           announce('AI tools loaded successfully', 'polite')
         } else {
           throw new Error(result.error || 'Failed to load tools')
@@ -418,7 +419,7 @@ export default function AIEnhancedPage() {
 
         setIsLoading(false)
       } catch (err: any) {
-        console.error('❌ AI ENHANCED: Load error:', err)
+        logger.error('Failed to load AI tools', { error: err.message })
         setError(err instanceof Error ? err.message : 'Failed to load AI tools')
         setIsLoading(false)
         announce('Error loading AI tools', 'assertive')
@@ -433,7 +434,7 @@ export default function AIEnhancedPage() {
   // ============================================================================
 
   const stats = useMemo(() => {
-    console.log('📊 AI ENHANCED: Computing stats...')
+    logger.debug('Computing stats')
     const total = state.tools.length
     const active = state.tools.filter(t => t.status === 'active').length
     const popular = state.tools.filter(t => t.isPopular).length
@@ -450,18 +451,11 @@ export default function AIEnhancedPage() {
       avgSuccessRate: (avgSuccessRate * 100).toFixed(1)
     }
 
-    console.log('📊 AI ENHANCED: Stats -', JSON.stringify(result))
+    logger.debug('Stats computed', result)
     return result
   }, [state.tools])
 
   const filteredAndSortedTools = useMemo(() => {
-    console.log('🔍 AI ENHANCED: Filtering and sorting...')
-    console.log('🔍 AI ENHANCED: Search term:', state.searchTerm)
-    console.log('🔍 AI ENHANCED: Filter type:', state.filterType)
-    console.log('🔍 AI ENHANCED: Filter category:', state.filterCategory)
-    console.log('🔍 AI ENHANCED: Filter status:', state.filterStatus)
-    console.log('🔀 AI ENHANCED: Sort by:', state.sortBy)
-
     let filtered = state.tools
 
     // Search
@@ -472,25 +466,25 @@ export default function AIEnhancedPage() {
         tool.model.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
         tool.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()))
       )
-      console.log('🔍 AI ENHANCED: Search filtered to', filtered.length, 'tools')
+      logger.debug('Search filtered', { resultCount: filtered.length, searchTerm: state.searchTerm })
     }
 
     // Filter by type
     if (state.filterType !== 'all') {
       filtered = filtered.filter(tool => tool.type === state.filterType)
-      console.log('🏷️ AI ENHANCED: Type filtered to', filtered.length, 'tools')
+      logger.debug('Type filtered', { resultCount: filtered.length, filterType: state.filterType })
     }
 
     // Filter by category
     if (state.filterCategory !== 'all') {
       filtered = filtered.filter(tool => tool.category === state.filterCategory)
-      console.log('📁 AI ENHANCED: Category filtered to', filtered.length, 'tools')
+      logger.debug('Category filtered', { resultCount: filtered.length, filterCategory: state.filterCategory })
     }
 
     // Filter by status
     if (state.filterStatus !== 'all') {
       filtered = filtered.filter(tool => tool.status === state.filterStatus)
-      console.log('⚡ AI ENHANCED: Status filtered to', filtered.length, 'tools')
+      logger.debug('Status filtered', { resultCount: filtered.length, filterStatus: state.filterStatus })
     }
 
     // Sort
@@ -512,7 +506,7 @@ export default function AIEnhancedPage() {
       }
     })
 
-    console.log('✅ AI ENHANCED: Final result:', sorted.length, 'tools')
+    logger.debug('Filter and sort complete', { resultCount: sorted.length, sortBy: state.sortBy })
     return sorted
   }, [state.tools, state.searchTerm, state.filterType, state.filterCategory, state.filterStatus, state.sortBy])
 
@@ -521,13 +515,21 @@ export default function AIEnhancedPage() {
   // ============================================================================
 
   const handleCreateTool = async () => {
-    console.log('➕ AI ENHANCED: Creating tool via API...')
-    console.log('📝 AI ENHANCED: Name:', toolName)
-    console.log('📝 AI ENHANCED: Type:', toolType)
-    console.log('📝 AI ENHANCED: Category:', toolCategory)
+    logger.info('Creating AI tool', {
+      name: toolName,
+      type: toolType,
+      category: toolCategory,
+      model: toolModel,
+      provider: toolProvider
+    })
 
     if (!toolName || !toolDescription || !toolModel || !toolProvider) {
-      console.warn('⚠️ AI ENHANCED: Missing required fields')
+      logger.warn('Missing required fields for tool creation', {
+        hasName: !!toolName,
+        hasDescription: !!toolDescription,
+        hasModel: !!toolModel,
+        hasProvider: !!toolProvider
+      })
       toast.error('Please fill in all required fields')
       return
     }
@@ -557,10 +559,16 @@ export default function AIEnhancedPage() {
       if (result.success) {
         dispatch({ type: 'ADD_TOOL', tool: result.tool })
 
-        toast.success('🤖 AI tool created', {
-          description: `${result.tool.name} is now available`
+        logger.info('AI tool created successfully', {
+          toolId: result.tool.id,
+          name: result.tool.name,
+          type: result.tool.type,
+          category: result.tool.category
         })
-        console.log('✅ AI ENHANCED: Tool created - ID:', result.tool.id)
+
+        toast.success('AI tool created', {
+          description: `${result.tool.name} - ${result.tool.type} - ${result.tool.category} - ${result.tool.model} - ${result.tool.provider} - Ready to use`
+        })
 
         setShowCreateModal(false)
         setToolName('')
@@ -571,7 +579,11 @@ export default function AIEnhancedPage() {
         throw new Error(result.error || 'Failed to create tool')
       }
     } catch (error: any) {
-      console.error('❌ AI ENHANCED: Create error:', error)
+      logger.error('Failed to create AI tool', {
+        error: error.message,
+        name: toolName,
+        type: toolType
+      })
       toast.error('Failed to create AI tool', {
         description: error.message || 'Please try again later'
       })
@@ -581,13 +593,32 @@ export default function AIEnhancedPage() {
   }
 
   const handleViewTool = (tool: AITool) => {
-    console.log('👁️ AI ENHANCED: Opening tool view - ID:', tool.id, 'Name:', tool.name)
+    logger.info('Opening tool details', {
+      toolId: tool.id,
+      name: tool.name,
+      type: tool.type,
+      category: tool.category,
+      usageCount: tool.usageCount,
+      successRate: tool.successRate
+    })
+
     dispatch({ type: 'SELECT_TOOL', tool })
     setShowViewModal(true)
+
+    toast.info('View AI Tool', {
+      description: `${tool.name} - ${tool.type} - ${tool.model} - ${tool.provider} - ${formatNumber(tool.usageCount)} uses - ${(tool.successRate * 100).toFixed(1)}% success`
+    })
   }
 
   const handleDeleteTool = async (toolId: string) => {
-    console.log('🗑️ AI ENHANCED: Deleting tool via API - ID:', toolId)
+    const tool = state.tools.find(t => t.id === toolId)
+
+    logger.info('Deleting AI tool', {
+      toolId,
+      name: tool?.name,
+      type: tool?.type,
+      usageCount: tool?.usageCount
+    })
 
     try {
       setIsSaving(true)
@@ -606,10 +637,14 @@ export default function AIEnhancedPage() {
       if (result.success) {
         dispatch({ type: 'DELETE_TOOL', toolId })
 
-        toast.success('🗑️ AI tool deleted', {
-          description: 'Tool removed from your workspace'
+        logger.info('AI tool deleted successfully', {
+          toolId,
+          name: tool?.name
         })
-        console.log('✅ AI ENHANCED: Tool deleted')
+
+        toast.success('AI tool deleted', {
+          description: `${tool?.name} - ${tool?.type} - ${formatNumber(tool?.usageCount || 0)} uses - Removed from workspace`
+        })
 
         setShowDeleteModal(false)
         setShowViewModal(false)
@@ -617,7 +652,10 @@ export default function AIEnhancedPage() {
         throw new Error(result.error || 'Delete failed')
       }
     } catch (error: any) {
-      console.error('❌ AI ENHANCED: Delete error:', error)
+      logger.error('Failed to delete AI tool', {
+        error: error.message,
+        toolId
+      })
       toast.error('Failed to delete AI tool', {
         description: error.message || 'Please try again later'
       })
@@ -627,8 +665,14 @@ export default function AIEnhancedPage() {
   }
 
   const handleBulkDelete = async () => {
-    console.log('🗑️ AI ENHANCED: Bulk delete via API - Count:', state.selectedTools.length)
-    console.log('🗑️ AI ENHANCED: IDs:', state.selectedTools)
+    const selectedToolsData = state.tools.filter(t => state.selectedTools.includes(t.id))
+    const totalUsage = selectedToolsData.reduce((sum, t) => sum + t.usageCount, 0)
+
+    logger.info('Bulk deleting AI tools', {
+      count: state.selectedTools.length,
+      toolIds: state.selectedTools,
+      totalUsage
+    })
 
     try {
       setIsSaving(true)
@@ -649,17 +693,24 @@ export default function AIEnhancedPage() {
           dispatch({ type: 'DELETE_TOOL', toolId: id })
         })
 
-        toast.success(`🗑️ Deleted ${result.deletedCount} tool(s)`, {
-          description: 'Selected AI tools removed'
+        logger.info('Bulk delete complete', {
+          deletedCount: result.deletedCount,
+          totalUsage
         })
-        console.log('✅ AI ENHANCED: Bulk delete complete')
+
+        toast.success(`Deleted ${result.deletedCount} tool(s)`, {
+          description: `${result.deletedCount} AI tools - ${formatNumber(totalUsage)} total uses - Removed from workspace`
+        })
 
         dispatch({ type: 'CLEAR_SELECTED_TOOLS' })
       } else {
         throw new Error(result.error || 'Bulk delete failed')
       }
     } catch (error: any) {
-      console.error('❌ AI ENHANCED: Bulk delete error:', error)
+      logger.error('Bulk delete failed', {
+        error: error.message,
+        count: state.selectedTools.length
+      })
       toast.error('Failed to delete tools', {
         description: error.message || 'Please try again later'
       })
@@ -669,61 +720,98 @@ export default function AIEnhancedPage() {
   }
 
   const handleToggleFavorite = (toolId: string) => {
-    console.log('⭐ AI ENHANCED: Toggling favorite - ID:', toolId)
+    const tool = state.tools.find(t => t.id === toolId)
+    const newFavoriteState = !tool?.isFavorite
+
+    logger.info('Toggling favorite', {
+      toolId,
+      name: tool?.name,
+      isFavorite: newFavoriteState
+    })
+
     dispatch({ type: 'TOGGLE_FAVORITE', toolId })
-    toast.success('Favorite updated')
+
+    toast.success(newFavoriteState ? 'Added to favorites' : 'Removed from favorites', {
+      description: `${tool?.name} - ${tool?.type} - ${newFavoriteState ? '★ Favorited' : '☆ Unfavorited'}`
+    })
   }
 
   const handleRunTool = async (toolId: string) => {
-    console.log('▶️ AI ENHANCED: Running tool via API - ID:', toolId)
     const tool = state.tools.find(t => t.id === toolId)
 
-    if (tool) {
-      toast.info(`▶️ Running ${tool.name}...`, {
-        description: 'Executing AI tool'
+    if (!tool) {
+      logger.warn('Tool not found for execution', { toolId })
+      return
+    }
+
+    logger.info('Executing AI tool', {
+      toolId,
+      name: tool.name,
+      type: tool.type,
+      model: tool.model,
+      currentUsageCount: tool.usageCount
+    })
+
+    toast.info(`Running ${tool.name}...`, {
+      description: `${tool.type} - ${tool.model} - ${tool.provider} - Executing...`
+    })
+
+    try {
+      const response = await fetch('/api/ai-tools', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'execute',
+          toolId
+        })
       })
-      console.log('🚀 AI ENHANCED: Tool execution started')
 
-      try {
-        const response = await fetch('/api/ai-tools', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'execute',
-            toolId
-          })
-        })
+      const result = await response.json()
 
-        const result = await response.json()
-
-        if (result.success) {
-          const updatedTool = {
-            ...tool,
-            usageCount: tool.usageCount + 1,
-            lastUsed: new Date().toISOString()
-          }
-
-          dispatch({ type: 'UPDATE_TOOL', tool: updatedTool })
-          toast.success(`✅ ${tool.name} completed`, {
-            description: `Execution time: ${result.result.executionTime}`
-          })
-          console.log('✅ AI ENHANCED: Tool execution complete -', result.result)
-        } else {
-          throw new Error(result.error || 'Execution failed')
+      if (result.success) {
+        const updatedTool = {
+          ...tool,
+          usageCount: tool.usageCount + 1,
+          lastUsed: new Date().toISOString()
         }
-      } catch (error: any) {
-        console.error('❌ AI ENHANCED: Execution error:', error)
-        toast.error(`Failed to execute ${tool.name}`, {
-          description: error.message || 'Please try again'
+
+        dispatch({ type: 'UPDATE_TOOL', tool: updatedTool })
+
+        logger.info('Tool execution complete', {
+          toolId,
+          name: tool.name,
+          executionTime: result.result.executionTime,
+          newUsageCount: updatedTool.usageCount
         })
+
+        toast.success(`${tool.name} completed`, {
+          description: `${tool.type} - ${result.result.executionTime} - ${formatNumber(updatedTool.usageCount)} total uses - ${(tool.successRate * 100).toFixed(1)}% success rate`
+        })
+      } else {
+        throw new Error(result.error || 'Execution failed')
       }
+    } catch (error: any) {
+      logger.error('Tool execution failed', {
+        error: error.message,
+        toolId,
+        name: tool.name
+      })
+      toast.error(`Failed to execute ${tool.name}`, {
+        description: error.message || 'Please try again'
+      })
     }
   }
 
   const handleExport = async () => {
-    console.log('📤 AI ENHANCED: Exporting data via API...')
-    console.log('📄 AI ENHANCED: Format:', exportFormat)
-    console.log('📊 AI ENHANCED: Count:', filteredAndSortedTools.length, 'tools')
+    const totalUsage = filteredAndSortedTools.reduce((sum, t) => sum + t.usageCount, 0)
+    const avgSuccessRate = filteredAndSortedTools.reduce((sum, t) => sum + t.successRate, 0) / filteredAndSortedTools.length
+
+    logger.info('Exporting AI tools', {
+      format: exportFormat,
+      count: filteredAndSortedTools.length,
+      totalUsage,
+      avgSuccessRate
+    })
 
     try {
       setIsSaving(true)
@@ -741,25 +829,54 @@ export default function AIEnhancedPage() {
 
       if (result.success) {
         // Client-side download
-        const dataStr = JSON.stringify(filteredAndSortedTools, null, 2)
-        const dataBlob = new Blob([dataStr], { type: 'application/json' })
+        let dataStr: string
+        let mimeType: string
+
+        if (exportFormat === 'json') {
+          dataStr = JSON.stringify(filteredAndSortedTools, null, 2)
+          mimeType = 'application/json'
+        } else if (exportFormat === 'csv') {
+          const headers = ['ID', 'Name', 'Type', 'Category', 'Model', 'Provider', 'Status', 'Usage', 'Success Rate', 'Avg Response Time']
+          const rows = filteredAndSortedTools.map(t => [
+            t.id, t.name, t.type, t.category, t.model, t.provider, t.status,
+            t.usageCount, `${(t.successRate * 100).toFixed(1)}%`, formatTime(t.avgResponseTime)
+          ])
+          dataStr = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+          mimeType = 'text/csv'
+        } else {
+          dataStr = JSON.stringify(filteredAndSortedTools, null, 2)
+          mimeType = 'application/pdf'
+        }
+
+        const dataBlob = new Blob([dataStr], { type: mimeType })
         const url = URL.createObjectURL(dataBlob)
         const link = document.createElement('a')
         link.href = url
         link.download = `ai-tools-${new Date().toISOString().split('T')[0]}.${exportFormat}`
         link.click()
+        URL.revokeObjectURL(url)
 
-        toast.success(`📤 Exported ${result.toolCount} tools`, {
-          description: `Format: ${result.format} • Download started`
+        logger.info('Export complete', {
+          format: exportFormat,
+          count: filteredAndSortedTools.length,
+          fileSize: dataBlob.size,
+          fileName: link.download
         })
-        console.log('✅ AI ENHANCED: Export complete - URL:', result.exportUrl)
+
+        toast.success(`Exported ${result.toolCount} tools`, {
+          description: `${exportFormat.toUpperCase()} - ${Math.round(dataBlob.size / 1024)}KB - ${formatNumber(totalUsage)} total uses - ${(avgSuccessRate * 100).toFixed(1)}% avg success - ${link.download}`
+        })
 
         setShowExportModal(false)
       } else {
         throw new Error(result.error || 'Export failed')
       }
     } catch (error: any) {
-      console.error('❌ AI ENHANCED: Export error:', error)
+      logger.error('Export failed', {
+        error: error.message,
+        format: exportFormat,
+        count: filteredAndSortedTools.length
+      })
       toast.error('Failed to export tools', {
         description: error.message || 'Please try again later'
       })
@@ -773,7 +890,7 @@ export default function AIEnhancedPage() {
   // ============================================================================
 
   if (isLoading) {
-    console.log('⏳ AI ENHANCED: Rendering loading state')
+    logger.debug('Rendering loading state')
     return (
       <div className="min-h-screen relative overflow-hidden">
         <div className="fixed inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
@@ -802,7 +919,7 @@ export default function AIEnhancedPage() {
   // ============================================================================
 
   if (error) {
-    console.log('❌ AI ENHANCED: Rendering error state')
+    logger.debug('Rendering error state', { error })
     return (
       <div className="min-h-screen relative overflow-hidden">
         <div className="fixed inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
@@ -820,7 +937,7 @@ export default function AIEnhancedPage() {
   // MAIN RENDER
   // ============================================================================
 
-  console.log('🎨 AI ENHANCED: Rendering main view')
+  logger.debug('Rendering main view', { toolCount: filteredAndSortedTools.length, viewMode: state.viewMode })
 
   return (
     <div className="min-h-screen relative overflow-hidden">
