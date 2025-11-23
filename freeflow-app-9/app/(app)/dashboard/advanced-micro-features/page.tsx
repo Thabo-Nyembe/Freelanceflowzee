@@ -1,6 +1,8 @@
 'use client'
 
 import * as React from 'react'
+import { useMemo, useCallback, memo } from 'react'
+import dynamic from 'next/dynamic'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,31 +13,64 @@ import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleto
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
-// Import our new enhanced micro features
-import { 
-  EnhancedDashboardWidget,
-  EnhancedQuickActions,
-  EnhancedNotifications 
-} from '@/components/ui/enhanced-dashboard-widgets'
-import {
-  EnhancedChartContainer,
-  EnhancedChartLegend,
-  EnhancedDataTable
-} from '@/components/ui/enhanced-data-visualization'
-import {
-  EnhancedPresenceIndicator,
-  EnhancedActivityFeed,
-  EnhancedCommentSystem
-} from '@/components/ui/enhanced-collaboration'
-import {
-  EnhancedSettingsCategories,
-  EnhancedThemeSelector,
-  EnhancedKeyboardShortcuts,
-  EnhancedNotificationSettings,
-  EnhancedSettingsData
-} from '@/components/ui/enhanced-settings'
+// A++++ DYNAMIC IMPORTS - Lazy load heavy components for better performance
+const EnhancedDashboardWidget = dynamic(
+  () => import('@/components/ui/enhanced-dashboard-widgets').then(mod => mod.EnhancedDashboardWidget),
+  { loading: () => <CardSkeleton />, ssr: false }
+)
+const EnhancedQuickActions = dynamic(
+  () => import('@/components/ui/enhanced-dashboard-widgets').then(mod => mod.EnhancedQuickActions),
+  { loading: () => <CardSkeleton />, ssr: false }
+)
+const EnhancedNotifications = dynamic(
+  () => import('@/components/ui/enhanced-dashboard-widgets').then(mod => mod.EnhancedNotifications),
+  { loading: () => <CardSkeleton />, ssr: false }
+)
 
-// Import existing micro features for comparison
+const EnhancedChartContainer = dynamic(
+  () => import('@/components/ui/enhanced-data-visualization').then(mod => mod.EnhancedChartContainer),
+  { loading: () => <CardSkeleton />, ssr: false }
+)
+const EnhancedChartLegend = dynamic(
+  () => import('@/components/ui/enhanced-data-visualization').then(mod => mod.EnhancedChartLegend),
+  { loading: () => <div className="h-8 w-full bg-gray-100 animate-pulse rounded" />, ssr: false }
+)
+const EnhancedDataTable = dynamic(
+  () => import('@/components/ui/enhanced-data-visualization').then(mod => mod.EnhancedDataTable),
+  { loading: () => <CardSkeleton />, ssr: false }
+)
+
+const EnhancedPresenceIndicator = dynamic(
+  () => import('@/components/ui/enhanced-collaboration').then(mod => mod.EnhancedPresenceIndicator),
+  { loading: () => <div className="h-10 w-full bg-gray-100 animate-pulse rounded" />, ssr: false }
+)
+const EnhancedActivityFeed = dynamic(
+  () => import('@/components/ui/enhanced-collaboration').then(mod => mod.EnhancedActivityFeed),
+  { loading: () => <CardSkeleton />, ssr: false }
+)
+const EnhancedCommentSystem = dynamic(
+  () => import('@/components/ui/enhanced-collaboration').then(mod => mod.EnhancedCommentSystem),
+  { loading: () => <CardSkeleton />, ssr: false }
+)
+
+const EnhancedSettingsCategories = dynamic(
+  () => import('@/components/ui/enhanced-settings').then(mod => mod.EnhancedSettingsCategories),
+  { loading: () => <CardSkeleton />, ssr: false }
+)
+const EnhancedThemeSelector = dynamic(
+  () => import('@/components/ui/enhanced-settings').then(mod => mod.EnhancedThemeSelector),
+  { loading: () => <CardSkeleton />, ssr: false }
+)
+const EnhancedKeyboardShortcuts = dynamic(
+  () => import('@/components/ui/enhanced-settings').then(mod => mod.EnhancedKeyboardShortcuts),
+  { loading: () => <CardSkeleton />, ssr: false }
+)
+const EnhancedNotificationSettings = dynamic(
+  () => import('@/components/ui/enhanced-settings').then(mod => mod.EnhancedNotificationSettings),
+  { loading: () => <CardSkeleton />, ssr: false }
+)
+
+// Import existing micro features for comparison (keep these as regular imports - they're lightweight)
 import { EnhancedBreadcrumb } from '@/components/ui/enhanced-breadcrumb'
 import { EnhancedSearch } from '@/components/ui/enhanced-search'
 import { ContextualTooltip, HelpTooltip } from '@/components/ui/enhanced-contextual-tooltips'
@@ -100,16 +135,16 @@ export default function AdvancedMicroFeaturesPage() {
     loadAdvancedMicroFeaturesData()
   }, [announce])
 
-  // Mock data for demonstrations
-  const mockUsers = [
+  // A++++ MEMOIZED MOCK DATA - Prevent re-creation on every render
+  const mockUsers = useMemo(() => [
     { id: '1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', status: 'online' as const, role: 'Designer' },
     { id: '2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', status: 'away' as const, role: 'Developer', isTyping: true },
     { id: '3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', status: 'busy' as const, role: 'Manager' },
     { id: '4', name: 'Alex Kumar', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Analyst' },
     { id: '5', name: 'Lisa Wong', avatar: '/avatars/lisa.jpg', status: 'offline' as const, role: 'Writer', lastSeen: new Date(Date.now() - 30 * 60 * 1000) }
-  ]
+  ], [])
 
-  const mockWidgetData = {
+  const mockWidgetData = useMemo(() => ({
     id: 'revenue',
     title: 'Monthly Revenue',
     value: '$45,230',
@@ -122,18 +157,18 @@ export default function AdvancedMicroFeaturesPage() {
       { label: 'Week 3', value: 15200 },
       { label: 'Week 4', value: 9230 }
     ]
-  }
+  }), [])
 
-  const mockQuickActions = [
+  const mockQuickActions = useMemo(() => [
     { id: '1', label: 'New Project', icon: Zap, onClick: () => {}, variant: 'primary' as const, shortcut: '⌘N' },
     { id: '2', label: 'Upload Files', icon: Download, onClick: () => {}, badge: '5' },
     { id: '3', label: 'Team Chat', icon: MessageSquare, onClick: () => {}, badge: 3 },
     { id: '4', label: 'Analytics', icon: BarChart3, onClick: () => {} },
     { id: '5', label: 'Settings', icon: Settings, onClick: () => {} },
     { id: '6', label: 'Share', icon: Share2, onClick: () => {}, disabled: true }
-  ]
+  ], [])
 
-  const mockNotifications = [
+  const mockNotifications = useMemo(() => [
     {
       id: '1',
       title: 'New project assigned',
@@ -160,9 +195,9 @@ export default function AdvancedMicroFeaturesPage() {
       type: 'warning' as const,
       timestamp: new Date(Date.now() - 60 * 60 * 1000)
     }
-  ]
+  ], [])
 
-  const mockActivities = [
+  const mockActivities = useMemo(() => [
     {
       id: '1',
       user: mockUsers[0],
@@ -187,9 +222,9 @@ export default function AdvancedMicroFeaturesPage() {
       target: 'Project Files',
       timestamp: new Date(Date.now() - 45 * 60 * 1000)
     }
-  ]
+  ], [mockUsers])
 
-  const mockComments = [
+  const mockComments = useMemo(() => [
     {
       id: '1',
       user: mockUsers[0],
@@ -215,16 +250,16 @@ export default function AdvancedMicroFeaturesPage() {
       likes: 3,
       isPinned: true
     }
-  ]
+  ], [mockUsers])
 
-  const mockTableData = [
+  const mockTableData = useMemo(() => [
     { id: 1, project: 'KAZI Redesign', client: 'TechCorp', status: 'Active', revenue: '$15,000', completion: '75%' },
     { id: 2, project: 'Mobile App', client: 'StartupXYZ', status: 'Review', revenue: '$8,500', completion: '90%' },
     { id: 3, project: 'Website Refresh', client: 'LocalBiz', status: 'Planning', revenue: '$5,200', completion: '25%' },
     { id: 4, project: 'Brand Identity', client: 'Creative Co', status: 'Complete', revenue: '$12,000', completion: '100%' }
-  ]
+  ], [])
 
-  const tableColumns = [
+  const tableColumns = useMemo(() => [
     { key: 'project', label: 'Project', sortable: true },
     { key: 'client', label: 'Client', sortable: true },
     { 
@@ -238,16 +273,16 @@ export default function AdvancedMicroFeaturesPage() {
     },
     { key: 'revenue', label: 'Revenue', sortable: true },
     { key: 'completion', label: 'Progress' }
-  ]
+  ], [])
 
-  const mockSettingsCategories = [
+  const mockSettingsCategories = useMemo(() => [
     { id: 'general', label: 'General', icon: Settings, description: 'Basic app settings' },
     { id: 'theme', label: 'Appearance', icon: Palette, description: 'Themes and display', badge: 'New' },
     { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Alerts and sounds', badge: 3 },
     { id: 'shortcuts', label: 'Shortcuts', icon: Zap, description: 'Keyboard shortcuts' }
-  ]
+  ], [])
 
-  const mockThemes = [
+  const mockThemes = useMemo(() => [
     {
       id: 'default',
       name: 'KAZI Default',
@@ -272,12 +307,12 @@ export default function AdvancedMicroFeaturesPage() {
       description: 'Calm and focused',
       colors: { primary: '#10b981', secondary: '#059669', background: '#ffffff', foreground: '#000000' }
     }
-  ]
+  ], [])
 
-  const breadcrumbItems = [
+  const breadcrumbItems = useMemo(() => [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Advanced Features', href: '/dashboard/advanced-micro-features', isActive: true }
-  ]
+  ], [])
 
   // A+++ LOADING STATE
   if (isLoading) {
