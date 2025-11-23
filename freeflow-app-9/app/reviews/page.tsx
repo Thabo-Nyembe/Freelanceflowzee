@@ -6,6 +6,9 @@ import ReviewManagementDashboard from '@/components/video/review-management-dash
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { InfoIcon } from 'lucide-react';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('Reviews');
 
 export const metadata: Metadata = {
   title: 'Client Review Management | KAZI',
@@ -49,7 +52,11 @@ async function getReviewData(userId: string) {
       .order('created_at', { ascending: false });
 
     if (reviewsError) {
-      console.error('Error fetching reviews:', reviewsError);
+      logger.error('Error fetching reviews', {
+        userId,
+        error: reviewsError.message,
+        code: reviewsError.code
+      });
       return { reviews: [], templates: [], stats: getDefaultStats() };
     }
 
@@ -61,7 +68,11 @@ async function getReviewData(userId: string) {
       .order('usage_count', { ascending: false });
 
     if (templatesError) {
-      console.error('Error fetching templates:', templatesError);
+      logger.error('Error fetching templates', {
+        userId,
+        error: templatesError.message,
+        code: templatesError.code
+      });
     }
 
     // Calculate stats
@@ -73,7 +84,10 @@ async function getReviewData(userId: string) {
       stats
     };
   } catch (error) {
-    console.error('Error in getReviewData:', error);
+    logger.error('Error in getReviewData', {
+      userId,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     return { reviews: [], templates: [], stats: getDefaultStats() };
   }
 }

@@ -6,11 +6,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import EnhancedAIChat from '@/components/ai/enhanced-ai-chat'
 import SimpleAIChat from '@/components/ai/simple-ai-chat'
 import { AICreateStudio } from '@/components/ai/ai-create-studio'
+import { toast } from 'sonner'
+import { createFeatureLogger } from '@/lib/logger'
 
 // A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+
+const logger = createFeatureLogger('AI-Assistant')
 
 export default function AIAssistantPage() {
   // A+++ STATE MANAGEMENT
@@ -103,7 +107,14 @@ export default function AIAssistantPage() {
             <CardContent>
               <AICreateStudio
                 onGenerate={(result) => {
-                  console.log('Generated content:', result)
+                  logger.info('AI content generated', {
+                    contentLength: result?.length || 0,
+                    contentType: typeof result
+                  })
+
+                  toast.success('Content generated successfully', {
+                    description: `Generated ${result?.length || 0} characters`
+                  })
                 }}
               />
             </CardContent>

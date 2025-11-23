@@ -8,6 +8,9 @@ import {
   AlertTriangle, RefreshCw, Home, MessageCircle,
   Bug, Settings, Zap, Shield, ArrowLeft
 } from 'lucide-react'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ErrorPage')
 
 interface ErrorProps {
   error: Error & { digest?: string }
@@ -52,7 +55,7 @@ const TROUBLESHOOTING_STEPS = [
 export default function ErrorPage({ error, reset }: ErrorProps) {
   useEffect(() => {
     // Log error to analytics/monitoring service
-    console.error('Application Error:', {
+    logger.error('Application Error', {
       message: error.message,
       stack: error.stack,
       digest: error.digest,

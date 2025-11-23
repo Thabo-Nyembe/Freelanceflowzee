@@ -1,5 +1,9 @@
 'use server'
 
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('Projects-Actions');
+
 export async function searchProjects(query: string) {
   // Mock implementation for now
   return []
@@ -23,10 +27,13 @@ export async function semanticSearchProjects(query: string) {
         similarity: 0.85
       }
     ];
-    
+
     return { projects: mockProjects, error: null };
   } catch (error) {
-    console.error('Semantic search error:', error);
+    logger.error('Semantic search error', {
+      query,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     return { projects: [], error: 'Failed to perform semantic search' };
   }
 }

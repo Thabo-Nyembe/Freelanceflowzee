@@ -2,6 +2,9 @@
 
 import { searchProjects, getProjectDetails } from "@/app/(app)/projects/actions";
 import OpenAI from 'openai';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('AI-Assistant-Actions');
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -52,11 +55,15 @@ const stringifyProjectContent = (content: BlockContent[] | string | null | undef
     // Handle array of BlockNote blocks
     if (Array.isArray(content)) {
         try {
-            return content.map((block: BlockContent) => 
+            return content.map((block: BlockContent) =>
                 block.content?.map((inline: InlineContent) => inline.text).join('') || ''
             ).join('\n');
         } catch (e) {
-            console.error("Error stringifying project content:", e);
+            logger.error('Error stringifying project content', {
+                error: e instanceof Error ? e.message : 'Unknown error',
+                contentType: 'array',
+                arrayLength: content.length
+            });
             // Fallback for unexpected format within the array
             return JSON.stringify(content);
         }
@@ -92,9 +99,20 @@ export async function getProjectSummary(projectId: string): Promise<{ summary?: 
         if (!summary) {
             return { error: "I was unable to generate a summary." };
         }
+
+        logger.info('Project summary generated successfully', {
+            projectId,
+            summaryLength: summary.length,
+            contentLength: contentToSummarize.length
+        });
+
         return { summary };
     } catch (error) {
-        console.error("OpenAI API error:", error);
+        logger.error('OpenAI API error - Project summary', {
+            projectId,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            contentLength: contentToSummarize.length
+        });
         return { error: "I'm sorry, but I encountered an error while trying to generate the summary." };
     }
 }
@@ -132,10 +150,22 @@ export async function extractActionItems(projectId: string): Promise<{ actionIte
         }
 
         const parsedResult = JSON.parse(result);
-        return { actionItems: parsedResult.actionItems || [] };
+        const actionItems = parsedResult.actionItems || [];
+
+        logger.info('Action items extracted successfully', {
+            projectId,
+            actionItemsCount: actionItems.length,
+            contentLength: contentToAnalyze.length
+        });
+
+        return { actionItems };
 
     } catch (error) {
-        console.error("OpenAI API error:", error);
+        logger.error('OpenAI API error - Action items extraction', {
+            projectId,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            contentLength: contentToAnalyze.length
+        });
         return { error: "I'm sorry, but I encountered an error while trying to extract action items." };
     }
 }
@@ -204,10 +234,20 @@ export async function getWritingAssistance(text: string, command: string): Promi
             return { error: "I was unable to get a response from the AI." };
         }
 
+        logger.info('Writing assistance completed successfully', {
+            command,
+            inputLength: text.length,
+            outputLength: result.length
+        });
+
         return { result };
 
     } catch (error) {
-        console.error("OpenAI API error:", error);
+        logger.error('OpenAI API error - Writing assistance', {
+            command,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            inputLength: text.length
+        });
         return { error: "I'm sorry, but I encountered an error while trying to get writing assistance." };
     }
 }

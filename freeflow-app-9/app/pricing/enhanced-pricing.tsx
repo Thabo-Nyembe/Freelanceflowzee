@@ -37,6 +37,10 @@ import Marketing2025Wrapper, {
   Enhanced2025MarketingButton,
   Enhanced2025HeroSection
 } from '@/components/ui/marketing-2025-wrapper'
+import { toast } from 'sonner'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Pricing')
 
 interface QuickAccessFeature {
   id: string
@@ -451,7 +455,17 @@ export default function EnhancedPricingPage() {
           featureDescription={selectedQuickFeature.description}
           duration={selectedQuickFeature.duration}
           onSuccess={(sessionId) => {
-            console.log('Payment successful for session:', sessionId)
+            logger.info('Payment successful', {
+              sessionId,
+              feature: selectedQuickFeature.name,
+              price: selectedQuickFeature.price,
+              duration: selectedQuickFeature.duration
+            })
+
+            toast.success('Payment successful', {
+              description: `${selectedQuickFeature.name} - $${selectedQuickFeature.price} - ${selectedQuickFeature.duration} - Access unlocked`
+            })
+
             // Handle successful payment
             setShowGuestPayment(false)
             // Redirect to feature or show success message

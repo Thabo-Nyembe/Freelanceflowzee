@@ -1,3 +1,7 @@
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ToolMessageParts');
+
 // Define the tool types
 interface WeatherToolInput {
   location: string
@@ -28,7 +32,11 @@ export function ToolMessageParts({ tool, onResponse }: ToolMessagePartsProps) {
       }
       onResponse(`Weather in ${location}: ${mockWeather.temperature}°${units === 'metric' ? 'C' : 'F'}, ${mockWeather.condition}`)
     } catch (error) {
-      console.error('Weather request error: ', error)
+      logger.error('Weather request error', {
+        location,
+        units,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
       onResponse('Failed to get weather information')
     }
   }
