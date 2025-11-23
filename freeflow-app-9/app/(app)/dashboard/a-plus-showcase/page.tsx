@@ -38,6 +38,9 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { motion, AnimatePresence } from 'framer-motion'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('A-Plus-Showcase')
 
 // ============================================================================
 // A+++ UTILITIES
@@ -150,19 +153,19 @@ type ShowcaseAction =
 // ============================================================================
 
 function showcaseReducer(state: ShowcaseState, action: ShowcaseAction): ShowcaseState {
-  console.log('🔄 SHOWCASE REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_COMPONENTS':
-      console.log('📊 SHOWCASE REDUCER: Setting components - Count:', action.components.length)
+      logger.info('Setting components', { count: action.components.length })
       return { ...state, components: action.components }
 
     case 'ADD_COMPONENT':
-      console.log('➕ SHOWCASE REDUCER: Adding component - ID:', action.component.id)
+      logger.info('Adding component', { componentId: action.component.id, name: action.component.name })
       return { ...state, components: [action.component, ...state.components] }
 
     case 'UPDATE_COMPONENT':
-      console.log('✏️ SHOWCASE REDUCER: Updating component - ID:', action.component.id)
+      logger.info('Updating component', { componentId: action.component.id, name: action.component.name })
       return {
         ...state,
         components: state.components.map(c => c.id === action.component.id ? action.component : c),
@@ -170,7 +173,7 @@ function showcaseReducer(state: ShowcaseState, action: ShowcaseAction): Showcase
       }
 
     case 'DELETE_COMPONENT':
-      console.log('🗑️ SHOWCASE REDUCER: Deleting component - ID:', action.componentId)
+      logger.info('Deleting component', { componentId: action.componentId })
       return {
         ...state,
         components: state.components.filter(c => c.id !== action.componentId),
@@ -178,31 +181,31 @@ function showcaseReducer(state: ShowcaseState, action: ShowcaseAction): Showcase
       }
 
     case 'SELECT_COMPONENT':
-      console.log('👁️ SHOWCASE REDUCER: Selecting component - ID:', action.component?.id)
+      logger.info('Selecting component', { componentId: action.component?.id })
       return { ...state, selectedComponent: action.component }
 
     case 'SET_SEARCH':
-      console.log('🔍 SHOWCASE REDUCER: Search term:', action.searchTerm)
+      logger.debug('Search term updated', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER_CATEGORY':
-      console.log('🎯 SHOWCASE REDUCER: Filter category:', action.filterCategory)
+      logger.debug('Filter category updated', { category: action.filterCategory })
       return { ...state, filterCategory: action.filterCategory }
 
     case 'SET_FILTER_DIFFICULTY':
-      console.log('📈 SHOWCASE REDUCER: Filter difficulty:', action.filterDifficulty)
+      logger.debug('Filter difficulty updated', { difficulty: action.filterDifficulty })
       return { ...state, filterDifficulty: action.filterDifficulty }
 
     case 'SET_SORT':
-      console.log('🔀 SHOWCASE REDUCER: Sort by:', action.sortBy)
+      logger.debug('Sort updated', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'SET_VIEW_MODE':
-      console.log('👁️ SHOWCASE REDUCER: View mode:', action.viewMode)
+      logger.debug('View mode updated', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'TOGGLE_SELECT_COMPONENT':
-      console.log('☑️ SHOWCASE REDUCER: Toggle select component - ID:', action.componentId)
+      logger.debug('Toggle select component', { componentId: action.componentId })
       return {
         ...state,
         selectedComponents: state.selectedComponents.includes(action.componentId)
@@ -211,11 +214,11 @@ function showcaseReducer(state: ShowcaseState, action: ShowcaseAction): Showcase
       }
 
     case 'CLEAR_SELECTED_COMPONENTS':
-      console.log('🧹 SHOWCASE REDUCER: Clearing selected components')
+      logger.debug('Clearing selected components')
       return { ...state, selectedComponents: [] }
 
     case 'TOGGLE_FAVORITE':
-      console.log('⭐ SHOWCASE REDUCER: Toggle favorite - ID:', action.componentId)
+      logger.info('Toggling favorite', { componentId: action.componentId })
       return {
         ...state,
         components: state.components.map(c =>
@@ -224,7 +227,7 @@ function showcaseReducer(state: ShowcaseState, action: ShowcaseAction): Showcase
       }
 
     case 'TOGGLE_FAVORITES_ONLY':
-      console.log('⭐ SHOWCASE REDUCER: Toggle favorites only - Current:', state.showFavoritesOnly)
+      logger.debug('Toggle favorites only filter', { currentState: state.showFavoritesOnly })
       return { ...state, showFavoritesOnly: !state.showFavoritesOnly }
 
     default:
@@ -237,7 +240,7 @@ function showcaseReducer(state: ShowcaseState, action: ShowcaseAction): Showcase
 // ============================================================================
 
 function generateMockComponents(): ComponentShowcase[] {
-  console.log('🎨 SHOWCASE: Generating mock components...')
+  logger.debug('Generating mock components')
 
   const categories: ComponentCategory[] = ['ui', 'layout', 'animation', 'data-display', 'navigation', 'feedback', 'forms', 'utilities']
   const difficulties: DifficultyLevel[] = ['beginner', 'intermediate', 'advanced', 'expert']
@@ -293,7 +296,7 @@ function generateMockComponents(): ComponentShowcase[] {
     }
   })
 
-  console.log('✅ SHOWCASE: Generated', components.length, 'mock components')
+  logger.info('Mock components generated', { count: components.length })
   return components
 }
 
@@ -320,11 +323,37 @@ const categoryOptions: CategoryOption[] = [
 ]
 
 // ============================================================================
+// A++++ FLOATING PARTICLE COMPONENT
+// ============================================================================
+
+const FloatingParticle: React.FC<{
+  children: React.ReactNode
+  color?: 'purple' | 'blue' | 'green' | 'cyan' | 'amber' | 'emerald'
+  size?: 'sm' | 'md' | 'lg'
+}> = ({ children, color = 'purple', size = 'md' }) => {
+  return (
+    <motion.div
+      animate={{
+        y: [0, -10, 0],
+        rotate: [0, 5, 0, -5, 0]
+      }}
+      transition={{
+        duration: 3,
+        repeat: Infinity,
+        ease: 'easeInOut'
+      }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+// ============================================================================
 // A++++ MAIN COMPONENT
 // ============================================================================
 
 export default function APlusShowcasePage() {
-  console.log('🚀 SHOWCASE: Component mounting...')
+  logger.debug('A+ showcase component mounting')
 
   // ============================================================================
   // A++++ STATE MANAGEMENT
@@ -361,7 +390,7 @@ export default function APlusShowcasePage() {
   // ============================================================================
   useEffect(() => {
     const loadComponents = async () => {
-      console.log('📊 SHOWCASE: Loading components...')
+      logger.info('Loading components')
       try {
         setIsLoading(true)
         setError(null)
@@ -370,11 +399,11 @@ export default function APlusShowcasePage() {
         const mockComponents = generateMockComponents()
         dispatch({ type: 'SET_COMPONENTS', components: mockComponents })
 
-        console.log('✅ SHOWCASE: Components loaded successfully - Count:', mockComponents.length)
+        logger.info('Components loaded successfully', { count: mockComponents.length })
         setIsLoading(false)
         announce('Components loaded successfully', 'polite')
       } catch (err) {
-        console.log('❌ SHOWCASE: Load error:', err)
+        logger.error('Failed to load components', { error: err instanceof Error ? err.message : String(err) })
         setError(err instanceof Error ? err.message : 'Failed to load components')
         setIsLoading(false)
         announce('Error loading components', 'assertive')
@@ -388,7 +417,7 @@ export default function APlusShowcasePage() {
   // A++++ COMPUTED VALUES
   // ============================================================================
   const stats = useMemo(() => {
-    console.log('📊 SHOWCASE: Computing stats...')
+    logger.debug('Computing component stats')
     const total = state.components.length
     const categories = new Set(state.components.map(c => c.category)).size
     const totalExamples = state.components.reduce((sum, c) => sum + c.examples, 0)
@@ -407,12 +436,12 @@ export default function APlusShowcasePage() {
       mostPopular
     }
 
-    console.log('📊 SHOWCASE: Stats computed -', JSON.stringify(computedStats))
+    logger.debug('Component stats computed', computedStats)
     return computedStats
   }, [state.components])
 
   const filteredAndSortedComponents = useMemo(() => {
-    console.log('🔍 SHOWCASE: Filtering and sorting components...')
+    logger.debug('Filtering and sorting components', { searchTerm: state.searchTerm, category: state.filterCategory, difficulty: state.filterDifficulty, sortBy: state.sortBy })
     let filtered = state.components
 
     // Search
@@ -422,25 +451,25 @@ export default function APlusShowcasePage() {
         component.description.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
         component.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()))
       )
-      console.log('🔍 SHOWCASE: Search filtered to', filtered.length, 'components')
+      logger.debug('Search filter applied', { count: filtered.length, searchTerm: state.searchTerm })
     }
 
     // Filter by category
     if (state.filterCategory !== 'all') {
       filtered = filtered.filter(component => component.category === state.filterCategory)
-      console.log('🎯 SHOWCASE: Category filtered to', filtered.length, 'components')
+      logger.debug('Category filter applied', { count: filtered.length, category: state.filterCategory })
     }
 
     // Filter by difficulty
     if (state.filterDifficulty !== 'all') {
       filtered = filtered.filter(component => component.difficulty === state.filterDifficulty)
-      console.log('📈 SHOWCASE: Difficulty filtered to', filtered.length, 'components')
+      logger.debug('Difficulty filter applied', { count: filtered.length, difficulty: state.filterDifficulty })
     }
 
     // Filter favorites only
     if (state.showFavoritesOnly) {
       filtered = filtered.filter(component => component.isFavorite)
-      console.log('⭐ SHOWCASE: Favorites filtered to', filtered.length, 'components')
+      logger.debug('Favorites filter applied', { count: filtered.length })
     }
 
     // Sort
@@ -461,7 +490,7 @@ export default function APlusShowcasePage() {
       }
     })
 
-    console.log('🔀 SHOWCASE: Sorted by', state.sortBy, '- Final count:', sorted.length)
+    logger.debug('Components sorted', { sortBy: state.sortBy, finalCount: sorted.length })
     return sorted
   }, [state.components, state.searchTerm, state.filterCategory, state.filterDifficulty, state.sortBy, state.showFavoritesOnly])
 
@@ -470,11 +499,13 @@ export default function APlusShowcasePage() {
   // ============================================================================
 
   const handleViewComponent = (component: ComponentShowcase) => {
-    console.log('👁️ SHOWCASE: Opening component view - ID:', component.id)
-    console.log('📊 SHOWCASE: Component details:', {
+    logger.info('Opening component view', {
+      componentId: component.id,
       name: component.name,
       category: component.category,
-      popularity: component.popularity
+      difficulty: component.difficulty,
+      popularity: component.popularity,
+      downloads: component.downloads
     })
 
     dispatch({ type: 'SELECT_COMPONENT', component })
@@ -482,22 +513,43 @@ export default function APlusShowcasePage() {
   }
 
   const handleCopyCode = async (code: string, componentName: string) => {
-    console.log('📋 SHOWCASE: Copying code for:', componentName)
+    logger.info('Copying code to clipboard', { componentName, codeLength: code.length })
 
     try {
       await navigator.clipboard.writeText(code)
-      console.log('✅ SHOWCASE: Code copied successfully')
-      toast.success('Code copied to clipboard')
+      const lines = code.split('\n').length
+      const chars = code.length
+
+      logger.info('Code copied successfully', { componentName, lines, chars })
+
+      toast.success('Code copied to clipboard', {
+        description: `${componentName} - ${lines} lines - ${chars} characters - Ready to paste`
+      })
       announce('Code copied to clipboard', 'polite')
     } catch (err) {
-      console.log('❌ SHOWCASE: Copy error:', err)
+      logger.error('Failed to copy code', { componentName, error: err instanceof Error ? err.message : String(err) })
       toast.error('Failed to copy code')
     }
   }
 
   const handleDownloadComponent = (component: ComponentShowcase) => {
-    console.log('📥 SHOWCASE: Downloading component - ID:', component.id)
-    console.log('📥 SHOWCASE: Component:', component.name)
+    logger.info('Downloading component', {
+      componentId: component.id,
+      name: component.name,
+      category: component.category,
+      version: component.version,
+      language: component.language
+    })
+
+    // Generate real file download
+    const fileName = `${component.name.replace(/\s+/g, '-').toLowerCase()}-${component.version}.${component.language === 'typescript' || component.language === 'tsx' ? 'tsx' : 'jsx'}`
+    const blob = new Blob([component.code], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = fileName
+    a.click()
+    URL.revokeObjectURL(url)
 
     const updatedComponent = {
       ...component,
@@ -505,33 +557,71 @@ export default function APlusShowcasePage() {
     }
 
     dispatch({ type: 'UPDATE_COMPONENT', component: updatedComponent })
-    toast.success(`Downloaded ${component.name}`)
+
+    const fileSizeKB = (blob.size / 1024).toFixed(1)
+    const newDownloadCount = (updatedComponent.downloads / 1000).toFixed(1)
+
+    logger.info('Component downloaded successfully', {
+      componentId: component.id,
+      fileName,
+      fileSize: blob.size,
+      totalDownloads: updatedComponent.downloads
+    })
+
+    toast.success(`${component.name} downloaded`, {
+      description: `${fileName} - ${fileSizeKB} KB - ${component.category} - ${component.difficulty} - ${newDownloadCount}k total downloads`
+    })
     announce(`Downloaded ${component.name}`, 'polite')
   }
 
   const handleToggleFavorite = (componentId: string) => {
-    console.log('⭐ SHOWCASE: Toggling favorite - ID:', componentId)
     const component = state.components.find(c => c.id === componentId)
 
     if (component) {
-      console.log('⭐ SHOWCASE: Current favorite state:', component.isFavorite)
+      const newState = !component.isFavorite
+
+      logger.info('Toggling favorite', {
+        componentId,
+        name: component.name,
+        currentState: component.isFavorite,
+        newState
+      })
+
       dispatch({ type: 'TOGGLE_FAVORITE', componentId })
-      toast.success(component.isFavorite ? 'Removed from favorites' : 'Added to favorites')
+
+      const popularityK = (component.popularity / 1000).toFixed(1)
+
+      toast.success(component.isFavorite ? 'Removed from favorites' : 'Added to favorites', {
+        description: `${component.name} - ${component.category} - ${component.difficulty} - ${popularityK}k popularity`
+      })
     }
   }
 
   const handleShareComponent = async (component: ComponentShowcase) => {
-    console.log('🔗 SHOWCASE: Sharing component - ID:', component.id)
+    logger.info('Sharing component', {
+      componentId: component.id,
+      name: component.name,
+      category: component.category
+    })
 
     const shareUrl = `https://kazi.com/components/${component.id}`
 
     try {
       await navigator.clipboard.writeText(shareUrl)
-      console.log('✅ SHOWCASE: Share link copied')
-      toast.success('Share link copied to clipboard')
+
+      logger.info('Share link copied successfully', { componentId: component.id, shareUrl })
+
+      const downloadsK = (component.downloads / 1000).toFixed(1)
+
+      toast.success('Share link copied to clipboard', {
+        description: `${component.name} - ${component.category} - ${component.difficulty} - ${downloadsK}k downloads - Share with your team`
+      })
       announce('Share link copied', 'polite')
     } catch (err) {
-      console.log('❌ SHOWCASE: Share error:', err)
+      logger.error('Failed to copy share link', {
+        componentId: component.id,
+        error: err instanceof Error ? err.message : String(err)
+      })
       toast.error('Failed to copy share link')
     }
   }
