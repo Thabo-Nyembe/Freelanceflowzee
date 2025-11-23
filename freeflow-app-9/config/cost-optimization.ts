@@ -10,6 +10,9 @@
  */
 
 import { useEffect, useState } from 'react';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('CostOptimization');
 
 // ==========================================================
 // TYPES AND INTERFACES
@@ -732,7 +735,10 @@ export function trackFunctionExecution(
   
   // Log if enabled
   if (config.monitoring.logFunctionExecutions) {
-    console.log(`Function executed: ${functionName} (${functionExecutionCounts[functionName]} times)`);
+    logger.info('Function executed', {
+      functionName,
+      executionCount: functionExecutionCounts[functionName]
+    });
   }
   
   // Check threshold
@@ -759,9 +765,13 @@ function alertThresholdExceeded(
   config: CostOptimizationConfig
 ): void {
   const message = `COST ALERT: ${resource} threshold exceeded. Current: ${current}, Threshold: ${threshold}`;
-  
+
   if (config.monitoring.alertChannels.includes('console')) {
-    console.warn(message);
+    logger.warn('Cost threshold exceeded', {
+      resource,
+      current,
+      threshold
+    });
   }
   
   if (config.monitoring.alertChannels.includes('localStorage') && typeof window !== 'undefined') {
@@ -781,7 +791,12 @@ function alertThresholdExceeded(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: message })
-    }).catch(err => console.error('Failed to send Slack alert:', err));
+    }).catch(err => {
+      logger.error('Failed to send Slack alert', {
+        error: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined
+      });
+    });
   }
 }
 
@@ -907,9 +922,8 @@ export function generateCostDebugReport(
 export function logCostDebugReport(
   config: CostOptimizationConfig = ACTIVE_CONFIG
 ): void {
-  console.group('KAZI Cost Optimization Debug Report');
-  console.log(generateCostDebugReport(config));
-  console.groupEnd();
+  const report = generateCostDebugReport(config);
+  logger.info('KAZI Cost Optimization Debug Report', report);
 }
 
 // ==========================================================

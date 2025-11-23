@@ -2,6 +2,9 @@ import { NextRequest, NextResponse, NextFetchEvent } from 'next/server';
 import { geolocation } from '@vercel/edge';
 import { withAxiom } from 'next-axiom';
 import { nanoid } from 'nanoid';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('Middleware');
 
 // ==========================================================
 // TYPES AND INTERFACES
@@ -455,7 +458,10 @@ function pathMatches(path: string, pattern: string): boolean {
       const regex = new RegExp(pattern);
       return regex.test(path);
     } catch (e) {
-      console.error('Invalid regex pattern:', pattern);
+      logger.error('Invalid regex pattern', {
+        error: e instanceof Error ? e.message : 'Unknown error',
+        pattern
+      });
       return false;
     }
   }
@@ -566,7 +572,10 @@ function collectMetrics(ctx: RequestContext, res: NextResponse): void {
           timestamp: Date.now(),
         }),
       }).catch(err => {
-        console.error('Failed to report edge metrics:', err);
+        logger.error('Failed to report edge metrics', {
+          error: err instanceof Error ? err.message : 'Unknown error',
+          stack: err instanceof Error ? err.stack : undefined
+        });
       })
     );
   }
@@ -730,8 +739,12 @@ export async function middleware(req: NextRequest, event: NextFetchEvent): Promi
   try {
     return await middlewareEnhanced(req, event);
   } catch (error) {
-    console.error('Middleware error:', error);
-    
+    logger.error('Middleware error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      path: req.nextUrl.pathname
+    });
+
     // Return a generic response in case of error
     const res = NextResponse.next();
     res.headers.set('X-Middleware-Error', 'true');
