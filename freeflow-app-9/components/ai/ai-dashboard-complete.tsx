@@ -387,14 +387,14 @@ export function AIDashboardComplete() {
   const { toast } = useToast();
   const supabase = useSupabaseClient();
   const { user } = useUser();
-  const isDesktop = useMediaQuery("(min-width: 1024px)");"
-  
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+
   // Refs
   const wsRef = useRef<WebSocket | null>(null);
   const chartRefs = useRef<{[key: string]: any}>({});
-  
+
   // State management
-  const [activeTab, setActiveTab] = useState("overview");"
+  const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(true);
   const [jobs, setJobs] = useState<AIProcessingJob[]>([]);
   const [selectedJob, setSelectedJob] = useState<AIProcessingJob | null>(null);
@@ -426,7 +426,7 @@ export function AIDashboardComplete() {
   });
   const [isExporting, setIsExporting] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [settings, setSettings] = useLocalStorage<AISettings>("ai-dashboard-settings", {"
+  const [settings, setSettings] = useLocalStorage<AISettings>("ai-dashboard-settings", {
     defaultProvider: 'auto',
     fallbackProviders: ['assemblyai', 'openai', 'deepgram'],
     defaultLanguage: 'en',
@@ -465,7 +465,7 @@ export function AIDashboardComplete() {
   const [selectedModel, setSelectedModel] = useState<AIModelMetrics | null>(null);
   const [isSettingsChanged, setIsSettingsChanged] = useState(false);
   const [tempSettings, setTempSettings] = useState<AISettings | null>(null);
-  const [activeSettingsTab, setActiveSettingsTab] = useState("general");"
+  const [activeSettingsTab, setActiveSettingsTab] = useState("general");
   const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'excel'>('json');
   const [exportProgress, setExportProgress] = useState(0);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
@@ -620,21 +620,21 @@ export function AIDashboardComplete() {
           case 'processing_complete':
             // Show toast notification
             toast({
-              title: "Processing Complete","
+              title: "Processing Complete",
               description: `Job ${data.jobId.substring(0, 8)}... has been completed successfully.`,
-              variant: "success""
+              variant: "success"
             });
-            
+
             // Refresh jobs list
             fetchJobs();
             break;
-            
+
           case 'processing_error':
             // Show toast notification
             toast({
-              title: "Processing Error","
-              description: data.error || "An unknown error occurred","
-              variant: "destructive""
+              title: "Processing Error",
+              description: data.error || "An unknown error occurred",
+              variant: "destructive"
             });
             
             // Add to errors list
@@ -644,7 +644,7 @@ export function AIDashboardComplete() {
                 timestamp: new Date().toISOString(),
                 jobId: data.jobId,
                 errorCode: 'PROCESSING_ERROR',
-                message: data.error || "An unknown error occurred","
+                message: data.error || "An unknown error occurred",
                 status: 'new',
                 impact: 'medium',
                 errorType: 'processing'
@@ -678,9 +678,9 @@ export function AIDashboardComplete() {
             // Show cost alert
             if (data.userId === user.id) {
               toast({
-                title: "Cost Alert","
+                title: "Cost Alert",
                 description: `Your AI processing costs have reached ${data.percentage}% of your threshold ($${settings.costAlertThreshold}).`,
-                variant: "warning""
+                variant: "warning"
               });
             }
             break;
@@ -782,9 +782,9 @@ export function AIDashboardComplete() {
     } catch (error) {
       console.error('Error fetching jobs', error);
       toast({
-        title: "Error","
-        description: "Failed to fetch processing jobs","
-        variant: "destructive""
+        title: "Error",
+        description: "Failed to fetch processing jobs",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -1113,9 +1113,9 @@ export function AIDashboardComplete() {
       }
       
       toast({
-        title: "Job Restarted","
-        description: "Processing job has been queued for retry","
-        variant: "success""
+        title: "Job Restarted",
+        description: "Processing job has been queued for retry",
+        variant: "success"
       });
       
       // Refresh jobs list
@@ -1123,9 +1123,9 @@ export function AIDashboardComplete() {
     } catch (error) {
       console.error('Error retrying job', error);
       toast({
-        title: "Error","
-        description: "Failed to restart processing job","
-        variant: "destructive""
+        title: "Error",
+        description: "Failed to restart processing job",
+        variant: "destructive"
       });
     }
   }, [fetchJobs, toast]);
@@ -1146,9 +1146,9 @@ export function AIDashboardComplete() {
       }
       
       toast({
-        title: "Job Cancelled","
-        description: "Processing job has been cancelled","
-        variant: "success""
+        title: "Job Cancelled",
+        description: "Processing job has been cancelled",
+        variant: "success"
       });
       
       // Refresh jobs list
@@ -1156,9 +1156,9 @@ export function AIDashboardComplete() {
     } catch (error) {
       console.error('Error cancelling job', error);
       toast({
-        title: "Error","
-        description: "Failed to cancel processing job","
-        variant: "destructive""
+        title: "Error",
+        description: "Failed to cancel processing job",
+        variant: "destructive"
       });
     }
   }, [fetchJobs, toast]);
@@ -1179,16 +1179,16 @@ export function AIDashboardComplete() {
       ));
       
       toast({
-        title: "Error Updated","
+        title: "Error Updated",
         description: `Error status updated to ${status}`,
-        variant: "success""
+        variant: "success"
       });
     } catch (error) {
       console.error('Error updating error status', error);
       toast({
-        title: "Error","
-        description: "Failed to update error status","
-        variant: "destructive""
+        title: "Error",
+        description: "Failed to update error status",
+        variant: "destructive"
       });
     }
   }, [supabase, toast]);
@@ -1209,16 +1209,16 @@ export function AIDashboardComplete() {
       ));
       
       toast({
-        title: implemented ? "Recommendation Implemented" : "Recommendation Marked as Not Implemented","
-        description: "Optimization recommendation status updated","
-        variant: "success""
+        title: implemented ? "Recommendation Implemented" : "Recommendation Marked as Not Implemented",
+        description: "Optimization recommendation status updated",
+        variant: "success"
       });
     } catch (error) {
       console.error('Error updating recommendation status', error);
       toast({
-        title: "Error","
-        description: "Failed to update recommendation status","
-        variant: "destructive""
+        title: "Error",
+        description: "Failed to update recommendation status",
+        variant: "destructive"
       });
     }
   }, [supabase, toast]);
@@ -1230,9 +1230,9 @@ export function AIDashboardComplete() {
     setTempSettings(null);
     
     toast({
-      title: "Settings Updated","
-      description: "AI processing settings have been updated","
-      variant: "success""
+      title: "Settings Updated",
+      description: "AI processing settings have been updated",
+      variant: "success"
     });
   }, [setSettings, toast]);
   
@@ -1368,18 +1368,18 @@ export function AIDashboardComplete() {
         setIsExporting(false);
         
         toast({
-          title: "Export Complete","
+          title: "Export Complete",
           description: `Data has been exported to ${filename}.${fileExtension}`,
-          variant: "success""
+          variant: "success"
         });
       }, 500);
       
     } catch (error) {
       console.error('Error exporting data', error);
       toast({
-        title: "Export Error","
-        description: "Failed to export data","
-        variant: "destructive""
+        title: "Export Error",
+        description: "Failed to export data",
+        variant: "destructive"
       });
       setIsExporting(false);
     }
@@ -1584,20 +1584,20 @@ export function AIDashboardComplete() {
       <div className="flex flex-col space-y-4">"
         {/* Enhanced Navigation */}
         <EnhancedNavigation
-          title="AI Management Dashboard""
+          title="AI Management Dashboard"
           breadcrumbs={[
-            { title: "Dashboard", href: "/dashboard" },"
+            { title: "Dashboard", href: "/dashboard" },
             { title: "AI Management", href: pathname }"
           ]}
           actions={[
             {
-              title: "New Processing Job","
-              icon: "Plus","
+              title: "New Processing Job",
+              icon: "Plus",
               onClick: () => router.push("/dashboard/ai/new-job")"
             },
             {
-              title: "Refresh Data","
-              icon: "RefreshCw","
+              title: "Refresh Data",
+              icon: "RefreshCw",
               onClick: () => {
                 fetchJobs();
                 fetchProviders();
@@ -1614,8 +1614,8 @@ export function AIDashboardComplete() {
             }
           ]}
           relatedFeatures={[
-            { title: "AI Video Recording", href: "/dashboard/ai/video-recording" },"
-            { title: "AI Assistant", href: "/dashboard/ai/assistant" },"
+            { title: "AI Video Recording", href: "/dashboard/ai/video-recording" },
+            { title: "AI Assistant", href: "/dashboard/ai/assistant" },
             { title: "AI Content Studio", href: "/dashboard/ai/content-studio" }"
           ]}
         />
@@ -1628,34 +1628,34 @@ export function AIDashboardComplete() {
               <ContextualSidebar
                 categories={[
                   {
-                    title: "AI Management","
+                    title: "AI Management",
                     items: [
-                      { title: "Dashboard", href: "/dashboard/ai", icon: "LayoutDashboard" },"
-                      { title: "Processing Jobs", href: "/dashboard/ai/jobs", icon: "ListChecks" },"
-                      { title: "Cost Analytics", href: "/dashboard/ai/costs", icon: "BarChart" },"
-                      { title: "Provider Status", href: "/dashboard/ai/providers", icon: "Server" },"
-                      { title: "Error Reports", href: "/dashboard/ai/errors", icon: "AlertTriangle" },"
+                      { title: "Dashboard", href: "/dashboard/ai", icon: "LayoutDashboard" },
+                      { title: "Processing Jobs", href: "/dashboard/ai/jobs", icon: "ListChecks" },
+                      { title: "Cost Analytics", href: "/dashboard/ai/costs", icon: "BarChart" },
+                      { title: "Provider Status", href: "/dashboard/ai/providers", icon: "Server" },
+                      { title: "Error Reports", href: "/dashboard/ai/errors", icon: "AlertTriangle" },
                       { title: "Settings", href: "/dashboard/ai/settings", icon: "Settings" }"
                     ]
                   },
                   {
-                    title: "AI Features","
+                    title: "AI Features",
                     items: [
-                      { title: "Video Recording", href: "/dashboard/ai/video-recording", icon: "Video" },"
-                      { title: "Content Studio", href: "/dashboard/ai/content-studio", icon: "Palette" },"
-                      { title: "AI Assistant", href: "/dashboard/ai/assistant", icon: "Zap" },"
-                      { title: "Transcription", href: "/dashboard/ai/transcription", icon: "FileText" },"
+                      { title: "Video Recording", href: "/dashboard/ai/video-recording", icon: "Video" },
+                      { title: "Content Studio", href: "/dashboard/ai/content-studio", icon: "Palette" },
+                      { title: "AI Assistant", href: "/dashboard/ai/assistant", icon: "Zap" },
+                      { title: "Transcription", href: "/dashboard/ai/transcription", icon: "FileText" },
                       { title: "Image Generation", href: "/dashboard/ai/images", icon: "Image" }"
                     ]
                   }
                 ]}
                 favorites={[
-                  { title: "Processing Jobs", href: "/dashboard/ai/jobs", icon: "ListChecks" },"
-                  { title: "Cost Analytics", href: "/dashboard/ai/costs", icon: "BarChart" },"
+                  { title: "Processing Jobs", href: "/dashboard/ai/jobs", icon: "ListChecks" },
+                  { title: "Cost Analytics", href: "/dashboard/ai/costs", icon: "BarChart" },
                   { title: "Video Recording", href: "/dashboard/ai/video-recording", icon: "Video" }"
                 ]}
                 recentlyUsed={[
-                  { title: "AI Assistant", href: "/dashboard/ai/assistant", icon: "Zap", timestamp: new Date().toISOString() },"
+                  { title: "AI Assistant", href: "/dashboard/ai/assistant", icon: "Zap", timestamp: new Date().toISOString() },
                   { title: "Content Studio", href: "/dashboard/ai/content-studio", icon: "Palette", timestamp: new Date(Date.now() - 3600000).toISOString() }"
                 ]}
               />
@@ -1675,18 +1675,18 @@ export function AIDashboardComplete() {
                 <div className="relative">"
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />"
                   <Input
-                    type="search""
-                    placeholder="Search jobs...""
-                    className="pl-8 w-full md:w-[200px]""
+                    type="search"
+                    placeholder="Search jobs..."
+                    className="pl-8 w-full md:w-[200px]"
                     onChange={(e) => handleSearch(e.target.value)}
                   />
                 </div>
                 
                 <Button
-                  variant="outline""
-                  size="sm""
+                  variant="outline"
+                  size="sm"
                   onClick={() => setShowFilters(!showFilters)}
-                  aria-label="Toggle filters""
+                  aria-label="Toggle filters"
                 >
                   <Filter className="h-4 w-4 mr-2" />"
                   Filters
@@ -1728,10 +1728,10 @@ export function AIDashboardComplete() {
                 </DropdownMenu>
                 
                 <Button
-                  variant="outline""
-                  size="sm""
+                  variant="outline"
+                  size="sm"
                   onClick={() => setActiveTab("settings")}"
-                  aria-label="Settings""
+                  aria-label="Settings"
                 >
                   <Settings className="h-4 w-4" />"
                 </Button>
@@ -1758,10 +1758,10 @@ export function AIDashboardComplete() {
                   <div className="flex items-center justify-between">"
                     <CardTitle>Filters</CardTitle>
                     <Button
-                      variant="ghost""
-                      size="sm""
+                      variant="ghost"
+                      size="sm"
                       onClick={() => setShowFilters(false)}
-                      aria-label="Close filters""
+                      aria-label="Close filters"
                     >
                       <X className="h-4 w-4" />"
                     </Button>
@@ -1775,8 +1775,8 @@ export function AIDashboardComplete() {
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button
-                              variant="outline""
-                              className="w-full justify-start text-left font-normal""
+                              variant="outline"
+                              className="w-full justify-start text-left font-normal"
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />"
                               {filters.dateRange.from ? (
@@ -1788,7 +1788,7 @@ export function AIDashboardComplete() {
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0">"
                             <Calendar
-                              mode="single""
+                              mode="single"
                               selected={filters.dateRange.from}
                               onSelect={(date) => 
                                 setFilters(prev => ({
@@ -1803,8 +1803,8 @@ export function AIDashboardComplete() {
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button
-                              variant="outline""
-                              className="w-full justify-start text-left font-normal""
+                              variant="outline"
+                              className="w-full justify-start text-left font-normal"
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />"
                               {filters.dateRange.to ? (
@@ -1816,7 +1816,7 @@ export function AIDashboardComplete() {
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0">"
                             <Calendar
-                              mode="single""
+                              mode="single"
                               selected={filters.dateRange.to}
                               onSelect={(date) => 
                                 setFilters(prev => ({
@@ -1928,7 +1928,7 @@ export function AIDashboardComplete() {
                 </CardContent>
                 <CardFooter className="flex justify-between">"
                   <Button
-                    variant="outline""
+                    variant="outline"
                     onClick={() => setFilters({
                       dateRange: {
                         from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
