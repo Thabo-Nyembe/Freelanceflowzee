@@ -79,6 +79,9 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Storage')
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -139,26 +142,26 @@ type StorageAction =
 // ============================================================================
 
 function storageReducer(state: StorageState, action: StorageAction): StorageState {
-  console.log('🔄 STORAGE REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_FILES':
-      console.log('✅ STORAGE: Set files -', action.files.length, 'files loaded')
+      logger.info('Setting files', { count: action.files.length })
       return { ...state, files: action.files }
 
     case 'ADD_FILE':
-      console.log('✅ STORAGE: File added - ID:', action.file.id, 'Name:', action.file.name)
+      logger.info('Adding file', { fileId: action.file.id, fileName: action.file.name })
       return { ...state, files: [action.file, ...state.files] }
 
     case 'UPDATE_FILE':
-      console.log('✅ STORAGE: File updated - ID:', action.file.id)
+      logger.info('Updating file', { fileId: action.file.id })
       return {
         ...state,
         files: state.files.map(f => f.id === action.file.id ? action.file : f)
       }
 
     case 'DELETE_FILE':
-      console.log('✅ STORAGE: File deleted - ID:', action.fileId)
+      logger.info('Deleting file', { fileId: action.fileId })
       return {
         ...state,
         files: state.files.filter(f => f.id !== action.fileId),
@@ -166,36 +169,36 @@ function storageReducer(state: StorageState, action: StorageAction): StorageStat
       }
 
     case 'SELECT_FILE':
-      console.log('👁️ STORAGE: File selected -', action.file ? action.file.name : 'None')
+      logger.debug('Selecting file', { fileName: action.file?.name })
       return { ...state, selectedFile: action.file }
 
     case 'SET_SEARCH':
-      console.log('🔍 STORAGE: Search term set:', action.searchTerm)
+      logger.debug('Search term updated', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER_PROVIDER':
-      console.log('🔍 STORAGE: Filter provider:', action.filterProvider)
+      logger.debug('Filter provider updated', { filterProvider: action.filterProvider })
       return { ...state, filterProvider: action.filterProvider }
 
     case 'SET_FILTER_TYPE':
-      console.log('🔍 STORAGE: Filter type:', action.filterType)
+      logger.debug('Filter type updated', { filterType: action.filterType })
       return { ...state, filterType: action.filterType }
 
     case 'SET_FILTER_STATUS':
-      console.log('🔍 STORAGE: Filter status:', action.filterStatus)
+      logger.debug('Filter status updated', { filterStatus: action.filterStatus })
       return { ...state, filterStatus: action.filterStatus }
 
     case 'SET_SORT':
-      console.log('🔀 STORAGE: Sort by:', action.sortBy)
+      logger.debug('Sort by updated', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'SET_VIEW_MODE':
-      console.log('🖼️ STORAGE: View mode:', action.viewMode)
+      logger.debug('View mode updated', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'TOGGLE_SELECT_FILE':
       const isSelected = state.selectedFiles.includes(action.fileId)
-      console.log('☑️ STORAGE: Toggle select file:', action.fileId, isSelected ? 'deselected' : 'selected')
+      logger.debug('Toggle select file', { fileId: action.fileId, isSelected: !isSelected })
       return {
         ...state,
         selectedFiles: isSelected
@@ -204,7 +207,7 @@ function storageReducer(state: StorageState, action: StorageAction): StorageStat
       }
 
     case 'CLEAR_SELECTED_FILES':
-      console.log('✅ STORAGE: Cleared selected files')
+      logger.debug('Clearing selected files')
       return { ...state, selectedFiles: [] }
 
     default:
@@ -217,7 +220,7 @@ function storageReducer(state: StorageState, action: StorageAction): StorageStat
 // ============================================================================
 
 const generateMockStorageFiles = (): StorageFile[] => {
-  console.log('📊 STORAGE: Generating mock storage files...')
+  logger.debug('Generating mock storage files')
 
   const providers: StorageProvider[] = ['aws', 'google', 'azure', 'dropbox', 'local']
   const types: FileType[] = ['document', 'image', 'video', 'audio', 'archive', 'code']
@@ -264,7 +267,7 @@ const generateMockStorageFiles = (): StorageFile[] => {
     }
   })
 
-  console.log('✅ STORAGE: Generated', files.length, 'mock storage files')
+  logger.info('Generated mock storage files', { count: files.length })
   return files
 }
 
@@ -273,7 +276,7 @@ const generateMockStorageFiles = (): StorageFile[] => {
 // ============================================================================
 
 export default function StoragePage() {
-  console.log('🚀 STORAGE: Component mounting...')
+  logger.debug('Component mounting')
 
   // A+++ UTILITIES
   const { announce } = useAnnouncer()
@@ -313,7 +316,7 @@ export default function StoragePage() {
   // ============================================================================
 
   useEffect(() => {
-    console.log('📊 STORAGE: Loading storage files...')
+    logger.info('Loading storage files from API')
 
     const loadFiles = async () => {
       try {
@@ -324,13 +327,16 @@ export default function StoragePage() {
 
         if (result.success && result.files) {
           dispatch({ type: 'SET_FILES', files: result.files })
-          console.log('✅ STORAGE: Files loaded successfully -', result.files.length, 'files')
+          logger.info('Files loaded successfully from API', { count: result.files.length })
           announce('Storage dashboard loaded', 'polite')
         } else {
           throw new Error(result.error || 'Failed to load files')
         }
       } catch (error) {
-        console.error('❌ STORAGE: Load error:', error)
+        logger.error('Storage files load error', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          errorObject: error
+        })
         toast.error('Failed to load storage files')
       } finally {
         setIsLoading(false)
@@ -345,7 +351,7 @@ export default function StoragePage() {
   // ============================================================================
 
   const stats = useMemo(() => {
-    console.log('📊 STORAGE: Calculating stats...')
+    logger.debug('Calculating storage stats')
 
     const totalFiles = state.files.length
     const totalSize = state.files.reduce((sum, f) => sum + f.size, 0)
@@ -370,17 +376,18 @@ export default function StoragePage() {
       providerStats
     }
 
-    console.log('📊 STORAGE: Stats calculated -', JSON.stringify(result))
+    logger.debug('Stats calculated', result)
     return result
   }, [state.files])
 
   const filteredAndSortedFiles = useMemo(() => {
-    console.log('🔍 STORAGE: Filtering and sorting files...')
-    console.log('🔍 STORAGE: Search term:', state.searchTerm)
-    console.log('🔍 STORAGE: Filter provider:', state.filterProvider)
-    console.log('🔍 STORAGE: Filter type:', state.filterType)
-    console.log('🔍 STORAGE: Filter status:', state.filterStatus)
-    console.log('🔀 STORAGE: Sort by:', state.sortBy)
+    logger.debug('Filtering and sorting files', {
+      searchTerm: state.searchTerm,
+      filterProvider: state.filterProvider,
+      filterType: state.filterType,
+      filterStatus: state.filterStatus,
+      sortBy: state.sortBy
+    })
 
     let filtered = [...state.files]
 
@@ -423,7 +430,7 @@ export default function StoragePage() {
       }
     })
 
-    console.log('✅ STORAGE: Filtered to', filtered.length, 'files')
+    logger.debug('Filter and sort complete', { resultCount: filtered.length })
     return filtered
   }, [state.files, state.searchTerm, state.filterProvider, state.filterType, state.filterStatus, state.sortBy])
 
@@ -433,20 +440,29 @@ export default function StoragePage() {
 
   const handleUploadFiles = async () => {
     if (!uploadFiles || uploadFiles.length === 0) {
-      console.log('⚠️ STORAGE: No files selected for upload')
+      logger.warn('No files selected for upload')
       toast.error('Please select files to upload')
       return
     }
 
-    console.log('📤 STORAGE: Uploading', uploadFiles.length, 'file(s)...')
-    console.log('☁️ STORAGE: Target provider:', uploadProvider)
+    const totalSize = Array.from(uploadFiles).reduce((sum, f) => sum + f.size, 0)
+    logger.info('Uploading files', {
+      count: uploadFiles.length,
+      provider: uploadProvider,
+      totalSize
+    })
 
     try {
       setIsSaving(true)
+      const uploadedFiles: string[] = []
 
       for (let i = 0; i < uploadFiles.length; i++) {
         const file = uploadFiles[i]
-        console.log(`📄 STORAGE: Processing file ${i + 1}/${uploadFiles.length}:`, file.name)
+        logger.debug(`Processing file ${i + 1}/${uploadFiles.length}`, {
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type
+        })
 
         const extension = file.name.split('.').pop() || 'file'
         const type = getFileType(extension)
@@ -466,7 +482,6 @@ export default function StoragePage() {
         })
 
         const result = await response.json()
-        console.log('📡 STORAGE: Upload API response:', result)
 
         if (result.success && result.file) {
           const newFile: StorageFile = {
@@ -488,18 +503,33 @@ export default function StoragePage() {
           }
 
           dispatch({ type: 'ADD_FILE', file: newFile })
-          console.log('✅ STORAGE: File uploaded -', file.name)
+          uploadedFiles.push(file.name)
+
+          logger.info('File uploaded successfully', {
+            fileName: file.name,
+            fileSize: file.size,
+            provider: uploadProvider,
+            fileId: result.file.id
+          })
         } else {
           throw new Error(result.error || 'Failed to upload file')
         }
       }
 
-      toast.success(`Uploaded ${uploadFiles.length} file(s) successfully`)
+      toast.success(`Uploaded ${uploadFiles.length} file(s)`, {
+        description: `${formatFileSize(totalSize)} - ${uploadProvider.toUpperCase()} - Files: ${uploadedFiles.slice(0, 3).join(', ')}${uploadedFiles.length > 3 ? ` +${uploadedFiles.length - 3} more` : ''}`
+      })
       setIsUploadModalOpen(false)
       setUploadFiles(null)
-    } catch (error) {
-      console.error('❌ STORAGE: Upload error:', error)
-      toast.error('Failed to upload files')
+    } catch (error: any) {
+      logger.error('File upload failed', {
+        error: error.message,
+        provider: uploadProvider,
+        fileCount: uploadFiles.length
+      })
+      toast.error('Failed to upload files', {
+        description: error.message || 'Please try again later'
+      })
     } finally {
       setIsSaving(false)
     }
@@ -507,7 +537,12 @@ export default function StoragePage() {
 
   const handleDeleteFile = async (fileId: string) => {
     const file = state.files.find(f => f.id === fileId)
-    console.log('🗑️ STORAGE: Deleting file - ID:', fileId, 'Name:', file?.name)
+    logger.info('Deleting file', {
+      fileId,
+      fileName: file?.name,
+      fileSize: file?.size,
+      provider: file?.provider
+    })
 
     try {
       const response = await fetch('/api/files', {
@@ -520,18 +555,28 @@ export default function StoragePage() {
       })
 
       const result = await response.json()
-      console.log('📡 STORAGE: Delete API response:', result)
 
       if (result.success) {
         dispatch({ type: 'DELETE_FILE', fileId })
-        toast.success('File deleted successfully')
+
+        logger.info('File deleted successfully', {
+          fileId,
+          fileName: file?.name
+        })
+
+        toast.success('File deleted', {
+          description: `${file?.name} - ${formatFileSize(file?.size || 0)} - ${file?.provider?.toUpperCase()} - Removed from storage`
+        })
         setIsDeleteModalOpen(false)
-        console.log('✅ STORAGE: File deleted')
       } else {
         throw new Error(result.error || 'Failed to delete file')
       }
     } catch (error: any) {
-      console.error('❌ STORAGE: Delete error:', error)
+      logger.error('File delete failed', {
+        error: error.message,
+        fileId,
+        fileName: file?.name
+      })
       toast.error('Failed to delete file', {
         description: error.message || 'Please try again later'
       })
@@ -539,7 +584,14 @@ export default function StoragePage() {
   }
 
   const handleBulkDelete = async () => {
-    console.log('🗑️ STORAGE: Bulk delete - Count:', state.selectedFiles.length)
+    const selectedFilesData = state.files.filter(f => state.selectedFiles.includes(f.id))
+    const totalSize = selectedFilesData.reduce((sum, f) => sum + f.size, 0)
+
+    logger.info('Bulk deleting files', {
+      count: state.selectedFiles.length,
+      totalSize,
+      fileIds: state.selectedFiles
+    })
 
     try {
       setIsSaving(true)
@@ -554,21 +606,29 @@ export default function StoragePage() {
       })
 
       const result = await response.json()
-      console.log('📡 STORAGE: Bulk delete API response:', result)
 
       if (result.success) {
         state.selectedFiles.forEach(fileId => {
           dispatch({ type: 'DELETE_FILE', fileId })
         })
 
-        toast.success(`Deleted ${state.selectedFiles.length} file(s)`)
+        logger.info('Bulk delete complete', {
+          deletedCount: result.deletedCount || state.selectedFiles.length,
+          totalSize
+        })
+
+        toast.success(`Deleted ${state.selectedFiles.length} file(s)`, {
+          description: `${formatFileSize(totalSize)} freed - ${selectedFilesData.slice(0, 3).map(f => f.name).join(', ')}${selectedFilesData.length > 3 ? ` +${selectedFilesData.length - 3} more` : ''}`
+        })
         dispatch({ type: 'CLEAR_SELECTED_FILES' })
-        console.log('✅ STORAGE: Bulk delete complete')
       } else {
         throw new Error(result.error || 'Failed to delete files')
       }
     } catch (error: any) {
-      console.error('❌ STORAGE: Bulk delete error:', error)
+      logger.error('Bulk delete failed', {
+        error: error.message,
+        count: state.selectedFiles.length
+      })
       toast.error('Failed to delete files', {
         description: error.message || 'Please try again later'
       })
@@ -579,13 +639,16 @@ export default function StoragePage() {
 
   const handleMoveFile = async () => {
     if (!state.selectedFile || !movePath) {
-      console.log('⚠️ STORAGE: Missing file or path')
+      logger.warn('Missing file or destination path for move operation')
       toast.error('Please specify destination path')
       return
     }
 
-    console.log('📂 STORAGE: Moving file:', state.selectedFile.name)
-    console.log('🎯 STORAGE: Target path:', movePath)
+    logger.info('Moving file', {
+      fileName: state.selectedFile.name,
+      currentPath: state.selectedFile.path,
+      targetPath: movePath
+    })
 
     try {
       setIsSaving(true)
@@ -603,7 +666,6 @@ export default function StoragePage() {
       })
 
       const result = await response.json()
-      console.log('📡 STORAGE: Move API response:', result)
 
       if (result.success) {
         const updatedFile = {
@@ -613,15 +675,27 @@ export default function StoragePage() {
         }
 
         dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-        toast.success('File moved successfully')
+
+        logger.info('File moved successfully', {
+          fileName: state.selectedFile.name,
+          fromPath: state.selectedFile.path,
+          toPath: movePath
+        })
+
+        toast.success('File moved', {
+          description: `${state.selectedFile.name} - ${formatFileSize(state.selectedFile.size)} - From: ${state.selectedFile.path} → To: ${movePath}`
+        })
         setIsMoveModalOpen(false)
         setMovePath('')
-        console.log('✅ STORAGE: File moved')
       } else {
         throw new Error(result.error || 'Failed to move file')
       }
     } catch (error: any) {
-      console.error('❌ STORAGE: Move error:', error)
+      logger.error('File move failed', {
+        error: error.message,
+        fileName: state.selectedFile?.name,
+        targetPath: movePath
+      })
       toast.error('Failed to move file', {
         description: error.message || 'Please try again later'
       })
@@ -632,12 +706,15 @@ export default function StoragePage() {
 
   const handleShareFile = async () => {
     if (!state.selectedFile) {
-      console.log('⚠️ STORAGE: No file selected for sharing')
+      logger.warn('No file selected for sharing')
       return
     }
 
-    console.log('🔗 STORAGE: Sharing file:', state.selectedFile.name)
-    console.log('👥 STORAGE: Share with:', shareEmails)
+    logger.info('Sharing file', {
+      fileName: state.selectedFile.name,
+      recipients: shareEmails,
+      recipientCount: shareEmails.length
+    })
 
     try {
       setIsSaving(true)
@@ -656,7 +733,6 @@ export default function StoragePage() {
       })
 
       const result = await response.json()
-      console.log('📡 STORAGE: Share API response:', result)
 
       if (result.success) {
         const updatedFile = {
@@ -665,16 +741,28 @@ export default function StoragePage() {
         }
 
         dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-        toast.success('File shared successfully')
+
+        logger.info('File shared successfully', {
+          fileName: state.selectedFile.name,
+          recipientCount: shareEmails.length,
+          totalSharedWith: updatedFile.sharedWith.length
+        })
+
+        toast.success('File shared', {
+          description: `${state.selectedFile.name} - ${formatFileSize(state.selectedFile.size)} - Shared with: ${shareEmails.join(', ')} - Total: ${updatedFile.sharedWith.length} users`
+        })
         setIsShareModalOpen(false)
         setShareEmail('')
         setShareEmails([])
-        console.log('✅ STORAGE: File shared')
       } else {
         throw new Error(result.error || 'Failed to share file')
       }
     } catch (error: any) {
-      console.error('❌ STORAGE: Share error:', error)
+      logger.error('File share failed', {
+        error: error.message,
+        fileName: state.selectedFile?.name,
+        recipients: shareEmails
+      })
       toast.error('Failed to share file', {
         description: error.message || 'Please try again later'
       })
@@ -685,7 +773,12 @@ export default function StoragePage() {
 
   const handleDownload = async (fileId: string) => {
     const file = state.files.find(f => f.id === fileId)
-    console.log('📥 STORAGE: Downloading file - ID:', fileId, 'Name:', file?.name)
+    logger.info('Downloading file', {
+      fileId,
+      fileName: file?.name,
+      fileSize: file?.size,
+      provider: file?.provider
+    })
 
     try {
       const response = await fetch('/api/files', {
@@ -698,7 +791,6 @@ export default function StoragePage() {
       })
 
       const result = await response.json()
-      console.log('📡 STORAGE: Download API response:', result)
 
       if (result.success) {
         if (file) {
@@ -707,15 +799,25 @@ export default function StoragePage() {
             downloadCount: file.downloadCount + 1
           }
           dispatch({ type: 'UPDATE_FILE', file: updatedFile })
-        }
 
-        toast.success('Download started')
-        console.log('✅ STORAGE: Download initiated')
+          logger.info('Download initiated successfully', {
+            fileName: file.name,
+            newDownloadCount: updatedFile.downloadCount
+          })
+
+          toast.success('Download started', {
+            description: `${file.name} - ${formatFileSize(file.size)} - ${file.provider.toUpperCase()} - Total downloads: ${updatedFile.downloadCount}`
+          })
+        }
       } else {
         throw new Error(result.error || 'Failed to download file')
       }
     } catch (error: any) {
-      console.error('❌ STORAGE: Download error:', error)
+      logger.error('File download failed', {
+        error: error.message,
+        fileId,
+        fileName: file?.name
+      })
       toast.error('Failed to download file', {
         description: error.message || 'Please try again later'
       })
