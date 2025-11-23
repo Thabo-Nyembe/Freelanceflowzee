@@ -662,7 +662,7 @@ export default function TutorialSystemLaunchPanel() {
                       <Skeleton className="h-5 w-[70px]" />
                     ) : (
                       <Badge variant={systemStatus?.scriptAvailable ? "outline" : "destructive"}>
-                        {systemStatus?.scriptAvailable ? "Yes" : "No"}"
+                        {systemStatus?.scriptAvailable ? "Yes" : "No"}
                       </Badge>
                     )}
                   </div>
@@ -673,9 +673,9 @@ export default function TutorialSystemLaunchPanel() {
                       <Skeleton className="h-5 w-[120px]" />
                     ) : (
                       <span className="text-sm">
-                        {systemStatus?.lastLaunch 
+                        {systemStatus?.lastLaunch
                           ? formatDistanceToNow(new Date(systemStatus.lastLaunch), { addSuffix: true })
-                          : "Never"}"
+                          : "Never"}
                       </span>
                     )}
                   </div>
@@ -1474,7 +1474,7 @@ export default function TutorialSystemLaunchPanel() {
                       <div className="flex items-center justify-between">
                         <Label>Tutorials</Label>
                         <Badge variant={systemStatus?.components.tutorials ? "success" : "outline"}>
-                          {systemStatus?.components.tutorials ? "Healthy" : "Inactive"}"
+                          {systemStatus?.components.tutorials ? "Healthy" : "Inactive"}
                         </Badge>
                       </div>
                       <Progress 
@@ -1487,7 +1487,7 @@ export default function TutorialSystemLaunchPanel() {
                       <div className="flex items-center justify-between">
                         <Label>Achievements</Label>
                         <Badge variant={systemStatus?.components.achievements ? "success" : "outline"}>
-                          {systemStatus?.components.achievements ? "Healthy" : "Inactive"}"
+                          {systemStatus?.components.achievements ? "Healthy" : "Inactive"}
                         </Badge>
                       </div>
                       <Progress 
@@ -1500,7 +1500,7 @@ export default function TutorialSystemLaunchPanel() {
                       <div className="flex items-center justify-between">
                         <Label>Help Center</Label>
                         <Badge variant={systemStatus?.components.helpCenter ? "success" : "outline"}>
-                          {systemStatus?.components.helpCenter ? "Healthy" : "Inactive"}"
+                          {systemStatus?.components.helpCenter ? "Healthy" : "Inactive"}
                         </Badge>
                       </div>
                       <Progress 
@@ -1513,7 +1513,7 @@ export default function TutorialSystemLaunchPanel() {
                       <div className="flex items-center justify-between">
                         <Label>Analytics</Label>
                         <Badge variant={systemStatus?.components.analytics ? "success" : "outline"}>
-                          {systemStatus?.components.analytics ? "Healthy" : "Inactive"}"
+                          {systemStatus?.components.analytics ? "Healthy" : "Inactive"}
                         </Badge>
                       </div>
                       <Progress 
