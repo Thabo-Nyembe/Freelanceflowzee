@@ -32,6 +32,9 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Client-Portal')
 
 // UI Components
 import { Button } from '@/components/ui/button'
@@ -172,77 +175,77 @@ type PortalAction =
 // ============================================================================
 
 function portalReducer(state: PortalState, action: PortalAction): PortalState {
-  console.log('🔄 CLIENT PORTAL REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_CLIENTS':
-      console.log('✅ CLIENT PORTAL: Set clients -', action.clients.length, 'clients loaded')
+      logger.info('Setting clients', { count: action.clients.length })
       return { ...state, clients: action.clients }
 
     case 'SET_PROJECTS':
-      console.log('✅ CLIENT PORTAL: Set projects -', action.projects.length, 'projects loaded')
+      logger.info('Setting projects', { count: action.projects.length })
       return { ...state, projects: action.projects }
 
     case 'SET_COMMUNICATIONS':
-      console.log('✅ CLIENT PORTAL: Set communications -', action.communications.length, 'items loaded')
+      logger.info('Setting communications', { count: action.communications.length })
       return { ...state, communications: action.communications }
 
     case 'SET_FILES':
-      console.log('✅ CLIENT PORTAL: Set files -', action.files.length, 'files loaded')
+      logger.info('Setting files', { count: action.files.length })
       return { ...state, files: action.files }
 
     case 'ADD_CLIENT':
-      console.log('✅ CLIENT PORTAL: Client added - ID:', action.client.id, 'Company:', action.client.companyName)
+      logger.info('Client added', { clientId: action.client.id, companyName: action.client.companyName })
       return { ...state, clients: [action.client, ...state.clients] }
 
     case 'UPDATE_CLIENT':
-      console.log('✅ CLIENT PORTAL: Client updated - ID:', action.client.id)
+      logger.info('Client updated', { clientId: action.client.id })
       return {
         ...state,
         clients: state.clients.map(c => c.id === action.client.id ? action.client : c)
       }
 
     case 'DELETE_CLIENT':
-      console.log('✅ CLIENT PORTAL: Client deleted - ID:', action.clientId)
+      logger.info('Client deleted', { clientId: action.clientId })
       return {
         ...state,
         clients: state.clients.filter(c => c.id !== action.clientId)
       }
 
     case 'ADD_PROJECT':
-      console.log('✅ CLIENT PORTAL: Project added - ID:', action.project.id, 'Name:', action.project.name)
+      logger.info('Project added', { projectId: action.project.id, name: action.project.name })
       return { ...state, projects: [action.project, ...state.projects] }
 
     case 'ADD_COMMUNICATION':
-      console.log('✅ CLIENT PORTAL: Communication added - ID:', action.communication.id)
+      logger.info('Communication added', { communicationId: action.communication.id })
       return { ...state, communications: [action.communication, ...state.communications] }
 
     case 'SELECT_CLIENT':
-      console.log('👁️ CLIENT PORTAL: Client selected -', action.client ? action.client.companyName : 'None')
+      logger.info('Client selected', { companyName: action.client ? action.client.companyName : null })
       return { ...state, selectedClient: action.client }
 
     case 'SELECT_PROJECT':
-      console.log('👁️ CLIENT PORTAL: Project selected -', action.project ? action.project.name : 'None')
+      logger.info('Project selected', { name: action.project ? action.project.name : null })
       return { ...state, selectedProject: action.project }
 
     case 'SET_VIEW_MODE':
-      console.log('🖼️ CLIENT PORTAL: View mode:', action.viewMode)
+      logger.debug('View mode changed', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'SET_SEARCH':
-      console.log('🔍 CLIENT PORTAL: Search term:', action.searchTerm)
+      logger.debug('Search term changed', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER_STATUS':
-      console.log('🔍 CLIENT PORTAL: Filter status:', action.filterStatus)
+      logger.debug('Filter status changed', { filterStatus: action.filterStatus })
       return { ...state, filterStatus: action.filterStatus }
 
     case 'SET_FILTER_TIER':
-      console.log('🔍 CLIENT PORTAL: Filter tier:', action.filterTier)
+      logger.debug('Filter tier changed', { filterTier: action.filterTier })
       return { ...state, filterTier: action.filterTier }
 
     case 'SET_SORT':
-      console.log('🔀 CLIENT PORTAL: Sort by:', action.sortBy)
+      logger.debug('Sort changed', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     default:
@@ -255,7 +258,7 @@ function portalReducer(state: PortalState, action: PortalAction): PortalState {
 // ============================================================================
 
 const generateMockClients = (): Client[] => {
-  console.log('📊 CLIENT PORTAL: Generating mock clients...')
+  logger.debug('Generating mock clients')
 
   const companies = [
     'TechCorp Solutions', 'Digital Innovators', 'Cloud Systems Inc', 'Data Dynamics',
@@ -291,12 +294,12 @@ const generateMockClients = (): Client[] => {
     createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
   }))
 
-  console.log('✅ CLIENT PORTAL: Generated', clients.length, 'mock clients')
+  logger.info('Generated mock clients', { count: clients.length })
   return clients
 }
 
 const generateMockProjects = (clients: Client[]): Project[] => {
-  console.log('📊 CLIENT PORTAL: Generating mock projects...')
+  logger.debug('Generating mock projects')
 
   const projectNames = [
     'Website Redesign', 'Mobile App Development', 'Cloud Migration', 'API Integration',
@@ -326,7 +329,7 @@ const generateMockProjects = (clients: Client[]): Project[] => {
     }
   })
 
-  console.log('✅ CLIENT PORTAL: Generated', projects.length, 'mock projects')
+  logger.info('Generated mock projects', { count: projects.length })
   return projects
 }
 
@@ -335,7 +338,7 @@ const generateMockProjects = (clients: Client[]): Project[] => {
 // ============================================================================
 
 export default function ClientPortalPage() {
-  console.log('🚀 CLIENT PORTAL: Component mounting...')
+  logger.debug('Component mounting')
 
   // A+++ UTILITIES
   const { announce } = useAnnouncer()
@@ -392,7 +395,7 @@ export default function ClientPortalPage() {
   // ============================================================================
 
   useEffect(() => {
-    console.log('📊 CLIENT PORTAL: Loading portal data from API...')
+    logger.info('Loading portal data from API')
 
     const loadData = async () => {
       try {
@@ -414,13 +417,19 @@ export default function ClientPortalPage() {
           dispatch({ type: 'SET_CLIENTS', clients })
           dispatch({ type: 'SET_PROJECTS', projects })
 
-          console.log('✅ CLIENT PORTAL: Data loaded from API -', result.clients?.length || 0, 'clients')
+          logger.info('Data loaded from API', {
+            clientsCount: result.clients?.length || 0,
+            projectsCount: result.projects?.length || 0
+          })
           announce('Client portal loaded', 'polite')
         } else {
           throw new Error(result.error || 'Failed to load clients')
         }
       } catch (error: any) {
-        console.error('❌ CLIENT PORTAL: Load error:', error)
+        logger.error('Portal data load error', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          errorObject: error
+        })
         toast.error('Failed to load client portal data', {
           description: error.message || 'Please try again later'
         })
@@ -437,8 +446,6 @@ export default function ClientPortalPage() {
   // ============================================================================
 
   const stats = useMemo(() => {
-    console.log('📊 CLIENT PORTAL: Calculating stats...')
-
     const totalClients = state.clients.length
     const activeClients = state.clients.filter(c => c.status === 'active').length
     const totalRevenue = state.clients.reduce((sum, c) => sum + c.totalRevenue, 0)
@@ -455,12 +462,18 @@ export default function ClientPortalPage() {
       activeProjects
     }
 
-    console.log('📊 CLIENT PORTAL: Stats calculated -', JSON.stringify(result))
+    logger.debug('Stats calculated', result)
     return result
   }, [state.clients, state.projects])
 
   const filteredAndSortedClients = useMemo(() => {
-    console.log('🔍 CLIENT PORTAL: Filtering and sorting clients...')
+    logger.debug('Filtering and sorting clients', {
+      searchTerm: state.searchTerm,
+      filterStatus: state.filterStatus,
+      filterTier: state.filterTier,
+      sortBy: state.sortBy,
+      totalClients: state.clients.length
+    })
 
     let filtered = [...state.clients]
 
@@ -471,16 +484,19 @@ export default function ClientPortalPage() {
         c.contactPerson.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
         c.email.toLowerCase().includes(state.searchTerm.toLowerCase())
       )
+      logger.debug('Search filter applied', { resultCount: filtered.length })
     }
 
     // Filter by status
     if (state.filterStatus !== 'all') {
       filtered = filtered.filter(c => c.status === state.filterStatus)
+      logger.debug('Status filter applied', { status: state.filterStatus, resultCount: filtered.length })
     }
 
     // Filter by tier
     if (state.filterTier !== 'all') {
       filtered = filtered.filter(c => c.tier === state.filterTier)
+      logger.debug('Tier filter applied', { tier: state.filterTier, resultCount: filtered.length })
     }
 
     // Sort
@@ -499,7 +515,7 @@ export default function ClientPortalPage() {
       }
     })
 
-    console.log('✅ CLIENT PORTAL: Filtered to', filtered.length, 'clients')
+    logger.debug('Filtering and sorting complete', { finalCount: filtered.length })
     return filtered
   }, [state.clients, state.searchTerm, state.filterStatus, state.filterTier, state.sortBy])
 
@@ -509,13 +525,16 @@ export default function ClientPortalPage() {
 
   const handleAddClient = async () => {
     if (!clientForm.companyName || !clientForm.contactPerson || !clientForm.email) {
-      console.log('⚠️ CLIENT PORTAL: Missing required fields')
+      logger.warn('Client creation failed', { reason: 'Missing required fields' })
       toast.error('Please fill in all required fields')
       return
     }
 
-    console.log('➕ CLIENT PORTAL: Adding new client via API...')
-    console.log('📝 CLIENT PORTAL: Company:', clientForm.companyName)
+    logger.info('Adding new client via API', {
+      companyName: clientForm.companyName,
+      contactPerson: clientForm.contactPerson,
+      tier: clientForm.tier
+    })
 
     try {
       setIsSaving(true)
@@ -557,17 +576,28 @@ export default function ClientPortalPage() {
         }
 
         dispatch({ type: 'ADD_CLIENT', client: newClient })
-        toast.success('🏢 Client added successfully', {
-          description: `${clientForm.companyName} is now in your client portal`
+
+        logger.info('Client added successfully', {
+          clientId: result.client.id,
+          companyName: clientForm.companyName
+        })
+
+        const followUpDate = new Date(newClient.nextFollowUp).toLocaleDateString()
+
+        toast.success('Client added successfully', {
+          description: `${clientForm.companyName} - ${clientForm.tier} tier - ${clientForm.contactPerson} - Health: 85% - Follow-up: ${followUpDate}`
         })
         setIsAddClientModalOpen(false)
         setClientForm({ companyName: '', contactPerson: '', email: '', phone: '', tier: 'basic' })
-        console.log('✅ CLIENT PORTAL: Client added - ID:', result.client.id)
       } else {
         throw new Error(result.error || 'Failed to add client')
       }
     } catch (error: any) {
-      console.error('❌ CLIENT PORTAL: Add client error:', error)
+      logger.error('Client creation error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorObject: error,
+        companyName: clientForm.companyName
+      })
       toast.error('Failed to add client', {
         description: error.message || 'Please try again later'
       })
@@ -578,7 +608,12 @@ export default function ClientPortalPage() {
 
   const handleDeleteClient = async (clientId: string) => {
     const client = state.clients.find(c => c.id === clientId)
-    console.log('🗑️ CLIENT PORTAL: Deleting client via API - ID:', clientId, 'Company:', client?.companyName)
+
+    logger.info('Deleting client via API', {
+      clientId,
+      companyName: client?.companyName,
+      activeProjects: client?.activeProjects
+    })
 
     try {
       const response = await fetch('/api/clients', {
@@ -594,16 +629,24 @@ export default function ClientPortalPage() {
 
       if (result.success) {
         dispatch({ type: 'DELETE_CLIENT', clientId })
-        toast.success('🗑️ Client deleted successfully', {
-          description: `${client?.companyName || 'Client'} removed from portal`
+
+        logger.info('Client deleted successfully', { clientId })
+
+        const revenueLost = client?.totalRevenue || 0
+
+        toast.success('Client deleted successfully', {
+          description: `${client?.companyName || 'Client'} - ${client?.tier || 'basic'} tier - ${client?.activeProjects || 0} projects - $${revenueLost.toLocaleString()} total revenue`
         })
         setIsDeleteModalOpen(false)
-        console.log('✅ CLIENT PORTAL: Client deleted')
       } else {
         throw new Error(result.error || 'Failed to delete client')
       }
     } catch (error: any) {
-      console.error('❌ CLIENT PORTAL: Delete error:', error)
+      logger.error('Client deletion error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorObject: error,
+        clientId
+      })
       toast.error('Failed to delete client', {
         description: error.message || 'Please try again later'
       })
@@ -612,13 +655,18 @@ export default function ClientPortalPage() {
 
   const handleAddProject = async () => {
     if (!projectForm.name || !projectForm.clientId) {
-      console.log('⚠️ CLIENT PORTAL: Missing required fields')
+      logger.warn('Project creation failed', { reason: 'Missing required fields' })
       toast.error('Please fill in all required fields')
       return
     }
 
-    console.log('➕ CLIENT PORTAL: Adding new project (local state)...')
-    console.log('📝 CLIENT PORTAL: Project:', projectForm.name)
+    const client = state.clients.find(c => c.id === projectForm.clientId)
+
+    logger.info('Adding new project', {
+      projectName: projectForm.name,
+      clientId: projectForm.clientId,
+      companyName: client?.companyName
+    })
 
     try {
       setIsSaving(true)
@@ -641,14 +689,22 @@ export default function ClientPortalPage() {
       }
 
       dispatch({ type: 'ADD_PROJECT', project: newProject })
-      toast.success('📁 Project added successfully', {
-        description: `${projectForm.name} is now in planning stage`
+
+      logger.info('Project added successfully', { projectId: newProject.id, name: newProject.name })
+
+      const endDate = new Date(newProject.endDate).toLocaleDateString()
+
+      toast.success('Project added successfully', {
+        description: `${projectForm.name} - ${client?.companyName} - Planning stage - Budget: $${budget.toLocaleString()} - Due: ${endDate}`
       })
       setIsAddProjectModalOpen(false)
       setProjectForm({ name: '', description: '', budget: '', clientId: '' })
-      console.log('✅ CLIENT PORTAL: Project added - ID:', newProject.id)
     } catch (error: any) {
-      console.error('❌ CLIENT PORTAL: Add project error:', error)
+      logger.error('Project creation error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorObject: error,
+        projectName: projectForm.name
+      })
       toast.error('Failed to add project', {
         description: error.message || 'Please try again later'
       })
@@ -659,13 +715,17 @@ export default function ClientPortalPage() {
 
   const handleAddCommunication = async () => {
     if (!communicationForm.subject || !state.selectedClient) {
-      console.log('⚠️ CLIENT PORTAL: Missing required fields')
+      logger.warn('Communication creation failed', { reason: 'Missing required fields' })
       toast.error('Please fill in all required fields')
       return
     }
 
-    console.log('➕ CLIENT PORTAL: Adding communication (local state)...')
-    console.log('📝 CLIENT PORTAL: Subject:', communicationForm.subject)
+    logger.info('Adding communication', {
+      clientId: state.selectedClient.id,
+      companyName: state.selectedClient.companyName,
+      type: communicationForm.type,
+      subject: communicationForm.subject
+    })
 
     try {
       setIsSaving(true)
@@ -682,14 +742,22 @@ export default function ClientPortalPage() {
       }
 
       dispatch({ type: 'ADD_COMMUNICATION', communication: newComm })
-      toast.success('💬 Communication logged successfully', {
-        description: `${communicationForm.type} - ${communicationForm.subject}`
+
+      logger.info('Communication added successfully', { communicationId: newComm.id, type: newComm.type })
+
+      const timestamp = new Date(newComm.createdAt).toLocaleString()
+
+      toast.success('Communication logged successfully', {
+        description: `${state.selectedClient.companyName} - ${communicationForm.type} - ${communicationForm.subject} - ${timestamp}`
       })
       setIsAddCommunicationModalOpen(false)
       setCommunicationForm({ type: 'email', subject: '', content: '' })
-      console.log('✅ CLIENT PORTAL: Communication added - ID:', newComm.id)
     } catch (error: any) {
-      console.error('❌ CLIENT PORTAL: Add communication error:', error)
+      logger.error('Communication creation error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorObject: error,
+        subject: communicationForm.subject
+      })
       toast.error('Failed to log communication', {
         description: error.message || 'Please try again later'
       })
