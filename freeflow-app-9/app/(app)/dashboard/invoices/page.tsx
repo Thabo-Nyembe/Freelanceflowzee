@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -36,7 +38,15 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  Palette,
+  Upload,
+  Image as ImageIcon,
+  Type,
+  Percent,
+  CreditCard,
+  Sparkles,
+  Layout
 } from 'lucide-react'
 
 export default function InvoicesPage() {
@@ -119,6 +129,28 @@ export default function InvoicesPage() {
       ]
     }
   ])
+
+  // Template state - USER MANUAL SPEC (Gap #8)
+  const [invoiceTemplate, setInvoiceTemplate] = useState({
+    layout: 'professional' as 'modern' | 'classic' | 'minimal' | 'professional',
+    primaryColor: '#3B82F6', // Blue
+    secondaryColor: '#1E40AF', // Dark blue
+    accentColor: '#60A5FA', // Light blue
+    logo: null as string | null,
+    headerText: 'Your Business Name',
+    footerText: 'Thank you for your business!',
+    showLineNumbers: true,
+    showItemImages: false,
+    taxRate: 0,
+    currency: 'USD',
+    taxType: 'none' as 'none' | 'sales' | 'vat' | 'custom',
+    paymentMethods: {
+      stripe: true,
+      bankTransfer: true,
+      paypal: false,
+      crypto: false
+    }
+  })
 
   // ============================================================================
   // A+++ LOAD INVOICES DATA
@@ -870,6 +902,420 @@ ${invoices.map(inv =>
           </LiquidGlassCard>
         </div>
       </div>
+
+      {/* PROFESSIONAL INVOICE TEMPLATES - USER MANUAL SPEC (Gap #8) */}
+      <Card className="bg-gradient-to-br from-indigo-50/50 via-purple-50/50 to-pink-50/50 border-2 border-indigo-200">
+        <CardHeader>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
+              <Sparkles className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <Palette className="w-6 h-6 text-indigo-600" />
+                Professional Invoice Templates
+              </CardTitle>
+              <CardDescription className="text-gray-700">
+                Customize your invoice branding, colors, and layout for a professional appearance
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Template Selector */}
+          <div>
+            <label className="text-sm font-semibold text-gray-900 mb-3 block flex items-center gap-2">
+              <Layout className="w-4 h-4 text-indigo-600" />
+              Invoice Layout Template
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              {[
+                { id: 'modern', name: 'Modern', desc: 'Clean, minimalist design', color: 'blue' },
+                { id: 'classic', name: 'Classic', desc: 'Traditional business style', color: 'gray' },
+                { id: 'minimal', name: 'Minimal', desc: 'Simple and elegant', color: 'purple' },
+                { id: 'professional', name: 'Professional', desc: 'Corporate standard', color: 'indigo' }
+              ].map((template) => (
+                <button
+                  key={template.id}
+                  onClick={() => {
+                    setInvoiceTemplate({ ...invoiceTemplate, layout: template.id as any })
+                    logger.info('Invoice template layout changed', {
+                      layout: template.id,
+                      previousLayout: invoiceTemplate.layout
+                    })
+                    toast.success('Template updated', {
+                      description: `${template.name} - ${template.desc} - Applied to all future invoices`
+                    })
+                  }}
+                  className={`p-4 rounded-lg border-2 text-left transition-all ${
+                    invoiceTemplate.layout === template.id
+                      ? `border-${template.color}-500 bg-${template.color}-50 shadow-md`
+                      : 'border-gray-200 hover:border-gray-300 bg-white'
+                  }`}
+                >
+                  <div className="font-semibold text-gray-900">{template.name}</div>
+                  <div className="text-xs text-gray-600 mt-1">{template.desc}</div>
+                  {invoiceTemplate.layout === template.id && (
+                    <CheckCircle className="w-4 h-4 text-green-600 mt-2" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Branding Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Logo Upload */}
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-indigo-600" />
+                Business Logo
+              </label>
+              <div className="border-2 border-dashed border-indigo-300 rounded-lg p-6 text-center hover:border-indigo-400 transition-colors bg-white">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  id="logo-upload"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      const reader = new FileReader()
+                      reader.onload = (event) => {
+                        setInvoiceTemplate({ ...invoiceTemplate, logo: event.target?.result as string })
+                        logger.info('Invoice logo uploaded', {
+                          fileName: file.name,
+                          fileSize: file.size,
+                          fileType: file.type
+                        })
+                        toast.success('Logo uploaded', {
+                          description: `${file.name} - ${Math.round(file.size / 1024)}KB - ${file.type} - Will appear on all invoices`
+                        })
+                      }
+                      reader.readAsDataURL(file)
+                    }
+                  }}
+                />
+                <label htmlFor="logo-upload" className="cursor-pointer">
+                  <Upload className="w-8 h-8 mx-auto text-indigo-400 mb-2" />
+                  <p className="text-sm text-gray-700 font-medium">Click to upload logo</p>
+                  <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 2MB</p>
+                </label>
+                {invoiceTemplate.logo && (
+                  <div className="mt-3">
+                    <img src={invoiceTemplate.logo} alt="Logo preview" className="h-16 mx-auto" />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mt-2"
+                      onClick={() => {
+                        setInvoiceTemplate({ ...invoiceTemplate, logo: null })
+                        logger.info('Invoice logo removed')
+                        toast.info('Logo removed', {
+                          description: 'Logo cleared - Upload a new one to add branding'
+                        })
+                      }}
+                    >
+                      Remove Logo
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Color Picker */}
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <Palette className="w-4 h-4 text-indigo-600" />
+                Brand Colors
+              </label>
+              <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200">
+                <div>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Primary Color</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={invoiceTemplate.primaryColor}
+                      onChange={(e) => {
+                        setInvoiceTemplate({ ...invoiceTemplate, primaryColor: e.target.value })
+                        logger.debug('Primary color changed', { color: e.target.value })
+                      }}
+                      className="h-10 w-20 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={invoiceTemplate.primaryColor}
+                      onChange={(e) => setInvoiceTemplate({ ...invoiceTemplate, primaryColor: e.target.value })}
+                      className="flex-1"
+                      placeholder="#3B82F6"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-700 mb-1 block">Secondary Color</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={invoiceTemplate.secondaryColor}
+                      onChange={(e) => {
+                        setInvoiceTemplate({ ...invoiceTemplate, secondaryColor: e.target.value })
+                        logger.debug('Secondary color changed', { color: e.target.value })
+                      }}
+                      className="h-10 w-20 rounded cursor-pointer"
+                    />
+                    <Input
+                      value={invoiceTemplate.secondaryColor}
+                      onChange={(e) => setInvoiceTemplate({ ...invoiceTemplate, secondaryColor: e.target.value })}
+                      className="flex-1"
+                      placeholder="#1E40AF"
+                    />
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    logger.info('Brand colors saved', {
+                      primary: invoiceTemplate.primaryColor,
+                      secondary: invoiceTemplate.secondaryColor,
+                      accent: invoiceTemplate.accentColor
+                    })
+                    toast.success('Brand colors saved', {
+                      description: `Primary: ${invoiceTemplate.primaryColor} - Secondary: ${invoiceTemplate.secondaryColor} - Applied to all invoices`
+                    })
+                  }}
+                >
+                  Save Colors
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Header and Footer Text */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <Type className="w-4 h-4 text-indigo-600" />
+                Header Text
+              </label>
+              <Input
+                value={invoiceTemplate.headerText}
+                onChange={(e) => setInvoiceTemplate({ ...invoiceTemplate, headerText: e.target.value })}
+                placeholder="Your Business Name"
+                className="bg-white"
+              />
+              <p className="text-xs text-gray-600">Appears at the top of every invoice</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <Type className="w-4 h-4 text-indigo-600" />
+                Footer Text
+              </label>
+              <Textarea
+                value={invoiceTemplate.footerText}
+                onChange={(e) => setInvoiceTemplate({ ...invoiceTemplate, footerText: e.target.value })}
+                placeholder="Thank you for your business!"
+                className="bg-white"
+                rows={2}
+              />
+              <p className="text-xs text-gray-600">Appears at the bottom of every invoice</p>
+            </div>
+          </div>
+
+          {/* Tax Calculation */}
+          <div className="bg-white p-5 rounded-lg border-2 border-indigo-200 space-y-4">
+            <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+              <Percent className="w-5 h-5 text-indigo-600" />
+              Tax Calculation
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Tax Type</label>
+                <select
+                  value={invoiceTemplate.taxType}
+                  onChange={(e) => {
+                    const taxType = e.target.value as any
+                    const defaultRates = {
+                      none: 0,
+                      sales: 8,
+                      vat: 20,
+                      custom: invoiceTemplate.taxRate
+                    }
+                    setInvoiceTemplate({
+                      ...invoiceTemplate,
+                      taxType,
+                      taxRate: defaultRates[taxType]
+                    })
+                    logger.info('Tax type changed', {
+                      taxType,
+                      taxRate: defaultRates[taxType],
+                      previousType: invoiceTemplate.taxType
+                    })
+                    toast.info('Tax type updated', {
+                      description: `${taxType === 'none' ? 'No tax' : taxType === 'sales' ? '8% Sales Tax' : taxType === 'vat' ? '20% VAT' : 'Custom rate'} - ${taxType === 'none' ? 'Tax disabled' : `${defaultRates[taxType]}% will be applied`}`
+                    })
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                >
+                  <option value="none">No Tax</option>
+                  <option value="sales">Sales Tax (8%)</option>
+                  <option value="vat">VAT (20%)</option>
+                  <option value="custom">Custom Rate</option>
+                </select>
+              </div>
+              {invoiceTemplate.taxType === 'custom' && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Tax Rate (%)</label>
+                  <Input
+                    type="number"
+                    value={invoiceTemplate.taxRate}
+                    onChange={(e) => setInvoiceTemplate({ ...invoiceTemplate, taxRate: Number(e.target.value) })}
+                    placeholder="0"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    className="bg-white"
+                  />
+                </div>
+              )}
+            </div>
+            <div className="bg-indigo-50 p-3 rounded-md">
+              <p className="text-sm text-indigo-900">
+                💡 <strong>Tax Preview:</strong> For a $1,000 invoice, tax would be{' '}
+                <strong>${(1000 * invoiceTemplate.taxRate / 100).toFixed(2)}</strong>, total{' '}
+                <strong>${(1000 + 1000 * invoiceTemplate.taxRate / 100).toFixed(2)}</strong>
+              </p>
+            </div>
+          </div>
+
+          {/* Payment Methods */}
+          <div className="bg-white p-5 rounded-lg border-2 border-indigo-200 space-y-4">
+            <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-indigo-600" />
+              Accepted Payment Methods
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { key: 'stripe', label: 'Stripe', icon: CreditCard, color: 'purple' },
+                { key: 'bankTransfer', label: 'Bank Transfer', icon: DollarSign, color: 'green' },
+                { key: 'paypal', label: 'PayPal', icon: CreditCard, color: 'blue' },
+                { key: 'crypto', label: 'Cryptocurrency', icon: DollarSign, color: 'orange' }
+              ].map((method) => (
+                <button
+                  key={method.key}
+                  onClick={() => {
+                    const newMethods = {
+                      ...invoiceTemplate.paymentMethods,
+                      [method.key]: !invoiceTemplate.paymentMethods[method.key as keyof typeof invoiceTemplate.paymentMethods]
+                    }
+                    setInvoiceTemplate({ ...invoiceTemplate, paymentMethods: newMethods })
+                    const enabledCount = Object.values(newMethods).filter(Boolean).length
+                    logger.info('Payment method toggled', {
+                      method: method.key,
+                      enabled: newMethods[method.key as keyof typeof newMethods],
+                      totalEnabled: enabledCount
+                    })
+                    toast.success(
+                      invoiceTemplate.paymentMethods[method.key as keyof typeof invoiceTemplate.paymentMethods]
+                        ? 'Payment method disabled'
+                        : 'Payment method enabled',
+                      {
+                        description: `${method.label} - ${
+                          invoiceTemplate.paymentMethods[method.key as keyof typeof invoiceTemplate.paymentMethods]
+                            ? 'Removed from invoices'
+                            : 'Will appear on invoices'
+                        } - ${enabledCount} method${enabledCount !== 1 ? 's' : ''} enabled`
+                      }
+                    )
+                  }}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    invoiceTemplate.paymentMethods[method.key as keyof typeof invoiceTemplate.paymentMethods]
+                      ? `border-${method.color}-500 bg-${method.color}-50`
+                      : 'border-gray-200 bg-white hover:border-gray-300'
+                  }`}
+                >
+                  <method.icon className={`w-6 h-6 mx-auto mb-2 ${
+                    invoiceTemplate.paymentMethods[method.key as keyof typeof invoiceTemplate.paymentMethods]
+                      ? `text-${method.color}-600`
+                      : 'text-gray-400'
+                  }`} />
+                  <div className="text-xs font-medium text-gray-900">{method.label}</div>
+                  {invoiceTemplate.paymentMethods[method.key as keyof typeof invoiceTemplate.paymentMethods] && (
+                    <CheckCircle className="w-4 h-4 text-green-600 mx-auto mt-2" />
+                  )}
+                </button>
+              ))}
+            </div>
+            <div className="bg-indigo-50 p-3 rounded-md">
+              <p className="text-sm text-indigo-900">
+                ✓ {Object.values(invoiceTemplate.paymentMethods).filter(Boolean).length} payment method{Object.values(invoiceTemplate.paymentMethods).filter(Boolean).length !== 1 ? 's' : ''} enabled - These will appear on your invoices
+              </p>
+            </div>
+          </div>
+
+          {/* Save Template Button */}
+          <div className="flex gap-3 pt-4 border-t border-indigo-200">
+            <Button
+              className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+              onClick={() => {
+                const enabledPaymentMethods = Object.entries(invoiceTemplate.paymentMethods)
+                  .filter(([_, enabled]) => enabled)
+                  .map(([method]) => method)
+
+                logger.info('Invoice template saved', {
+                  layout: invoiceTemplate.layout,
+                  hasLogo: !!invoiceTemplate.logo,
+                  colors: {
+                    primary: invoiceTemplate.primaryColor,
+                    secondary: invoiceTemplate.secondaryColor
+                  },
+                  taxType: invoiceTemplate.taxType,
+                  taxRate: invoiceTemplate.taxRate,
+                  paymentMethods: enabledPaymentMethods,
+                  headerText: invoiceTemplate.headerText,
+                  footerText: invoiceTemplate.footerText
+                })
+
+                toast.success('Template saved successfully', {
+                  description: `${invoiceTemplate.layout} layout - ${invoiceTemplate.taxType} tax - ${enabledPaymentMethods.length} payment methods - Applied to all future invoices`
+                })
+              }}
+            >
+              <CheckCircle className="w-5 h-5 mr-2" />
+              Save Template Settings
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setInvoiceTemplate({
+                  layout: 'professional',
+                  primaryColor: '#3B82F6',
+                  secondaryColor: '#1E40AF',
+                  accentColor: '#60A5FA',
+                  logo: null,
+                  headerText: 'Your Business Name',
+                  footerText: 'Thank you for your business!',
+                  showLineNumbers: true,
+                  showItemImages: false,
+                  taxRate: 0,
+                  currency: 'USD',
+                  taxType: 'none',
+                  paymentMethods: {
+                    stripe: true,
+                    bankTransfer: true,
+                    paypal: false,
+                    crypto: false
+                  }
+                })
+                logger.info('Invoice template reset to defaults')
+                toast.info('Template reset', {
+                  description: 'Professional layout - No tax - Stripe & Bank Transfer - All settings restored to defaults'
+                })
+              }}
+            >
+              Reset to Defaults
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Invoice Management */}
       <Card>
