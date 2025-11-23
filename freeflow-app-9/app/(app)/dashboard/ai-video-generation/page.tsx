@@ -59,8 +59,9 @@ import { EmptyState } from '@/components/ui/empty-states'
 import { useAnnouncer } from '@/lib/accessibility'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { createFeatureLogger } from '@/lib/logger'
 
-console.log('🚀 AI VIDEO GENERATION: Component mounting...')
+const logger = createFeatureLogger('AI-Video-Generation')
 
 // ============================================================================
 // TYPESCRIPT INTERFACES
@@ -151,19 +152,19 @@ type AIVideoAction =
 // ============================================================================
 
 const aiVideoReducer = (state: AIVideoState, action: AIVideoAction): AIVideoState => {
-  console.log('🔄 AI VIDEO REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_VIDEOS':
-      console.log('📊 AI VIDEO REDUCER: Setting videos -', action.videos.length, 'videos')
+      logger.info('Setting videos', { count: action.videos.length })
       return { ...state, videos: action.videos, isLoading: false }
 
     case 'ADD_VIDEO':
-      console.log('➕ AI VIDEO REDUCER: Adding video - ID:', action.video.id)
+      logger.info('Adding video', { videoId: action.video.id })
       return { ...state, videos: [action.video, ...state.videos] }
 
     case 'UPDATE_VIDEO':
-      console.log('✏️ AI VIDEO REDUCER: Updating video - ID:', action.video.id)
+      logger.info('Updating video', { videoId: action.video.id })
       return {
         ...state,
         videos: state.videos.map(v => v.id === action.video.id ? action.video : v),
@@ -171,7 +172,7 @@ const aiVideoReducer = (state: AIVideoState, action: AIVideoAction): AIVideoStat
       }
 
     case 'DELETE_VIDEO':
-      console.log('🗑️ AI VIDEO REDUCER: Deleting video - ID:', action.videoId)
+      logger.info('Deleting video', { videoId: action.videoId })
       return {
         ...state,
         videos: state.videos.filter(v => v.id !== action.videoId),
@@ -179,31 +180,31 @@ const aiVideoReducer = (state: AIVideoState, action: AIVideoAction): AIVideoStat
       }
 
     case 'SELECT_VIDEO':
-      console.log('👁️ AI VIDEO REDUCER: Selecting video - ID:', action.video?.id || 'none')
+      logger.debug('Selecting video', { videoId: action.video?.id })
       return { ...state, selectedVideo: action.video }
 
     case 'SET_SEARCH':
-      console.log('🔍 AI VIDEO REDUCER: Search term changed:', action.searchTerm)
+      logger.debug('Search term changed', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER_STATUS':
-      console.log('🔧 AI VIDEO REDUCER: Filter status changed:', action.filterStatus)
+      logger.debug('Filter status changed', { filterStatus: action.filterStatus })
       return { ...state, filterStatus: action.filterStatus }
 
     case 'SET_FILTER_QUALITY':
-      console.log('🔧 AI VIDEO REDUCER: Filter quality changed:', action.filterQuality)
+      logger.debug('Filter quality changed', { filterQuality: action.filterQuality })
       return { ...state, filterQuality: action.filterQuality }
 
     case 'SET_SORT':
-      console.log('🔀 AI VIDEO REDUCER: Sort changed:', action.sortBy)
+      logger.debug('Sort changed', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'SET_VIEW_MODE':
-      console.log('📺 AI VIDEO REDUCER: View mode changed:', action.viewMode)
+      logger.debug('View mode changed', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'INCREMENT_VIEW':
-      console.log('👁️ AI VIDEO REDUCER: Incrementing view - ID:', action.videoId)
+      logger.debug('Incrementing view', { videoId: action.videoId })
       return {
         ...state,
         videos: state.videos.map(v =>
@@ -212,7 +213,7 @@ const aiVideoReducer = (state: AIVideoState, action: AIVideoAction): AIVideoStat
       }
 
     case 'INCREMENT_DOWNLOAD':
-      console.log('📥 AI VIDEO REDUCER: Incrementing download - ID:', action.videoId)
+      logger.debug('Incrementing download', { videoId: action.videoId })
       return {
         ...state,
         videos: state.videos.map(v =>
@@ -221,7 +222,7 @@ const aiVideoReducer = (state: AIVideoState, action: AIVideoAction): AIVideoStat
       }
 
     case 'TOGGLE_LIKE':
-      console.log('❤️ AI VIDEO REDUCER: Toggling like - ID:', action.videoId)
+      logger.debug('Toggling like', { videoId: action.videoId })
       return {
         ...state,
         videos: state.videos.map(v =>
@@ -230,7 +231,7 @@ const aiVideoReducer = (state: AIVideoState, action: AIVideoAction): AIVideoStat
       }
 
     case 'TOGGLE_PUBLIC':
-      console.log('🌐 AI VIDEO REDUCER: Toggling public - ID:', action.videoId)
+      logger.debug('Toggling public', { videoId: action.videoId })
       return {
         ...state,
         videos: state.videos.map(v =>
@@ -239,11 +240,11 @@ const aiVideoReducer = (state: AIVideoState, action: AIVideoAction): AIVideoStat
       }
 
     case 'SET_LOADING':
-      console.log('⏳ AI VIDEO REDUCER: Loading state:', action.isLoading)
+      logger.debug('Loading state changed', { isLoading: action.isLoading })
       return { ...state, isLoading: action.isLoading }
 
     case 'SET_TEMPLATES':
-      console.log('📋 AI VIDEO REDUCER: Setting templates -', action.templates.length, 'templates')
+      logger.info('Setting templates', { count: action.templates.length })
       return { ...state, templates: action.templates }
 
     default:
@@ -292,7 +293,7 @@ const VIDEO_TAGS = [
 ]
 
 const generateMockVideos = (): GeneratedVideo[] => {
-  console.log('🎬 AI VIDEO: Generating 60 mock videos...')
+  logger.debug('Generating mock videos')
 
   const videos: GeneratedVideo[] = []
   const baseDate = new Date()
@@ -347,12 +348,12 @@ const generateMockVideos = (): GeneratedVideo[] => {
     })
   }
 
-  console.log('✅ AI VIDEO: Generated', videos.length, 'videos')
+  logger.info('Generated mock videos', { count: videos.length })
   return videos
 }
 
 const generateMockTemplates = (): VideoTemplate[] => {
-  console.log('📋 AI VIDEO: Generating mock templates...')
+  logger.debug('Generating mock templates')
 
   const templates: VideoTemplate[] = [
     {
@@ -429,7 +430,7 @@ const generateMockTemplates = (): VideoTemplate[] => {
     }
   ]
 
-  console.log('✅ AI VIDEO: Generated', templates.length, 'templates')
+  logger.info('Generated mock templates', { count: templates.length })
   return templates
 }
 
@@ -492,7 +493,7 @@ const getStatusBadgeColor = (status: GenerationStatus): string => {
 // ============================================================================
 
 export default function AIVideoGenerationPage() {
-  console.log('🎬 AI VIDEO GENERATION: Page rendering...')
+  logger.debug('Page rendering')
 
   const { announce } = useAnnouncer()
 
@@ -530,7 +531,7 @@ export default function AIVideoGenerationPage() {
 
   // Initialize data
   useEffect(() => {
-    console.log('🚀 AI VIDEO: Component mounted, initializing data...')
+    logger.info('Component mounted, initializing data')
 
     const videos = generateMockVideos()
     const templates = generateMockTemplates()
@@ -538,12 +539,12 @@ export default function AIVideoGenerationPage() {
     dispatch({ type: 'SET_VIDEOS', videos })
     dispatch({ type: 'SET_TEMPLATES', templates })
 
-    console.log('✅ AI VIDEO: Data initialization complete')
+    logger.info('Data initialization complete', { videoCount: videos.length, templateCount: templates.length })
   }, [])
 
   // Calculate stats with useMemo
   const stats = useMemo(() => {
-    console.log('📊 AI VIDEO: Calculating stats...')
+    logger.debug('Calculating stats')
 
     const total = state.videos.length
     const completed = state.videos.filter(v => v.status === 'completed').length
@@ -563,13 +564,18 @@ export default function AIVideoGenerationPage() {
       totalDuration
     }
 
-    console.log('📊 AI VIDEO: Stats calculated -', JSON.stringify(result))
+    logger.debug('Stats calculated', result)
     return result
   }, [state.videos])
 
   // Filter and sort videos with useMemo
   const filteredAndSortedVideos = useMemo(() => {
-    console.log('🔍 AI VIDEO: Filtering and sorting videos...')
+    logger.debug('Filtering and sorting videos', {
+      searchTerm: state.searchTerm,
+      filterStatus: state.filterStatus,
+      filterQuality: state.filterQuality,
+      sortBy: state.sortBy
+    })
 
     let filtered = [...state.videos]
 
@@ -581,19 +587,19 @@ export default function AIVideoGenerationPage() {
         v.prompt.toLowerCase().includes(searchLower) ||
         v.tags.some(tag => tag.toLowerCase().includes(searchLower))
       )
-      console.log('🔍 AI VIDEO: Search filtered to', filtered.length, 'videos')
+      logger.debug('Search filtered', { resultCount: filtered.length })
     }
 
     // Status filter
     if (state.filterStatus !== 'all') {
       filtered = filtered.filter(v => v.status === state.filterStatus)
-      console.log('🔧 AI VIDEO: Status filtered to', filtered.length, 'videos')
+      logger.debug('Status filtered', { resultCount: filtered.length })
     }
 
     // Quality filter
     if (state.filterQuality !== 'all') {
       filtered = filtered.filter(v => v.quality === state.filterQuality)
-      console.log('🔧 AI VIDEO: Quality filtered to', filtered.length, 'videos')
+      logger.debug('Quality filtered', { resultCount: filtered.length })
     }
 
     // Sort
@@ -613,7 +619,7 @@ export default function AIVideoGenerationPage() {
       }
     })
 
-    console.log('✅ AI VIDEO: Final filtered count:', sorted.length)
+    logger.debug('Filtering complete', { finalCount: sorted.length })
     return sorted
   }, [state.videos, state.searchTerm, state.filterStatus, state.filterQuality, state.sortBy])
 
@@ -622,15 +628,16 @@ export default function AIVideoGenerationPage() {
   // ============================================================================
 
   const handleGenerate = async () => {
-    console.log('🎬 AI VIDEO: Starting video generation...')
-    console.log('📝 AI VIDEO: Prompt:', genPrompt)
-    console.log('🎨 AI VIDEO: Style:', genStyle)
-    console.log('📐 AI VIDEO: Format:', genFormat)
-    console.log('💎 AI VIDEO: Quality:', genQuality)
-    console.log('🤖 AI VIDEO: Model:', genModel)
+    logger.info('Starting video generation', {
+      prompt: genPrompt,
+      style: genStyle,
+      format: genFormat,
+      quality: genQuality,
+      model: genModel
+    })
 
     if (!genPrompt.trim()) {
-      console.log('⚠️ AI VIDEO: Prompt is empty')
+      logger.warn('Prompt is empty')
       toast.error('Please enter a video prompt')
       announce('Please enter a video prompt')
       return
@@ -651,7 +658,7 @@ export default function AIVideoGenerationPage() {
       for (const stage of stages) {
         // Note: Using mock delay - in production, this would stream from /api/ai/video-generate
         setGenProgress(stage.progress)
-        console.log('⏳ AI VIDEO: Generation progress:', stage.progress + '%', '-', stage.message)
+        logger.debug('Generation progress', { progress: stage.progress, message: stage.message })
       }
 
       // Create new video
@@ -689,9 +696,18 @@ export default function AIVideoGenerationPage() {
       }
 
       dispatch({ type: 'ADD_VIDEO', video: newVideo })
-      console.log('✅ AI VIDEO: Video generated successfully - ID:', newVideo.id)
 
-      toast.success('Video generated successfully!')
+      logger.info('Video generated successfully', {
+        videoId: newVideo.id,
+        duration,
+        fileSize,
+        quality: genQuality,
+        model: genModel
+      })
+
+      toast.success('Video generated successfully!', {
+        description: `${newVideo.title.substring(0, 40)}... - ${formatDuration(duration)} - ${formatFileSize(fileSize)} - ${genQuality.toUpperCase()} - ${genModel}`
+      })
       announce('Video generated successfully')
 
       // Reset form
@@ -703,23 +719,29 @@ export default function AIVideoGenerationPage() {
       // Switch to library view
       dispatch({ type: 'SET_VIEW_MODE', viewMode: 'library' })
 
-    } catch (error) {
-      console.error('❌ AI VIDEO: Generation error:', error)
-      toast.error('Failed to generate video')
+    } catch (error: any) {
+      logger.error('Video generation failed', {
+        error: error.message,
+        prompt: genPrompt,
+        model: genModel
+      })
+      toast.error('Failed to generate video', {
+        description: error.message || 'Please try again later'
+      })
       announce('Failed to generate video')
       setIsGenerating(false)
     }
   }
 
   const handleViewVideo = (video: GeneratedVideo) => {
-    console.log('👁️ AI VIDEO: Opening video view - ID:', video.id)
+    logger.info('Opening video view', { videoId: video.id, title: video.title })
     dispatch({ type: 'SELECT_VIDEO', video })
     dispatch({ type: 'INCREMENT_VIEW', videoId: video.id })
     setShowViewModal(true)
   }
 
   const handleEditVideo = (video: GeneratedVideo) => {
-    console.log('✏️ AI VIDEO: Opening video edit - ID:', video.id)
+    logger.info('Opening video edit', { videoId: video.id, title: video.title })
     dispatch({ type: 'SELECT_VIDEO', video })
     setEditTitle(video.title)
     setEditTags(video.tags.join(', '))
@@ -727,13 +749,17 @@ export default function AIVideoGenerationPage() {
   }
 
   const handleUpdateVideo = async () => {
-    console.log('💾 AI VIDEO: Updating video...')
-
     if (!state.selectedVideo || !editTitle.trim()) {
-      console.log('⚠️ AI VIDEO: Invalid update data')
+      logger.warn('Invalid update data', { hasVideo: !!state.selectedVideo, hasTitle: !!editTitle.trim() })
       toast.error('Please enter a valid title')
       return
     }
+
+    logger.info('Updating video', {
+      videoId: state.selectedVideo.id,
+      oldTitle: state.selectedVideo.title,
+      newTitle: editTitle
+    })
 
     try {
       const updatedVideo: GeneratedVideo = {
@@ -744,51 +770,77 @@ export default function AIVideoGenerationPage() {
       }
 
       dispatch({ type: 'UPDATE_VIDEO', video: updatedVideo })
-      console.log('✅ AI VIDEO: Video updated successfully - ID:', updatedVideo.id)
 
-      toast.success('Video updated successfully!')
+      logger.info('Video updated successfully', { videoId: updatedVideo.id })
+
+      toast.success('Video updated successfully!', {
+        description: `${updatedVideo.title} - ${formatDuration(updatedVideo.duration)} - ${updatedVideo.quality.toUpperCase()} - Tags: ${updatedVideo.tags.join(', ')}`
+      })
       announce('Video updated successfully')
       setShowEditModal(false)
 
-    } catch (error) {
-      console.error('❌ AI VIDEO: Update error:', error)
-      toast.error('Failed to update video')
+    } catch (error: any) {
+      logger.error('Video update failed', { error: error.message, videoId: state.selectedVideo?.id })
+      toast.error('Failed to update video', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 
   const handleDeleteVideo = async (videoId: string) => {
-    console.log('🗑️ AI VIDEO: Deleting video - ID:', videoId)
+    const video = state.videos.find(v => v.id === videoId)
+    logger.info('Deleting video', { videoId, title: video?.title })
 
     try {
       dispatch({ type: 'DELETE_VIDEO', videoId })
-      console.log('✅ AI VIDEO: Video deleted successfully - ID:', videoId)
 
-      toast.success('Video deleted successfully!')
+      logger.info('Video deleted successfully', { videoId })
+
+      toast.success('Video deleted successfully!', {
+        description: `${video?.title} - ${formatFileSize(video?.fileSize || 0)} removed from library`
+      })
       announce('Video deleted successfully')
       setShowViewModal(false)
 
-    } catch (error) {
-      console.error('❌ AI VIDEO: Delete error:', error)
-      toast.error('Failed to delete video')
+    } catch (error: any) {
+      logger.error('Video delete failed', { error: error.message, videoId })
+      toast.error('Failed to delete video', {
+        description: error.message || 'Please try again later'
+      })
     }
   }
 
   const handleDownload = (video: GeneratedVideo) => {
-    console.log('📥 AI VIDEO: Downloading video - ID:', video.id, 'Title:', video.title)
+    logger.info('Downloading video', { videoId: video.id, title: video.title, fileSize: video.fileSize })
     dispatch({ type: 'INCREMENT_DOWNLOAD', videoId: video.id })
-    toast.success('Download started!')
+
+    toast.success('Download started!', {
+      description: `${video.title} - ${formatDuration(video.duration)} - ${formatFileSize(video.fileSize)} - ${video.quality.toUpperCase()}`
+    })
     announce(`Downloading ${video.title}`)
   }
 
   const handleToggleLike = (videoId: string) => {
-    console.log('❤️ AI VIDEO: Toggling like - ID:', videoId)
+    const video = state.videos.find(v => v.id === videoId)
+    const isLiked = video?.likes && video.likes > 0
+
+    logger.info(isLiked ? 'Unliking video' : 'Liking video', { videoId, currentLikes: video?.likes })
     dispatch({ type: 'TOGGLE_LIKE', videoId })
+
+    toast.success(isLiked ? 'Removed from liked videos' : 'Added to liked videos', {
+      description: `${video?.title} - ${video?.likes || 0} likes`
+    })
   }
 
   const handleTogglePublic = (videoId: string) => {
-    console.log('🌐 AI VIDEO: Toggling public status - ID:', videoId)
+    const video = state.videos.find(v => v.id === videoId)
+
+    logger.info('Toggling public status', { videoId, currentStatus: video?.isPublic })
     dispatch({ type: 'TOGGLE_PUBLIC', videoId })
-    toast.success('Visibility updated!')
+
+    toast.success('Visibility updated!', {
+      description: `${video?.title} - ${video?.isPublic ? 'Now private - Only you can view' : 'Now public - Anyone with link can view'}`
+    })
   }
 
   // ============================================================================
