@@ -18,6 +18,9 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Invoices')
 import {
   FileText,
   Plus,
@@ -47,6 +50,75 @@ export default function InvoicesPage() {
   // Regular state
   const [selectedStatus, setSelectedStatus] = useState<any>('all')
   const [searchTerm, setSearchTerm] = useState<any>('')
+  const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
+  const [sortBy, setSortBy] = useState<string>('date')
+
+  // Invoice state with mock data
+  const [invoices, setInvoices] = useState([
+    {
+      id: 'INV-001',
+      client: 'Acme Corp',
+      clientEmail: 'contact@acmecorp.com',
+      project: 'Brand Identity Package',
+      amount: 5000,
+      status: 'paid',
+      dueDate: '2024-01-15',
+      issueDate: '2024-01-01',
+      paidDate: '2024-01-14',
+      description: 'Complete brand identity design including logo, colors, and guidelines',
+      items: [
+        { description: 'Logo Design', quantity: 1, rate: 2000, amount: 2000 },
+        { description: 'Brand Guidelines', quantity: 1, rate: 1500, amount: 1500 },
+        { description: 'Color Palette', quantity: 1, rate: 800, amount: 800 },
+        { description: 'Typography System', quantity: 1, rate: 700, amount: 700 }
+      ]
+    },
+    {
+      id: 'INV-002',
+      client: 'Tech Startup',
+      clientEmail: 'hello@techstartup.io',
+      project: 'Website Development',
+      amount: 3500,
+      status: 'pending',
+      dueDate: '2024-01-20',
+      issueDate: '2024-01-10',
+      description: 'Modern responsive website with e-commerce functionality',
+      items: [
+        { description: 'Frontend Development', quantity: 20, rate: 100, amount: 2000 },
+        { description: 'Backend Integration', quantity: 10, rate: 150, amount: 1500 }
+      ]
+    },
+    {
+      id: 'INV-003',
+      client: 'Design Agency',
+      clientEmail: 'billing@designagency.com',
+      project: 'UI/UX Consultation',
+      amount: 2000,
+      status: 'overdue',
+      dueDate: '2024-01-05',
+      issueDate: '2023-12-20',
+      description: 'User experience analysis and design recommendations',
+      items: [
+        { description: 'UX Audit', quantity: 8, rate: 150, amount: 1200 },
+        { description: 'Design Recommendations', quantity: 4, rate: 200, amount: 800 }
+      ]
+    },
+    {
+      id: 'INV-004',
+      client: 'Local Business',
+      clientEmail: 'info@localbusiness.com',
+      project: 'Social Media Package',
+      amount: 1500,
+      status: 'draft',
+      dueDate: '2024-01-25',
+      issueDate: '2024-01-15',
+      description: 'Complete social media content and management package',
+      items: [
+        { description: 'Content Creation', quantity: 10, rate: 100, amount: 1000 },
+        { description: 'Account Management', quantity: 5, rate: 100, amount: 500 }
+      ]
+    }
+  ])
 
   // ============================================================================
   // A+++ LOAD INVOICES DATA
@@ -85,227 +157,519 @@ export default function InvoicesPage() {
 
   // Handlers
   const handleCreateInvoice = () => {
-    console.log('✨ INVOICES: Opening create invoice form')
-    console.log('📋 INVOICES: User initiated new invoice creation')
-    toast.success('Create Invoice', {
-      description: 'Opening invoice creation form...'
+    logger.info('Creating new invoice', {
+      currentInvoiceCount: invoices.length,
+      nextInvoiceNumber: `INV-${String(invoices.length + 1).padStart(3, '0')}`
+    })
+
+    const newInvoiceId = `INV-${String(invoices.length + 1).padStart(3, '0')}`
+    const today = new Date().toISOString().split('T')[0]
+    const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+
+    const newInvoice = {
+      id: newInvoiceId,
+      client: 'New Client',
+      clientEmail: 'client@example.com',
+      project: 'New Project',
+      amount: 0,
+      status: 'draft',
+      dueDate: dueDate,
+      issueDate: today,
+      description: 'Project description',
+      items: []
+    }
+
+    setInvoices([...invoices, newInvoice])
+
+    toast.success('Invoice created', {
+      description: `${newInvoiceId} - Draft - Due ${dueDate} - Ready to edit`
     })
   }
 
   const handleViewInvoice = (id: string) => {
-    console.log('✨ INVOICES: Viewing invoice details')
-    console.log('📋 INVOICES: Invoice ID: ' + id)
-    console.log('👁️ INVOICES: Opening invoice viewer')
+    const invoice = invoices.find(inv => inv.id === id)
+    if (!invoice) {
+      logger.warn('Invoice not found', { invoiceId: id })
+      return
+    }
+
+    logger.info('Viewing invoice', {
+      invoiceId: id,
+      client: invoice.client,
+      amount: invoice.amount,
+      status: invoice.status
+    })
+
     toast.info('View Invoice', {
-      description: 'Opening invoice ' + id
+      description: `${id} - ${invoice.client} - $${invoice.amount.toLocaleString()} - ${invoice.status}`
     })
   }
 
   const handleEditInvoice = (id: string) => {
-    console.log('✨ INVOICES: Opening edit mode')
-    console.log('📋 INVOICES: Invoice ID: ' + id)
-    console.log('✏️ INVOICES: User editing invoice')
+    const invoice = invoices.find(inv => inv.id === id)
+    if (!invoice) {
+      logger.warn('Invoice not found for editing', { invoiceId: id })
+      return
+    }
+
+    logger.info('Opening invoice editor', {
+      invoiceId: id,
+      client: invoice.client,
+      project: invoice.project,
+      itemCount: invoice.items?.length || 0
+    })
+
     toast.info('Edit Invoice', {
-      description: 'Opening editor for ' + id
+      description: `${id} - ${invoice.client} - ${invoice.project} - ${invoice.items?.length || 0} items`
     })
   }
 
   const handleDeleteInvoice = (id: string) => {
-    console.log('✨ INVOICES: Delete invoice requested')
-    console.log('📋 INVOICES: Invoice ID: ' + id)
-    if (confirm('Delete?')) {
-      console.log('✅ INVOICES: Invoice deleted successfully')
-      console.log('🗑️ INVOICES: Removed invoice: ' + id)
-      toast.success('Invoice Deleted', {
-        description: 'Invoice ' + id + ' has been removed'
+    const invoice = invoices.find(inv => inv.id === id)
+    if (!invoice) {
+      logger.warn('Invoice not found for deletion', { invoiceId: id })
+      return
+    }
+
+    logger.info('Delete invoice requested', {
+      invoiceId: id,
+      client: invoice.client,
+      amount: invoice.amount,
+      status: invoice.status
+    })
+
+    if (confirm(`Delete invoice ${id} for ${invoice.client}?`)) {
+      setInvoices(invoices.filter(inv => inv.id !== id))
+
+      logger.info('Invoice deleted', {
+        invoiceId: id,
+        client: invoice.client,
+        amount: invoice.amount
+      })
+
+      toast.success('Invoice deleted', {
+        description: `${id} - ${invoice.client} - $${invoice.amount.toLocaleString()} - Removed from system`
       })
     }
   }
 
   const handleSendInvoice = (id: string) => {
-    console.log('✨ INVOICES: Sending invoice to client')
-    console.log('📋 INVOICES: Invoice ID: ' + id)
-    console.log('📧 INVOICES: Email dispatched successfully')
-    toast.success('Invoice Sent', {
-      description: 'Invoice ' + id + ' sent to client'
+    const invoice = invoices.find(inv => inv.id === id)
+    if (!invoice) {
+      logger.warn('Invoice not found for sending', { invoiceId: id })
+      return
+    }
+
+    const sentDate = new Date().toISOString()
+
+    setInvoices(invoices.map(inv =>
+      inv.id === id ? { ...inv, sentDate, status: inv.status === 'draft' ? 'pending' : inv.status } : inv
+    ))
+
+    logger.info('Invoice sent to client', {
+      invoiceId: id,
+      client: invoice.client,
+      clientEmail: invoice.clientEmail,
+      amount: invoice.amount,
+      sentDate
+    })
+
+    toast.success('Invoice sent', {
+      description: `${id} - ${invoice.client} - ${invoice.clientEmail} - $${invoice.amount.toLocaleString()} - Due ${invoice.dueDate}`
     })
   }
 
   const handleDownloadPDF = (id: string) => {
-    console.log('✨ INVOICES: Generating PDF document')
-    console.log('📋 INVOICES: Invoice ID: ' + id)
-    console.log('💾 INVOICES: PDF download initiated')
-    toast.success('PDF Downloaded', {
-      description: 'Invoice ' + id + ' downloaded as PDF'
+    const invoice = invoices.find(inv => inv.id === id)
+    if (!invoice) {
+      logger.warn('Invoice not found for PDF generation', { invoiceId: id })
+      return
+    }
+
+    // Generate PDF content
+    const pdfContent = `
+INVOICE ${invoice.id}
+======================================
+Client: ${invoice.client}
+Email: ${invoice.clientEmail}
+Project: ${invoice.project}
+
+Issue Date: ${invoice.issueDate}
+Due Date: ${invoice.dueDate}
+
+Description: ${invoice.description}
+
+Items:
+${invoice.items?.map((item: any) =>
+  `${item.description} - Qty: ${item.quantity} x $${item.rate} = $${item.amount}`
+).join('\n') || 'No items'}
+
+======================================
+TOTAL: $${invoice.amount.toLocaleString()}
+Status: ${invoice.status.toUpperCase()}
+======================================
+`
+
+    const blob = new Blob([pdfContent], { type: 'application/pdf' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${invoice.id}-${invoice.client.replace(/\s+/g, '-')}.pdf`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    logger.info('PDF generated and downloaded', {
+      invoiceId: id,
+      client: invoice.client,
+      fileSize: blob.size,
+      fileName: a.download
+    })
+
+    toast.success('PDF downloaded', {
+      description: `${invoice.id} - ${invoice.client} - ${Math.round(blob.size / 1024)}KB - ${a.download}`
     })
   }
 
   const handleMarkPaid = (id: string) => {
-    console.log('✨ INVOICES: Marking invoice as paid')
-    console.log('📋 INVOICES: Invoice ID: ' + id)
-    console.log('✅ INVOICES: Payment status updated')
-    toast.success('Marked as Paid', {
-      description: 'Invoice ' + id + ' marked as paid'
+    const invoice = invoices.find(inv => inv.id === id)
+    if (!invoice) {
+      logger.warn('Invoice not found for payment marking', { invoiceId: id })
+      return
+    }
+
+    const paidDate = new Date().toISOString().split('T')[0]
+
+    setInvoices(invoices.map(inv =>
+      inv.id === id ? { ...inv, status: 'paid', paidDate } : inv
+    ))
+
+    logger.info('Invoice marked as paid', {
+      invoiceId: id,
+      client: invoice.client,
+      amount: invoice.amount,
+      paidDate,
+      previousStatus: invoice.status
+    })
+
+    toast.success('Marked as paid', {
+      description: `${id} - ${invoice.client} - $${invoice.amount.toLocaleString()} - Paid on ${paidDate} - ${invoice.status} → paid`
     })
   }
 
   const handleMarkUnpaid = (id: string) => {
-    console.log('✨ INVOICES: Marking invoice as unpaid')
-    console.log('📋 INVOICES: Invoice ID: ' + id)
-    console.log('❌ INVOICES: Payment status reverted')
-    toast.info('Marked as Unpaid', {
-      description: 'Invoice ' + id + ' marked as unpaid'
+    const invoice = invoices.find(inv => inv.id === id)
+    if (!invoice) {
+      logger.warn('Invoice not found for unpaid marking', { invoiceId: id })
+      return
+    }
+
+    setInvoices(invoices.map(inv =>
+      inv.id === id ? { ...inv, status: 'pending', paidDate: undefined } : inv
+    ))
+
+    logger.info('Invoice marked as unpaid', {
+      invoiceId: id,
+      client: invoice.client,
+      amount: invoice.amount,
+      previousStatus: invoice.status
+    })
+
+    toast.info('Marked as unpaid', {
+      description: `${id} - ${invoice.client} - $${invoice.amount.toLocaleString()} - ${invoice.status} → pending`
     })
   }
 
   const handleDuplicateInvoice = (id: string) => {
-    console.log('✨ INVOICES: Duplicating invoice')
-    console.log('📋 INVOICES: Original Invoice ID: ' + id)
-    console.log('📋 INVOICES: Creating duplicate copy')
-    toast.success('Invoice Duplicated', {
-      description: 'Created copy of invoice ' + id
+    const invoice = invoices.find(inv => inv.id === id)
+    if (!invoice) {
+      logger.warn('Invoice not found for duplication', { invoiceId: id })
+      return
+    }
+
+    const newInvoiceId = `INV-${String(invoices.length + 1).padStart(3, '0')}`
+    const today = new Date().toISOString().split('T')[0]
+    const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+
+    const duplicateInvoice = {
+      ...invoice,
+      id: newInvoiceId,
+      status: 'draft',
+      issueDate: today,
+      dueDate: dueDate,
+      paidDate: undefined,
+      sentDate: undefined
+    }
+
+    setInvoices([...invoices, duplicateInvoice])
+
+    logger.info('Invoice duplicated', {
+      originalId: id,
+      newId: newInvoiceId,
+      client: invoice.client,
+      amount: invoice.amount,
+      itemCount: invoice.items?.length || 0
+    })
+
+    toast.success('Invoice duplicated', {
+      description: `${id} → ${newInvoiceId} - ${invoice.client} - $${invoice.amount.toLocaleString()} - ${invoice.items?.length || 0} items copied`
     })
   }
 
   const handleSendReminder = (id: string) => {
-    console.log('✨ INVOICES: Sending payment reminder')
-    console.log('📋 INVOICES: Invoice ID: ' + id)
-    console.log('🔔 INVOICES: Reminder email sent to client')
-    toast.success('Reminder Sent', {
-      description: 'Payment reminder sent for ' + id
+    const invoice = invoices.find(inv => inv.id === id)
+    if (!invoice) {
+      logger.warn('Invoice not found for reminder', { invoiceId: id })
+      return
+    }
+
+    const overdueDays = Math.floor((new Date().getTime() - new Date(invoice.dueDate).getTime()) / (1000 * 60 * 60 * 24))
+    const reminderDate = new Date().toISOString()
+
+    logger.info('Payment reminder sent', {
+      invoiceId: id,
+      client: invoice.client,
+      clientEmail: invoice.clientEmail,
+      amount: invoice.amount,
+      overdueDays,
+      reminderDate
+    })
+
+    toast.success('Reminder sent', {
+      description: `${id} - ${invoice.client} - ${invoice.clientEmail} - $${invoice.amount.toLocaleString()} - ${overdueDays > 0 ? `${overdueDays} days overdue` : `Due ${invoice.dueDate}`}`
     })
   }
 
   const handleRecordPayment = (id: string) => {
-    console.log('✨ INVOICES: Recording payment')
-    console.log('📋 INVOICES: Invoice ID: ' + id)
-    console.log('💰 INVOICES: Opening payment recording form')
+    const invoice = invoices.find(inv => inv.id === id)
+    if (!invoice) {
+      logger.warn('Invoice not found for payment recording', { invoiceId: id })
+      return
+    }
+
+    const paymentAmount = invoice.amount
+    const paymentMethod = 'Bank Transfer'
+    const paymentDate = new Date().toISOString().split('T')[0]
+
+    logger.info('Recording payment', {
+      invoiceId: id,
+      client: invoice.client,
+      amount: paymentAmount,
+      method: paymentMethod,
+      paymentDate
+    })
+
     toast.info('Record Payment', {
-      description: 'Recording payment for ' + id
+      description: `${id} - ${invoice.client} - $${paymentAmount.toLocaleString()} - ${paymentMethod} - Date: ${paymentDate}`
     })
   }
 
   const handleVoidInvoice = (id: string) => {
-    console.log('✨ INVOICES: Void invoice requested')
-    console.log('📋 INVOICES: Invoice ID: ' + id)
-    if (confirm('Void?')) {
-      console.log('✅ INVOICES: Invoice voided successfully')
-      console.log('❌ INVOICES: Invoice ' + id + ' is now void')
-      toast.success('Invoice Voided', {
-        description: 'Invoice ' + id + ' has been voided'
+    const invoice = invoices.find(inv => inv.id === id)
+    if (!invoice) {
+      logger.warn('Invoice not found for voiding', { invoiceId: id })
+      return
+    }
+
+    logger.info('Void invoice requested', {
+      invoiceId: id,
+      client: invoice.client,
+      amount: invoice.amount,
+      currentStatus: invoice.status
+    })
+
+    if (confirm(`Void invoice ${id} for ${invoice.client}?`)) {
+      const voidDate = new Date().toISOString().split('T')[0]
+
+      setInvoices(invoices.map(inv =>
+        inv.id === id ? { ...inv, status: 'void', voidDate } : inv
+      ))
+
+      logger.info('Invoice voided', {
+        invoiceId: id,
+        client: invoice.client,
+        amount: invoice.amount,
+        voidDate,
+        previousStatus: invoice.status
+      })
+
+      toast.success('Invoice voided', {
+        description: `${id} - ${invoice.client} - $${invoice.amount.toLocaleString()} - Voided on ${voidDate} - ${invoice.status} → void`
       })
     }
   }
 
   const handleExportInvoices = () => {
-    console.log('✨ INVOICES: Exporting invoices')
-    console.log('📊 INVOICES: Generating export file')
-    console.log('💾 INVOICES: Export completed successfully')
-    toast.success('Invoices Exported', {
-      description: 'Invoice data exported successfully'
+    logger.info('Exporting invoices to CSV', {
+      totalInvoices: invoices.length,
+      statuses: {
+        paid: invoices.filter(inv => inv.status === 'paid').length,
+        pending: invoices.filter(inv => inv.status === 'pending').length,
+        overdue: invoices.filter(inv => inv.status === 'overdue').length,
+        draft: invoices.filter(inv => inv.status === 'draft').length
+      }
+    })
+
+    const csvContent = `Invoice ID,Client,Email,Project,Amount,Status,Issue Date,Due Date,Paid Date
+${invoices.map(inv =>
+  `${inv.id},${inv.client},${inv.clientEmail || ''},${inv.project},${inv.amount},${inv.status},${inv.issueDate},${inv.dueDate},${inv.paidDate || ''}`
+).join('\n')}`
+
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `invoices-export-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    const totalAmount = invoices.reduce((sum, inv) => sum + inv.amount, 0)
+    const paidAmount = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.amount, 0)
+
+    toast.success('Invoices exported', {
+      description: `${invoices.length} invoices - ${Math.round(blob.size / 1024)}KB - Total: $${totalAmount.toLocaleString()} - Paid: $${paidAmount.toLocaleString()} - ${a.download}`
     })
   }
 
   const handleFilterStatus = (status: string) => {
-    console.log('✨ INVOICES: Filtering by status')
-    console.log('🔍 INVOICES: Status filter: ' + status)
+    logger.info('Filtering invoices by status', {
+      status,
+      previousStatus: selectedStatus,
+      invoicesMatchingStatus: invoices.filter(inv => status === 'all' || inv.status === status).length
+    })
+
     setSelectedStatus(status)
   }
 
   const handleSearch = (query: string) => {
-    console.log('✨ INVOICES: Search query updated')
-    console.log('🔍 INVOICES: Search term: ' + query)
+    logger.debug('Search query updated', {
+      query,
+      previousQuery: searchTerm,
+      resultsCount: invoices.filter(inv =>
+        inv.client.toLowerCase().includes(query.toLowerCase()) ||
+        inv.project.toLowerCase().includes(query.toLowerCase()) ||
+        inv.id.toLowerCase().includes(query.toLowerCase())
+      ).length
+    })
+
     setSearchTerm(query)
   }
 
   const handleSort = (by: string) => {
-    console.log('✨ INVOICES: Sorting invoices')
-    console.log('📊 INVOICES: Sort criteria: ' + by)
-    console.log('🔃 INVOICES: Invoices reordered')
-    toast.info('Invoices Sorted', {
-      description: 'Sorted by ' + by
+    logger.info('Sorting invoices', {
+      sortBy: by,
+      previousSort: sortBy,
+      invoiceCount: invoices.length
+    })
+
+    setSortBy(by)
+
+    let sorted = [...invoices]
+    if (by === 'date') {
+      sorted.sort((a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime())
+    } else if (by === 'amount') {
+      sorted.sort((a, b) => b.amount - a.amount)
+    } else if (by === 'client') {
+      sorted.sort((a, b) => a.client.localeCompare(b.client))
+    } else if (by === 'dueDate') {
+      sorted.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+    }
+
+    setInvoices(sorted)
+
+    toast.info('Invoices sorted', {
+      description: `${invoices.length} invoices - Sorted by ${by} - ${by === 'amount' ? `Highest: $${sorted[0]?.amount.toLocaleString()}` : `First: ${by === 'client' ? sorted[0]?.client : sorted[0]?.issueDate}`}`
     })
   }
 
   const handleBulkAction = (action: string) => {
-    console.log('✨ INVOICES: Bulk action initiated')
-    console.log('☑️ INVOICES: Action type: ' + action)
-    console.log('📋 INVOICES: Processing selected invoices')
-    toast.success('Bulk Action Complete', {
-      description: 'Applied ' + action + ' to selected invoices'
+    if (selectedInvoices.length === 0) {
+      logger.warn('Bulk action attempted with no invoices selected', { action })
+      toast.info('No invoices selected', {
+        description: 'Please select invoices to apply bulk actions'
+      })
+      return
+    }
+
+    logger.info('Bulk action initiated', {
+      action,
+      selectedCount: selectedInvoices.length,
+      invoiceIds: selectedInvoices
     })
+
+    if (action === 'delete') {
+      setInvoices(invoices.filter(inv => !selectedInvoices.includes(inv.id)))
+    } else if (action === 'markPaid') {
+      const paidDate = new Date().toISOString().split('T')[0]
+      setInvoices(invoices.map(inv =>
+        selectedInvoices.includes(inv.id) ? { ...inv, status: 'paid', paidDate } : inv
+      ))
+    } else if (action === 'send') {
+      const sentDate = new Date().toISOString()
+      setInvoices(invoices.map(inv =>
+        selectedInvoices.includes(inv.id) ? { ...inv, sentDate, status: inv.status === 'draft' ? 'pending' : inv.status } : inv
+      ))
+    }
+
+    const totalAmount = invoices
+      .filter(inv => selectedInvoices.includes(inv.id))
+      .reduce((sum, inv) => sum + inv.amount, 0)
+
+    toast.success('Bulk action complete', {
+      description: `${action} - ${selectedInvoices.length} invoices - Total value: $${totalAmount.toLocaleString()}`
+    })
+
+    setSelectedInvoices([])
   }
 
   const handlePreview = (id: string) => {
-    console.log('✨ INVOICES: Opening preview')
-    console.log('📋 INVOICES: Invoice ID: ' + id)
-    console.log('👁️ INVOICES: Displaying invoice preview')
+    const invoice = invoices.find(inv => inv.id === id)
+    if (!invoice) {
+      logger.warn('Invoice not found for preview', { invoiceId: id })
+      return
+    }
+
+    logger.info('Opening invoice preview', {
+      invoiceId: id,
+      client: invoice.client,
+      amount: invoice.amount,
+      itemCount: invoice.items?.length || 0
+    })
+
     toast.info('Invoice Preview', {
-      description: 'Previewing invoice ' + id
+      description: `${id} - ${invoice.client} - $${invoice.amount.toLocaleString()} - ${invoice.items?.length || 0} items - ${invoice.status}`
     })
   }
 
   const handleEmailTemplate = () => {
-    console.log('✨ INVOICES: Opening email template editor')
-    console.log('📧 INVOICES: Managing email templates')
-    console.log('⚙️ INVOICES: Template configuration loaded')
+    const templateCount = 3 // Default, Reminder, Overdue
+    const customFields = ['client_name', 'invoice_number', 'amount', 'due_date']
+
+    logger.info('Opening email template editor', {
+      templateCount,
+      customFieldCount: customFields.length
+    })
+
     toast.info('Email Template', {
-      description: 'Opening email template settings'
+      description: `${templateCount} templates - ${customFields.length} custom fields - Customize invoice emails`
     })
   }
 
   const handleInvoiceSettings = () => {
-    console.log('✨ INVOICES: Opening invoice settings')
-    console.log('⚙️ INVOICES: Loading configuration panel')
-    console.log('🔧 INVOICES: Settings interface ready')
+    const settingsSections = ['General', 'Payment Terms', 'Tax Settings', 'Branding', 'Numbering']
+
+    logger.info('Opening invoice settings', {
+      sectionCount: settingsSections.length,
+      sections: settingsSections
+    })
+
     toast.info('Invoice Settings', {
-      description: 'Opening invoice configuration'
+      description: `${settingsSections.length} sections - ${settingsSections.join(', ')}`
     })
   }
-
-  // Mock invoice data
-  const invoices = [
-    {
-      id: 'INV-001',
-      client: 'Acme Corp',
-      project: 'Brand Identity Package',
-      amount: 5000,
-      status: 'paid',
-      dueDate: '2024-01-15',
-      issueDate: '2024-01-01',
-      description: 'Complete brand identity design including logo, colors, and guidelines'
-    },
-    {
-      id: 'INV-002',
-      client: 'Tech Startup',
-      project: 'Website Development',
-      amount: 3500,
-      status: 'pending',
-      dueDate: '2024-01-20',
-      issueDate: '2024-01-10',
-      description: 'Modern responsive website with e-commerce functionality'
-    },
-    {
-      id: 'INV-003',
-      client: 'Design Agency',
-      project: 'UI/UX Consultation',
-      amount: 2000,
-      status: 'overdue',
-      dueDate: '2024-01-05',
-      issueDate: '2023-12-20',
-      description: 'User experience analysis and design recommendations'
-    },
-    {
-      id: 'INV-004',
-      client: 'Local Business',
-      project: 'Social Media Package',
-      amount: 1500,
-      status: 'draft',
-      dueDate: '2024-01-25',
-      issueDate: '2024-01-15',
-      description: 'Complete social media content and management package'
-    }
-  ]
 
   const getStatusColor = (status: string) => {
     switch (status) {
