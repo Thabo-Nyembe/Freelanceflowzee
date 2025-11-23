@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { toast } from "sonner";
 import { NumberFlow } from "@/components/ui/number-flow";
 import { TextShimmer } from "@/components/ui/text-shimmer";
 import { LiquidGlassCard } from "@/components/ui/liquid-glass-card";
+import { ScrollReveal } from "@/components/ui/scroll-reveal";
 import {
   MessageCircle,
   Users,
@@ -44,7 +46,14 @@ import {
   Square,
   Smile,
   Send,
-  MoreVertical
+  MoreVertical,
+  Brain,
+  AlertTriangle,
+  ListChecks,
+  Sparkles,
+  Target,
+  Timer,
+  ArrowRight
 } from "lucide-react";
 
 // A+++ UTILITIES
@@ -1774,6 +1783,365 @@ export default function CollaborationPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* AI FEEDBACK ANALYSIS DASHBOARD - USER MANUAL SPEC */}
+                <ScrollReveal delay={0.2}>
+                  <div className="mt-8 p-6 bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 rounded-lg border-2 border-purple-200">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-full flex items-center justify-center">
+                        <Brain className="h-6 w-6 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                          <Sparkles className="w-6 h-6 text-purple-600" />
+                          AI Feedback Analysis
+                        </h3>
+                        <p className="text-sm text-gray-600">Smart categorization, priority identification, and implementation roadmap</p>
+                      </div>
+                    </div>
+
+                    {/* AI Insights Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                      {/* Feedback Themes */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="bg-white rounded-lg p-4 shadow-sm"
+                      >
+                        <div className="flex items-center gap-2 mb-3">
+                          <ListChecks className="w-5 h-5 text-purple-600" />
+                          <h4 className="font-semibold text-gray-900">Feedback Themes</h4>
+                        </div>
+                        <p className="text-3xl font-bold text-purple-600 mb-2">
+                          <NumberFlow value={5} />
+                        </p>
+                        <p className="text-sm text-gray-600 mb-3">themes identified</p>
+                        <div className="flex flex-wrap gap-1">
+                          <Badge className="bg-purple-100 text-purple-700 text-xs">Design</Badge>
+                          <Badge className="bg-blue-100 text-blue-700 text-xs">Performance</Badge>
+                          <Badge className="bg-green-100 text-green-700 text-xs">UX</Badge>
+                          <Badge className="bg-orange-100 text-orange-700 text-xs">Content</Badge>
+                          <Badge className="bg-pink-100 text-pink-700 text-xs">Features</Badge>
+                        </div>
+                      </motion.div>
+
+                      {/* Critical Issues */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="bg-white rounded-lg p-4 shadow-sm"
+                      >
+                        <div className="flex items-center gap-2 mb-3">
+                          <AlertTriangle className="w-5 h-5 text-red-600" />
+                          <h4 className="font-semibold text-gray-900">Critical Issues</h4>
+                        </div>
+                        <p className="text-3xl font-bold text-red-600 mb-2">
+                          <NumberFlow value={3} />
+                        </p>
+                        <p className="text-sm text-gray-600 mb-3">require immediate attention</p>
+                        <Button size="sm" variant="destructive" className="w-full">
+                          <Target className="w-4 h-4 mr-2" />
+                          View & Address
+                        </Button>
+                      </motion.div>
+
+                      {/* Implementation Time */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="bg-white rounded-lg p-4 shadow-sm"
+                      >
+                        <div className="flex items-center gap-2 mb-3">
+                          <Timer className="w-5 h-5 text-blue-600" />
+                          <h4 className="font-semibold text-gray-900">Est. Time</h4>
+                        </div>
+                        <p className="text-3xl font-bold text-blue-600 mb-2">
+                          <NumberFlow value={12} /> hrs
+                        </p>
+                        <p className="text-sm text-gray-600 mb-2">to implement all feedback</p>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: "30%" }}
+                            transition={{ duration: 1, delay: 0.5 }}
+                            className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full"
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">30% complete</p>
+                      </motion.div>
+                    </div>
+
+                    {/* Feedback Categories Breakdown */}
+                    <div className="bg-white rounded-lg p-5 shadow-sm mb-6">
+                      <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <BarChart3 className="w-5 h-5 text-purple-600" />
+                        Feedback by Category
+                      </h4>
+                      <div className="space-y-3">
+                        {[
+                          { category: "Design", count: 18, color: "purple", percentage: 90 },
+                          { category: "Performance", count: 12, color: "blue", percentage: 60 },
+                          { category: "UX/Usability", count: 15, color: "green", percentage: 75 },
+                          { category: "Content", count: 8, color: "orange", percentage: 40 },
+                          { category: "New Features", count: 10, color: "pink", percentage: 50 }
+                        ].map((item, index) => (
+                          <div key={item.category} className="space-y-1">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-medium text-gray-700">{item.category}</span>
+                              <span className="text-gray-600">{item.count} items</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${item.percentage}%` }}
+                                transition={{ duration: 0.8, delay: index * 0.1 }}
+                                className={`h-full bg-gradient-to-r ${
+                                  item.color === 'purple' ? 'from-purple-500 to-purple-600' :
+                                  item.color === 'blue' ? 'from-blue-500 to-blue-600' :
+                                  item.color === 'green' ? 'from-green-500 to-green-600' :
+                                  item.color === 'orange' ? 'from-orange-500 to-orange-600' :
+                                  'from-pink-500 to-pink-600'
+                                }`}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Priority Breakdown */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                      {[
+                        { priority: "Critical", count: 3, color: "red", icon: AlertTriangle },
+                        { priority: "High", count: 8, color: "orange", icon: TrendingUp },
+                        { priority: "Medium", count: 12, color: "yellow", icon: Activity },
+                        { priority: "Low", count: 5, color: "green", icon: CheckCircle }
+                      ].map((item, index) => {
+                        const Icon = item.icon
+                        return (
+                          <motion.div
+                            key={item.priority}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: index * 0.1 }}
+                            className={`bg-gradient-to-br ${
+                              item.color === 'red' ? 'from-red-50 to-red-100 border-red-200' :
+                              item.color === 'orange' ? 'from-orange-50 to-orange-100 border-orange-200' :
+                              item.color === 'yellow' ? 'from-yellow-50 to-yellow-100 border-yellow-200' :
+                              'from-green-50 to-green-100 border-green-200'
+                            } rounded-lg p-4 border-2`}
+                          >
+                            <Icon className={`w-5 h-5 mb-2 ${
+                              item.color === 'red' ? 'text-red-600' :
+                              item.color === 'orange' ? 'text-orange-600' :
+                              item.color === 'yellow' ? 'text-yellow-600' :
+                              'text-green-600'
+                            }`} />
+                            <p className={`text-2xl font-bold ${
+                              item.color === 'red' ? 'text-red-700' :
+                              item.color === 'orange' ? 'text-orange-700' :
+                              item.color === 'yellow' ? 'text-yellow-700' :
+                              'text-green-700'
+                            }`}>
+                              <NumberFlow value={item.count} />
+                            </p>
+                            <p className="text-xs text-gray-600">{item.priority} Priority</p>
+                          </motion.div>
+                        )
+                      })}
+                    </div>
+
+                    {/* Implementation Roadmap */}
+                    <div className="bg-white rounded-lg p-5 shadow-sm mb-6">
+                      <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <Target className="w-5 h-5 text-indigo-600" />
+                        Implementation Roadmap
+                      </h4>
+                      <div className="space-y-4">
+                        {[
+                          {
+                            phase: 1,
+                            time: "2 hours",
+                            tasks: ["Fix navigation bug", "Update color contrast"],
+                            status: "completed"
+                          },
+                          {
+                            phase: 2,
+                            time: "5 hours",
+                            tasks: ["Redesign dashboard layout", "Add missing features"],
+                            status: "in-progress"
+                          },
+                          {
+                            phase: 3,
+                            time: "3 hours",
+                            tasks: ["Performance optimizations", "Mobile responsiveness"],
+                            status: "pending"
+                          },
+                          {
+                            phase: 4,
+                            time: "2 hours",
+                            tasks: ["Content updates", "Final polish"],
+                            status: "pending"
+                          }
+                        ].map((phase, index) => (
+                          <motion.div
+                            key={phase.phase}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.15 }}
+                            className={`p-4 rounded-lg border-2 ${
+                              phase.status === 'completed' ? 'bg-green-50 border-green-200' :
+                              phase.status === 'in-progress' ? 'bg-blue-50 border-blue-200' :
+                              'bg-gray-50 border-gray-200'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${
+                                  phase.status === 'completed' ? 'bg-green-600' :
+                                  phase.status === 'in-progress' ? 'bg-blue-600' :
+                                  'bg-gray-400'
+                                }`}>
+                                  {phase.status === 'completed' ? <CheckCircle className="w-5 h-5" /> : phase.phase}
+                                </div>
+                                <div>
+                                  <p className="font-semibold text-gray-900">Phase {phase.phase}</p>
+                                  <p className="text-xs text-gray-600 flex items-center gap-1">
+                                    <Timer className="w-3 h-3" />
+                                    {phase.time}
+                                  </p>
+                                </div>
+                              </div>
+                              <Badge className={
+                                phase.status === 'completed' ? 'bg-green-500' :
+                                phase.status === 'in-progress' ? 'bg-blue-500' :
+                                'bg-gray-400'
+                              }>
+                                {phase.status === 'completed' ? 'Completed' :
+                                 phase.status === 'in-progress' ? 'In Progress' :
+                                 'Pending'}
+                              </Badge>
+                            </div>
+                            <div className="space-y-2">
+                              {phase.tasks.map((task, taskIndex) => (
+                                <div key={taskIndex} className="flex items-center gap-2 text-sm text-gray-700">
+                                  {phase.status === 'completed' ? (
+                                    <CheckCircle className="w-4 h-4 text-green-600" />
+                                  ) : phase.status === 'in-progress' ? (
+                                    <div className="w-4 h-4 border-2 border-blue-600 rounded-full animate-pulse" />
+                                  ) : (
+                                    <div className="w-4 h-4 border-2 border-gray-400 rounded-full" />
+                                  )}
+                                  <span>{task}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Smart Insights */}
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-5 border-2 border-indigo-200">
+                      <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <Sparkles className="w-5 h-5 text-indigo-600" />
+                        AI-Generated Insights
+                      </h4>
+                      <div className="space-y-3">
+                        <div className="bg-white rounded-lg p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                              <TrendingUp className="w-4 h-4 text-purple-600" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-sm text-gray-900 mb-1">Most Common Issue</p>
+                              <p className="text-sm text-gray-600">"Navigation confusion" - mentioned in 12 feedback items. Consider redesigning the main menu structure.</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-white rounded-lg p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                              <PieChart className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-sm text-gray-900 mb-1">Client Satisfaction Score</p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-2xl font-bold text-blue-600">8.2/10</p>
+                                <Badge className="bg-green-500 text-xs">+0.5 vs last month</Badge>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-white rounded-lg p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                              <Target className="w-4 h-4 text-green-600" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-sm text-gray-900 mb-1">Quality Trends</p>
+                              <p className="text-sm text-gray-600">
+                                <Badge className="bg-green-500 text-xs mr-2">Improving</Badge>
+                                Positive sentiment increased by 15% since last review cycle.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="mt-6 flex gap-3">
+                      <Button
+                        size="lg"
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                        onClick={() => {
+                          logger.info('AI Feedback Analysis - Export report clicked', {
+                            totalFeedback: 63,
+                            categories: 5,
+                            criticalIssues: 3,
+                            estimatedTime: 12
+                          })
+                          toast.success('📊 Exporting AI Analysis Report', {
+                            description: 'PDF report with all insights, roadmap, and recommendations'
+                          })
+                        }}
+                      >
+                        <Download className="w-5 h-5 mr-2" />
+                        Export Full Report
+                      </Button>
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        onClick={() => {
+                          logger.info('AI Feedback Analysis - View detailed roadmap clicked')
+                          toast.info('🗺️ Opening Implementation Roadmap', {
+                            description: 'Interactive roadmap with dependencies and timelines'
+                          })
+                        }}
+                      >
+                        <ArrowRight className="w-5 w-5 mr-2" />
+                        View Full Roadmap
+                      </Button>
+                    </div>
+
+                    {/* Info Banner */}
+                    <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <Brain className="w-5 h-5 text-blue-600 mt-0.5" />
+                        <div>
+                          <p className="text-sm font-semibold text-blue-900 mb-1">AI-Powered Analysis</p>
+                          <p className="text-xs text-blue-700">
+                            This analysis uses advanced AI to categorize feedback, identify patterns, estimate implementation time, and generate actionable insights. Analysis updates in real-time as new feedback arrives.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </ScrollReveal>
               </div>
             </CardContent>
           </Card>
