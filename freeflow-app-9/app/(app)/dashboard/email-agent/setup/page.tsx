@@ -21,7 +21,7 @@ import {
   Zap, Shield, Clock, TrendingUp, Settings, RefreshCw,
   Info, HelpCircle, Sparkles, ArrowRight, PlayCircle
 } from 'lucide-react';
-import logger from '@/app/lib/logger';
+import logger from '@/lib/logger';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';

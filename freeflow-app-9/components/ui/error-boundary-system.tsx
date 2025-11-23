@@ -8,8 +8,8 @@ import {
   AlertTriangle, RefreshCw, Bug, Copy, ExternalLink,
   Shield, Zap, MessageCircle, Home, ArrowLeft
 } from 'lucide-react'
-import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
+import { toast } from '@/components/ui/enhanced-toast'
 
 const logger = createFeatureLogger('ErrorBoundarySystem')
 
@@ -125,8 +125,10 @@ class ErrorBoundaryClass extends Component<ErrorBoundaryProps, ErrorBoundaryStat
       errorMessage: this.state.error?.message
     });
 
-    toast.success('Error Details Copied', {
-      description: `Error ID: ${this.state.errorId}`
+    // Use enhanced copy toast with metadata
+    toast.copy('Error Details', JSON.stringify(errorDetails, null, 2), {
+      size: '~500 chars',
+      format: 'JSON'
     });
   }
 

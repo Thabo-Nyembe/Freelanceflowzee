@@ -6,8 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Shield, Lock, AlertCircle } from 'lucide-react'
 import { GlowEffect } from './glow-effect'
 import { BorderTrail } from './border-trail'
-import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
+import { toast } from '@/components/ui/enhanced-toast'
 
 const logger = createFeatureLogger('RouteGuard')
 
@@ -85,12 +85,13 @@ export function RouteGuard({
           requiredRole
         });
 
+        const errorId = `err-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
         setIsAuthorized(false)
         router.push(fallbackUrl)
 
-        toast.error('Authorization Failed', {
-          description: 'Please log in to access this page'
-        });
+        // Use enhanced error toast
+        toast.error('Authorization Failed', 'Please log in to access this page', errorId);
       } finally {
         setIsChecking(false)
       }

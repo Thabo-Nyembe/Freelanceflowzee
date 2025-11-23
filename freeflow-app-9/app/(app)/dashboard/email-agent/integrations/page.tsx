@@ -31,7 +31,7 @@ import { Input } from '@/components/ui/enhanced-input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
-import logger from '@/app/lib/logger';
+import logger from '@/lib/logger';
 
 // ============================================================================
 // TYPES

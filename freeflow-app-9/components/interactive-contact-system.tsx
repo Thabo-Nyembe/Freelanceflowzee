@@ -49,8 +49,8 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
+import { toast } from '@/components/ui/enhanced-toast'
 
 const logger = createFeatureLogger('ContactSystem')
 
@@ -228,19 +228,22 @@ export function InteractiveContactSystem({
         textLength: text.length
       });
 
-      toast.success(`${item} Copied`, {
-        description: `${text} copied to clipboard`
+      // Use enhanced copy toast
+      toast.copy(item, text, {
+        size: `${text.length} characters`
       });
     } catch (error) {
+      const errorId = `err-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
       logger.error('Failed to copy contact info', {
         error: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
-        item
+        item,
+        errorId
       });
 
-      toast.error('Copy Failed', {
-        description: `Could not copy ${item} to clipboard`
-      });
+      // Use enhanced error toast
+      toast.error('Copy Failed', `Could not copy ${item}`, errorId);
     }
   };
 

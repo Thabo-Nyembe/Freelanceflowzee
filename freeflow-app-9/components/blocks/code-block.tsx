@@ -14,8 +14,8 @@ import { Copy, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
-import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
+import { toast } from '@/components/ui/enhanced-toast'
 
 const logger = createFeatureLogger('CodeBlock')
 
@@ -69,20 +69,24 @@ export function CodeBlock({
         contentLength: content.length
       });
 
-      toast.success('Code Copied', {
-        description: `${content.length} characters copied to clipboard`
+      // Use enhanced toast with rich data
+      toast.copy('Code Snippet', content, {
+        size: `${content.length} chars`,
+        format: properties.language || 'javascript'
       });
     } catch (err) {
+      const errorId = `err-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
       logger.error('Failed to copy code', {
         error: err instanceof Error ? err.message : 'Unknown error',
         stack: err instanceof Error ? err.stack : undefined,
         language: properties.language,
-        contentLength: content.length
+        contentLength: content.length,
+        errorId
       });
 
-      toast.error('Copy Failed', {
-        description: 'Could not copy code to clipboard'
-      });
+      // Use enhanced error toast with error ID
+      toast.error('Copy Failed', err instanceof Error ? err : 'Could not copy code', errorId);
     }
   }
 
