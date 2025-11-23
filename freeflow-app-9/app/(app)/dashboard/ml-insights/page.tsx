@@ -53,8 +53,9 @@ import { toast } from 'sonner'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
 
-console.log('🚀 ML INSIGHTS: Component module loaded')
+const logger = createFeatureLogger('ML-Insights')
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -129,19 +130,19 @@ type MLInsightsAction =
 // ============================================================================
 
 function mlInsightsReducer(state: MLInsightsState, action: MLInsightsAction): MLInsightsState {
-  console.log('🔄 ML INSIGHTS REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_INSIGHTS':
-      console.log('📊 ML INSIGHTS REDUCER: Setting insights - Count:', action.insights.length)
+      logger.info('Setting insights', { count: action.insights.length })
       return { ...state, insights: action.insights }
 
     case 'ADD_INSIGHT':
-      console.log('➕ ML INSIGHTS REDUCER: Adding insight - ID:', action.insight.id)
+      logger.info('Adding insight', { insightId: action.insight.id, title: action.insight.title })
       return { ...state, insights: [action.insight, ...state.insights] }
 
     case 'UPDATE_INSIGHT':
-      console.log('✏️ ML INSIGHTS REDUCER: Updating insight - ID:', action.insight.id)
+      logger.info('Updating insight', { insightId: action.insight.id, title: action.insight.title })
       return {
         ...state,
         insights: state.insights.map(i => i.id === action.insight.id ? action.insight : i),
@@ -149,7 +150,7 @@ function mlInsightsReducer(state: MLInsightsState, action: MLInsightsAction): ML
       }
 
     case 'DELETE_INSIGHT':
-      console.log('🗑️ ML INSIGHTS REDUCER: Deleting insight - ID:', action.insightId)
+      logger.info('Deleting insight', { insightId: action.insightId })
       return {
         ...state,
         insights: state.insights.filter(i => i.id !== action.insightId),
@@ -158,35 +159,35 @@ function mlInsightsReducer(state: MLInsightsState, action: MLInsightsAction): ML
       }
 
     case 'SELECT_INSIGHT':
-      console.log('👁️ ML INSIGHTS REDUCER: Selecting insight - ID:', action.insight?.id)
+      logger.debug('Selecting insight', { insightId: action.insight?.id })
       return { ...state, selectedInsight: action.insight }
 
     case 'SET_SEARCH':
-      console.log('🔍 ML INSIGHTS REDUCER: Search term:', action.searchTerm)
+      logger.debug('Search term updated', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER_TYPE':
-      console.log('🏷️ ML INSIGHTS REDUCER: Filter type:', action.filterType)
+      logger.debug('Filter type', { filterType: action.filterType })
       return { ...state, filterType: action.filterType }
 
     case 'SET_FILTER_CATEGORY':
-      console.log('📁 ML INSIGHTS REDUCER: Filter category:', action.filterCategory)
+      logger.debug('Filter category', { filterCategory: action.filterCategory })
       return { ...state, filterCategory: action.filterCategory }
 
     case 'SET_FILTER_SEVERITY':
-      console.log('⚠️ ML INSIGHTS REDUCER: Filter severity:', action.filterSeverity)
+      logger.debug('Filter severity', { filterSeverity: action.filterSeverity })
       return { ...state, filterSeverity: action.filterSeverity }
 
     case 'SET_SORT':
-      console.log('🔀 ML INSIGHTS REDUCER: Sort by:', action.sortBy)
+      logger.debug('Sort by', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'SET_VIEW_MODE':
-      console.log('👀 ML INSIGHTS REDUCER: View mode:', action.viewMode)
+      logger.debug('View mode', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'TOGGLE_SELECT_INSIGHT':
-      console.log('☑️ ML INSIGHTS REDUCER: Toggle select - ID:', action.insightId)
+      logger.debug('Toggle select insight', { insightId: action.insightId })
       const isSelected = state.selectedInsights.includes(action.insightId)
       return {
         ...state,
@@ -196,11 +197,11 @@ function mlInsightsReducer(state: MLInsightsState, action: MLInsightsAction): ML
       }
 
     case 'CLEAR_SELECTED_INSIGHTS':
-      console.log('🔲 ML INSIGHTS REDUCER: Clearing selection')
+      logger.debug('Clearing selection')
       return { ...state, selectedInsights: [] }
 
     case 'RETRAIN_MODEL':
-      console.log('🔄 ML INSIGHTS REDUCER: Retraining model - ID:', action.insightId)
+      logger.info('Retraining model', { insightId: action.insightId })
       return {
         ...state,
         insights: state.insights.map(i =>
@@ -220,7 +221,7 @@ function mlInsightsReducer(state: MLInsightsState, action: MLInsightsAction): ML
 // ============================================================================
 
 function generateMockInsights(): MLInsight[] {
-  console.log('📦 ML INSIGHTS: Generating mock data...')
+  logger.debug('Generating mock ML insights data')
 
   const types: InsightType[] = ['trend', 'anomaly', 'forecast', 'pattern', 'recommendation', 'alert']
   const categories: InsightCategory[] = ['revenue', 'engagement', 'performance', 'retention', 'quality', 'growth']
@@ -314,7 +315,7 @@ function generateMockInsights(): MLInsight[] {
     }
   })
 
-  console.log('✅ ML INSIGHTS: Generated', insights.length, 'insights')
+  logger.info('Generated mock ML insights', { count: insights.length })
   return insights
 }
 
@@ -398,7 +399,7 @@ function formatPercentage(value: number): string {
 // ============================================================================
 
 export default function MLInsightsPage() {
-  console.log('🚀 ML INSIGHTS: Component mounting...')
+  logger.debug('Component mounting')
 
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
@@ -440,7 +441,7 @@ export default function MLInsightsPage() {
   // ============================================================================
 
   useEffect(() => {
-    console.log('🔄 ML INSIGHTS: Loading data from API...')
+    logger.info('Loading ML insights from API')
     const loadData = async () => {
       try {
         setIsLoading(true)
@@ -454,7 +455,7 @@ export default function MLInsightsPage() {
           const mockInsights = generateMockInsights()
           dispatch({ type: 'SET_INSIGHTS', insights: mockInsights })
 
-          console.log('✅ ML INSIGHTS: Data loaded from API -', result.insights?.length || 0, 'insights')
+          logger.info('ML insights loaded from API', { count: result.insights?.length || 0 })
           announce('ML insights loaded successfully', 'polite')
         } else {
           throw new Error(result.error || 'Failed to load insights')
@@ -462,7 +463,10 @@ export default function MLInsightsPage() {
 
         setIsLoading(false)
       } catch (err) {
-        console.error('❌ ML INSIGHTS: Load error:', err)
+        logger.error('ML insights load error', {
+          error: err instanceof Error ? err.message : 'Unknown error',
+          errorObject: err
+        })
         setError(err instanceof Error ? err.message : 'Failed to load ML insights')
         setIsLoading(false)
         announce('Error loading ML insights', 'assertive')
@@ -477,7 +481,7 @@ export default function MLInsightsPage() {
   // ============================================================================
 
   const stats = useMemo(() => {
-    console.log('📊 ML INSIGHTS: Computing stats...')
+    logger.debug('Computing stats')
     const total = state.insights.length
     const critical = state.insights.filter(i => i.impact === 'critical').length
     const highConfidence = state.insights.filter(i => i.confidence === 'high' || i.confidence === 'very-high').length
@@ -494,18 +498,11 @@ export default function MLInsightsPage() {
       totalAffectedUsers
     }
 
-    console.log('📊 ML INSIGHTS: Stats -', JSON.stringify(result))
+    logger.debug('Stats computed', result)
     return result
   }, [state.insights])
 
   const filteredAndSortedInsights = useMemo(() => {
-    console.log('🔍 ML INSIGHTS: Filtering and sorting...')
-    console.log('🔍 ML INSIGHTS: Search term:', state.searchTerm)
-    console.log('🔍 ML INSIGHTS: Filter type:', state.filterType)
-    console.log('🔍 ML INSIGHTS: Filter category:', state.filterCategory)
-    console.log('🔍 ML INSIGHTS: Filter severity:', state.filterSeverity)
-    console.log('🔀 ML INSIGHTS: Sort by:', state.sortBy)
-
     let filtered = state.insights
 
     // Search
@@ -515,25 +512,25 @@ export default function MLInsightsPage() {
         insight.description.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
         insight.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()))
       )
-      console.log('🔍 ML INSIGHTS: Search filtered to', filtered.length, 'insights')
+      logger.debug('Search filtered', { resultCount: filtered.length, searchTerm: state.searchTerm })
     }
 
     // Filter by type
     if (state.filterType !== 'all') {
       filtered = filtered.filter(insight => insight.type === state.filterType)
-      console.log('🏷️ ML INSIGHTS: Type filtered to', filtered.length, 'insights')
+      logger.debug('Type filtered', { resultCount: filtered.length, filterType: state.filterType })
     }
 
     // Filter by category
     if (state.filterCategory !== 'all') {
       filtered = filtered.filter(insight => insight.category === state.filterCategory)
-      console.log('📁 ML INSIGHTS: Category filtered to', filtered.length, 'insights')
+      logger.debug('Category filtered', { resultCount: filtered.length, filterCategory: state.filterCategory })
     }
 
     // Filter by severity
     if (state.filterSeverity !== 'all') {
       filtered = filtered.filter(insight => insight.severity === state.filterSeverity)
-      console.log('⚠️ ML INSIGHTS: Severity filtered to', filtered.length, 'insights')
+      logger.debug('Severity filtered', { resultCount: filtered.length, filterSeverity: state.filterSeverity })
     }
 
     // Sort
@@ -556,7 +553,7 @@ export default function MLInsightsPage() {
       }
     })
 
-    console.log('✅ ML INSIGHTS: Final result:', sorted.length, 'insights')
+    logger.debug('Filter and sort complete', { resultCount: sorted.length, sortBy: state.sortBy })
     return sorted
   }, [state.insights, state.searchTerm, state.filterType, state.filterCategory, state.filterSeverity, state.sortBy])
 
@@ -565,13 +562,19 @@ export default function MLInsightsPage() {
   // ============================================================================
 
   const handleCreateInsight = async () => {
-    console.log('➕ ML INSIGHTS: Creating insight via API...')
-    console.log('📝 ML INSIGHTS: Title:', insightTitle)
-    console.log('📝 ML INSIGHTS: Type:', insightType)
-    console.log('📝 ML INSIGHTS: Category:', insightCategory)
+    logger.info('Creating ML insight', {
+      title: insightTitle,
+      type: insightType,
+      category: insightCategory,
+      confidence: insightConfidence,
+      impact: insightImpact
+    })
 
     if (!insightTitle || !insightDescription) {
-      console.warn('⚠️ ML INSIGHTS: Missing required fields')
+      logger.warn('Missing required fields for insight creation', {
+        hasTitle: !!insightTitle,
+        hasDescription: !!insightDescription
+      })
       toast.error('Please fill in all required fields')
       return
     }
@@ -601,10 +604,16 @@ export default function MLInsightsPage() {
       if (result.success) {
         dispatch({ type: 'ADD_INSIGHT', insight: result.insight })
 
-        toast.success('🧠 Insight created', {
-          description: `"${result.insight.title}" added successfully`
+        logger.info('ML insight created successfully', {
+          insightId: result.insight.id,
+          title: result.insight.title,
+          type: result.insight.type,
+          category: result.insight.category
         })
-        console.log('✅ ML INSIGHTS: Insight created - ID:', result.insight.id)
+
+        toast.success('ML insight created', {
+          description: `${result.insight.title} - ${result.insight.type} - ${result.insight.category} - ${result.insight.confidence} confidence - ${result.insight.impact} impact`
+        })
 
         setShowCreateModal(false)
         setInsightTitle('')
@@ -613,7 +622,11 @@ export default function MLInsightsPage() {
         throw new Error(result.error || 'Failed to create insight')
       }
     } catch (error: any) {
-      console.error('❌ ML INSIGHTS: Create error:', error)
+      logger.error('Failed to create ML insight', {
+        error: error.message,
+        title: insightTitle,
+        type: insightType
+      })
       toast.error('Failed to create insight', {
         description: error.message || 'Please try again later'
       })
@@ -623,13 +636,30 @@ export default function MLInsightsPage() {
   }
 
   const handleViewInsight = (insight: MLInsight) => {
-    console.log('👁️ ML INSIGHTS: Opening insight view - ID:', insight.id, 'Title:', insight.title)
+    logger.info('Opening insight details', {
+      insightId: insight.id,
+      title: insight.title,
+      type: insight.type,
+      category: insight.category,
+      confidence: insight.confidence
+    })
+
     dispatch({ type: 'SELECT_INSIGHT', insight })
     setShowViewModal(true)
+
+    toast.info('View ML Insight', {
+      description: `${insight.title} - ${insight.type} - ${insight.confidence} confidence - ${(insight.metrics.accuracy * 100).toFixed(1)}% accuracy - ${insight.affectedUsers || 0} users affected`
+    })
   }
 
   const handleDeleteInsight = async (insightId: string) => {
-    console.log('🗑️ ML INSIGHTS: Deleting insight via API - ID:', insightId)
+    const insight = state.insights.find(i => i.id === insightId)
+
+    logger.info('Deleting ML insight', {
+      insightId,
+      title: insight?.title,
+      type: insight?.type
+    })
 
     try {
       setIsSaving(true)
@@ -648,10 +678,14 @@ export default function MLInsightsPage() {
       if (result.success) {
         dispatch({ type: 'DELETE_INSIGHT', insightId })
 
-        toast.success('🗑️ Insight deleted', {
-          description: 'ML insight removed from dashboard'
+        logger.info('ML insight deleted successfully', {
+          insightId,
+          title: insight?.title
         })
-        console.log('✅ ML INSIGHTS: Insight deleted')
+
+        toast.success('ML insight deleted', {
+          description: `${insight?.title} - ${insight?.type} - ${insight?.category} - Removed from dashboard`
+        })
 
         setShowDeleteModal(false)
         setShowViewModal(false)
@@ -659,7 +693,10 @@ export default function MLInsightsPage() {
         throw new Error(result.error || 'Delete failed')
       }
     } catch (error: any) {
-      console.error('❌ ML INSIGHTS: Delete error:', error)
+      logger.error('Failed to delete ML insight', {
+        error: error.message,
+        insightId
+      })
       toast.error('Failed to delete insight', {
         description: error.message || 'Please try again later'
       })
@@ -669,8 +706,14 @@ export default function MLInsightsPage() {
   }
 
   const handleBulkDelete = async () => {
-    console.log('🗑️ ML INSIGHTS: Bulk delete via API - Count:', state.selectedInsights.length)
-    console.log('🗑️ ML INSIGHTS: IDs:', state.selectedInsights)
+    const selectedInsightsData = state.insights.filter(i => state.selectedInsights.includes(i.id))
+    const totalAffectedUsers = selectedInsightsData.reduce((sum, i) => sum + (i.affectedUsers || 0), 0)
+
+    logger.info('Bulk deleting ML insights', {
+      count: state.selectedInsights.length,
+      insightIds: state.selectedInsights,
+      totalAffectedUsers
+    })
 
     try {
       setIsSaving(true)
@@ -691,17 +734,24 @@ export default function MLInsightsPage() {
           dispatch({ type: 'DELETE_INSIGHT', insightId: id })
         })
 
-        toast.success(`🗑️ Deleted ${result.deletedCount} insight(s)`, {
-          description: 'Selected insights removed from dashboard'
+        logger.info('Bulk delete complete', {
+          deletedCount: result.deletedCount,
+          totalAffectedUsers
         })
-        console.log('✅ ML INSIGHTS: Bulk delete complete')
+
+        toast.success(`Deleted ${result.deletedCount} insight(s)`, {
+          description: `${result.deletedCount} ML insights - ${totalAffectedUsers.toLocaleString()} total users affected - Removed from dashboard`
+        })
 
         dispatch({ type: 'CLEAR_SELECTED_INSIGHTS' })
       } else {
         throw new Error(result.error || 'Bulk delete failed')
       }
     } catch (error: any) {
-      console.error('❌ ML INSIGHTS: Bulk delete error:', error)
+      logger.error('Bulk delete failed', {
+        error: error.message,
+        count: state.selectedInsights.length
+      })
       toast.error('Failed to delete insights', {
         description: error.message || 'Please try again later'
       })
@@ -711,12 +761,19 @@ export default function MLInsightsPage() {
   }
 
   const handleRetrainModel = async (insightId: string) => {
-    console.log('🔄 ML INSIGHTS: Retraining model via API - ID:', insightId)
+    const insight = state.insights.find(i => i.id === insightId)
+
+    logger.info('Retraining ML model', {
+      insightId,
+      modelName: insight?.modelName,
+      currentVersion: insight?.modelVersion,
+      currentAccuracy: insight?.metrics.accuracy
+    })
 
     try {
       dispatch({ type: 'RETRAIN_MODEL', insightId })
-      toast.info('🔄 Model retraining started...', {
-        description: 'This may take a few moments'
+      toast.info('Model retraining started...', {
+        description: `${insight?.modelName} - v${insight?.modelVersion} - This may take a few moments`
       })
 
       const response = await fetch('/api/ml-insights', {
@@ -743,15 +800,25 @@ export default function MLInsightsPage() {
           dispatch({ type: 'UPDATE_INSIGHT', insight: updatedInsight })
         }
 
-        toast.success('🎯 Model retrained successfully', {
-          description: `New version: ${result.insight.modelVersion} • Accuracy: ${(result.metrics.accuracy * 100).toFixed(1)}%`
+        logger.info('Model retrained successfully', {
+          insightId,
+          modelName: insight?.modelName,
+          newVersion: result.insight.modelVersion,
+          newMetrics: result.metrics
         })
-        console.log('✅ ML INSIGHTS: Model retrained - Metrics:', result.metrics)
+
+        toast.success('Model retrained successfully', {
+          description: `${insight?.modelName} - v${result.insight.modelVersion} - Accuracy: ${(result.metrics.accuracy * 100).toFixed(1)}% - F1: ${(result.metrics.f1Score * 100).toFixed(1)}%`
+        })
       } else {
         throw new Error(result.error || 'Retrain failed')
       }
     } catch (error: any) {
-      console.error('❌ ML INSIGHTS: Retrain error:', error)
+      logger.error('Failed to retrain model', {
+        error: error.message,
+        insightId,
+        modelName: insight?.modelName
+      })
       toast.error('Failed to retrain model', {
         description: error.message || 'Please try again later'
       })
@@ -759,9 +826,15 @@ export default function MLInsightsPage() {
   }
 
   const handleExport = async () => {
-    console.log('📤 ML INSIGHTS: Exporting data via API...')
-    console.log('📄 ML INSIGHTS: Format:', exportFormat)
-    console.log('📊 ML INSIGHTS: Count:', filteredAndSortedInsights.length, 'insights')
+    const totalUsers = filteredAndSortedInsights.reduce((sum, i) => sum + (i.affectedUsers || 0), 0)
+    const avgAccuracy = filteredAndSortedInsights.reduce((sum, i) => sum + i.metrics.accuracy, 0) / filteredAndSortedInsights.length
+
+    logger.info('Exporting ML insights', {
+      format: exportFormat,
+      count: filteredAndSortedInsights.length,
+      totalUsers,
+      avgAccuracy
+    })
 
     try {
       setIsSaving(true)
@@ -786,18 +859,29 @@ export default function MLInsightsPage() {
         link.href = url
         link.download = `ml-insights-${new Date().toISOString().split('T')[0]}.${exportFormat}`
         link.click()
+        URL.revokeObjectURL(url)
 
-        toast.success(`📤 Exported ${result.insightCount} insights`, {
-          description: `Format: ${result.format} • Download started`
+        logger.info('Export complete', {
+          format: exportFormat,
+          count: filteredAndSortedInsights.length,
+          fileSize: dataBlob.size,
+          fileName: link.download
         })
-        console.log('✅ ML INSIGHTS: Export complete - URL:', result.exportUrl)
+
+        toast.success(`Exported ${result.insightCount} insights`, {
+          description: `${exportFormat.toUpperCase()} - ${Math.round(dataBlob.size / 1024)}KB - ${totalUsers.toLocaleString()} users affected - ${(avgAccuracy * 100).toFixed(1)}% avg accuracy - ${link.download}`
+        })
 
         setShowExportModal(false)
       } else {
         throw new Error(result.error || 'Export failed')
       }
     } catch (error: any) {
-      console.error('❌ ML INSIGHTS: Export error:', error)
+      logger.error('Export failed', {
+        error: error.message,
+        format: exportFormat,
+        count: filteredAndSortedInsights.length
+      })
       toast.error('Failed to export insights', {
         description: error.message || 'Please try again later'
       })
@@ -811,7 +895,7 @@ export default function MLInsightsPage() {
   // ============================================================================
 
   if (isLoading) {
-    console.log('⏳ ML INSIGHTS: Rendering loading state')
+    logger.debug('Rendering loading state')
     return (
       <div className="min-h-screen relative overflow-hidden">
         <div className="fixed inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
@@ -840,7 +924,7 @@ export default function MLInsightsPage() {
   // ============================================================================
 
   if (error) {
-    console.log('❌ ML INSIGHTS: Rendering error state')
+    logger.error('Rendering error state', { error })
     return (
       <div className="min-h-screen relative overflow-hidden">
         <div className="fixed inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
@@ -858,7 +942,11 @@ export default function MLInsightsPage() {
   // MAIN RENDER
   // ============================================================================
 
-  console.log('🎨 ML INSIGHTS: Rendering main view')
+  logger.debug('Rendering main view', {
+    totalInsights: state.insights.length,
+    filteredCount: filteredAndSortedInsights.length,
+    viewMode: state.viewMode
+  })
 
   return (
     <div className="min-h-screen relative overflow-hidden">
