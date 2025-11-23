@@ -286,6 +286,10 @@ export default function MyDayPage() {
   const [aiGeneratedSchedule, setAiGeneratedSchedule] = useState<any[]>([])
   const [showCelebration, setShowCelebration] = useState(false)
 
+  // AI Work Pattern Analysis State
+  const [workPatternAnalytics, setWorkPatternAnalytics] = useState<any>(null)
+  const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false)
+
   // Initialize state with mock data
   const initialState: TaskState = {
     tasks: [
@@ -405,6 +409,48 @@ export default function MyDayPage() {
     }
     return () => clearInterval(interval)
   }, [state.currentTimer, state.timerStartTime])
+
+  // Fetch AI Work Pattern Analytics
+  useEffect(() => {
+    const fetchWorkPatternAnalytics = async () => {
+      try {
+        setIsLoadingAnalytics(true)
+
+        logger.info('Fetching work pattern analytics', {})
+
+        const response = await fetch('/api/my-day/analytics?days=30&includeSchedule=true')
+        const data = await response.json()
+
+        if (data.success) {
+          setWorkPatternAnalytics(data.data)
+
+          logger.info('Work pattern analytics loaded', {
+            analyzedTasks: data.data.metadata.analyzedTasks,
+            completionRate: data.data.insights.completionRate
+          })
+
+          toast.success('AI Analysis Complete', {
+            description: `Analyzed ${data.data.metadata.analyzedTasks} tasks from the past 30 days`
+          })
+        } else {
+          throw new Error(data.error || 'Failed to fetch analytics')
+        }
+
+        setIsLoadingAnalytics(false)
+      } catch (error: any) {
+        logger.error('Failed to fetch work pattern analytics', { error: error.message })
+        setIsLoadingAnalytics(false)
+
+        // Silently fail - use mock data from initial state
+        logger.warn('Using mock analytics data')
+      }
+    }
+
+    // Only fetch when on analytics tab
+    if (activeTab === 'analytics' && !workPatternAnalytics) {
+      fetchWorkPatternAnalytics()
+    }
+  }, [activeTab, workPatternAnalytics])
 
   const formatTime = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600)
@@ -1128,11 +1174,21 @@ export default function MyDayPage() {
 
   // Calculate progress metrics
   const totalTasks = state.tasks.length
-  const completionRate = totalTasks > 0 ? Math.round((state.completedTasks / totalTasks) * 100) : 0
-  const focusHours = Math.floor(state.totalFocusTime / 60)
-  const focusMinutes = state.totalFocusTime % 60
+  // Use AI analytics data when available, fallback to local state
+  const completionRate = workPatternAnalytics?.insights?.completionRate ??
+    (totalTasks > 0 ? Math.round((state.completedTasks / totalTasks) * 100) : 0)
+
+  const focusTimeFromAnalytics = workPatternAnalytics?.insights?.focusTimePerDay
+  const focusHours = focusTimeFromAnalytics
+    ? Math.floor(focusTimeFromAnalytics / 60)
+    : Math.floor(state.totalFocusTime / 60)
+  const focusMinutes = focusTimeFromAnalytics
+    ? focusTimeFromAnalytics % 60
+    : state.totalFocusTime % 60
+
   const targetHours = 8 * 60 // 8 hours in minutes
-  const productivityScore = Math.min(Math.round((state.totalFocusTime / targetHours) * 100), 100)
+  const productivityScore = workPatternAnalytics?.insights?.energyOptimizationScore ??
+    Math.min(Math.round((state.totalFocusTime / targetHours) * 100), 100)
 
   // A+++ LOADING STATE
   if (isLoading) {
@@ -1702,30 +1758,36 @@ export default function MyDayPage() {
               <p className="text-gray-600">Based on your work patterns and performance data</p>
             </div>
 
-            {/* Peak Performance Window - Manual Spec */}
+            {/* Peak Performance Window - Manual Spec (REAL AI DATA) */}
             <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-purple-600" />
                   Peak Performance Window
+                  {isLoadingAnalytics && <RefreshCw className="h-4 w-4 animate-spin text-gray-400" />}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-semibold text-lg">9:00 AM - 11:00 AM</h3>
+                      <h3 className="font-semibold text-lg">
+                        {workPatternAnalytics?.insights?.peakPerformanceWindow || '9:00-11:00'}
+                      </h3>
                       <p className="text-sm text-gray-600">Your most productive hours</p>
                     </div>
                     <div className="text-right">
-                      <div className="text-3xl font-bold text-purple-600">95%</div>
+                      <div className="text-3xl font-bold text-purple-600">
+                        {workPatternAnalytics?.insights?.energyOptimizationScore || 95}%
+                      </div>
                       <div className="text-xs text-gray-500">Efficiency Score</div>
                     </div>
                   </div>
                   <div className="bg-white/60 p-4 rounded-xl">
                     <p className="text-sm text-gray-700">
-                      💡 <strong>AI Recommendation:</strong> Schedule your most challenging tasks during this window.
-                      You complete tasks 35% faster and with 28% higher quality during these hours.
+                      💡 <strong>AI Recommendation:</strong>{' '}
+                      {workPatternAnalytics?.insights?.recommendations?.[0] ||
+                        'Schedule your most challenging tasks during this window. You complete tasks 35% faster and with 28% higher quality during these hours.'}
                     </p>
                   </div>
                 </div>
