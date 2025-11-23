@@ -56,13 +56,16 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Files')
 
 // ============================================================================
 // FRAMER MOTION COMPONENTS
 // ============================================================================
 
 const FloatingParticle = ({ delay = 0, color = 'blue' }: { delay?: number; color?: string }) => {
-  console.log('🎨 FILES: FloatingParticle rendered with color:', color, 'delay:', delay)
+  logger.debug('FloatingParticle rendered', { color, delay })
   return (
     <motion.div
       className={`absolute w-2 h-2 bg-${color}-400 rounded-full opacity-30`}
@@ -133,26 +136,26 @@ type FilesAction =
 // ============================================================================
 
 function filesReducer(state: FilesState, action: FilesAction): FilesState {
-  console.log('🔄 FILES REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_FILES':
-      console.log('✅ FILES: Set files -', action.files.length, 'files loaded')
+      logger.info('Setting files', { count: action.files.length })
       return { ...state, files: action.files }
 
     case 'ADD_FILE':
-      console.log('✅ FILES: Add file - ID:', action.file.id, 'Name:', action.file.name)
+      logger.info('Adding file', { fileId: action.file.id, fileName: action.file.name })
       return { ...state, files: [action.file, ...state.files] }
 
     case 'UPDATE_FILE':
-      console.log('✅ FILES: Update file - ID:', action.file.id)
+      logger.info('Updating file', { fileId: action.file.id })
       return {
         ...state,
         files: state.files.map(f => f.id === action.file.id ? action.file : f)
       }
 
     case 'DELETE_FILE':
-      console.log('🗑️ FILES: Delete file - ID:', action.fileId)
+      logger.info('Deleting file', { fileId: action.fileId })
       return {
         ...state,
         files: state.files.filter(f => f.id !== action.fileId),
@@ -160,28 +163,28 @@ function filesReducer(state: FilesState, action: FilesAction): FilesState {
       }
 
     case 'SELECT_FILE':
-      console.log('👁️ FILES: Select file -', action.file?.name || 'None')
+      logger.debug('Selecting file', { fileName: action.file?.name })
       return { ...state, selectedFile: action.file }
 
     case 'SET_VIEW_MODE':
-      console.log('👁️ FILES: View mode changed:', action.viewMode)
+      logger.debug('View mode changed', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'SET_FOLDER':
-      console.log('📂 FILES: Folder changed:', action.folder)
+      logger.debug('Folder changed', { folder: action.folder })
       return { ...state, selectedFolder: action.folder }
 
     case 'SET_SEARCH':
-      console.log('🔍 FILES: Search term changed:', action.searchTerm)
+      logger.debug('Search term changed', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_SORT':
-      console.log('🔀 FILES: Sort changed:', action.sortBy)
+      logger.debug('Sort changed', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'TOGGLE_SELECT_FILE':
       const isSelected = state.selectedFiles.includes(action.fileId)
-      console.log(isSelected ? '❌ FILES: Deselect file' : '✅ FILES: Select file', '- ID:', action.fileId)
+      logger.debug('Toggle select file', { fileId: action.fileId, isSelected: !isSelected })
       return {
         ...state,
         selectedFiles: isSelected
@@ -190,11 +193,11 @@ function filesReducer(state: FilesState, action: FilesAction): FilesState {
       }
 
     case 'CLEAR_SELECTED_FILES':
-      console.log('🔄 FILES: Clear all selected files')
+      logger.debug('Clearing all selected files')
       return { ...state, selectedFiles: [] }
 
     case 'TOGGLE_STAR':
-      console.log('⭐ FILES: Toggle star - ID:', action.fileId)
+      logger.debug('Toggle star', { fileId: action.fileId })
       return {
         ...state,
         files: state.files.map(f =>
@@ -212,7 +215,7 @@ function filesReducer(state: FilesState, action: FilesAction): FilesState {
 // ============================================================================
 
 const generateMockFiles = (): FileItem[] => {
-  console.log('📁 FILES: Generating mock file data...')
+  logger.debug('Generating mock file data')
 
   const fileTypes: Array<FileItem['type']> = ['pdf', 'excel', 'word', 'image', 'video', 'archive', 'code', 'figma']
   const folders = ['Documents', 'Images', 'Videos', 'Design', 'Code', 'Archives']
@@ -246,7 +249,7 @@ const generateMockFiles = (): FileItem[] => {
     })
   }
 
-  console.log('✅ FILES: Generated', files.length, 'mock files')
+  logger.info('Generated mock files', { count: files.length })
   return files
 }
 
@@ -255,7 +258,7 @@ const generateMockFiles = (): FileItem[] => {
 // ============================================================================
 
 export default function FilesPage() {
-  console.log('🚀 FILES: Component mounting...')
+  logger.debug('Component mounting')
 
   // A+++ ANNOUNCER
   const { announce } = useAnnouncer()
@@ -295,7 +298,7 @@ export default function FilesPage() {
 
   useEffect(() => {
     const loadFilesData = async () => {
-      console.log('🔄 FILES: Loading files data from API...')
+      logger.info('Loading files from API')
       try {
         setIsLoading(true)
         setError(null)
@@ -308,7 +311,7 @@ export default function FilesPage() {
           const mockFiles = generateMockFiles()
           dispatch({ type: 'SET_FILES', files: mockFiles })
 
-          console.log('✅ FILES: Data loaded from API -', result.files?.length || 0, 'files')
+          logger.info('Files loaded successfully from API', { count: result.files?.length || 0 })
           announce('Files loaded successfully', 'polite')
         } else {
           throw new Error(result.error || 'Failed to load files')
@@ -316,7 +319,10 @@ export default function FilesPage() {
 
         setIsLoading(false)
       } catch (err) {
-        console.error('❌ FILES: Load error:', err)
+        logger.error('Files load error', {
+          error: err instanceof Error ? err.message : 'Unknown error',
+          errorObject: err
+        })
         setError(err instanceof Error ? err.message : 'Failed to load files')
         setIsLoading(false)
         announce('Error loading files', 'assertive')
@@ -341,7 +347,7 @@ export default function FilesPage() {
       { name: 'starred', label: 'Starred', count: state.files.filter(f => f.starred).length, icon: Star },
       { name: 'shared', label: 'Shared', count: state.files.filter(f => f.shared).length, icon: Share2 }
     ]
-    console.log('📁 FILES: Calculated folder counts')
+    logger.debug('Calculated folder counts')
     return folderList
   }, [state.files])
 
@@ -358,15 +364,16 @@ export default function FilesPage() {
       shared: state.files.filter(f => f.shared).length,
       starred: state.files.filter(f => f.starred).length
     }
-    console.log('📊 FILES: Stats calculated -', JSON.stringify(s))
+    logger.debug('Stats calculated', s)
     return s
   }, [state.files])
 
   const filteredAndSortedFiles = useMemo(() => {
-    console.log('🔍 FILES: Filtering and sorting files...')
-    console.log('📋 FILES: Search term:', state.searchTerm)
-    console.log('📂 FILES: Selected folder:', state.selectedFolder)
-    console.log('🔀 FILES: Sort by:', state.sortBy)
+    logger.debug('Filtering and sorting files', {
+      searchTerm: state.searchTerm,
+      selectedFolder: state.selectedFolder,
+      sortBy: state.sortBy
+    })
 
     let filtered = state.files
 
@@ -379,7 +386,7 @@ export default function FilesPage() {
       } else {
         filtered = filtered.filter(f => f.folder === state.selectedFolder)
       }
-      console.log('📂 FILES: Folder filtered to', filtered.length, 'files')
+      logger.debug('Folder filtered', { resultCount: filtered.length })
     }
 
     // Filter by search
@@ -388,7 +395,7 @@ export default function FilesPage() {
         f.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
         f.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()))
       )
-      console.log('🔍 FILES: Search filtered to', filtered.length, 'files')
+      logger.debug('Search filtered', { resultCount: filtered.length })
     }
 
     // Sort
@@ -407,7 +414,7 @@ export default function FilesPage() {
       }
     })
 
-    console.log('✅ FILES: Filtered and sorted to', sorted.length, 'files')
+    logger.debug('Filtering and sorting complete', { resultCount: sorted.length })
     return sorted
   }, [state.files, state.selectedFolder, state.searchTerm, state.sortBy])
 
@@ -417,19 +424,26 @@ export default function FilesPage() {
 
   const handleUploadFiles = async () => {
     if (!uploadFiles || uploadFiles.length === 0) {
-      console.log('⚠️ FILES: No files selected for upload')
+      logger.warn('No files selected for upload')
       toast.error('No files selected')
       return
     }
 
-    console.log('📤 FILES: Uploading', uploadFiles.length, 'file(s) to API...')
+    const totalSize = Array.from(uploadFiles).reduce((sum, f) => sum + f.size, 0)
+    const uploadedFileNames: string[] = []
+
+    logger.info('Uploading files', { count: uploadFiles.length, totalSize })
 
     try {
       setIsSaving(true)
 
       for (let i = 0; i < uploadFiles.length; i++) {
         const file = uploadFiles[i]
-        console.log(`📄 FILES: Processing file ${i + 1}/${uploadFiles.length}:`, file.name)
+        logger.debug(`Processing file ${i + 1}/${uploadFiles.length}`, {
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type
+        })
 
         const response = await fetch('/api/files', {
           method: 'POST',
@@ -466,6 +480,7 @@ export default function FilesPage() {
           }
 
           dispatch({ type: 'ADD_FILE', file: newFile })
+          uploadedFileNames.push(file.name)
         } else {
           throw new Error(result.error || 'Upload failed')
         }
@@ -473,12 +488,15 @@ export default function FilesPage() {
 
       setIsUploadModalOpen(false)
       setUploadFiles(null)
-      toast.success(`📤 Uploaded ${uploadFiles.length} file(s)`, {
-        description: 'Files are now available in your workspace'
+
+      const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(1)
+      logger.info('Upload complete', { count: uploadFiles.length, totalSize })
+
+      toast.success(`Uploaded ${uploadFiles.length} file(s)`, {
+        description: `${totalSizeMB} MB - Documents - Files: ${uploadedFileNames.slice(0, 3).join(', ')}${uploadedFileNames.length > 3 ? ` +${uploadedFileNames.length - 3} more` : ''}`
       })
-      console.log('✅ FILES: Upload complete')
     } catch (error: any) {
-      console.error('❌ FILES: Upload error:', error)
+      logger.error('Upload failed', { error: error.message, count: uploadFiles.length })
       toast.error('Failed to upload files', {
         description: error.message || 'Please try again later'
       })
@@ -489,7 +507,7 @@ export default function FilesPage() {
 
   const handleDeleteFile = async (fileId: string) => {
     const file = state.files.find(f => f.id === fileId)
-    console.log('🗑️ FILES: Deleting file via API - ID:', fileId, 'Name:', file?.name)
+    logger.info('Deleting file', { fileId, fileName: file?.name, fileSize: file?.size })
 
     try {
       const response = await fetch('/api/files', {
@@ -508,15 +526,17 @@ export default function FilesPage() {
 
       if (result.success) {
         dispatch({ type: 'DELETE_FILE', fileId })
-        toast.success('🗑️ File deleted', {
-          description: result.undoAvailable ? 'Can be restored from trash' : undefined
+
+        logger.info('File deleted successfully', { fileId, fileName: file?.name })
+
+        toast.success('File deleted', {
+          description: `${file?.name} - ${file?.size} - ${file?.folder} - ${result.undoAvailable ? 'Can be restored from trash' : 'Permanently deleted'}`
         })
-        console.log('✅ FILES: Delete successful')
       } else {
         throw new Error(result.error || 'Delete failed')
       }
     } catch (error: any) {
-      console.error('❌ FILES: Delete error:', error)
+      logger.error('Delete failed', { error: error.message, fileId, fileName: file?.name })
       toast.error('Failed to delete file', {
         description: error.message || 'Please try again later'
       })
@@ -524,12 +544,20 @@ export default function FilesPage() {
   }
 
   const handleBulkDelete = async () => {
-    console.log('🗑️ FILES: Bulk deleting', state.selectedFiles.length, 'files via API')
-
     if (state.selectedFiles.length === 0) {
       toast.error('No files selected')
       return
     }
+
+    const selectedFilesData = state.files.filter(f => state.selectedFiles.includes(f.id))
+    const totalSize = selectedFilesData.reduce((sum, f) => sum + f.sizeBytes, 0)
+    const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(1)
+
+    logger.info('Bulk deleting files', {
+      count: state.selectedFiles.length,
+      totalSize,
+      fileIds: state.selectedFiles
+    })
 
     try {
       setIsSaving(true)
@@ -554,15 +582,19 @@ export default function FilesPage() {
         })
 
         dispatch({ type: 'CLEAR_SELECTED_FILES' })
-        toast.success(`🗑️ Deleted ${result.fileCount} file(s)`, {
-          description: result.undoAvailable ? `Can be restored within ${result.undoExpires}` : undefined
+
+        logger.info('Bulk delete successful', {
+          deletedCount: result.fileCount || state.selectedFiles.length
         })
-        console.log('✅ FILES: Bulk delete successful')
+
+        toast.success(`Deleted ${result.fileCount || state.selectedFiles.length} file(s)`, {
+          description: `${totalSizeMB} MB freed - ${selectedFilesData.slice(0, 3).map(f => f.name).join(', ')}${selectedFilesData.length > 3 ? ` +${selectedFilesData.length - 3} more` : ''} - ${result.undoAvailable ? `Restorable for ${result.undoExpires}` : 'Permanent'}`
+        })
       } else {
         throw new Error(result.error || 'Bulk delete failed')
       }
     } catch (error: any) {
-      console.error('❌ FILES: Bulk delete error:', error)
+      logger.error('Bulk delete failed', { error: error.message, count: state.selectedFiles.length })
       toast.error('Failed to delete files', {
         description: error.message || 'Please try again later'
       })
@@ -573,19 +605,30 @@ export default function FilesPage() {
 
   const handleToggleStar = (fileId: string) => {
     const file = state.files.find(f => f.id === fileId)
-    console.log(file?.starred ? '☆ FILES: Unstarring file' : '⭐ FILES: Starring file', '- ID:', fileId)
+
+    logger.info(file?.starred ? 'Unstarring file' : 'Starring file', {
+      fileId,
+      fileName: file?.name
+    })
 
     dispatch({ type: 'TOGGLE_STAR', fileId })
-    toast.success(file?.starred ? 'Removed from favorites' : 'Added to favorites')
+
+    toast.success(file?.starred ? 'Removed from favorites' : 'Added to favorites', {
+      description: `${file?.name} - ${file?.size} - ${file?.folder}`
+    })
   }
 
   const handleRenameFile = async () => {
     if (!state.selectedFile || !newFileName) {
-      console.log('⚠️ FILES: Missing file or name for rename')
+      logger.warn('Missing file or name for rename')
       return
     }
 
-    console.log('✏️ FILES: Renaming file via local state:', state.selectedFile.name, '→', newFileName)
+    logger.info('Renaming file', {
+      oldName: state.selectedFile.name,
+      newName: newFileName,
+      fileId: state.selectedFile.id
+    })
 
     try {
       setIsSaving(true)
@@ -597,12 +640,20 @@ export default function FilesPage() {
 
       setIsRenameModalOpen(false)
       setNewFileName('')
-      toast.success('✏️ File renamed', {
-        description: `Now called "${newFileName}"`
+
+      logger.info('Rename successful', {
+        oldName: state.selectedFile.name,
+        newName: newFileName
       })
-      console.log('✅ FILES: Rename successful')
+
+      toast.success('File renamed', {
+        description: `${state.selectedFile.name} → ${newFileName} - ${state.selectedFile.size} - ${state.selectedFile.folder}`
+      })
     } catch (error: any) {
-      console.error('❌ FILES: Rename error:', error)
+      logger.error('Rename failed', {
+        error: error.message,
+        fileName: state.selectedFile?.name
+      })
       toast.error('Failed to rename file', {
         description: error.message || 'Please try again later'
       })
@@ -613,11 +664,15 @@ export default function FilesPage() {
 
   const handleMoveFile = async () => {
     if (!state.selectedFile || !moveToFolder) {
-      console.log('⚠️ FILES: Missing file or folder for move')
+      logger.warn('Missing file or folder for move')
       return
     }
 
-    console.log('📂 FILES: Moving file via API:', state.selectedFile.name, 'to folder:', moveToFolder)
+    logger.info('Moving file', {
+      fileName: state.selectedFile.name,
+      fromFolder: state.selectedFile.folder,
+      toFolder: moveToFolder
+    })
 
     try {
       setIsSaving(true)
@@ -642,15 +697,24 @@ export default function FilesPage() {
 
         setIsMoveModalOpen(false)
         setMoveToFolder('')
-        toast.success(`📂 Moved to ${moveToFolder}`, {
-          description: `${result.fileCount} file(s) relocated successfully`
+
+        logger.info('Move successful', {
+          fileName: state.selectedFile.name,
+          fromFolder: state.selectedFile.folder,
+          toFolder: moveToFolder
         })
-        console.log('✅ FILES: Move successful')
+
+        toast.success(`Moved to ${moveToFolder}`, {
+          description: `${state.selectedFile.name} - ${state.selectedFile.size} - From: ${state.selectedFile.folder} → To: ${moveToFolder}`
+        })
       } else {
         throw new Error(result.error || 'Move failed')
       }
     } catch (error: any) {
-      console.error('❌ FILES: Move error:', error)
+      logger.error('Move failed', {
+        error: error.message,
+        fileName: state.selectedFile?.name
+      })
       toast.error('Failed to move file', {
         description: error.message || 'Please try again later'
       })
@@ -661,17 +725,20 @@ export default function FilesPage() {
 
   const handleShareFile = async () => {
     if (!state.selectedFile || !shareEmails) {
-      console.log('⚠️ FILES: Missing file or emails for share')
+      logger.warn('Missing file or emails for share')
       return
     }
 
-    console.log('🔗 FILES: Sharing file via API:', state.selectedFile.name)
-    console.log('📧 FILES: Share with:', shareEmails)
+    const recipients = shareEmails.split(',').map(email => email.trim())
+
+    logger.info('Sharing file', {
+      fileName: state.selectedFile.name,
+      recipients,
+      recipientCount: recipients.length
+    })
 
     try {
       setIsSaving(true)
-
-      const recipients = shareEmails.split(',').map(email => email.trim())
 
       const response = await fetch('/api/files', {
         method: 'POST',
@@ -695,15 +762,24 @@ export default function FilesPage() {
 
         setIsShareModalOpen(false)
         setShareEmails('')
-        toast.success('🔗 File shared', {
-          description: `Shared with ${result.fileCount} file(s) • Expires in ${result.expiresIn}`
+
+        logger.info('Share successful', {
+          fileName: state.selectedFile.name,
+          recipientCount: recipients.length,
+          shareUrl: result.shareUrl
         })
-        console.log('✅ FILES: Share successful - URL:', result.shareUrl)
+
+        toast.success('File shared', {
+          description: `${state.selectedFile.name} - ${state.selectedFile.size} - Shared with: ${recipients.slice(0, 2).join(', ')}${recipients.length > 2 ? ` +${recipients.length - 2} more` : ''} - Expires: ${result.expiresIn || '30 days'}`
+        })
       } else {
         throw new Error(result.error || 'Share failed')
       }
     } catch (error: any) {
-      console.error('❌ FILES: Share error:', error)
+      logger.error('Share failed', {
+        error: error.message,
+        fileName: state.selectedFile?.name
+      })
       toast.error('Failed to share file', {
         description: error.message || 'Please try again later'
       })
@@ -732,7 +808,7 @@ export default function FilesPage() {
   // ============================================================================
 
   if (isLoading) {
-    console.log('⏳ FILES: Rendering loading state...')
+    logger.debug('Rendering loading state')
     return (
       <div className="container mx-auto p-6 space-y-6">
         <CardSkeleton />
@@ -746,7 +822,7 @@ export default function FilesPage() {
   // ============================================================================
 
   if (error) {
-    console.log('❌ FILES: Rendering error state...')
+    logger.error('Rendering error state', { error })
     return (
       <div className="container mx-auto p-6">
         <div className="max-w-2xl mx-auto mt-20">
@@ -763,9 +839,12 @@ export default function FilesPage() {
   // MAIN RENDER
   // ============================================================================
 
-  console.log('🎨 FILES: Rendering main UI...')
-  console.log('📊 FILES: Total files:', state.files.length)
-  console.log('📋 FILES: Filtered files:', filteredAndSortedFiles.length)
+  logger.debug('Rendering main UI', {
+    totalFiles: state.files.length,
+    filteredFiles: filteredAndSortedFiles.length,
+    viewMode: state.viewMode,
+    selectedFolder: state.selectedFolder
+  })
 
   return (
     <div className="container mx-auto p-6 space-y-6">
