@@ -19,6 +19,10 @@ import { Slider } from '@/components/ui/slider'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+
+const logger = createFeatureLogger('Desktop-App')
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
@@ -103,21 +107,21 @@ const DesktopWindow = ({ app, os, width, height }: DesktopWindowProps) => {
     if (os === 'macOS') {
       return (
         <div className="flex items-center gap-2 p-3">
-          <button className="w-3 h-3 bg-red-500 rounded-full hover:bg-red-600" onClick={() => { setIsMinimized(true); console.log("🔻 Minimizing window"); }} data-testid="minimize-window-btn" />
-          <button className="w-3 h-3 bg-yellow-500 rounded-full hover:bg-yellow-600" onClick={() => { setIsMinimized(!isMinimized); console.log(isMinimized ? "⬆️ Restoring window" : "🔻 Minimizing window"); }} data-testid="toggle-minimize-btn" />
-          <button className="w-3 h-3 bg-green-500 rounded-full hover:bg-green-600" onClick={() => { setIsMaximized(!isMaximized); console.log(isMaximized ? "🗗 Restoring window" : "🗖 Maximizing window"); }} data-testid="toggle-maximize-btn" />
+          <button className="w-3 h-3 bg-red-500 rounded-full hover:bg-red-600" onClick={() => { logger.info('Minimizing window', { os, app }); setIsMinimized(true); toast.info('Window minimized', { description: `${app} - ${os}` }); }} data-testid="minimize-window-btn" />
+          <button className="w-3 h-3 bg-yellow-500 rounded-full hover:bg-yellow-600" onClick={() => { logger.info(isMinimized ? 'Restoring window' : 'Minimizing window', { os, app, state: isMinimized ? 'minimized' : 'normal' }); setIsMinimized(!isMinimized); toast.info(isMinimized ? 'Window restored' : 'Window minimized', { description: `${app} - ${os}` }); }} data-testid="toggle-minimize-btn" />
+          <button className="w-3 h-3 bg-green-500 rounded-full hover:bg-green-600" onClick={() => { logger.info(isMaximized ? 'Restoring window' : 'Maximizing window', { os, app, state: isMaximized ? 'maximized' : 'normal' }); setIsMaximized(!isMaximized); toast.info(isMaximized ? 'Window restored' : 'Window maximized', { description: `${app} - ${os}` }); }} data-testid="toggle-maximize-btn" />
         </div>
       )
     } else {
       return (
         <div className="flex items-center gap-1 p-2">
-          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" onClick={() => { setIsMinimized(!isMinimized); console.log(isMinimized ? "⬆️ Restoring window" : "🔻 Minimizing window"); }} data-testid="toggle-minimize-btn">
+          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" onClick={() => { logger.info(isMinimized ? 'Restoring window' : 'Minimizing window', { os, app, state: isMinimized ? 'minimized' : 'normal' }); setIsMinimized(!isMinimized); toast.info(isMinimized ? 'Window restored' : 'Window minimized', { description: `${app} - ${os}` }); }} data-testid="toggle-minimize-btn">
             <Minus className="w-3 h-3" />
           </button>
-          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" onClick={() => { setIsMaximized(!isMaximized); console.log(isMaximized ? "🗗 Restoring window" : "🗖 Maximizing window"); }} data-testid="toggle-maximize-btn">
+          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" onClick={() => { logger.info(isMaximized ? 'Restoring window' : 'Maximizing window', { os, app, state: isMaximized ? 'maximized' : 'normal' }); setIsMaximized(!isMaximized); toast.info(isMaximized ? 'Window restored' : 'Window maximized', { description: `${app} - ${os}` }); }} data-testid="toggle-maximize-btn">
             <Square className="w-3 h-3" />
           </button>
-          <button className="p-1 hover:bg-red-500 hover:text-white rounded" onClick={() => { setIsMinimized(true); console.log("🔻 Minimizing window"); }} data-testid="minimize-window-btn">
+          <button className="p-1 hover:bg-red-500 hover:text-white rounded" onClick={() => { logger.info('Minimizing window', { os, app }); setIsMinimized(true); toast.info('Window minimized', { description: `${app} - ${os}` }); }} data-testid="minimize-window-btn">
             <X className="w-3 h-3" />
           </button>
         </div>
@@ -196,15 +200,110 @@ export default function DesktopAppPage() {
   const scaleFactor = zoom[0] / 100
 
   const exportAsImage = () => {
-    console.log('📸 Exporting as image...')
+    const appName = DEMO_APPS.find(a => a.id === selectedApp)?.name || 'Desktop App'
+
+    logger.info('Exporting as image', {
+      app: selectedApp,
+      device: selectedDevice,
+      framework: selectedFramework,
+      zoom: zoom[0],
+      resolution: `${device.width}x${device.height}`
+    })
+
+    // Simulate image generation
+    const canvas = document.createElement('canvas')
+    canvas.width = device.width
+    canvas.height = device.height
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+      ctx.fillStyle = '#f0f0f0'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+    }
+
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const fileName = `${selectedApp}-${device.id}-${Date.now()}.png`
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = fileName
+        a.click()
+        URL.revokeObjectURL(url)
+
+        const fileSizeKB = (blob.size / 1024).toFixed(1)
+
+        toast.success('Desktop preview exported', {
+          description: `${appName} - ${fileName} - ${fileSizeKB} KB - ${device.width}x${device.height} - ${framework.name}`
+        })
+      }
+    })
   }
 
   const sharePreview = () => {
-    console.log('🔗 Sharing preview...')
+    const appName = DEMO_APPS.find(a => a.id === selectedApp)?.name || 'Desktop App'
+
+    logger.info('Sharing preview', {
+      app: selectedApp,
+      device: selectedDevice,
+      framework: selectedFramework
+    })
+
+    const shareUrl = `${window.location.origin}/desktop-preview/${selectedApp}?device=${selectedDevice}&framework=${selectedFramework}&zoom=${zoom[0]}`
+
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      toast.success('Share link copied to clipboard', {
+        description: `${appName} - ${device.name} - ${framework.name} - ${shareUrl.length} characters`
+      })
+    }).catch((err) => {
+      logger.error('Failed to copy share link', { error: err.message })
+      toast.error('Failed to copy share link')
+    })
   }
 
   const generateCode = () => {
-    console.log('💻 Generating code...')
+    const appName = DEMO_APPS.find(a => a.id === selectedApp)?.name || 'Desktop App'
+
+    logger.info('Generating code', {
+      app: selectedApp,
+      framework: selectedFramework,
+      device: selectedDevice
+    })
+
+    const codeTemplate = `// ${appName} - ${framework.name} Desktop App
+// Target: ${device.name} (${device.os})
+// Resolution: ${device.width}x${device.height}
+
+import { app, BrowserWindow } from '${selectedFramework}'
+
+function createWindow() {
+  const mainWindow = new BrowserWindow({
+    width: ${device.width},
+    height: ${device.height},
+    title: '${appName}',
+    // Add your configuration here
+  })
+
+  mainWindow.loadFile('index.html')
+}
+
+app.whenReady().then(createWindow)
+`
+
+    const fileName = `${selectedApp}-${selectedFramework}.js`
+    const blob = new Blob([codeTemplate], { type: 'text/javascript' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = fileName
+    a.click()
+    URL.revokeObjectURL(url)
+
+    const fileSizeKB = (blob.size / 1024).toFixed(1)
+    const linesOfCode = codeTemplate.split('\n').length
+
+    toast.success('Desktop app code generated', {
+      description: `${fileName} - ${fileSizeKB} KB - ${linesOfCode} lines - ${framework.name} - Ready to build`
+    })
   }
 
   // A+++ LOADING STATE
@@ -268,13 +367,13 @@ export default function DesktopAppPage() {
                     Desktop Preview
                   </h2>
                   <div className="flex gap-2">
-                    <button variant="outline" size="sm" onClick={() => { exportAsImage(); console.log("📸 Exporting as image..."); }} data-testid="export-image-btn">
+                    <button variant="outline" size="sm" onClick={exportAsImage} data-testid="export-image-btn">
                       <Download className="w-4 h-4" />
                     </button>
-                    <button variant="outline" size="sm" onClick={() => { sharePreview(); console.log("🔗 Sharing preview..."); }} data-testid="share-preview-btn">
+                    <button variant="outline" size="sm" onClick={sharePreview} data-testid="share-preview-btn">
                       <Share2 className="w-4 h-4" />
                     </button>
-                    <button variant="outline" size="sm" onClick={() => { generateCode(); console.log("💻 Generating code..."); }} data-testid="generate-code-btn">
+                    <button variant="outline" size="sm" onClick={generateCode} data-testid="generate-code-btn">
                       <Code className="w-4 h-4" />
                     </button>
                   </div>
