@@ -7,6 +7,7 @@ import { BreadcrumbNav } from '@/components/ui/breadcrumb-nav'
 import { AdminSearch } from '@/components/admin/admin-search'
 import { MobileAdminNav } from '@/components/admin/mobile-admin-nav'
 import { KeyboardShortcutsModal } from '@/components/ui/keyboard-shortcuts-modal'
+import { ActivityLogViewer } from '@/components/activity-log-viewer'
 import { ROUTE_LABELS } from '@/lib/route-utils'
 
 interface DashboardLayoutClientProps {
@@ -51,6 +52,9 @@ export default function DashboardLayoutClient({
 
       {/* Floating Theme Toggle - visible on all dashboard pages */}
       <FloatingThemeToggle />
+
+      {/* Activity Log Viewer - Real-time system activity notifications */}
+      <ActivityLogViewer />
 
       {/* Keyboard Shortcuts Modal - Press ? to open */}
       <KeyboardShortcutsModal />
