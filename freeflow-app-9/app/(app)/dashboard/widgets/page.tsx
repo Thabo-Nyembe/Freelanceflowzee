@@ -29,13 +29,16 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Widgets')
 
 // ============================================================================
 // FRAMER MOTION COMPONENTS
 // ============================================================================
 
 const FloatingParticle = ({ delay = 0, color = 'cyan' }: { delay?: number; color?: string }) => {
-  console.log('🎨 WIDGETS: FloatingParticle rendered with color:', color, 'delay:', delay)
+  logger.debug('FloatingParticle rendered', { color, delay })
   return (
     <motion.div
       className={`absolute w-2 h-2 bg-${color}-400 rounded-full opacity-30`}
@@ -122,26 +125,26 @@ type WidgetsAction =
 // ============================================================================
 
 function widgetsReducer(state: WidgetsState, action: WidgetsAction): WidgetsState {
-  console.log('🔄 WIDGETS REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_WIDGETS':
-      console.log('✅ WIDGETS: Set widgets -', action.widgets.length, 'widgets loaded')
+      logger.info('Setting widgets', { count: action.widgets.length })
       return { ...state, widgets: action.widgets }
 
     case 'ADD_WIDGET':
-      console.log('✅ WIDGETS: Add widget - ID:', action.widget.id, 'Name:', action.widget.name)
+      logger.info('Adding widget', { widgetId: action.widget.id, widgetName: action.widget.name })
       return { ...state, widgets: [action.widget, ...state.widgets] }
 
     case 'UPDATE_WIDGET':
-      console.log('✅ WIDGETS: Update widget - ID:', action.widget.id)
+      logger.info('Updating widget', { widgetId: action.widget.id })
       return {
         ...state,
         widgets: state.widgets.map(w => w.id === action.widget.id ? action.widget : w)
       }
 
     case 'DELETE_WIDGET':
-      console.log('🗑️ WIDGETS: Delete widget - ID:', action.widgetId)
+      logger.info('Deleting widget', { widgetId: action.widgetId })
       return {
         ...state,
         widgets: state.widgets.filter(w => w.id !== action.widgetId),
@@ -149,36 +152,36 @@ function widgetsReducer(state: WidgetsState, action: WidgetsAction): WidgetsStat
       }
 
     case 'SELECT_WIDGET':
-      console.log('👁️ WIDGETS: Select widget -', action.widget?.name || 'None')
+      logger.debug('Selecting widget', { widgetName: action.widget?.name })
       return { ...state, selectedWidget: action.widget }
 
     case 'SET_SEARCH':
-      console.log('🔍 WIDGETS: Search term changed:', action.searchTerm)
+      logger.debug('Search term changed', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER_CATEGORY':
-      console.log('🔎 WIDGETS: Filter category changed:', action.filterCategory)
+      logger.debug('Filter category changed', { filterCategory: action.filterCategory })
       return { ...state, filterCategory: action.filterCategory }
 
     case 'SET_FILTER_TYPE':
-      console.log('🔎 WIDGETS: Filter type changed:', action.filterType)
+      logger.debug('Filter type changed', { filterType: action.filterType })
       return { ...state, filterType: action.filterType }
 
     case 'SET_FILTER_SIZE':
-      console.log('🔎 WIDGETS: Filter size changed:', action.filterSize)
+      logger.debug('Filter size changed', { filterSize: action.filterSize })
       return { ...state, filterSize: action.filterSize }
 
     case 'SET_SORT':
-      console.log('🔀 WIDGETS: Sort changed:', action.sortBy)
+      logger.debug('Sort changed', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'SET_VIEW_MODE':
-      console.log('👁️ WIDGETS: View mode changed:', action.viewMode)
+      logger.debug('View mode changed', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'TOGGLE_SELECT_WIDGET':
       const isSelected = state.selectedWidgets.includes(action.widgetId)
-      console.log(isSelected ? '❌ WIDGETS: Deselect' : '✅ WIDGETS: Select', '- ID:', action.widgetId)
+      logger.debug('Toggle select widget', { widgetId: action.widgetId, isSelected: !isSelected })
       return {
         ...state,
         selectedWidgets: isSelected
@@ -187,11 +190,11 @@ function widgetsReducer(state: WidgetsState, action: WidgetsAction): WidgetsStat
       }
 
     case 'CLEAR_SELECTED_WIDGETS':
-      console.log('🔄 WIDGETS: Clear all selected')
+      logger.debug('Clearing all selected widgets')
       return { ...state, selectedWidgets: [] }
 
     case 'TOGGLE_VISIBILITY':
-      console.log('👁️ WIDGETS: Toggle visibility - ID:', action.widgetId)
+      logger.debug('Toggle visibility', { widgetId: action.widgetId })
       return {
         ...state,
         widgets: state.widgets.map(w =>
@@ -200,7 +203,7 @@ function widgetsReducer(state: WidgetsState, action: WidgetsAction): WidgetsStat
       }
 
     case 'TOGGLE_LOCK':
-      console.log('🔒 WIDGETS: Toggle lock - ID:', action.widgetId)
+      logger.debug('Toggle lock', { widgetId: action.widgetId })
       return {
         ...state,
         widgets: state.widgets.map(w =>
@@ -209,7 +212,7 @@ function widgetsReducer(state: WidgetsState, action: WidgetsAction): WidgetsStat
       }
 
     case 'SET_EDIT_MODE':
-      console.log('✏️ WIDGETS: Edit mode changed:', action.isEditMode)
+      logger.debug('Edit mode changed', { isEditMode: action.isEditMode })
       return { ...state, isEditMode: action.isEditMode }
 
     default:
@@ -222,7 +225,7 @@ function widgetsReducer(state: WidgetsState, action: WidgetsAction): WidgetsStat
 // ============================================================================
 
 const generateMockWidgets = (): Widget[] => {
-  console.log('📊 WIDGETS: Generating mock widget data...')
+  logger.debug('Generating mock widget data')
 
   const types: WidgetType[] = ['metric', 'chart', 'table', 'activity', 'quick-actions', 'calendar']
   const categories: WidgetCategory[] = ['analytics', 'productivity', 'finance', 'social', 'custom']
@@ -279,7 +282,7 @@ const generateMockWidgets = (): Widget[] => {
     })
   }
 
-  console.log('✅ WIDGETS: Generated', widgets.length, 'mock widgets')
+  logger.info('Generated mock widgets', { count: widgets.length })
   return widgets
 }
 
@@ -288,7 +291,7 @@ const generateMockWidgets = (): Widget[] => {
 // ============================================================================
 
 export default function WidgetsPage() {
-  console.log('🚀 WIDGETS: Component mounting...')
+  logger.debug('Component mounting')
 
   // A+++ ANNOUNCER
   const { announce } = useAnnouncer()
@@ -332,7 +335,7 @@ export default function WidgetsPage() {
 
   useEffect(() => {
     const loadWidgetsData = async () => {
-      console.log('🔄 WIDGETS: Loading widgets data...')
+      logger.info('Loading widgets data')
       try {
         setIsLoading(true)
         setError(null)
@@ -352,9 +355,12 @@ export default function WidgetsPage() {
 
         setIsLoading(false)
         announce('Widgets loaded successfully', 'polite')
-        console.log('✅ WIDGETS: Data loaded successfully')
+        logger.info('Widgets data loaded successfully', { count: mockWidgets.length })
       } catch (err) {
-        console.error('❌ WIDGETS: Load error:', err)
+        logger.error('Widgets load error', {
+          error: err instanceof Error ? err.message : 'Unknown error',
+          errorObject: err
+        })
         setError(err instanceof Error ? err.message : 'Failed to load widgets')
         setIsLoading(false)
         announce('Error loading widgets', 'assertive')
@@ -379,7 +385,7 @@ export default function WidgetsPage() {
         ? Math.floor(state.widgets.reduce((sum, w) => sum + w.usageCount, 0) / state.widgets.length)
         : 0
     }
-    console.log('📊 WIDGETS: Stats calculated -', JSON.stringify(s))
+    logger.debug('Stats calculated', s)
     return s
   }, [state.widgets])
 
@@ -388,11 +394,14 @@ export default function WidgetsPage() {
   // ============================================================================
 
   const filteredAndSortedWidgets = useMemo(() => {
-    console.log('🔍 WIDGETS: Filtering and sorting...')
-    console.log('📋 WIDGETS: Search term:', state.searchTerm)
-    console.log('🔎 WIDGETS: Filter category:', state.filterCategory)
-    console.log('🔎 WIDGETS: Filter type:', state.filterType)
-    console.log('🔀 WIDGETS: Sort by:', state.sortBy)
+    logger.debug('Filtering and sorting widgets', {
+      searchTerm: state.searchTerm,
+      filterCategory: state.filterCategory,
+      filterType: state.filterType,
+      filterSize: state.filterSize,
+      sortBy: state.sortBy,
+      totalWidgets: state.widgets.length
+    })
 
     let filtered = state.widgets
 
@@ -402,25 +411,25 @@ export default function WidgetsPage() {
         w.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
         w.description.toLowerCase().includes(state.searchTerm.toLowerCase())
       )
-      console.log('🔍 WIDGETS: Search filtered to', filtered.length, 'widgets')
+      logger.debug('Search filter applied', { resultCount: filtered.length })
     }
 
     // Filter by category
     if (state.filterCategory !== 'all') {
       filtered = filtered.filter(w => w.category === state.filterCategory)
-      console.log('🔎 WIDGETS: Category filtered to', filtered.length, 'widgets')
+      logger.debug('Category filter applied', { category: state.filterCategory, resultCount: filtered.length })
     }
 
     // Filter by type
     if (state.filterType !== 'all') {
       filtered = filtered.filter(w => w.type === state.filterType)
-      console.log('🔎 WIDGETS: Type filtered to', filtered.length, 'widgets')
+      logger.debug('Type filter applied', { type: state.filterType, resultCount: filtered.length })
     }
 
     // Filter by size
     if (state.filterSize !== 'all') {
       filtered = filtered.filter(w => w.size === state.filterSize)
-      console.log('🔎 WIDGETS: Size filtered to', filtered.length, 'widgets')
+      logger.debug('Size filter applied', { size: state.filterSize, resultCount: filtered.length })
     }
 
     // Sort
@@ -440,7 +449,7 @@ export default function WidgetsPage() {
       }
     })
 
-    console.log('✅ WIDGETS: Filtered and sorted to', sorted.length, 'widgets')
+    logger.debug('Filtering and sorting complete', { finalCount: sorted.length })
     return sorted
   }, [state.widgets, state.searchTerm, state.filterCategory, state.filterType, state.filterSize, state.sortBy])
 
@@ -450,12 +459,12 @@ export default function WidgetsPage() {
 
   const handleCreateWidget = async () => {
     if (!widgetName) {
-      console.log('⚠️ WIDGETS: Widget name required')
+      logger.warn('Widget creation failed', { reason: 'Name required' })
       toast.error('Widget name required')
       return
     }
 
-    console.log('➕ WIDGETS: Creating widget (local state):', widgetName)
+    logger.info('Creating widget', { name: widgetName, type: widgetType, category: widgetCategory, size: widgetSize })
 
     try {
       setIsSaving(true)
@@ -496,13 +505,17 @@ export default function WidgetsPage() {
       setIsCreateModalOpen(false)
       setWidgetName('')
       setWidgetDescription('')
-      console.log('✅ WIDGETS: Widget created successfully - ID:', newWidget.id)
 
-      toast.success('🎨 Widget created', {
-        description: `${newWidget.name} has been added to your dashboard`
+      logger.info('Widget created successfully', { widgetId: newWidget.id, name: newWidget.name, type: newWidget.type })
+
+      toast.success('Widget created', {
+        description: `${newWidget.name} - ${newWidget.type} - ${newWidget.category} - ${newWidget.size} size - Visible on dashboard`
       })
     } catch (error) {
-      console.error('❌ WIDGETS: Create error:', error)
+      logger.error('Widget creation error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorObject: error
+      })
       toast.error('Failed to create widget')
     } finally {
       setIsSaving(false)
@@ -512,21 +525,31 @@ export default function WidgetsPage() {
   const handleDeleteWidget = async () => {
     if (!state.selectedWidget) return
 
-    console.log('🗑️ WIDGETS: Deleting widget (local state):', state.selectedWidget.name)
+    const widgetToDelete = state.selectedWidget
+    logger.info('Deleting widget', {
+      widgetId: widgetToDelete.id,
+      name: widgetToDelete.name,
+      type: widgetToDelete.type
+    })
 
     try {
       setIsSaving(true)
 
       // Note: Using local state - in production, this would POST to /api/widgets with action 'delete'
-      dispatch({ type: 'DELETE_WIDGET', widgetId: state.selectedWidget.id })
+      dispatch({ type: 'DELETE_WIDGET', widgetId: widgetToDelete.id })
       setIsDeleteModalOpen(false)
-      console.log('✅ WIDGETS: Widget deleted successfully')
 
-      toast.success('🗑️ Widget deleted', {
-        description: `${state.selectedWidget.name} removed from dashboard`
+      logger.info('Widget deleted successfully', { widgetId: widgetToDelete.id })
+
+      toast.success('Widget deleted', {
+        description: `${widgetToDelete.name} - ${widgetToDelete.type} - ${widgetToDelete.category} - Usage: ${widgetToDelete.usageCount} times`
       })
     } catch (error: any) {
-      console.error('❌ WIDGETS: Delete error:', error)
+      logger.error('Widget deletion error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorObject: error,
+        widgetId: widgetToDelete.id
+      })
       toast.error('Failed to delete widget', {
         description: error.message || 'Please try again later'
       })
@@ -536,12 +559,20 @@ export default function WidgetsPage() {
   }
 
   const handleBulkDelete = async () => {
-    console.log('🗑️ WIDGETS: Bulk deleting (local state)', state.selectedWidgets.length, 'widgets')
-
     if (state.selectedWidgets.length === 0) {
+      logger.warn('Bulk delete failed', { reason: 'No widgets selected' })
       toast.error('No widgets selected')
       return
     }
+
+    const selectedWidgetsData = state.widgets.filter(w => state.selectedWidgets.includes(w.id))
+    const widgetNames = selectedWidgetsData.map(w => w.name)
+
+    logger.info('Bulk deleting widgets', {
+      count: state.selectedWidgets.length,
+      widgetIds: state.selectedWidgets,
+      widgetNames
+    })
 
     try {
       setIsSaving(true)
@@ -553,12 +584,18 @@ export default function WidgetsPage() {
 
       const deletedCount = state.selectedWidgets.length
       dispatch({ type: 'CLEAR_SELECTED_WIDGETS' })
-      toast.success(`🗑️ Deleted ${deletedCount} widget(s)`, {
-        description: 'Selected widgets removed from dashboard'
+
+      logger.info('Bulk delete successful', { count: deletedCount })
+
+      toast.success(`Deleted ${deletedCount} widget(s)`, {
+        description: `Removed: ${widgetNames.slice(0, 3).join(', ')}${widgetNames.length > 3 ? ` +${widgetNames.length - 3} more` : ''}`
       })
-      console.log('✅ WIDGETS: Bulk delete successful -', deletedCount, 'widgets')
     } catch (error: any) {
-      console.error('❌ WIDGETS: Bulk delete error:', error)
+      logger.error('Bulk delete error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorObject: error,
+        count: state.selectedWidgets.length
+      })
       toast.error('Failed to delete widgets', {
         description: error.message || 'Please try again later'
       })
@@ -568,7 +605,7 @@ export default function WidgetsPage() {
   }
 
   const handleExportConfig = () => {
-    console.log('📤 WIDGETS: Exporting widget configuration')
+    logger.info('Exporting widget configuration', { widgetCount: state.widgets.length })
 
     const config = {
       widgets: state.widgets,
@@ -576,15 +613,27 @@ export default function WidgetsPage() {
       version: '1.0'
     }
 
-    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' })
+    const configJson = JSON.stringify(config, null, 2)
+    const blob = new Blob([configJson], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `widgets-config-${Date.now()}.json`
+    const fileName = `widgets-config-${Date.now()}.json`
+    a.download = fileName
     a.click()
+    URL.revokeObjectURL(url)
 
-    console.log('✅ WIDGETS: Configuration exported')
-    toast.success('Configuration exported')
+    const fileSizeKB = (blob.size / 1024).toFixed(1)
+
+    logger.info('Configuration exported successfully', {
+      fileName,
+      fileSize: blob.size,
+      widgetCount: state.widgets.length
+    })
+
+    toast.success('Configuration exported', {
+      description: `${fileName} - ${fileSizeKB} KB - ${state.widgets.length} widgets - JSON format`
+    })
   }
 
   // ============================================================================
@@ -592,7 +641,7 @@ export default function WidgetsPage() {
   // ============================================================================
 
   if (isLoading) {
-    console.log('⏳ WIDGETS: Rendering loading state...')
+    logger.debug('Rendering loading state')
     return (
       <div className="min-h-screen p-8">
         <div className="max-w-[1800px] mx-auto space-y-8">
@@ -613,7 +662,7 @@ export default function WidgetsPage() {
   // ============================================================================
 
   if (error) {
-    console.log('❌ WIDGETS: Rendering error state...')
+    logger.error('Rendering error state', { error })
     return (
       <div className="min-h-screen p-8">
         <div className="max-w-[1800px] mx-auto">
@@ -630,10 +679,12 @@ export default function WidgetsPage() {
   // MAIN RENDER
   // ============================================================================
 
-  console.log('🎨 WIDGETS: Rendering main UI...')
-  console.log('📊 WIDGETS: Total widgets:', state.widgets.length)
-  console.log('📋 WIDGETS: Filtered widgets:', filteredAndSortedWidgets.length)
-  console.log('👁️ WIDGETS: View mode:', state.viewMode)
+  logger.debug('Rendering main UI', {
+    totalWidgets: state.widgets.length,
+    filteredWidgets: filteredAndSortedWidgets.length,
+    viewMode: state.viewMode,
+    visibleCount: state.widgets.filter(w => w.isVisible).length
+  })
 
   const visibleWidgets = state.viewMode === 'dashboard' ? state.widgets.filter(w => w.isVisible) : filteredAndSortedWidgets
 
