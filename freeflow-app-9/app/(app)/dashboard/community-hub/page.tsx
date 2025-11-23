@@ -54,6 +54,9 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Community-Hub')
 
 interface CommunityMember {
   id: string
@@ -708,7 +711,14 @@ export default function CommunityHubPage() {
 
   // Handlers
   const handleLikePost = async (id: string) => {
-    console.log('❤️ LIKE POST - ID:', id)
+    const post = state.posts.find(p => p.id === id)
+
+    logger.info('Liking post', {
+      postId: id,
+      authorId: post?.authorId,
+      type: post?.type,
+      currentLikes: post?.likes
+    })
 
     try {
       const response = await fetch('/api/community', {
@@ -728,30 +738,55 @@ export default function CommunityHubPage() {
       const result = await response.json()
 
       if (result.success) {
+        logger.info('Post liked successfully', {
+          postId: id,
+          newLikeCount: (post?.likes || 0) + 1,
+          hasAchievement: !!result.achievement
+        })
+
         // Show achievement for Social Butterfly (+5 points, 10% chance)
         if (result.achievement) {
           toast.success(`${result.message} ${result.achievement.message} +${result.achievement.points} points!`, {
-            description: `Badge: ${result.achievement.badge}`
+            description: `${post?.type} post - ${(post?.likes || 0) + 1} likes - Badge: ${result.achievement.badge}`
           })
         } else {
-          toast.success(result.message)
+          toast.success(result.message, {
+            description: `${post?.type} post - ${(post?.likes || 0) + 1} likes - ${post?.comments || 0} comments`
+          })
         }
       }
     } catch (error: any) {
-      console.error('Like Post Error:', error)
+      logger.error('Failed to like post', {
+        error: error.message,
+        postId: id
+      })
       toast.error('Failed to like post', {
         description: error.message || 'Please try again later'
       })
     }
   }
   const handleCommentOnPost = (id: string) => {
-    console.log('💬 COMMUNITY: Comment on post initiated')
-    console.log('📝 COMMUNITY: Post ID:', id)
-    console.log('✅ COMMUNITY: Opening comment dialog')
-    toast.info('💬 Add comment')
+    const post = state.posts.find(p => p.id === id)
+
+    logger.info('Opening comment dialog', {
+      postId: id,
+      postType: post?.type,
+      currentComments: post?.comments
+    })
+
+    toast.info('Add comment', {
+      description: `${post?.type} post - ${post?.comments || 0} comments - ${post?.likes || 0} likes`
+    })
   }
+
   const handleSharePost = async (id: string) => {
-    console.log('🔗 SHARE POST - ID:', id)
+    const post = state.posts.find(p => p.id === id)
+
+    logger.info('Sharing post', {
+      postId: id,
+      postType: post?.type,
+      currentShares: post?.shares
+    })
 
     try {
       const response = await fetch('/api/community', {
@@ -771,19 +806,35 @@ export default function CommunityHubPage() {
       const result = await response.json()
 
       if (result.success) {
+        logger.info('Post shared successfully', {
+          postId: id,
+          shareUrl: result.shareUrl,
+          newShareCount: (post?.shares || 0) + 1
+        })
+
         toast.success(result.message, {
-          description: result.shareUrl ? `Link: ${result.shareUrl}` : undefined
+          description: `${post?.type} post - ${(post?.shares || 0) + 1} shares - Link: ${result.shareUrl || 'Generated'}`
         })
       }
     } catch (error: any) {
-      console.error('Share Post Error:', error)
+      logger.error('Failed to share post', {
+        error: error.message,
+        postId: id
+      })
       toast.error('Failed to share post', {
         description: error.message || 'Please try again later'
       })
     }
   }
+
   const handleBookmarkPost = async (id: string) => {
-    console.log('🔖 BOOKMARK POST - ID:', id)
+    const post = state.posts.find(p => p.id === id)
+
+    logger.info('Bookmarking post', {
+      postId: id,
+      postType: post?.type,
+      currentBookmarks: post?.bookmarks
+    })
 
     try {
       const response = await fetch('/api/community', {
@@ -803,19 +854,34 @@ export default function CommunityHubPage() {
       const result = await response.json()
 
       if (result.success) {
+        logger.info('Post bookmarked successfully', {
+          postId: id,
+          newBookmarkCount: (post?.bookmarks || 0) + 1
+        })
+
         toast.success(result.message, {
-          description: result.tip || undefined
+          description: `${post?.type} post - ${(post?.bookmarks || 0) + 1} bookmarks - ${result.tip || 'Saved for later'}`
         })
       }
     } catch (error: any) {
-      console.error('Bookmark Post Error:', error)
+      logger.error('Failed to bookmark post', {
+        error: error.message,
+        postId: id
+      })
       toast.error('Failed to bookmark post', {
         description: error.message || 'Please try again later'
       })
     }
   }
   const handleFollowMember = async (id: string) => {
-    console.log('➕ FOLLOW MEMBER - ID:', id)
+    const member = state.members.find(m => m.id === id)
+
+    logger.info('Following member', {
+      memberId: id,
+      memberName: member?.name,
+      memberCategory: member?.category,
+      currentFollowers: member?.followers
+    })
 
     try {
       const response = await fetch('/api/community', {
@@ -835,30 +901,57 @@ export default function CommunityHubPage() {
       const result = await response.json()
 
       if (result.success) {
+        logger.info('Member followed successfully', {
+          memberId: id,
+          memberName: member?.name,
+          newFollowerCount: (member?.followers || 0) + 1,
+          hasAchievement: !!result.achievement
+        })
+
         // Show achievement for Networker (+10 points, 20% chance)
         if (result.achievement) {
           toast.success(`${result.message} ${result.achievement.message} +${result.achievement.points} points!`, {
-            description: `Badge: ${result.achievement.badge}`
+            description: `${member?.name} - ${member?.title} - ${(member?.followers || 0) + 1} followers - Badge: ${result.achievement.badge}`
           })
         } else {
-          toast.success(result.message)
+          toast.success(result.message, {
+            description: `${member?.name} - ${member?.title} - ${(member?.followers || 0) + 1} followers - ${member?.category}`
+          })
         }
       }
     } catch (error: any) {
-      console.error('Follow Member Error:', error)
+      logger.error('Failed to follow member', {
+        error: error.message,
+        memberId: id
+      })
       toast.error('Failed to follow member', {
         description: error.message || 'Please try again later'
       })
     }
   }
+
   const handleUnfollowMember = (id: string) => {
-    console.log('➖ COMMUNITY: Unfollow member initiated')
-    console.log('👤 COMMUNITY: Member ID:', id)
-    console.log('✅ COMMUNITY: Unfollowed successfully')
-    toast.success('➖ Unfollowed')
+    const member = state.members.find(m => m.id === id)
+
+    logger.info('Unfollowing member', {
+      memberId: id,
+      memberName: member?.name,
+      currentFollowers: member?.followers
+    })
+
+    toast.success('Unfollowed', {
+      description: `${member?.name} - ${member?.title} - ${(member?.followers || 0) - 1} followers remaining`
+    })
   }
+
   const handleConnectWithMember = async (id: string) => {
-    console.log('🤝 CONNECT WITH MEMBER - ID:', id)
+    const member = state.members.find(m => m.id === id)
+
+    logger.info('Connecting with member', {
+      memberId: id,
+      memberName: member?.name,
+      memberCategory: member?.category
+    })
 
     try {
       const response = await fetch('/api/community', {
@@ -878,108 +971,220 @@ export default function CommunityHubPage() {
       const result = await response.json()
 
       if (result.success) {
+        logger.info('Connected with member successfully', {
+          memberId: id,
+          memberName: member?.name,
+          hasNextSteps: !!(result.nextSteps && result.nextSteps.length > 0)
+        })
+
         // Show next steps if available
         if (result.nextSteps && result.nextSteps.length > 0) {
-          console.log('📝 COMMUNITY: Next steps:')
-          result.nextSteps.forEach((step: string) => console.log('  •', step))
+          logger.debug('Connection next steps', {
+            steps: result.nextSteps
+          })
+
           toast.success(result.message, {
-            description: result.nextSteps.slice(0, 2).join(', ')
+            description: `${member?.name} - ${member?.title} - Next: ${result.nextSteps.slice(0, 2).join(', ')}`
           })
         } else {
-          toast.success(result.message)
+          toast.success(result.message, {
+            description: `${member?.name} - ${member?.title} - ${member?.category} - Now connected`
+          })
         }
       }
     } catch (error: any) {
-      console.error('Connect With Member Error:', error)
+      logger.error('Failed to connect with member', {
+        error: error.message,
+        memberId: id
+      })
       toast.error('Failed to connect with member', {
         description: error.message || 'Please try again later'
       })
     }
   }
   const handleMessageMember = (id: string) => {
-    console.log('💬 COMMUNITY: Message member initiated')
-    console.log('👤 COMMUNITY: Member ID:', id)
-    console.log('📨 COMMUNITY: Opening chat interface')
-    toast.info('💬 Opening chat...')
+    const member = state.members.find(m => m.id === id)
+
+    logger.info('Opening chat with member', {
+      memberId: id,
+      memberName: member?.name,
+      isOnline: member?.isOnline
+    })
+
+    toast.info('Opening chat...', {
+      description: `${member?.name} - ${member?.title} - ${member?.isOnline ? 'Online' : `Last seen: ${member?.lastSeen}`}`
+    })
   }
+
   const handleJoinEvent = (id: string) => {
-    console.log('📅 COMMUNITY: Join event initiated')
-    console.log('🎟️ COMMUNITY: Event ID:', id)
-    console.log('✅ COMMUNITY: Registered for event!')
-    toast.success('📅 Registered for event!')
+    const event = state.events.find(e => e.id === id)
+
+    logger.info('Joining event', {
+      eventId: id,
+      eventTitle: event?.title,
+      eventDate: event?.date,
+      currentAttendees: event?.attendees?.length
+    })
+
+    toast.success('Registered for event!', {
+      description: `${event?.title} - ${event?.date} - ${event?.location} - ${(event?.attendees?.length || 0) + 1} attendees`
+    })
   }
+
   const handleCreateEvent = () => {
-    console.log('➕ COMMUNITY: Create event initiated')
-    console.log('📋 COMMUNITY: Opening event creation form')
-    console.log('✅ COMMUNITY: Event form ready')
-    toast.info('➕ Create community event')
+    logger.info('Opening event creation form')
+
+    toast.info('Create community event', {
+      description: 'Online, offline, or hybrid - Set date, location, and attendee limit'
+    })
   }
+
   const handleJoinGroup = (id: string) => {
-    console.log('👥 COMMUNITY: Join group initiated')
-    console.log('🔗 COMMUNITY: Group ID:', id)
-    console.log('✅ COMMUNITY: Joined group!')
-    toast.success('👥 Joined group!')
+    const group = state.groups.find(g => g.id === id)
+
+    logger.info('Joining group', {
+      groupId: id,
+      groupName: group?.name,
+      currentMembers: group?.members?.length
+    })
+
+    toast.success('Joined group!', {
+      description: `${group?.name} - ${group?.category} - ${(group?.members?.length || 0) + 1} members - ${group?.posts} posts`
+    })
   }
+
   const handleCreateGroup = () => {
-    console.log('➕ COMMUNITY: Create group initiated')
-    console.log('📋 COMMUNITY: Opening group creation form')
-    console.log('✅ COMMUNITY: Group form ready')
-    toast.info('➕ Create new group')
+    logger.info('Opening group creation form')
+
+    toast.info('Create new group', {
+      description: 'Public, private, or secret - Set category, rules, and member permissions'
+    })
   }
+
   const handlePostJob = () => {
-    console.log('💼 COMMUNITY: Post job initiated')
-    console.log('📋 COMMUNITY: Opening job posting form')
-    console.log('✅ COMMUNITY: Job form ready')
-    toast.info('💼 Post job opportunity')
+    logger.info('Opening job posting form')
+
+    toast.info('Post job opportunity', {
+      description: 'Fixed or hourly - Set budget, deadline, and required skills'
+    })
   }
+
   const handleApplyToJob = (id: string) => {
-    console.log('📝 COMMUNITY: Apply to job initiated')
-    console.log('💼 COMMUNITY: Job ID:', id)
-    console.log('✅ COMMUNITY: Application submitted!')
-    toast.success('📝 Application submitted!')
+    const post = state.posts.find(p => p.id === id)
+    const job = post?.job
+
+    logger.info('Applying to job', {
+      jobId: id,
+      jobTitle: job?.title,
+      budget: job?.budget,
+      deadline: job?.deadline
+    })
+
+    toast.success('Application submitted!', {
+      description: `${job?.title} - ${job?.currency}${job?.budget} - Deadline: ${job?.deadline} - ${(job?.applicants || 0) + 1} applicants`
+    })
   }
+
   const handleSearchMembers = (query: string) => {
-    console.log('🔍 COMMUNITY: Search members initiated')
-    console.log('📝 COMMUNITY: Query:', query)
-    console.log('✅ COMMUNITY: Searching...')
-    toast.info('🔍 Searching: ' + query)
+    logger.info('Searching members', {
+      query,
+      totalMembers: state.members.length
+    })
+
+    const results = state.members.filter(m =>
+      m.name.toLowerCase().includes(query.toLowerCase()) ||
+      m.title.toLowerCase().includes(query.toLowerCase()) ||
+      m.skills.some(s => s.toLowerCase().includes(query.toLowerCase()))
+    )
+
+    logger.debug('Search results', {
+      query,
+      resultCount: results.length
+    })
+
+    toast.info(`Searching: ${query}`, {
+      description: `${results.length} members found - ${results.filter(m => m.isOnline).length} online`
+    })
   }
   const handleFilterBySkill = (skill: string) => {
-    console.log('🏷️ COMMUNITY: Filter by skill initiated')
-    console.log('💼 COMMUNITY: Skill:', skill)
-    console.log('✅ COMMUNITY: Filter applied')
-    toast.info('🏷️ Filter by: ' + skill)
+    logger.info('Filtering by skill', { skill })
+
+    const matchingMembers = state.members.filter(m => m.skills.includes(skill))
+
+    logger.debug('Skill filter results', {
+      skill,
+      resultCount: matchingMembers.length
+    })
+
+    toast.info(`Filter by: ${skill}`, {
+      description: `${matchingMembers.length} members - ${matchingMembers.filter(m => m.availability === 'available').length} available`
+    })
   }
+
   const handleViewProfile = (id: string) => {
-    console.log('👤 COMMUNITY: View profile initiated')
-    console.log('👤 COMMUNITY: Profile ID:', id)
-    console.log('✅ COMMUNITY: Loading profile')
-    toast.info('👤 Viewing profile')
+    const member = state.members.find(m => m.id === id)
+
+    logger.info('Viewing profile', {
+      memberId: id,
+      memberName: member?.name,
+      category: member?.category
+    })
+
+    toast.info('Viewing profile', {
+      description: `${member?.name} - ${member?.title} - ${member?.rating}★ rating - ${member?.totalProjects} projects completed`
+    })
   }
+
   const handleEditProfile = () => {
-    console.log('✏️ COMMUNITY: Edit profile initiated')
-    console.log('📋 COMMUNITY: Opening profile editor')
-    console.log('✅ COMMUNITY: Editor ready')
-    toast.info('✏️ Edit your profile')
+    logger.info('Opening profile editor')
+
+    toast.info('Edit your profile', {
+      description: 'Update skills, bio, portfolio, rates, and availability'
+    })
   }
+
   const handleSendEndorsement = (id: string) => {
-    console.log('⭐ COMMUNITY: Send endorsement initiated')
-    console.log('👤 COMMUNITY: Member ID:', id)
-    console.log('✅ COMMUNITY: Endorsement sent!')
-    toast.success('⭐ Endorsement sent!')
+    const member = state.members.find(m => m.id === id)
+
+    logger.info('Sending endorsement', {
+      memberId: id,
+      memberName: member?.name,
+      currentEndorsements: member?.endorsements
+    })
+
+    toast.success('Endorsement sent!', {
+      description: `${member?.name} - ${member?.title} - ${(member?.endorsements || 0) + 1} endorsements - ${member?.rating}★ rating`
+    })
   }
+
   const handleReportContent = (id: string) => {
-    console.log('⚠️ COMMUNITY: Report content initiated')
-    console.log('📋 COMMUNITY: Content ID:', id)
-    console.log('✅ COMMUNITY: Content reported')
-    toast.success('⚠️ Content reported')
+    logger.warn('Reporting content', {
+      contentId: id,
+      reportedBy: 'user-1'
+    })
+
+    toast.success('Content reported', {
+      description: 'Our team will review this content within 24 hours - Thank you for keeping the community safe'
+    })
   }
+
   const handleBlockUser = (id: string) => {
-    console.log('🚫 COMMUNITY: Block user initiated')
-    console.log('👤 COMMUNITY: User ID:', id)
-    if (confirm('Block user?')) {
-      console.log('✅ COMMUNITY: User blocked')
-      toast.success('🚫 User blocked')
+    const member = state.members.find(m => m.id === id)
+
+    logger.warn('Block user requested', {
+      userId: id,
+      userName: member?.name
+    })
+
+    if (confirm(`Block ${member?.name}? They won't be able to contact you or see your content.`)) {
+      logger.info('User blocked', {
+        userId: id,
+        userName: member?.name
+      })
+
+      toast.success('User blocked', {
+        description: `${member?.name} - Blocked successfully - You can unblock from Settings`
+      })
     }
   }
 
