@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-AIGenerate')
 
 interface GenerateRequest {
   prompt: string
@@ -213,8 +216,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('AI generation error:', error)
-    
+    logger.error('AI generation error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
+
     return NextResponse.json(
       { 
         error: error instanceof Error ? error.message : 'Internal server error',

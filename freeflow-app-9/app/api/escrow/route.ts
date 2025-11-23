@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-Escrow')
 
 /**
  * Escrow API Route
@@ -60,7 +63,10 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error: any) {
-    console.error('Escrow API Error:', error);
+    logger.error('Escrow API error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
       { status: 500 }
@@ -95,7 +101,10 @@ export async function GET(request: NextRequest) {
       stats,
     });
   } catch (error: any) {
-    console.error('Escrow GET Error:', error);
+    logger.error('Escrow GET error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }

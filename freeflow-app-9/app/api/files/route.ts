@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-Files')
 
 /**
  * Files API Route
@@ -72,7 +75,10 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error: any) {
-    console.error('Files API Error:', error);
+    logger.error('Files API error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
       { status: 500 }
@@ -119,7 +125,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('Files GET Error:', error);
+    logger.error('Files GET error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }

@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-AICreate')
 
 // Comprehensive asset generation templates for freelancers
 const ASSET_GENERATION_TEMPLATES = {
@@ -241,7 +244,13 @@ export async function POST(request: NextRequest) {
   try {
     const { creativeField, assetType, style = 'Professional', aiModel, prompt } = await request.json();
 
-    console.log('AI Create Request:', { creativeField, assetType, style, aiModel, prompt });
+    logger.info('AI Create request received', {
+      creativeField,
+      assetType,
+      style,
+      aiModel: aiModel || 'FreeFlow AI',
+      promptLength: prompt?.length || 0
+    });
 
     // Validate required fields
     if (!creativeField || !assetType) {
@@ -303,10 +312,20 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    console.log('✅ AI Create: Generated asset successfully');
+    logger.info('Asset generated successfully', {
+      assetId: asset.id,
+      type: asset.type,
+      creativeField,
+      qualityScore: asset.qualityScore,
+      processingTime: response.generationStats.processingTime,
+      tokensUsed: response.generationStats.tokensUsed
+    });
     return NextResponse.json(response);
   } catch (error) {
-    console.error('AI Create API Error:', error);
+    logger.error('AI Create API error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json({
       success: false,
       error: 'Failed to generate asset. Please try again.'

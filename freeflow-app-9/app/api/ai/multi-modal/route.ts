@@ -15,6 +15,9 @@ import { IntegratedAISystem } from '@/lib/ai/integrated-ai-system';
 import { createHash, randomBytes } from 'crypto';
 import { WebSocketServer } from 'ws';
 import { Server } from 'http';
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-MultiModal')
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -252,11 +255,16 @@ async function validateRequest(req: NextRequest, schema: z.ZodSchema): Promise<{
 }
 
 function handleError(error: any): NextResponse {
-  console.error('API error:', error);
-  
+  logger.error('Multi-modal API error', {
+    error: error instanceof Error ? error.message : 'Unknown error',
+    stack: error instanceof Error ? error.stack : undefined,
+    code: error.code || 'unknown_error',
+    status: error.status || 500
+  });
+
   const errorMessage = error instanceof Error ? error.message : 'Unknown error';
   const errorCode = error.code || 'unknown_error';
-  
+
   return NextResponse.json(
     {
       success: false,
@@ -350,7 +358,11 @@ function initWebSocketServer(server: Server) {
             break;
         }
       } catch (error) {
-        console.error('WebSocket message error:', error);
+        logger.error('WebSocket message error', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          userId: authUserId
+        });
       }
     });
     
@@ -1285,9 +1297,12 @@ if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
     const server = createServer();
     initWebSocketServer(server);
     server.listen(3001, () => {
-      console.log('WebSocket server listening on port 3001');
+      logger.info('WebSocket server started', { port: 3001, environment: 'development' });
     });
   } catch (error) {
-    console.error('Failed to initialize WebSocket server:', error);
+    logger.error('Failed to initialize WebSocket server', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
   }
 }
