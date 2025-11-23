@@ -346,6 +346,9 @@ export default function FeatureTestingPage() {
   const [currentTest, setCurrentTest] = React.useState<string | null>(null)
   const [testResults, setTestResults] = React.useState<Record<string, any>>({})
 
+  // useTransition for non-blocking test operations
+  const [isPending, startTransition] = useTransition()
+
   // A+++ LOAD FEATURE TESTING DATA
   React.useEffect(() => {
     const loadFeatureTestingData = async () => {
@@ -376,16 +379,18 @@ export default function FeatureTestingPage() {
     loadFeatureTestingData()
   }, [announce])
 
-  const updateTestStatus = (testId: string, status: FeatureTest['status'], issues?: string[]) => {
-    setTests(prev => prev.map(test => 
-      test.id === testId 
+  // Stable callback for updating test status
+  const updateTestStatus = useCallback((testId: string, status: FeatureTest['status'], issues?: string[]) => {
+    setTests(prev => prev.map(test =>
+      test.id === testId
         ? { ...test, status, issues }
         : test
     ))
     setTestResults(prev => ({ ...prev, [testId]: { status, issues, timestamp: Date.now() } }))
-  }
+  }, [])
 
-  const testFeature = async (test: FeatureTest) => {
+  // Stable callback for testing individual features
+  const testFeature = useCallback(async (test: FeatureTest) => {
     setCurrentTest(test.id)
     updateTestStatus(test.id, 'testing')
 
@@ -405,45 +410,23 @@ export default function FeatureTestingPage() {
     } finally {
       setCurrentTest(null)
     }
-  }
+  }, [updateTestStatus])
 
-  const testAllFeatures = async () => {
-    for (const test of tests) {
-      if (test.status === 'pending' || test.status === 'failed') {
-        await testFeature(test)
+  // Stable callback for testing all features with useTransition
+  const testAllFeatures = useCallback(() => {
+    startTransition(async () => {
+      for (const test of tests) {
+        if (test.status === 'pending' || test.status === 'failed') {
+          await testFeature(test)
+        }
       }
-    }
-  }
+    })
+  }, [tests, testFeature])
 
-  const getStatusIcon = (status: FeatureTest['status']) => {
-    switch (status) {
-      case 'passed':
-        return <CheckCircle className="h-5 w-5 text-green-600" />
-      case 'failed':
-        return <XCircle className="h-5 w-5 text-red-600" />
-      case 'warning':
-        return <AlertCircle className="h-5 w-5 text-yellow-600" />
-      case 'testing':
-        return <RefreshCw className="h-5 w-5 text-blue-600 animate-spin" />
-      default:
-        return <Clock className="h-5 w-5 text-gray-400" />
-    }
-  }
-
-  const getStatusColor = (status: FeatureTest['status']) => {
-    switch (status) {
-      case 'passed':
-        return 'bg-green-100 text-green-800 border-green-200'
-      case 'failed':
-        return 'bg-red-100 text-red-800 border-red-200'
-      case 'warning':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'testing':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
-    }
-  }
+  // Stable callback for visiting feature pages
+  const handleVisitFeature = useCallback((path: string) => {
+    router.push(path)
+  }, [router])
 
   // Memoize expensive grouping and filtering operations
   const groupedTests = useMemo(() => {
@@ -541,15 +524,24 @@ export default function FeatureTestingPage() {
 
           {/* Action Buttons */}
           <div className="flex gap-4">
-            <Button 
+            <Button
               onClick={testAllFeatures}
-              disabled={currentTest !== null}
+              disabled={currentTest !== null || isPending}
               className="gap-2"
             >
-              <Play className="h-4 w-4" />
-              Test All Features
+              {isPending ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  Testing...
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4" />
+                  Test All Features
+                </>
+              )}
             </Button>
-            <Button 
+            <Button
               variant="outline"
               onClick={() => router.push('/dashboard')}
               className="gap-2"
@@ -575,76 +567,13 @@ export default function FeatureTestingPage() {
               <CardContent>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {categoryTests.map(test => (
-                    <div
+                    <TestCard
                       key={test.id}
-                      className={cn(
-                        "p-4 border rounded-lg transition-all duration-200",
-                        getStatusColor(test.status)
-                      )}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          {getStatusIcon(test.status)}
-                          <h4 className="font-semibold">{test.name}</h4>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => testFeature(test)}
-                          disabled={currentTest === test.id}
-                          className="gap-1"
-                        >
-                          {currentTest === test.id ? (
-                            <RefreshCw className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <Play className="h-3 w-3" />
-                          )}
-                          Test
-                        </Button>
-                      </div>
-                      
-                      <p className="text-sm mb-2">{test.description}</p>
-                      
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-gray-600">{test.path}</span>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => router.push(test.path)}
-                          className="h-6 px-2 gap-1"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                          Visit
-                        </Button>
-                      </div>
-                      
-                      {test.dependencies && (
-                        <div className="mt-2">
-                          <div className="text-xs text-gray-600 mb-1">Dependencies:</div>
-                          <div className="flex flex-wrap gap-1">
-                            {test.dependencies.map(dep => (
-                              <Badge key={dep} variant="secondary" className="text-xs">
-                                {dep}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {test.issues && test.issues.length > 0 && (
-                        <div className="mt-2">
-                          <div className="text-xs text-red-600 mb-1">Issues:</div>
-                          <ul className="text-xs space-y-1">
-                            {test.issues.map((issue, index) => (
-                              <li key={index} className="flex items-start gap-1">
-                                <span className="text-red-500">•</span>
-                                <span>{issue}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
+                      test={test}
+                      currentTest={currentTest}
+                      onTest={testFeature}
+                      onVisit={handleVisitFeature}
+                    />
                   ))}
                 </div>
               </CardContent>
