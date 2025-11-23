@@ -12,11 +12,14 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { GlowEffect } from '@/components/ui/glow-effect'
 import { BorderTrail } from '@/components/ui/border-trail'
+import { createFeatureLogger } from '@/lib/logger'
 
 // A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+
+const logger = createFeatureLogger('Contact')
 
 export default function ContactPage() {
   // A+++ STATE MANAGEMENT
@@ -97,12 +100,25 @@ export default function ContactPage() {
           message: ''
         })
       } else {
+        logger.warn('Contact form submission failed', {
+          error: result.error,
+          formData: { ...formData, message: formData.message.substring(0, 50) + '...' }
+        })
+
         toast.error('Failed to send message', {
           description: result.error || 'Please try again later'
         })
       }
     } catch (error: any) {
-      console.error('Contact form error:', error)
+      logger.error('Contact form error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        formData: {
+          email: formData.email,
+          subject: formData.subject,
+          hasMessage: formData.message.length > 0
+        }
+      })
+
       toast.error('Failed to send message', {
         description: 'Please check your connection and try again'
       })

@@ -5,6 +5,9 @@ import VideoEditor, { VideoEdit, ExportFormat, ShareSettings } from '@/component
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Share, Eye } from 'lucide-react';
 import Link from 'next/link';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('VideoEditor');
 
 export const metadata: Metadata = {
   title: 'Video Editor | FreeFlow',
@@ -81,17 +84,21 @@ export default async function VideoEditorPage({ params }: VideoEditorPageProps) 
 
   const handleExport = async (format: ExportFormat) => {
     'use server';
-    
-    // Trigger export process
-    console.log('Exporting video with format:', format);
+
+    logger.info('Video export initiated', {
+      videoId: params.id,
+      userId: user.id,
+      format,
+      action: 'export'
+    });
     // Implementation would trigger Mux or other video processing service
   };
 
   const handleShare = async (settings: ShareSettings) => {
     'use server';
-    
+
     const supabase = await createClient();
-    
+
     // Update sharing settings
     const { error } = await supabase
       .from('videos')
@@ -103,7 +110,19 @@ export default async function VideoEditorPage({ params }: VideoEditorPageProps) 
       .eq('id', params.id);
 
     if (!error) {
-      console.log('Video sharing settings updated');
+      logger.info('Video sharing settings updated', {
+        videoId: params.id,
+        userId: user.id,
+        privacy: settings.privacy,
+        isPublic: settings.privacy === 'public',
+        action: 'share'
+      });
+    } else {
+      logger.error('Failed to update video sharing settings', {
+        videoId: params.id,
+        userId: user.id,
+        error: error.message
+      });
     }
   };
 

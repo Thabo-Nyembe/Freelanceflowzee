@@ -19,9 +19,12 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import Link from 'next/link';
-import { 
+import {
   ClientReview
 } from '@/components/video/client-review-panel';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('VideoReview');
 
 interface VideoReviewPageProps {
   params: { id: string };
@@ -156,7 +159,12 @@ async function getVideoReviewData(videoId: string, reviewId?: string, userId?: s
 
     return { video, review, userRole };
   } catch (error) {
-    console.error('Error fetching video review data:', error);
+    logger.error('Error fetching video review data', {
+      videoId,
+      reviewId,
+      userId,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     return { video: null, review: null, userRole: null };
   }
 }
@@ -375,24 +383,19 @@ export default async function VideoReviewPage({ params, searchParams }: VideoRev
                   review={review}
                   userRole={userRole || 'client'}
                   onApprove={async (stageId, feedback) => {
-                    // This would be handled by client-side logic
-                    console.log('Approve:', stageId, feedback);
+                    // Handled by client-side logic in ClientReviewPanel
                   }}
                   onReject={async (stageId, feedback) => {
-                    // This would be handled by client-side logic
-                    console.log('Reject:', stageId, feedback);
+                    // Handled by client-side logic in ClientReviewPanel
                   }}
                   onRequestChanges={async (stageId, feedback) => {
-                    // This would be handled by client-side logic
-                    console.log('Request changes:', stageId, feedback);
+                    // Handled by client-side logic in ClientReviewPanel
                   }}
                   onAddReviewer={async (email, role) => {
-                    // This would be handled by client-side logic
-                    console.log('Add reviewer:', email, role);
+                    // Handled by client-side logic in ClientReviewPanel
                   }}
                   onUpdateDeadline={async (deadline) => {
-                    // This would be handled by client-side logic
-                    console.log('Update deadline:', deadline);
+                    // Handled by client-side logic in ClientReviewPanel
                   }}
                 />
               </Suspense>

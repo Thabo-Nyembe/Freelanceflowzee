@@ -11,6 +11,10 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react'
+import { toast } from 'sonner'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ForgotPassword')
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -21,19 +25,41 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
 
     if (!email.includes('@')) {
-      alert('❌ Please enter a valid email address')
+      logger.warn('Invalid email address attempted', {
+        email: email.substring(0, 3) + '...',
+        hasAtSymbol: email.includes('@')
+      })
+
+      toast.error('Invalid email address', {
+        description: 'Please enter a valid email address'
+      })
       return
     }
 
     setIsLoading(true)
 
+    logger.info('Password reset requested', {
+      email,
+      timestamp: new Date().toISOString()
+    })
+
+    toast.info('Sending reset instructions...', {
+      description: `Sending email to ${email}`
+    })
+
     // Simulate API call
     setTimeout(() => {
-      console.log('📧 Password reset email sent to:', email)
+      logger.info('Password reset email sent', {
+        email,
+        success: true
+      })
+
       setIsSubmitted(true)
       setIsLoading(false)
 
-      alert(`✅ Password Reset Email Sent!\n\nWe've sent a password reset link to ${email}.\n\nPlease check your inbox and follow the instructions to reset your password.\n\nIf you don't see the email, check your spam folder.`)
+      toast.success('Password reset email sent', {
+        description: `Check your inbox at ${email} - Link expires in 1 hour`
+      })
     }, 1500)
   }
 
