@@ -47,6 +47,9 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
+// 3-Step Project Creation Wizard - USER MANUAL SPEC
+import { ProjectCreationWizard } from '@/components/projects/project-creation-wizard'
+
 interface Project {
   id: string
   title: string
@@ -257,17 +260,25 @@ export default function ProjectsHubPage() {
   const [statusFilter, setStatusFilter] = useState('all')
   const [priorityFilter, setPriorityFilter] = useState('all')
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [wizardStep, setWizardStep] = useState(1) // 1, 2, or 3 for 3-step wizard
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [newProject, setNewProject] = useState({
+    // Step 1: Project Details
     title: '',
     description: '',
     client_name: '',
     budget: '',
     end_date: '',
+    start_date: '',
     priority: 'medium',
-    category: 'web-development'
+    category: 'web-development',
+    // Step 2: Project Setup
+    team_members: [] as string[],
+    initial_files: [] as File[],
+    milestones: [] as { title: string; amount: string; dueDate: string }[],
+    permissions: 'private' as 'private' | 'team' | 'public'
   })
 
   // A+++ Accessibility
@@ -1754,135 +1765,16 @@ export default function ProjectsHubPage() {
           </div>
         )}
 
-        {/* Create Project Modal */}
-        {isCreateModalOpen && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <Card className="w-full max-w-2xl bg-white">
-              <CardHeader>
-                <CardTitle>Create New Project</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">
-                      Project Title *
-                    </label>
-                    <Input
-                      value={newProject.title}
-                      onChange={(e) => setNewProject({...newProject, title: e.target.value})}
-                      placeholder="Enter project title..."
-                      data-testid="project-title-input"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">
-                      Client Name
-                    </label>
-                    <Input
-                      value={newProject.client_name}
-                      onChange={(e) => setNewProject({...newProject, client_name: e.target.value})}
-                      placeholder="Enter client name..."
-                      data-testid="client-name-input"
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">
-                    Description
-                  </label>
-                  <Textarea
-                    value={newProject.description}
-                    onChange={(e) => setNewProject({...newProject, description: e.target.value})}
-                    placeholder="Describe the project..."
-                    rows={3}
-                    data-testid="project-description-input"
-                  />
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">
-                      Budget ($)
-                    </label>
-                    <Input
-                      type="number"
-                      value={newProject.budget}
-                      onChange={(e) => setNewProject({...newProject, budget: e.target.value})}
-                      placeholder="0"
-                      data-testid="project-budget-input"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">
-                      Priority
-                    </label>
-                    <select
-                      value={newProject.priority}
-                      onChange={(e) => setNewProject({...newProject, priority: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      data-testid="project-priority-select"
-                    >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                      <option value="urgent">Urgent</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">
-                      Category
-                    </label>
-                    <select
-                      value={newProject.category}
-                      onChange={(e) => setNewProject({...newProject, category: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      data-testid="project-category-select"
-                    >
-                      <option value="web-development">Web Development</option>
-                      <option value="mobile-development">Mobile Development</option>
-                      <option value="branding">Branding</option>
-                      <option value="video-production">Video Production</option>
-                      <option value="marketing">Marketing</option>
-                      <option value="design">Design</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">
-                    End Date
-                  </label>
-                  <Input
-                    type="date"
-                    value={newProject.end_date}
-                    onChange={(e) => setNewProject({...newProject, end_date: e.target.value})}
-                    data-testid="project-end-date-input"
-                  />
-                </div>
-                
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    className="flex-1"
-                    onClick={handleCreateProject}
-                    disabled={!newProject.title.trim()}
-                    data-testid="create-project-submit"
-                  >
-                    Create Project
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => setIsCreateModalOpen(false)}
-                    data-testid="create-project-cancel"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        {/* 3-STEP PROJECT CREATION WIZARD - USER MANUAL SPEC */}
+        <ProjectCreationWizard
+          isOpen={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          projectData={newProject}
+          onProjectDataChange={setNewProject}
+          onSubmit={handleCreateProject}
+          wizardStep={wizardStep}
+          setWizardStep={setWizardStep}
+        />
       </div>
     </div>
   )

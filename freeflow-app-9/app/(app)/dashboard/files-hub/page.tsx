@@ -1044,6 +1044,246 @@ export default function FilesHubPage() {
           </ScrollReveal>
         </div>
 
+        {/* MULTI-CLOUD STORAGE INTELLIGENCE - USER MANUAL SPEC */}
+        <ScrollReveal delay={0.5}>
+          <Card className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 border-green-200 dark:from-green-950/30 dark:via-emerald-950/30 dark:to-teal-950/30">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl">
+                <Cloud className="w-6 h-6 text-green-600" />
+                Multi-Cloud Storage Intelligence
+              </CardTitle>
+              <CardDescription>
+                Save 70-80% on storage costs with intelligent file routing across Supabase and Wasabi S3
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Cost Savings Comparison */}
+              <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-sm rounded-xl p-6 shadow-sm">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-green-600" />
+                  Your Monthly Savings
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Traditional Storage Cost */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Traditional Storage</span>
+                      <Badge variant="outline" className="bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-400">
+                        Standard
+                      </Badge>
+                    </div>
+                    <div className="h-24 bg-gradient-to-t from-red-500 to-red-400 rounded-lg flex items-end justify-center pb-2">
+                      <span className="text-2xl font-bold text-white">$125</span>
+                    </div>
+                    <p className="text-xs text-center text-gray-500">Industry average</p>
+                  </div>
+
+                  {/* Your Hybrid Cost */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Your Hybrid Cost</span>
+                      <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 dark:bg-green-900/30 dark:text-green-400">
+                        Optimized
+                      </Badge>
+                    </div>
+                    <div className="h-24 bg-gradient-to-t from-green-600 to-green-500 rounded-lg flex items-end justify-center pb-2 relative overflow-hidden">
+                      <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                        animate={{ x: [-100, 200] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                      />
+                      <span className="text-2xl font-bold text-white relative z-10">$28</span>
+                    </div>
+                    <p className="text-xs text-center text-green-600 font-semibold">Multi-cloud savings</p>
+                  </div>
+
+                  {/* Savings */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">You Save</span>
+                      <Badge className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        78%
+                      </Badge>
+                    </div>
+                    <div className="h-24 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40 rounded-lg flex flex-col items-center justify-center border-2 border-green-300 dark:border-green-700">
+                      <span className="text-3xl font-bold text-green-700 dark:text-green-400">
+                        <NumberFlow value={97} />
+                      </span>
+                      <span className="text-sm text-green-600 dark:text-green-500 font-medium">$/month saved</span>
+                    </div>
+                    <p className="text-xs text-center text-gray-500">$1,164/year</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Storage Distribution */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Supabase Storage */}
+                <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-sm rounded-xl p-5 shadow-sm border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                      <Zap className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">Supabase Storage</h4>
+                      <p className="text-xs text-gray-500">Fast access for active files</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Files</span>
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">
+                        <NumberFlow value={142} />
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Size</span>
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">2.4 GB</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Monthly Cost</span>
+                      <span className="font-semibold text-blue-600 dark:text-blue-400">$18</span>
+                    </div>
+                    <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <p className="text-xs text-gray-500">
+                        <FileCheck className="w-3 h-3 inline mr-1" />
+                        Recently accessed files, active projects
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Wasabi S3 Storage */}
+                <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-sm rounded-xl p-5 shadow-sm border border-orange-200 dark:border-orange-800">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                      <HardDrive className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">Wasabi S3</h4>
+                      <p className="text-xs text-gray-500">Cost-effective archives</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Files</span>
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">
+                        <NumberFlow value={287} />
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Size</span>
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">18.7 GB</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Monthly Cost</span>
+                      <span className="font-semibold text-orange-600 dark:text-orange-400">$10</span>
+                    </div>
+                    <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                      <p className="text-xs text-gray-500">
+                        <FileArchive className="w-3 h-3 inline mr-1" />
+                        Long-term archives, large video files
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Storage Benefits */}
+              <div className="bg-white/80 dark:bg-slate-900/50 backdrop-blur-sm rounded-xl p-5 shadow-sm">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-green-600" />
+                  Multi-Cloud Storage Benefits
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <TrendingUp className="w-4 h-4 text-green-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100">70-80% Cost Savings</h4>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Save thousands annually with intelligent file routing
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Zap className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100">Intelligent Routing</h4>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Files automatically placed in optimal storage tier
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Copy className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100">Redundant Backups</h4>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Your files protected across multiple cloud providers
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Lock className="w-4 h-4 text-orange-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100">Enterprise Security</h4>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Bank-level encryption and access controls
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* How It Works */}
+              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 rounded-xl p-5 border border-blue-200 dark:border-blue-800">
+                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <Info className="w-5 h-5 text-blue-600" />
+                  How Intelligent Routing Works
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex gap-3 items-start">
+                    <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+                      1
+                    </div>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      <strong>Active files</strong> (accessed in last 30 days) automatically stored in <strong>Supabase</strong> for fast access
+                    </p>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <div className="w-6 h-6 bg-orange-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+                      2
+                    </div>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      <strong>Archive files</strong> (older than 30 days or large files) moved to <strong>Wasabi S3</strong> for cost savings
+                    </p>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <div className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+                      3
+                    </div>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      <strong>Smart optimization</strong> runs daily to ensure files are in the most cost-effective location
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </ScrollReveal>
+
         {/* Filters and Controls */}
         <ScrollReveal>
           <LiquidGlassCard className="p-4">

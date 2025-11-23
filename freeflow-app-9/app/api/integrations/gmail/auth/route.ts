@@ -7,15 +7,50 @@ import logger from '@/lib/logger';
  * Handles Gmail OAuth flow for email integration
  */
 
+// Force dynamic rendering for OAuth routes
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
+    const error = searchParams.get('error');
+
+    // Handle OAuth error from Google
+    if (error) {
+      const errorDescription = searchParams.get('error_description') || error;
+      logger.warn('Gmail OAuth error from provider', { error, errorDescription });
+
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      return NextResponse.redirect(
+        `${baseUrl}/dashboard/email-agent/setup?gmail=error&message=${encodeURIComponent(errorDescription)}`
+      );
+    }
 
     if (!code) {
-      // Initiate OAuth flow
+      // Validate required environment variables
       const clientId = process.env.GOOGLE_CLIENT_ID;
-      const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/gmail/auth`;
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+      if (!clientId || clientId === 'your-google-oauth-client-id') {
+        logger.error('Gmail OAuth not configured - missing GOOGLE_CLIENT_ID');
+        const fallbackUrl = baseUrl || 'http://localhost:3000';
+        return NextResponse.redirect(
+          `${fallbackUrl}/dashboard/email-agent/setup?gmail=error&message=${encodeURIComponent('Gmail integration not configured. Please set GOOGLE_CLIENT_ID in environment variables.')}`
+        );
+      }
+
+      if (!baseUrl) {
+        logger.error('Missing NEXT_PUBLIC_APP_URL environment variable');
+        return NextResponse.json(
+          { error: 'Server configuration error: NEXT_PUBLIC_APP_URL not set' },
+          { status: 500 }
+        );
+      }
+
+      // Initiate OAuth flow
+      const redirectUri = `${baseUrl}/api/integrations/gmail/auth`;
       const scope = 'https://www.googleapis.com/auth/gmail.modify';
 
       const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
@@ -26,44 +61,64 @@ export async function GET(request: NextRequest) {
         `access_type=offline&` +
         `prompt=consent`;
 
-      logger.info('Initiating Gmail OAuth flow');
+      logger.info('Initiating Gmail OAuth flow', { redirectUri });
       return NextResponse.redirect(authUrl);
     }
 
     // Exchange code for tokens
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+    if (!clientSecret || clientSecret === 'your-google-oauth-client-secret') {
+      logger.error('Gmail OAuth not configured - missing GOOGLE_CLIENT_SECRET');
+      return NextResponse.redirect(
+        `${baseUrl}/dashboard/email-agent/setup?gmail=error&message=${encodeURIComponent('Gmail integration not fully configured. Please set GOOGLE_CLIENT_SECRET.')}`
+      );
+    }
+
     logger.info('Exchanging Gmail OAuth code for tokens');
 
-    const response = await fetch('https://oauth2.googleapis.com/token', {
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         code,
         client_id: process.env.GOOGLE_CLIENT_ID,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/integrations/gmail/auth`,
+        client_secret: clientSecret,
+        redirect_uri: `${baseUrl}/api/integrations/gmail/auth`,
         grant_type: 'authorization_code',
       }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error_description || 'Failed to exchange code for tokens');
+    if (!tokenResponse.ok) {
+      const errorData = await tokenResponse.json().catch(() => ({ error: 'Unknown error' }));
+      const errorMessage = errorData.error_description || errorData.error || 'Failed to exchange code for tokens';
+      logger.error('Gmail token exchange failed', { error: errorData });
+      throw new Error(errorMessage);
     }
 
-    const tokens = await response.json();
+    const tokens = await tokenResponse.json();
 
-    // Save tokens to database (should be done via /api/integrations/save)
-    // For now, redirect back to setup page with success message
-
-    logger.info('Gmail OAuth successful');
+    // TODO: Save tokens to database via /api/integrations/save
+    // For now, tokens are logged but not persisted
+    logger.info('Gmail OAuth successful', {
+      hasAccessToken: !!tokens.access_token,
+      hasRefreshToken: !!tokens.refresh_token,
+      expiresIn: tokens.expires_in
+    });
 
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/email-agent/setup?gmail=success`
+      `${baseUrl}/dashboard/email-agent/setup?gmail=success`
     );
   } catch (error: any) {
-    logger.error('Gmail OAuth failed', { error: error.message });
+    logger.error('Gmail OAuth failed', {
+      error: error.message,
+      stack: error.stack
+    });
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/email-agent/setup?gmail=error&message=${encodeURIComponent(error.message)}`
+      `${baseUrl}/dashboard/email-agent/setup?gmail=error&message=${encodeURIComponent(error.message)}`
     );
   }
 }

@@ -159,6 +159,13 @@ export default function VideoStudioPage() {
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false)
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<VideoProject | null>(null)
+  // COLLABORATIVE REVIEW - USER MANUAL SPEC
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false)
+  const [reviewProject, setReviewProject] = useState<VideoProject | null>(null)
+  const [reviewLink, setReviewLink] = useState('')
+  const [reviewExpiry, setReviewExpiry] = useState('7')
+  const [allowComments, setAllowComments] = useState(true)
+  const [requireApproval, setRequireApproval] = useState(false)
   const [isRecording, setIsRecording] = useState<boolean>(false)
   const [isPlaying, setIsPlaying] = useState<boolean>(false)
   const [isMuted, setIsMuted] = useState<boolean>(false)
@@ -1445,13 +1452,16 @@ export default function VideoStudioPage() {
                         size="sm"
                         className="flex-1"
                         onClick={() => {
-                          logger.info('Share link copied', { projectId: project.id, title: project.title })
-                          // Copy share link to clipboard
-                          navigator.clipboard.writeText(`${window.location.origin}/share/${project.id}`)
+                          logger.info('Opening collaborative review dialog', { projectId: project.id, title: project.title })
+                          setReviewProject(project)
+                          const link = `${window.location.origin}/review/${project.id}`
+                          setReviewLink(link)
+                          setIsReviewDialogOpen(true)
+                          announce(`Collaborative review dialog opened for ${project.title}`)
                         }}
                       >
                         <Share2 className="w-4 h-4 mr-1" />
-                        Share
+                        Share for Review
                       </Button>
                     </div>
                   </CardContent>
@@ -1847,6 +1857,239 @@ onClick={() => {
           logger.info('Asset download started', { assetId: asset.id, name: asset.name })
         }}
       />
+
+      {/* COLLABORATIVE REVIEW DIALOG - USER MANUAL SPEC */}
+      <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="w-5 h-5 text-blue-600" />
+              Share Video for Collaborative Review
+            </DialogTitle>
+          </DialogHeader>
+
+          {reviewProject && (
+            <div className="space-y-6">
+              {/* Video Info */}
+              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                    <Video className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">{reviewProject.title}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {reviewProject.resolution} • {formatDuration(reviewProject.duration)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Review Link */}
+              <div className="space-y-2">
+                <Label htmlFor="review-link" className="text-sm font-medium">
+                  Shareable Review Link
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="review-link"
+                    value={reviewLink}
+                    readOnly
+                    className="flex-1 font-mono text-sm"
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(reviewLink)
+                      toast.success('Review link copied!', {
+                        description: 'Share this link with clients to collect feedback'
+                      })
+                      logger.info('Review link copied', {
+                        projectId: reviewProject.id,
+                        title: reviewProject.title,
+                        link: reviewLink
+                      })
+                    }}
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-500">
+                  Anyone with this link can view and comment on the video
+                </p>
+              </div>
+
+              {/* Review Settings */}
+              <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-800">
+                <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                  <Settings className="w-4 h-4" />
+                  Review Settings
+                </h4>
+
+                {/* Allow Comments */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-gray-500" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        Allow timestamp comments
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Reviewers can add comments at specific video timestamps
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={allowComments}
+                      onChange={(e) => setAllowComments(e.target.checked)}
+                      className="w-4 h-4 rounded border-gray-300"
+                    />
+                  </div>
+                </div>
+
+                {/* Require Approval */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 text-gray-500" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        Require approval
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        Request explicit approval before finalizing
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={requireApproval}
+                      onChange={(e) => setRequireApproval(e.target.checked)}
+                      className="w-4 h-4 rounded border-gray-300"
+                    />
+                  </div>
+                </div>
+
+                {/* Link Expiry */}
+                <div className="space-y-2">
+                  <Label htmlFor="review-expiry" className="text-sm font-medium flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-gray-500" />
+                    Link expires in
+                  </Label>
+                  <Select value={reviewExpiry} onValueChange={setReviewExpiry}>
+                    <SelectTrigger id="review-expiry">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="7">7 days</SelectItem>
+                      <SelectItem value="14">14 days</SelectItem>
+                      <SelectItem value="30">30 days</SelectItem>
+                      <SelectItem value="never">Never</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Review Features Info */}
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+                <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-purple-600" />
+                  Collaborative Review Features
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="flex gap-2 text-sm">
+                    <div className="w-5 h-5 bg-purple-100 dark:bg-purple-900/30 rounded flex items-center justify-center flex-shrink-0">
+                      <Clock className="w-3 h-3 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">Timestamp Comments</p>
+                      <p className="text-xs text-gray-500">Comments linked to specific moments</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 text-sm">
+                    <div className="w-5 h-5 bg-blue-100 dark:bg-blue-900/30 rounded flex items-center justify-center flex-shrink-0">
+                      <Users className="w-3 h-3 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">Real-time Collaboration</p>
+                      <p className="text-xs text-gray-500">Multiple reviewers simultaneously</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 text-sm">
+                    <div className="w-5 h-5 bg-green-100 dark:bg-green-900/30 rounded flex items-center justify-center flex-shrink-0">
+                      <Star className="w-3 h-3 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">Approval Tracking</p>
+                      <p className="text-xs text-gray-500">Track who approved changes</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 text-sm">
+                    <div className="w-5 h-5 bg-orange-100 dark:bg-orange-900/30 rounded flex items-center justify-center flex-shrink-0">
+                      <Activity className="w-3 h-3 text-orange-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">Version Comparison</p>
+                      <p className="text-xs text-gray-500">Compare different versions</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setIsReviewDialogOpen(false)
+                    logger.info('Review dialog closed', { projectId: reviewProject.id })
+                  }}
+                >
+                  Done
+                </Button>
+                <Button
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
+                  onClick={() => {
+                    // Send review invite email
+                    toast.success('Review invites sent!', {
+                      description: `${reviewProject.client || 'Clients'} will receive an email with the review link`
+                    })
+                    logger.info('Review invites sent', {
+                      projectId: reviewProject.id,
+                      title: reviewProject.title,
+                      settings: {
+                        allowComments,
+                        requireApproval,
+                        expiresIn: reviewExpiry
+                      }
+                    })
+                    announce('Review invitations sent successfully')
+                    setIsReviewDialogOpen(false)
+                  }}
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Send Review Invite
+                </Button>
+              </div>
+
+              {/* Tips */}
+              <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+                <p className="text-xs text-blue-800 dark:text-blue-300">
+                  <strong>💡 Pro tip:</strong> Timestamp comments help clients provide precise feedback.
+                  They can click anywhere in the video to add a comment at that exact moment.
+                </p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

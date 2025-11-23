@@ -996,13 +996,13 @@ export default function EscrowPage() {
               <span className="text-sm text-gray-600">Protected payments for freelancers</span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm">
               <Download className="w-4 h-4 mr-2" />
               Export Report
             </Button>
-            
+
             <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
@@ -1195,7 +1195,192 @@ export default function EscrowPage() {
         </div>
       </div>
 
+      {/* EDUCATIONAL SECTION - USER MANUAL SPEC */}
       <div className="p-6">
+        <Card className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 border-purple-200 mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <Shield className="w-6 h-6 text-purple-600" />
+              Understanding Escrow
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* What is Escrow */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm">
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-blue-600" />
+                What is Escrow?
+              </h3>
+              <p className="text-gray-700 leading-relaxed">
+                Escrow is a <strong>secure payment system</strong> where client funds are held safely until project
+                milestones are completed, <strong>protecting both parties</strong>. Think of it as a trusted third party
+                that holds payment until work is approved.
+              </p>
+            </div>
+
+            {/* Benefits Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Benefits for Freelancers */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm border-2 border-green-200">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-green-700">
+                  <CheckCircle className="w-5 h-5" />
+                  Benefits for Freelancers
+                </h3>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <Shield className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">Guaranteed Payment Security</p>
+                      <p className="text-sm text-gray-600">Funds are secured upfront, ensuring you get paid for your work</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Star className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">Professional Credibility</p>
+                      <p className="text-sm text-gray-600">Using escrow demonstrates professionalism and builds trust</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <FileText className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">Clear Payment Terms</p>
+                      <p className="text-sm text-gray-600">Milestone-based releases with defined deliverables</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Shield className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">Dispute Protection</p>
+                      <p className="text-sm text-gray-600">Fair resolution process if disagreements arise</p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Benefits for Clients */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm border-2 border-blue-200">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-blue-700">
+                  <CheckCircle className="w-5 h-5" />
+                  Benefits for Clients
+                </h3>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">Work Quality Assurance</p>
+                      <p className="text-sm text-gray-600">Only release payment when you're satisfied with deliverables</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Target className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">Milestone-Based Releases</p>
+                      <p className="text-sm text-gray-600">Pay as work progresses, not all upfront</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <DollarSign className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">Refund Protection</p>
+                      <p className="text-sm text-gray-600">Get your money back if work doesn't meet standards</p>
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">Professional Service Guarantee</p>
+                      <p className="text-sm text-gray-600">Freelancers are committed to delivering quality work</p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* How It Works Process Flow */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Activity className="w-5 h-5 text-purple-600" />
+                How Escrow Works
+              </h3>
+              <div className="space-y-4">
+                {[
+                  {
+                    step: 1,
+                    title: 'Create Project with Escrow',
+                    description: 'Set up your project and define milestone structure',
+                    icon: Plus
+                  },
+                  {
+                    step: 2,
+                    title: 'Client Deposits Funds',
+                    description: 'Money is held securely in escrow (not released yet)',
+                    icon: Lock
+                  },
+                  {
+                    step: 3,
+                    title: 'Freelancer Completes Milestone',
+                    description: 'Work is done and deliverables are submitted',
+                    icon: CheckCircle
+                  },
+                  {
+                    step: 4,
+                    title: 'Client Reviews and Approves',
+                    description: 'Review the work and approve if satisfied',
+                    icon: Eye
+                  },
+                  {
+                    step: 5,
+                    title: 'Funds Released Automatically',
+                    description: 'Payment goes to freelancer upon approval',
+                    icon: Zap
+                  }
+                ].map(({ step, title, description, icon: Icon }) => (
+                  <div key={step} className="flex items-start gap-4 group">
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-lg group-hover:scale-110 transition-transform">
+                        {step}
+                      </div>
+                    </div>
+                    <div className="flex-1 pt-1">
+                      <div className="flex items-start gap-2">
+                        <Icon className="w-5 h-5 text-purple-600 mt-0.5" />
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{title}</h4>
+                          <p className="text-sm text-gray-600">{description}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Trust Indicators */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 text-center border border-green-200">
+                <Shield className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                <p className="font-semibold text-green-900">100% Money-Back Guarantee</p>
+                <p className="text-xs text-green-700 mt-1">If work doesn't meet standards</p>
+              </div>
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 text-center border border-blue-200">
+                <Lock className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+                <p className="font-semibold text-blue-900">Funds Protected by Escrow</p>
+                <p className="text-xs text-blue-700 mt-1">Bank-level security</p>
+              </div>
+              <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-lg p-4 text-center border border-purple-200">
+                <TrendingUp className="w-8 h-8 text-purple-600 mx-auto mb-2" />
+                <p className="font-semibold text-purple-900">
+                  <NumberFlow value={1247} className="inline" /> Successful Releases
+                </p>
+                <p className="text-xs text-purple-700 mt-1">This month alone</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="p-6 pt-0">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
