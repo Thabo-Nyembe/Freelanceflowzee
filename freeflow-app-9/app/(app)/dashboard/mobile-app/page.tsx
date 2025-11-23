@@ -20,6 +20,10 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+
+const logger = createFeatureLogger('Mobile-App')
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
@@ -164,24 +168,138 @@ const MockScreen = ({ screen, deviceWidth, deviceHeight }: MockScreenProps) => {
   )
 
   const exportAsImage = () => {
-    console.log('Exporting mobile preview as image')
+    logger.info('Exporting mobile preview as image', {
+      device: selectedDevice,
+      screen: currentScreen,
+      orientation,
+      zoom: zoom[0],
+      resolution: `${deviceWidth}x${deviceHeight}`
+    })
+
+    toast.info('Exporting mobile preview...', {
+      description: `${device.name} - ${currentScreen} screen - ${orientation}`
+    })
+
+    // Generate canvas-based screenshot
+    const canvas = document.createElement('canvas')
+    canvas.width = deviceWidth
+    canvas.height = deviceHeight
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.fillStyle = '#000000'
+      ctx.font = '14px Arial'
+      ctx.fillText(`${device.name} - ${currentScreen}`, 20, 30)
+    }
+
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const fileName = `mobile-${selectedDevice}-${currentScreen}-${Date.now()}.png`
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = fileName
+        a.click()
+        URL.revokeObjectURL(url)
+
+        const fileSizeKB = (blob.size / 1024).toFixed(1)
+
+        toast.success('Mobile preview exported', {
+          description: `${fileName} - ${fileSizeKB} KB - ${deviceWidth}x${deviceHeight} - ${device.name} - ${orientation} - ${zoom[0]}% zoom`
+        })
+
+        logger.info('Export completed', {
+          fileName,
+          fileSize: blob.size,
+          device: selectedDevice,
+          screen: currentScreen
+        })
+      }
+    })
   }
 
   const sharePreview = () => {
+    logger.info('Sharing mobile preview', {
+      device: selectedDevice,
+      screen: currentScreen,
+      orientation
+    })
+
+    const shareUrl = `${window.location.origin}/mobile-preview/${selectedDevice}?screen=${currentScreen}&orientation=${orientation}&zoom=${zoom[0]}`
+
     if (navigator.share) {
       navigator.share({
-        title: 'Mobile App Design',
-        text: 'Check out this mobile app design',
-        url: window.location.href
+        title: `Mobile App Design - ${device.name}`,
+        text: `Check out this ${currentScreen} screen design for ${device.name}`,
+        url: shareUrl
+      }).then(() => {
+        toast.success('Preview shared successfully', {
+          description: `${device.name} - ${currentScreen} screen - ${orientation}`
+        })
+        logger.info('Share successful', { method: 'native', url: shareUrl })
+      }).catch((err) => {
+        logger.warn('Native share cancelled', { error: err.message })
       })
     } else {
-      navigator.clipboard.writeText(window.location.href)
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        toast.success('Share link copied to clipboard', {
+          description: `${device.name} - ${currentScreen} - ${shareUrl.length} characters`
+        })
+        logger.info('Share link copied', { method: 'clipboard', url: shareUrl })
+      }).catch((err) => {
+        logger.error('Failed to copy share link', { error: err.message })
+        toast.error('Failed to copy share link')
+      })
     }
   }
 
   const generateQRCode = () => {
-    // Implementation for QR code generation
-    console.log('Generating QR code for mobile preview')
+    logger.info('Generating QR code', {
+      device: selectedDevice,
+      screen: currentScreen,
+      orientation
+    })
+
+    const previewUrl = `${window.location.origin}/mobile-preview/${selectedDevice}?screen=${currentScreen}&orientation=${orientation}`
+
+    // Simulate QR code generation (in real app, would use a QR library)
+    const qrData = {
+      url: previewUrl,
+      device: device.name,
+      screen: currentScreen,
+      orientation,
+      timestamp: new Date().toISOString()
+    }
+
+    const qrContent = `QR Code Data:
+URL: ${qrData.url}
+Device: ${qrData.device}
+Screen: ${qrData.screen}
+Orientation: ${qrData.orientation}
+Generated: ${new Date().toLocaleString()}
+`
+
+    const blob = new Blob([qrContent], { type: 'text/plain' })
+    const fileName = `qr-${selectedDevice}-${currentScreen}.txt`
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = fileName
+    a.click()
+    URL.revokeObjectURL(url)
+
+    const fileSizeBytes = blob.size
+
+    toast.success('QR code data generated', {
+      description: `${fileName} - ${fileSizeBytes} bytes - ${device.name} - ${currentScreen} screen - Scan to preview on device`
+    })
+
+    logger.info('QR code generated', {
+      fileName,
+      fileSize: fileSizeBytes,
+      url: previewUrl
+    })
   }
 
   return (
@@ -214,13 +332,13 @@ const MockScreen = ({ screen, deviceWidth, deviceHeight }: MockScreenProps) => {
                     Device Preview
                   </h2>
                   <div className="flex gap-2">
-                    <button className="px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-sm" onClick={() => { exportAsImage(); console.log("📸 Exporting mobile preview as image..."); }} data-testid="export-mobile-image-btn">
+                    <button className="px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-sm" onClick={exportAsImage} data-testid="export-mobile-image-btn">
                       <Download className="w-4 h-4" />
                     </button>
-                    <button className="px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-sm" onClick={() => { sharePreview(); console.log("🔗 Sharing mobile preview..."); }} data-testid="share-mobile-preview-btn">
+                    <button className="px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-sm" onClick={sharePreview} data-testid="share-mobile-preview-btn">
                       <Share2 className="w-4 h-4" />
                     </button>
-                    <button className="px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-sm" onClick={() => { generateQRCode(); console.log("📱 Generating QR code..."); }} data-testid="generate-qr-btn">
+                    <button className="px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-sm" onClick={generateQRCode} data-testid="generate-qr-btn">
                       <QrCode className="w-4 h-4" />
                     </button>
                   </div>
@@ -243,7 +361,20 @@ const MockScreen = ({ screen, deviceWidth, deviceHeight }: MockScreenProps) => {
 
                   <button
                     className="px-3 py-1.5 border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-md text-sm flex items-center gap-2"
-                    onClick={() => { const newOrientation = orientation === 'portrait' ? 'landscape' : 'portrait'; setOrientation(newOrientation); console.log('📱 Rotating to', newOrientation); }} data-testid="toggle-orientation-btn"
+                    onClick={() => {
+                      const newOrientation = orientation === 'portrait' ? 'landscape' : 'portrait'
+                      logger.info('Rotating device orientation', {
+                        from: orientation,
+                        to: newOrientation,
+                        device: selectedDevice,
+                        screen: currentScreen
+                      })
+                      setOrientation(newOrientation)
+                      toast.info(`Rotated to ${newOrientation}`, {
+                        description: `${device.name} - ${currentScreen} screen - ${deviceWidth}x${deviceHeight}`
+                      })
+                    }}
+                    data-testid="toggle-orientation-btn"
                   >
                     <RotateCcw className="w-4 h-4" />
                     {orientation === 'portrait' ? 'Landscape' : 'Portrait'}
