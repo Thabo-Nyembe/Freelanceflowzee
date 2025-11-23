@@ -72,6 +72,9 @@ import { EmptyState } from '@/components/ui/empty-states'
 import { useAnnouncer } from '@/lib/accessibility'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('Browser-Extension')
 
 // ========================================
 // TYPE DEFINITIONS
@@ -160,15 +163,15 @@ const browserExtensionReducer = (
   state: BrowserExtensionState,
   action: BrowserExtensionAction
 ): BrowserExtensionState => {
-  console.log('🔄 BROWSER EXTENSION REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_CAPTURES':
-      console.log('📊 BROWSER EXTENSION REDUCER: Setting', action.captures.length, 'captures')
+      logger.info('Setting captures', { count: action.captures.length })
       return { ...state, captures: action.captures, isLoading: false }
 
     case 'ADD_CAPTURE':
-      console.log('➕ BROWSER EXTENSION REDUCER: Adding capture -', action.capture.title)
+      logger.info('Adding capture', { title: action.capture.title })
       return {
         ...state,
         captures: [action.capture, ...state.captures],
@@ -176,7 +179,7 @@ const browserExtensionReducer = (
       }
 
     case 'UPDATE_CAPTURE':
-      console.log('✏️ BROWSER EXTENSION REDUCER: Updating capture -', action.capture.id)
+      logger.info('Updating capture', { captureId: action.capture.id })
       return {
         ...state,
         captures: state.captures.map(c => c.id === action.capture.id ? action.capture : c),
@@ -184,7 +187,7 @@ const browserExtensionReducer = (
       }
 
     case 'DELETE_CAPTURE':
-      console.log('🗑️ BROWSER EXTENSION REDUCER: Deleting capture -', action.captureId)
+      logger.info('Deleting capture', { captureId: action.captureId })
       return {
         ...state,
         captures: state.captures.filter(c => c.id !== action.captureId),
@@ -192,19 +195,19 @@ const browserExtensionReducer = (
       }
 
     case 'SELECT_CAPTURE':
-      console.log('👁️ BROWSER EXTENSION REDUCER: Selecting capture -', action.capture?.title || 'null')
+      logger.info('Selecting capture', { title: action.capture?.title || null })
       return { ...state, selectedCapture: action.capture }
 
     case 'SET_ACTIONS':
-      console.log('📊 BROWSER EXTENSION REDUCER: Setting', action.actions.length, 'actions')
+      logger.info('Setting actions', { count: action.actions.length })
       return { ...state, actions: action.actions }
 
     case 'SET_FEATURES':
-      console.log('📊 BROWSER EXTENSION REDUCER: Setting', action.features.length, 'features')
+      logger.info('Setting features', { count: action.features.length })
       return { ...state, features: action.features }
 
     case 'TOGGLE_FEATURE':
-      console.log('🔀 BROWSER EXTENSION REDUCER: Toggling feature -', action.featureId)
+      logger.debug('Toggling feature', { featureId: action.featureId })
       return {
         ...state,
         features: state.features.map(f =>
@@ -213,27 +216,27 @@ const browserExtensionReducer = (
       }
 
     case 'SET_SEARCH':
-      console.log('🔍 BROWSER EXTENSION REDUCER: Search term:', action.searchTerm)
+      logger.debug('Search term changed', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER_TYPE':
-      console.log('🔍 BROWSER EXTENSION REDUCER: Filter type:', action.filterType)
+      logger.debug('Filter type changed', { filterType: action.filterType })
       return { ...state, filterType: action.filterType }
 
     case 'SET_SORT':
-      console.log('🔀 BROWSER EXTENSION REDUCER: Sort by:', action.sortBy)
+      logger.debug('Sort changed', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'SET_VIEW_MODE':
-      console.log('👁️ BROWSER EXTENSION REDUCER: View mode:', action.viewMode)
+      logger.debug('View mode changed', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'SET_INSTALLED':
-      console.log('📦 BROWSER EXTENSION REDUCER: Installation status:', action.isInstalled)
+      logger.info('Installation status changed', { isInstalled: action.isInstalled })
       return { ...state, isInstalled: action.isInstalled }
 
     case 'SET_BROWSER':
-      console.log('🌐 BROWSER EXTENSION REDUCER: Browser:', action.browser)
+      logger.debug('Browser changed', { browser: action.browser })
       return { ...state, currentBrowser: action.browser }
 
     case 'SET_LOADING':
@@ -249,7 +252,7 @@ const browserExtensionReducer = (
 // ========================================
 
 const generateMockCaptures = (): PageCapture[] => {
-  console.log('🎲 BROWSER EXTENSION: Generating mock captures...')
+  logger.debug('Generating mock captures')
 
   const types: CaptureType[] = ['screenshot', 'full-page', 'selection', 'video', 'text']
   const browsers: BrowserType[] = ['chrome', 'firefox', 'safari', 'edge', 'brave', 'opera']
@@ -284,12 +287,12 @@ const generateMockCaptures = (): PageCapture[] => {
     })
   }
 
-  console.log('✅ BROWSER EXTENSION: Generated', captures.length, 'mock captures')
+  logger.info('Generated mock captures', { count: captures.length })
   return captures
 }
 
 const generateMockActions = (): QuickAction[] => {
-  console.log('🎲 BROWSER EXTENSION: Generating mock actions...')
+  logger.debug('Generating mock actions')
 
   const actions: QuickAction[] = [
     {
@@ -354,12 +357,12 @@ const generateMockActions = (): QuickAction[] => {
     }
   ]
 
-  console.log('✅ BROWSER EXTENSION: Generated', actions.length, 'mock actions')
+  logger.info('Generated mock actions', { count: actions.length })
   return actions
 }
 
 const generateMockFeatures = (): ExtensionFeature[] => {
-  console.log('🎲 BROWSER EXTENSION: Generating mock features...')
+  logger.debug('Generating mock features')
 
   const features: ExtensionFeature[] = [
     {
@@ -418,7 +421,7 @@ const generateMockFeatures = (): ExtensionFeature[] => {
     }
   ]
 
-  console.log('✅ BROWSER EXTENSION: Generated', features.length, 'mock features')
+  logger.info('Generated mock features', { count: features.length })
   return features
 }
 
@@ -497,7 +500,7 @@ const getCaptureTypeColor = (type: CaptureType): string => {
 // ========================================
 
 export default function BrowserExtensionPage() {
-  console.log('🚀 BROWSER EXTENSION: Component mounting...')
+  logger.debug('Component mounting')
 
   const announce = useAnnouncer()
 
@@ -526,7 +529,7 @@ export default function BrowserExtensionPage() {
 
   // Load mock data
   useEffect(() => {
-    console.log('📊 BROWSER EXTENSION: Loading mock data...')
+    logger.info('Loading mock data')
 
     const mockCaptures = generateMockCaptures()
     const mockActions = generateMockActions()
@@ -536,14 +539,12 @@ export default function BrowserExtensionPage() {
     dispatch({ type: 'SET_ACTIONS', actions: mockActions })
     dispatch({ type: 'SET_FEATURES', features: mockFeatures })
 
-    console.log('✅ BROWSER EXTENSION: Mock data loaded successfully')
+    logger.info('Mock data loaded successfully')
     announce('Browser extension page loaded', 'polite')
   }, [announce])
 
   // Computed Stats
   const stats = useMemo(() => {
-    console.log('📊 BROWSER EXTENSION: Calculating stats...')
-
     const totalCaptures = state.captures.length
     const totalStorage = state.captures.reduce((sum, c) => sum + c.fileSize, 0)
     const screenshotCount = state.captures.filter(c => c.type === 'screenshot').length
@@ -561,16 +562,18 @@ export default function BrowserExtensionPage() {
       avgFileSize: totalCaptures > 0 ? totalStorage / totalCaptures : 0
     }
 
-    console.log('📊 BROWSER EXTENSION: Stats -', JSON.stringify(computed))
+    logger.debug('Stats calculated', computed)
     return computed
   }, [state.captures, state.actions, state.features])
 
   // Filtered and Sorted Captures
   const filteredAndSortedCaptures = useMemo(() => {
-    console.log('🔍 BROWSER EXTENSION: Filtering and sorting captures...')
-    console.log('🔍 Search term:', state.searchTerm)
-    console.log('🔍 Filter type:', state.filterType)
-    console.log('🔀 Sort by:', state.sortBy)
+    logger.debug('Filtering and sorting captures', {
+      searchTerm: state.searchTerm,
+      filterType: state.filterType,
+      sortBy: state.sortBy,
+      totalCaptures: state.captures.length
+    })
 
     let filtered = state.captures
 
@@ -581,13 +584,13 @@ export default function BrowserExtensionPage() {
         capture.url.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
         capture.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()))
       )
-      console.log('🔍 BROWSER EXTENSION: Search filtered to', filtered.length, 'captures')
+      logger.debug('Search filter applied', { resultCount: filtered.length })
     }
 
     // Filter by type
     if (state.filterType !== 'all') {
       filtered = filtered.filter(capture => capture.type === state.filterType)
-      console.log('🔍 BROWSER EXTENSION: Type filtered to', filtered.length, 'captures')
+      logger.debug('Type filter applied', { type: state.filterType, resultCount: filtered.length })
     }
 
     // Sort
@@ -603,7 +606,7 @@ export default function BrowserExtensionPage() {
       }
     })
 
-    console.log('✅ BROWSER EXTENSION: Final capture count:', sorted.length)
+    logger.debug('Filtering and sorting complete', { finalCount: sorted.length })
     return sorted
   }, [state.captures, state.searchTerm, state.filterType, state.sortBy])
 
@@ -612,11 +615,11 @@ export default function BrowserExtensionPage() {
   // ========================================
 
   const handleInstallExtension = async () => {
-    console.log('📥 BROWSER EXTENSION: Installing extension for:', state.currentBrowser)
+    logger.info('Installing extension', { browser: state.currentBrowser })
 
     try {
-      console.log('⏳ BROWSER EXTENSION: Starting installation (local state)...')
-      toast.info('🔌 Installing extension...', {
+      logger.debug('Starting installation')
+      toast.info('Installing extension...', {
         description: 'Setting up browser integration'
       })
 
@@ -624,21 +627,28 @@ export default function BrowserExtensionPage() {
       dispatch({ type: 'SET_INSTALLED', isInstalled: true })
       setShowInstallModal(false)
 
-      console.log('✅ BROWSER EXTENSION: Extension installed successfully')
-      toast.success('🎉 Extension installed', {
-        description: `Now active in ${state.currentBrowser}`
+      logger.info('Extension installed successfully', { browser: state.currentBrowser })
+      toast.success('Extension installed', {
+        description: `${state.currentBrowser} - Active and syncing - All features enabled`
       })
       announce('Extension installed', 'polite')
     } catch (error) {
-      console.log('❌ BROWSER EXTENSION: Installation error:', error)
+      logger.error('Extension installation error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorObject: error,
+        browser: state.currentBrowser
+      })
       toast.error('Failed to install extension')
       announce('Failed to install extension', 'assertive')
     }
   }
 
   const handleViewCapture = (capture: PageCapture) => {
-    console.log('👁️ BROWSER EXTENSION: Opening capture view - ID:', capture.id)
-    console.log('👁️ BROWSER EXTENSION: Capture:', capture.title)
+    logger.info('Opening capture view', {
+      captureId: capture.id,
+      title: capture.title,
+      type: capture.type
+    })
 
     dispatch({ type: 'SELECT_CAPTURE', capture })
     setViewCaptureTab('details')
@@ -647,40 +657,55 @@ export default function BrowserExtensionPage() {
   }
 
   const handleDeleteCapture = (captureId: string) => {
-    console.log('🗑️ BROWSER EXTENSION: Deleting capture - ID:', captureId)
-
     const capture = state.captures.find(c => c.id === captureId)
     if (!capture) {
-      console.log('❌ BROWSER EXTENSION: Capture not found')
+      logger.warn('Capture deletion failed', { reason: 'Capture not found', captureId })
       return
     }
 
+    logger.info('Deleting capture', { captureId, title: capture.title, fileSize: capture.fileSize })
+
     if (confirm(`Delete "${capture.title}"?`)) {
-      console.log('✅ BROWSER EXTENSION: User confirmed deletion')
+      logger.info('User confirmed deletion', { captureId })
       dispatch({ type: 'DELETE_CAPTURE', captureId })
-      toast.success('Capture deleted')
+
+      const fileSizeMB = (capture.fileSize / (1024 * 1024)).toFixed(1)
+
+      toast.success('Capture deleted', {
+        description: `${capture.title} - ${capture.type} - ${fileSizeMB} MB freed`
+      })
       announce('Capture deleted', 'polite')
     } else {
-      console.log('❌ BROWSER EXTENSION: User cancelled deletion')
+      logger.debug('User cancelled deletion', { captureId })
     }
   }
 
   const handleToggleFeature = (featureId: string) => {
-    console.log('🔀 BROWSER EXTENSION: Toggling feature - ID:', featureId)
-
     const feature = state.features.find(f => f.id === featureId)
     if (!feature) return
 
+    logger.info('Toggling feature', {
+      featureId,
+      name: feature.name,
+      currentState: feature.enabled
+    })
+
     dispatch({ type: 'TOGGLE_FEATURE', featureId })
-    toast.success(feature.enabled ? `${feature.name} disabled` : `${feature.name} enabled`)
-    announce(feature.enabled ? `${feature.name} disabled` : `${feature.name} enabled`, 'polite')
+
+    const newState = !feature.enabled
+    toast.success(newState ? `${feature.name} enabled` : `${feature.name} disabled`, {
+      description: `${feature.description} - ${newState ? 'Now active' : 'Disabled'}`
+    })
+    announce(newState ? `${feature.name} enabled` : `${feature.name} disabled`, 'polite')
   }
 
   const handleCopyUrl = (url: string) => {
-    console.log('📋 BROWSER EXTENSION: Copying URL:', url)
+    logger.info('Copying URL', { url })
 
     navigator.clipboard.writeText(url)
-    toast.success('URL copied to clipboard')
+    toast.success('URL copied to clipboard', {
+      description: url.length > 50 ? url.substring(0, 50) + '...' : url
+    })
     announce('URL copied', 'polite')
   }
 
@@ -688,12 +713,12 @@ export default function BrowserExtensionPage() {
   // RENDER
   // ========================================
 
-  console.log('🎨 BROWSER EXTENSION: Rendering component...')
-  console.log('📊 Current state:', {
+  logger.debug('Rendering component', {
     capturesCount: state.captures.length,
     viewMode: state.viewMode,
     isInstalled: state.isInstalled,
-    isLoading: state.isLoading
+    isLoading: state.isLoading,
+    currentBrowser: state.currentBrowser
   })
 
   if (state.isLoading && state.captures.length === 0) {
@@ -848,7 +873,7 @@ export default function BrowserExtensionPage() {
                   key={mode.id}
                   variant={state.viewMode === mode.id ? "default" : "outline"}
                   onClick={() => {
-                    console.log('👁️ BROWSER EXTENSION: Changing view mode to:', mode.id)
+                    logger.debug('View mode changed', { viewMode: mode.id })
                     dispatch({ type: 'SET_VIEW_MODE', viewMode: mode.id })
                     announce(`Switched to ${mode.label}`, 'polite')
                   }}
@@ -920,7 +945,7 @@ export default function BrowserExtensionPage() {
                           state.currentBrowser === browser ? 'bg-emerald-500/20 border border-emerald-500/30' : 'bg-slate-800 hover:bg-slate-700'
                         }`}
                         onClick={() => {
-                          console.log('🌐 BROWSER EXTENSION: Browser changed:', browser)
+                          logger.debug('Browser changed', { browser })
                           dispatch({ type: 'SET_BROWSER', browser })
                         }}
                       >
@@ -964,7 +989,7 @@ export default function BrowserExtensionPage() {
                       placeholder="Search captures..."
                       value={state.searchTerm}
                       onChange={(e) => {
-                        console.log('🔍 BROWSER EXTENSION: Search term changed:', e.target.value)
+                        logger.debug('Search term changed', { searchTerm: e.target.value })
                         dispatch({ type: 'SET_SEARCH', searchTerm: e.target.value })
                       }}
                       className="pl-10 bg-slate-900/50 border-gray-700 text-white"
@@ -989,7 +1014,7 @@ export default function BrowserExtensionPage() {
                       variant={state.filterType === type ? "default" : "outline"}
                       className={`cursor-pointer ${state.filterType === type ? 'bg-emerald-600' : 'border-gray-700'}`}
                       onClick={() => {
-                        console.log('🔍 BROWSER EXTENSION: Filter type changed:', type)
+                        logger.debug('Filter type changed', { filterType: type })
                         dispatch({ type: 'SET_FILTER_TYPE', filterType: type })
                       }}
                     >
@@ -1001,7 +1026,7 @@ export default function BrowserExtensionPage() {
                   <Select
                     value={state.sortBy}
                     onValueChange={(value) => {
-                      console.log('🔀 BROWSER EXTENSION: Sort changed:', value)
+                      logger.debug('Sort changed', { sortBy: value })
                       dispatch({ type: 'SET_SORT', sortBy: value as any })
                     }}
                   >
