@@ -67,6 +67,7 @@ import { DashboardSkeleton, CardSkeleton } from '@/components/ui/loading-skeleto
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
 
 // Initialize logger
 const logger = createFeatureLogger('Dashboard')
@@ -297,7 +298,12 @@ export default function DashboardPage() {
 
   const handleUpgradePlan = () => {
     logger.info('Plan upgrade initiated', { currentPlan: 'Free', targetPlan: 'Pro' })
-    console.log('✨ UPGRADE: Features unlocked: AI, Team collaboration, Priority support')
+
+    const features = ['AI Tools', 'Team Collaboration', 'Priority Support', 'Advanced Analytics']
+
+    toast.info('Upgrade to Pro Plan', {
+      description: `Unlock: ${features.join(', ')} - View pricing options`
+    })
 
     // Add to activity feed
     const newActivity = {
@@ -315,9 +321,15 @@ export default function DashboardPage() {
   }
 
   const handleExportReport = async () => {
-    console.log('💾 EXPORT: Starting dashboard export')
-    console.log('📊 EXPORT: Data sources: Projects, Earnings, Analytics')
-    console.log('📄 EXPORT: Format: PDF + CSV')
+    logger.info('Starting dashboard export', {
+      dataSources: ['Projects', 'Earnings', 'Analytics'],
+      format: 'JSON',
+      period: '30 days'
+    })
+
+    toast.info('Exporting dashboard data...', {
+      description: 'Projects, Earnings, Analytics - JSON format - Last 30 days'
+    })
 
     setRefreshing(true)
 
@@ -362,7 +374,10 @@ export default function DashboardPage() {
         exportedBy: 'Current User'
       }
 
-      console.log('📡 DASHBOARD: Export data fetched from API')
+      logger.info('Export data fetched from API', {
+        projectsCount: projects.length,
+        hasAnalytics: !!result.data
+      })
 
       // Download as JSON
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
@@ -373,8 +388,17 @@ export default function DashboardPage() {
       a.click()
       URL.revokeObjectURL(url)
 
-      console.log('✅ EXPORT: Report generated successfully')
-      console.log('📄 EXPORT: File:', a.download)
+      const fileSizeKB = (blob.size / 1024).toFixed(1)
+
+      logger.info('Report generated successfully', {
+        fileName: a.download,
+        fileSize: blob.size,
+        projectsCount: projects.length
+      })
+
+      toast.success('Dashboard report exported', {
+        description: `${a.download} - ${fileSizeKB} KB - ${projects.length} projects - Analytics included`
+      })
 
       // Add to activity feed
       const newActivity = {
@@ -387,16 +411,31 @@ export default function DashboardPage() {
       }
       setLiveActivities(prev => [newActivity, ...prev])
     } catch (error) {
-      console.error('❌ EXPORT: Failed', error)
+      logger.error('Export failed', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      })
+
+      toast.error('Export failed', {
+        description: 'Failed to generate dashboard report - Please try again'
+      })
     } finally {
       setRefreshing(false)
     }
   }
 
   const handleCustomizeWidgets = () => {
-    console.log('🎨 CUSTOMIZE: Widget customization started')
-    console.log('📊 CUSTOMIZE: Available widgets:', ['Projects', 'Analytics', 'AI Insights', 'Messages', 'Calendar'])
-    console.log('🎯 CUSTOMIZE: Layout options:', ['Grid', 'List', 'Compact'])
+    const availableWidgets = ['Projects', 'Analytics', 'AI Insights', 'Messages', 'Calendar']
+    const layoutOptions = ['Grid', 'List', 'Compact']
+
+    logger.info('Widget customization started', {
+      availableWidgets,
+      layoutOptions,
+      currentLayout: 'Grid'
+    })
+
+    toast.info('Customize dashboard widgets', {
+      description: `${availableWidgets.length} widgets available - Layouts: ${layoutOptions.join(', ')}`
+    })
 
     // Add to activity feed
     const newActivity = {
@@ -414,31 +453,54 @@ export default function DashboardPage() {
   }
 
   const handleViewActivity = () => {
-    console.log('📈 ACTIVITY: Opening activity feed')
-    console.log('📊 ACTIVITY: Total activities:', liveActivities.length)
-    console.log('📊 ACTIVITY: Recent actions:', liveActivities.slice(0, 5).map(a => a.message).join(', '))
+    const recentActions = liveActivities.slice(0, 5).map(a => a.message)
+
+    logger.info('Opening activity feed', {
+      totalActivities: liveActivities.length,
+      recentActions
+    })
+
+    toast.info('Activity feed', {
+      description: `${liveActivities.length} total activities - Recent: ${recentActions.slice(0, 3).join(', ')}${liveActivities.length > 5 ? '...' : ''}`
+    })
 
     // Navigate to notifications with activity filter
     navigateToPage('notifications?filter=activity')
   }
 
   const handleViewTasks = () => {
-    console.log('✅ TASKS: Opening My Day')
-    console.log('📊 TASKS: Today\'s tasks:', Math.floor(Math.random() * 12))
-    console.log('🎯 TASKS: Priority tasks:', Math.floor(Math.random() * 5))
+    const todaysTasks = Math.floor(Math.random() * 12)
+    const priorityTasks = Math.floor(Math.random() * 5)
+
+    logger.info('Opening My Day', {
+      todaysTasks,
+      priorityTasks
+    })
+
+    toast.info('My Day', {
+      description: `${todaysTasks} tasks today - ${priorityTasks} priority tasks - View and manage your schedule`
+    })
+
     navigateToPage('my-day')
   }
 
   const handleStartTour = () => {
-    console.log('🎓 TOUR: Interactive platform tour started')
-    console.log('📚 TOUR: Steps:', [
+    const tourSteps = [
       '1. Dashboard Overview',
       '2. Projects Management',
       '3. AI Features',
       '4. Collaboration Tools',
       '5. Financial Management'
-    ].join(' → '))
-    console.log('⏱️ TOUR: Estimated time: 5 minutes')
+    ]
+
+    logger.info('Interactive platform tour started', {
+      steps: tourSteps.length,
+      estimatedTime: '5 minutes'
+    })
+
+    toast.info('Platform tour started', {
+      description: `${tourSteps.length} steps - ${tourSteps.join(' → ')} - Est. 5 minutes`
+    })
 
     // Add to activity feed
     const newActivity = {
@@ -452,13 +514,24 @@ export default function DashboardPage() {
     setLiveActivities(prev => [newActivity, ...prev])
 
     // TODO: Implement interactive tour with step-by-step guidance
-    console.log('✅ TOUR: Tour system ready (implementation pending)')
+    logger.info('Tour system ready', {
+      status: 'implementation pending',
+      tourSteps: tourSteps.length
+    })
   }
 
   const handleInviteTeam = () => {
-    console.log('➕ INVITE: Team invitation flow started')
-    console.log('📧 INVITE: Invitation methods:', ['Email', 'Link', 'Import CSV'])
-    console.log('🎯 INVITE: Roles available:', ['Admin', 'Manager', 'Member', 'Guest'])
+    const invitationMethods = ['Email', 'Link', 'Import CSV']
+    const rolesAvailable = ['Admin', 'Manager', 'Member', 'Guest']
+
+    logger.info('Team invitation flow started', {
+      invitationMethods,
+      rolesAvailable
+    })
+
+    toast.info('Invite team members', {
+      description: `Methods: ${invitationMethods.join(', ')} - Roles: ${rolesAvailable.join(', ')}`
+    })
 
     // Add to activity feed
     const newActivity = {
@@ -476,24 +549,47 @@ export default function DashboardPage() {
   }
 
   const handleViewStats = (stat: string) => {
-    console.log('📊 STATS: Viewing detailed statistics for', stat)
-    console.log('📈 STATS: Metric:', stat)
-    console.log('🎯 STATS: Available views:', ['Chart', 'Table', 'Export'])
+    const availableViews = ['Chart', 'Table', 'Export']
+
+    logger.info('Viewing detailed statistics', {
+      metric: stat,
+      availableViews
+    })
+
+    toast.info(`View statistics: ${stat}`, {
+      description: `Available views: ${availableViews.join(', ')} - Detailed analytics and insights`
+    })
 
     // Navigate to analytics with specific stat filter
     navigateToPage(`analytics?metric=${stat.toLowerCase().replace(/\s+/g, '-')}`)
   }
 
   const handleViewReports = () => {
-    console.log('📄 REPORTS: Opening reports dashboard')
-    console.log('📊 REPORTS: Available reports:', ['Financial', 'Projects', 'Team Performance', 'AI Usage'])
+    const availableReports = ['Financial', 'Projects', 'Team Performance', 'AI Usage']
+
+    logger.info('Opening reports dashboard', {
+      availableReports
+    })
+
+    toast.info('Reports dashboard', {
+      description: `${availableReports.length} report types - ${availableReports.join(', ')}`
+    })
+
     navigateToPage('reports')
   }
 
   const handleAIInsights = () => {
-    console.log('🤖 AI INSIGHTS: Opening AI-powered insights')
-    console.log('📊 AI INSIGHTS: Analyzing:', ['Revenue trends', 'Project performance', 'Client satisfaction', 'Time utilization'])
-    console.log('🎯 AI INSIGHTS: Recommendations:', insights.filter(i => !i.actedUpon).length + ' actionable insights')
+    const analyzingAreas = ['Revenue trends', 'Project performance', 'Client satisfaction', 'Time utilization']
+    const actionableInsights = insights.filter(i => !i.actedUpon).length
+
+    logger.info('Opening AI-powered insights', {
+      analyzingAreas,
+      actionableInsights
+    })
+
+    toast.info('AI Insights', {
+      description: `Analyzing: ${analyzingAreas.join(', ')} - ${actionableInsights} actionable recommendations`
+    })
 
     // Navigate to analytics with AI filter
     navigateToPage('analytics?view=ai-insights')
@@ -501,7 +597,14 @@ export default function DashboardPage() {
 
   // Comprehensive handlers with full functionality
   const handleRefreshDashboard = async () => {
-    console.log('🔄 DASHBOARD: Starting refresh...')
+    logger.info('Starting dashboard refresh', {
+      timestamp: new Date().toISOString()
+    })
+
+    toast.info('Refreshing dashboard...', {
+      description: 'Fetching latest data and analytics'
+    })
+
     setRefreshing(true)
 
     try {
@@ -532,12 +635,26 @@ export default function DashboardPage() {
         }
 
         setLiveActivities(prev => [newActivity, ...prev])
-        console.log('✅ DASHBOARD: Refresh complete with API data')
+
+        logger.info('Dashboard refresh complete', {
+          success: true,
+          dataSource: 'API'
+        })
+
+        toast.success('Dashboard refreshed', {
+          description: 'Latest data loaded successfully from API'
+        })
       } else {
         throw new Error(result.error || 'Refresh failed')
       }
     } catch (error: any) {
-      console.error('❌ DASHBOARD: Refresh failed', error)
+      logger.error('Dashboard refresh failed', {
+        error: error.message || 'Unknown error'
+      })
+
+      toast.error('Refresh failed', {
+        description: error.message || 'Failed to refresh dashboard - Please try again'
+      })
       const errorActivity = {
         id: Date.now(),
         type: 'error',
@@ -554,34 +671,51 @@ export default function DashboardPage() {
 
   const handleViewProject = (projectId: number) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('👁️ VIEW PROJECT:', {
+
+    logger.info('Viewing project', {
       id: projectId,
       name: project?.name,
       client: project?.client,
       progress: project?.progress,
       status: project?.status
     })
+
+    toast.info(`Project: ${project?.name || 'Unknown'}`, {
+      description: `Client: ${project?.client || 'N/A'} - Progress: ${project?.progress || 0}% - Status: ${project?.status || 'Unknown'}`
+    })
+
     navigateToPage(`projects-hub?id=${projectId}`)
   }
 
   const handleProjectMessage = (projectId: number) => {
     const project = projects.find(p => p.id === projectId)
-    console.log('💬 MESSAGE PROJECT:', {
+
+    logger.info('Messaging project', {
       id: projectId,
       name: project?.name,
       client: project?.client
     })
+
+    toast.info(`Message: ${project?.name || 'Project'}`, {
+      description: `Client: ${project?.client || 'N/A'} - Opening messages`
+    })
+
     navigateToPage(`messages?project=${projectId}`)
   }
 
   const handleActOnInsight = (insightId: number) => {
     const insight = insights.find(i => i.id === insightId)
-    console.log('🎯 ACT ON INSIGHT:', {
+
+    logger.info('Acting on insight', {
       id: insightId,
       type: insight?.type,
       title: insight?.title,
       action: insight?.action,
       confidence: insight?.confidence
+    })
+
+    toast.success(`Acting on: ${insight?.title || 'Insight'}`, {
+      description: `Type: ${insight?.type || 'Unknown'} - Action: ${insight?.action || 'View'} - ${insight?.confidence || 0}% confidence`
     })
 
     // Mark insight as acted upon
@@ -591,52 +725,80 @@ export default function DashboardPage() {
 
     // Smart navigation based on insight type
     if (insight?.type === 'revenue') {
-      console.log('📊 Navigating to analytics for revenue insight')
+      logger.info('Navigating to analytics', { insightType: 'revenue' })
       navigateToPage('analytics')
     } else if (insight?.type === 'productivity') {
-      console.log('🤖 Navigating to AI Create for productivity insight')
+      logger.info('Navigating to AI Create', { insightType: 'productivity' })
       navigateToPage('ai-create')
     } else if (insight?.type === 'client') {
-      console.log('👥 Navigating to client zone for client insight')
+      logger.info('Navigating to client zone', { insightType: 'client' })
       navigateToPage('client-zone')
     }
   }
 
   const handleViewAllActivities = () => {
-    console.log('📋 VIEW ALL: Navigating to all activities')
+    logger.info('Navigating to all activities', {
+      activitiesCount: liveActivities.length
+    })
+
+    toast.info('Viewing all activities', {
+      description: `${liveActivities.length} activities - Full activity history`
+    })
+
     navigateToPage('notifications')
   }
 
   const handleOpenNotifications = () => {
-    console.log('🔔 NOTIFICATIONS:', {
-      unreadCount: notificationCount,
-      action: 'Opening notifications panel'
+    logger.info('Opening notifications panel', {
+      unreadCount: notificationCount
     })
+
+    toast.info('Notifications', {
+      description: `${notificationCount} unread notifications - Opening panel`
+    })
+
     setNotificationCount(0) // Reset badge
     navigateToPage('notifications')
   }
 
   const handleSearch = (query: string, filters?: { category?: string, dateRange?: string }) => {
-    console.log('🔍 SEARCH:', {
+    logger.info('Search initiated', {
       query,
       filters,
       timestamp: new Date().toISOString()
     })
+
+    const filterStr = filters ? `Filters: ${Object.entries(filters).map(([k, v]) => `${k}=${v}`).join(', ')}` : 'No filters'
+
+    toast.info(`Search: ${query}`, {
+      description: `${filterStr} - Searching dashboard`
+    })
+
     setSearchQuery(query)
     trackEvent('dashboard_search', { query, filters })
   }
 
   const handle2025GUIToggle = () => {
-    console.log('🎨 GUI TOGGLE:', {
+    logger.info('GUI toggle', {
       current: use2025GUI,
-      switching_to: !use2025GUI
+      switchingTo: !use2025GUI
     })
+
+    toast.success(`GUI: ${!use2025GUI ? '2025 Mode' : 'Classic Mode'}`, {
+      description: `Switched to ${!use2025GUI ? 'modern 2025' : 'classic'} interface`
+    })
+
     setUse2025GUI(prev => !prev)
     trackEvent('gui_2025_toggle', { enabled: !use2025GUI })
   }
 
   const handleOpenSettings = () => {
-    console.log('⚙️ SETTINGS: Opening settings panel')
+    logger.info('Opening settings panel')
+
+    toast.info('Settings', {
+      description: 'Opening settings panel - Manage your preferences'
+    })
+
     navigateToPage('settings')
   }
 
