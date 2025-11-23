@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-GuestPayment')
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-06-20'
@@ -85,7 +88,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error: any) {
-    console.error('Guest payment error:', error)
+    logger.error('Guest payment error', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined })
     return NextResponse.json(
       { error: error.message || 'Payment failed' },
       { status: 500 }
@@ -150,7 +153,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ received: true })
 
   } catch (error: any) {
-    console.error('Webhook error:', error)
+    logger.error('Webhook error', { error: error instanceof Error ? error.message : 'Unknown error', stack: error instanceof Error ? error.stack : undefined })
     return NextResponse.json(
       { error: error.message },
       { status: 400 }
@@ -172,7 +175,7 @@ async function grantGuestFeatureAccess(data: {
   // 3. Create access token
   // 4. Set expiration time
 
-  console.log('Granting guest feature access:', data)
+  logger.info('Granting guest feature access', { featureId: data.featureId, email: data.email, duration: data.duration })
 }
 
 async function sendGuestAccessEmail(data: {
@@ -189,5 +192,5 @@ async function sendGuestAccessEmail(data: {
   // 3. Feature usage guide
   // 4. Expiration reminder
 
-  console.log('Sending guest access email:', data)
+  logger.info('Sending guest access email', { email: data.email, featureId: data.featureId })
 }

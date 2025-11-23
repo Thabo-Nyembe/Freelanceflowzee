@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-Contact')
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,13 +40,15 @@ export async function POST(request: NextRequest) {
     const timestamp = new Date().toISOString()
 
     // Log the contact form submission (in production, send to email service or database)
-    console.log('📧 Contact Form Submission:', {
+    logger.info('Contact form submission received', {
       caseId,
       timestamp,
-      from: `${firstName} ${lastName} (${email})`,
+      from: `${firstName} ${lastName}`,
+      email,
       company: company || 'N/A',
       subject,
-      message: message.substring(0, 100) + '...'
+      messageLength: message.length,
+      messagePreview: message.substring(0, 100)
     })
 
     // In production, integrate with:
@@ -83,7 +88,10 @@ export async function POST(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Contact form error:', error)
+    logger.error('Contact form processing error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { success: false, error: 'Failed to process contact form submission' },
       { status: 500 }

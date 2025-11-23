@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-ErrorReport')
 
 interface ErrorReport {
   error: string
@@ -19,13 +22,18 @@ export async function POST(request: NextRequest) {
     const errorReport: ErrorReport = await request.json()
 
     // Log error for monitoring (replace with your monitoring service)
-    console.error('Error Report Received:', {
-      ...errorReport,
+    logger.error('Error report received from client', {
+      errorId: errorReport.errorId,
+      error: errorReport.error,
+      digest: errorReport.digest,
+      level: errorReport.level,
+      name: errorReport.name,
+      type: errorReport.type,
+      url: errorReport.url,
+      timestamp: errorReport.timestamp,
       ip: request.ip || 'unknown',
-      headers: {
-        userAgent: request.headers.get('user-agent'),
-        referer: request.headers.get('referer')
-      }
+      userAgent: request.headers.get('user-agent'),
+      referer: request.headers.get('referer')
     })
 
     // In production, send to error tracking service
@@ -44,7 +52,10 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Failed to process error report:', error)
+    logger.error('Failed to process error report', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
 
     return NextResponse.json(
       {

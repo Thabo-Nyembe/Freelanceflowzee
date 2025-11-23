@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('API-Gallery');
 
 /**
  * Gallery API Route
@@ -48,7 +51,10 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error: any) {
-    console.error('Gallery API Error:', error);
+    logger.error('Gallery API error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
       { success: false, error: error.message || 'Internal server error' },
       { status: 500 }
@@ -90,7 +96,10 @@ export async function GET(request: NextRequest) {
       categories: getCategories(items),
     });
   } catch (error: any) {
-    console.error('Gallery GET Error:', error);
+    logger.error('Gallery GET error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }
