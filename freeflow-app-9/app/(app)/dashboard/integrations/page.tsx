@@ -23,18 +23,21 @@ import {
   Plus, Download, Upload, Share2, Link, ExternalLink, Star
 } from 'lucide-react'
 import { NumberFlow } from '@/components/ui/number-flow'
+import { createFeatureLogger } from '@/lib/logger'
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
+const logger = createFeatureLogger('Integrations')
+
 // ============================================================================
 // FRAMER MOTION COMPONENTS
 // ============================================================================
 
 const FloatingParticle = ({ delay = 0, color = 'green' }: { delay?: number; color?: string }) => {
-  console.log('🎨 INTEGRATIONS: FloatingParticle rendered with color:', color, 'delay:', delay)
+  logger.debug('FloatingParticle rendered', { color, delay })
   return (
     <motion.div
       className={`absolute w-2 h-2 bg-${color}-400 rounded-full opacity-30`}
@@ -128,43 +131,43 @@ type IntegrationsAction =
 // ============================================================================
 
 function integrationsReducer(state: IntegrationsState, action: IntegrationsAction): IntegrationsState {
-  console.log('🔄 INTEGRATIONS REDUCER: Action:', action.type)
+  logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
     case 'SET_INTEGRATIONS':
-      console.log('✅ INTEGRATIONS: Set integrations -', action.integrations.length, 'integrations loaded')
+      logger.info('Setting integrations', { count: action.integrations.length })
       return { ...state, integrations: action.integrations }
 
     case 'UPDATE_INTEGRATION':
-      console.log('✅ INTEGRATIONS: Update integration - ID:', action.integration.id)
+      logger.info('Updating integration', { integrationId: action.integration.id })
       return {
         ...state,
         integrations: state.integrations.map(i => i.id === action.integration.id ? action.integration : i)
       }
 
     case 'SELECT_INTEGRATION':
-      console.log('👁️ INTEGRATIONS: Select integration -', action.integration?.name || 'None')
+      logger.info('Selecting integration', { name: action.integration?.name || 'None' })
       return { ...state, selectedIntegration: action.integration }
 
     case 'SET_SEARCH':
-      console.log('🔍 INTEGRATIONS: Search term changed:', action.searchTerm)
+      logger.debug('Search term changed', { searchTerm: action.searchTerm })
       return { ...state, searchTerm: action.searchTerm }
 
     case 'SET_FILTER_CATEGORY':
-      console.log('🔎 INTEGRATIONS: Filter category changed:', action.filterCategory)
+      logger.debug('Filter category changed', { filterCategory: action.filterCategory })
       return { ...state, filterCategory: action.filterCategory }
 
     case 'SET_FILTER_STATUS':
-      console.log('🔎 INTEGRATIONS: Filter status changed:', action.filterStatus)
+      logger.debug('Filter status changed', { filterStatus: action.filterStatus })
       return { ...state, filterStatus: action.filterStatus }
 
     case 'SET_SORT':
-      console.log('🔀 INTEGRATIONS: Sort changed:', action.sortBy)
+      logger.debug('Sort changed', { sortBy: action.sortBy })
       return { ...state, sortBy: action.sortBy }
 
     case 'TOGGLE_SELECT_INTEGRATION':
       const isSelected = state.selectedIntegrations.includes(action.integrationId)
-      console.log(isSelected ? '❌ INTEGRATIONS: Deselect' : '✅ INTEGRATIONS: Select', '- ID:', action.integrationId)
+      logger.debug(isSelected ? 'Deselecting integration' : 'Selecting integration', { integrationId: action.integrationId })
       return {
         ...state,
         selectedIntegrations: isSelected
@@ -173,15 +176,15 @@ function integrationsReducer(state: IntegrationsState, action: IntegrationsActio
       }
 
     case 'CLEAR_SELECTED_INTEGRATIONS':
-      console.log('🔄 INTEGRATIONS: Clear all selected')
+      logger.debug('Clearing selected integrations')
       return { ...state, selectedIntegrations: [] }
 
     case 'SET_VIEW_MODE':
-      console.log('👁️ INTEGRATIONS: View mode changed:', action.viewMode)
+      logger.debug('View mode changed', { viewMode: action.viewMode })
       return { ...state, viewMode: action.viewMode }
 
     case 'CONNECT_INTEGRATION':
-      console.log('🔗 INTEGRATIONS: Connecting integration - ID:', action.integrationId)
+      logger.info('Connecting integration', { integrationId: action.integrationId })
       return {
         ...state,
         integrations: state.integrations.map(i =>
@@ -192,7 +195,7 @@ function integrationsReducer(state: IntegrationsState, action: IntegrationsActio
       }
 
     case 'DISCONNECT_INTEGRATION':
-      console.log('🔌 INTEGRATIONS: Disconnecting integration - ID:', action.integrationId)
+      logger.info('Disconnecting integration', { integrationId: action.integrationId })
       return {
         ...state,
         integrations: state.integrations.map(i =>
@@ -212,7 +215,7 @@ function integrationsReducer(state: IntegrationsState, action: IntegrationsActio
 // ============================================================================
 
 const generateMockIntegrations = (): Integration[] => {
-  console.log('🔌 INTEGRATIONS: Generating mock integration data...')
+  logger.debug('Generating mock integration data')
 
   const categories: IntegrationCategory[] = ['payment', 'communication', 'productivity', 'analytics', 'storage', 'marketing', 'crm', 'development']
   const authTypes: Array<Integration['authType']> = ['oauth', 'api-key', 'basic']
@@ -268,7 +271,7 @@ const generateMockIntegrations = (): Integration[] => {
     })
   })
 
-  console.log('✅ INTEGRATIONS: Generated', integrations.length, 'mock integrations')
+  logger.info('Generated mock integrations', { count: integrations.length })
   return integrations
 }
 
@@ -277,7 +280,7 @@ const generateMockIntegrations = (): Integration[] => {
 // ============================================================================
 
 export default function IntegrationsPage() {
-  console.log('🚀 INTEGRATIONS: Component mounting...')
+  logger.debug('Component mounting')
 
   // A+++ ANNOUNCER
   const { announce } = useAnnouncer()
@@ -317,7 +320,7 @@ export default function IntegrationsPage() {
 
   useEffect(() => {
     const loadIntegrationsData = async () => {
-      console.log('🔄 INTEGRATIONS: Loading integrations data...')
+      logger.info('Loading integrations data')
       try {
         setIsLoading(true)
         setError(null)
@@ -337,9 +340,12 @@ export default function IntegrationsPage() {
 
         setIsLoading(false)
         announce('Integrations loaded successfully', 'polite')
-        console.log('✅ INTEGRATIONS: Data loaded successfully')
+        logger.info('Integrations data loaded successfully', { count: mockIntegrations.length })
       } catch (err) {
-        console.error('❌ INTEGRATIONS: Load error:', err)
+        logger.error('Integrations load error', {
+          error: err instanceof Error ? err.message : 'Unknown error',
+          errorObject: err
+        })
         setError(err instanceof Error ? err.message : 'Failed to load integrations')
         setIsLoading(false)
         announce('Error loading integrations', 'assertive')
@@ -364,7 +370,7 @@ export default function IntegrationsPage() {
         : 0,
       totalDataTransferred: state.integrations.reduce((sum, i) => sum + i.dataTransferred, 0)
     }
-    console.log('📊 INTEGRATIONS: Stats calculated -', JSON.stringify(s))
+    logger.debug('Stats calculated', s)
     return s
   }, [state.integrations])
 
@@ -373,11 +379,13 @@ export default function IntegrationsPage() {
   // ============================================================================
 
   const filteredAndSortedIntegrations = useMemo(() => {
-    console.log('🔍 INTEGRATIONS: Filtering and sorting...')
-    console.log('📋 INTEGRATIONS: Search term:', state.searchTerm)
-    console.log('🔎 INTEGRATIONS: Filter category:', state.filterCategory)
-    console.log('🔎 INTEGRATIONS: Filter status:', state.filterStatus)
-    console.log('🔀 INTEGRATIONS: Sort by:', state.sortBy)
+    logger.debug('Filtering and sorting integrations', {
+      searchTerm: state.searchTerm,
+      filterCategory: state.filterCategory,
+      filterStatus: state.filterStatus,
+      sortBy: state.sortBy,
+      totalIntegrations: state.integrations.length
+    })
 
     let filtered = state.integrations
 
@@ -387,19 +395,19 @@ export default function IntegrationsPage() {
         i.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
         i.description.toLowerCase().includes(state.searchTerm.toLowerCase())
       )
-      console.log('🔍 INTEGRATIONS: Search filtered to', filtered.length, 'integrations')
+      logger.debug('Search filter applied', { resultCount: filtered.length })
     }
 
     // Filter by category
     if (state.filterCategory !== 'all') {
       filtered = filtered.filter(i => i.category === state.filterCategory)
-      console.log('🔎 INTEGRATIONS: Category filtered to', filtered.length, 'integrations')
+      logger.debug('Category filter applied', { category: state.filterCategory, resultCount: filtered.length })
     }
 
     // Filter by status
     if (state.filterStatus !== 'all') {
       filtered = filtered.filter(i => i.status === state.filterStatus)
-      console.log('🔎 INTEGRATIONS: Status filtered to', filtered.length, 'integrations')
+      logger.debug('Status filter applied', { status: state.filterStatus, resultCount: filtered.length })
     }
 
     // Sort
@@ -418,7 +426,7 @@ export default function IntegrationsPage() {
       }
     })
 
-    console.log('✅ INTEGRATIONS: Filtered and sorted to', sorted.length, 'integrations')
+    logger.debug('Filtering and sorting complete', { finalCount: sorted.length })
     return sorted
   }, [state.integrations, state.searchTerm, state.filterCategory, state.filterStatus, state.sortBy])
 
@@ -428,18 +436,24 @@ export default function IntegrationsPage() {
 
   const handleConnectIntegration = async () => {
     if (!state.selectedIntegration) {
-      console.log('⚠️ INTEGRATIONS: No integration selected for connection')
+      logger.warn('Connection failed', { reason: 'No integration selected' })
       return
     }
 
     if (!apiKey) {
-      console.log('⚠️ INTEGRATIONS: API key required')
+      logger.warn('Connection failed', { reason: 'API key required' })
       toast.error('API key required')
       return
     }
 
-    console.log('🔗 INTEGRATIONS: Connecting integration:', state.selectedIntegration.name)
-    console.log('🔑 INTEGRATIONS: API key:', apiKey.substring(0, 5) + '...')
+    const integration = state.selectedIntegration
+
+    logger.info('Connecting integration', {
+      integrationId: integration.id,
+      name: integration.name,
+      category: integration.category,
+      authType: integration.authType
+    })
 
     try {
       setIsSaving(true)
@@ -449,28 +463,33 @@ export default function IntegrationsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'connect',
-          integrationId: state.selectedIntegration.id,
+          integrationId: integration.id,
           apiKey
         })
       })
 
       const result = await response.json()
-      console.log('📡 INTEGRATIONS: Connect API response:', result)
+      logger.debug('Connect API response', { success: result.success })
 
       if (result.success) {
-        dispatch({ type: 'CONNECT_INTEGRATION', integrationId: state.selectedIntegration.id })
+        dispatch({ type: 'CONNECT_INTEGRATION', integrationId: integration.id })
         setIsConnectModalOpen(false)
         setApiKey('')
-        console.log('✅ INTEGRATIONS: Integration connected successfully')
 
-        toast.success(`${state.selectedIntegration.name} connected`, {
-          description: 'Integration is now active and syncing'
+        logger.info('Integration connected successfully', { integrationId: integration.id, name: integration.name })
+
+        toast.success(`${integration.name} connected`, {
+          description: `${integration.category} integration - ${integration.authType} auth - Active and syncing`
         })
       } else {
         throw new Error(result.error || 'Failed to connect integration')
       }
     } catch (error: any) {
-      console.error('❌ INTEGRATIONS: Connection error:', error)
+      logger.error('Integration connection error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorObject: error,
+        integrationId: integration.id
+      })
       toast.error('Failed to connect integration', {
         description: error.message || 'Please check your API key and try again'
       })
@@ -481,11 +500,17 @@ export default function IntegrationsPage() {
 
   const handleDisconnectIntegration = async () => {
     if (!state.selectedIntegration) {
-      console.log('⚠️ INTEGRATIONS: No integration selected for disconnection')
+      logger.warn('Disconnection failed', { reason: 'No integration selected' })
       return
     }
 
-    console.log('🔌 INTEGRATIONS: Disconnecting integration:', state.selectedIntegration.name)
+    const integration = state.selectedIntegration
+
+    logger.info('Disconnecting integration', {
+      integrationId: integration.id,
+      name: integration.name,
+      totalSyncs: integration.totalSyncs
+    })
 
     try {
       setIsSaving(true)
@@ -495,24 +520,31 @@ export default function IntegrationsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'disconnect',
-          integrationId: state.selectedIntegration.id
+          integrationId: integration.id
         })
       })
 
       const result = await response.json()
-      console.log('📡 INTEGRATIONS: Disconnect API response:', result)
+      logger.debug('Disconnect API response', { success: result.success })
 
       if (result.success) {
-        dispatch({ type: 'DISCONNECT_INTEGRATION', integrationId: state.selectedIntegration.id })
+        dispatch({ type: 'DISCONNECT_INTEGRATION', integrationId: integration.id })
         setIsDisconnectModalOpen(false)
-        console.log('✅ INTEGRATIONS: Integration disconnected successfully')
 
-        toast.success(`${state.selectedIntegration.name} disconnected`)
+        logger.info('Integration disconnected successfully', { integrationId: integration.id })
+
+        toast.success(`${integration.name} disconnected`, {
+          description: `${integration.category} integration - ${integration.totalSyncs} total syncs - Data preserved`
+        })
       } else {
         throw new Error(result.error || 'Failed to disconnect integration')
       }
     } catch (error: any) {
-      console.error('❌ INTEGRATIONS: Disconnection error:', error)
+      logger.error('Integration disconnection error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorObject: error,
+        integrationId: integration.id
+      })
       toast.error('Failed to disconnect integration', {
         description: error.message || 'Please try again later'
       })
@@ -524,7 +556,13 @@ export default function IntegrationsPage() {
   const handleTestConnection = async () => {
     if (!state.selectedIntegration) return
 
-    console.log('🧪 INTEGRATIONS: Testing connection for:', state.selectedIntegration.name)
+    const integration = state.selectedIntegration
+
+    logger.info('Testing connection', {
+      integrationId: integration.id,
+      name: integration.name,
+      status: integration.status
+    })
 
     try {
       setIsSaving(true)
@@ -534,23 +572,31 @@ export default function IntegrationsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'test',
-          integrationId: state.selectedIntegration.id
+          integrationId: integration.id
         })
       })
 
       const result = await response.json()
-      console.log('📡 INTEGRATIONS: Test API response:', result)
+      logger.debug('Test API response', { success: result.success, hasDetails: !!result.details })
 
       if (result.success) {
-        console.log('✅ INTEGRATIONS: Connection test successful')
+        logger.info('Connection test successful', { integrationId: integration.id })
+
+        const responseTime = result.details?.responseTime || 'N/A'
+        const successRate = integration.successRate.toFixed(1)
+
         toast.success('Connection test successful', {
-          description: result.details ? `Response time: ${result.details.responseTime}` : 'Integration is working correctly'
+          description: `${integration.name} - Response time: ${responseTime} - Success rate: ${successRate}% - All systems operational`
         })
       } else {
         throw new Error(result.error || 'Connection test failed')
       }
     } catch (error: any) {
-      console.error('❌ INTEGRATIONS: Test error:', error)
+      logger.error('Connection test error', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        errorObject: error,
+        integrationId: integration.id
+      })
       toast.error('Connection test failed', {
         description: error.message || 'Please check your configuration'
       })
@@ -595,7 +641,7 @@ export default function IntegrationsPage() {
   // ============================================================================
 
   if (isLoading) {
-    console.log('⏳ INTEGRATIONS: Rendering loading state...')
+    logger.debug('Rendering loading state')
     return (
       <div className="min-h-screen p-8">
         <div className="max-w-[1800px] mx-auto space-y-6">
@@ -617,7 +663,7 @@ export default function IntegrationsPage() {
   // ============================================================================
 
   if (error) {
-    console.log('❌ INTEGRATIONS: Rendering error state...')
+    logger.error('Rendering error state', { error })
     return (
       <div className="min-h-screen p-8">
         <div className="max-w-[1800px] mx-auto">
@@ -634,10 +680,12 @@ export default function IntegrationsPage() {
   // MAIN RENDER
   // ============================================================================
 
-  console.log('🎨 INTEGRATIONS: Rendering main UI...')
-  console.log('📊 INTEGRATIONS: Total integrations:', state.integrations.length)
-  console.log('📋 INTEGRATIONS: Filtered integrations:', filteredAndSortedIntegrations.length)
-  console.log('👁️ INTEGRATIONS: View mode:', state.viewMode)
+  logger.debug('Rendering main UI', {
+    totalIntegrations: state.integrations.length,
+    filteredIntegrations: filteredAndSortedIntegrations.length,
+    viewMode: state.viewMode,
+    connectedCount: state.integrations.filter(i => i.status === 'connected').length
+  })
 
   return (
     <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
