@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-GenerateTitle')
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -33,7 +36,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ title });
   } catch (error) {
-    console.error('Error generating title:', error);
+    logger.error('Error generating title', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     return NextResponse.json({ error: 'Failed to generate title' }, { status: 500 });
   }
 } 

@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-VideoProjectSave')
 
 /**
  * Save Video Project API
@@ -65,7 +68,16 @@ export async function POST(request: NextRequest) {
     //   }
     // })
 
-    console.log('💾 Project saved:', projectSave)
+    logger.info('Project saved successfully', {
+      saveId: projectSave.saveId,
+      projectId: projectSave.projectId,
+      projectName: projectSave.projectName,
+      clipsCount: projectSave.clips.length,
+      effectsCount: projectSave.effects.length,
+      timelineItems: projectSave.timeline.length,
+      version: projectSave.metadata.version,
+      autoSave: projectSave.metadata.autoSave
+    })
 
     return NextResponse.json({
       success: true,
@@ -80,7 +92,10 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Save project error:', error)
+    logger.error('Save project error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { error: 'Failed to save project' },
       { status: 500 }
@@ -122,7 +137,10 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Get project error:', error)
+    logger.error('Get project error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { error: 'Failed to retrieve project' },
       { status: 500 }
@@ -152,7 +170,11 @@ export async function PUT(request: NextRequest) {
     //   }
     // })
 
-    console.log('💾 Auto-save:', { projectId, changes })
+    logger.info('Project auto-saved', {
+      projectId,
+      changesCount: Object.keys(changes || {}).length,
+      changeFields: Object.keys(changes || {}).join(', ')
+    })
 
     return NextResponse.json({
       success: true,
@@ -161,7 +183,10 @@ export async function PUT(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Auto-save error:', error)
+    logger.error('Auto-save error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { error: 'Failed to auto-save' },
       { status: 500 }

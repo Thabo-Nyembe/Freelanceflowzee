@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-AIOpenRouter')
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,7 +44,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(mockResponse)
   } catch (error) {
-    console.error('OpenRouter API error:', error)
+    logger.error('OpenRouter API error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

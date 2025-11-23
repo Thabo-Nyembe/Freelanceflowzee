@@ -5,6 +5,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-AICollaboration')
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
@@ -410,7 +413,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(response)
 
   } catch (error: any) {
-    console.error('Collaboration AI error:', error)
+    logger.error('Collaboration AI error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
 
     return NextResponse.json({
       success: false,

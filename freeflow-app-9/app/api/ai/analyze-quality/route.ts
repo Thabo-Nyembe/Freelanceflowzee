@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { createFeatureLogger } from '@/lib/logger'
 
+const logger = createFeatureLogger('API-AIAnalyzeQuality')
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY!)
 
 export async function POST(request: Request) {
@@ -42,7 +44,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json(quality)
   } catch (error) {
-    console.error('Quality analysis error:', error)
+    logger.error('Quality analysis error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { error: 'Failed to analyze quality' },
       { status: 500 }

@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-Checkout')
 
 // Plan configurations with pricing IDs (in production, these would be real Stripe price IDs)
 const PLANS = {
@@ -153,7 +156,10 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Checkout error:', error)
+    logger.error('Checkout error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { success: false, error: 'Failed to process checkout' },
       { status: 500 }
@@ -172,9 +178,14 @@ async function createStripeCheckoutSession(
 
   if (!stripeKey || stripeKey.includes('sk_test_')) {
     // Demo mode - return mock checkout URL
-    console.log('🔶 Demo Mode: Stripe not configured')
-    console.log('📦 Plan:', plan.name)
-    console.log('🎯 Trial:', isTrial)
+    logger.info('Stripe checkout in demo mode', {
+      mode: 'demo',
+      plan: plan.name,
+      price: plan.price,
+      isTrial,
+      trialDays: plan.trialDays,
+      stripeConfigured: false
+    })
 
     // Simulate delay
     await new Promise(resolve => setTimeout(resolve, 500))

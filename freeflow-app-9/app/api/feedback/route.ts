@@ -6,6 +6,9 @@ import { Readable } from "stream"
 import { createClient } from "@supabase/supabase-js"
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib"
 import { Parser } from "json2csv"
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-Feedback')
 
 // Rate limiting setup
 import { Ratelimit } from "@upstash/ratelimit"
@@ -173,7 +176,11 @@ const checkRateLimit = async (request: NextRequest) => {
 }
 
 const handleError = (error: any) => {
-  console.error("API Error:", error)
+  logger.error('API Error', {
+    error: error instanceof Error ? error.message : 'Unknown error',
+    stack: error instanceof Error ? error.stack : undefined,
+    errorType: error?.name
+  })
 
   if (error.message === "Unauthorized") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -391,7 +398,13 @@ export async function GET(request: NextRequest) {
     const { data: comments, error, count } = await query.order("created_at", { ascending: false })
 
     if (error) {
-      console.error("Database error:", error)
+      logger.error('Database error fetching comments', {
+        error: error.message,
+        projectId,
+        fileId,
+        status,
+        priority
+      })
       return NextResponse.json({ error: "Failed to fetch comments" }, { status: 500 })
     }
 
@@ -493,7 +506,12 @@ export async function POST(request: NextRequest) {
             .upload(filePath, file)
             
           if (uploadError) {
-            console.error("File upload error:", uploadError)
+            logger.error('File upload error in feedback attachment', {
+              error: uploadError.message,
+              fileName: file.name,
+              fileSize: file.size,
+              fileType: file.type
+            })
             continue
           }
           
@@ -524,7 +542,10 @@ export async function POST(request: NextRequest) {
         .single()
         
       if (error) {
-        console.error("Database error:", error)
+        logger.error('Database error creating comment', {
+          error: error.message,
+          projectId: parsedComment?.project_id || body?.project_id
+        })
         return NextResponse.json({ error: "Failed to create comment" }, { status: 500 })
       }
       
@@ -672,7 +693,12 @@ export async function PUT(request: NextRequest) {
             .upload(filePath, file)
             
           if (uploadError) {
-            console.error("File upload error:", uploadError)
+            logger.error('File upload error in feedback attachment', {
+              error: uploadError.message,
+              fileName: file.name,
+              fileSize: file.size,
+              fileType: file.type
+            })
             continue
           }
           
@@ -704,7 +730,10 @@ export async function PUT(request: NextRequest) {
         .single()
         
       if (error) {
-        console.error("Database error:", error)
+        logger.error('Database error updating comment', {
+          error: error.message,
+          commentId
+        })
         return NextResponse.json({ error: "Failed to update comment" }, { status: 500 })
       }
       
@@ -827,7 +856,10 @@ export async function DELETE(request: NextRequest) {
       .eq("id", commentId)
       
     if (error) {
-      console.error("Database error:", error)
+      logger.error('Database error deleting comment', {
+        error: error.message,
+        commentId
+      })
       return NextResponse.json({ error: "Failed to delete comment" }, { status: 500 })
     }
     

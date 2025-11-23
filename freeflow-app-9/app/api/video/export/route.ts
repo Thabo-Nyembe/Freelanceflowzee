@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('API-VideoExport')
 
 /**
  * Video Export API
@@ -96,7 +99,22 @@ export async function POST(request: NextRequest) {
       retryCount: 0
     }
 
-    console.log('📤 Export job created:', exportConfig)
+    logger.info('Export job created', {
+      exportId: exportConfig.exportId,
+      projectId: exportConfig.projectId,
+      projectName: exportConfig.projectName,
+      format: exportConfig.format,
+      quality: exportConfig.quality,
+      resolution: exportConfig.resolution,
+      fps: exportConfig.fps,
+      codec: exportConfig.codec,
+      audioCodec: exportConfig.audioSettings.codec,
+      audioBitrate: exportConfig.audioSettings.bitrate,
+      clipsCount: exportConfig.clips.length,
+      effectsCount: exportConfig.effects.length,
+      estimatedDuration: exportConfig.estimatedDuration,
+      outputFilename: exportConfig.outputFilename
+    })
 
     // In production:
     // 1. Store job in database
@@ -118,7 +136,10 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Export API error:', error)
+    logger.error('Export API error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { error: 'Failed to queue export job' },
       { status: 500 }
@@ -168,7 +189,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(mockExportStatus)
 
   } catch (error) {
-    console.error('Export status API error:', error)
+    logger.error('Export status API error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    })
     return NextResponse.json(
       { error: 'Failed to get export status' },
       { status: 500 }
@@ -218,11 +242,18 @@ function estimateExportDuration(clips: any[], format: string, quality: string): 
 
 // Simulated export processing
 async function processExportJob(config: any) {
-  console.log(`🎬 Starting export job: ${config.exportId}`)
-  console.log(`Format: ${config.format}, Quality: ${config.quality}, Resolution: ${config.resolution}`)
-  console.log(`Codec: ${config.codec}, FPS: ${config.fps}`)
-  console.log(`Audio: ${config.audioSettings.codec} @ ${config.audioSettings.bitrate}`)
-  console.log(`Clips: ${config.clips.length}, Effects: ${config.effects.length}`)
+  logger.info('Starting export job', {
+    exportId: config.exportId,
+    format: config.format,
+    quality: config.quality,
+    resolution: config.resolution,
+    codec: config.codec,
+    fps: config.fps,
+    audioCodec: config.audioSettings.codec,
+    audioBitrate: config.audioSettings.bitrate,
+    clipsCount: config.clips.length,
+    effectsCount: config.effects.length
+  })
 
   // Simulate export stages
   const stages = [
@@ -237,14 +268,20 @@ async function processExportJob(config: any) {
   let cumulativeTime = 0
   for (const stage of stages) {
     setTimeout(() => {
-      console.log(`  ⏳ ${stage.name}...`)
+      logger.debug('Export stage processing', {
+        exportId: config.exportId,
+        stage: stage.name
+      })
     }, cumulativeTime)
     cumulativeTime += stage.duration
   }
 
   setTimeout(() => {
-    console.log(`✅ Export job ${config.exportId} completed`)
-    console.log(`📁 Output: ${config.outputFilename}`)
+    logger.info('Export job completed', {
+      exportId: config.exportId,
+      outputFilename: config.outputFilename,
+      totalDuration: cumulativeTime
+    })
     // In production: update database/redis with completion status
     // and upload file to CDN
   }, cumulativeTime)
