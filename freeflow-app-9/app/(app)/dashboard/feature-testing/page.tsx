@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
+import { memo, useDeferredValue, useMemo, useCallback, useTransition } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -31,6 +32,121 @@ interface FeatureTest {
   issues?: string[]
   dependencies?: string[]
 }
+
+// Helper functions moved to top-level
+const getStatusIcon = (status: FeatureTest['status']) => {
+  switch (status) {
+    case 'passed':
+      return <CheckCircle className="h-5 w-5 text-green-600" />
+    case 'failed':
+      return <XCircle className="h-5 w-5 text-red-600" />
+    case 'warning':
+      return <AlertCircle className="h-5 w-5 text-yellow-600" />
+    case 'testing':
+      return <RefreshCw className="h-5 w-5 text-blue-600 animate-spin" />
+    default:
+      return <Clock className="h-5 w-5 text-gray-400" />
+  }
+}
+
+const getStatusColor = (status: FeatureTest['status']) => {
+  switch (status) {
+    case 'passed':
+      return 'bg-green-100 text-green-800 border-green-200'
+    case 'failed':
+      return 'bg-red-100 text-red-800 border-red-200'
+    case 'warning':
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+    case 'testing':
+      return 'bg-blue-100 text-blue-800 border-blue-200'
+    default:
+      return 'bg-gray-100 text-gray-800 border-gray-200'
+  }
+}
+
+// Memoized TestCard component for better performance
+interface TestCardProps {
+  test: FeatureTest
+  currentTest: string | null
+  onTest: (test: FeatureTest) => void
+  onVisit: (path: string) => void
+}
+
+const TestCard = memo(({ test, currentTest, onTest, onVisit }: TestCardProps) => {
+  return (
+    <div
+      className={cn(
+        "p-4 border rounded-lg transition-all duration-200",
+        getStatusColor(test.status)
+      )}
+    >
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex items-center gap-2">
+          {getStatusIcon(test.status)}
+          <h4 className="font-semibold">{test.name}</h4>
+        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => onTest(test)}
+          disabled={currentTest === test.id}
+          className="gap-1"
+        >
+          {currentTest === test.id ? (
+            <RefreshCw className="h-3 w-3 animate-spin" />
+          ) : (
+            <Play className="h-3 w-3" />
+          )}
+          Test
+        </Button>
+      </div>
+
+      <p className="text-sm mb-2">{test.description}</p>
+
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-gray-600">{test.path}</span>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => onVisit(test.path)}
+          className="h-6 px-2 gap-1"
+        >
+          <ExternalLink className="h-3 w-3" />
+          Visit
+        </Button>
+      </div>
+
+      {test.dependencies && (
+        <div className="mt-2">
+          <div className="text-xs text-gray-600 mb-1">Dependencies:</div>
+          <div className="flex flex-wrap gap-1">
+            {test.dependencies.map(dep => (
+              <Badge key={dep} variant="secondary" className="text-xs">
+                {dep}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {test.issues && test.issues.length > 0 && (
+        <div className="mt-2">
+          <div className="text-xs text-red-600 mb-1">Issues:</div>
+          <ul className="text-xs space-y-1">
+            {test.issues.map((issue, index) => (
+              <li key={index} className="flex items-start gap-1">
+                <span className="text-red-500">•</span>
+                <span>{issue}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+})
+
+TestCard.displayName = 'TestCard'
 
 const FEATURE_TESTS: FeatureTest[] = [
   // Core Business Features
@@ -329,18 +445,25 @@ export default function FeatureTestingPage() {
     }
   }
 
-  const groupedTests = tests.reduce((acc, test) => {
-    if (!acc[test.category]) {
-      acc[test.category] = []
-    }
-    acc[test.category].push(test)
-    return acc
-  }, {} as Record<string, FeatureTest[]>)
+  // Memoize expensive grouping and filtering operations
+  const groupedTests = useMemo(() => {
+    return tests.reduce((acc, test) => {
+      if (!acc[test.category]) {
+        acc[test.category] = []
+      }
+      acc[test.category].push(test)
+      return acc
+    }, {} as Record<string, FeatureTest[]>)
+  }, [tests])
 
-  const totalTests = tests.length
-  const passedTests = tests.filter(t => t.status === 'passed').length
-  const failedTests = tests.filter(t => t.status === 'failed').length
-  const warningTests = tests.filter(t => t.status === 'warning').length
+  const testStatistics = useMemo(() => ({
+    total: tests.length,
+    passed: tests.filter(t => t.status === 'passed').length,
+    failed: tests.filter(t => t.status === 'failed').length,
+    warning: tests.filter(t => t.status === 'warning').length
+  }), [tests])
+
+  const { total: totalTests, passed: passedTests, failed: failedTests, warning: warningTests } = testStatistics
 
   // A+++ LOADING STATE
   if (isLoading) {
