@@ -30,7 +30,14 @@ import {
   X,
   Check,
   Sparkles,
-  Settings
+  Settings,
+  ArrowUpRight,
+  ArrowDownRight,
+  TrendingDown,
+  Wallet,
+  Target,
+  Award,
+  Zap
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
@@ -107,6 +114,42 @@ interface Report {
   fileSize: number
   recipients: string[]
   tags: string[]
+}
+
+interface FinancialAnalytics {
+  revenueData: {
+    monthly: { month: string; revenue: number; growth: number }[]
+    yearly: { year: number; revenue: number; growth: number }
+    currentMonth: number
+    lastMonth: number
+    averageProjectValue: number
+  }
+  profitability: {
+    projects: {
+      id: string
+      name: string
+      revenue: number
+      expenses: number
+      profit: number
+      margin: number
+    }[]
+    totalRevenue: number
+    totalExpenses: number
+    totalProfit: number
+    averageMargin: number
+  }
+  cashFlow: {
+    projections: { month: string; income: number; expenses: number; net: number }[]
+    currentBalance: number
+    projectedBalance: number
+    runway: number // months
+  }
+  insights: {
+    topServices: { service: string; revenue: number; count: number }[]
+    clientRetention: number // percentage
+    seasonalTrends: { quarter: string; revenue: number; projects: number }[]
+    growthRate: number // percentage
+  }
 }
 
 interface ReportsState {
@@ -254,6 +297,77 @@ const generateMockReports = (): Report[] => {
   return reports
 }
 
+const generateMockFinancialData = (): FinancialAnalytics => {
+  logger.debug('Generating mock financial analytics data')
+
+  return {
+    revenueData: {
+      monthly: [
+        { month: 'Jan', revenue: 24500, growth: 12 },
+        { month: 'Feb', revenue: 28700, growth: 17 },
+        { month: 'Mar', revenue: 32100, growth: 12 },
+        { month: 'Apr', revenue: 29800, growth: -7 },
+        { month: 'May', revenue: 35400, growth: 19 },
+        { month: 'Jun', revenue: 38900, growth: 10 },
+        { month: 'Jul', revenue: 42300, growth: 9 },
+        { month: 'Aug', revenue: 39600, growth: -6 },
+        { month: 'Sep', revenue: 44200, growth: 12 },
+        { month: 'Oct', revenue: 47800, growth: 8 },
+        { month: 'Nov', revenue: 51200, growth: 7 },
+        { month: 'Dec', revenue: 54600, growth: 7 }
+      ],
+      yearly: { year: 2024, revenue: 469100, growth: 23 },
+      currentMonth: 54600,
+      lastMonth: 51200,
+      averageProjectValue: 8750
+    },
+    profitability: {
+      projects: [
+        { id: 'PRJ-001', name: 'E-commerce Platform', revenue: 45000, expenses: 18000, profit: 27000, margin: 60 },
+        { id: 'PRJ-002', name: 'Mobile App Design', revenue: 32000, expenses: 12800, profit: 19200, margin: 60 },
+        { id: 'PRJ-003', name: 'Brand Identity Package', revenue: 15000, expenses: 4500, profit: 10500, margin: 70 },
+        { id: 'PRJ-004', name: 'Website Redesign', revenue: 28000, expenses: 11200, profit: 16800, margin: 60 },
+        { id: 'PRJ-005', name: 'Marketing Campaign', revenue: 22000, expenses: 8800, profit: 13200, margin: 60 },
+        { id: 'PRJ-006', name: 'SEO Optimization', revenue: 12000, expenses: 3600, profit: 8400, margin: 70 }
+      ],
+      totalRevenue: 154000,
+      totalExpenses: 58900,
+      totalProfit: 95100,
+      averageMargin: 62
+    },
+    cashFlow: {
+      projections: [
+        { month: 'Jan', income: 52000, expenses: 21000, net: 31000 },
+        { month: 'Feb', income: 48000, expenses: 19000, net: 29000 },
+        { month: 'Mar', income: 55000, expenses: 22000, net: 33000 },
+        { month: 'Apr', income: 58000, expenses: 23000, net: 35000 },
+        { month: 'May', income: 51000, expenses: 20000, net: 31000 },
+        { month: 'Jun', income: 60000, expenses: 24000, net: 36000 }
+      ],
+      currentBalance: 125000,
+      projectedBalance: 320000,
+      runway: 18
+    },
+    insights: {
+      topServices: [
+        { service: 'Web Development', revenue: 145000, count: 12 },
+        { service: 'Mobile Apps', revenue: 98000, count: 8 },
+        { service: 'UI/UX Design', revenue: 87000, count: 15 },
+        { service: 'Branding', revenue: 64000, count: 10 },
+        { service: 'SEO & Marketing', revenue: 75000, count: 14 }
+      ],
+      clientRetention: 87,
+      seasonalTrends: [
+        { quarter: 'Q1 2024', revenue: 85300, projects: 8 },
+        { quarter: 'Q2 2024', revenue: 104100, projects: 11 },
+        { quarter: 'Q3 2024', revenue: 126100, projects: 13 },
+        { quarter: 'Q4 2024', revenue: 153600, projects: 15 }
+      ],
+      growthRate: 23
+    }
+  }
+}
+
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -278,6 +392,8 @@ export default function ReportsPage() {
 
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [financialData, setFinancialData] = useState<FinancialAnalytics | null>(null)
+  const [activeTab, setActiveTab] = useState<'analytics' | 'reports'>('analytics')
 
   // MODALS
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -302,25 +418,36 @@ export default function ReportsPage() {
   // ============================================================================
 
   useEffect(() => {
-    logger.info('Loading reports data')
+    logger.info('Loading reports and financial data')
 
     const loadData = async () => {
       try {
         setIsLoading(true)
 
+        // Load reports
         const response = await fetch('/api/reports')
         const result = await response.json()
 
         if (result.success && result.reports) {
           dispatch({ type: 'SET_REPORTS', reports: result.reports })
-          logger.info('Data loaded successfully', { count: result.reports.length })
-          announce('Reports dashboard loaded', 'polite')
+          logger.info('Reports loaded successfully', { count: result.reports.length })
         } else {
           throw new Error(result.error || 'Failed to load reports')
         }
+
+        // Load financial analytics (using mock data for now)
+        const financials = generateMockFinancialData()
+        setFinancialData(financials)
+        logger.info('Financial analytics loaded', {
+          revenue: financials.revenueData.yearly.revenue,
+          profit: financials.profitability.totalProfit,
+          projects: financials.profitability.projects.length
+        })
+
+        announce('Reports and financial analytics loaded', 'polite')
       } catch (error) {
-        logger.error('Failed to load reports', { error })
-        toast.error('Failed to load reports')
+        logger.error('Failed to load data', { error })
+        toast.error('Failed to load dashboard data')
       } finally {
         setIsLoading(false)
       }
@@ -784,7 +911,7 @@ export default function ReportsPage() {
                   <TextShimmer>Reports & Analytics</TextShimmer>
                 </h1>
                 <p className="text-muted-foreground text-sm">
-                  Generate and manage comprehensive reports
+                  Comprehensive financial insights and report generation
                 </p>
               </div>
             </div>
@@ -795,9 +922,387 @@ export default function ReportsPage() {
           </div>
         </ScrollReveal>
 
-        {/* Stats Dashboard */}
+        {/* Navigation Tabs - USER MANUAL SPEC */}
         <ScrollReveal>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'analytics' | 'reports')} className="w-full">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="analytics">
+                <DollarSign className="h-4 w-4 mr-2" />
+                Financial Analytics
+              </TabsTrigger>
+              <TabsTrigger value="reports">
+                <FileText className="h-4 w-4 mr-2" />
+                Reports Library
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </ScrollReveal>
+
+        {/* FINANCIAL ANALYTICS TAB - USER MANUAL SPEC */}
+        {activeTab === 'analytics' && financialData && (
+          <>
+            {/* Revenue Overview Section */}
+            <ScrollReveal>
+              <LiquidGlassCard className="p-6 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 border-green-200">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                      <DollarSign className="w-6 h-6 text-green-600" />
+                      Revenue Tracking
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">Monthly and yearly revenue breakdown with growth trends</p>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Data
+                  </Button>
+                </div>
+
+                {/* Key Metrics Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <p className="text-xs text-gray-600 mb-1">Current Month</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      $<NumberFlow value={financialData.revenueData.currentMonth} />
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                      <ArrowUpRight className="w-3 h-3 text-green-600" />
+                      +{((financialData.revenueData.currentMonth - financialData.revenueData.lastMonth) / financialData.revenueData.lastMonth * 100).toFixed(1)}% vs last month
+                    </p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <p className="text-xs text-gray-600 mb-1">Client Retention</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      <NumberFlow value={financialData.insights.clientRetention} />%
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">Industry avg: 75%</p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <p className="text-xs text-gray-600 mb-1">Avg Project Value</p>
+                    <p className="text-2xl font-bold text-purple-600">
+                      $<NumberFlow value={financialData.revenueData.averageProjectValue} />
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">Per completed project</p>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <p className="text-xs text-gray-600 mb-1">Cash Runway</p>
+                    <p className="text-2xl font-bold text-orange-600">
+                      <NumberFlow value={financialData.cashFlow.runway} /> mo
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">Based on current burn rate</p>
+                  </div>
+                </div>
+
+                {/* Monthly Revenue Chart */}
+                <div className="bg-white rounded-lg p-4 shadow-sm">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-4">Monthly Revenue Breakdown (2024)</h3>
+                  <div className="space-y-2">
+                    {financialData.revenueData.monthly.map((month, index) => {
+                      const maxRevenue = Math.max(...financialData.revenueData.monthly.map(m => m.revenue))
+                      const widthPercent = (month.revenue / maxRevenue) * 100
+
+                      return (
+                        <div key={month.month} className="flex items-center gap-3">
+                          <span className="text-xs font-medium text-gray-600 w-8">{month.month}</span>
+                          <div className="flex-1 bg-gray-100 rounded-full h-8 relative overflow-hidden">
+                            <motion.div
+                              initial={{ width: 0 }}
+                              animate={{ width: `${widthPercent}%` }}
+                              transition={{ duration: 0.8, delay: index * 0.05 }}
+                              className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-end px-3"
+                            >
+                              <span className="text-xs font-bold text-white">${(month.revenue / 1000).toFixed(1)}k</span>
+                            </motion.div>
+                          </div>
+                          <div className={`text-xs font-semibold w-12 text-right ${month.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {month.growth >= 0 ? <ArrowUpRight className="w-3 h-3 inline" /> : <ArrowDownRight className="w-3 h-3 inline" />}
+                            {Math.abs(month.growth)}%
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-gray-600">2024 Total Revenue</p>
+                      <p className="text-xl font-bold text-gray-900">${(financialData.revenueData.yearly.revenue / 1000).toFixed(1)}k</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-600">YoY Growth</p>
+                      <p className="text-xl font-bold text-green-600 flex items-center gap-1">
+                        <ArrowUpRight className="w-4 h-4" />
+                        {financialData.revenueData.yearly.growth}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </LiquidGlassCard>
+            </ScrollReveal>
+
+            {/* Project Profitability Analysis */}
+            <ScrollReveal delay={0.1}>
+              <LiquidGlassCard className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                      <Target className="w-6 h-6 text-purple-600" />
+                      Project Profitability Analysis
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">Revenue, expenses, and profit margins per project</p>
+                  </div>
+                </div>
+
+                {/* Summary Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
+                    <p className="text-xs text-green-700 mb-1">Total Revenue</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      $<NumberFlow value={financialData.profitability.totalRevenue} />
+                    </p>
+                  </div>
+                  <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg p-4 border border-red-200">
+                    <p className="text-xs text-red-700 mb-1">Total Expenses</p>
+                    <p className="text-2xl font-bold text-red-600">
+                      $<NumberFlow value={financialData.profitability.totalExpenses} />
+                    </p>
+                  </div>
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+                    <p className="text-xs text-blue-700 mb-1">Net Profit</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      $<NumberFlow value={financialData.profitability.totalProfit} />
+                    </p>
+                  </div>
+                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-200">
+                    <p className="text-xs text-purple-700 mb-1">Avg Margin</p>
+                    <p className="text-2xl font-bold text-purple-600">
+                      <NumberFlow value={financialData.profitability.averageMargin} />%
+                    </p>
+                  </div>
+                </div>
+
+                {/* Projects Table */}
+                <div className="bg-white rounded-lg border overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b">
+                      <tr>
+                        <th className="text-left text-xs font-semibold text-gray-700 px-4 py-3">Project</th>
+                        <th className="text-right text-xs font-semibold text-gray-700 px-4 py-3">Revenue</th>
+                        <th className="text-right text-xs font-semibold text-gray-700 px-4 py-3">Expenses</th>
+                        <th className="text-right text-xs font-semibold text-gray-700 px-4 py-3">Profit</th>
+                        <th className="text-right text-xs font-semibold text-gray-700 px-4 py-3">Margin</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y">
+                      {financialData.profitability.projects.map((project, index) => (
+                        <motion.tr
+                          key={project.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="hover:bg-gray-50"
+                        >
+                          <td className="px-4 py-3">
+                            <p className="text-sm font-medium text-gray-900">{project.name}</p>
+                            <p className="text-xs text-gray-500">{project.id}</p>
+                          </td>
+                          <td className="text-right px-4 py-3 text-sm font-semibold text-green-600">
+                            ${project.revenue.toLocaleString()}
+                          </td>
+                          <td className="text-right px-4 py-3 text-sm font-semibold text-red-600">
+                            ${project.expenses.toLocaleString()}
+                          </td>
+                          <td className="text-right px-4 py-3 text-sm font-bold text-blue-600">
+                            ${project.profit.toLocaleString()}
+                          </td>
+                          <td className="text-right px-4 py-3">
+                            <Badge className={project.margin >= 65 ? 'bg-green-500' : project.margin >= 55 ? 'bg-yellow-500' : 'bg-orange-500'}>
+                              {project.margin}%
+                            </Badge>
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </LiquidGlassCard>
+            </ScrollReveal>
+
+            {/* Cash Flow Projections */}
+            <ScrollReveal delay={0.2}>
+              <LiquidGlassCard className="p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-blue-200">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                      <Wallet className="w-6 h-6 text-blue-600" />
+                      Cash Flow Projections
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">6-month income and expense forecast</p>
+                  </div>
+                </div>
+
+                {/* Balance Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <p className="text-xs text-gray-600 mb-1">Current Balance</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      $<NumberFlow value={financialData.cashFlow.currentBalance} />
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <p className="text-xs text-gray-600 mb-1">Projected (6mo)</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      $<NumberFlow value={financialData.cashFlow.projectedBalance} />
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <p className="text-xs text-gray-600 mb-1">Growth</p>
+                    <p className="text-2xl font-bold text-purple-600 flex items-center gap-1">
+                      <ArrowUpRight className="w-5 h-5" />
+                      <NumberFlow value={((financialData.cashFlow.projectedBalance - financialData.cashFlow.currentBalance) / financialData.cashFlow.currentBalance * 100)} />%
+                    </p>
+                  </div>
+                </div>
+
+                {/* Projections Chart */}
+                <div className="bg-white rounded-lg p-4 shadow-sm">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-4">Monthly Cash Flow Projections</h3>
+                  <div className="space-y-3">
+                    {financialData.cashFlow.projections.map((month, index) => (
+                      <div key={month.month} className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-medium text-gray-700">{month.month}</span>
+                          <span className={`font-bold ${month.net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            Net: ${month.net.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex gap-1 h-6">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(month.income / (month.income + month.expenses)) * 100}%` }}
+                            transition={{ duration: 0.8, delay: index * 0.1 }}
+                            className="bg-gradient-to-r from-green-500 to-emerald-500 rounded flex items-center justify-center"
+                          >
+                            <span className="text-xs font-bold text-white">${(month.income / 1000).toFixed(0)}k</span>
+                          </motion.div>
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(month.expenses / (month.income + month.expenses)) * 100}%` }}
+                            transition={{ duration: 0.8, delay: index * 0.1 + 0.1 }}
+                            className="bg-gradient-to-r from-red-500 to-orange-500 rounded flex items-center justify-center"
+                          >
+                            <span className="text-xs font-bold text-white">${(month.expenses / 1000).toFixed(0)}k</span>
+                          </motion.div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </LiquidGlassCard>
+            </ScrollReveal>
+
+            {/* Business Insights */}
+            <ScrollReveal delay={0.3}>
+              <LiquidGlassCard className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                      <Award className="w-6 h-6 text-yellow-600" />
+                      Business Insights
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">Top services, seasonal trends, and growth analysis</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Top Services */}
+                  <div className="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-lg p-4 border border-yellow-200">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-yellow-600" />
+                      Top Performing Services
+                    </h3>
+                    <div className="space-y-2">
+                      {financialData.insights.topServices.map((service, index) => {
+                        const maxRevenue = Math.max(...financialData.insights.topServices.map(s => s.revenue))
+                        const widthPercent = (service.revenue / maxRevenue) * 100
+
+                        return (
+                          <div key={service.service} className="space-y-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="font-medium text-gray-700">{service.service}</span>
+                              <span className="font-bold text-yellow-700">${(service.revenue / 1000).toFixed(0)}k</span>
+                            </div>
+                            <div className="bg-white rounded-full h-4 overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${widthPercent}%` }}
+                                transition={{ duration: 0.8, delay: index * 0.1 }}
+                                className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 flex items-center justify-end px-2"
+                              >
+                                <span className="text-xs font-bold text-white">{service.count} projects</span>
+                              </motion.div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Seasonal Trends */}
+                  <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg p-4 border border-indigo-200">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-indigo-600" />
+                      Quarterly Performance Trends
+                    </h3>
+                    <div className="space-y-3">
+                      {financialData.insights.seasonalTrends.map((quarter, index) => {
+                        const growth = index > 0
+                          ? ((quarter.revenue - financialData.insights.seasonalTrends[index - 1].revenue) / financialData.insights.seasonalTrends[index - 1].revenue * 100)
+                          : 0
+
+                        return (
+                          <div key={quarter.quarter} className="bg-white rounded-lg p-3">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-semibold text-gray-700">{quarter.quarter}</span>
+                              {index > 0 && (
+                                <span className={`text-xs font-bold flex items-center gap-1 ${growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {growth >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                                  {Math.abs(growth).toFixed(1)}%
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-lg font-bold text-indigo-600">${(quarter.revenue / 1000).toFixed(1)}k</span>
+                              <span className="text-xs text-gray-600">{quarter.projects} projects</span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t">
+                      <p className="text-xs text-gray-600 mb-1">Overall Growth Rate</p>
+                      <p className="text-xl font-bold text-green-600 flex items-center gap-1">
+                        <ArrowUpRight className="w-5 h-5" />
+                        <NumberFlow value={financialData.insights.growthRate} />% YoY
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </LiquidGlassCard>
+            </ScrollReveal>
+          </>
+        )}
+
+        {/* REPORTS LIBRARY TAB */}
+        {activeTab === 'reports' && (
+          <>
+            {/* Stats Dashboard */}
+            <ScrollReveal>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <LiquidGlassCard className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -1081,6 +1586,8 @@ export default function ReportsPage() {
               )
             })}
           </div>
+        )}
+          </>
         )}
 
         {/* Create Report Modal */}
