@@ -36,6 +36,10 @@ import {
 } from '@/lib/ai-voice-synthesis-utils'
 
 import type { Voice } from '@/lib/ai-voice-synthesis-types'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+
+const logger = createFeatureLogger('AI-Voice-Synthesis')
 
 // A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
@@ -109,10 +113,42 @@ export default function AIVoiceSynthesisPage() {
   const estimatedCost = calculateCost(characterCount, selectedVoice.isPremium)
 
   const handleSynthesize = () => {
+    logger.info('Starting voice synthesis', {
+      voice: selectedVoice.name,
+      voiceId: selectedVoice.id,
+      characterCount,
+      estimatedDuration,
+      estimatedCost,
+      speed: speed[0],
+      pitch: pitch[0],
+      volume: volume[0],
+      audioFormat,
+      audioQuality,
+      language: selectedVoice.language
+    })
+
+    toast.info('Synthesizing voice...', {
+      description: `${selectedVoice.name} - ${characterCount} characters - ${estimatedDuration}s - ${audioFormat.toUpperCase()} ${audioQuality}`
+    })
+
     setIsSynthesizing(true)
     setTimeout(() => {
       setIsSynthesizing(false)
-      console.log('Voice synthesized!')
+
+      const fileSize = Math.round(estimatedDuration * (audioQuality === 'high' ? 128 : audioQuality === 'medium' ? 96 : 64) / 8)
+
+      logger.info('Voice synthesized successfully', {
+        voice: selectedVoice.name,
+        characterCount,
+        duration: estimatedDuration,
+        cost: estimatedCost,
+        fileSize,
+        format: audioFormat
+      })
+
+      toast.success('Voice synthesized successfully', {
+        description: `${selectedVoice.name} - ${characterCount} chars - ${estimatedDuration}s - ${fileSize}KB ${audioFormat.toUpperCase()} - $${estimatedCost.toFixed(4)} - Ready to download`
+      })
     }, 2000)
   }
 
