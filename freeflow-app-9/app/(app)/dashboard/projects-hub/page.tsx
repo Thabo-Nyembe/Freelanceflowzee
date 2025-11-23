@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, memo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -116,6 +116,135 @@ const TextShimmer = ({ children, className = '' }: { children: React.ReactNode; 
     </motion.div>
   )
 }
+
+// Helper functions for ProjectCard
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'active': return 'bg-green-100 text-green-800 border-green-200'
+    case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200'
+    case 'paused': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+    case 'cancelled': return 'bg-red-100 text-red-800 border-red-200'
+    default: return 'bg-gray-100 text-gray-800 border-gray-200'
+  }
+}
+
+const getPriorityColor = (priority: string) => {
+  switch (priority) {
+    case 'urgent': return 'bg-red-500'
+    case 'high': return 'bg-orange-500'
+    case 'medium': return 'bg-yellow-500'
+    case 'low': return 'bg-green-500'
+    default: return 'bg-gray-500'
+  }
+}
+
+const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+// Memoized ProjectCard component for better performance
+interface ProjectCardProps {
+  project: Project
+  onView: (project: Project) => void
+  onEdit: (project: Project) => void
+  onUpdateStatus: (id: string, status: string) => void
+}
+
+const ProjectCard = memo(({ project, onView, onEdit, onUpdateStatus }: ProjectCardProps) => {
+  return (
+    <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <h3 className="text-xl font-semibold text-gray-900">{project.title}</h3>
+              <Badge variant="outline" className={cn("text-xs", getStatusColor(project.status))}>
+                {project.status}
+              </Badge>
+              <div className={cn("w-3 h-3 rounded-full", getPriorityColor(project.priority))} title={`${project.priority} priority`}></div>
+            </div>
+
+            <p className="text-gray-600 mb-4">{project.description}</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <p className="text-sm text-gray-500">Client</p>
+                <p className="font-medium">{project.client_name}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Budget</p>
+                <p className="font-medium">${project.budget.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Due Date</p>
+                <p className="font-medium">{formatDate(project.end_date)}</p>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-600">Progress</span>
+                <span className="text-sm font-medium">{project.progress}%</span>
+              </div>
+              <Progress value={project.progress} className="h-2" />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">{project.team_members.length} members</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">{project.comments_count} comments</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => onView(project)}
+                  data-testid="view-project-btn"
+                >
+                  <Eye className="h-3 w-3" />
+                  View
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => onEdit(project)}
+                  data-testid="edit-project-btn"
+                >
+                  <Edit className="h-3 w-3" />
+                  Edit
+                </Button>
+
+                {project.status === 'active' && (
+                  <Button
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => onUpdateStatus(project.id, 'completed')}
+                    data-testid="complete-project-btn"
+                  >
+                    <CheckCircle className="h-3 w-3" />
+                    Complete
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+})
+
+ProjectCard.displayName = 'ProjectCard'
 
 export default function ProjectsHubPage() {
   const router = useRouter()
@@ -823,26 +952,7 @@ export default function ProjectsHubPage() {
     efficiency: projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + p.progress, 0) / projects.length) : 0
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-800 border-green-200'
-      case 'completed': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'paused': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200'
-      case 'draft': return 'bg-gray-100 text-gray-800 border-gray-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
-    }
-  }
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'urgent': return 'bg-red-500'
-      case 'high': return 'bg-orange-500'
-      case 'medium': return 'bg-yellow-500'
-      case 'low': return 'bg-green-500'
-      default: return 'bg-gray-500'
-    }
-  }
+  // Helper functions moved to top-level for use in ProjectCard
 
   const getProgressColor = (progress: number) => {
     if (progress >= 80) return 'bg-green-500'
@@ -999,13 +1109,7 @@ export default function ProjectsHubPage() {
     }
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    })
-  }
+  // formatDate function moved to top-level for use in ProjectCard
 
   // A+++ Loading State
   if (loading) {
@@ -1290,95 +1394,13 @@ export default function ProjectsHubPage() {
                 </Card>
               ) : (
                 filteredProjects.map(project => (
-                  <Card key={project.id} className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-xl font-semibold text-gray-900">{project.title}</h3>
-                            <Badge variant="outline" className={cn("text-xs", getStatusColor(project.status))}>
-                              {project.status}
-                            </Badge>
-                            <div className={cn("w-3 h-3 rounded-full", getPriorityColor(project.priority))} title={`${project.priority} priority`}></div>
-                          </div>
-                          
-                          <p className="text-gray-600 mb-4">{project.description}</p>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <div>
-                              <p className="text-sm text-gray-500">Client</p>
-                              <p className="font-medium">{project.client_name}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">Budget</p>
-                              <p className="font-medium">${project.budget.toLocaleString()}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">Due Date</p>
-                              <p className="font-medium">{formatDate(project.end_date)}</p>
-                            </div>
-                          </div>
-                          
-                          <div className="mb-4">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm text-gray-600">Progress</span>
-                              <span className="text-sm font-medium">{project.progress}%</span>
-                            </div>
-                            <Progress value={project.progress} className="h-2" />
-                          </div>
-                          
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className="flex items-center gap-2">
-                                <Users className="h-4 w-4 text-gray-500" />
-                                <span className="text-sm text-gray-600">{project.team_members.length} members</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-gray-500" />
-                                <span className="text-sm text-gray-600">{project.comments_count} comments</span>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-2"
-                                onClick={() => handleViewProject(project)}
-                                data-testid="view-project-btn"
-                              >
-                                <Eye className="h-3 w-3" />
-                                View
-                              </Button>
-
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-2"
-                                onClick={() => handleEditProject(project)}
-                                data-testid="edit-project-btn"
-                              >
-                                <Edit className="h-3 w-3" />
-                                Edit
-                              </Button>
-                              
-                              {project.status === 'active' && (
-                                <Button
-                                  size="sm"
-                                  className="gap-2"
-                                  onClick={() => handleUpdateProjectStatus(project.id, 'completed')}
-                                  data-testid="complete-project-btn"
-                                >
-                                  <CheckCircle className="h-3 w-3" />
-                                  Complete
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    onView={handleViewProject}
+                    onEdit={handleEditProject}
+                    onUpdateStatus={handleUpdateProjectStatus}
+                  />
                 ))
               )}
             </div>

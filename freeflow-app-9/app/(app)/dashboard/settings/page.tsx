@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -109,6 +109,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<string>('profile')
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isPending, startTransition] = useTransition()
 
   // A+++ LOAD SETTINGS DATA
   useEffect(() => {
@@ -182,56 +183,58 @@ export default function SettingsPage() {
     animations: true
   })
 
-  const handleSave = async () => {
-    setIsLoading(true)
+  const handleSave = () => {
+    startTransition(async () => {
+      setIsLoading(true)
 
-    try {
-      const response = await fetch('/api/settings/profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update',
-          category: 'all',
-          data: { profile, notifications, security, appearance }
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to save settings')
-      }
-
-      const result = await response.json()
-
-      if (result.success) {
-        logger.info('Settings saved successfully', {
-          profileName: `${profile.firstName} ${profile.lastName}`,
-          notificationsEnabled: Object.values(notifications).filter(Boolean).length,
-          securityFeatures: Object.values(security).filter(Boolean).length,
-          theme: appearance.theme
-        })
-
-        toast.success(result.message || 'Settings saved successfully!')
-
-        // Show achievement if present
-        if (result.achievement) {
-          toast.success(`${result.achievement.message} +${result.achievement.points} points!`, {
-            description: result.achievement.badge
+      try {
+        const response = await fetch('/api/settings/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'update',
+            category: 'all',
+            data: { profile, notifications, security, appearance }
           })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to save settings')
         }
-      } else {
-        throw new Error(result.error || 'Failed to save settings')
+
+        const result = await response.json()
+
+        if (result.success) {
+          logger.info('Settings saved successfully', {
+            profileName: `${profile.firstName} ${profile.lastName}`,
+            notificationsEnabled: Object.values(notifications).filter(Boolean).length,
+            securityFeatures: Object.values(security).filter(Boolean).length,
+            theme: appearance.theme
+          })
+
+          toast.success(result.message || 'Settings saved successfully!')
+
+          // Show achievement if present
+          if (result.achievement) {
+            toast.success(`${result.achievement.message} +${result.achievement.points} points!`, {
+              description: result.achievement.badge
+            })
+          }
+        } else {
+          throw new Error(result.error || 'Failed to save settings')
+        }
+      } catch (error: any) {
+        logger.error('Settings save failed', {
+          error: error.message,
+          profileEmail: profile.email
+        })
+        toast.error('Failed to save settings', {
+          description: error.message || 'Please try again later'
+        })
+      } finally {
+        setIsLoading(false)
       }
-    } catch (error: any) {
-      logger.error('Settings save failed', {
-        error: error.message,
-        profileEmail: profile.email
-      })
-      toast.error('Failed to save settings', {
-        description: error.message || 'Please try again later'
-      })
-    } finally {
-      setIsLoading(false)
-    }
+    })
   }
 
   const handleExportData = () => {
@@ -817,13 +820,13 @@ If you lose access to your authenticator app, you can use these codes to sign in
               Export Settings
             </Button>
 
-            <Button data-testid="save-changes-btn" size="sm" onClick={handleSave} disabled={isLoading}>
-              {isLoading ? (
+            <Button data-testid="save-changes-btn" size="sm" onClick={handleSave} disabled={isLoading || isPending}>
+              {(isLoading || isPending) ? (
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
               ) : (
                 <Save className="w-4 h-4 mr-2" />
               )}
-              Save Changes
+              {isPending ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </div>

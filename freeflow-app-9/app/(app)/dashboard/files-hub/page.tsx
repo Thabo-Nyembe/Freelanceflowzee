@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, useReducer, useMemo } from 'react'
+import { useState, useCallback, useEffect, useReducer, useMemo, useDeferredValue } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -397,14 +397,17 @@ export default function FilesHubPage() {
   // FILTERING AND SORTING
   // ============================================================================
 
+  // Use deferred value for search to keep input responsive during expensive filtering
+  const deferredSearchTerm = useDeferredValue(state.searchTerm)
+
   const filteredAndSortedFiles = useMemo(() => {
     let filtered = state.files
 
-    // Filter by search term
-    if (state.searchTerm) {
+    // Filter by search term (using deferred value for better performance)
+    if (deferredSearchTerm) {
       filtered = filtered.filter(file =>
-        file.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-        file.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()))
+        file.name.toLowerCase().includes(deferredSearchTerm.toLowerCase()) ||
+        file.tags.some(tag => tag.toLowerCase().includes(deferredSearchTerm.toLowerCase()))
       )
     }
 
@@ -445,14 +448,14 @@ export default function FilesHubPage() {
     logger.debug('Files filtered and sorted', {
       totalFiles: state.files.length,
       filteredCount: sorted.length,
-      searchTerm: state.searchTerm,
+      searchTerm: deferredSearchTerm,
       filterType: state.filterType,
       sortBy: state.sortBy,
       currentFolder: state.currentFolder
     })
 
     return sorted
-  }, [state.files, state.searchTerm, state.filterType, state.sortBy, state.currentFolder])
+  }, [state.files, deferredSearchTerm, state.filterType, state.sortBy, state.currentFolder])
 
   // ============================================================================
   // HANDLERS
