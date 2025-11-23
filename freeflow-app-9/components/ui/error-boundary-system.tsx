@@ -8,6 +8,10 @@ import {
   AlertTriangle, RefreshCw, Bug, Copy, ExternalLink,
   Shield, Zap, MessageCircle, Home, ArrowLeft
 } from 'lucide-react'
+import { toast } from 'sonner'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ErrorBoundarySystem')
 
 interface ErrorBoundaryState {
   hasError: boolean
@@ -53,7 +57,7 @@ class ErrorBoundaryClass extends Component<ErrorBoundaryProps, ErrorBoundaryStat
     this.props.onError?.(error, errorInfo)
 
     // Log error for monitoring
-    console.error('ErrorBoundary caught an error:', {
+    logger.error('ErrorBoundary caught an error', {
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,
@@ -61,7 +65,7 @@ class ErrorBoundaryClass extends Component<ErrorBoundaryProps, ErrorBoundaryStat
       name: this.props.name || 'Unknown',
       errorId: this.state.errorId,
       timestamp: new Date().toISOString()
-    })
+    });
 
     // Send to error tracking service in production
     if (process.env.NODE_ENV === 'production') {
@@ -87,7 +91,11 @@ class ErrorBoundaryClass extends Component<ErrorBoundaryProps, ErrorBoundaryStat
         })
       })
     } catch (reportError) {
-      console.error('Failed to report error:', reportError)
+      logger.error('Failed to report error', {
+        error: reportError instanceof Error ? reportError.message : 'Unknown error',
+        stack: reportError instanceof Error ? reportError.stack : undefined,
+        originalErrorId: this.state.errorId
+      });
     }
   }
 
@@ -111,7 +119,15 @@ class ErrorBoundaryClass extends Component<ErrorBoundaryProps, ErrorBoundaryStat
     }
 
     navigator.clipboard.writeText(JSON.stringify(errorDetails, null, 2))
-    console.log('Error details copied to clipboard')
+
+    logger.info('Error details copied to clipboard', {
+      errorId: this.state.errorId,
+      errorMessage: this.state.error?.message
+    });
+
+    toast.success('Error Details Copied', {
+      description: `Error ID: ${this.state.errorId}`
+    });
   }
 
   handleReportError = () => {
@@ -376,7 +392,12 @@ export function withErrorBoundary<P extends object>(
 // Hook for programmatic error handling
 export function useErrorHandler() {
   return (error: Error, errorInfo?: ErrorInfo) => {
-    console.error('Programmatic error:', error, errorInfo)
+    logger.error('Programmatic error', {
+      error: error.message,
+      stack: error.stack,
+      componentStack: errorInfo?.componentStack,
+      type: 'programmatic'
+    });
 
     // Report to error tracking service
     if (process.env.NODE_ENV === 'production') {

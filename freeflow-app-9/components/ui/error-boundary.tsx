@@ -7,6 +7,9 @@
 
 import React, { Component, ReactNode } from 'react'
 import { LiquidGlassCard } from './liquid-glass-card'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ErrorBoundary')
 
 interface Props {
   children: ReactNode
@@ -36,7 +39,11 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo)
+    logger.error('Error caught by boundary', {
+      error: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack
+    });
     this.props.onError?.(error, errorInfo)
   }
 

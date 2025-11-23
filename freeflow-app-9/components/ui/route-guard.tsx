@@ -6,6 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Shield, Lock, AlertCircle } from 'lucide-react'
 import { GlowEffect } from './glow-effect'
 import { BorderTrail } from './border-trail'
+import { toast } from 'sonner'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('RouteGuard')
 
 /**
  * Route Guard
@@ -73,9 +77,20 @@ export function RouteGuard({
 
         setIsAuthorized(true)
       } catch (error) {
-        console.error('Auth check failed:', error)
+        logger.error('Auth check failed', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          pathname,
+          requireAuth,
+          requiredRole
+        });
+
         setIsAuthorized(false)
         router.push(fallbackUrl)
+
+        toast.error('Authorization Failed', {
+          description: 'Please log in to access this page'
+        });
       } finally {
         setIsChecking(false)
       }

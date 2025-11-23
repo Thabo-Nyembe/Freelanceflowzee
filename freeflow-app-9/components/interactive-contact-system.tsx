@@ -49,6 +49,10 @@ import {
     FormMessage,
 } from '@/components/ui/form'
 import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ContactSystem')
 
 // types
 type ContactMethod = 'email' | 'phone' | 'scheduler' | 'form';
@@ -218,8 +222,25 @@ export function InteractiveContactSystem({
       await navigator.clipboard.writeText(text);
       dispatch({ type: 'SET_COPIED_ITEM', item });
       setTimeout(() => dispatch({ type: 'SET_COPIED_ITEM', item: null }), 2000);
+
+      logger.info('Contact info copied', {
+        item,
+        textLength: text.length
+      });
+
+      toast.success(`${item} Copied`, {
+        description: `${text} copied to clipboard`
+      });
     } catch (error) {
-      console.error('Failed to copy:', error);
+      logger.error('Failed to copy contact info', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        item
+      });
+
+      toast.error('Copy Failed', {
+        description: `Could not copy ${item} to clipboard`
+      });
     }
   };
 

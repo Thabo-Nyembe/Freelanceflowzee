@@ -14,6 +14,10 @@ import { Copy, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { toast } from 'sonner'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('CodeBlock')
 
 interface CodeBlockProps {
   id: string
@@ -59,8 +63,26 @@ export function CodeBlock({
       await navigator.clipboard.writeText(content)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
+
+      logger.info('Code copied to clipboard', {
+        language: properties.language || 'javascript',
+        contentLength: content.length
+      });
+
+      toast.success('Code Copied', {
+        description: `${content.length} characters copied to clipboard`
+      });
     } catch (err) {
-      console.error('Failed to copy text: ', err)
+      logger.error('Failed to copy code', {
+        error: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined,
+        language: properties.language,
+        contentLength: content.length
+      });
+
+      toast.error('Copy Failed', {
+        description: 'Could not copy code to clipboard'
+      });
     }
   }
 
