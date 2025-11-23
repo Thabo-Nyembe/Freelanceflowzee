@@ -17,7 +17,7 @@
 import { EmailAgentService } from './email-agent-service';
 import { AIService } from './ai-service';
 import { createClient } from '@supabase/supabase-js';
-import logger from '@/app/lib/logger';
+import logger from '@/lib/logger';
 
 // ============================================================================
 // TYPES AND INTERFACES

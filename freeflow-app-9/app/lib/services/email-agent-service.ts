@@ -12,7 +12,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { AIService } from './ai-service';
-import logger from '@/app/lib/logger';
+import logger from '@/lib/logger';
 
 // ============================================================================
 // TYPES AND INTERFACES

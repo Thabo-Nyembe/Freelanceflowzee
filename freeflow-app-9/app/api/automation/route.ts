@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { BusinessAutomationAgent } from '@/app/lib/services/business-automation-agent';
-import logger from '@/app/lib/logger';
+import logger from '@/lib/logger';
 
 const automationAgent = new BusinessAutomationAgent();
 

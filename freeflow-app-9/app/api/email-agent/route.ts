@@ -9,7 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { EmailAgentService } from '@/app/lib/services/email-agent-service';
-import logger from '@/app/lib/logger';
+import logger from '@/lib/logger';
 
 const emailAgent = new EmailAgentService();
 
