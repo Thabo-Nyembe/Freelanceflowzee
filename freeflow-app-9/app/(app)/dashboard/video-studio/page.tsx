@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useScreenRecorder } from '@/hooks/use-screen-recorder'
 import VideoTemplates from '@/components/video/video-templates'
 import AssetPreviewModal, { Asset } from '@/components/video/asset-preview-modal'
 import EnhancedFileUpload from '@/components/video/enhanced-file-upload'
@@ -174,6 +175,8 @@ export default function VideoStudioPage() {
   const [duration, setDuration] = useState<number>(300)
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false)
   const [recordingType, setRecordingType] = useState<RecordingType>('screen')
+  const [recordingQuality, setRecordingQuality] = useState<'high' | 'medium' | 'low'>('high')
+  const [recordingFrameRate, setRecordingFrameRate] = useState<number>(30)
   const [selectedTemplate, setSelectedTemplate] = useState<VideoTemplate | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchTerm, setSearchTerm] = useState<string>('')
@@ -194,6 +197,45 @@ export default function VideoStudioPage() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const timelineRef = useRef<HTMLDivElement>(null)
+
+  // ============================================================================
+  // SCREEN RECORDER HOOK INTEGRATION
+  // ============================================================================
+  const {
+    recordingState,
+    recordingBlob,
+    previewUrl,
+    capabilities,
+    startRecording,
+    stopRecording,
+    pauseRecording,
+    resetRecording,
+    downloadRecording,
+    uploadRecording
+  } = useScreenRecorder({
+    onRecordingComplete: (blob, metadata) => {
+      logger.info('Recording completed', {
+        duration: metadata.duration,
+        size: metadata.size,
+        mimeType: metadata.mimeType
+      })
+      announce('Recording completed successfully')
+      toast.success(`Recording completed! Duration: ${Math.floor(metadata.duration / 60)}:${String(metadata.duration % 60).padStart(2, '0')}`)
+    },
+    onUploadComplete: (videoId) => {
+      logger.info('Recording uploaded', { videoId })
+      announce('Recording uploaded successfully')
+      toast.success('Recording uploaded to your library')
+    }
+  })
+
+  // Sync recording state with UI
+  useEffect(() => {
+    setIsRecording(recordingState.status === 'recording')
+    if (recordingState.status === 'recording') {
+      setDuration(recordingState.duration)
+    }
+  }, [recordingState.status, recordingState.duration])
 
   // Handlers - New comprehensive implementations
   const handleCreateFirstProject = () => {
@@ -259,9 +301,52 @@ export default function VideoStudioPage() {
     }
   }
 
-  const handleRecord = () => {
-    logger.info('Video recorder opened')
-    toast.info('Opening video recorder...')
+  const handleRecord = async () => {
+    if (recordingState.status === 'recording') {
+      // Stop recording
+      try {
+        logger.info('Stopping recording')
+        await stopRecording()
+      } catch (error: any) {
+        logger.error('Failed to stop recording', { error: error.message })
+        toast.error('Failed to stop recording')
+      }
+    } else if (recordingState.status === 'paused') {
+      // Resume recording
+      logger.info('Resuming recording')
+      pauseRecording() // Toggle pause/resume
+    } else {
+      // Start new recording
+      try {
+        logger.info('Starting recording', {
+          type: recordingType,
+          quality: recordingQuality,
+          frameRate: recordingFrameRate,
+          audio: !isMuted
+        })
+
+        const mediaSource = recordingType === 'screen' ? 'screen' :
+                          recordingType === 'webcam' ? 'window' :
+                          recordingType === 'both' ? 'screen' : 'screen'
+
+        await startRecording({
+          video: {
+            mediaSource,
+            audio: !isMuted,
+            systemAudio: true,
+            quality: recordingQuality,
+            frameRate: recordingFrameRate
+          },
+          title: `Recording ${new Date().toLocaleDateString()}`,
+          autoUpload: false
+        })
+
+        announce('Recording started')
+      } catch (error: any) {
+        logger.error('Failed to start recording', { error: error.message })
+        toast.error('Failed to start recording. Please check permissions.')
+      }
+    }
   }
 
   const handleAITools = () => {
@@ -998,13 +1083,83 @@ export default function VideoStudioPage() {
           <div className="flex items-center gap-3">
             <Button
               data-testid="record-video-btn"
-              variant="default"
+              variant={recordingState.status === 'recording' ? 'destructive' : 'default'}
               size="sm"
               onClick={handleRecord}
+              disabled={recordingState.status === 'setup' || recordingState.status === 'stopping'}
             >
-              <Video className="w-4 h-4 mr-2" />
-              Record
+              {recordingState.status === 'recording' ? (
+                <>
+                  <Square className="w-4 h-4 mr-2" />
+                  Stop Recording
+                </>
+              ) : recordingState.status === 'paused' ? (
+                <>
+                  <Play className="w-4 h-4 mr-2" />
+                  Resume
+                </>
+              ) : recordingState.status === 'setup' || recordingState.status === 'stopping' ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  {recordingState.status === 'setup' ? 'Starting...' : 'Stopping...'}
+                </>
+              ) : (
+                <>
+                  <Video className="w-4 h-4 mr-2" />
+                  Start Recording
+                </>
+              )}
             </Button>
+
+            {recordingState.status === 'recording' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={pauseRecording}
+              >
+                <Pause className="w-4 h-4 mr-2" />
+                Pause
+              </Button>
+            )}
+
+            {recordingState.status === 'completed' && recordingBlob && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={downloadRecording}
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => uploadRecording({
+                    video: {
+                      mediaSource: 'screen',
+                      audio: true,
+                      systemAudio: true,
+                      quality: recordingQuality,
+                      frameRate: recordingFrameRate
+                    },
+                    title: `Recording ${new Date().toLocaleDateString()}`,
+                    autoUpload: false
+                  })}
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={resetRecording}
+                >
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  New
+                </Button>
+              </>
+            )}
 
             <Button
               data-testid="ai-tools-btn"
@@ -1265,21 +1420,21 @@ export default function VideoStudioPage() {
 
                   <div className="space-y-2">
                     <Label>Quality</Label>
-                    <Select defaultValue="1080p">
+                    <Select value={recordingQuality} onValueChange={(value: 'high' | 'medium' | 'low') => setRecordingQuality(value)}>
                       <SelectTrigger data-testid="recording-quality-select">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="720p">720p</SelectItem>
-                        <SelectItem value="1080p">1080p</SelectItem>
-                        <SelectItem value="4k">4K</SelectItem>
+                        <SelectItem value="low">Low (720p)</SelectItem>
+                        <SelectItem value="medium">Medium (1080p)</SelectItem>
+                        <SelectItem value="high">High (1080p+)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2">
                     <Label>Frame Rate</Label>
-                    <Select defaultValue="30">
+                    <Select value={String(recordingFrameRate)} onValueChange={(value) => setRecordingFrameRate(Number(value))}>
                       <SelectTrigger data-testid="recording-framerate-select">
                         <SelectValue />
                       </SelectTrigger>
@@ -1315,6 +1470,59 @@ export default function VideoStudioPage() {
                     </Button>
                   </div>
                 </div>
+
+                {/* Recording Status Display */}
+                {(recordingState.status === 'recording' || recordingState.status === 'paused' || recordingState.status === 'completed') && (
+                  <div className="mt-4 p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/20 dark:to-orange-950/20 rounded-lg border border-red-200 dark:border-red-800">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          {recordingState.status === 'recording' && (
+                            <div className="w-3 h-3 rounded-full bg-red-600 animate-pulse" />
+                          )}
+                          {recordingState.status === 'paused' && (
+                            <Pause className="w-4 h-4 text-orange-600" />
+                          )}
+                          {recordingState.status === 'completed' && (
+                            <Badge className="bg-green-600">Completed</Badge>
+                          )}
+                          <span className="font-semibold text-gray-900 dark:text-gray-100">
+                            {recordingState.status === 'recording' && 'Recording...'}
+                            {recordingState.status === 'paused' && 'Paused'}
+                            {recordingState.status === 'completed' && 'Recording Ready'}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            <NumberFlow
+                              value={recordingState.duration}
+                              format={{ minimumIntegerDigits: 2 }}
+                              className="font-mono"
+                            />
+                            <span>:{String(recordingState.duration % 60).padStart(2, '0')}</span>
+                          </div>
+
+                          <div className="flex items-center gap-1">
+                            <Activity className="w-4 h-4" />
+                            <span className="font-mono">
+                              {(recordingState.fileSize / (1024 * 1024)).toFixed(2)} MB
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {previewUrl && recordingState.status === 'completed' && (
+                        <video
+                          src={previewUrl}
+                          controls
+                          className="w-48 h-auto rounded border border-gray-300 dark:border-gray-700"
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
