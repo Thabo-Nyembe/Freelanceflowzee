@@ -7,6 +7,7 @@ import { useScreenRecorder } from '@/hooks/use-screen-recorder'
 import VideoTemplates from '@/components/video/video-templates'
 import AssetPreviewModal, { Asset } from '@/components/video/asset-preview-modal'
 import EnhancedFileUpload from '@/components/video/enhanced-file-upload'
+import { TeleprompterOverlay } from '@/components/video/teleprompter-overlay'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -193,6 +194,8 @@ export default function VideoStudioPage() {
   const [isAIToolsOpen, setIsAIToolsOpen] = useState<boolean>(false)
   const [selectedAiTool, setSelectedAiTool] = useState<string>('')
   const [videoTopic, setVideoTopic] = useState<string>('')
+  const [showTeleprompter, setShowTeleprompter] = useState<boolean>(false)
+  const [teleprompterScript, setTeleprompterScript] = useState<string>('')
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -1162,6 +1165,20 @@ export default function VideoStudioPage() {
             )}
 
             <Button
+              data-testid="teleprompter-btn"
+              size="sm"
+              onClick={() => {
+                setShowTeleprompter(true)
+                logger.info('Teleprompter opened')
+                announce('Teleprompter opened')
+              }}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <FileText className="w-4 h-4 mr-2" />
+              Teleprompter
+            </Button>
+
+            <Button
               data-testid="ai-tools-btn"
               size="sm"
               onClick={handleAITools}
@@ -2064,6 +2081,17 @@ onClick={() => {
         onDownload={(asset) => {
           logger.info('Asset download started', { assetId: asset.id, name: asset.name })
         }}
+      />
+
+      {/* TELEPROMPTER OVERLAY */}
+      <TeleprompterOverlay
+        isVisible={showTeleprompter}
+        onClose={() => {
+          setShowTeleprompter(false)
+          logger.info('Teleprompter closed')
+          announce('Teleprompter closed')
+        }}
+        initialScript={teleprompterScript}
       />
 
       {/* COLLABORATIVE REVIEW DIALOG - USER MANUAL SPEC */}
