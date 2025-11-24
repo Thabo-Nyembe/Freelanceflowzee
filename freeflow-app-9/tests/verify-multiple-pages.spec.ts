@@ -4,7 +4,7 @@ test('Verify Multiple Dashboard Pages Load Content', async ({ page }) => {
   const pages = [
     { url: '/dashboard/my-day', name: 'My Day', selector: '[data-testid="add-task-header-btn"]' },
     { url: '/dashboard/projects-hub', name: 'Projects Hub', selector: 'button:has-text("New Project")' },
-    { url: '/dashboard/ai-create', name: 'AI Create', selector: 'button:has-text("Generate")' },
+    { url: '/dashboard/ai-create', name: 'AI Create', selector: 'button:has-text("Generate Content")' },
     { url: '/dashboard/files-hub', name: 'Files Hub', selector: 'button:has-text("Upload")' },
     { url: '/dashboard/settings', name: 'Settings', selector: 'input[type="text"]' }
   ];
