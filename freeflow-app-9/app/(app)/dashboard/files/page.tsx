@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useReducer, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useReducer, useMemo, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -57,6 +57,7 @@ import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleto
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useInfiniteScroll } from '@/lib/hooks/use-infinite-scroll'
 
 const logger = createFeatureLogger('Files')
 
@@ -278,6 +279,7 @@ export default function FilesPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [displayedFilesCount, setDisplayedFilesCount] = useState(20) // Show 20 files initially
 
   // MODAL STATES
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
@@ -330,7 +332,7 @@ export default function FilesPage() {
     }
 
     loadFilesData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // COMPUTED VALUES
@@ -417,6 +419,36 @@ export default function FilesPage() {
     logger.debug('Filtering and sorting complete', { resultCount: sorted.length })
     return sorted
   }, [state.files, state.selectedFolder, state.searchTerm, state.sortBy])
+
+  // DISPLAYED FILES - Only show subset for infinite scroll
+  const displayedFiles = useMemo(() => {
+    return filteredAndSortedFiles.slice(0, displayedFilesCount)
+  }, [filteredAndSortedFiles, displayedFilesCount])
+
+  // INFINITE SCROLL - Load more files when scrolling near bottom
+  const handleLoadMoreFiles = useCallback(() => {
+    const totalFiles = filteredAndSortedFiles.length
+    // Only load more if there are more files to show
+    if (displayedFilesCount < totalFiles) {
+      logger.info('Loading more files', {
+        currentCount: displayedFilesCount,
+        totalFiles,
+        loadingMore: 20
+      })
+
+      setDisplayedFilesCount(prev => Math.min(prev + 20, totalFiles))
+
+      toast.info('Loading more files...', {
+        description: `Showing ${Math.min(displayedFilesCount + 20, totalFiles)} of ${totalFiles} files`
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [displayedFilesCount])
+
+  const { ref: scrollContainerRef, isLoading: isLoadingMore} = useInfiniteScroll(
+    handleLoadMoreFiles,
+    { threshold: 300, enabled: displayedFilesCount < filteredAndSortedFiles.length }
+  )
 
   // ============================================================================
   // HANDLERS
@@ -1022,10 +1054,10 @@ export default function FilesPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent ref={scrollContainerRef} className="max-h-[600px] overflow-y-auto">
                 {state.viewMode === 'grid' ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredAndSortedFiles.map((file, index) => (
+                    {displayedFiles.map((file, index) => (
                       <motion.div
                         key={file.id}
                         initial={{ opacity: 0, y: 20 }}
@@ -1095,7 +1127,7 @@ export default function FilesPage() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {filteredAndSortedFiles.map((file) => (
+                    {displayedFiles.map((file) => (
                       <div key={file.id} className="flex items-center gap-4 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 group">
                         <Checkbox
                           checked={state.selectedFiles.includes(file.id)}
@@ -1154,6 +1186,21 @@ export default function FilesPage() {
                   <div className="text-center py-12">
                     <File className="h-12 w-12 mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-500">No files found</p>
+                  </div>
+                )}
+
+                {/* Loading More Indicator */}
+                {isLoadingMore && displayedFilesCount < filteredAndSortedFiles.length && (
+                  <div className="text-center py-4">
+                    <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                    <p className="text-sm text-gray-500 mt-2">Loading more files...</p>
+                  </div>
+                )}
+
+                {/* Show count */}
+                {displayedFilesCount < filteredAndSortedFiles.length && !isLoadingMore && (
+                  <div className="text-center py-4 text-sm text-gray-500">
+                    Showing {displayedFilesCount} of {filteredAndSortedFiles.length} files - Scroll down for more
                   </div>
                 )}
               </CardContent>

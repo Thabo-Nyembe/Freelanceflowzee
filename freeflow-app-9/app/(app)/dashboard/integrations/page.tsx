@@ -353,7 +353,7 @@ export default function IntegrationsPage() {
     }
 
     loadIntegrationsData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // COMPUTED STATS

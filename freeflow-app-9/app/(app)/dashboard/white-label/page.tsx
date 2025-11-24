@@ -90,7 +90,7 @@ export default function WhiteLabelPage() {
     }
 
     loadWhiteLabelData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const brandingScore = calculateBrandingScore(config)
   const domainStatus = config.customDomain ? formatDomainStatus(MOCK_DOMAIN_VERIFICATION.status) : null

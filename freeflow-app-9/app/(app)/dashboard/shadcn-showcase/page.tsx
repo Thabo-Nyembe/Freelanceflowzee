@@ -162,7 +162,7 @@ export default function ShadcnShowcasePage() {
     }
 
     loadShadcnShowcaseData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const breadcrumbItems = [
     { label: 'Dashboard', href: '/dashboard', title: 'Main Dashboard' },

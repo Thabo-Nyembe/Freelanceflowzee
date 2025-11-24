@@ -170,7 +170,7 @@ export default function MicroFeaturesShowcase() {
     }
 
     loadMicroFeaturesData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // A++++ STABLE CALLBACK - Demo handler with useTransition for non-blocking UI
   const handleDemoAction = useCallback((feature: string) => {

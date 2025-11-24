@@ -140,7 +140,7 @@ export default function AIAssistantPage() {
     }
 
     loadAIAssistantData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const [isVoiceMode, setIsVoiceMode] = useState<boolean>(false)
   const [isListening, setIsListening] = useState<boolean>(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)

@@ -84,7 +84,7 @@ export default function ProfilePage() {
     }
 
     loadProfileData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handlers
   const handleEditProfile = () => {

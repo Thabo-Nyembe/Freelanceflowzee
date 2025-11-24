@@ -196,7 +196,7 @@ export default function TeamPage() {
     }
 
     loadTeamData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handlers
   const handleInviteMember = () => {

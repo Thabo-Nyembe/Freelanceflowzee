@@ -47,7 +47,7 @@ export default function UIShowcasePage() {
     }
 
     loadUIShowcaseData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     document.title = 'KAZI - UI Showcase'

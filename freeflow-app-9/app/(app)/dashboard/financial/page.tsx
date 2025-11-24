@@ -116,7 +116,7 @@ export default function FinancialPage() {
     }
 
     loadFinancialData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Utility Functions
   const formatCurrency = (amount: number) => {

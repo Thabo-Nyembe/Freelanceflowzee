@@ -437,7 +437,7 @@ export default function MessagesPage() {
     }
 
     loadChats()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load messages when chat selected
   useEffect(() => {

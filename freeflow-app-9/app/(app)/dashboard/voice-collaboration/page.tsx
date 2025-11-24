@@ -534,7 +534,7 @@ export default function VoiceCollaborationPage() {
       recordingsCount: mockRecordings.length
     })
     announce('Voice collaboration page loaded', 'polite')
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Computed Stats
   const stats = useMemo(() => {

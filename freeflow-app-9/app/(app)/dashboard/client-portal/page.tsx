@@ -439,7 +439,7 @@ export default function ClientPortalPage() {
     }
 
     loadData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // COMPUTED VALUES

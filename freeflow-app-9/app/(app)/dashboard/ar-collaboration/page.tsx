@@ -495,7 +495,7 @@ export default function ARCollaborationPage() {
 
     logger.info('Initial data loaded', { sessionCount: mockSessions.length })
     announce('AR collaboration page loaded', 'polite')
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Computed Stats
   const stats = useMemo(() => {

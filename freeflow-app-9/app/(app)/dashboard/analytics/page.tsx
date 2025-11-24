@@ -266,15 +266,11 @@ export default function AnalyticsPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
+        // Simulate data loading
+        await new Promise((resolve) => {
           setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load analytics'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
+            resolve(null)
+          }, 500) // Reduced from 1000ms to 500ms for faster loading
         })
 
         setIsLoading(false)
@@ -287,7 +283,7 @@ export default function AnalyticsPage() {
     }
 
     loadAnalyticsData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // FILTERED DATA (useMemo for performance)

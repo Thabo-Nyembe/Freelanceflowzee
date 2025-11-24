@@ -102,7 +102,7 @@ export default function MotionGraphicsPage() {
     }
 
     loadMotionGraphicsData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying)

@@ -133,7 +133,7 @@ export default function AdvancedMicroFeaturesPage() {
     }
 
     loadAdvancedMicroFeaturesData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // A++++ MEMOIZED MOCK DATA - Prevent re-creation on every render
   const mockUsers = useMemo(() => [

@@ -72,7 +72,7 @@ export default function AuditTrailPage() {
     }
 
     loadAuditTrailData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const viewTabs = [
     { id: 'overview' as ViewMode, label: 'Overview', icon: '📊' },

@@ -448,15 +448,11 @@ export default function EscrowPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
+        // Simulate data loading
+        await new Promise((resolve) => {
           setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load escrow deposits'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
+            resolve(null)
+          }, 500) // Reduced from 1000ms to 500ms for faster loading
         })
 
         setIsLoading(false)
@@ -469,7 +465,7 @@ export default function EscrowPage() {
     }
 
     loadEscrowData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     dispatch({ type: 'SET_DEPOSITS', deposits: memoizedMockDeposits })

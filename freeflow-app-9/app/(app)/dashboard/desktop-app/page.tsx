@@ -193,7 +193,7 @@ export default function DesktopAppPage() {
     }
 
     loadDesktopAppData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const device = DESKTOP_PRESETS.find(d => d.id === selectedDevice) || DESKTOP_PRESETS[0]
   const framework = APP_FRAMEWORKS.find(f => f.id === selectedFramework) || APP_FRAMEWORKS[0]

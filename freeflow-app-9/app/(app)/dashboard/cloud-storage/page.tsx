@@ -64,7 +64,7 @@ export default function CloudStoragePage() {
     }
 
     loadCloudStorageData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Mock cloud storage data
   const cloudProviders = [

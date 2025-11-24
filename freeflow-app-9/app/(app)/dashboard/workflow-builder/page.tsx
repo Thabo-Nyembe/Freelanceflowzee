@@ -79,7 +79,7 @@ export default function WorkflowBuilderPage() {
     }
 
     loadWorkflowData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const workflows = [
     {

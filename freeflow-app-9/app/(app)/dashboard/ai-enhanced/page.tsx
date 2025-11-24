@@ -427,7 +427,7 @@ export default function AIEnhancedPage() {
     }
 
     loadData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // COMPUTED VALUES

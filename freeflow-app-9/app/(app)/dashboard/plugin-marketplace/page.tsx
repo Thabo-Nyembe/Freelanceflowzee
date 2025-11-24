@@ -496,7 +496,7 @@ export default function PluginMarketplacePage() {
     }
 
     loadPlugins()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // A++++ COMPUTED VALUES

@@ -411,7 +411,7 @@ export default function APlusShowcasePage() {
     }
 
     loadComponents()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // A++++ COMPUTED VALUES

@@ -46,6 +46,7 @@ const logger = createFeatureLogger('ProjectsHub')
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useInfiniteScroll } from '@/lib/hooks/use-infinite-scroll'
 
 // 3-Step Project Creation Wizard - USER MANUAL SPEC
 import { ProjectCreationWizard } from '@/components/projects/project-creation-wizard'
@@ -281,8 +282,38 @@ export default function ProjectsHubPage() {
     permissions: 'private' as 'private' | 'team' | 'public'
   })
 
+  // Infinite Scroll State
+  const [displayedProjectsCount, setDisplayedProjectsCount] = useState(12) // Show 12 projects initially
+
   // A+++ Accessibility
   const { announce } = useAnnouncer()
+
+  // INFINITE SCROLL - Load more projects when scrolling near bottom
+  const handleLoadMoreProjects = React.useCallback(() => {
+    if (displayedProjectsCount < filteredProjects.length) {
+      logger.info('Loading more projects', {
+        currentCount: displayedProjectsCount,
+        totalProjects: filteredProjects.length,
+        loadingMore: 12
+      })
+
+      setDisplayedProjectsCount(prev => Math.min(prev + 12, filteredProjects.length))
+
+      toast.info('Loading more projects...', {
+        description: `Showing ${Math.min(displayedProjectsCount + 12, filteredProjects.length)} of ${filteredProjects.length} projects`
+      })
+    }
+  }, [displayedProjectsCount, filteredProjects.length])
+
+  const { ref: scrollContainerRef, isLoading: isLoadingMore } = useInfiniteScroll(
+    handleLoadMoreProjects,
+    { threshold: 300, enabled: displayedProjectsCount < filteredProjects.length }
+  )
+
+  // Displayed Projects - Only show subset for infinite scroll
+  const displayedProjects = React.useMemo(() => {
+    return filteredProjects.slice(0, displayedProjectsCount)
+  }, [filteredProjects, displayedProjectsCount])
 
   // Enhanced Handlers with Full Implementations
   const handleViewProject = (project: Project) => {
@@ -892,16 +923,11 @@ export default function ProjectsHubPage() {
         setLoading(true)
         setError(null) // A+++ Reset error state
 
-        // Simulate API call with potential failure
-        await new Promise((resolve, reject) => {
+        // Simulate API call
+        await new Promise((resolve) => {
           setTimeout(() => {
-            // Simulate occasional errors (remove in production)
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load projects'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
+            resolve(null)
+          }, 500) // Reduced from 1000ms to 500ms for faster loading
         })
 
         const stats = {
@@ -930,7 +956,7 @@ export default function ProjectsHubPage() {
     }
 
     loadProjects()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const filtered = projects.filter(project => {
@@ -1383,18 +1409,18 @@ export default function ProjectsHubPage() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-6">
+            <div ref={scrollContainerRef} className="grid gap-6 max-h-[800px] overflow-y-auto">
               {filteredProjects.length === 0 ? (
                 <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
                   <CardContent className="p-12 text-center">
                     <FolderOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No projects found</h3>
                     <p className="text-gray-600 mb-4">
-                      {searchTerm || statusFilter !== 'all' || priorityFilter !== 'all' 
+                      {searchTerm || statusFilter !== 'all' || priorityFilter !== 'all'
                         ? 'Try adjusting your filters or search terms.'
                         : 'Get started by creating your first project.'}
                     </p>
-                    <Button 
+                    <Button
                       onClick={() => setIsCreateModalOpen(true)}
                       className="gap-2"
                     >
@@ -1404,15 +1430,32 @@ export default function ProjectsHubPage() {
                   </CardContent>
                 </Card>
               ) : (
-                filteredProjects.map(project => (
-                  <ProjectCard
-                    key={project.id}
-                    project={project}
-                    onView={handleViewProject}
-                    onEdit={handleEditProject}
-                    onUpdateStatus={handleUpdateProjectStatus}
-                  />
-                ))
+                <>
+                  {displayedProjects.map(project => (
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                      onView={handleViewProject}
+                      onEdit={handleEditProject}
+                      onUpdateStatus={handleUpdateProjectStatus}
+                    />
+                  ))}
+
+                  {/* Loading More Indicator */}
+                  {isLoadingMore && displayedProjectsCount < filteredProjects.length && (
+                    <div className="text-center py-6">
+                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                      <p className="text-sm text-gray-500 mt-2">Loading more projects...</p>
+                    </div>
+                  )}
+
+                  {/* Show count */}
+                  {displayedProjectsCount < filteredProjects.length && !isLoadingMore && (
+                    <div className="text-center py-6 text-sm text-gray-500">
+                      Showing {displayedProjectsCount} of {filteredProjects.length} projects - Scroll down for more
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </TabsContent>

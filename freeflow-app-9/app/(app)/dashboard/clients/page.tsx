@@ -517,7 +517,7 @@ export default function ClientsPage() {
     }
 
     loadClients()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // HANDLERS

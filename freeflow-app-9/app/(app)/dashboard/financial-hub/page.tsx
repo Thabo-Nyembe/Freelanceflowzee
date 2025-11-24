@@ -76,7 +76,7 @@ export default function FinancialHubPage() {
     }
 
     loadFinancialHubData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handler functions with comprehensive logging
   const handleExportReport = () => {

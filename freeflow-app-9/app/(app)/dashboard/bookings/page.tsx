@@ -373,7 +373,7 @@ export default function BookingsPage() {
     }
 
     loadBookingsData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ==================== STATE MANAGEMENT ====================
   const [activeTab, setActiveTab] = useState('upcoming')

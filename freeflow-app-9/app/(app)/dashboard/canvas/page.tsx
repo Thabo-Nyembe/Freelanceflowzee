@@ -561,7 +561,7 @@ export default function CanvasPage() {
     }
 
     loadCanvases()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // A++++ COMPUTED VALUES

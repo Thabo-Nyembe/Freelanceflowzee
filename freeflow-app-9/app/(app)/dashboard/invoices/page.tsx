@@ -161,16 +161,11 @@ export default function InvoicesPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate API call with potential failure
-        await new Promise((resolve, reject) => {
+        // Simulate API call
+        await new Promise((resolve) => {
           setTimeout(() => {
-            // Simulate occasional errors (5% failure rate)
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load invoices'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
+            resolve(null)
+          }, 500) // Reduced from 1000ms to 500ms for faster loading
         })
 
         setIsLoading(false)
@@ -185,7 +180,7 @@ export default function InvoicesPage() {
     }
 
     loadInvoicesData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handlers
   const handleCreateInvoice = () => {

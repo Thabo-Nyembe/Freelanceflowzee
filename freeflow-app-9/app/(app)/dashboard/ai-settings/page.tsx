@@ -642,7 +642,7 @@ export default function AISettingsPage() {
     }
 
     loadAISettingsData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load saved API keys on component mount
   useEffect(() => {

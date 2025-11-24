@@ -64,7 +64,7 @@ export default function ReportingPage() {
     }
 
     loadReportingData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // View Mode Tabs
   const viewTabs = [

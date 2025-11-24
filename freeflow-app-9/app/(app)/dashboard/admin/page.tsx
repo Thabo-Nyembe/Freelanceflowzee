@@ -93,7 +93,7 @@ export default function AdminPage() {
     }
 
     loadAdminData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // A+++ LOADING STATE
   if (isLoading) {

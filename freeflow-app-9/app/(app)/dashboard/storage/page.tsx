@@ -344,7 +344,7 @@ export default function StoragePage() {
     }
 
     loadFiles()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // COMPUTED VALUES

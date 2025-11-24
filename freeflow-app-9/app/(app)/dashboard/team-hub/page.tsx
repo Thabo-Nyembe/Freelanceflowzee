@@ -224,7 +224,7 @@ export default function TeamHubPage() {
     }
 
     loadTeamData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================
   // REAL WORKING CRUD HANDLERS WITH PRODUCTION LOGGER

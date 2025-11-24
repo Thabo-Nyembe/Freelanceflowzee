@@ -86,7 +86,7 @@ export default function UserManagementPage() {
     }
 
     loadUserManagementData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const filteredUsers = sortUsers(
     filterUsers(MOCK_USERS, {

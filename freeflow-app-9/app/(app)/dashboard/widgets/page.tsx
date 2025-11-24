@@ -340,14 +340,11 @@ export default function WidgetsPage() {
         setIsLoading(true)
         setError(null)
 
-        await new Promise((resolve, reject) => {
+        // Simulate data loading
+        await new Promise((resolve) => {
           setTimeout(() => {
-            if (Math.random() > 0.98) {
-              reject(new Error('Failed to load widgets'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
+            resolve(null)
+          }, 500) // Reduced from 1000ms to 500ms for faster loading
         })
 
         const mockWidgets = generateMockWidgets()
@@ -368,7 +365,7 @@ export default function WidgetsPage() {
     }
 
     loadWidgetsData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // COMPUTED STATS

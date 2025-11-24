@@ -141,7 +141,7 @@ export default function SettingsPage() {
     }
 
     loadSettingsData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const [profile, setProfile] = useState<UserProfile>({
     firstName: 'John',

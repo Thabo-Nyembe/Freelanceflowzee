@@ -143,7 +143,7 @@ export default function GalleryPage() {
     }
 
     loadGalleryData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialize mock data
   const initializeMockData = () => {

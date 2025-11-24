@@ -91,7 +91,7 @@ export default function CustomReportBuilderPage() {
     }
 
     loadReportBuilderData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTemplateSelect = (template: ReportTemplate) => {
     setSelectedTemplate(template)

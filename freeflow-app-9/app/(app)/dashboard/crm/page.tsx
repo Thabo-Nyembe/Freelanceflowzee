@@ -88,7 +88,7 @@ export default function CRMPage() {
     }
 
     loadCRMData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const stats = MOCK_CRM_STATS
   const pipelineMetrics = calculatePipelineMetrics(MOCK_PIPELINE)

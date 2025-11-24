@@ -541,7 +541,7 @@ export default function BrowserExtensionPage() {
 
     logger.info('Mock data loaded successfully')
     announce('Browser extension page loaded', 'polite')
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Computed Stats
   const stats = useMemo(() => {

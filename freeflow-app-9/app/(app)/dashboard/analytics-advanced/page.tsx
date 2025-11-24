@@ -77,7 +77,7 @@ export default function AdvancedAnalyticsPage() {
     }
 
     loadAdvancedAnalyticsData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const viewModes = [
     { id: 'overview', label: 'Overview', icon: '📊' },

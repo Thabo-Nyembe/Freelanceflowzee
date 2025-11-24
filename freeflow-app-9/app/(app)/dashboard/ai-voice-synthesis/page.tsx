@@ -101,7 +101,7 @@ export default function AIVoiceSynthesisPage() {
       }
     }
     loadAIVoiceSynthesisData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const filteredVoices = filterVoices(MOCK_VOICES, {
     gender: voiceGender !== 'all' ? voiceGender as any : undefined,

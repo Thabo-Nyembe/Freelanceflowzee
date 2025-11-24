@@ -75,7 +75,7 @@ export default function TeamManagementPage() {
     }
 
     loadTeamManagementData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')
 

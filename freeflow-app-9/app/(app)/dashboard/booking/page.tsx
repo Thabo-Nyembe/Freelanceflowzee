@@ -59,7 +59,7 @@ export default function BookingPage() {
     }
 
     loadBookingData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   // Handler functions with real features
   const handleNewBooking = async () => {
     logger.info('Initiating new booking', {
