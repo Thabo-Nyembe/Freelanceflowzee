@@ -607,7 +607,7 @@ export function SidebarEnhanced() {
 
   return (
     <aside data-tour="sidebar-nav" className="fixed top-16 left-0 z-40 w-64 h-[calc(100vh-4rem)] bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col">
-      <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-1">
+      <div className="flex-1 overflow-y-auto overscroll-contain scroll-smooth p-4 space-y-1">
         {/* Admin Quick Access */}
         <AdminFavorites />
 

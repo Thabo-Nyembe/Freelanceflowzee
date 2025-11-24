@@ -74,7 +74,7 @@ export default function AgentsPage() {
       }
     }
     loadAgentsData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // A+++ LOADING STATE
   if (isLoading) {

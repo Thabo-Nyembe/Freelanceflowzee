@@ -11,6 +11,7 @@ import { ActivityLogViewer } from '@/components/activity-log-viewer'
 import { TourManager } from '@/components/onboarding/tour-manager'
 import { platformTours } from '@/lib/tours/platform-tours'
 import { ROUTE_LABELS } from '@/lib/route-utils'
+import { ErrorBoundary } from '@/components/error-boundary'
 
 interface DashboardLayoutClientProps {
   children: React.ReactNode
@@ -31,7 +32,7 @@ export default function DashboardLayoutClient({
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto pt-16 lg:pt-0 pb-16 lg:pb-0">
+      <main className="flex-1 overflow-y-auto pt-16 lg:pt-0 pb-16 lg:pb-0 scroll-smooth">
         {/* Mobile Header with Sidebar Toggle */}
         <div className="lg:hidden sticky top-0 z-40 kazi-bg-light dark:kazi-bg-dark border-b px-4 py-3">
           <div className="flex items-center justify-between">
@@ -40,15 +41,21 @@ export default function DashboardLayoutClient({
           </div>
         </div>
 
-        <div className="container mx-auto p-4 lg:p-6">
+        <div className="container mx-auto p-4 lg:p-6 max-w-[1600px]">
           {/* Premium Breadcrumb Navigation & Global Search */}
-          <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <BreadcrumbNav labels={ROUTE_LABELS} />
-            <AdminSearch />
+            <div className="w-full sm:w-auto">
+              <AdminSearch />
+            </div>
           </div>
 
-          {/* Instant page loading - no transition wrapper */}
-          {children}
+          {/* Instant page loading - with error boundary */}
+          <ErrorBoundary>
+            <div className="min-h-[calc(100vh-12rem)]">
+              {children}
+            </div>
+          </ErrorBoundary>
         </div>
       </main>
 

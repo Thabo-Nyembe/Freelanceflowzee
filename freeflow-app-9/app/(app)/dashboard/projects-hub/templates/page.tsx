@@ -180,7 +180,7 @@ export default function ProjectTemplatesPage() {
     }
 
     loadTemplatesData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const categories = [
     { id: 'all', label: 'All', count: templates.length, icon: Grid },

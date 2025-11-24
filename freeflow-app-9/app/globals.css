@@ -37,24 +37,24 @@
 }
 
 .dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 240 5.9% 10%;
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --card: 0 0% 0%;
+  --card-foreground: 0 0% 100%;
+  --popover: 0 0% 0%;
+  --popover-foreground: 0 0% 100%;
+  --primary: 0 0% 100%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 10%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 10%;
   --muted-foreground: 240 5% 64.9%;
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
+  --accent: 0 0% 10%;
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
   --ring: 240 4.9% 83.9%;
 }
 
@@ -64,10 +64,10 @@
 
 @layer base {
   * {
-    @apply border-neutral-200 dark:border-neutral-700;
+    @apply border-neutral-200 dark:border-white/20;
   }
   body {
-    @apply bg-white dark:bg-gray-900 text-neutral-900 dark:text-neutral-100;
+    @apply bg-white dark:bg-black text-black dark:text-white;
     font-feature-settings: "rlig" 1, "calt" 1;
     min-height: 100vh;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -83,20 +83,20 @@
 
 /* Glass morphism styles - Enhanced for dark mode */
 .glass-nav {
-  @apply bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl border-b border-[hsl(var(--border))] shadow-sm;
+  @apply bg-white/60 dark:bg-black/60 backdrop-blur-xl border-b border-[hsl(var(--border))] shadow-sm;
 }
 
 .glass-card {
-  @apply bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl border border-[hsl(var(--border))] rounded-2xl shadow-lg;
+  @apply bg-white/60 dark:bg-black/60 backdrop-blur-xl border border-[hsl(var(--border))] rounded-2xl shadow-lg;
 }
 
 /* Dark mode glass morphism */
 .dark .glass-nav {
-  @apply bg-gray-900/80 border-gray-700;
+  @apply bg-black/80 border-gray-700;
 }
 
 .dark .glass-card {
-  @apply bg-gray-900/80 border-gray-700;
+  @apply bg-black/80 border-gray-700;
 }
 
 .gradient-bg {
@@ -150,22 +150,22 @@
 
 /* Enhanced form inputs with better contrast */
 .input-enhanced {
-  @apply w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 
+  @apply w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600
          focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-         bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm
-         text-gray-900 dark:text-gray-100
+         bg-white/90 dark:bg-black/90 backdrop-blur-sm
+         text-black dark:text-white
          placeholder:text-gray-500 dark:placeholder:text-gray-400
          transition-all duration-200;
 }
 
 .input-enhanced:focus {
-  @apply bg-white dark:bg-gray-800 shadow-lg;
+  @apply bg-white dark:bg-black shadow-lg;
 }
 
 /* Navigation styles */
 .nav-item {
   @apply px-4 py-2 rounded-lg transition-all duration-200
-         hover:bg-gray-100 dark:hover:bg-gray-800
+         hover:bg-gray-100 dark:hover:bg-white/10
          focus:outline-none focus:ring-2 focus:ring-indigo-500;
 }
 
@@ -301,7 +301,7 @@
 
 /* Text visibility improvements */
 .text-primary {
-  @apply text-gray-900 dark:text-gray-100;
+  @apply text-black dark:text-white;
 }
 
 .text-secondary {
@@ -318,13 +318,13 @@
 
 /* Card improvements */
 .card-enhanced {
-  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg;
-  @apply text-gray-900 dark:text-gray-100;
+  @apply bg-white dark:bg-black border border-gray-200 dark:border-white/20 rounded-xl shadow-lg;
+  @apply text-black dark:text-white;
   transition: all 0.3s ease;
 }
 
 .card-enhanced:hover {
-  @apply shadow-xl border-gray-300 dark:border-gray-600;
+  @apply shadow-xl border-gray-300 dark:border-white/30;
 }
 
 /* Button improvements */
@@ -332,28 +332,28 @@
   @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
   @apply bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600;
   @apply text-white border-0;
-  @apply focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800;
+  @apply focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-black;
 }
 
 .btn-secondary-enhanced {
   @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
-  @apply bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600;
-  @apply text-gray-900 dark:text-gray-100;
-  @apply border border-gray-300 dark:border-gray-600;
+  @apply bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20;
+  @apply text-black dark:text-white;
+  @apply border border-gray-300 dark:border-white/20;
 }
 
 /* Navigation improvements */
 .nav-enhanced {
-  @apply bg-white/95 dark:bg-gray-900/95 backdrop-blur-md;
-  @apply border-b border-gray-200 dark:border-gray-700;
-  @apply text-gray-900 dark:text-gray-100;
+  @apply bg-white/95 dark:bg-black/95 backdrop-blur-md;
+  @apply border-b border-gray-200 dark:border-white/20;
+  @apply text-black dark:text-white;
 }
 
 .nav-link-enhanced {
   @apply px-3 py-2 rounded-md text-sm font-medium transition-all duration-200;
   @apply text-gray-700 dark:text-gray-300;
-  @apply hover:text-gray-900 dark:hover:text-gray-100;
-  @apply hover:bg-gray-100 dark:hover:bg-gray-800;
+  @apply hover:text-black dark:hover:text-white;
+  @apply hover:bg-gray-100 dark:hover:bg-white/10;
 }
 
 .nav-link-enhanced.active {
@@ -367,26 +367,26 @@
 }
 
 .dashboard-card {
-  @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700;
+  @apply bg-white dark:bg-black rounded-xl shadow-lg border border-gray-200 dark:border-white/20;
   @apply p-6 transition-all duration-300 hover:shadow-xl;
-  @apply text-gray-900 dark:text-gray-100;
+  @apply text-black dark:text-white;
 }
 
 .dashboard-card:hover {
-  @apply transform scale-105 border-gray-300 dark:border-gray-600;
+  @apply transform scale-105 border-gray-300 dark:border-white/30;
 }
 
 /* Tab improvements */
 .tabs-enhanced .tabs-list {
-  @apply bg-gray-100 dark:bg-gray-800 p-1 rounded-lg;
+  @apply bg-gray-100 dark:bg-white/10 p-1 rounded-lg;
 }
 
 .tabs-enhanced .tabs-trigger {
   @apply px-4 py-2 rounded-md text-sm font-medium transition-all duration-200;
   @apply text-gray-600 dark:text-gray-400;
-  @apply hover:text-gray-900 dark:hover:text-gray-100;
-  @apply data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700;
-  @apply data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-100;
+  @apply hover:text-black dark:hover:text-white;
+  @apply data-[state=active]:bg-white dark:data-[state=active]:bg-white/20;
+  @apply data-[state=active]:text-black dark:data-[state=active]:text-white;
   @apply data-[state=active]:shadow-sm;
 }
 
@@ -410,7 +410,7 @@
 
 /* Progress bar improvements */
 .progress-enhanced {
-  @apply w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2;
+  @apply w-full bg-gray-200 dark:bg-white/20 rounded-full h-2;
 }
 
 .progress-enhanced .progress-bar {
@@ -419,8 +419,8 @@
 
 /* Modal/Dialog improvements */
 .modal-enhanced {
-  @apply bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700;
-  @apply text-gray-900 dark:text-gray-100;
+  @apply bg-white dark:bg-black rounded-xl shadow-2xl border border-gray-200 dark:border-white/20;
+  @apply text-black dark:text-white;
 }
 
 .modal-overlay {
@@ -455,22 +455,22 @@
 
 /* Loading state improvements */
 .loading-skeleton {
-  @apply bg-gray-200 dark:bg-gray-700 animate-pulse rounded;
+  @apply bg-gray-200 dark:bg-white/20 animate-pulse rounded;
 }
 
 /* Focus improvements for accessibility */
 .focus-enhanced:focus {
-  @apply outline-none ring-2 ring-blue-500 dark:ring-blue-400 ring-offset-2 dark:ring-offset-gray-800;
+  @apply outline-none ring-2 ring-blue-500 dark:ring-blue-400 ring-offset-2 dark:ring-offset-black;
 }
 
 /* Text selection improvements */
 ::selection {
-  @apply bg-blue-200 dark:bg-blue-800 text-gray-900 dark:text-gray-100;
+  @apply bg-blue-200 dark:bg-blue-800 text-black dark:text-white;
 }
 
 /* Tooltip improvements */
 .tooltip-enhanced {
-  @apply bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900;
+  @apply bg-black dark:bg-white text-white dark:text-black;
   @apply px-2 py-1 rounded text-xs font-medium shadow-lg;
 }
 

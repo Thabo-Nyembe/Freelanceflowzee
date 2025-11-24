@@ -58,7 +58,7 @@ export default function ProjectImportPage() {
       }
     }
     loadImportData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const [importStatus, setImportStatus] = useState<any>('idle') // idle, importing, success, error
   const [selectedFiles, setSelectedFiles] = useState<any>([])
   const [importProgress, setImportProgress] = useState<any>(0)

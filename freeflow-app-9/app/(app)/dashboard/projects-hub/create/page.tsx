@@ -65,7 +65,7 @@ export default function CreateProjectPage() {
       }
     }
     loadCreateProjectData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null)
   const [projectType, setProjectType] = useState<any>('custom')
   const [formData, setFormData] = useState<any>({

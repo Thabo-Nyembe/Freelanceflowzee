@@ -398,7 +398,7 @@ const AI_MODELS: AIModel[] = [
 ]
 
 const initialState: AssetGenerationState = {
-  creativeField: Object.values(CREATIVE_FIELDS)[0].name,
+  creativeField: Object.keys(CREATIVE_FIELDS)[0],
   assetType: Object.values(CREATIVE_FIELDS)[0].assetTypes[0].id,
   categories: Object.values(CREATIVE_FIELDS).flatMap(field => field.assetTypes.map(type => ({ id: type.id, name: type.name }))),
   selectedModel: AI_MODELS[0],

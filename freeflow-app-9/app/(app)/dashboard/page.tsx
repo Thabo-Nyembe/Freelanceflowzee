@@ -241,7 +241,7 @@ export default function DashboardPage() {
     }
 
     loadDashboardData()
-  }, [announce])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
