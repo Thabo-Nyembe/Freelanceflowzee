@@ -8,11 +8,14 @@ import { NextResponse } from 'next/server';
 
 const publicRoutes = [
   '/',
-  '/landing', '/login', '/signup', '/features', '/how-it-works', '/docs', '/tutorials', '/dashboard', '/dashboard/video-studio',
+  '/landing', '/login', '/signup', '/features', '/how-it-works', '/docs', '/tutorials',
   '/community', '/api-docs', '/demo', '/support', '/contact', '/payment', '/blog',
   '/newsletter', '/privacy', '/terms', '/pricing', '/careers', '/cookies',
   '/book-appointment', '/community-showcase', '/enhanced-collaboration-demo'
 ];
+
+// Allow all dashboard routes
+const isDashboardRoute = (pathname: string) => pathname.startsWith('/dashboard');
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -31,9 +34,9 @@ export function middleware(req: NextRequest) {
   }
 
   // ----------------------------------------------------------
-  // 2. Allow public pages through with zero processing
+  // 2. Allow public pages and all dashboard routes through with zero processing
   // ----------------------------------------------------------
-  if (publicRoutes.includes(pathname)) {
+  if (publicRoutes.includes(pathname) || isDashboardRoute(pathname)) {
     return NextResponse.next();
   }
 

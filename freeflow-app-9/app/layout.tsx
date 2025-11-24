@@ -7,7 +7,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { Context7Provider } from '@/components/providers/context7-provider'
 import { Providers } from '@/components/providers'
 import { RouteProgress } from '@/components/ui/route-progress'
-import '../styles/globals.css'
+import './globals.css'
 import { ErrorBoundary } from "react-error-boundary"
 
 const inter = Inter({ subsets: ['latin'] })
@@ -31,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="scroll-smooth">
       <body className={inter.className}>
         <ErrorBoundary fallback={<div>Something went wrong</div>}>
           <ThemeProvider
