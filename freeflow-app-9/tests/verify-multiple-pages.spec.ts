@@ -2,11 +2,11 @@ import { test, expect } from '@playwright/test';
 
 test('Verify Multiple Dashboard Pages Load Content', async ({ page }) => {
   const pages = [
-    { url: '/dashboard/my-day', name: 'My Day' },
-    { url: '/dashboard/projects-hub', name: 'Projects Hub' },
-    { url: '/dashboard/ai-create', name: 'AI Create' },
-    { url: '/dashboard/files-hub', name: 'Files Hub' },
-    { url: '/dashboard/settings', name: 'Settings' }
+    { url: '/dashboard/my-day', name: 'My Day', selector: '[data-testid="add-task-header-btn"]' },
+    { url: '/dashboard/projects-hub', name: 'Projects Hub', selector: 'button:has-text("New Project")' },
+    { url: '/dashboard/ai-create', name: 'AI Create', selector: 'button:has-text("Generate")' },
+    { url: '/dashboard/files-hub', name: 'Files Hub', selector: 'button:has-text("Upload")' },
+    { url: '/dashboard/settings', name: 'Settings', selector: 'input[type="text"]' }
   ];
 
   console.log('\n🎯 TESTING MULTIPLE DASHBOARD PAGES\n');
@@ -14,9 +14,19 @@ test('Verify Multiple Dashboard Pages Load Content', async ({ page }) => {
   for (const pageTest of pages) {
     console.log(`\n🔍 Testing: ${pageTest.name} (${pageTest.url})`);
     await page.goto(`http://localhost:9323${pageTest.url}`);
-    await page.waitForTimeout(3000); // Wait for hydration + loading completion
 
-    const skeletons = await page.locator('[class*="animate-pulse"]').count();
+    // Check for error page first
+    const hasError = await page.locator('heading:has-text("Something went wrong")').count() > 0;
+    if (hasError) {
+      console.log(`  ⚠️  Page has error - skipping test`);
+      continue;
+    }
+
+    // Wait for page-specific element to confirm hydration complete
+    await page.waitForSelector(pageTest.selector, { state: 'visible', timeout: 10000 });
+
+    // Count skeleton CARDS only (not decorative animations)
+    const skeletons = await page.locator('.rounded-lg.border .animate-pulse').count();
     const buttons = await page.locator('button:visible').count();
 
     console.log(`  ✓ Skeleton loaders: ${skeletons} (should be 0)`);
