@@ -8,6 +8,7 @@ import VideoTemplates from '@/components/video/video-templates'
 import AssetPreviewModal, { Asset } from '@/components/video/asset-preview-modal'
 import EnhancedFileUpload from '@/components/video/enhanced-file-upload'
 import { TeleprompterOverlay } from '@/components/video/teleprompter-overlay'
+import { AnnotationOverlay } from '@/components/video/annotation-overlay'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -196,6 +197,7 @@ export default function VideoStudioPage() {
   const [videoTopic, setVideoTopic] = useState<string>('')
   const [showTeleprompter, setShowTeleprompter] = useState<boolean>(false)
   const [teleprompterScript, setTeleprompterScript] = useState<string>('')
+  const [showAnnotations, setShowAnnotations] = useState<boolean>(false)
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -1165,6 +1167,20 @@ export default function VideoStudioPage() {
             )}
 
             <Button
+              data-testid="annotations-btn"
+              size="sm"
+              onClick={() => {
+                setShowAnnotations(true)
+                logger.info('Annotations overlay opened')
+                announce('Annotations overlay opened')
+              }}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Pencil className="w-4 h-4 mr-2" />
+              Annotate
+            </Button>
+
+            <Button
               data-testid="teleprompter-btn"
               size="sm"
               onClick={() => {
@@ -2081,6 +2097,18 @@ onClick={() => {
         onDownload={(asset) => {
           logger.info('Asset download started', { assetId: asset.id, name: asset.name })
         }}
+      />
+
+      {/* ANNOTATION OVERLAY */}
+      <AnnotationOverlay
+        isVisible={showAnnotations}
+        onClose={() => {
+          setShowAnnotations(false)
+          logger.info('Annotations overlay closed')
+          announce('Annotations overlay closed')
+        }}
+        canvasWidth={1280}
+        canvasHeight={720}
       />
 
       {/* TELEPROMPTER OVERLAY */}
