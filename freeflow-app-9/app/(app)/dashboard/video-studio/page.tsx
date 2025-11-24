@@ -1067,7 +1067,7 @@ export default function VideoStudioPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div data-tour="video-studio-main" className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 p-6">
         <div className="flex items-center justify-between">
@@ -1088,6 +1088,7 @@ export default function VideoStudioPage() {
           <div className="flex items-center gap-3">
             <Button
               data-testid="record-video-btn"
+              data-tour="video-record-btn"
               variant={recordingState.status === 'recording' ? 'destructive' : 'default'}
               size="sm"
               onClick={handleRecord}
@@ -1168,6 +1169,7 @@ export default function VideoStudioPage() {
 
             <Button
               data-testid="annotations-btn"
+              data-tour="video-annotate-btn"
               size="sm"
               onClick={() => {
                 setShowAnnotations(true)
@@ -1182,6 +1184,7 @@ export default function VideoStudioPage() {
 
             <Button
               data-testid="teleprompter-btn"
+              data-tour="video-teleprompter-btn"
               size="sm"
               onClick={() => {
                 setShowTeleprompter(true)
@@ -1196,6 +1199,7 @@ export default function VideoStudioPage() {
 
             <Button
               data-testid="ai-tools-btn"
+              data-tour="video-ai-tools-btn"
               size="sm"
               onClick={handleAITools}
               className="bg-purple-600 hover:bg-purple-700"

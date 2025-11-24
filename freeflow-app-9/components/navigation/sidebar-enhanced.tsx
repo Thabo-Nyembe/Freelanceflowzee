@@ -436,6 +436,7 @@ function SortableSubcategory({
                 <Link
                   key={item.href}
                   href={item.href}
+                  data-tour={`nav-${item.id}`}
                   className={cn(
                     'flex items-center gap-2.5 px-3 py-2 text-sm rounded-md transition-all duration-200 group',
                     itemIsActive
@@ -605,7 +606,7 @@ export function SidebarEnhanced() {
   }
 
   return (
-    <aside className="fixed top-16 left-0 z-40 w-64 h-[calc(100vh-4rem)] bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col">
+    <aside data-tour="sidebar-nav" className="fixed top-16 left-0 z-40 w-64 h-[calc(100vh-4rem)] bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col">
       <div className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-1">
         {/* Admin Quick Access */}
         <AdminFavorites />

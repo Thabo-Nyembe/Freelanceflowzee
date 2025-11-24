@@ -8,6 +8,8 @@ import { AdminSearch } from '@/components/admin/admin-search'
 import { MobileAdminNav } from '@/components/admin/mobile-admin-nav'
 import { KeyboardShortcutsModal } from '@/components/ui/keyboard-shortcuts-modal'
 import { ActivityLogViewer } from '@/components/activity-log-viewer'
+import { TourManager } from '@/components/onboarding/tour-manager'
+import { platformTours } from '@/lib/tours/platform-tours'
 import { ROUTE_LABELS } from '@/lib/route-utils'
 
 interface DashboardLayoutClientProps {
@@ -58,6 +60,16 @@ export default function DashboardLayoutClient({
 
       {/* Keyboard Shortcuts Modal - Press ? to open */}
       <KeyboardShortcutsModal />
+
+      {/* Interactive Onboarding Tours */}
+      <TourManager
+        tours={platformTours}
+        autoStart={false} // Set to true for new users
+        onTourComplete={(tourId, duration) => {
+          console.log(`Tour ${tourId} completed in ${duration}ms`)
+          // TODO: Track completion analytics
+        }}
+      />
     </div>
   )
 }
