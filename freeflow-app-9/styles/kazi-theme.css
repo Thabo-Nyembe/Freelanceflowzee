@@ -28,58 +28,70 @@
   }
 
   .dark {
-    /* Dark Theme Colors */
-    --kazi-bg-dark: 15 23 42;
-    --kazi-bg-dark-secondary: 30 41 59;
-    --kazi-bg-dark-tertiary: 51 65 85;
-    
-    --kazi-text-primary-dark: 248 250 252;
-    --kazi-text-secondary-dark: 203 213 225;
-    --kazi-text-tertiary-dark: 148 163 184;
-    
-    --kazi-border-dark: 51 65 85;
-    --kazi-border-dark-secondary: 71 85 105;
+    /* Dark Theme Colors - PURE BLACK */
+    --kazi-bg-dark: 0 0 0;
+    --kazi-bg-dark-secondary: 0 0 0;
+    --kazi-bg-dark-tertiary: 0 0 0;
+
+    --kazi-text-primary-dark: 255 255 255;
+    --kazi-text-secondary-dark: 255 255 255;
+    --kazi-text-tertiary-dark: 255 255 255;
+
+    --kazi-border-dark: 255 255 255;
+    --kazi-border-dark-secondary: 255 255 255;
   }
 }
 
 @layer components {
-  /* Background Classes */
+  /* Background Classes - PURE BLACK/WHITE */
   .kazi-bg-light {
-    @apply bg-white dark:bg-slate-900;
+    @apply bg-white dark:bg-black;
   }
-  
+
   .kazi-bg-secondary {
-    @apply bg-gray-50 dark:bg-slate-800;
+    @apply bg-white dark:bg-black;
   }
-  
+
   .kazi-bg-tertiary {
-    @apply bg-gray-100 dark:bg-slate-700;
+    @apply bg-white dark:bg-black;
   }
 
-  /* Text Classes */
+  .kazi-bg-dark {
+    @apply bg-black;
+  }
+
+  /* Text Classes - PURE BLACK/WHITE */
   .kazi-text-primary {
-    @apply text-gray-900 dark:text-slate-100;
-  }
-  
-  .kazi-text-secondary {
-    @apply text-gray-700 dark:text-slate-300;
-  }
-  
-  .kazi-text-tertiary {
-    @apply text-gray-500 dark:text-slate-400;
-  }
-  
-  .kazi-text-muted {
-    @apply text-gray-400 dark:text-slate-500;
+    @apply text-black dark:text-white;
   }
 
-  /* Border Classes */
-  .kazi-border {
-    @apply border-gray-200 dark:border-slate-700;
+  .kazi-text-secondary {
+    @apply text-black dark:text-white;
   }
-  
+
+  .kazi-text-tertiary {
+    @apply text-black dark:text-white;
+  }
+
+  .kazi-text-muted {
+    @apply text-black/70 dark:text-white/70;
+  }
+
+  .kazi-text-light {
+    @apply text-white;
+  }
+
+  .kazi-text-dark {
+    @apply text-black;
+  }
+
+  /* Border Classes - PURE BLACK/WHITE */
+  .kazi-border {
+    @apply border-black/10 dark:border-white/10;
+  }
+
   .kazi-border-secondary {
-    @apply border-gray-300 dark:border-slate-600;
+    @apply border-black/20 dark:border-white/20;
   }
 
   /* Typography Classes */
@@ -139,12 +151,12 @@
   }
   
   .btn-kazi-secondary {
-    @apply bg-white dark:bg-slate-800 kazi-text-primary kazi-border border font-medium px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply bg-white dark:bg-black kazi-text-primary kazi-border border font-medium px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2;
     focus-ring-color: rgb(var(--kazi-primary) / 0.5);
   }
-  
+
   .btn-kazi-ghost {
-    @apply kazi-text-secondary font-medium px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply kazi-text-secondary font-medium px-4 py-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
     focus-ring-color: rgb(var(--kazi-primary) / 0.5);
   }
 
@@ -155,7 +167,7 @@
   }
   
   .kazi-hover {
-    @apply hover:bg-gray-50 dark:hover:bg-slate-800 transition-all duration-200;
+    @apply hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-200;
   }
 
   /* Animation Classes */
@@ -237,10 +249,10 @@
 @media (prefers-contrast: high) {
   .kazi-text-tertiary,
   .kazi-text-muted {
-    @apply text-gray-800 dark:text-slate-200;
+    @apply text-black dark:text-white;
   }
-  
+
   .kazi-border {
-    @apply border-gray-400 dark:border-slate-500;
+    @apply border-black/30 dark:border-white/30;
   }
 }
