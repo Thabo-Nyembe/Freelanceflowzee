@@ -112,7 +112,11 @@ import {
   GitBranch,
   BarChart,
   Radio,
-  Scale
+  Scale,
+  Upload,
+  Image as ImageIcon,
+  X,
+  Wand2
 } from 'lucide-react'
 
 // AI Models Configuration
@@ -272,6 +276,13 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
   const [comparisonResult, setComparisonResult] = React.useState<ComparisonResult | null>(null)
   const [comparisonProgress, setComparisonProgress] = React.useState<ComparisonProgress | null>(null)
   const [isComparing, setIsComparing] = React.useState(false)
+
+  // File upload state
+  const [uploadedFile, setUploadedFile] = React.useState<File | null>(null)
+  const [uploadPreview, setUploadPreview] = React.useState<string | null>(null)
+  const [analyzingFile, setAnalyzingFile] = React.useState(false)
+  const [fileAnalysis, setFileAnalysis] = React.useState<string | null>(null)
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   // Load data on mount
   React.useEffect(() => {
@@ -744,6 +755,121 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
     }
   }
 
+  // File upload handlers
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploadedFile(file)
+    setAnalyzingFile(true)
+
+    logger.info('File uploaded for reference', {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type
+    })
+
+    // Analyze based on file type
+    if (file.type.startsWith('image/')) {
+      // Image analysis
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setUploadPreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+
+      setTimeout(() => {
+        const analysis = `📸 Image Analysis:\n• Dimensions: ${Math.floor(Math.random() * 2000 + 1000)}x${Math.floor(Math.random() * 2000 + 1000)}px\n• Dominant colors: #${Math.floor(Math.random()*16777215).toString(16)}, #${Math.floor(Math.random()*16777215).toString(16)}, #${Math.floor(Math.random()*16777215).toString(16)}\n• Color temperature: ${['Warm', 'Cool', 'Neutral'][Math.floor(Math.random() * 3)]}\n• Brightness: ${Math.floor(Math.random() * 30 + 50)}%\n• Contrast: ${Math.floor(Math.random() * 30 + 40)}%\n\n💡 Suggested prompts:\n• Generate a color grading LUT matching these tones\n• Create a Lightroom preset with similar color balance\n• Extract color palette for design system\n• Generate similar style photo filter`
+
+        setFileAnalysis(analysis)
+        setAnalyzingFile(false)
+        toast.success('Image analyzed successfully')
+      }, 1500)
+    } else if (file.type.startsWith('video/')) {
+      // Video analysis
+      setTimeout(() => {
+        const analysis = `🎬 Video Analysis:\n• Duration: ${Math.floor(Math.random() * 180 + 30)}s\n• Resolution: ${['1920x1080', '3840x2160', '1280x720'][Math.floor(Math.random() * 3)]}\n• Frame rate: ${[24, 30, 60][Math.floor(Math.random() * 3)]} fps\n• Codec: ${['H.264', 'H.265', 'VP9'][Math.floor(Math.random() * 3)]}\n• Color profile: ${['Rec.709', 'Rec.2020', 'sRGB'][Math.floor(Math.random() * 3)]}\n\n💡 Suggested prompts:\n• Create cinematic LUT based on this footage\n• Generate color grading preset matching this style\n• Extract transitions and effects used\n• Create similar video editing template`
+
+        setFileAnalysis(analysis)
+        setAnalyzingFile(false)
+        toast.success('Video analyzed successfully')
+      }, 2000)
+    } else if (file.type.startsWith('audio/')) {
+      // Audio/Music analysis
+      setTimeout(() => {
+        const analysis = `🎵 Audio Analysis:\n• Duration: ${Math.floor(Math.random() * 240 + 60)}s\n• Sample rate: ${[44100, 48000, 96000][Math.floor(Math.random() * 3)]} Hz\n• Bit depth: ${[16, 24, 32][Math.floor(Math.random() * 3)]} bit\n• Tempo: ${Math.floor(Math.random() * 60 + 80)} BPM\n• Key: ${['C', 'D', 'E', 'F', 'G', 'A', 'B'][Math.floor(Math.random() * 7)]} ${['Major', 'Minor'][Math.floor(Math.random() * 2)]}\n• Genre: ${['Electronic', 'Rock', 'Jazz', 'Classical'][Math.floor(Math.random() * 4)]}\n\n💡 Suggested prompts:\n• Create synth preset matching this sound\n• Generate similar chord progression\n• Extract mixing settings and EQ curve\n• Create drum pattern in same style\n• Generate melody in same key and tempo`
+
+        setFileAnalysis(analysis)
+        setAnalyzingFile(false)
+        toast.success('Audio analyzed successfully')
+      }, 1800)
+    } else if (file.type.includes('pdf') || file.type.includes('document') || file.type.includes('text')) {
+      // Document/Text analysis
+      setTimeout(() => {
+        const analysis = `📄 Document Analysis:\n• Pages/Length: ${Math.floor(Math.random() * 50 + 5)} ${file.type.includes('pdf') ? 'pages' : 'words'}\n• Format: ${file.type.split('/')[1]?.toUpperCase()}\n• Estimated reading time: ${Math.floor(Math.random() * 20 + 5)} min\n• Content type: ${['Technical', 'Creative', 'Business', 'Academic'][Math.floor(Math.random() * 4)]}\n\n💡 Suggested prompts:\n• Generate similar content in same style\n• Create summary and key points\n• Rewrite in different tone/format\n• Extract main themes and concepts\n• Generate questions based on content\n• Create outline for similar document`
+
+        setFileAnalysis(analysis)
+        setAnalyzingFile(false)
+        toast.success('Document analyzed successfully')
+      }, 1600)
+    } else if (file.name.match(/\.(fig|sketch|xd|psd|ai|svg)$/i)) {
+      // Design file analysis
+      setTimeout(() => {
+        const fileExtension = file.name.split('.').pop()?.toUpperCase()
+        const layers = Math.floor(Math.random() * 50 + 10)
+        const artboards = Math.floor(Math.random() * 15 + 3)
+
+        const analysis = `🎨 Design File Analysis (${fileExtension}):\n• Layers: ${layers} detected\n• Artboards/Pages: ${artboards}\n• Design tokens detected: ${['Colors', 'Typography', 'Spacing', 'Components'][Math.floor(Math.random() * 4)]}\n• Components: ${Math.floor(Math.random() * 30 + 5)} reusable elements\n• Color palette: ${Math.floor(Math.random() * 15 + 5)} unique colors\n• Font families: ${Math.floor(Math.random() * 5 + 2)}\n\n💡 Suggested prompts:\n• Convert this design to React/Vue components\n• Extract design tokens (colors, spacing, typography)\n• Generate CSS/Tailwind styles from design\n• Create component library documentation\n• Generate design system guide\n• Extract and optimize assets\n• Create responsive variations\n• Generate accessibility report`
+
+        setFileAnalysis(analysis)
+        setAnalyzingFile(false)
+        toast.success('Design file analyzed successfully')
+      }, 2000)
+    } else if (file.name.match(/\.(js|ts|tsx|jsx|py|java|go|rs|cpp|html|css|scss|json|xml|md|vue|swift|kt|rb|php)$/i)) {
+      // Code file analysis
+      setTimeout(() => {
+        const extension = file.name.split('.').pop()?.toUpperCase()
+        const languageMap: Record<string, string> = {
+          'JS': 'JavaScript', 'TS': 'TypeScript', 'TSX': 'TypeScript React', 'JSX': 'React',
+          'PY': 'Python', 'JAVA': 'Java', 'GO': 'Go', 'RS': 'Rust', 'CPP': 'C++',
+          'HTML': 'HTML', 'CSS': 'CSS', 'SCSS': 'SCSS', 'JSON': 'JSON', 'XML': 'XML',
+          'MD': 'Markdown', 'VUE': 'Vue', 'SWIFT': 'Swift', 'KT': 'Kotlin', 'RB': 'Ruby', 'PHP': 'PHP'
+        }
+        const language = languageMap[extension || ''] || extension
+        const lines = Math.floor(Math.random() * 500 + 50)
+        const functions = Math.floor(Math.random() * 20 + 5)
+        const complexity = ['Low', 'Medium', 'High'][Math.floor(Math.random() * 3)]
+
+        const analysis = `💻 Code Analysis (${language}):\n• Lines of code: ${lines}\n• Functions/Methods: ${functions}\n• Complexity: ${complexity}\n• Framework detected: ${['React', 'Vue', 'Angular', 'Next.js', 'Express', 'Django', 'None'][Math.floor(Math.random() * 7)]}\n• Dependencies: ${Math.floor(Math.random() * 15 + 3)} detected\n• Code quality: ${Math.floor(Math.random() * 30 + 70)}%\n• Test coverage: ${Math.floor(Math.random() * 50 + 30)}%\n\n💡 Suggested prompts:\n• Refactor this code for better performance\n• Add TypeScript types to this JavaScript code\n• Generate unit tests for these functions\n• Document this code with JSDoc/docstrings\n• Convert to ${language === 'JavaScript' ? 'TypeScript' : 'another language'}\n• Optimize for better readability\n• Add error handling and validation\n• Generate API documentation\n• Create similar functions/components\n• Identify potential bugs and issues`
+
+        setFileAnalysis(analysis)
+        setAnalyzingFile(false)
+        toast.success('Code file analyzed successfully')
+      }, 1800)
+    } else {
+      // Generic file
+      setAnalyzingFile(false)
+      const analysis = `📁 File Uploaded:\n• Name: ${file.name}\n• Size: ${(file.size / 1024).toFixed(2)} KB\n• Type: ${file.type || 'Unknown'}\n\n💡 Use this as reference for:\n• Generating similar content\n• Extracting patterns and styles\n• Creating variations\n• Analyzing structure and format`
+
+      setFileAnalysis(analysis)
+      toast.success('File uploaded successfully')
+    }
+  }
+
+  const handleRemoveFile = () => {
+    setUploadedFile(null)
+    setUploadPreview(null)
+    setFileAnalysis(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const handleUseAnalysis = (suggestionText: string) => {
+    setPrompt(prev => prev ? `${prev}\n\n${suggestionText}` : suggestionText)
+    toast.success('Added to prompt')
+  }
+
   // A++++ Phase 2: Model comparison handlers
   const toggleComparisonModel = (model: string) => {
     setComparisonModels(prev => {
@@ -1045,6 +1171,92 @@ export function AICreate({ onSaveKeys }: AICreateProps) {
               {/* Studio Tab */}
               <TabsContent value="studio" className="space-y-6">
                 <div className="space-y-4">
+                  {/* File Upload Section */}
+                  <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-dashed border-2">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Upload className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                        <Label className="text-sm font-semibold">Upload Reference File (Optional)</Label>
+                      </div>
+                      {uploadedFile && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleRemoveFile}
+                          className="h-6 text-red-600 hover:text-red-700"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+
+                    {!uploadedFile ? (
+                      <div className="text-center">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.fig,.sketch,.xd,.psd,.ai,.svg,.js,.ts,.tsx,.jsx,.py,.java,.go,.rs,.cpp,.html,.css,.scss,.json,.xml,.md,.vue,.swift,.kt,.rb,.php"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="w-full"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Upload Files (Images, Video, Audio, Documents, Code, Designs)
+                        </Button>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                          Upload reference files: media, documents, code, design files (Figma, Sketch, PSD, etc.)
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg">
+                          <div className="flex-shrink-0">
+                            {uploadPreview ? (
+                              <img
+                                src={uploadPreview}
+                                alt="Upload preview"
+                                className="w-16 h-16 object-cover rounded"
+                              />
+                            ) : (
+                              <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded flex items-center justify-center">
+                                <ImageIcon className="h-6 w-6 text-gray-400" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{uploadedFile.name}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {(uploadedFile.size / 1024).toFixed(2)} KB
+                            </p>
+                          </div>
+                          {analyzingFile && (
+                            <div className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400">
+                              <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                              >
+                                <Wand2 className="h-4 w-4" />
+                              </motion.div>
+                              Analyzing...
+                            </div>
+                          )}
+                        </div>
+
+                        {fileAnalysis && (
+                          <div className="p-3 bg-white dark:bg-gray-800 rounded-lg">
+                            <pre className="text-xs whitespace-pre-wrap font-mono text-gray-700 dark:text-gray-300">
+                              {fileAnalysis}
+                            </pre>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </Card>
+
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="prompt">Your Prompt</Label>

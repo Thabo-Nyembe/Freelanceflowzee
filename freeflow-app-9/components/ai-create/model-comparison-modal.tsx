@@ -138,7 +138,11 @@ export function ModelComparisonModal({
         setResults(prev => ({
           ...prev,
           [model]: {
-            ...prev[model],
+            model,
+            content: '',
+            tokens: 0,
+            cost: 0,
+            time: 0,
             status: 'error',
             error: error.message || 'Failed to generate'
           }
@@ -277,10 +281,10 @@ export function ModelComparisonModal({
                         <div className="font-semibold text-sm flex items-center gap-2">
                           {modelInfo.name}
                           {isRecommended && !comparing && (
-                            <Award className="h-4 w-4 text-yellow-500" title="Recommended" />
+                            <Award className="h-4 w-4 text-yellow-500" />
                           )}
                           {isBest && (
-                            <CheckCircle className="h-4 w-4 text-green-500" title="Your Choice" />
+                            <CheckCircle className="h-4 w-4 text-green-500" />
                           )}
                         </div>
                         <div className="text-xs text-gray-500">{modelInfo.provider}</div>
@@ -380,10 +384,10 @@ export function ModelComparisonModal({
           {/* Footer Actions */}
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              {isRecommended && !comparing && (
+              {recommendedModel && !comparing && (
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-yellow-500" />
-                  <span>Recommended: <strong>{getModelInfo(recommendedModel).name}</strong></span>
+                  <span>Recommended: <strong>{recommendedModel ? getModelInfo(recommendedModel).name : ''}</strong></span>
                 </div>
               )}
             </div>
