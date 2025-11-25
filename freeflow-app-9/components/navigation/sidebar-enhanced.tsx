@@ -54,7 +54,13 @@ import {
   Target,
   Mail,
   UserPlus,
-  BarChart2
+  BarChart2,
+  Save,
+  Trash2,
+  Play,
+  Bookmark,
+  Star,
+  CheckCircle2
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -85,7 +91,9 @@ import {
 } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { AdminFavorites } from '@/components/admin/admin-favorites'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Separator } from '@/components/ui/separator'
 
 interface SidebarItem {
   id: string
@@ -114,54 +122,49 @@ interface SidebarCategory {
 // Default navigation structure
 const DEFAULT_CATEGORIES: SidebarCategory[] = [
   {
-    id: 'admin-overview',
-    name: 'Admin & Business',
-    icon: Briefcase,
+    id: 'ai-creative-suite',
+    name: 'AI Creative Suite',
+    icon: Brain,
     visible: true,
     subcategories: [
       {
-        id: 'admin-dashboard',
-        name: 'Admin Dashboard',
+        id: 'ai-tools',
+        name: 'AI Tools',
         visible: true,
         items: [
-          { id: 'admin-overview', name: 'Admin Overview', href: '/dashboard/admin-overview', icon: BarChart2, description: 'Unified admin dashboard', badge: 'New' }
+          { id: 'ai-assistant', name: 'AI Assistant', href: '/dashboard/ai-assistant', icon: Brain, description: 'AI-powered assistant' },
+          { id: 'ai-design', name: 'AI Design', href: '/dashboard/ai-design', icon: Zap, description: 'AI design generation' },
+          { id: 'ai-create', name: 'AI Create', href: '/dashboard/ai-create', icon: Sparkles, description: 'AI content creation' }
         ]
       },
       {
-        id: 'admin-business',
-        name: 'Business Management',
+        id: 'advanced-ai',
+        name: 'Advanced AI',
         visible: true,
         items: [
-          { id: 'analytics-advanced', name: 'Analytics', href: '/dashboard/analytics-advanced', icon: TrendingUp, description: 'Business intelligence', badge: 'New' },
-          { id: 'crm', name: 'CRM & Sales', href: '/dashboard/crm', icon: Briefcase, description: 'Sales pipeline', badge: 'New' },
-          { id: 'invoicing', name: 'Invoicing', href: '/dashboard/invoicing', icon: Receipt, description: 'Billing management', badge: 'New' },
-          { id: 'client-portal-admin', name: 'Client Portal', href: '/dashboard/client-portal', icon: Users, description: 'Client management', badge: 'New' }
+          { id: 'ai-video-generation', name: 'AI Video Generation', href: '/dashboard/ai-video-generation', icon: Video, description: 'AI video creation', badge: 'New' },
+          { id: 'ai-voice-synthesis', name: 'AI Voice Synthesis', href: '/dashboard/ai-voice-synthesis', icon: Mic, description: 'AI voice generation', badge: 'New' },
+          { id: 'ai-code-completion', name: 'AI Code Completion', href: '/dashboard/ai-code-completion', icon: Code, description: 'AI coding assistant', badge: 'New' },
+          { id: 'ml-insights', name: 'ML Insights', href: '/dashboard/ml-insights', icon: Brain, description: 'Machine learning', badge: 'New' },
+          { id: 'ai-settings', name: 'AI Settings', href: '/dashboard/ai-settings', icon: Settings, description: 'AI configuration', badge: 'New' }
         ]
-      },
+      }
+    ]
+  },
+  {
+    id: 'storage',
+    name: 'Storage',
+    icon: Cloud,
+    visible: true,
+    subcategories: [
       {
-        id: 'admin-marketing',
-        name: 'Marketing & Sales',
+        id: 'storage-main',
+        name: 'Storage Management',
         visible: true,
         items: [
-          { id: 'lead-generation', name: 'Lead Generation', href: '/dashboard/lead-generation', icon: Target, description: 'Lead capture', badge: 'New' },
-          { id: 'email-marketing', name: 'Email Marketing', href: '/dashboard/email-marketing', icon: Mail, description: 'Email campaigns', badge: 'New' }
-        ]
-      },
-      {
-        id: 'admin-operations',
-        name: 'Operations',
-        visible: true,
-        items: [
-          { id: 'user-management', name: 'User Management', href: '/dashboard/user-management', icon: UserPlus, description: 'Team & permissions', badge: 'New' }
-        ]
-      },
-      {
-        id: 'admin-automation',
-        name: 'Business Automation',
-        visible: true,
-        items: [
-          { id: 'email-agent', name: 'Business Agent', href: '/dashboard/email-agent', icon: Zap, description: 'AI automation hub', badge: 'New' },
-          { id: 'email-agent-setup', name: 'Setup Integrations', href: '/dashboard/email-agent/setup', icon: Settings, description: '5-min setup' }
+          { id: 'files-hub', name: 'Files Hub', href: '/dashboard/files-hub', icon: FolderOpen, description: 'File management', badge: 'NewTab' },
+          { id: 'cloud-storage', name: 'Cloud Storage', href: '/dashboard/cloud-storage', icon: Cloud, description: 'Cloud files', badge: 'New' },
+          { id: 'resource-library', name: 'Resource Library', href: '/dashboard/resource-library', icon: BookOpen, description: 'Asset library', badge: 'New' }
         ]
       }
     ]
@@ -243,56 +246,58 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'calendar', name: 'Calendar', href: '/dashboard/calendar', icon: Calendar, description: 'Scheduling' },
           { id: 'bookings', name: 'Bookings', href: '/dashboard/bookings', icon: Calendar, description: 'Booking system' }
         ]
-      },
-      {
-        id: 'white-label-platform',
-        name: 'White Label & Platform',
-        visible: true,
-        items: [
-          { id: 'white-label', name: 'White Label', href: '/dashboard/white-label', icon: Crown, description: 'Rebrand platform', badge: 'Pro' },
-          { id: 'plugins', name: 'Plugins', href: '/dashboard/plugin-marketplace', icon: Package, description: 'App integrations', badge: 'New' },
-          { id: 'desktop-app', name: 'Desktop App', href: '/dashboard/desktop-app', icon: Monitor, description: 'Desktop version', badge: 'New' },
-          { id: 'mobile-app', name: 'Mobile App', href: '/dashboard/mobile-app', icon: Smartphone, description: 'Mobile version', badge: 'New' }
-        ]
-      },
-      {
-        id: 'account',
-        name: 'Account',
-        visible: true,
-        items: [
-          { id: 'profile', name: 'Profile', href: '/dashboard/profile', icon: User, description: 'Your profile', badge: 'New' },
-          { id: 'settings', name: 'Settings', href: '/dashboard/settings', icon: Settings, description: 'Settings' },
-          { id: 'notifications', name: 'Notifications', href: '/dashboard/notifications', icon: Bell, description: 'Alerts' }
-        ]
       }
     ]
   },
   {
-    id: 'ai-creative-suite',
-    name: 'AI Creative Suite',
-    icon: Brain,
+    id: 'admin-overview',
+    name: 'Business Admin Intelligence',
+    icon: Briefcase,
     visible: true,
     subcategories: [
       {
-        id: 'ai-tools',
-        name: 'AI Tools',
+        id: 'admin-dashboard',
+        name: 'Admin Dashboard',
         visible: true,
         items: [
-          { id: 'ai-assistant', name: 'AI Assistant', href: '/dashboard/ai-assistant', icon: Brain, description: 'AI-powered assistant' },
-          { id: 'ai-design', name: 'AI Design', href: '/dashboard/ai-design', icon: Zap, description: 'AI design generation' },
-          { id: 'ai-create', name: 'AI Create', href: '/dashboard/ai-create', icon: Sparkles, description: 'AI content creation' }
+          { id: 'admin-overview', name: 'Admin Overview', href: '/dashboard/admin-overview', icon: BarChart2, description: 'Unified admin dashboard', badge: 'New' }
         ]
       },
       {
-        id: 'advanced-ai',
-        name: 'Advanced AI',
+        id: 'admin-business',
+        name: 'Business Management',
         visible: true,
         items: [
-          { id: 'ai-video-generation', name: 'AI Video Generation', href: '/dashboard/ai-video-generation', icon: Video, description: 'AI video creation', badge: 'New' },
-          { id: 'ai-voice-synthesis', name: 'AI Voice Synthesis', href: '/dashboard/ai-voice-synthesis', icon: Mic, description: 'AI voice generation', badge: 'New' },
-          { id: 'ai-code-completion', name: 'AI Code Completion', href: '/dashboard/ai-code-completion', icon: Code, description: 'AI coding assistant', badge: 'New' },
-          { id: 'ml-insights', name: 'ML Insights', href: '/dashboard/ml-insights', icon: Brain, description: 'Machine learning', badge: 'New' },
-          { id: 'ai-settings', name: 'AI Settings', href: '/dashboard/ai-settings', icon: Settings, description: 'AI configuration', badge: 'New' }
+          { id: 'analytics-advanced', name: 'Analytics', href: '/dashboard/analytics-advanced', icon: TrendingUp, description: 'Business intelligence', badge: 'New' },
+          { id: 'crm', name: 'CRM & Sales', href: '/dashboard/crm', icon: Briefcase, description: 'Sales pipeline', badge: 'New' },
+          { id: 'invoicing', name: 'Invoicing', href: '/dashboard/invoicing', icon: Receipt, description: 'Billing management', badge: 'New' },
+          { id: 'client-portal-admin', name: 'Client Portal', href: '/dashboard/client-portal', icon: Users, description: 'Client management', badge: 'New' }
+        ]
+      },
+      {
+        id: 'admin-marketing',
+        name: 'Marketing & Sales',
+        visible: true,
+        items: [
+          { id: 'lead-generation', name: 'Lead Generation', href: '/dashboard/lead-generation', icon: Target, description: 'Lead capture', badge: 'New' },
+          { id: 'email-marketing', name: 'Email Marketing', href: '/dashboard/email-marketing', icon: Mail, description: 'Email campaigns', badge: 'New' }
+        ]
+      },
+      {
+        id: 'admin-operations',
+        name: 'Operations',
+        visible: true,
+        items: [
+          { id: 'user-management', name: 'User Management', href: '/dashboard/user-management', icon: UserPlus, description: 'Team & permissions', badge: 'New' }
+        ]
+      },
+      {
+        id: 'admin-automation',
+        name: 'Business Automation',
+        visible: true,
+        items: [
+          { id: 'email-agent', name: 'Business Agent', href: '/dashboard/email-agent', icon: Zap, description: 'AI automation hub', badge: 'New' },
+          { id: 'email-agent-setup', name: 'Setup Integrations', href: '/dashboard/email-agent/setup', icon: Settings, description: '5-min setup' }
         ]
       }
     ]
@@ -336,17 +341,29 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         name: 'Portfolio',
         visible: true,
         items: [
-          { id: 'cv-portfolio', name: 'CV Portfolio', href: '/dashboard/cv-portfolio', icon: Briefcase, description: 'CV builder' },
-          { id: 'files-hub', name: 'Files Hub', href: '/dashboard/files-hub', icon: FolderOpen, description: 'File management' }
+          { id: 'cv-portfolio', name: 'CV Portfolio', href: '/dashboard/cv-portfolio', icon: Briefcase, description: 'CV builder' }
         ]
-      },
+      }
+    ]
+  },
+  {
+    id: 'settings',
+    name: 'Settings',
+    icon: Settings,
+    visible: true,
+    subcategories: [
       {
-        id: 'resources',
-        name: 'Resources',
+        id: 'settings-main',
+        name: 'Settings & Configuration',
         visible: true,
         items: [
-          { id: 'cloud-storage', name: 'Cloud Storage', href: '/dashboard/cloud-storage', icon: Cloud, description: 'Cloud files', badge: 'New' },
-          { id: 'resource-library', name: 'Resource Library', href: '/dashboard/resource-library', icon: BookOpen, description: 'Asset library', badge: 'New' }
+          { id: 'settings', name: 'Settings', href: '/dashboard/settings', icon: Settings, description: 'Account settings', badge: 'NewTab' },
+          { id: 'profile', name: 'Profile', href: '/dashboard/profile', icon: User, description: 'Your profile', badge: 'New' },
+          { id: 'notifications', name: 'Notifications', href: '/dashboard/notifications', icon: Bell, description: 'Alerts', badge: 'NewTab' },
+          { id: 'white-label', name: 'White Label', href: '/dashboard/white-label', icon: Crown, description: 'Rebrand platform', badge: 'Pro' },
+          { id: 'plugins', name: 'Plugins', href: '/dashboard/plugin-marketplace', icon: Package, description: 'App integrations', badge: 'New' },
+          { id: 'desktop-app', name: 'Desktop App', href: '/dashboard/desktop-app', icon: Monitor, description: 'Desktop version', badge: 'New' },
+          { id: 'mobile-app', name: 'Mobile App', href: '/dashboard/mobile-app', icon: Smartphone, description: 'Mobile version', badge: 'New' }
         ]
       }
     ]
@@ -368,7 +385,7 @@ function SortableSubcategory({
   isExpanded: boolean
   onToggle: () => void
   isActive: (href: string) => boolean
-  pathname: string
+  pathname: string | null
   isCustomizing: boolean
 }) {
   const {
@@ -481,14 +498,20 @@ export function SidebarEnhanced() {
   const pathname = usePathname()
   const [categories, setCategories] = useState<SidebarCategory[]>(DEFAULT_CATEGORIES)
   const [expandedCategories, setExpandedCategories] = useState<string[]>([
-    'admin-overview',
-    'business-intelligence',
     'ai-creative-suite',
-    'creative-studio'
+    'storage',
+    'business-intelligence',
+    'admin-overview',
+    'creative-studio',
+    'settings'
   ])
   const [expandedSubcategories, setExpandedSubcategories] = useState<string[]>([])
   const [isCustomizing, setIsCustomizing] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [presetName, setPresetName] = useState('')
+  const [savedPresets, setSavedPresets] = useState<Array<{id: string, name: string, config: SidebarCategory[]}>>([])
+  const [activePreset, setActivePreset] = useState<string>('default')
+  const [showPresetSaved, setShowPresetSaved] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -497,9 +520,15 @@ export function SidebarEnhanced() {
     })
   )
 
-  // Load saved configuration from localStorage
+  // Load saved configuration and presets from localStorage
   useEffect(() => {
+    // Ensure this only runs on client
+    if (typeof window === 'undefined') return
+
     const saved = localStorage.getItem('kazi-navigation-config')
+    const presets = localStorage.getItem('kazi-navigation-presets')
+    const active = localStorage.getItem('kazi-navigation-active-preset')
+
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
@@ -507,6 +536,37 @@ export function SidebarEnhanced() {
       } catch (e) {
         console.error('Failed to load navigation config:', e)
       }
+    }
+
+    if (presets) {
+      try {
+        const parsedPresets = JSON.parse(presets)
+        setSavedPresets(parsedPresets)
+      } catch (e) {
+        console.error('Failed to load presets:', e)
+      }
+    }
+
+    if (active) {
+      setActivePreset(active)
+    }
+
+    // Track that user has seen the customization feature
+    const hasSeenCustomization = localStorage.getItem('kazi-seen-customization')
+    if (!hasSeenCustomization) {
+      const timeoutId = setTimeout(() => {
+        toast.info('💡 Pro Tip: Customize your navigation!', {
+          description: 'Click "Customize Navigation" to personalize your workspace',
+          duration: 8000,
+          action: {
+            label: 'Show me',
+            onClick: () => setIsSettingsOpen(true)
+          }
+        })
+        localStorage.setItem('kazi-seen-customization', 'true')
+      }, 3000)
+
+      return () => clearTimeout(timeoutId)
     }
   }, [])
 
@@ -530,15 +590,121 @@ export function SidebarEnhanced() {
     console.log('💾 Saving navigation configuration:', newCategories)
     setCategories(newCategories)
     localStorage.setItem('kazi-navigation-config', JSON.stringify(newCategories))
-    toast.success('Navigation saved', { duration: 2000 })
+
+    // Track customization event
+    const customizationCount = parseInt(localStorage.getItem('kazi-customization-count') || '0') + 1
+    localStorage.setItem('kazi-customization-count', customizationCount.toString())
+
+    toast.success('✅ Navigation saved successfully', {
+      description: `Your personalized workspace is ready! (${customizationCount} customizations)`,
+      duration: 3000
+    })
+  }
+
+  const saveAsPreset = () => {
+    if (!presetName.trim()) {
+      toast.error('Please enter a preset name')
+      return
+    }
+
+    const newPreset = {
+      id: Date.now().toString(),
+      name: presetName,
+      config: categories
+    }
+
+    const updatedPresets = [...savedPresets, newPreset]
+    setSavedPresets(updatedPresets)
+    localStorage.setItem('kazi-navigation-presets', JSON.stringify(updatedPresets))
+    setActivePreset(newPreset.id)
+    localStorage.setItem('kazi-navigation-active-preset', newPreset.id)
+    setPresetName('')
+    setShowPresetSaved(true)
+
+    toast.success('🎯 Preset saved!', {
+      description: `"${newPreset.name}" is now available for quick switching`,
+      duration: 4000
+    })
+
+    setTimeout(() => setShowPresetSaved(false), 3000)
+  }
+
+  const loadPreset = (presetId: string) => {
+    if (presetId === 'default') {
+      setCategories(DEFAULT_CATEGORIES)
+      localStorage.setItem('kazi-navigation-config', JSON.stringify(DEFAULT_CATEGORIES))
+    } else {
+      const preset = savedPresets.find(p => p.id === presetId)
+      if (preset) {
+        setCategories(preset.config)
+        localStorage.setItem('kazi-navigation-config', JSON.stringify(preset.config))
+        toast.success(`Loaded "${preset.name}" preset`, { duration: 2000 })
+      }
+    }
+    setActivePreset(presetId)
+    localStorage.setItem('kazi-navigation-active-preset', presetId)
+  }
+
+  const deletePreset = (presetId: string) => {
+    const preset = savedPresets.find(p => p.id === presetId)
+    const updatedPresets = savedPresets.filter(p => p.id !== presetId)
+    setSavedPresets(updatedPresets)
+    localStorage.setItem('kazi-navigation-presets', JSON.stringify(updatedPresets))
+
+    if (activePreset === presetId) {
+      loadPreset('default')
+    }
+
+    toast.success(`Deleted "${preset?.name}" preset`, { duration: 2000 })
   }
 
   const resetToDefault = () => {
     console.log('🔄 Resetting navigation to defaults')
     setCategories(DEFAULT_CATEGORIES)
-    localStorage.removeItem('kazi-navigation-config')
-    setIsSettingsOpen(false)
-    toast.success('Navigation reset to defaults', { duration: 2000 })
+    localStorage.setItem('kazi-navigation-config', JSON.stringify(DEFAULT_CATEGORIES))
+    setActivePreset('default')
+    localStorage.setItem('kazi-navigation-active-preset', 'default')
+
+    toast.success('Navigation reset to defaults', {
+      description: 'Your navigation has been restored to the original layout',
+      duration: 2000
+    })
+  }
+
+  const applyWorkflowPreset = (workflow: string) => {
+    let workflowConfig: SidebarCategory[] = []
+
+    switch (workflow) {
+      case 'creator':
+        workflowConfig = DEFAULT_CATEGORIES.map(cat => ({
+          ...cat,
+          visible: ['ai-creative-suite', 'creative-studio', 'storage'].includes(cat.id)
+        }))
+        break
+      case 'business':
+        workflowConfig = DEFAULT_CATEGORIES.map(cat => ({
+          ...cat,
+          visible: ['business-intelligence', 'admin-overview', 'settings'].includes(cat.id)
+        }))
+        break
+      case 'developer':
+        workflowConfig = DEFAULT_CATEGORIES.map(cat => ({
+          ...cat,
+          visible: ['ai-creative-suite', 'business-intelligence', 'storage'].includes(cat.id)
+        }))
+        break
+      case 'all':
+        workflowConfig = DEFAULT_CATEGORIES
+        break
+    }
+
+    setCategories(workflowConfig)
+    saveConfiguration(workflowConfig)
+
+    toast.success(`🎨 Applied ${workflow} workflow`, {
+      description: 'Navigation optimized for your workflow',
+      duration: 3000
+    })
   }
 
   const toggleCategory = (categoryId: string) => {
@@ -602,102 +768,13 @@ export function SidebarEnhanced() {
   }
 
   const isActive = (href: string) => {
+    if (!pathname) return false
     return pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
   }
 
   return (
     <aside data-tour="sidebar-nav" className="fixed top-16 left-0 z-40 w-64 h-[calc(100vh-4rem)] bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col">
       <div className="flex-1 overflow-y-auto overscroll-contain scroll-smooth p-4 space-y-1">
-        {/* Admin Quick Access */}
-        <AdminFavorites />
-
-        {/* Customize Navigation Button */}
-        <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-          <DialogTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full mb-4 justify-start gap-2"
-            >
-              <Settings className="h-4 w-4" />
-              Customize Navigation
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Customize Your Navigation</DialogTitle>
-              <DialogDescription>
-                Drag to reorder, toggle visibility, or reset to defaults. Changes save automatically.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="max-h-[65vh] overflow-y-auto space-y-6 py-4 pr-2">
-              {/* Customization Mode Toggle */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="customize-mode" className="text-sm font-medium">
-                    Reorder Mode
-                  </Label>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Enable to drag and reorder subcategories
-                  </p>
-                </div>
-                <Switch
-                  id="customize-mode"
-                  checked={isCustomizing}
-                  onCheckedChange={(checked) => {
-                    setIsCustomizing(checked)
-                    toast.info(checked ? 'Reorder mode enabled - drag to reorder' : 'Reorder mode disabled', { duration: 2000 })
-                  }}
-                />
-              </div>
-
-              {/* Categories Visibility */}
-              {categories.map((category) => (
-                <div key={category.id} className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <category.icon className="h-4 w-4" />
-                      <span className="font-semibold">{category.name}</span>
-                    </div>
-                    <Switch
-                      checked={category.visible}
-                      onCheckedChange={() => toggleCategoryVisibility(category.id)}
-                    />
-                  </div>
-
-                  {/* Subcategories */}
-                  <div className="ml-6 space-y-2">
-                    {category.subcategories.map((subcategory) => (
-                      <div key={subcategory.id} className="flex items-center justify-between text-sm">
-                        <span className={cn(!subcategory.visible && 'text-gray-400')}>
-                          {subcategory.name}
-                        </span>
-                        <Switch
-                          checked={subcategory.visible}
-                          onCheckedChange={() =>
-                            toggleSubcategoryVisibility(category.id, subcategory.id)
-                          }
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-
-              {/* Reset Button */}
-              <Button
-                variant="outline"
-                onClick={resetToDefault}
-                className="w-full"
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Reset to Default
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
         {/* Navigation Categories */}
         {categories.map((category) => {
           if (!category.visible) return null
@@ -784,6 +861,332 @@ export function SidebarEnhanced() {
             </span>
           </Link>
         </div>
+      </div>
+
+      {/* Customize Navigation - Bottom Section */}
+      <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+        <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+          <DialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-start gap-2"
+            >
+              <Settings className="h-4 w-4" />
+              Customize Navigation
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-white dark:bg-gray-950">
+            <DialogHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Wand2 className="h-6 w-6 text-blue-600" />
+                    Customize Your Workspace
+                  </DialogTitle>
+                  <DialogDescription className="text-gray-600 dark:text-gray-400 mt-2">
+                    Personalize your navigation to match your workflow. Changes save automatically.
+                  </DialogDescription>
+                </div>
+                <AnimatePresence>
+                  {showPresetSaved && (
+                    <motion.div
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      className="flex items-center gap-2 text-green-600"
+                    >
+                      <CheckCircle2 className="h-5 w-5" />
+                      <span className="font-medium">Saved!</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </DialogHeader>
+
+            <Tabs defaultValue="customize" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-4">
+                <TabsTrigger value="presets" className="flex items-center gap-2">
+                  <Bookmark className="h-4 w-4" />
+                  Quick Presets
+                </TabsTrigger>
+                <TabsTrigger value="customize" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Customize
+                </TabsTrigger>
+                <TabsTrigger value="saved" className="flex items-center gap-2">
+                  <Star className="h-4 w-4" />
+                  My Presets ({savedPresets.length})
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Quick Workflow Presets */}
+              <TabsContent value="presets" className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <Button
+                    variant="outline"
+                    className="h-auto flex-col items-start p-4 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                    onClick={() => applyWorkflowPreset('creator')}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Palette className="h-5 w-5 text-purple-600" />
+                      <h3 className="font-semibold">Creator Mode</h3>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 text-left">
+                      Optimized for content creation, video editing, and creative work
+                    </p>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="h-auto flex-col items-start p-4 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                    onClick={() => applyWorkflowPreset('business')}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Briefcase className="h-5 w-5 text-blue-600" />
+                      <h3 className="font-semibold">Business Mode</h3>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 text-left">
+                      Focus on analytics, admin tools, and business intelligence
+                    </p>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="h-auto flex-col items-start p-4 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                    onClick={() => applyWorkflowPreset('developer')}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Code className="h-5 w-5 text-green-600" />
+                      <h3 className="font-semibold">Developer Mode</h3>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 text-left">
+                      Streamlined for development, AI tools, and technical work
+                    </p>
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    className="h-auto flex-col items-start p-4 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                    onClick={() => applyWorkflowPreset('all')}
+                  >
+                    <div className="flex items-center gap-2 mb-2">
+                      <Star className="h-5 w-5 text-yellow-600" />
+                      <h3 className="font-semibold">Full Access</h3>
+                    </div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400 text-left">
+                      Show all features and tools for maximum flexibility
+                    </p>
+                  </Button>
+                </div>
+
+                <Separator className="my-4" />
+
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-1">Pro Tip</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Apply a preset, then customize it further and save as your own! Perfect for creating role-specific views for your team.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Customization Tab */}
+              <TabsContent value="customize" className="space-y-4">
+                <div className="max-h-[50vh] overflow-y-auto space-y-4 pr-2">
+              {/* Customization Mode Toggle */}
+              <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div>
+                  <Label htmlFor="customize-mode" className="text-sm font-medium text-gray-900 dark:text-white">
+                    Reorder Mode
+                  </Label>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    Enable to drag and reorder subcategories
+                  </p>
+                </div>
+                <Switch
+                  id="customize-mode"
+                  checked={isCustomizing}
+                  onCheckedChange={(checked) => {
+                    setIsCustomizing(checked)
+                    toast.info(checked ? 'Reorder mode enabled - drag to reorder' : 'Reorder mode disabled', { duration: 2000 })
+                  }}
+                />
+              </div>
+
+              {/* Categories Visibility */}
+              {categories.map((category) => (
+                <div key={category.id} className="space-y-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <category.icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      <span className="font-semibold text-gray-900 dark:text-white">{category.name}</span>
+                    </div>
+                    <Switch
+                      checked={category.visible}
+                      onCheckedChange={() => toggleCategoryVisibility(category.id)}
+                    />
+                  </div>
+
+                  {/* Subcategories */}
+                  <div className="ml-7 space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    {category.subcategories.map((subcategory) => (
+                      <div key={subcategory.id} className="flex items-center justify-between text-sm py-1">
+                        <span className={cn(
+                          "text-gray-700 dark:text-gray-300",
+                          !subcategory.visible && 'text-gray-400 dark:text-gray-600 line-through'
+                        )}>
+                          {subcategory.name}
+                        </span>
+                        <Switch
+                          checked={subcategory.visible}
+                          onCheckedChange={() =>
+                            toggleSubcategoryVisibility(category.id, subcategory.id)
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+                  {/* Save as Preset Section */}
+                  <div className="mt-6 p-4 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                      <Save className="h-4 w-4 text-purple-600" />
+                      Save Current Layout as Preset
+                    </h4>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="e.g., My Morning Workflow"
+                        value={presetName}
+                        onChange={(e) => setPresetName(e.target.value)}
+                        className="flex-1"
+                        onKeyDown={(e) => e.key === 'Enter' && saveAsPreset()}
+                      />
+                      <Button onClick={saveAsPreset} className="bg-purple-600 hover:bg-purple-700">
+                        <Save className="h-4 w-4 mr-2" />
+                        Save
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Reset Button */}
+                  <Button
+                    variant="outline"
+                    onClick={resetToDefault}
+                    className="w-full"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Reset to Default Layout
+                  </Button>
+                </div>
+              </TabsContent>
+
+              {/* My Presets Tab */}
+              <TabsContent value="saved" className="space-y-4">
+                {savedPresets.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Bookmark className="h-16 w-16 mx-auto text-gray-300 dark:text-gray-700 mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      No saved presets yet
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                      Customize your navigation and save it as a preset for quick access
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const tabs = document.querySelector('[value="customize"]') as HTMLElement
+                        tabs?.click()
+                      }}
+                    >
+                      Start Customizing
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {/* Default Preset */}
+                    <div
+                      className={cn(
+                        'p-4 rounded-lg border-2 transition-all cursor-pointer',
+                        activePreset === 'default'
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                          : 'border-gray-200 dark:border-gray-800 hover:border-blue-300'
+                      )}
+                      onClick={() => loadPreset('default')}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900">
+                            <Star className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900 dark:text-white">Default Layout</h4>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">Original KAZI workspace</p>
+                          </div>
+                        </div>
+                        {activePreset === 'default' && (
+                          <CheckCircle2 className="h-5 w-5 text-blue-600" />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* User Saved Presets */}
+                    {savedPresets.map((preset) => (
+                      <div
+                        key={preset.id}
+                        className={cn(
+                          'p-4 rounded-lg border-2 transition-all cursor-pointer',
+                          activePreset === preset.id
+                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                            : 'border-gray-200 dark:border-gray-800 hover:border-purple-300'
+                        )}
+                        onClick={() => loadPreset(preset.id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900">
+                              <Bookmark className="h-5 w-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 dark:text-white">{preset.name}</h4>
+                              <p className="text-xs text-gray-600 dark:text-gray-400">
+                                {preset.config.filter(c => c.visible).length} sections visible
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {activePreset === preset.id && (
+                              <CheckCircle2 className="h-5 w-5 text-purple-600" />
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                if (confirm(`Delete "${preset.name}" preset?`)) {
+                                  deletePreset(preset.id)
+                                }
+                              }}
+                              className="hover:bg-red-100 hover:text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </DialogContent>
+        </Dialog>
       </div>
     </aside>
   )
