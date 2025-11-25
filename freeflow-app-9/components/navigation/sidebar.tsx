@@ -82,6 +82,13 @@ const sidebarItems: SidebarItem[] = [
     description: 'Generate creative assets with AI'
   },
   {
+    name: 'Growth Hub',
+    href: '/dashboard/growth-hub',
+    icon: TrendingUp,
+    description: 'AI-powered business growth & monetization',
+    badge: 'New'
+  },
+  {
     name: 'My Day',
     href: '/dashboard/my-day',
     icon: Calendar,

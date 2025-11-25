@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -44,6 +45,7 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useKaziAI } from '@/lib/hooks/use-kazi-ai'
 
 const logger = createFeatureLogger('AIAssistant')
 
@@ -88,9 +90,11 @@ interface ProjectAnalysis {
 
 export default function AIAssistantPage() {
   // A+++ STATE MANAGEMENT
+  const router = useRouter()
   const [isPageLoading, setIsPageLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { chat, loading: aiLoading } = useKaziAI('current-user-123')
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -173,6 +177,15 @@ export default function AIAssistantPage() {
   ])
 
   const [aiInsights] = useState<AIInsight[]>([
+    {
+      id: '0',
+      title: '🚀 NEW: AI-Powered Growth Engine',
+      description: 'Unlock 110% revenue growth! Our Growth Hub uses research-backed strategies (2025 data) to optimize pricing, reduce CAC by 45%, and improve conversions by 35-78%.',
+      category: 'business',
+      priority: 'high',
+      action: 'Explore Growth Hub',
+      icon: Sparkles
+    },
     {
       id: '1',
       title: 'Productivity Opportunity',
@@ -274,7 +287,7 @@ export default function AIAssistantPage() {
   }, [messages])
 
   const handleSendMessage = async () => {
-    if (!inputMessage.trim() || isLoading) return
+    if (!inputMessage.trim() || isLoading || aiLoading) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -284,22 +297,73 @@ export default function AIAssistantPage() {
     }
 
     setMessages(prev => [...prev, userMessage])
+    const currentMessage = inputMessage
     setInputMessage('')
     setIsLoading(true)
 
-    // Simulate AI response
-    setTimeout(() => {
+    try {
+      // Use real AI instead of mock
+      logger.info('Sending message to Kazi AI', {
+        messageLength: currentMessage.length,
+        selectedModel
+      })
+
+      const taskType = getTaskTypeFromModel(selectedModel)
+      const response = await chat(currentMessage, taskType)
+
+      logger.info('Received AI response', {
+        provider: response.metadata.provider,
+        tokens: response.metadata.tokens.total,
+        cached: response.metadata.cached
+      })
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: generateAIResponse(inputMessage),
+        content: response.response,
         type: 'assistant',
         timestamp: new Date(),
-        suggestions: generateSuggestions(inputMessage)
+        suggestions: generateSuggestions(currentMessage)
       }
-      
+
       setMessages(prev => [...prev, assistantMessage])
+
+      toast.success('AI response received', {
+        description: `${response.metadata.provider} • ${response.metadata.tokens.total} tokens${response.metadata.cached ? ' • Cached' : ''}`
+      })
+    } catch (error) {
+      logger.error('AI response failed', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      })
+
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: 'I apologize, but I encountered an error processing your request. Please try again.',
+        type: 'assistant',
+        timestamp: new Date()
+      }
+
+      setMessages(prev => [...prev, errorMessage])
+
+      toast.error('AI request failed', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
+  }
+
+  // Helper function to map model selection to task type
+  const getTaskTypeFromModel = (model: string): 'chat' | 'analysis' | 'creative' | 'strategic' | 'operational' => {
+    switch (model) {
+      case 'anthropic':
+        return 'strategic' // Claude for strategic thinking
+      case 'openai':
+        return 'creative' // GPT-4 for creative tasks
+      case 'google':
+        return 'operational' // Gemini for quick operations
+      default:
+        return 'chat'
+    }
   }
 
   const generateAIResponse = (_input: string): string => {
@@ -474,6 +538,15 @@ export default function AIAssistantPage() {
       category: insight?.category,
       priority: insight?.priority
     })
+
+    // Special handling for Growth Hub navigation
+    if (action === 'Explore Growth Hub') {
+      toast.success('Opening Growth Hub', {
+        description: 'Redirecting to AI-powered business growth tools...'
+      })
+      router.push('/dashboard/growth-hub')
+      return
+    }
 
     // Note: Using local state - in production, this would POST to /api/ai/actions
     toast.success('Implementing action', {

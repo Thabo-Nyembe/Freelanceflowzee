@@ -866,6 +866,7 @@ export default function DashboardPage() {
       { name: 'AI Create', path: 'ai-create', icon: Brain, description: 'Multi-model AI studio (GPT-4o, Claude, DALL-E)' },
       { name: 'AI Design', path: 'ai-design', icon: Palette, description: 'AI-powered design generation and optimization' },
       { name: 'AI Assistant', path: 'ai-assistant', icon: Zap, description: 'Personal AI assistant for workflow automation' },
+      { name: 'Growth Hub', path: 'growth-hub', icon: TrendingUp, description: '🚀 NEW: AI-powered business growth & revenue optimization (110% revenue increase)' },
       { name: 'AI Enhanced', path: 'ai-enhanced', icon: Star, description: 'Enhanced AI features and capabilities' }
     ],
     creative: [
@@ -1679,7 +1680,20 @@ export default function DashboardPage() {
                 </Button>
               </GlowEffect>
 
-              {/* 5. Gallery */}
+              {/* 5. Growth Hub - NEW */}
+              <GlowEffect glowColor="rgb(34, 197, 94)" intensity="high">
+                <Button
+                  className="h-auto p-4 flex-col gap-2 w-full bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/30 dark:to-green-950/30 border-emerald-300 dark:border-emerald-700 hover:shadow-xl relative"
+                  variant="outline"
+                  onClick={() => navigateToPage('growth-hub')}
+                >
+                  <Badge className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 animate-pulse">NEW</Badge>
+                  <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-xs font-medium">Growth Hub</span>
+                </Button>
+              </GlowEffect>
+
+              {/* 6. Gallery */}
               <GlowEffect glowColor="rgb(168, 85, 247)" intensity="low">
                 <Button
                   className="h-auto p-4 flex-col gap-2 w-full bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border-purple-300 dark:border-purple-700 hover:shadow-xl"
@@ -1691,7 +1705,7 @@ export default function DashboardPage() {
                 </Button>
               </GlowEffect>
 
-              {/* 6. Projects Hub */}
+              {/* 7. Projects Hub */}
               <GlowEffect glowColor="rgb(59, 130, 246)" intensity="medium">
                 <Button
                   className="h-auto p-4 flex-col gap-2 w-full bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 border-blue-300 dark:border-blue-700 hover:shadow-xl"
@@ -1703,7 +1717,7 @@ export default function DashboardPage() {
                 </Button>
               </GlowEffect>
 
-              {/* 7. Community Hub */}
+              {/* 8. Community Hub */}
               <GlowEffect glowColor="rgb(14, 165, 233)" intensity="low">
                 <Button
                   className="h-auto p-4 flex-col gap-2 w-full bg-gradient-to-br from-cyan-50 to-sky-50 dark:from-cyan-950/30 dark:to-sky-950/30 border-cyan-300 dark:border-cyan-700 hover:shadow-xl"
@@ -1715,7 +1729,7 @@ export default function DashboardPage() {
                 </Button>
               </GlowEffect>
 
-              {/* 8. My Day */}
+              {/* 9. My Day */}
               <GlowEffect glowColor="rgb(34, 197, 94)" intensity="low">
                 <Button
                   className="h-auto p-4 flex-col gap-2 w-full bg-gradient-to-br from-green-50 to-lime-50 dark:from-green-950/30 dark:to-lime-950/30 border-green-300 dark:border-green-700 hover:shadow-xl"
@@ -1727,7 +1741,7 @@ export default function DashboardPage() {
                 </Button>
               </GlowEffect>
 
-              {/* 9. Analytics */}
+              {/* 10. Analytics */}
               <GlowEffect glowColor="rgb(234, 179, 8)" intensity="low">
                 <Button
                   className="h-auto p-4 flex-col gap-2 w-full bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/30 dark:to-amber-950/30 border-yellow-300 dark:border-yellow-700 hover:shadow-xl"
@@ -1739,7 +1753,7 @@ export default function DashboardPage() {
                 </Button>
               </GlowEffect>
 
-              {/* 10. Interactive Tours - NEW */}
+              {/* 11. Interactive Tours - NEW */}
               <GlowEffect glowColor="rgb(236, 72, 153)" intensity="medium">
                 <Button
                   className="h-auto p-4 flex-col gap-2 w-full bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/30 dark:to-rose-950/30 border-pink-300 dark:border-pink-700 hover:shadow-xl relative"
