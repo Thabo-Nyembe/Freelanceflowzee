@@ -26,9 +26,12 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { GlowEffect } from '@/components/ui/glow-effect'
 import { BorderTrail } from '@/components/ui/border-trail'
 import { NumberFlow } from '@/components/ui/number-flow'
+import { OAuthProviders } from '@/components/auth/OAuthProviders'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()
+  const supabase = createClient()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -41,32 +44,33 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate login delay
-    setTimeout(() => {
-      if (formData.email.includes('@') && formData.password.length > 0) {
-        // Store auth state
-        localStorage.setItem('kazi-auth', 'true')
-        localStorage.setItem('kazi-user', JSON.stringify({
-          email: formData.email,
-          name: 'Professional User'
-        }))
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      })
 
-        // Success feedback
-        toast.success('Login successful!')
-
-        setTimeout(() => {
-          alert(`✨ Welcome Back to KAZI!\n\nNext Steps:\n• Explore your dashboard and projects\n• Check notifications and messages\n• Resume work on active projects\n• Review your calendar and schedule\n• Access new AI-powered features\n• Collaborate with your team`)
-        }, 500)
-
-        // Redirect to dashboard after 2 seconds
-        setTimeout(() => {
-          router.push('/dashboard')
-        }, 2000)
-      } else {
-        alert('Please enter valid credentials')
-        setIsLoading(false)
+      if (error) {
+        throw error
       }
-    }, 1000)
+
+      // Success feedback
+      toast.success('Login successful!')
+
+      setTimeout(() => {
+        toast.success('✨ Welcome Back to KAZI! Redirecting to dashboard...')
+      }, 500)
+
+      // Redirect to dashboard
+      setTimeout(() => {
+        router.push('/dashboard/overview')
+        router.refresh()
+      }, 1500)
+    } catch (error: any) {
+      console.error('Login error:', error)
+      toast.error(error.message || 'Invalid email or password')
+      setIsLoading(false)
+    }
   }
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -237,25 +241,32 @@ export default function LoginPage() {
                     </div>
                   )}
                 </Button>
-
-                {/* Demo Credentials */}
-                <LiquidGlassCard className="p-3">
-                  <p className="text-xs font-medium text-blue-400 mb-1">Demo Credentials:</p>
-                  <p className="text-xs text-gray-400">Email: thabo@kaleidocraft.co.za</p>
-                  <p className="text-xs text-gray-400">Password: password1234</p>
-                </LiquidGlassCard>
-
-                {/* Sign Up Link */}
-                <div className="text-center pt-4 border-t border-slate-700">
-                  <p className="text-sm text-gray-400">
-                    Don't have an account?{' '}
-                    <Link href="/signup" className="font-medium text-blue-400 hover:text-blue-300 inline-flex items-center gap-1">
-                      Sign up for free
-                      <ArrowRight className="h-3 w-3" />
-                    </Link>
-                  </p>
-                </div>
               </form>
+
+              {/* OAuth Providers */}
+              <div className="mt-6">
+                <OAuthProviders />
+              </div>
+
+              {/* Demo Credentials */}
+              {process.env.NODE_ENV === 'development' && (
+                <LiquidGlassCard className="p-3 mt-4">
+                  <p className="text-xs font-medium text-blue-400 mb-1">Test Account:</p>
+                  <p className="text-xs text-gray-400">Email: test@kazi.dev</p>
+                  <p className="text-xs text-gray-400">Password: Trapster103</p>
+                </LiquidGlassCard>
+              )}
+
+              {/* Sign Up Link */}
+              <div className="text-center pt-4 border-t border-slate-700">
+                <p className="text-sm text-gray-400">
+                  Don't have an account?{' '}
+                  <Link href="/signup" className="font-medium text-blue-400 hover:text-blue-300 inline-flex items-center gap-1">
+                    Sign up for free
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
+                </p>
+              </div>
             </CardContent>
           </LiquidGlassCard>
 
