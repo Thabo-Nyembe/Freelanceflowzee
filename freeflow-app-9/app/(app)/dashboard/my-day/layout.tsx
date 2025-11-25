@@ -37,13 +37,13 @@ export default function MyDayLayout({ children }: { children: React.ReactNode })
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">My Day</h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600">
           Plan, track, and optimize your daily workflow with AI-powered insights
         </p>
       </div>
 
       {/* Tab Navigation */}
-      <div className="grid w-full grid-cols-6 bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-white/30 dark:border-gray-700/30 rounded-3xl p-2 shadow-xl">
+      <div className="grid w-full grid-cols-6 bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl p-2 shadow-xl">
         {MAIN_TABS.map((tab) => {
           const Icon = tab.icon
           const active = isActive(tab.path)
@@ -56,7 +56,7 @@ export default function MyDayLayout({ children }: { children: React.ReactNode })
                 flex items-center justify-center gap-2 rounded-2xl px-4 py-2 transition-all
                 ${active
                   ? 'bg-purple-600 text-white shadow-lg'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  : 'text-gray-600 hover:bg-gray-100'
                 }
               `}
             >

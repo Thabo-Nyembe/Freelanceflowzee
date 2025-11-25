@@ -399,14 +399,14 @@ export default function ProjectsOverviewPage() {
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Projects</p>
-                  <NumberFlow value={stats.total} className="text-3xl font-bold text-gray-900 dark:text-gray-100" />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm font-medium text-gray-700">Total Projects</p>
+                  <NumberFlow value={stats.total} className="text-3xl font-bold text-gray-900" />
+                  <p className="text-sm text-gray-500">
                     <NumberFlow value={stats.active} className="inline-block" /> active
                   </p>
                 </div>
-                <div className="p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 dark:from-blue-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm">
-                  <Briefcase className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                <div className="p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-xl backdrop-blur-sm">
+                  <Briefcase className="h-6 w-6 text-blue-600" />
                 </div>
               </div>
             </div>
@@ -417,12 +417,12 @@ export default function ProjectsOverviewPage() {
           <div className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Completed</p>
-                <NumberFlow value={stats.completed} className="text-3xl font-bold text-gray-900 dark:text-gray-100" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">Projects finished</p>
+                <p className="text-sm font-medium text-gray-700">Completed</p>
+                <NumberFlow value={stats.completed} className="text-3xl font-bold text-gray-900" />
+                <p className="text-sm text-gray-500">Projects finished</p>
               </div>
-              <div className="p-3 bg-gradient-to-br from-green-400/20 to-emerald-400/20 dark:from-green-400/10 dark:to-emerald-400/10 rounded-xl backdrop-blur-sm">
-                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <div className="p-3 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-xl backdrop-blur-sm">
+                <CheckCircle className="h-6 w-6 text-green-600" />
               </div>
             </div>
           </div>
@@ -432,12 +432,12 @@ export default function ProjectsOverviewPage() {
           <div className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Revenue</p>
-                <NumberFlow value={stats.revenue} format="currency" className="text-3xl font-bold text-gray-900 dark:text-gray-100" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">Total earned</p>
+                <p className="text-sm font-medium text-gray-700">Revenue</p>
+                <NumberFlow value={stats.revenue} format="currency" className="text-3xl font-bold text-gray-900" />
+                <p className="text-sm text-gray-500">Total earned</p>
               </div>
-              <div className="p-3 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 dark:from-emerald-400/10 dark:to-teal-400/10 rounded-xl backdrop-blur-sm">
-                <DollarSign className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+              <div className="p-3 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-xl backdrop-blur-sm">
+                <DollarSign className="h-6 w-6 text-emerald-600" />
               </div>
             </div>
           </div>
@@ -447,15 +447,15 @@ export default function ProjectsOverviewPage() {
           <div className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Efficiency</p>
+                <p className="text-sm font-medium text-gray-700">Efficiency</p>
                 <div className="flex items-baseline">
-                  <NumberFlow value={stats.efficiency} className="text-3xl font-bold text-gray-900 dark:text-gray-100" />
-                  <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">%</span>
+                  <NumberFlow value={stats.efficiency} className="text-3xl font-bold text-gray-900" />
+                  <span className="text-3xl font-bold text-gray-900">%</span>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Average progress</p>
+                <p className="text-sm text-gray-500">Average progress</p>
               </div>
-              <div className="p-3 bg-gradient-to-br from-purple-400/20 to-pink-400/20 dark:from-purple-400/10 dark:to-pink-400/10 rounded-xl backdrop-blur-sm">
-                <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              <div className="p-3 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-xl backdrop-blur-sm">
+                <TrendingUp className="h-6 w-6 text-purple-600" />
               </div>
             </div>
           </div>

@@ -20,7 +20,7 @@ export default function GoalsPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold mb-2">Goals Tracking</h2>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600">
           Monitor your progress and achieve your objectives
         </p>
       </div>

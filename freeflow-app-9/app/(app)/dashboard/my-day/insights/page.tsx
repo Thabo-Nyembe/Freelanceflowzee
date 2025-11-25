@@ -22,7 +22,7 @@ export default function InsightsPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-3xl font-bold mb-2">AI Insights</h2>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600">
           Personalized recommendations to optimize your workflow
         </p>
       </div>

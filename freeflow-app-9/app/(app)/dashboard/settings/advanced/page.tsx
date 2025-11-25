@@ -333,7 +333,7 @@ export default function AdvancedPage() {
               </Button>
             </div>
 
-            <div className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 border-blue-200 dark:border-blue-800">
+            <div className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
               <div>
                 <h4 className="font-medium flex items-center gap-2">
                   Manage Integrations
@@ -356,7 +356,7 @@ export default function AdvancedPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 border-purple-200 dark:border-purple-800">
+            <div className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
               <div>
                 <h4 className="font-medium flex items-center gap-2">
                   API Keys (BYOK)
