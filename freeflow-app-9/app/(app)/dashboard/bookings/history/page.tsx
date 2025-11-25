@@ -5,7 +5,7 @@ import { createFeatureLogger } from '@/lib/logger'
 import { Clock, Download, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { getPastBookings, formatDate } from '@/lib/bookings-utils'
+import { getPastBookings, formatDate, mockBookings } from '@/lib/bookings-utils'
 import {
   Select,
   SelectContent,
@@ -17,7 +17,7 @@ import {
 const logger = createFeatureLogger('BookingsHistory')
 
 export default function HistoryPage() {
-  const pastBookings = getPastBookings()
+  const pastBookings = getPastBookings(mockBookings)
 
   const handleExportHistory = () => {
     logger.info('Exporting booking history', {
