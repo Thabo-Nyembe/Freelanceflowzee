@@ -271,63 +271,63 @@
 
 /* Text visibility improvements */
 .text-primary {
-  @apply text-black
+  @apply text-black;
 }
 
 .text-secondary {
-  @apply text-gray-600
+  @apply text-gray-600;
 }
 
 .text-muted {
-  @apply text-gray-500
+  @apply text-gray-500;
 }
 
 .text-accent {
-  @apply text-blue-600
+  @apply text-blue-600;
 }
 
 /* Card improvements */
 .card-enhanced {
   @apply bg-white border border-gray-200 rounded-xl shadow-lg;
-  @apply text-black
+  @apply text-black;
   transition: all 0.3s ease;
 }
 
 .card-enhanced:hover {
-  @apply shadow-xl border-gray-300
+  @apply shadow-xl border-gray-300;
 }
 
 /* Button improvements */
 .btn-enhanced {
   @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
-  @apply bg-blue-600 hover:bg-blue-700
+  @apply bg-blue-600 hover:bg-blue-700;
   @apply text-white border-0;
-  @apply focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+  @apply focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
 }
 
 .btn-secondary-enhanced {
   @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
-  @apply bg-gray-100 hover:bg-gray-200
-  @apply text-black
-  @apply border border-gray-300
+  @apply bg-gray-100 hover:bg-gray-200;
+  @apply text-black;
+  @apply border border-gray-300;
 }
 
 /* Navigation improvements */
 .nav-enhanced {
   @apply bg-white/95 backdrop-blur-md;
-  @apply border-b border-gray-200
-  @apply text-black
+  @apply border-b border-gray-200;
+  @apply text-black;
 }
 
 .nav-link-enhanced {
   @apply px-3 py-2 rounded-md text-sm font-medium transition-all duration-200;
-  @apply text-gray-700
-  @apply hover:text-black
-  @apply hover:bg-gray-100
+  @apply text-gray-700;
+  @apply hover:text-black;
+  @apply hover:bg-gray-100;
 }
 
 .nav-link-enhanced.active {
-  @apply bg-blue-100 text-blue-700
+  @apply bg-blue-100 text-blue-700;
 }
 
 /* Dashboard specific styles */
@@ -337,13 +337,13 @@
 }
 
 .dashboard-card {
-  @apply bg-white rounded-xl shadow-lg border border-gray-200
+  @apply bg-white rounded-xl shadow-lg border border-gray-200;
   @apply p-6 transition-all duration-300 hover:shadow-xl;
-  @apply text-black
+  @apply text-black;
 }
 
 .dashboard-card:hover {
-  @apply transform scale-105 border-gray-300
+  @apply transform scale-105 border-gray-300;
 }
 
 /* Tab improvements */
@@ -353,29 +353,29 @@
 
 .tabs-enhanced .tabs-trigger {
   @apply px-4 py-2 rounded-md text-sm font-medium transition-all duration-200;
-  @apply text-gray-600
-  @apply hover:text-black
-  @apply data-[state=active]:bg-white
-  @apply data-[state=active]:text-black
+  @apply text-gray-600;
+  @apply hover:text-black;
+  @apply data-[state=active]:bg-white;
+  @apply data-[state=active]:text-black;
   @apply data-[state=active]:shadow-sm;
 }
 
 /* Badge improvements */
 .badge-enhanced {
   @apply px-2.5 py-0.5 rounded-full text-xs font-medium;
-  @apply bg-blue-100 text-blue-800
+  @apply bg-blue-100 text-blue-800;
 }
 
 .badge-success {
-  @apply bg-green-100 text-green-800
+  @apply bg-green-100 text-green-800;
 }
 
 .badge-warning {
-  @apply bg-yellow-100 text-yellow-800
+  @apply bg-yellow-100 text-yellow-800;
 }
 
 .badge-danger {
-  @apply bg-red-100 text-red-800
+  @apply bg-red-100 text-red-800;
 }
 
 /* Progress bar improvements */
@@ -389,8 +389,8 @@
 
 /* Modal/Dialog improvements */
 .modal-enhanced {
-  @apply bg-white rounded-xl shadow-2xl border border-gray-200
-  @apply text-black
+  @apply bg-white rounded-xl shadow-2xl border border-gray-200;
+  @apply text-black;
 }
 
 .modal-overlay {
@@ -416,7 +416,7 @@
 }
 
 .scrollbar-enhanced::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-500
+  @apply bg-gray-500;
 }
 
 /* Loading state improvements */
@@ -426,17 +426,17 @@
 
 /* Focus improvements for accessibility */
 .focus-enhanced:focus {
-  @apply outline-none ring-2 ring-blue-500 ring-offset-2
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
 }
 
 /* Text selection improvements */
 ::selection {
-  @apply bg-blue-200 text-black
+  @apply bg-blue-200 text-black;
 }
 
 /* Tooltip improvements */
 .tooltip-enhanced {
-  @apply bg-black text-white
+  @apply bg-black text-white;
   @apply px-2 py-1 rounded text-xs font-medium shadow-lg;
 }
 

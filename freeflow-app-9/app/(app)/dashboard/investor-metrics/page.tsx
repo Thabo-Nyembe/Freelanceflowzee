@@ -162,16 +162,17 @@ export default function InvestorMetricsPage() {
       toast.success('Metrics updated', {
         description: `Platform health score: ${data.data.score}/100`
       })
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load metrics'
-      setError(errorMessage)
-      logger.error('Failed to fetch platform health', { error: errorMessage })
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load metrics'
+        setError(errorMessage)
+        logger.error('Failed to fetch platform health', { error: errorMessage })
 
-      toast.error('Failed to load metrics', {
-        description: errorMessage
-      })
-    } finally {
-      setLoading(false)
+        toast.error('Failed to load metrics', {
+          description: errorMessage
+        })
+      } finally {
+        setLoading(false)
+      }
     }
   }
 
