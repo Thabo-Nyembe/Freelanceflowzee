@@ -1,17 +1,160 @@
-/**
- * Advanced Analytics Utilities
- * Helper functions and mock data for analytics dashboard
- */
+// ============================================================================
+// ANALYTICS UTILITIES FOR KAZI PLATFORM
+// ============================================================================
 
+import { Target, Lightbulb, TrendingUp, Zap, ArrowUpRight, ArrowDownRight } from 'lucide-react'
 import {
   Metric,
   ChartData,
-  Insight,
   Goal,
   FunnelStage,
   AnalyticsStats,
   MetricType
 } from './analytics-types'
+
+// ============================================================================
+// KAZI-SPECIFIC TYPES
+// ============================================================================
+
+export interface KaziInsight {
+  id: string
+  type: 'revenue' | 'efficiency' | 'growth'
+  title: string
+  description: string
+  impact: 'high' | 'medium' | 'low'
+  confidence: number
+  recommendation: string
+  potentialValue: number
+}
+
+export interface ProjectCategory {
+  category: string
+  count: number
+  revenue: number
+  color: string
+  growth: number
+}
+
+export interface MonthlyRevenue {
+  month: string
+  revenue: number
+  projects: number
+  clients: number
+}
+
+export interface RevenueForecast {
+  month: string
+  revenue: number
+  confidence: number
+}
+
+export interface TopClient {
+  name: string
+  revenue: number
+  projects: number
+  satisfaction: number
+}
+
+// ============================================================================
+// KAZI ANALYTICS DATA
+// ============================================================================
+
+export const KAZI_ANALYTICS_DATA = {
+  overview: {
+    totalRevenue: 287450,
+    monthlyRevenue: 45231,
+    activeProjects: 12,
+    totalProjects: 68,
+    totalClients: 156,
+    newClients: 23,
+    efficiency: 87,
+    billableHours: 1089,
+    revenueGrowth: 16.2,
+    projectGrowth: 8.5,
+    clientGrowth: 17.3,
+    efficiencyGrowth: 3.2
+  },
+
+  revenue: {
+    monthly: [
+      { month: 'Jan', revenue: 32000, projects: 8, clients: 45 },
+      { month: 'Feb', revenue: 35000, projects: 10, clients: 52 },
+      { month: 'Mar', revenue: 28000, projects: 7, clients: 48 },
+      { month: 'Apr', revenue: 42000, projects: 12, clients: 58 },
+      { month: 'May', revenue: 38000, projects: 9, clients: 55 },
+      { month: 'Jun', revenue: 45231, projects: 11, clients: 62 }
+    ] as MonthlyRevenue[],
+    forecast: [
+      { month: 'Jul', revenue: 48500, confidence: 85 },
+      { month: 'Aug', revenue: 52000, confidence: 78 },
+      { month: 'Sep', revenue: 55600, confidence: 72 }
+    ] as RevenueForecast[]
+  },
+
+  projectCategories: [
+    { category: 'Web Development', count: 28, revenue: 18500, color: 'bg-blue-500', growth: 12.5 },
+    { category: 'Mobile Apps', count: 15, revenue: 12800, color: 'bg-green-500', growth: 8.3 },
+    { category: 'Branding', count: 12, revenue: 8200, color: 'bg-purple-500', growth: -2.1 },
+    { category: 'UI/UX Design', count: 8, revenue: 4200, color: 'bg-orange-500', growth: 15.7 },
+    { category: 'Marketing', count: 5, revenue: 1530, color: 'bg-pink-500', growth: 22.4 }
+  ] as ProjectCategory[],
+
+  insights: [
+    {
+      id: 'insight-1',
+      type: 'revenue',
+      title: 'Revenue Acceleration Detected',
+      description: 'Monthly revenue growth trending 23% above forecast. Web development projects driving surge.',
+      impact: 'high',
+      confidence: 92,
+      recommendation: 'Increase web dev capacity by 2 FTEs',
+      potentialValue: 15000
+    },
+    {
+      id: 'insight-2',
+      type: 'efficiency',
+      title: 'Efficiency Optimization Opportunity',
+      description: 'Branding projects showing 2.1% decline. Consider streamlining workflow or adjusting pricing.',
+      impact: 'medium',
+      confidence: 78,
+      recommendation: 'Review branding project templates',
+      potentialValue: 4200
+    },
+    {
+      id: 'insight-3',
+      type: 'growth',
+      title: 'Marketing Segment High-Growth',
+      description: 'Marketing projects up 22.4% despite small volume. Strong demand signal for expansion.',
+      impact: 'high',
+      confidence: 88,
+      recommendation: 'Launch marketing package tier',
+      potentialValue: 8500
+    }
+  ] as KaziInsight[],
+
+  clients: {
+    topPerformers: [
+      { name: 'TechCorp Inc', revenue: 45000, projects: 8, satisfaction: 98 },
+      { name: 'DesignStudio', revenue: 38000, projects: 6, satisfaction: 95 },
+      { name: 'StartupXYZ', revenue: 32000, projects: 12, satisfaction: 92 }
+    ] as TopClient[],
+    retention: 94.2,
+    averageLifetimeValue: 28500,
+    churnRate: 5.8
+  },
+
+  performance: {
+    projectCompletionRate: 96.5,
+    onTimeDelivery: 89.2,
+    clientSatisfaction: 94.8,
+    revenuePerProject: 4230,
+    profitMargin: 68.5
+  }
+}
+
+// ============================================================================
+// LEGACY MOCK DATA (PRESERVED FOR COMPATIBILITY)
+// ============================================================================
 
 export const MOCK_METRICS: Metric[] = [
   {
@@ -460,4 +603,49 @@ export function getChartColors(count: number): string[] {
     '#06b6d4', '#14b8a6', '#f97316', '#ef4444', '#6366f1'
   ]
   return baseColors.slice(0, count)
+}
+
+// ============================================================================
+// KAZI-SPECIFIC UTILITY FUNCTIONS
+// ============================================================================
+
+export const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD'
+  }).format(amount)
+}
+
+export const getKaziInsightColor = (impact: string) => {
+  switch (impact) {
+    case 'high': return 'border-red-300 bg-red-50'
+    case 'medium': return 'border-yellow-300 bg-yellow-50'
+    case 'low': return 'border-green-300 bg-green-50'
+    default: return 'border-gray-300 bg-gray-50'
+  }
+}
+
+export const getKaziInsightIcon = (type: string) => {
+  switch (type) {
+    case 'revenue': return Target
+    case 'efficiency': return Lightbulb
+    case 'growth': return TrendingUp
+    default: return Zap
+  }
+}
+
+export const getGrowthIndicator = (growth: number) => {
+  if (growth > 0) {
+    return {
+      icon: ArrowUpRight,
+      color: 'text-green-600',
+      bg: 'bg-green-100'
+    }
+  } else {
+    return {
+      icon: ArrowDownRight,
+      color: 'text-red-600',
+      bg: 'bg-red-100'
+    }
+  }
 }
