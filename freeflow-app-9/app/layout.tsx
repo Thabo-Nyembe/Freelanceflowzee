@@ -31,14 +31,15 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className="scroll-smooth">
-      <body className={inter.className}>
+    <html lang="en" suppressHydrationWarning className="scroll-smooth light">
+      <body className={`${inter.className} bg-white text-black`}>
         <ErrorBoundary fallback={<div>Something went wrong</div>}>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
-            enableSystem
+            defaultTheme="light"
+            enableSystem={false}
             disableTransitionOnChange
+            forcedTheme="light"
           >
             {/* Premium Route Progress Bar */}
             <RouteProgress height={3} showSpinner={false} />

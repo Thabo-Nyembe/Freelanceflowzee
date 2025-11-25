@@ -36,43 +36,47 @@
   --radius: 0.75rem;
 }
 
-.dark {
-  --background: 0 0% 0%;
-  --foreground: 0 0% 100%;
-  --card: 0 0% 0%;
-  --card-foreground: 0 0% 100%;
-  --popover: 0 0% 0%;
-  --popover-foreground: 0 0% 100%;
-  --primary: 0 0% 100%;
-  --primary-foreground: 0 0% 0%;
-  --secondary: 0 0% 10%;
-  --secondary-foreground: 0 0% 100%;
-  --muted: 0 0% 10%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 0 0% 10%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 0 0% 20%;
-  --input: 0 0% 20%;
-  --ring: 240 4.9% 83.9%;
-}
-
 * {
   @apply border-neutral-200;
 }
 
 @layer base {
   * {
-    @apply border-neutral-200 dark:border-white/20;
+    @apply border-neutral-200;
   }
+
+  html {
+    @apply bg-white;
+  }
+
   body {
-    @apply bg-white dark:bg-black text-black dark:text-white;
+    @apply bg-white text-black;
     font-feature-settings: "rlig" 1, "calt" 1;
     min-height: 100vh;
-    transition: background-color 0.3s ease, color 0.3s ease;
   }
-  
+
+  /* FORCE WHITE BACKGROUNDS GLOBALLY - NO DARK MODE */
+  body, html, #__next, [data-theme="dark"], .dark,
+  div, section, article, aside, main, header, footer, nav,
+  [class*="bg-gray-"], [class*="bg-slate-"], [class*="bg-neutral-"],
+  [class*="bg-zinc-"], [class*="bg-stone-"] {
+    background-color: white !important;
+  }
+
+  /* Force black text for visibility */
+  h1, h2, h3, h4, h5, h6, p, span, a, button, input, textarea, label {
+    color: black !important;
+  }
+
+  /* Override specific dark background classes */
+  .bg-black, .bg-gray-900, .bg-gray-800, .bg-gray-700, .bg-gray-600,
+  .bg-slate-900, .bg-slate-800, .bg-slate-700, .bg-slate-600,
+  .bg-neutral-900, .bg-neutral-800, .bg-neutral-700, .bg-neutral-600,
+  .bg-zinc-900, .bg-zinc-800, .bg-zinc-700, .bg-zinc-600 {
+    background-color: white !important;
+    color: black !important;
+  }
+
   /* Ensure proper font rendering across all devices */
   * {
     -webkit-font-smoothing: antialiased;
@@ -83,19 +87,16 @@
 
 /* Glass morphism styles - Enhanced for dark mode */
 .glass-nav {
-  @apply bg-white/60 dark:bg-black/60 backdrop-blur-xl border-b border-[hsl(var(--border))] shadow-sm;
+  @apply bg-white/60 backdrop-blur-xl border-b border-[hsl(var(--border))] shadow-sm;
 }
 
 .glass-card {
-  @apply bg-white/60 dark:bg-black/60 backdrop-blur-xl border border-[hsl(var(--border))] rounded-2xl shadow-lg;
+  @apply bg-white/60 backdrop-blur-xl border border-[hsl(var(--border))] rounded-2xl shadow-lg;
 }
 
-/* Dark mode glass morphism */
-.dark .glass-nav {
   @apply bg-black/80 border-gray-700;
 }
 
-.dark .glass-card {
   @apply bg-black/80 border-gray-700;
 }
 
@@ -132,13 +133,10 @@
   color: #F8F7F4;
 }
 
-/* Dark mode button variations */
-.dark .btn-kazi-secondary {
   border-color: #6E4BFF;
   color: #6E4BFF;
 }
 
-.dark .btn-kazi-secondary:hover {
   background: #6E4BFF;
   color: #F8F7F4;
 }
@@ -150,22 +148,22 @@
 
 /* Enhanced form inputs with better contrast */
 .input-enhanced {
-  @apply w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600
+  @apply w-full px-4 py-2 rounded-lg border border-gray-200
          focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-         bg-white/90 dark:bg-black/90 backdrop-blur-sm
-         text-black dark:text-white
-         placeholder:text-gray-500 dark:placeholder:text-gray-400
+         bg-white/90 backdrop-blur-sm
+         text-black
+         placeholder:text-gray-500
          transition-all duration-200;
 }
 
 .input-enhanced:focus {
-  @apply bg-white dark:bg-black shadow-lg;
+  @apply bg-white shadow-lg;
 }
 
 /* Navigation styles */
 .nav-item {
   @apply px-4 py-2 rounded-lg transition-all duration-200
-         hover:bg-gray-100 dark:hover:bg-white/10
+         hover:bg-gray-100
          focus:outline-none focus:ring-2 focus:ring-indigo-500;
 }
 
@@ -174,9 +172,6 @@
 }
 
 /* Kazi Brand Styles */
-.kazi-bg-dark {
-  background-color: var(--kazi-jet-black);
-}
 
 .kazi-bg-light {
   background-color: var(--kazi-soft-ivory);
@@ -190,9 +185,6 @@
   color: var(--kazi-electric-turquoise);
 }
 
-.kazi-text-dark {
-  color: var(--kazi-jet-black);
-}
 
 .kazi-text-light {
   color: var(--kazi-soft-ivory);
@@ -222,9 +214,6 @@
   background: linear-gradient(120deg, var(--kazi-violet-bolt), var(--kazi-electric-turquoise));
 }
 
-.kazi-gradient-dark {
-  background: linear-gradient(135deg, var(--kazi-jet-black), #1a1a1f);
-}
 
 .kazi-gradient-light {
   background: linear-gradient(135deg, var(--kazi-soft-ivory), #ffffff);
@@ -237,7 +226,6 @@
   border: 1px solid rgba(110, 75, 255, 0.1);
 }
 
-.dark .kazi-card {
   background: var(--kazi-jet-black);
   border: 1px solid rgba(110, 75, 255, 0.2);
 }
@@ -301,63 +289,63 @@
 
 /* Text visibility improvements */
 .text-primary {
-  @apply text-black dark:text-white;
+  @apply text-black
 }
 
 .text-secondary {
-  @apply text-gray-600 dark:text-gray-300;
+  @apply text-gray-600
 }
 
 .text-muted {
-  @apply text-gray-500 dark:text-gray-400;
+  @apply text-gray-500
 }
 
 .text-accent {
-  @apply text-blue-600 dark:text-blue-400;
+  @apply text-blue-600
 }
 
 /* Card improvements */
 .card-enhanced {
-  @apply bg-white dark:bg-black border border-gray-200 dark:border-white/20 rounded-xl shadow-lg;
-  @apply text-black dark:text-white;
+  @apply bg-white border border-gray-200 rounded-xl shadow-lg;
+  @apply text-black
   transition: all 0.3s ease;
 }
 
 .card-enhanced:hover {
-  @apply shadow-xl border-gray-300 dark:border-white/30;
+  @apply shadow-xl border-gray-300
 }
 
 /* Button improvements */
 .btn-enhanced {
   @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
-  @apply bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600;
+  @apply bg-blue-600 hover:bg-blue-700
   @apply text-white border-0;
-  @apply focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-black;
+  @apply focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
 }
 
 .btn-secondary-enhanced {
   @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
-  @apply bg-gray-100 hover:bg-gray-200 dark:bg-white/10 dark:hover:bg-white/20;
-  @apply text-black dark:text-white;
-  @apply border border-gray-300 dark:border-white/20;
+  @apply bg-gray-100 hover:bg-gray-200
+  @apply text-black
+  @apply border border-gray-300
 }
 
 /* Navigation improvements */
 .nav-enhanced {
-  @apply bg-white/95 dark:bg-black/95 backdrop-blur-md;
-  @apply border-b border-gray-200 dark:border-white/20;
-  @apply text-black dark:text-white;
+  @apply bg-white/95 backdrop-blur-md;
+  @apply border-b border-gray-200
+  @apply text-black
 }
 
 .nav-link-enhanced {
   @apply px-3 py-2 rounded-md text-sm font-medium transition-all duration-200;
-  @apply text-gray-700 dark:text-gray-300;
-  @apply hover:text-black dark:hover:text-white;
-  @apply hover:bg-gray-100 dark:hover:bg-white/10;
+  @apply text-gray-700
+  @apply hover:text-black
+  @apply hover:bg-gray-100
 }
 
 .nav-link-enhanced.active {
-  @apply bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300;
+  @apply bg-blue-100 text-blue-700
 }
 
 /* Dashboard specific styles */
@@ -367,64 +355,64 @@
 }
 
 .dashboard-card {
-  @apply bg-white dark:bg-black rounded-xl shadow-lg border border-gray-200 dark:border-white/20;
+  @apply bg-white rounded-xl shadow-lg border border-gray-200
   @apply p-6 transition-all duration-300 hover:shadow-xl;
-  @apply text-black dark:text-white;
+  @apply text-black
 }
 
 .dashboard-card:hover {
-  @apply transform scale-105 border-gray-300 dark:border-white/30;
+  @apply transform scale-105 border-gray-300
 }
 
 /* Tab improvements */
 .tabs-enhanced .tabs-list {
-  @apply bg-gray-100 dark:bg-white/10 p-1 rounded-lg;
+  @apply bg-gray-100 p-1 rounded-lg;
 }
 
 .tabs-enhanced .tabs-trigger {
   @apply px-4 py-2 rounded-md text-sm font-medium transition-all duration-200;
-  @apply text-gray-600 dark:text-gray-400;
-  @apply hover:text-black dark:hover:text-white;
-  @apply data-[state=active]:bg-white dark:data-[state=active]:bg-white/20;
-  @apply data-[state=active]:text-black dark:data-[state=active]:text-white;
+  @apply text-gray-600
+  @apply hover:text-black
+  @apply data-[state=active]:bg-white
+  @apply data-[state=active]:text-black
   @apply data-[state=active]:shadow-sm;
 }
 
 /* Badge improvements */
 .badge-enhanced {
   @apply px-2.5 py-0.5 rounded-full text-xs font-medium;
-  @apply bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200;
+  @apply bg-blue-100 text-blue-800
 }
 
 .badge-success {
-  @apply bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200;
+  @apply bg-green-100 text-green-800
 }
 
 .badge-warning {
-  @apply bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200;
+  @apply bg-yellow-100 text-yellow-800
 }
 
 .badge-danger {
-  @apply bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-200;
+  @apply bg-red-100 text-red-800
 }
 
 /* Progress bar improvements */
 .progress-enhanced {
-  @apply w-full bg-gray-200 dark:bg-white/20 rounded-full h-2;
+  @apply w-full bg-gray-200 rounded-full h-2;
 }
 
 .progress-enhanced .progress-bar {
-  @apply bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300;
+  @apply bg-blue-600 h-2 rounded-full transition-all duration-300;
 }
 
 /* Modal/Dialog improvements */
 .modal-enhanced {
-  @apply bg-white dark:bg-black rounded-xl shadow-2xl border border-gray-200 dark:border-white/20;
-  @apply text-black dark:text-white;
+  @apply bg-white rounded-xl shadow-2xl border border-gray-200
+  @apply text-black
 }
 
 .modal-overlay {
-  @apply bg-black/50 dark:bg-black/70 backdrop-blur-sm;
+  @apply bg-black/50 backdrop-blur-sm;
 }
 
 /* Scrollbar improvements */
@@ -433,7 +421,6 @@
   scrollbar-color: rgb(156 163 175) transparent;
 }
 
-.dark .scrollbar-enhanced {
   scrollbar-color: rgb(75 85 99) transparent;
 }
 
@@ -446,31 +433,31 @@
 }
 
 .scrollbar-enhanced::-webkit-scrollbar-thumb {
-  @apply bg-gray-400 dark:bg-gray-600 rounded-full;
+  @apply bg-gray-400 rounded-full;
 }
 
 .scrollbar-enhanced::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-500 dark:bg-gray-500;
+  @apply bg-gray-500
 }
 
 /* Loading state improvements */
 .loading-skeleton {
-  @apply bg-gray-200 dark:bg-white/20 animate-pulse rounded;
+  @apply bg-gray-200 animate-pulse rounded;
 }
 
 /* Focus improvements for accessibility */
 .focus-enhanced:focus {
-  @apply outline-none ring-2 ring-blue-500 dark:ring-blue-400 ring-offset-2 dark:ring-offset-black;
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2
 }
 
 /* Text selection improvements */
 ::selection {
-  @apply bg-blue-200 dark:bg-blue-800 text-black dark:text-white;
+  @apply bg-blue-200 text-black
 }
 
 /* Tooltip improvements */
 .tooltip-enhanced {
-  @apply bg-black dark:bg-white text-white dark:text-black;
+  @apply bg-black text-white
   @apply px-2 py-1 rounded text-xs font-medium shadow-lg;
 }
 

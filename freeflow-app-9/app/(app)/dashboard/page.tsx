@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge'
 import { EnhancedCard, EnhancedCardContent, EnhancedCardHeader, EnhancedCardTitle } from '@/components/ui/enhanced-card'
 import { EnhancedButton } from '@/components/ui/enhanced-button'
 import { EnhancedBadge } from '@/components/ui/enhanced-badge'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import {
@@ -2062,8 +2061,6 @@ export default function DashboardPage() {
                     <Settings className="h-4 w-4" />
                   </Button>
                 </div>
-
-                <ThemeToggle />
               </div>
             </div>
           </div>
