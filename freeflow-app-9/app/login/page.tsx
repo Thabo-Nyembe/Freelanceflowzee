@@ -63,7 +63,7 @@ export default function LoginPage() {
 
       // Redirect to dashboard
       setTimeout(() => {
-        router.push('/dashboard/overview')
+        router.push('/dashboard')
         router.refresh()
       }, 1500)
     } catch (error: any) {
