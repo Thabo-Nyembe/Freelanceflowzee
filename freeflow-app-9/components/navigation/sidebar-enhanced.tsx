@@ -876,15 +876,15 @@ export function SidebarEnhanced() {
               Customize Navigation
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden bg-white dark:bg-gray-950">
-            <DialogHeader className="pb-4">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden !bg-white dark:!bg-gray-950 border border-gray-200 dark:border-gray-800">
+            <DialogHeader className="pb-4 border-b border-gray-200 dark:border-gray-800">
               <div className="flex items-center justify-between">
                 <div>
-                  <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <DialogTitle className="text-2xl font-bold !text-gray-900 dark:!text-white flex items-center gap-2">
                     <Wand2 className="h-6 w-6 text-blue-600" />
                     Customize Your Workspace
                   </DialogTitle>
-                  <DialogDescription className="text-gray-600 dark:text-gray-400 mt-2">
+                  <DialogDescription className="!text-gray-600 dark:!text-gray-400 mt-2">
                     Personalize your navigation to match your workflow. Changes save automatically.
                   </DialogDescription>
                 </div>
@@ -905,23 +905,23 @@ export function SidebarEnhanced() {
             </DialogHeader>
 
             <Tabs defaultValue="customize" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-4">
-                <TabsTrigger value="presets" className="flex items-center gap-2">
+              <TabsList className="grid w-full grid-cols-3 mb-4 bg-gray-100 dark:bg-gray-900">
+                <TabsTrigger value="presets" className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800">
                   <Bookmark className="h-4 w-4" />
                   Quick Presets
                 </TabsTrigger>
-                <TabsTrigger value="customize" className="flex items-center gap-2">
+                <TabsTrigger value="customize" className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800">
                   <Settings className="h-4 w-4" />
                   Customize
                 </TabsTrigger>
-                <TabsTrigger value="saved" className="flex items-center gap-2">
+                <TabsTrigger value="saved" className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-800">
                   <Star className="h-4 w-4" />
                   My Presets ({savedPresets.length})
                 </TabsTrigger>
               </TabsList>
 
               {/* Quick Workflow Presets */}
-              <TabsContent value="presets" className="space-y-4">
+              <TabsContent value="presets" className="space-y-4 p-4 bg-white dark:bg-gray-950">
                 <div className="grid grid-cols-2 gap-4">
                   <Button
                     variant="outline"
@@ -996,7 +996,7 @@ export function SidebarEnhanced() {
               </TabsContent>
 
               {/* Customization Tab */}
-              <TabsContent value="customize" className="space-y-4">
+              <TabsContent value="customize" className="space-y-4 p-4 bg-white dark:bg-gray-950">
                 <div className="max-h-[50vh] overflow-y-auto space-y-4 pr-2">
               {/* Customization Mode Toggle */}
               <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -1088,7 +1088,7 @@ export function SidebarEnhanced() {
               </TabsContent>
 
               {/* My Presets Tab */}
-              <TabsContent value="saved" className="space-y-4">
+              <TabsContent value="saved" className="space-y-4 p-4 bg-white dark:bg-gray-950">
                 {savedPresets.length === 0 ? (
                   <div className="text-center py-12">
                     <Bookmark className="h-16 w-16 mx-auto text-gray-300 dark:text-gray-700 mb-4" />
