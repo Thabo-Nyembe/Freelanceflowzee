@@ -12,13 +12,13 @@ import { Progress } from '@/components/ui/progress'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer as TextShimmerComponent } from '@/components/ui/text-shimmer'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
-import { 
-  FolderOpen, 
-  Plus, 
-  Search, 
-  DollarSign, 
-  Users, 
-  CheckCircle, 
+import {
+  FolderOpen,
+  Plus,
+  Search,
+  DollarSign,
+  Users,
+  CheckCircle,
   Activity,
   Calendar,
   Clock,
@@ -29,7 +29,8 @@ import {
   Filter,
   TrendingUp,
   Target,
-  Briefcase
+  Briefcase,
+  Brain
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -50,6 +51,11 @@ import { useInfiniteScroll } from '@/lib/hooks/use-infinite-scroll'
 
 // 3-Step Project Creation Wizard - USER MANUAL SPEC
 import { ProjectCreationWizard } from '@/components/projects/project-creation-wizard'
+
+// AI FEATURES
+import { AIInsightsPanel } from '@/components/ai/ai-insights-panel'
+import { RevenueInsightsWidget } from '@/components/ai/revenue-insights-widget'
+import { useCurrentUser, useRevenueData } from '@/hooks/use-ai-data'
 
 interface Project {
   id: string
@@ -251,6 +257,10 @@ const ProjectCard = memo(({ project, onView, onEdit, onUpdateStatus }: ProjectCa
 ProjectCard.displayName = 'ProjectCard'
 
 export default function ProjectsHubPage() {
+  // REAL USER AUTH & REVENUE DATA
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { data: revenueData, loading: revenueLoading, refresh: refreshRevenue } = useRevenueData(userId || undefined)
+
   const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([])
@@ -284,6 +294,9 @@ export default function ProjectsHubPage() {
 
   // Infinite Scroll State
   const [displayedProjectsCount, setDisplayedProjectsCount] = useState(12) // Show 12 projects initially
+
+  // AI Panel State
+  const [showAIPanel, setShowAIPanel] = useState(true)
 
   // A+++ Accessibility
   const { announce } = useAnnouncer()
@@ -1228,18 +1241,28 @@ export default function ProjectsHubPage() {
             </div>
             
             <div className="flex items-center gap-4">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setShowAIPanel(!showAIPanel)}
+              >
+                <Brain className="h-4 w-4" />
+                {showAIPanel ? 'Hide' : 'Show'} AI Revenue
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
                 className="gap-2"
                 onClick={() => router.push('/dashboard')}
               >
                 <ArrowRight className="h-4 w-4 rotate-180" />
                 Back to Dashboard
               </Button>
-              
-              <Button 
-                size="sm" 
+
+              <Button
+                size="sm"
                 className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                 onClick={() => setIsCreateModalOpen(true)}
                 data-testid="create-project-btn"
@@ -1337,6 +1360,36 @@ export default function ProjectsHubPage() {
             </LiquidGlassCard>
           </div>
         </div>
+
+        {/* AI REVENUE INSIGHTS PANEL */}
+        {showAIPanel && (
+          <div className="mb-8">
+            <RevenueInsightsWidget
+              userId={userId || "demo-user-id"}
+              revenueData={revenueData || {
+                userId: userId || "demo-user-id",
+                timeframe: "monthly" as const,
+                totalRevenue: stats.revenue,
+                revenueBySource: {
+                  projects: stats.revenue * 0.7,
+                  retainers: stats.revenue * 0.2,
+                  passive: stats.revenue * 0.1,
+                  other: 0
+                },
+                revenueByClient: projects.slice(0, 5).map(p => ({
+                  clientId: p.id,
+                  clientName: p.client_name,
+                  revenue: p.budget,
+                  projectCount: 1
+                })),
+                expenses: stats.revenue * 0.3,
+                netProfit: stats.revenue * 0.7,
+                currency: "USD"
+              }}
+              showActions={true}
+            />
+          </div>
+        )}
 
         {/* Filters and Search */}
         <Card className="mb-8 bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">

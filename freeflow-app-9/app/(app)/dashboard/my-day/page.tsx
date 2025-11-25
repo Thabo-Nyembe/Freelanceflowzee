@@ -16,6 +16,10 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 
+// AI FEATURES
+import { AIInsightsPanel } from '@/components/ai/ai-insights-panel'
+import { useCurrentUser, useAIData } from '@/hooks/use-ai-data'
+
 // Initialize logger
 const logger = createFeatureLogger('MyDay')
 import {
@@ -271,6 +275,10 @@ const mockTimeBlocks: TimeBlock[] = [
 ]
 
 export default function MyDayPage() {
+  // REAL USER AUTH & AI DATA
+  const { userId, loading: userLoading } = useCurrentUser()
+  const aiData = useAIData(userId || undefined)
+
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -289,6 +297,9 @@ export default function MyDayPage() {
   // AI Work Pattern Analysis State
   const [workPatternAnalytics, setWorkPatternAnalytics] = useState<any>(null)
   const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false)
+
+  // AI Insights Panel State
+  const [showAIPanel, setShowAIPanel] = useState(true)
 
   // Initialize state with mock data
   const initialState: TaskState = {
@@ -1253,6 +1264,16 @@ export default function MyDayPage() {
             
             <div className="flex items-center gap-4">
               <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setShowAIPanel(!showAIPanel)}
+              >
+                <Brain className="h-4 w-4" />
+                {showAIPanel ? 'Hide' : 'Show'} AI Insights
+              </Button>
+
+              <Button
                 data-testid="back-to-dashboard-btn"
                 variant="outline"
                 size="sm"
@@ -1348,6 +1369,17 @@ export default function MyDayPage() {
             </LiquidGlassCard>
           </div>
         </div>
+
+        {/* AI INSIGHTS PANEL */}
+        {showAIPanel && userId && (
+          <div className="mb-8">
+            <AIInsightsPanel
+              userId={userId}
+              defaultExpanded={true}
+              showHeader={true}
+            />
+          </div>
+        )}
 
         {/* Active Timer Display */}
         {state.currentTimer && (

@@ -43,6 +43,10 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
+// AI FEATURES
+import { AIInsightsPanel } from '@/components/ai/ai-insights-panel'
+import { useCurrentUser, useAIData } from '@/hooks/use-ai-data'
+
 // ============================================================================
 // PRODUCTION LOGGER
 // ============================================================================
@@ -243,6 +247,10 @@ const getGrowthIndicator = (growth: number) => {
 // ============================================================================
 
 export default function AnalyticsPage() {
+  // REAL USER AUTH & AI DATA
+  const { userId, loading: userLoading } = useCurrentUser()
+  const aiData = useAIData(userId || undefined)
+
   const router = useRouter()
 
   // A+++ STATE MANAGEMENT
@@ -252,6 +260,7 @@ export default function AnalyticsPage() {
 
   // State Management
   const [activeTab, setActiveTab] = useState('overview')
+  const [showAIPanel, setShowAIPanel] = useState(true)
   const [dateRange, setDateRange] = useState('last-30-days')
   const [isExporting, setIsExporting] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -1008,6 +1017,15 @@ export default function AnalyticsPage() {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
+            {/* AI INSIGHTS PANEL */}
+            {showAIPanel && userId && (
+              <AIInsightsPanel
+                userId={userId}
+                defaultExpanded={false}
+                showHeader={true}
+              />
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Revenue Trend */}
               <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">

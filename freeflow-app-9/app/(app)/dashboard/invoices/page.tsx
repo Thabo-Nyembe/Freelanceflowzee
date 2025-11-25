@@ -22,6 +22,10 @@ import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 
+// AI FEATURES
+import { RevenueInsightsWidget } from '@/components/ai/revenue-insights-widget'
+import { useCurrentUser, useRevenueData } from '@/hooks/use-ai-data'
+
 const logger = createFeatureLogger('Invoices')
 import {
   FileText,
@@ -50,6 +54,10 @@ import {
 } from 'lucide-react'
 
 export default function InvoicesPage() {
+  // REAL USER AUTH & AI DATA
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { data: revenueData, loading: revenueLoading } = useRevenueData(userId || undefined)
+
   // ============================================================================
   // A+++ STATE MANAGEMENT
   // ============================================================================
@@ -59,6 +67,7 @@ export default function InvoicesPage() {
 
   // Regular state
   const [selectedStatus, setSelectedStatus] = useState<any>('all')
+  const [showAIWidget, setShowAIWidget] = useState(true)
   const [searchTerm, setSearchTerm] = useState<any>('')
   const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
   const [sortBy, setSortBy] = useState<string>('date')
@@ -834,6 +843,17 @@ ${invoices.map(inv =>
           </Button>
         </div>
       </div>
+
+      {/* AI REVENUE INSIGHTS */}
+      {showAIWidget && userId && revenueData && (
+        <div className="mb-6">
+          <RevenueInsightsWidget
+            userId={userId}
+            revenueData={revenueData}
+            showActions={true}
+          />
+        </div>
+      )}
 
       {/* Invoice Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

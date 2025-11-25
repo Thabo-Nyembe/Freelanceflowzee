@@ -74,6 +74,10 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 
+// AI FEATURES
+import { AIInsightsPanel } from '@/components/ai/ai-insights-panel'
+import { useCurrentUser, useAIData } from '@/hooks/use-ai-data'
+
 // Initialize logger
 const logger = createFeatureLogger('Dashboard')
 
@@ -166,6 +170,10 @@ const mockData = {
 }
 
 export default function DashboardPage() {
+  // REAL USER AUTH & AI DATA
+  const { userId, loading: userLoading } = useCurrentUser()
+  const aiData = useAIData(userId || undefined)
+
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('overview')
 
@@ -175,6 +183,9 @@ export default function DashboardPage() {
 
   // A+++ Accessibility
   const { announce } = useAnnouncer()
+
+  // AI Panel Toggle
+  const [showAIPanel, setShowAIPanel] = useState(true)
 
   // Enhanced state management for full functionality
   const [liveActivities, setLiveActivities] = useState(mockData.recentActivities)
@@ -1001,6 +1012,42 @@ export default function DashboardPage() {
             </div>
           </LiquidGlassCard>
         </div>
+
+        {/* AI INSIGHTS PANEL */}
+        {showAIPanel && userId && (
+          <ScrollReveal animation="fade-up" delay={0.1}>
+            <div className="relative">
+              <div className="absolute top-4 right-4 z-10">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAIPanel(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  Hide AI Insights
+                </Button>
+              </div>
+              <AIInsightsPanel
+                userId={userId}
+                defaultExpanded={true}
+                showHeader={true}
+              />
+            </div>
+          </ScrollReveal>
+        )}
+
+        {/* Show AI Insights Button (when hidden) */}
+        {!showAIPanel && (
+          <ScrollReveal animation="fade-up" delay={0.1}>
+            <Button
+              onClick={() => setShowAIPanel(true)}
+              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            >
+              <Brain className="h-4 w-4 mr-2" />
+              Show AI Insights
+            </Button>
+          </ScrollReveal>
+        )}
 
         {/* NEW: Collaboration Features Showcase */}
         <ScrollReveal animation="fade-up" delay={0.2}>

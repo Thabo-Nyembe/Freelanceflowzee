@@ -27,6 +27,10 @@ import {
 } from 'lucide-react'
 import { createFeatureLogger } from '@/lib/logger'
 
+// AI FEATURES
+import { GrowthActionsWidget } from '@/components/ai/growth-actions-widget'
+import { useCurrentUser, useGrowthPlaybook, useAIRecommendations } from '@/hooks/use-ai-data'
+
 const logger = createFeatureLogger('GrowthHub')
 
 interface GrowthStrategy {
@@ -47,9 +51,15 @@ interface GrowthStrategy {
 }
 
 export default function GrowthHubPage() {
+  // REAL USER AUTH & AI DATA
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { playbook, loading: playbookLoading } = useGrowthPlaybook(userId || undefined)
+  const { recommendations, loading: recommendationsLoading } = useAIRecommendations(userId || undefined, 'pending')
+
   const [activeGoal, setActiveGoal] = useState<string>('monetize')
   const [loading, setLoading] = useState(false)
   const [strategy, setStrategy] = useState<GrowthStrategy | null>(null)
+  const [showAIWidget, setShowAIWidget] = useState(true)
 
   // User business data form
   const [businessData, setBusinessData] = useState({
@@ -373,6 +383,17 @@ export default function GrowthHubPage() {
           </Card>
         </div>
       </div>
+
+      {/* AI GROWTH ACTIONS WIDGET */}
+      {showAIWidget && userId && (
+        <div className="mb-8">
+          <GrowthActionsWidget
+            userId={userId}
+            recommendations={recommendations}
+            compact={false}
+          />
+        </div>
+      )}
 
       <Tabs defaultValue="personalized" className="w-full">
         <TabsList className="grid w-full grid-cols-4">

@@ -11,7 +11,7 @@ import {
   Star, Briefcase, DollarSign, Edit2, Trash2, Eye, MessageSquare, Calendar,
   FileText, TrendingUp, Award, Building, Globe, Clock, CheckCircle, X,
   Download, Upload, Settings, Tag, Activity, BarChart3, PieChart, Target,
-  UserCheck, UserX, Zap, Heart, Share2, Send, Plus, AlertCircle, Info
+  UserCheck, UserX, Zap, Heart, Share2, Send, Plus, AlertCircle, Info, Brain
 } from 'lucide-react'
 
 import {
@@ -45,6 +45,10 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+
+// AI FEATURES
+import { LeadScoringWidget } from '@/components/ai/lead-scoring-widget'
+import { useCurrentUser, useLeadsData } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('Clients')
 
@@ -390,6 +394,10 @@ const statusConfig: Record<Client['status'], { color: string; icon: any; label: 
 export default function ClientsPage() {
   logger.debug('Clients page mounted')
 
+  // REAL USER AUTH & LEADS DATA
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { leads: realLeads, scores: leadScores, loading: leadsLoading } = useLeadsData(userId || undefined)
+
   // A+++ Loading & Error State
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -417,6 +425,9 @@ export default function ClientsPage() {
   // Form States
   const [formData, setFormData] = useState<Partial<Client>>({})
   const [isSaving, setIsSaving] = useState(false)
+
+  // AI Panel State
+  const [showAIPanel, setShowAIPanel] = useState(true)
 
   // Filtered and Sorted Clients
   const filteredAndSortedClients = useMemo(() => {
@@ -969,6 +980,13 @@ export default function ClientsPage() {
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
+                onClick={() => setShowAIPanel(!showAIPanel)}
+              >
+                <Brain className="h-4 w-4 mr-2" />
+                {showAIPanel ? 'Hide' : 'Show'} AI Leads
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() => {
                   logger.info('Import button clicked')
                   setIsImportModalOpen(true)
@@ -1160,6 +1178,28 @@ export default function ClientsPage() {
             })}
           </div>
         </ScrollReveal>
+
+        {/* AI LEAD SCORING PANEL */}
+        {showAIPanel && userId && (
+          <ScrollReveal delay={0.15}>
+            <LeadScoringWidget
+              userId={userId}
+              leads={realLeads.length > 0 ? realLeads : state.clients.filter(c => c.status === 'lead').map(c => ({
+                id: c.id,
+                name: c.name,
+                company: c.company,
+                industry: c.tags?.[0] || 'business',
+                email: c.email,
+                source: 'inbound' as const,
+                budget: c.lifetime_value || 5000,
+                projectDescription: c.notes || 'Potential client',
+                decisionMaker: true,
+                painPoints: []
+              }))}
+              compact={false}
+            />
+          </ScrollReveal>
+        )}
 
         {/* Filters & Controls */}
         <ScrollReveal delay={0.2}>

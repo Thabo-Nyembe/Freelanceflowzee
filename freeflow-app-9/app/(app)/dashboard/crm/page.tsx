@@ -46,15 +46,24 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
+// AI FEATURES
+import { LeadScoringWidget } from '@/components/ai/lead-scoring-widget'
+import { useCurrentUser, useLeadsData } from '@/hooks/use-ai-data'
+
 type ViewMode = 'overview' | 'contacts' | 'deals' | 'pipeline' | 'activities'
 
 export default function CRMPage() {
+  // REAL USER AUTH & AI DATA
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { leads, scores, loading: leadsLoading } = useLeadsData(userId || undefined)
+
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
 
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
+  const [showAIWidget, setShowAIWidget] = useState(true)
   const [contactSearch, setContactSearch] = useState('')
   const [dealSearch, setDealSearch] = useState('')
   const [contactSort, setContactSort] = useState('name')
@@ -260,7 +269,29 @@ export default function CRMPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+            className="space-y-6"
+          >
+            {/* AI LEAD SCORING WIDGET */}
+            {showAIWidget && userId && (
+              <LeadScoringWidget
+                userId={userId}
+                leads={leads.length > 0 ? leads : MOCK_CONTACTS.filter(c => c.type === 'lead').map(c => ({
+                  id: c.id,
+                  name: c.name,
+                  company: c.company,
+                  industry: 'business',
+                  email: c.email,
+                  source: 'inbound' as const,
+                  budget: 5000,
+                  projectDescription: 'Potential client',
+                  decisionMaker: true,
+                  painPoints: []
+                }))}
+                compact={false}
+              />
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6"
           >
             {/* Revenue Chart */}
             <div className="lg:col-span-2">
@@ -338,6 +369,7 @@ export default function CRMPage() {
                   </div>
                 </div>
               </LiquidGlassCard>
+            </div>
             </div>
           </motion.div>
         )}

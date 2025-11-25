@@ -37,9 +37,17 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 
+// AI FEATURES
+import { RevenueInsightsWidget } from '@/components/ai/revenue-insights-widget'
+import { useCurrentUser, useRevenueData } from '@/hooks/use-ai-data'
+
 const logger = createFeatureLogger('FinancialHub')
 
 export default function FinancialHubPage() {
+  // REAL USER AUTH & AI DATA
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { data: revenueData, loading: revenueLoading, refresh } = useRevenueData(userId || undefined)
+
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -47,6 +55,7 @@ export default function FinancialHubPage() {
 
   const [_selectedPeriod, setSelectedPeriod] = useState<string>('monthly')
   const [activeTab, setActiveTab] = useState<string>('overview')
+  const [showAIWidget, setShowAIWidget] = useState(true)
 
   // A+++ LOAD FINANCIAL HUB DATA
   useEffect(() => {
@@ -569,6 +578,17 @@ Overdue: ${financialData.invoices.overdue}
           </Button>
         </div>
       </div>
+
+      {/* AI REVENUE INSIGHTS WIDGET */}
+      {showAIWidget && userId && revenueData && (
+        <div className="mb-6">
+          <RevenueInsightsWidget
+            userId={userId}
+            revenueData={revenueData}
+            showActions={true}
+          />
+        </div>
+      )}
 
       {/* Financial Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
