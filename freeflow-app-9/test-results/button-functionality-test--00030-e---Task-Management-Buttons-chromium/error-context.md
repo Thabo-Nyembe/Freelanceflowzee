@@ -1,0 +1,440 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - region "Notifications alt+T"
+  - generic [ref=e2]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e8]:
+            - img [ref=e9]
+            - generic [ref=e11]: Quick Access
+          - generic [ref=e12]:
+            - link "📊 Admin Dashboard" [ref=e13] [cursor=pointer]:
+              - /url: /dashboard/admin-overview
+              - generic [ref=e14]: 📊
+              - generic [ref=e15]: Admin Dashboard
+            - link "📊 Analytics" [ref=e16] [cursor=pointer]:
+              - /url: /dashboard/analytics-advanced
+              - generic [ref=e17]: 📊
+              - generic [ref=e18]: Analytics
+            - link "🤝 CRM & Sales" [ref=e19] [cursor=pointer]:
+              - /url: /dashboard/crm
+              - generic [ref=e20]: 🤝
+              - generic [ref=e21]: CRM & Sales
+            - link "🧾 Invoicing" [ref=e22] [cursor=pointer]:
+              - /url: /dashboard/invoicing
+              - generic [ref=e23]: 🧾
+              - generic [ref=e24]: Invoicing
+            - link "📧 Email Marketing" [ref=e25] [cursor=pointer]:
+              - /url: /dashboard/email-marketing
+              - generic [ref=e26]: 📧
+              - generic [ref=e27]: Email Marketing
+        - button "Customize Navigation" [ref=e28] [cursor=pointer]:
+          - img [ref=e29]
+          - text: Customize Navigation
+        - generic [ref=e32]:
+          - button "Admin & Business" [ref=e33] [cursor=pointer]:
+            - generic [ref=e34]:
+              - img [ref=e35]
+              - generic [ref=e38]: Admin & Business
+            - img [ref=e40]
+          - generic [ref=e42]:
+            - button "Admin Dashboard" [ref=e44] [cursor=pointer]:
+              - generic [ref=e46]: Admin Dashboard
+              - img [ref=e48]
+            - button "Business Management" [ref=e51] [cursor=pointer]:
+              - generic [ref=e53]: Business Management
+              - img [ref=e55]
+            - button "Marketing & Sales" [ref=e58] [cursor=pointer]:
+              - generic [ref=e60]: Marketing & Sales
+              - img [ref=e62]
+            - button "Operations" [ref=e65] [cursor=pointer]:
+              - generic [ref=e67]: Operations
+              - img [ref=e69]
+            - button "Business Automation" [ref=e72] [cursor=pointer]:
+              - generic [ref=e74]: Business Automation
+              - img [ref=e76]
+            - status [ref=e78]
+        - generic [ref=e79]:
+          - button "Business Intelligence" [ref=e80] [cursor=pointer]:
+            - generic [ref=e81]:
+              - img [ref=e82]
+              - generic [ref=e85]: Business Intelligence
+            - img [ref=e87]
+          - generic [ref=e89]:
+            - generic [ref=e90]:
+              - button "Overview" [ref=e91] [cursor=pointer]:
+                - generic [ref=e93]: Overview
+                - img [ref=e95]
+              - generic [ref=e97]:
+                - link "Dashboard" [ref=e98] [cursor=pointer]:
+                  - /url: /dashboard
+                  - img [ref=e99]
+                  - generic [ref=e101]: Dashboard
+                - link "My Day" [ref=e102] [cursor=pointer]:
+                  - /url: /dashboard/my-day
+                  - img [ref=e103]
+                  - generic [ref=e105]: My Day
+            - button "Project Management" [ref=e107] [cursor=pointer]:
+              - generic [ref=e109]: Project Management
+              - img [ref=e111]
+            - button "Analytics & Reports" [ref=e114] [cursor=pointer]:
+              - generic [ref=e116]: Analytics & Reports
+              - img [ref=e118]
+            - button "Financial" [ref=e121] [cursor=pointer]:
+              - generic [ref=e123]: Financial
+              - img [ref=e125]
+            - button "Team & Clients" [ref=e128] [cursor=pointer]:
+              - generic [ref=e130]: Team & Clients
+              - img [ref=e132]
+            - button "Communication" [ref=e135] [cursor=pointer]:
+              - generic [ref=e137]: Communication
+              - img [ref=e139]
+            - button "Scheduling" [ref=e142] [cursor=pointer]:
+              - generic [ref=e144]: Scheduling
+              - img [ref=e146]
+            - button "White Label & Platform" [ref=e149] [cursor=pointer]:
+              - generic [ref=e151]: White Label & Platform
+              - img [ref=e153]
+            - button "Account" [ref=e156] [cursor=pointer]:
+              - generic [ref=e158]: Account
+              - img [ref=e160]
+            - status [ref=e162]
+        - generic [ref=e163]:
+          - button "AI Creative Suite" [ref=e164] [cursor=pointer]:
+            - generic [ref=e165]:
+              - img [ref=e166]
+              - generic [ref=e176]: AI Creative Suite
+            - img [ref=e178]
+          - generic [ref=e180]:
+            - button "AI Tools" [ref=e182] [cursor=pointer]:
+              - generic [ref=e184]: AI Tools
+              - img [ref=e186]
+            - button "Advanced AI" [ref=e189] [cursor=pointer]:
+              - generic [ref=e191]: Advanced AI
+              - img [ref=e193]
+            - status [ref=e195]
+        - generic [ref=e196]:
+          - button "Creative Studio" [ref=e197] [cursor=pointer]:
+            - generic [ref=e198]:
+              - img [ref=e199]
+              - generic [ref=e205]: Creative Studio
+            - img [ref=e207]
+          - generic [ref=e209]:
+            - button "Video & Media" [ref=e211] [cursor=pointer]:
+              - generic [ref=e213]: Video & Media
+              - img [ref=e215]
+            - button "Audio & Music" [ref=e218] [cursor=pointer]:
+              - generic [ref=e220]: Audio & Music
+              - img [ref=e222]
+            - button "3D & Animation" [ref=e225] [cursor=pointer]:
+              - generic [ref=e227]: 3D & Animation
+              - img [ref=e229]
+            - button "Portfolio" [ref=e232] [cursor=pointer]:
+              - generic [ref=e234]: Portfolio
+              - img [ref=e236]
+            - button "Resources" [ref=e239] [cursor=pointer]:
+              - generic [ref=e241]: Resources
+              - img [ref=e243]
+            - status [ref=e245]
+        - link "Coming Soon New" [ref=e247] [cursor=pointer]:
+          - /url: /dashboard/coming-soon
+          - img [ref=e248]
+          - generic [ref=e253]: Coming Soon
+          - generic [ref=e254]: New
+    - main [ref=e255]:
+      - generic [ref=e256]:
+        - generic [ref=e257]:
+          - navigation [ref=e258]:
+            - link "Home" [ref=e260] [cursor=pointer]:
+              - /url: /
+              - img [ref=e261]
+              - generic [ref=e264]: Home
+            - img [ref=e268]
+            - generic [ref=e270]:
+              - link "Dashboard" [ref=e272] [cursor=pointer]:
+                - /url: /dashboard
+              - img [ref=e276]
+            - generic [ref=e279]: My Day
+          - button "🔍 Search admin..." [ref=e281] [cursor=pointer]:
+            - generic [ref=e282]: 🔍
+            - generic [ref=e283]: Search admin...
+        - generic [ref=e286]:
+          - generic [ref=e287]:
+            - generic [ref=e288]:
+              - generic [ref=e289]:
+                - generic [ref=e291]:
+                  - generic [ref=e292]: My Day Today
+                  - text: My Day Today
+                - paragraph [ref=e293]: AI-powered daily planning and productivity optimization ✨
+              - generic [ref=e294]:
+                - button "Back to Dashboard" [ref=e295] [cursor=pointer]:
+                  - img [ref=e296]
+                  - text: Back to Dashboard
+                - button "Add Task" [active] [ref=e298] [cursor=pointer]:
+                  - img [ref=e299]
+                  - text: Add Task
+            - generic [ref=e300]:
+              - generic [ref=e304]:
+                - generic [ref=e305]:
+                  - paragraph [ref=e306]: Tasks Progress
+                  - generic [ref=e307]:
+                    - generic [ref=e308]: "1"
+                    - text: /
+                    - generic [ref=e309]: "6"
+                  - paragraph [ref=e310]:
+                    - generic [ref=e311]: 17%
+                    - text: complete
+                - img [ref=e313]
+              - generic [ref=e320]:
+                - generic [ref=e321]:
+                  - paragraph [ref=e322]: Focus Time
+                  - generic [ref=e323]:
+                    - generic [ref=e324]: "3"
+                    - text: h
+                    - generic [ref=e325]: "30"
+                    - text: m
+                  - paragraph [ref=e326]: Today's work
+                - img [ref=e328]
+              - generic [ref=e334]:
+                - generic [ref=e335]:
+                  - paragraph [ref=e336]: Productivity
+                  - generic [ref=e338]: 44%
+                  - paragraph [ref=e339]: Efficiency score
+                - img [ref=e341]
+              - generic [ref=e347]:
+                - generic [ref=e348]:
+                  - paragraph [ref=e349]: AI Insights
+                  - generic [ref=e351]: "3"
+                  - paragraph [ref=e352]: Recommendations
+                - img [ref=e354]
+          - generic [ref=e364]:
+            - tablist [ref=e365]:
+              - tab "Today's Tasks" [selected] [ref=e366] [cursor=pointer]:
+                - img [ref=e367]
+                - text: Today's Tasks
+              - tab "Time Blocks" [ref=e369] [cursor=pointer]:
+                - img [ref=e370]
+                - text: Time Blocks
+              - tab "AI Insights 2" [ref=e373] [cursor=pointer]:
+                - img [ref=e374]
+                - text: AI Insights
+                - generic [ref=e384]: "2"
+              - tab "Analytics" [ref=e385] [cursor=pointer]:
+                - img [ref=e386]
+                - text: Analytics
+              - tab "Projects" [ref=e388] [cursor=pointer]:
+                - img [ref=e389]
+                - text: Projects
+              - tab "Goals" [ref=e392] [cursor=pointer]:
+                - img [ref=e393]
+                - text: Goals
+            - tabpanel "Today's Tasks" [ref=e397]:
+              - generic [ref=e398]:
+                - generic [ref=e401]:
+                  - heading "Today's Tasks 5 remaining Add Task" [level=3] [ref=e403]:
+                    - generic [ref=e404]:
+                      - img [ref=e405]
+                      - text: Today's Tasks
+                    - generic [ref=e409]:
+                      - generic [ref=e410]: 5 remaining
+                      - button "Add Task" [ref=e411] [cursor=pointer]:
+                        - img [ref=e412]
+                        - text: Add Task
+                  - generic [ref=e413]:
+                    - generic [ref=e415]:
+                      - button [ref=e416] [cursor=pointer]:
+                        - img [ref=e417]
+                      - generic [ref=e421]:
+                        - generic [ref=e422]:
+                          - heading "Complete logo design mockups" [level=4] [ref=e423]
+                          - paragraph [ref=e424]: Create 3 logo variations for TechCorp client
+                          - generic [ref=e425]:
+                            - generic [ref=e426]: high
+                            - generic [ref=e427]:
+                              - img [ref=e428]
+                              - text: 2h 0m
+                          - generic [ref=e431]:
+                            - generic [ref=e432]: design
+                            - generic [ref=e433]: branding
+                            - generic [ref=e434]: urgent
+                        - generic [ref=e435]:
+                          - button "Start" [ref=e436] [cursor=pointer]:
+                            - img [ref=e437]
+                            - text: Start
+                          - button [ref=e439] [cursor=pointer]:
+                            - img [ref=e440]
+                    - generic [ref=e444]:
+                      - button [ref=e445] [cursor=pointer]:
+                        - img [ref=e446]
+                      - generic [ref=e450]:
+                        - generic [ref=e451]:
+                          - heading "Review brand guidelines document" [level=4] [ref=e452]
+                          - paragraph [ref=e453]: Final review before client presentation
+                          - generic [ref=e454]:
+                            - generic [ref=e455]: medium
+                            - generic [ref=e456]:
+                              - img [ref=e457]
+                              - text: 45m
+                          - generic [ref=e460]:
+                            - generic [ref=e461]: review
+                            - generic [ref=e462]: documentation
+                        - button [ref=e464] [cursor=pointer]:
+                          - img [ref=e465]
+                    - generic [ref=e469]:
+                      - button [ref=e470] [cursor=pointer]:
+                        - img [ref=e471]
+                      - generic [ref=e475]:
+                        - generic [ref=e476]:
+                          - heading "Client call with Sarah Johnson" [level=4] [ref=e477]
+                          - paragraph [ref=e478]: Project status update and feedback session
+                          - generic [ref=e479]:
+                            - generic [ref=e480]: high
+                            - generic [ref=e481]:
+                              - img [ref=e482]
+                              - text: 1h 0m
+                            - generic [ref=e485]:
+                              - img [ref=e486]
+                              - text: 14:00
+                          - generic [ref=e489]:
+                            - generic [ref=e490]: meeting
+                            - generic [ref=e491]: client
+                        - generic [ref=e492]:
+                          - button "Start" [ref=e493] [cursor=pointer]:
+                            - img [ref=e494]
+                            - text: Start
+                          - button [ref=e496] [cursor=pointer]:
+                            - img [ref=e497]
+                    - generic [ref=e501]:
+                      - button [ref=e502] [cursor=pointer]:
+                        - img [ref=e503]
+                      - generic [ref=e507]:
+                        - generic [ref=e508]:
+                          - heading "Team standup meeting" [level=4] [ref=e509]
+                          - paragraph [ref=e510]: Weekly sync with development team
+                          - generic [ref=e511]:
+                            - generic [ref=e512]: medium
+                            - generic [ref=e513]:
+                              - img [ref=e514]
+                              - text: 30m
+                            - generic [ref=e517]:
+                              - img [ref=e518]
+                              - text: 10:00
+                          - generic [ref=e521]:
+                            - generic [ref=e522]: meeting
+                            - generic [ref=e523]: team
+                        - generic [ref=e524]:
+                          - button "Start" [ref=e525] [cursor=pointer]:
+                            - img [ref=e526]
+                            - text: Start
+                          - button [ref=e528] [cursor=pointer]:
+                            - img [ref=e529]
+                    - generic [ref=e533]:
+                      - button [ref=e534] [cursor=pointer]:
+                        - img [ref=e535]
+                      - generic [ref=e539]:
+                        - generic [ref=e540]:
+                          - heading "Update portfolio website" [level=4] [ref=e541]
+                          - paragraph [ref=e542]: Add recent project showcase
+                          - generic [ref=e543]:
+                            - generic [ref=e544]: low
+                            - generic [ref=e545]:
+                              - img [ref=e546]
+                              - text: 1h 30m
+                          - generic [ref=e549]:
+                            - generic [ref=e550]: portfolio
+                            - generic [ref=e551]: personal
+                        - generic [ref=e552]:
+                          - button "Start" [ref=e553] [cursor=pointer]:
+                            - img [ref=e554]
+                            - text: Start
+                          - button [ref=e556] [cursor=pointer]:
+                            - img [ref=e557]
+                    - generic [ref=e561]:
+                      - button [ref=e562] [cursor=pointer]:
+                        - img [ref=e563]
+                      - generic [ref=e567]:
+                        - generic [ref=e568]:
+                          - heading "Review project proposals" [level=4] [ref=e569]
+                          - paragraph [ref=e570]: Evaluate 3 new project opportunities
+                          - generic [ref=e571]:
+                            - generic [ref=e572]: medium
+                            - generic [ref=e573]:
+                              - img [ref=e574]
+                              - text: 1h 15m
+                          - generic [ref=e577]:
+                            - generic [ref=e578]: business
+                            - generic [ref=e579]: proposals
+                        - generic [ref=e580]:
+                          - button "Start" [ref=e581] [cursor=pointer]:
+                            - img [ref=e582]
+                            - text: Start
+                          - button [ref=e584] [cursor=pointer]:
+                            - img [ref=e585]
+                - generic [ref=e588]:
+                  - generic [ref=e590]:
+                    - heading "Quick Actions" [level=3] [ref=e592]:
+                      - img [ref=e593]
+                      - text: Quick Actions
+                    - generic [ref=e595]:
+                      - button "View Calendar" [ref=e596] [cursor=pointer]:
+                        - img [ref=e597]
+                        - text: View Calendar
+                      - button "Generate Schedule" [ref=e599] [cursor=pointer]:
+                        - img [ref=e600]
+                        - text: Generate Schedule
+                      - button "Check Client Messages" [ref=e610] [cursor=pointer]:
+                        - img [ref=e611]
+                        - text: Check Client Messages
+                      - button "View Projects" [ref=e613] [cursor=pointer]:
+                        - img [ref=e614]
+                        - text: View Projects
+                  - generic [ref=e618]:
+                    - heading "AI Tips" [level=3] [ref=e620]:
+                      - img [ref=e621]
+                      - text: AI Tips
+                    - generic [ref=e623]:
+                      - generic [ref=e624]:
+                        - paragraph [ref=e625]: Peak Performance Window
+                        - paragraph [ref=e626]: Your most productive hours are 9-11 AM. Schedule your challenging design work during this time.
+                      - generic [ref=e627]:
+                        - paragraph [ref=e628]: Break Reminder
+                        - paragraph [ref=e629]: Take a 15-minute break after every 90 minutes of focused work to maintain peak performance.
+          - generic [ref=e632]:
+            - heading "Add New Task" [level=3] [ref=e634]
+            - generic [ref=e635]:
+              - generic [ref=e636]:
+                - generic [ref=e637]: Task Title
+                - textbox "Enter task title..." [ref=e638]
+              - generic [ref=e639]:
+                - generic [ref=e640]: Description (Optional)
+                - textbox "Add task description..." [ref=e641]
+              - generic [ref=e642]:
+                - generic [ref=e643]: Priority
+                - combobox [ref=e644]:
+                  - option "Low"
+                  - option "Medium" [selected]
+                  - option "High"
+                  - option "Urgent"
+              - generic [ref=e645]:
+                - button "Add Task" [disabled] [ref=e646]
+                - button "Cancel" [ref=e647] [cursor=pointer]
+    - button "Cycle theme" [ref=e654] [cursor=pointer]:
+      - img [ref=e655]
+    - button "2" [ref=e657] [cursor=pointer]:
+      - img [ref=e658]
+      - generic [ref=e661]: "2"
+    - button "Show keyboard shortcuts" [ref=e662] [cursor=pointer]:
+      - img [ref=e666]
+    - button "Interactive Tours" [ref=e668] [cursor=pointer]:
+      - img [ref=e669]
+      - text: Interactive Tours
+  - button "Context7 Docs" [ref=e671] [cursor=pointer]:
+    - img [ref=e672]
+    - text: Context7 Docs
+  - region "Notifications alt+T"
+  - status
+  - alert [ref=e674]
+```
