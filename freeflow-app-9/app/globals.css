@@ -85,19 +85,13 @@
   }
 }
 
-/* Glass morphism styles - Enhanced for dark mode */
+/* Glass morphism styles - Light mode only */
 .glass-nav {
   @apply bg-white/60 backdrop-blur-xl border-b border-[hsl(var(--border))] shadow-sm;
 }
 
 .glass-card {
   @apply bg-white/60 backdrop-blur-xl border border-[hsl(var(--border))] rounded-2xl shadow-lg;
-}
-
-  @apply bg-black/80 border-gray-700;
-}
-
-  @apply bg-black/80 border-gray-700;
 }
 
 .gradient-bg {
@@ -129,14 +123,6 @@
 
 .btn-kazi-secondary:hover {
   @apply transform scale-105;
-  background: #6E4BFF;
-  color: #F8F7F4;
-}
-
-  border-color: #6E4BFF;
-  color: #6E4BFF;
-}
-
   background: #6E4BFF;
   color: #F8F7F4;
 }
@@ -224,10 +210,6 @@
   @apply rounded-xl shadow-lg transition-all duration-300 hover:shadow-2xl;
   background: var(--kazi-soft-ivory);
   border: 1px solid rgba(110, 75, 255, 0.1);
-}
-
-  background: var(--kazi-jet-black);
-  border: 1px solid rgba(110, 75, 255, 0.2);
 }
 
 /* Kazi Interactive Elements */
@@ -419,9 +401,6 @@
 .scrollbar-enhanced {
   scrollbar-width: thin;
   scrollbar-color: rgb(156 163 175) transparent;
-}
-
-  scrollbar-color: rgb(75 85 99) transparent;
 }
 
 .scrollbar-enhanced::-webkit-scrollbar {
