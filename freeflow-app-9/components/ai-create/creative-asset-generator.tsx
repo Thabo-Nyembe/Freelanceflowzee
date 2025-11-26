@@ -13,6 +13,8 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
+// TODO: Re-enable when UPS component syntax is fixed
+// import { UniversalPinpointFeedbackSystem } from '@/components/projects-hub/universal-pinpoint-feedback-system'
 import {
   Camera,
   Video,
@@ -181,6 +183,8 @@ export function CreativeAssetGenerator({ asStandalone = true }: CreativeAssetGen
   const [generating, setGenerating] = useState(false)
   const [generatedAssets, setGeneratedAssets] = useState<GeneratedAsset[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [showUPS, setShowUPS] = useState(false)
+  const [selectedAssetForUPS, setSelectedAssetForUPS] = useState<GeneratedAsset | null>(null)
 
   const handleFieldSelect = useCallback((fieldId: string) => {
     setSelectedField(fieldId)
@@ -304,6 +308,15 @@ export function CreativeAssetGenerator({ asStandalone = true }: CreativeAssetGen
 
     toast.info('Preview', {
       description: asset.name
+    })
+  }, [])
+
+  const handleOpenUPS = useCallback((asset: GeneratedAsset) => {
+    setSelectedAssetForUPS(asset)
+    setShowUPS(true)
+    logger.info('Opening UPS for asset', { assetId: asset.id, assetName: asset.name })
+    toast.success('Visual Feedback System', {
+      description: `Opening pinpoint feedback for ${asset.name}`
     })
   }, [])
 
@@ -858,6 +871,17 @@ export function CreativeAssetGenerator({ asStandalone = true }: CreativeAssetGen
                         Download
                       </Button>
                     </div>
+
+                    {/* Universal Pinpoint System Button */}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleOpenUPS(asset)}
+                      className="w-full mt-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 hover:from-purple-600 hover:to-pink-600"
+                    >
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Visual Feedback
+                    </Button>
                   </Card>
                 ))}
               </div>
@@ -889,6 +913,49 @@ export function CreativeAssetGenerator({ asStandalone = true }: CreativeAssetGen
           </div>
         </Card>
       )}
+
+      {/* Universal Pinpoint System Dialog - TODO: Re-enable when UPS component syntax is fixed */}
+      {/* {showUPS && selectedAssetForUPS && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold flex items-center gap-3">
+                  <Sparkles className="w-6 h-6 text-purple-500" />
+                  Universal Pinpoint Feedback - {selectedAssetForUPS.name}
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Add precise, contextual feedback to your generated assets with AI-powered insights
+                </p>
+              </div>
+              <button
+                onClick={() => setShowUPS(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto p-6">
+              <UniversalPinpointFeedbackSystem
+                projectId={`ai-create-${selectedAssetForUPS.id}`}
+                readOnly={false}
+                onCommentAdd={(comment) => {
+                  logger.info('UPS comment added to asset', { assetId: selectedAssetForUPS.id, comment })
+                  toast.success('Feedback Added', {
+                    description: 'Your visual feedback has been saved to this asset'
+                  })
+                }}
+                onCommentUpdate={(comment) => {
+                  logger.info('UPS comment updated', { comment })
+                }}
+                onCommentDelete={(commentId) => {
+                  logger.info('UPS comment deleted', { commentId })
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )} */}
     </div>
   )
 }
