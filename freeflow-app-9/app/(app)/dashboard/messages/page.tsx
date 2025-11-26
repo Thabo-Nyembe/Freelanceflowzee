@@ -1,3 +1,111 @@
+/**
+ * Messages Hub - World-class A+++ Real-time Messaging System
+ *
+ * Session 10 of Systematic Dashboard Refactoring
+ *
+ * FEATURES:
+ * - Direct messages, group chats, and channels
+ * - Real-time messaging with typing indicators
+ * - File/image/voice/video attachments
+ * - Emoji reactions and message threads
+ * - Read receipts and message status
+ * - User mentions and hashtags
+ * - Message search with full-text
+ * - Chat permissions and roles
+ * - Pin, star, archive, mute chats
+ * - Export chat history
+ * - Bulk message operations
+ *
+ * API ENDPOINTS:
+ *
+ * Messages:
+ * - POST   /api/messages/send              - Send new message
+ * - GET    /api/messages/:chatId           - Load messages for chat (paginated)
+ * - PUT    /api/messages/:id               - Edit existing message
+ * - DELETE /api/messages/:id               - Delete message (soft delete)
+ * - POST   /api/messages/:id/react         - Add emoji reaction
+ * - DELETE /api/messages/:id/react/:emoji  - Remove reaction
+ * - POST   /api/messages/:id/read          - Mark message as read
+ * - POST   /api/messages/:id/pin           - Pin/unpin message
+ * - POST   /api/messages/:id/star          - Star/unstar message
+ * - POST   /api/messages/:id/forward       - Forward message to other chats
+ * - POST   /api/messages/search            - Search messages with full-text
+ * - POST   /api/messages/bulk-delete       - Delete multiple messages
+ *
+ * Chats:
+ * - GET    /api/chats                      - Get all user chats
+ * - POST   /api/chats/create               - Create new chat (direct/group)
+ * - GET    /api/chats/:id                  - Get chat details
+ * - PUT    /api/chats/:id                  - Update chat info (name, description, avatar)
+ * - DELETE /api/chats/:id                  - Delete chat
+ * - POST   /api/chats/:id/members          - Add member to chat
+ * - DELETE /api/chats/:id/members/:userId  - Remove member from chat
+ * - PUT    /api/chats/:id/settings         - Update chat settings (mute, pin, archive)
+ * - POST   /api/chats/:id/archive          - Archive/unarchive chat
+ * - POST   /api/chats/:id/mute             - Mute/unmute chat
+ * - POST   /api/chats/:id/leave            - Leave chat
+ * - GET    /api/chats/:id/media            - Get all media in chat
+ * - POST   /api/chats/:id/export           - Export chat history
+ *
+ * Attachments:
+ * - POST   /api/attachments/upload         - Upload file attachment
+ * - GET    /api/attachments/:id            - Download attachment
+ * - DELETE /api/attachments/:id            - Delete attachment
+ * - POST   /api/attachments/voice          - Upload voice recording
+ * - POST   /api/attachments/image          - Upload image with compression
+ * - POST   /api/attachments/video          - Upload video with transcoding
+ *
+ * Typing Indicators:
+ * - POST   /api/typing/start               - Start typing indicator
+ * - POST   /api/typing/stop                - Stop typing indicator
+ * - GET    /api/typing/:chatId             - Get typing users (real-time)
+ *
+ * Threads:
+ * - GET    /api/threads/:messageId         - Get message thread
+ * - POST   /api/threads/:messageId/reply   - Reply in thread
+ * - GET    /api/threads/:messageId/count   - Get thread message count
+ *
+ * Invites:
+ * - POST   /api/invites/create             - Create chat invite
+ * - GET    /api/invites/:id                - Get invite details
+ * - POST   /api/invites/:id/accept         - Accept invite
+ * - POST   /api/invites/:id/decline        - Decline invite
+ * - GET    /api/invites/pending            - Get user's pending invites
+ *
+ * Blocking:
+ * - POST   /api/block/:userId              - Block user
+ * - DELETE /api/block/:userId              - Unblock user
+ * - GET    /api/block                      - Get blocked users list
+ *
+ * REAL-TIME SUBSCRIPTIONS (Supabase):
+ * - messages:INSERT                        - New message in chat
+ * - messages:UPDATE                        - Message edited/status changed
+ * - messages:DELETE                        - Message deleted
+ * - message_reactions:INSERT               - New reaction added
+ * - message_reactions:DELETE               - Reaction removed
+ * - typing_indicators:INSERT               - User started typing
+ * - typing_indicators:DELETE               - User stopped typing
+ * - chat_members:INSERT                    - Member added to chat
+ * - chat_members:DELETE                    - Member removed from chat
+ * - message_read_receipts:INSERT           - Message read by user
+ *
+ * UTILITIES (from messages-utils.tsx):
+ * - 30+ helper functions for message/chat operations
+ * - TypeScript interfaces for type safety
+ * - Mock data for development (50+ chats, 200+ messages)
+ * - Validation functions
+ * - Search and filtering utilities
+ * - Formatting functions
+ *
+ * DATABASE SCHEMA (20251126_messages_system.sql):
+ * - 12 tables with proper relationships
+ * - 40+ indexes for performance
+ * - 30+ RLS policies for security
+ * - 8+ triggers for automation
+ * - 5+ helper functions
+ * - Full-text search support
+ */
+
 'use client'
 
 import { useState, useRef, useEffect, useReducer } from 'react'
@@ -31,6 +139,65 @@ import { useAnnouncer } from '@/lib/accessibility'
 // Production Logger
 import { createFeatureLogger } from '@/lib/logger'
 const logger = createFeatureLogger('Messages')
+
+// Messages Utilities - World-class A+++ messaging system
+import {
+  type Message as MessageType,
+  type Chat as ChatType,
+  type ChatMember,
+  type MessageReaction,
+  type MessageAttachment,
+  type ChatSettings,
+  type ChatPermissions,
+  MOCK_CHATS,
+  MOCK_MESSAGES,
+  formatMessageTime,
+  formatTime,
+  formatDateTime,
+  getMessageIcon,
+  getStatusIcon,
+  sortChatsByActivity,
+  sortChatsByUnread,
+  sortChatsByPinned,
+  filterChatsByType,
+  filterPinnedChats,
+  filterArchivedChats,
+  filterUnreadChats,
+  filterMutedChats,
+  searchChats,
+  searchMessages,
+  getUnreadCount,
+  getTotalMessageCount,
+  groupMessagesByDate,
+  getMentions,
+  highlightMentions,
+  getHashtags,
+  extractUrls,
+  isImageFile,
+  isVideoFile,
+  isAudioFile,
+  isDocumentFile,
+  formatFileSize,
+  canUserSendMessage,
+  canUserSendMedia,
+  canUserAddMembers,
+  canUserRemoveMembers,
+  getOnlineMembers,
+  getTypingUsers,
+  getAdminMembers,
+  calculateActivityScore,
+  getAttachmentsByType,
+  filterMessagesByDateRange,
+  getMessageStats,
+  validateMessage,
+  generateChatExport,
+  MESSAGE_TYPES,
+  MESSAGE_STATUSES,
+  CHAT_TYPES,
+  MEMBER_ROLES,
+  MAX_MESSAGE_LENGTH,
+  MAX_ATTACHMENTS_PER_MESSAGE
+} from '@/lib/messages-utils'
 
 // ============================================================================
 // FRAMER MOTION ANIMATION COMPONENTS
