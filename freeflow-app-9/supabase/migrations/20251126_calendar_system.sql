@@ -1,0 +1,1028 @@
+-- ============================================================================
+-- SESSION_13: CALENDAR SYSTEM - Production Database Schema
+-- ============================================================================
+-- World-class calendar and scheduling system with:
+-- - Event management with recurrence
+-- - RSVP and attendee tracking
+-- - AI-powered scheduling suggestions
+-- - Multiple calendar support
+-- - Reminder system
+-- - Meeting analytics
+-- - Integration with external calendars
+-- ============================================================================
+
+-- Enable required extensions
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- ============================================================================
+-- ENUMS
+-- ============================================================================
+
+CREATE TYPE event_type AS ENUM (
+  'meeting',
+  'call',
+  'presentation',
+  'workshop',
+  'deadline',
+  'reminder',
+  'task',
+  'interview',
+  'review',
+  'social',
+  'personal',
+  'other'
+);
+
+CREATE TYPE event_status AS ENUM (
+  'tentative',
+  'confirmed',
+  'cancelled',
+  'completed'
+);
+
+CREATE TYPE event_visibility AS ENUM (
+  'public',
+  'private',
+  'confidential'
+);
+
+CREATE TYPE location_type AS ENUM (
+  'physical',
+  'video',
+  'phone',
+  'hybrid',
+  'none'
+);
+
+CREATE TYPE attendee_role AS ENUM (
+  'organizer',
+  'required',
+  'optional',
+  'resource'
+);
+
+CREATE TYPE attendee_status AS ENUM (
+  'pending',
+  'accepted',
+  'declined',
+  'tentative',
+  'no-response'
+);
+
+CREATE TYPE reminder_method AS ENUM (
+  'email',
+  'push',
+  'sms',
+  'popup'
+);
+
+CREATE TYPE recurrence_frequency AS ENUM (
+  'daily',
+  'weekly',
+  'monthly',
+  'yearly'
+);
+
+-- ============================================================================
+-- TABLES
+-- ============================================================================
+
+-- Calendars Table
+CREATE TABLE calendars (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+  -- Calendar info
+  name TEXT NOT NULL,
+  description TEXT,
+  color TEXT NOT NULL DEFAULT '#3b82f6',
+
+  -- Settings
+  is_default BOOLEAN DEFAULT FALSE,
+  is_visible BOOLEAN DEFAULT TRUE,
+  time_zone TEXT NOT NULL DEFAULT 'America/New_York',
+
+  -- Working hours (JSONB for flexibility)
+  working_hours JSONB DEFAULT '{}',
+
+  -- Notifications
+  notifications JSONB DEFAULT '{"email": true, "push": true, "sms": false, "defaultReminder": 15}',
+
+  -- Timestamps
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Constraints
+  CONSTRAINT valid_color CHECK (color ~ '^#[0-9A-Fa-f]{6}$')
+);
+
+-- Events Table
+CREATE TABLE calendar_events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  calendar_id UUID NOT NULL REFERENCES calendars(id) ON DELETE CASCADE,
+
+  -- Basic info
+  title TEXT NOT NULL,
+  description TEXT,
+
+  -- Time
+  start_time TIMESTAMPTZ NOT NULL,
+  end_time TIMESTAMPTZ NOT NULL,
+  all_day BOOLEAN DEFAULT FALSE,
+  time_zone TEXT NOT NULL DEFAULT 'America/New_York',
+
+  -- Classification
+  event_type event_type NOT NULL DEFAULT 'meeting',
+  status event_status NOT NULL DEFAULT 'tentative',
+  visibility event_visibility NOT NULL DEFAULT 'public',
+
+  -- Location
+  location TEXT,
+  location_type location_type NOT NULL DEFAULT 'none',
+  meeting_url TEXT,
+  coordinates POINT, -- PostGIS point for lat/lng
+
+  -- Organizer
+  organizer_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  organizer_name TEXT NOT NULL,
+  organizer_email TEXT NOT NULL,
+
+  -- Visual
+  color TEXT,
+
+  -- RSVP
+  rsvp_required BOOLEAN DEFAULT FALSE,
+  rsvp_deadline TIMESTAMPTZ,
+
+  -- Integration
+  external_id TEXT, -- Google Calendar, Outlook, etc.
+  source TEXT, -- 'google', 'outlook', 'kazi', etc.
+
+  -- Tracking
+  views INTEGER DEFAULT 0,
+  responses INTEGER DEFAULT 0,
+
+  -- Timestamps
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Constraints
+  CONSTRAINT valid_time_range CHECK (end_time > start_time),
+  CONSTRAINT valid_rsvp_deadline CHECK (
+    rsvp_deadline IS NULL OR rsvp_deadline < start_time
+  )
+);
+
+-- Recurrence Rules Table
+CREATE TABLE event_recurrence (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  event_id UUID NOT NULL REFERENCES calendar_events(id) ON DELETE CASCADE,
+
+  -- Recurrence pattern
+  frequency recurrence_frequency NOT NULL,
+  interval INTEGER NOT NULL DEFAULT 1,
+
+  -- End conditions
+  end_date TIMESTAMPTZ,
+  count INTEGER, -- Number of occurrences
+
+  -- Advanced patterns
+  by_day INTEGER[], -- Days of week (0-6, Sun-Sat)
+  by_month_day INTEGER[], -- Days of month (1-31)
+  by_month INTEGER[], -- Months (1-12)
+
+  -- Exceptions
+  exceptions TEXT[], -- ISO dates to skip
+
+  -- Timestamps
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Constraints
+  CONSTRAINT valid_interval CHECK (interval > 0),
+  CONSTRAINT valid_end_condition CHECK (
+    end_date IS NOT NULL OR count IS NOT NULL
+  ),
+  CONSTRAINT valid_by_day CHECK (
+    by_day IS NULL OR (
+      array_length(by_day, 1) > 0 AND
+      by_day <@ ARRAY[0,1,2,3,4,5,6]
+    )
+  ),
+  CONSTRAINT valid_by_month_day CHECK (
+    by_month_day IS NULL OR (
+      array_length(by_month_day, 1) > 0 AND
+      by_month_day <@ ARRAY[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]
+    )
+  ),
+  CONSTRAINT valid_by_month CHECK (
+    by_month IS NULL OR (
+      array_length(by_month, 1) > 0 AND
+      by_month <@ ARRAY[1,2,3,4,5,6,7,8,9,10,11,12]
+    )
+  ),
+
+  -- One recurrence rule per event
+  UNIQUE(event_id)
+);
+
+-- Attendees Table
+CREATE TABLE event_attendees (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  event_id UUID NOT NULL REFERENCES calendar_events(id) ON DELETE CASCADE,
+
+  -- Attendee info
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL, -- NULL for external attendees
+  email TEXT NOT NULL,
+  name TEXT NOT NULL,
+  avatar TEXT,
+
+  -- Role and status
+  role attendee_role NOT NULL DEFAULT 'optional',
+  status attendee_status NOT NULL DEFAULT 'pending',
+  optional BOOLEAN DEFAULT FALSE,
+
+  -- Response
+  response_time TIMESTAMPTZ,
+  notes TEXT,
+
+  -- Timestamps
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Unique constraint
+  UNIQUE(event_id, email)
+);
+
+-- Reminders Table
+CREATE TABLE event_reminders (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  event_id UUID NOT NULL REFERENCES calendar_events(id) ON DELETE CASCADE,
+
+  -- Reminder settings
+  minutes INTEGER NOT NULL, -- Before event
+  method reminder_method NOT NULL,
+
+  -- Tracking
+  sent BOOLEAN DEFAULT FALSE,
+  sent_at TIMESTAMPTZ,
+
+  -- Timestamps
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Constraints
+  CONSTRAINT valid_minutes CHECK (minutes >= 0)
+);
+
+-- Attachments Table
+CREATE TABLE event_attachments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  event_id UUID NOT NULL REFERENCES calendar_events(id) ON DELETE CASCADE,
+
+  -- File info
+  name TEXT NOT NULL,
+  url TEXT NOT NULL,
+  size BIGINT NOT NULL,
+  type TEXT NOT NULL,
+
+  -- Tracking
+  uploaded_by UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  uploaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Constraints
+  CONSTRAINT valid_size CHECK (size > 0)
+);
+
+-- Event Views Table (Analytics)
+CREATE TABLE event_views (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  event_id UUID NOT NULL REFERENCES calendar_events(id) ON DELETE CASCADE,
+
+  -- Viewer info (nullable for anonymous views)
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  ip_address INET,
+  user_agent TEXT,
+
+  -- Timestamps
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- AI Insights Table
+CREATE TABLE calendar_ai_insights (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+  -- Insight details
+  type TEXT NOT NULL, -- 'optimization', 'conflict', 'productivity', etc.
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+
+  -- Importance
+  impact TEXT NOT NULL, -- 'low', 'medium', 'high'
+  confidence INTEGER NOT NULL, -- 0-100
+  actionable BOOLEAN DEFAULT FALSE,
+  suggestion TEXT,
+
+  -- Related data
+  data JSONB DEFAULT '{}',
+
+  -- Related events
+  event_ids UUID[],
+
+  -- Status
+  dismissed BOOLEAN DEFAULT FALSE,
+  dismissed_at TIMESTAMPTZ,
+
+  -- Timestamps
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+  -- Constraints
+  CONSTRAINT valid_impact CHECK (impact IN ('low', 'medium', 'high')),
+  CONSTRAINT valid_confidence CHECK (confidence >= 0 AND confidence <= 100)
+);
+
+-- Scheduling Suggestions Table
+CREATE TABLE scheduling_suggestions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+  -- Suggestion details
+  title TEXT NOT NULL,
+  description TEXT,
+  duration INTEGER NOT NULL, -- minutes
+
+  -- Time slot
+  suggested_start TIMESTAMPTZ NOT NULL,
+  suggested_end TIMESTAMPTZ NOT NULL,
+
+  -- Scoring
+  score INTEGER NOT NULL, -- 0-100
+  reasoning TEXT[],
+
+  -- Attendee availability
+  attendee_availability JSONB DEFAULT '{}',
+
+  -- Status
+  accepted BOOLEAN DEFAULT FALSE,
+  event_id UUID REFERENCES calendar_events(id) ON DELETE SET NULL,
+
+  -- Timestamps
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  expires_at TIMESTAMPTZ,
+
+  -- Constraints
+  CONSTRAINT valid_duration CHECK (duration > 0),
+  CONSTRAINT valid_score CHECK (score >= 0 AND score <= 100),
+  CONSTRAINT valid_time_slot CHECK (suggested_end > suggested_start)
+);
+
+-- ============================================================================
+-- INDEXES
+-- ============================================================================
+
+-- Calendars Indexes
+CREATE INDEX idx_calendars_user_id ON calendars(user_id);
+CREATE INDEX idx_calendars_is_default ON calendars(is_default) WHERE is_default = TRUE;
+CREATE INDEX idx_calendars_is_visible ON calendars(is_visible) WHERE is_visible = TRUE;
+
+-- Events Indexes
+CREATE INDEX idx_events_calendar_id ON calendar_events(calendar_id);
+CREATE INDEX idx_events_organizer_id ON calendar_events(organizer_id);
+CREATE INDEX idx_events_start_time ON calendar_events(start_time);
+CREATE INDEX idx_events_end_time ON calendar_events(end_time);
+CREATE INDEX idx_events_time_range ON calendar_events(start_time, end_time);
+CREATE INDEX idx_events_type ON calendar_events(event_type);
+CREATE INDEX idx_events_status ON calendar_events(status);
+CREATE INDEX idx_events_visibility ON calendar_events(visibility);
+CREATE INDEX idx_events_location_type ON calendar_events(location_type);
+CREATE INDEX idx_events_external_id ON calendar_events(external_id) WHERE external_id IS NOT NULL;
+CREATE INDEX idx_events_source ON calendar_events(source) WHERE source IS NOT NULL;
+CREATE INDEX idx_events_created_at ON calendar_events(created_at DESC);
+
+-- Full-text search on events
+CREATE INDEX idx_events_title_search ON calendar_events USING GIN(to_tsvector('english', title));
+CREATE INDEX idx_events_description_search ON calendar_events USING GIN(to_tsvector('english', COALESCE(description, '')));
+
+-- Recurrence Indexes
+CREATE INDEX idx_recurrence_event_id ON event_recurrence(event_id);
+CREATE INDEX idx_recurrence_frequency ON event_recurrence(frequency);
+CREATE INDEX idx_recurrence_end_date ON event_recurrence(end_date) WHERE end_date IS NOT NULL;
+
+-- Attendees Indexes
+CREATE INDEX idx_attendees_event_id ON event_attendees(event_id);
+CREATE INDEX idx_attendees_user_id ON event_attendees(user_id);
+CREATE INDEX idx_attendees_email ON event_attendees(email);
+CREATE INDEX idx_attendees_role ON event_attendees(role);
+CREATE INDEX idx_attendees_status ON event_attendees(status);
+CREATE INDEX idx_attendees_response_time ON event_attendees(response_time) WHERE response_time IS NOT NULL;
+
+-- Reminders Indexes
+CREATE INDEX idx_reminders_event_id ON event_reminders(event_id);
+CREATE INDEX idx_reminders_method ON event_reminders(method);
+CREATE INDEX idx_reminders_sent ON event_reminders(sent) WHERE sent = FALSE;
+CREATE INDEX idx_reminders_sent_at ON event_reminders(sent_at) WHERE sent_at IS NOT NULL;
+
+-- Attachments Indexes
+CREATE INDEX idx_attachments_event_id ON event_attachments(event_id);
+CREATE INDEX idx_attachments_uploaded_by ON event_attachments(uploaded_by);
+CREATE INDEX idx_attachments_uploaded_at ON event_attachments(uploaded_at DESC);
+
+-- Views Indexes
+CREATE INDEX idx_event_views_event_id ON event_views(event_id);
+CREATE INDEX idx_event_views_user_id ON event_views(user_id);
+CREATE INDEX idx_event_views_created_at ON event_views(created_at DESC);
+
+-- AI Insights Indexes
+CREATE INDEX idx_ai_insights_user_id ON calendar_ai_insights(user_id);
+CREATE INDEX idx_ai_insights_type ON calendar_ai_insights(type);
+CREATE INDEX idx_ai_insights_impact ON calendar_ai_insights(impact);
+CREATE INDEX idx_ai_insights_dismissed ON calendar_ai_insights(dismissed) WHERE dismissed = FALSE;
+CREATE INDEX idx_ai_insights_created_at ON calendar_ai_insights(created_at DESC);
+
+-- Suggestions Indexes
+CREATE INDEX idx_suggestions_user_id ON scheduling_suggestions(user_id);
+CREATE INDEX idx_suggestions_suggested_start ON scheduling_suggestions(suggested_start);
+CREATE INDEX idx_suggestions_score ON scheduling_suggestions(score DESC);
+CREATE INDEX idx_suggestions_accepted ON scheduling_suggestions(accepted) WHERE accepted = FALSE;
+CREATE INDEX idx_suggestions_expires_at ON scheduling_suggestions(expires_at) WHERE expires_at IS NOT NULL;
+
+-- ============================================================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- ============================================================================
+
+-- Enable RLS
+ALTER TABLE calendars ENABLE ROW LEVEL SECURITY;
+ALTER TABLE calendar_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE event_recurrence ENABLE ROW LEVEL SECURITY;
+ALTER TABLE event_attendees ENABLE ROW LEVEL SECURITY;
+ALTER TABLE event_reminders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE event_attachments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE event_views ENABLE ROW LEVEL SECURITY;
+ALTER TABLE calendar_ai_insights ENABLE ROW LEVEL SECURITY;
+ALTER TABLE scheduling_suggestions ENABLE ROW LEVEL SECURITY;
+
+-- Calendars Policies
+CREATE POLICY "Users can view their own calendars"
+  ON calendars FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own calendars"
+  ON calendars FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own calendars"
+  ON calendars FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own calendars"
+  ON calendars FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- Events Policies
+CREATE POLICY "Users can view events from their calendars"
+  ON calendar_events FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM calendars
+      WHERE id = calendar_id AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view events they're invited to"
+  ON calendar_events FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM event_attendees
+      WHERE event_id = calendar_events.id AND user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can view public events"
+  ON calendar_events FOR SELECT
+  USING (visibility = 'public');
+
+CREATE POLICY "Users can insert events in their calendars"
+  ON calendar_events FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM calendars
+      WHERE id = calendar_id AND user_id = auth.uid()
+    ) AND organizer_id = auth.uid()
+  );
+
+CREATE POLICY "Organizers can update their events"
+  ON calendar_events FOR UPDATE
+  USING (auth.uid() = organizer_id);
+
+CREATE POLICY "Organizers can delete their events"
+  ON calendar_events FOR DELETE
+  USING (auth.uid() = organizer_id);
+
+-- Recurrence Policies
+CREATE POLICY "Users can view recurrence for events they can see"
+  ON event_recurrence FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM calendar_events
+      WHERE id = event_id AND (
+        EXISTS (
+          SELECT 1 FROM calendars
+          WHERE id = calendar_id AND user_id = auth.uid()
+        ) OR
+        EXISTS (
+          SELECT 1 FROM event_attendees
+          WHERE event_id = calendar_events.id AND user_id = auth.uid()
+        )
+      )
+    )
+  );
+
+CREATE POLICY "Event organizers can manage recurrence"
+  ON event_recurrence FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM calendar_events
+      WHERE id = event_id AND organizer_id = auth.uid()
+    )
+  );
+
+-- Attendees Policies
+CREATE POLICY "Users can view attendees for events they can see"
+  ON event_attendees FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM calendar_events
+      WHERE id = event_id AND (
+        EXISTS (
+          SELECT 1 FROM calendars
+          WHERE id = calendar_id AND user_id = auth.uid()
+        ) OR
+        EXISTS (
+          SELECT 1 FROM event_attendees att
+          WHERE att.event_id = calendar_events.id AND att.user_id = auth.uid()
+        )
+      )
+    )
+  );
+
+CREATE POLICY "Event organizers can manage attendees"
+  ON event_attendees FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM calendar_events
+      WHERE id = event_id AND organizer_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Attendees can update their own status"
+  ON event_attendees FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- Reminders Policies
+CREATE POLICY "Users can view reminders for their events"
+  ON event_reminders FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM calendar_events
+      WHERE id = event_id AND (
+        organizer_id = auth.uid() OR
+        EXISTS (
+          SELECT 1 FROM event_attendees
+          WHERE event_id = calendar_events.id AND user_id = auth.uid()
+        )
+      )
+    )
+  );
+
+CREATE POLICY "Event organizers and attendees can manage reminders"
+  ON event_reminders FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM calendar_events
+      WHERE id = event_id AND (
+        organizer_id = auth.uid() OR
+        EXISTS (
+          SELECT 1 FROM event_attendees
+          WHERE event_id = calendar_events.id AND user_id = auth.uid()
+        )
+      )
+    )
+  );
+
+-- Attachments Policies
+CREATE POLICY "Users can view attachments for events they can see"
+  ON event_attachments FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM calendar_events
+      WHERE id = event_id AND (
+        EXISTS (
+          SELECT 1 FROM calendars
+          WHERE id = calendar_id AND user_id = auth.uid()
+        ) OR
+        EXISTS (
+          SELECT 1 FROM event_attendees
+          WHERE event_id = calendar_events.id AND user_id = auth.uid()
+        )
+      )
+    )
+  );
+
+CREATE POLICY "Event organizers and attendees can add attachments"
+  ON event_attachments FOR INSERT
+  WITH CHECK (
+    auth.uid() = uploaded_by AND
+    EXISTS (
+      SELECT 1 FROM calendar_events
+      WHERE id = event_id AND (
+        organizer_id = auth.uid() OR
+        EXISTS (
+          SELECT 1 FROM event_attendees
+          WHERE event_id = calendar_events.id AND user_id = auth.uid()
+        )
+      )
+    )
+  );
+
+CREATE POLICY "Uploaders can delete their attachments"
+  ON event_attachments FOR DELETE
+  USING (auth.uid() = uploaded_by);
+
+-- Views Policies
+CREATE POLICY "Anyone can insert event views"
+  ON event_views FOR INSERT
+  WITH CHECK (TRUE);
+
+CREATE POLICY "Users can view analytics for their events"
+  ON event_views FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM calendar_events
+      WHERE id = event_id AND organizer_id = auth.uid()
+    )
+  );
+
+-- AI Insights Policies
+CREATE POLICY "Users can view their own insights"
+  ON calendar_ai_insights FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "System can insert insights"
+  ON calendar_ai_insights FOR INSERT
+  WITH CHECK (TRUE);
+
+CREATE POLICY "Users can update their own insights"
+  ON calendar_ai_insights FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- Suggestions Policies
+CREATE POLICY "Users can view their own suggestions"
+  ON scheduling_suggestions FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "System can insert suggestions"
+  ON scheduling_suggestions FOR INSERT
+  WITH CHECK (TRUE);
+
+CREATE POLICY "Users can update their own suggestions"
+  ON scheduling_suggestions FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- ============================================================================
+-- TRIGGERS
+-- ============================================================================
+
+-- Update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_calendars_updated_at
+  BEFORE UPDATE ON calendars
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_calendar_events_updated_at
+  BEFORE UPDATE ON calendar_events
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_event_attendees_updated_at
+  BEFORE UPDATE ON event_attendees
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+-- Update event views count
+CREATE OR REPLACE FUNCTION update_event_views_count()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE calendar_events
+  SET views = views + 1
+  WHERE id = NEW.event_id;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_event_views_count
+  AFTER INSERT ON event_views
+  FOR EACH ROW
+  EXECUTE FUNCTION update_event_views_count();
+
+-- Update event responses count
+CREATE OR REPLACE FUNCTION update_event_responses_count()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND OLD.status = 'pending' AND NEW.status != 'pending') THEN
+    UPDATE calendar_events
+    SET responses = (
+      SELECT COUNT(*) FROM event_attendees
+      WHERE event_id = NEW.event_id AND status != 'pending'
+    )
+    WHERE id = NEW.event_id;
+  ELSIF TG_OP = 'DELETE' AND OLD.status != 'pending' THEN
+    UPDATE calendar_events
+    SET responses = (
+      SELECT COUNT(*) FROM event_attendees
+      WHERE event_id = OLD.event_id AND status != 'pending'
+    )
+    WHERE id = OLD.event_id;
+  END IF;
+
+  IF TG_OP = 'DELETE' THEN
+    RETURN OLD;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_event_responses_count
+  AFTER INSERT OR UPDATE OR DELETE ON event_attendees
+  FOR EACH ROW
+  EXECUTE FUNCTION update_event_responses_count();
+
+-- Ensure only one default calendar per user
+CREATE OR REPLACE FUNCTION ensure_single_default_calendar()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.is_default = TRUE THEN
+    UPDATE calendars
+    SET is_default = FALSE
+    WHERE user_id = NEW.user_id AND id != NEW.id;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_ensure_single_default_calendar
+  BEFORE INSERT OR UPDATE ON calendars
+  FOR EACH ROW
+  WHEN (NEW.is_default = TRUE)
+  EXECUTE FUNCTION ensure_single_default_calendar();
+
+-- ============================================================================
+-- HELPER FUNCTIONS
+-- ============================================================================
+
+-- Search events by text
+CREATE OR REPLACE FUNCTION search_calendar_events(
+  search_query TEXT,
+  user_uuid UUID DEFAULT NULL,
+  start_date TIMESTAMPTZ DEFAULT NULL,
+  end_date TIMESTAMPTZ DEFAULT NULL
+)
+RETURNS SETOF calendar_events AS $$
+BEGIN
+  RETURN QUERY
+  SELECT ce.*
+  FROM calendar_events ce
+  JOIN calendars c ON ce.calendar_id = c.id
+  WHERE
+    (user_uuid IS NULL OR c.user_id = user_uuid OR ce.organizer_id = user_uuid OR
+     EXISTS (
+       SELECT 1 FROM event_attendees
+       WHERE event_id = ce.id AND user_id = user_uuid
+     ))
+    AND (
+      to_tsvector('english', ce.title) @@ plainto_tsquery('english', search_query)
+      OR to_tsvector('english', COALESCE(ce.description, '')) @@ plainto_tsquery('english', search_query)
+    )
+    AND (start_date IS NULL OR ce.start_time >= start_date)
+    AND (end_date IS NULL OR ce.end_time <= end_date)
+  ORDER BY
+    ts_rank(to_tsvector('english', ce.title || ' ' || COALESCE(ce.description, '')),
+            plainto_tsquery('english', search_query)) DESC,
+    ce.start_time ASC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Get events in date range
+CREATE OR REPLACE FUNCTION get_events_in_range(
+  user_uuid UUID,
+  start_date TIMESTAMPTZ,
+  end_date TIMESTAMPTZ
+)
+RETURNS SETOF calendar_events AS $$
+BEGIN
+  RETURN QUERY
+  SELECT ce.*
+  FROM calendar_events ce
+  JOIN calendars c ON ce.calendar_id = c.id
+  WHERE
+    (c.user_id = user_uuid OR ce.organizer_id = user_uuid OR
+     EXISTS (
+       SELECT 1 FROM event_attendees
+       WHERE event_id = ce.id AND user_id = user_uuid
+     ))
+    AND ce.start_time >= start_date
+    AND ce.start_time < end_date
+  ORDER BY ce.start_time ASC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Find conflicting events
+CREATE OR REPLACE FUNCTION find_event_conflicts(
+  user_uuid UUID,
+  check_start TIMESTAMPTZ,
+  check_end TIMESTAMPTZ,
+  exclude_event_id UUID DEFAULT NULL
+)
+RETURNS SETOF calendar_events AS $$
+BEGIN
+  RETURN QUERY
+  SELECT ce.*
+  FROM calendar_events ce
+  JOIN calendars c ON ce.calendar_id = c.id
+  WHERE
+    (c.user_id = user_uuid OR ce.organizer_id = user_uuid)
+    AND ce.id != COALESCE(exclude_event_id, '00000000-0000-0000-0000-000000000000'::UUID)
+    AND ce.status != 'cancelled'
+    AND (
+      (ce.start_time, ce.end_time) OVERLAPS (check_start, check_end)
+    )
+  ORDER BY ce.start_time ASC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Get upcoming events
+CREATE OR REPLACE FUNCTION get_upcoming_events(
+  user_uuid UUID,
+  limit_count INTEGER DEFAULT 5
+)
+RETURNS SETOF calendar_events AS $$
+BEGIN
+  RETURN QUERY
+  SELECT ce.*
+  FROM calendar_events ce
+  JOIN calendars c ON ce.calendar_id = c.id
+  WHERE
+    (c.user_id = user_uuid OR ce.organizer_id = user_uuid OR
+     EXISTS (
+       SELECT 1 FROM event_attendees
+       WHERE event_id = ce.id AND user_id = user_uuid
+     ))
+    AND ce.start_time >= NOW()
+    AND ce.status != 'cancelled'
+  ORDER BY ce.start_time ASC
+  LIMIT limit_count;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Get calendar analytics
+CREATE OR REPLACE FUNCTION get_calendar_analytics(
+  user_uuid UUID,
+  start_date TIMESTAMPTZ DEFAULT NOW() - INTERVAL '30 days',
+  end_date TIMESTAMPTZ DEFAULT NOW()
+)
+RETURNS JSON AS $$
+DECLARE
+  result JSON;
+BEGIN
+  SELECT json_build_object(
+    'total_events', (
+      SELECT COUNT(*)
+      FROM calendar_events ce
+      JOIN calendars c ON ce.calendar_id = c.id
+      WHERE c.user_id = user_uuid
+        AND ce.start_time >= start_date
+        AND ce.start_time < end_date
+    ),
+    'confirmed', (
+      SELECT COUNT(*)
+      FROM calendar_events ce
+      JOIN calendars c ON ce.calendar_id = c.id
+      WHERE c.user_id = user_uuid
+        AND ce.status = 'confirmed'
+        AND ce.start_time >= start_date
+        AND ce.start_time < end_date
+    ),
+    'tentative', (
+      SELECT COUNT(*)
+      FROM calendar_events ce
+      JOIN calendars c ON ce.calendar_id = c.id
+      WHERE c.user_id = user_uuid
+        AND ce.status = 'tentative'
+        AND ce.start_time >= start_date
+        AND ce.start_time < end_date
+    ),
+    'avg_duration_minutes', (
+      SELECT COALESCE(AVG(EXTRACT(EPOCH FROM (end_time - start_time)) / 60), 0)
+      FROM calendar_events ce
+      JOIN calendars c ON ce.calendar_id = c.id
+      WHERE c.user_id = user_uuid
+        AND ce.start_time >= start_date
+        AND ce.start_time < end_date
+    ),
+    'events_by_type', (
+      SELECT json_object_agg(event_type, count)
+      FROM (
+        SELECT ce.event_type, COUNT(*) as count
+        FROM calendar_events ce
+        JOIN calendars c ON ce.calendar_id = c.id
+        WHERE c.user_id = user_uuid
+          AND ce.start_time >= start_date
+          AND ce.start_time < end_date
+        GROUP BY ce.event_type
+      ) types
+    )
+  ) INTO result;
+
+  RETURN result;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Clean up expired suggestions
+CREATE OR REPLACE FUNCTION cleanup_expired_suggestions()
+RETURNS INTEGER AS $$
+DECLARE
+  deleted_count INTEGER;
+BEGIN
+  DELETE FROM scheduling_suggestions
+  WHERE expires_at IS NOT NULL AND expires_at < NOW();
+
+  GET DIAGNOSTICS deleted_count = ROW_COUNT;
+  RETURN deleted_count;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================================================
+-- COMMENTS
+-- ============================================================================
+
+COMMENT ON TABLE calendars IS 'User calendars with settings and preferences';
+COMMENT ON TABLE calendar_events IS 'Calendar events with comprehensive metadata';
+COMMENT ON TABLE event_recurrence IS 'Recurrence patterns for repeating events';
+COMMENT ON TABLE event_attendees IS 'Event attendees with RSVP tracking';
+COMMENT ON TABLE event_reminders IS 'Event reminders via multiple channels';
+COMMENT ON TABLE event_attachments IS 'File attachments for events';
+COMMENT ON TABLE event_views IS 'Event view analytics';
+COMMENT ON TABLE calendar_ai_insights IS 'AI-generated scheduling insights';
+COMMENT ON TABLE scheduling_suggestions IS 'AI-powered scheduling suggestions';
+
+-- ============================================================================
+-- SAMPLE QUERIES FOR PRODUCTION API
+-- ============================================================================
+
+/*
+-- Get user's default calendar
+SELECT * FROM calendars
+WHERE user_id = auth.uid() AND is_default = TRUE
+LIMIT 1;
+
+-- Get events for today
+SELECT * FROM get_events_in_range(
+  auth.uid(),
+  CURRENT_DATE::TIMESTAMPTZ,
+  (CURRENT_DATE + INTERVAL '1 day')::TIMESTAMPTZ
+);
+
+-- Get upcoming events
+SELECT * FROM get_upcoming_events(auth.uid(), 10);
+
+-- Search events
+SELECT * FROM search_calendar_events('client meeting', auth.uid());
+
+-- Check for conflicts
+SELECT * FROM find_event_conflicts(
+  auth.uid(),
+  '2024-01-15 09:00:00'::TIMESTAMPTZ,
+  '2024-01-15 10:00:00'::TIMESTAMPTZ
+);
+
+-- Get calendar analytics
+SELECT get_calendar_analytics(auth.uid());
+
+-- Get event with attendees
+SELECT
+  ce.*,
+  json_agg(ea.*) as attendees
+FROM calendar_events ce
+LEFT JOIN event_attendees ea ON ea.event_id = ce.id
+WHERE ce.id = 'event-uuid'
+GROUP BY ce.id;
+*/
