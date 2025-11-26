@@ -1,0 +1,838 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FolderOpen,
+  Plus,
+  Search,
+  Filter,
+  MoreVertical,
+  FileText,
+  Image,
+  Video,
+  Download,
+  Upload,
+  Share2,
+  Trash2,
+  Edit,
+  Copy,
+  Star,
+  StarOff,
+  Lock,
+  Unlock,
+  Eye,
+  EyeOff,
+  Clock,
+  User,
+  Users,
+  Calendar,
+  Tag,
+  Grid3x3,
+  List,
+  RefreshCw,
+  Settings,
+  Archive,
+  FolderPlus,
+  File,
+  Folder,
+  CheckCircle,
+  AlertCircle,
+  XCircle,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import { createFeatureLogger } from "@/lib/logger";
+import { NumberFlow } from "@/components/ui/number-flow";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const logger = createFeatureLogger("CollaborationWorkspace");
+
+interface WorkspaceItem {
+  id: string;
+  name: string;
+  type: "folder" | "file";
+  fileType?: string;
+  size?: string;
+  createdBy: string;
+  createdAt: string;
+  modifiedAt: string;
+  isShared: boolean;
+  isLocked: boolean;
+  isFavorite: boolean;
+  tags: string[];
+  permissions: string;
+}
+
+export default function WorkspacePage() {
+  const [items, setItems] = useState<WorkspaceItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [filterType, setFilterType] = useState("all");
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [currentPath, setCurrentPath] = useState("/");
+  const [activeTab, setActiveTab] = useState("all");
+
+  // Stats
+  const [stats, setStats] = useState({
+    totalFiles: 0,
+    totalFolders: 0,
+    sharedItems: 0,
+    storageUsed: 0,
+  });
+
+  useEffect(() => {
+    fetchWorkspaceData();
+  }, []);
+
+  const fetchWorkspaceData = async () => {
+    try {
+      setLoading(true);
+      logger.info("Fetching workspace data");
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const mockItems: WorkspaceItem[] = [
+        {
+          id: "1",
+          name: "Project Documents",
+          type: "folder",
+          createdBy: "John Doe",
+          createdAt: "2024-01-15",
+          modifiedAt: "2024-01-20",
+          isShared: true,
+          isLocked: false,
+          isFavorite: true,
+          tags: ["important", "project"],
+          permissions: "edit",
+        },
+        {
+          id: "2",
+          name: "Design Assets",
+          type: "folder",
+          createdBy: "Sarah Johnson",
+          createdAt: "2024-01-10",
+          modifiedAt: "2024-01-18",
+          isShared: true,
+          isLocked: false,
+          isFavorite: false,
+          tags: ["design", "assets"],
+          permissions: "view",
+        },
+        {
+          id: "3",
+          name: "Meeting Notes.docx",
+          type: "file",
+          fileType: "document",
+          size: "2.4 MB",
+          createdBy: "Mike Chen",
+          createdAt: "2024-01-12",
+          modifiedAt: "2024-01-19",
+          isShared: false,
+          isLocked: false,
+          isFavorite: true,
+          tags: ["meeting", "notes"],
+          permissions: "edit",
+        },
+        {
+          id: "4",
+          name: "Presentation.pdf",
+          type: "file",
+          fileType: "pdf",
+          size: "5.1 MB",
+          createdBy: "Emily Davis",
+          createdAt: "2024-01-08",
+          modifiedAt: "2024-01-17",
+          isShared: true,
+          isLocked: true,
+          isFavorite: false,
+          tags: ["presentation"],
+          permissions: "view",
+        },
+        {
+          id: "5",
+          name: "Logo Design.png",
+          type: "file",
+          fileType: "image",
+          size: "1.2 MB",
+          createdBy: "Sarah Johnson",
+          createdAt: "2024-01-14",
+          modifiedAt: "2024-01-16",
+          isShared: true,
+          isLocked: false,
+          isFavorite: true,
+          tags: ["design", "logo"],
+          permissions: "edit",
+        },
+        {
+          id: "6",
+          name: "Demo Video.mp4",
+          type: "file",
+          fileType: "video",
+          size: "24.8 MB",
+          createdBy: "John Doe",
+          createdAt: "2024-01-11",
+          modifiedAt: "2024-01-15",
+          isShared: false,
+          isLocked: false,
+          isFavorite: false,
+          tags: ["video", "demo"],
+          permissions: "edit",
+        },
+      ];
+
+      setItems(mockItems);
+
+      const files = mockItems.filter((item) => item.type === "file");
+      const folders = mockItems.filter((item) => item.type === "folder");
+      const shared = mockItems.filter((item) => item.isShared);
+
+      setStats({
+        totalFiles: files.length,
+        totalFolders: folders.length,
+        sharedItems: shared.length,
+        storageUsed: 35,
+      });
+
+      logger.info("Workspace data fetched successfully");
+      toast.success("Workspace loaded");
+    } catch (error) {
+      logger.error("Failed to fetch workspace data", { error });
+      toast.error("Failed to load workspace");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateFolder = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      logger.info("Creating new folder");
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      const newFolder: WorkspaceItem = {
+        id: Date.now().toString(),
+        name: formData.get("folderName") as string,
+        type: "folder",
+        createdBy: "Current User",
+        createdAt: new Date().toISOString().split("T")[0],
+        modifiedAt: new Date().toISOString().split("T")[0],
+        isShared: false,
+        isLocked: false,
+        isFavorite: false,
+        tags: [],
+        permissions: "edit",
+      };
+
+      setItems([...items, newFolder]);
+      setIsCreateFolderOpen(false);
+
+      logger.info("Folder created successfully", { folderId: newFolder.id });
+      toast.success("Folder created successfully");
+    } catch (error) {
+      logger.error("Failed to create folder", { error });
+      toast.error("Failed to create folder");
+    }
+  };
+
+  const handleUploadFile = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    try {
+      logger.info("Uploading file");
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
+      const newFile: WorkspaceItem = {
+        id: Date.now().toString(),
+        name: formData.get("fileName") as string,
+        type: "file",
+        fileType: "document",
+        size: "1.5 MB",
+        createdBy: "Current User",
+        createdAt: new Date().toISOString().split("T")[0],
+        modifiedAt: new Date().toISOString().split("T")[0],
+        isShared: false,
+        isLocked: false,
+        isFavorite: false,
+        tags: [],
+        permissions: "edit",
+      };
+
+      setItems([...items, newFile]);
+      setIsUploadOpen(false);
+
+      logger.info("File uploaded successfully", { fileId: newFile.id });
+      toast.success("File uploaded successfully");
+    } catch (error) {
+      logger.error("Failed to upload file", { error });
+      toast.error("Failed to upload file");
+    }
+  };
+
+  const handleDeleteItem = async (itemId: string) => {
+    try {
+      logger.info("Deleting item", { itemId });
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      setItems(items.filter((item) => item.id !== itemId));
+
+      logger.info("Item deleted successfully");
+      toast.success("Item deleted");
+    } catch (error) {
+      logger.error("Failed to delete item", { error });
+      toast.error("Failed to delete item");
+    }
+  };
+
+  const handleToggleFavorite = async (itemId: string) => {
+    try {
+      logger.info("Toggling favorite", { itemId });
+
+      setItems(
+        items.map((item) =>
+          item.id === itemId ? { ...item, isFavorite: !item.isFavorite } : item
+        )
+      );
+
+      logger.info("Favorite toggled successfully");
+      toast.success("Favorite updated");
+    } catch (error) {
+      logger.error("Failed to toggle favorite", { error });
+      toast.error("Failed to update favorite");
+    }
+  };
+
+  const handleToggleLock = async (itemId: string) => {
+    try {
+      logger.info("Toggling lock", { itemId });
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      setItems(
+        items.map((item) =>
+          item.id === itemId ? { ...item, isLocked: !item.isLocked } : item
+        )
+      );
+
+      logger.info("Lock toggled successfully");
+      toast.success("Lock status updated");
+    } catch (error) {
+      logger.error("Failed to toggle lock", { error });
+      toast.error("Failed to update lock");
+    }
+  };
+
+  const handleShareItem = async (itemId: string) => {
+    try {
+      logger.info("Sharing item", { itemId });
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      setItems(
+        items.map((item) =>
+          item.id === itemId ? { ...item, isShared: true } : item
+        )
+      );
+
+      logger.info("Item shared successfully");
+      toast.success("Item shared successfully");
+    } catch (error) {
+      logger.error("Failed to share item", { error });
+      toast.error("Failed to share item");
+    }
+  };
+
+  const handleDownloadItem = async (itemId: string) => {
+    try {
+      logger.info("Downloading item", { itemId });
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      logger.info("Item downloaded successfully");
+      toast.success("Download started");
+    } catch (error) {
+      logger.error("Failed to download item", { error });
+      toast.error("Failed to download item");
+    }
+  };
+
+  const handleDuplicateItem = async (itemId: string) => {
+    try {
+      logger.info("Duplicating item", { itemId });
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      const originalItem = items.find((item) => item.id === itemId);
+      if (originalItem) {
+        const duplicatedItem: WorkspaceItem = {
+          ...originalItem,
+          id: Date.now().toString(),
+          name: `${originalItem.name} (Copy)`,
+          createdAt: new Date().toISOString().split("T")[0],
+          modifiedAt: new Date().toISOString().split("T")[0],
+        };
+
+        setItems([...items, duplicatedItem]);
+        logger.info("Item duplicated successfully");
+        toast.success("Item duplicated");
+      }
+    } catch (error) {
+      logger.error("Failed to duplicate item", { error });
+      toast.error("Failed to duplicate item");
+    }
+  };
+
+  const handleRenameItem = async (itemId: string, newName: string) => {
+    try {
+      logger.info("Renaming item", { itemId, newName });
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      setItems(
+        items.map((item) =>
+          item.id === itemId ? { ...item, name: newName } : item
+        )
+      );
+
+      logger.info("Item renamed successfully");
+      toast.success("Item renamed");
+    } catch (error) {
+      logger.error("Failed to rename item", { error });
+      toast.error("Failed to rename item");
+    }
+  };
+
+  const handleRefreshData = async () => {
+    await fetchWorkspaceData();
+  };
+
+  const handleBulkDelete = async () => {
+    try {
+      logger.info("Bulk deleting items", { count: selectedItems.length });
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      setItems(items.filter((item) => !selectedItems.includes(item.id)));
+      setSelectedItems([]);
+
+      logger.info("Bulk delete completed");
+      toast.success("Selected items deleted");
+    } catch (error) {
+      logger.error("Failed to bulk delete", { error });
+      toast.error("Failed to delete items");
+    }
+  };
+
+  const handleBulkShare = async () => {
+    try {
+      logger.info("Bulk sharing items", { count: selectedItems.length });
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      setItems(
+        items.map((item) =>
+          selectedItems.includes(item.id) ? { ...item, isShared: true } : item
+        )
+      );
+      setSelectedItems([]);
+
+      logger.info("Bulk share completed");
+      toast.success("Selected items shared");
+    } catch (error) {
+      logger.error("Failed to bulk share", { error });
+      toast.error("Failed to share items");
+    }
+  };
+
+  const filteredItems = items.filter((item) => {
+    const matchesSearch = item.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesType =
+      filterType === "all" ||
+      item.type === filterType ||
+      item.fileType === filterType;
+    const matchesTab =
+      activeTab === "all" ||
+      (activeTab === "favorites" && item.isFavorite) ||
+      (activeTab === "shared" && item.isShared);
+
+    return matchesSearch && matchesType && matchesTab;
+  });
+
+  const getFileIcon = (item: WorkspaceItem) => {
+    if (item.type === "folder") return <Folder className="h-8 w-8" />;
+    if (item.fileType === "image") return <Image className="h-8 w-8" />;
+    if (item.fileType === "video") return <Video className="h-8 w-8" />;
+    return <FileText className="h-8 w-8" />;
+  };
+
+  return (
+    <div className="flex-1 space-y-6 p-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Workspace</h2>
+          <p className="text-muted-foreground">
+            Manage your files and collaborate with your team
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleRefreshData}>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
+          <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Upload className="mr-2 h-4 w-4" />
+                Upload
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Upload File</DialogTitle>
+                <DialogDescription>
+                  Upload a new file to your workspace
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleUploadFile} className="space-y-4">
+                <div>
+                  <Label htmlFor="fileName">File Name</Label>
+                  <Input
+                    id="fileName"
+                    name="fileName"
+                    placeholder="Enter file name"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="fileUpload">Choose File</Label>
+                  <Input id="fileUpload" name="fileUpload" type="file" />
+                </div>
+                <Button type="submit" className="w-full">
+                  Upload File
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+          <Dialog
+            open={isCreateFolderOpen}
+            onOpenChange={setIsCreateFolderOpen}
+          >
+            <DialogTrigger asChild>
+              <Button>
+                <FolderPlus className="mr-2 h-4 w-4" />
+                New Folder
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Folder</DialogTitle>
+                <DialogDescription>
+                  Add a new folder to organize your files
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleCreateFolder} className="space-y-4">
+                <div>
+                  <Label htmlFor="folderName">Folder Name</Label>
+                  <Input
+                    id="folderName"
+                    name="folderName"
+                    placeholder="Enter folder name"
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full">
+                  Create Folder
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Files</CardTitle>
+            <File className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              <NumberFlow value={stats.totalFiles} />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Folders</CardTitle>
+            <Folder className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              <NumberFlow value={stats.totalFolders} />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Shared Items</CardTitle>
+            <Share2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              <NumberFlow value={stats.sharedItems} />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Storage Used</CardTitle>
+            <Archive className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              <NumberFlow value={stats.storageUsed} />%
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Toolbar */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-1 gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search workspace..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+          <Select value={filterType} onValueChange={setFilterType}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="folder">Folders</SelectItem>
+              <SelectItem value="document">Documents</SelectItem>
+              <SelectItem value="image">Images</SelectItem>
+              <SelectItem value="video">Videos</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex gap-2">
+          {selectedItems.length > 0 && (
+            <>
+              <Button variant="outline" size="sm" onClick={handleBulkShare}>
+                <Share2 className="mr-2 h-4 w-4" />
+                Share ({selectedItems.length})
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleBulkDelete}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete ({selectedItems.length})
+              </Button>
+            </>
+          )}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}
+          >
+            {viewMode === "grid" ? (
+              <List className="h-4 w-4" />
+            ) : (
+              <Grid3x3 className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="all">All Items</TabsTrigger>
+          <TabsTrigger value="favorites">Favorites</TabsTrigger>
+          <TabsTrigger value="shared">Shared</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value={activeTab} className="space-y-4">
+          {/* Items Grid/List */}
+          <div
+            className={
+              viewMode === "grid"
+                ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                : "space-y-2"
+            }
+          >
+            {filteredItems.map((item) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Card className="relative group">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start gap-3">
+                      <div className="text-primary">{getFileIcon(item)}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium truncate">
+                              {item.name}
+                            </h3>
+                            <p className="text-xs text-muted-foreground">
+                              {item.type === "file" && item.size}
+                            </p>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => handleToggleFavorite(item.id)}
+                              >
+                                <Star className="mr-2 h-4 w-4" />
+                                {item.isFavorite
+                                  ? "Remove Favorite"
+                                  : "Add Favorite"}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleShareItem(item.id)}
+                              >
+                                <Share2 className="mr-2 h-4 w-4" />
+                                Share
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleDownloadItem(item.id)}
+                              >
+                                <Download className="mr-2 h-4 w-4" />
+                                Download
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleDuplicateItem(item.id)}
+                              >
+                                <Copy className="mr-2 h-4 w-4" />
+                                Duplicate
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleToggleLock(item.id)}
+                              >
+                                {item.isLocked ? (
+                                  <Unlock className="mr-2 h-4 w-4" />
+                                ) : (
+                                  <Lock className="mr-2 h-4 w-4" />
+                                )}
+                                {item.isLocked ? "Unlock" : "Lock"}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteItem(item.id)}
+                                className="text-red-600"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {item.isFavorite && (
+                            <Badge variant="secondary" className="text-xs">
+                              <Star className="mr-1 h-3 w-3 fill-current" />
+                              Favorite
+                            </Badge>
+                          )}
+                          {item.isShared && (
+                            <Badge variant="secondary" className="text-xs">
+                              <Share2 className="mr-1 h-3 w-3" />
+                              Shared
+                            </Badge>
+                          )}
+                          {item.isLocked && (
+                            <Badge variant="secondary" className="text-xs">
+                              <Lock className="mr-1 h-3 w-3" />
+                              Locked
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="mt-2 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <User className="h-3 w-3" />
+                            {item.createdBy}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Clock className="h-3 w-3" />
+                            Modified {item.modifiedAt}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
