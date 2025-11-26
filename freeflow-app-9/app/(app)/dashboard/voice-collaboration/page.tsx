@@ -67,124 +67,26 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { createFeatureLogger } from '@/lib/logger'
+import {
+  type VoiceRoom,
+  type VoiceRecording,
+  type VoiceParticipant,
+  type VoiceCollaborationState,
+  type VoiceCollaborationAction,
+  type RoomType,
+  type RoomStatus,
+  type AudioQuality,
+  MOCK_VOICE_ROOMS,
+  MOCK_VOICE_RECORDINGS,
+  formatDuration,
+  formatFileSize,
+  formatRelativeTime,
+  getRoomTypeBadgeColor,
+  getStatusColor,
+  getRoomTypeIcon
+} from '@/lib/voice-collaboration-utils'
 
 const logger = createFeatureLogger('VoiceCollaboration')
-
-// ========================================
-// TYPE DEFINITIONS
-// ========================================
-
-type RoomType = 'public' | 'private' | 'team' | 'client' | 'project' | 'meeting'
-type RoomStatus = 'active' | 'scheduled' | 'ended' | 'archived'
-type AudioQuality = 'low' | 'medium' | 'high' | 'ultra'
-type ParticipantRole = 'host' | 'moderator' | 'speaker' | 'listener'
-type ParticipantStatus = 'speaking' | 'muted' | 'listening' | 'away'
-
-interface VoiceParticipant {
-  id: string
-  userId: string
-  name: string
-  avatar: string
-  role: ParticipantRole
-  status: ParticipantStatus
-  isMuted: boolean
-  isVideoEnabled: boolean
-  joinedAt: string
-  duration: number // in seconds
-  speakingTime: number // in seconds
-}
-
-interface VoiceRoom {
-  id: string
-  name: string
-  description: string
-  type: RoomType
-  status: RoomStatus
-  hostId: string
-  hostName: string
-  participants: VoiceParticipant[]
-  currentParticipants: number
-  capacity: number
-  quality: AudioQuality
-  isLocked: boolean
-  password?: string
-  scheduledTime?: string
-  startTime?: string
-  endTime?: string
-  duration?: number // in seconds
-  isRecording: boolean
-  features: {
-    recording: boolean
-    transcription: boolean
-    spatialAudio: boolean
-    noiseCancellation: boolean
-    echoCancellation: boolean
-    autoGainControl: boolean
-  }
-  category: string
-  tags: string[]
-  createdAt: string
-  updatedAt: string
-}
-
-interface VoiceRecording {
-  id: string
-  roomId: string
-  roomName: string
-  title: string
-  description: string
-  duration: number // in seconds
-  fileSize: number // in bytes
-  quality: AudioQuality
-  format: 'mp3' | 'wav' | 'ogg' | 'flac'
-  transcriptionAvailable: boolean
-  transcriptionText?: string
-  participants: number
-  startTime: string
-  endTime: string
-  status: 'completed' | 'processing' | 'failed'
-  downloadCount: number
-  viewCount: number
-  metadata: {
-    sampleRate: number
-    bitrate: number
-    channels: number
-    quality: AudioQuality
-  }
-  createdAt: string
-}
-
-interface VoiceCollaborationState {
-  rooms: VoiceRoom[]
-  recordings: VoiceRecording[]
-  selectedRoom: VoiceRoom | null
-  selectedRecording: VoiceRecording | null
-  searchTerm: string
-  filterType: 'all' | RoomType
-  filterStatus: 'all' | RoomStatus
-  sortBy: 'name' | 'participants' | 'recent' | 'duration' | 'capacity'
-  viewMode: 'rooms' | 'recordings' | 'settings'
-  isLoading: boolean
-  error: string | null
-}
-
-type VoiceCollaborationAction =
-  | { type: 'SET_ROOMS'; rooms: VoiceRoom[] }
-  | { type: 'ADD_ROOM'; room: VoiceRoom }
-  | { type: 'UPDATE_ROOM'; room: VoiceRoom }
-  | { type: 'DELETE_ROOM'; roomId: string }
-  | { type: 'SELECT_ROOM'; room: VoiceRoom | null }
-  | { type: 'SET_RECORDINGS'; recordings: VoiceRecording[] }
-  | { type: 'ADD_RECORDING'; recording: VoiceRecording }
-  | { type: 'SELECT_RECORDING'; recording: VoiceRecording | null }
-  | { type: 'SET_SEARCH'; searchTerm: string }
-  | { type: 'SET_FILTER_TYPE'; filterType: 'all' | RoomType }
-  | { type: 'SET_FILTER_STATUS'; filterStatus: 'all' | RoomStatus }
-  | { type: 'SET_SORT'; sortBy: 'name' | 'participants' | 'recent' | 'duration' | 'capacity' }
-  | { type: 'SET_VIEW_MODE'; viewMode: 'rooms' | 'recordings' | 'settings' }
-  | { type: 'SET_LOADING'; isLoading: boolean }
-  | { type: 'SET_ERROR'; error: string | null }
-  | { type: 'JOIN_ROOM'; roomId: string; participant: VoiceParticipant }
 
 // ========================================
 // REDUCER
@@ -292,185 +194,6 @@ const voiceCollaborationReducer = (
 }
 
 // ========================================
-// MOCK DATA GENERATOR
-// ========================================
-
-const generateMockRooms = (): VoiceRoom[] => {
-  logger.debug('Generating mock rooms')
-
-  const roomTypes: RoomType[] = ['public', 'private', 'team', 'client', 'project', 'meeting']
-  const statuses: RoomStatus[] = ['active', 'scheduled', 'ended', 'archived']
-  const qualities: AudioQuality[] = ['low', 'medium', 'high', 'ultra']
-  const categories = ['Team Standup', 'Client Call', 'Design Review', 'Brainstorming', 'Training', 'Q&A', 'Social', 'Workshop']
-
-  const rooms: VoiceRoom[] = []
-
-  for (let i = 1; i <= 60; i++) {
-    const type = roomTypes[Math.floor(Math.random() * roomTypes.length)]
-    const status = i <= 10 ? 'active' : statuses[Math.floor(Math.random() * statuses.length)]
-    const quality = qualities[Math.floor(Math.random() * qualities.length)]
-    const capacity = [5, 10, 25, 50, 100][Math.floor(Math.random() * 5)]
-    const currentParticipants = status === 'active' ? Math.floor(Math.random() * capacity) : 0
-
-    rooms.push({
-      id: `ROOM-${String(i).padStart(3, '0')}`,
-      name: `${categories[Math.floor(Math.random() * categories.length)]} ${i}`,
-      description: `Voice collaboration session ${i} for team communication and real-time discussions`,
-      type,
-      status,
-      hostId: `USER-${Math.floor(Math.random() * 20) + 1}`,
-      hostName: ['Alice Chen', 'Bob Smith', 'Carol White', 'David Brown', 'Emma Davis'][Math.floor(Math.random() * 5)],
-      participants: [],
-      currentParticipants,
-      capacity,
-      quality,
-      isLocked: Math.random() > 0.7,
-      password: Math.random() > 0.7 ? 'secret123' : undefined,
-      scheduledTime: status === 'scheduled' ? new Date(Date.now() + Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString() : undefined,
-      startTime: status === 'active' ? new Date(Date.now() - Math.random() * 2 * 60 * 60 * 1000).toISOString() : undefined,
-      duration: status === 'ended' ? Math.floor(Math.random() * 7200) : undefined,
-      isRecording: status === 'active' && Math.random() > 0.5,
-      features: {
-        recording: Math.random() > 0.3,
-        transcription: Math.random() > 0.5,
-        spatialAudio: Math.random() > 0.6,
-        noiseCancellation: true,
-        echoCancellation: true,
-        autoGainControl: true
-      },
-      category: categories[Math.floor(Math.random() * categories.length)],
-      tags: ['voice', 'collaboration', type, quality].filter(() => Math.random() > 0.3),
-      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString()
-    })
-  }
-
-  logger.info('Mock rooms generated', { count: rooms.length })
-  return rooms
-}
-
-const generateMockRecordings = (): VoiceRecording[] => {
-  logger.debug('Generating mock recordings')
-
-  const qualities: AudioQuality[] = ['low', 'medium', 'high', 'ultra']
-  const formats: ('mp3' | 'wav' | 'ogg' | 'flac')[] = ['mp3', 'wav', 'ogg', 'flac']
-  const statuses: ('completed' | 'processing' | 'failed')[] = ['completed', 'processing', 'failed']
-
-  const recordings: VoiceRecording[] = []
-
-  for (let i = 1; i <= 30; i++) {
-    const quality = qualities[Math.floor(Math.random() * qualities.length)]
-    const format = formats[Math.floor(Math.random() * formats.length)]
-    const status = i <= 20 ? 'completed' : statuses[Math.floor(Math.random() * statuses.length)]
-    const duration = Math.floor(Math.random() * 7200) + 300 // 5 min to 2 hours
-    const sampleRate = quality === 'ultra' ? 48000 : quality === 'high' ? 44100 : 22050
-    const bitrate = quality === 'ultra' ? 320 : quality === 'high' ? 256 : quality === 'medium' ? 192 : 128
-
-    recordings.push({
-      id: `REC-${String(i).padStart(3, '0')}`,
-      roomId: `ROOM-${String(Math.floor(Math.random() * 60) + 1).padStart(3, '0')}`,
-      roomName: `Room Recording ${i}`,
-      title: `Voice Session ${i}`,
-      description: `Recorded voice collaboration session ${i}`,
-      duration,
-      fileSize: Math.floor((duration * bitrate * 1000) / 8),
-      quality,
-      format,
-      transcriptionAvailable: Math.random() > 0.5,
-      transcriptionText: Math.random() > 0.5 ? 'Full transcription available...' : undefined,
-      participants: Math.floor(Math.random() * 10) + 1,
-      startTime: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      endTime: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000 + duration * 1000).toISOString(),
-      status,
-      downloadCount: Math.floor(Math.random() * 100),
-      viewCount: Math.floor(Math.random() * 500),
-      metadata: {
-        sampleRate,
-        bitrate,
-        channels: 2,
-        quality
-      },
-      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
-    })
-  }
-
-  logger.info('Mock recordings generated', { count: recordings.length })
-  return recordings
-}
-
-// ========================================
-// UTILITY FUNCTIONS
-// ========================================
-
-const formatDuration = (seconds: number): string => {
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const secs = seconds % 60
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`
-  } else if (minutes > 0) {
-    return `${minutes}m ${secs}s`
-  } else {
-    return `${secs}s`
-  }
-}
-
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`
-}
-
-const formatRelativeTime = (dateString: string): string => {
-  const date = new Date(dateString)
-  const now = new Date()
-  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
-
-  if (diffInSeconds < 60) return 'Just now'
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`
-  return date.toLocaleDateString()
-}
-
-const getRoomTypeBadgeColor = (type: RoomType): string => {
-  const colors: Record<RoomType, string> = {
-    public: 'blue',
-    private: 'purple',
-    team: 'green',
-    client: 'amber',
-    project: 'cyan',
-    meeting: 'pink'
-  }
-  return colors[type] || 'gray'
-}
-
-const getStatusColor = (status: RoomStatus): string => {
-  const colors: Record<RoomStatus, string> = {
-    active: 'green',
-    scheduled: 'blue',
-    ended: 'gray',
-    archived: 'slate'
-  }
-  return colors[status] || 'gray'
-}
-
-const getRoomTypeIcon = (type: RoomType) => {
-  const icons: Record<RoomType, any> = {
-    public: Globe,
-    private: Lock,
-    team: Users,
-    client: Headphones,
-    project: FileAudio,
-    meeting: Radio
-  }
-  return icons[type] || Radio
-}
-
-// ========================================
 // MAIN COMPONENT
 // ========================================
 
@@ -521,17 +244,14 @@ export default function VoiceCollaborationPage() {
 
   // Load mock data
   useEffect(() => {
-    logger.debug('Loading mock data')
+    logger.debug('Loading mock data from utilities')
 
-    const mockRooms = generateMockRooms()
-    const mockRecordings = generateMockRecordings()
+    dispatch({ type: 'SET_ROOMS', rooms: MOCK_VOICE_ROOMS })
+    dispatch({ type: 'SET_RECORDINGS', recordings: MOCK_VOICE_RECORDINGS })
 
-    dispatch({ type: 'SET_ROOMS', rooms: mockRooms })
-    dispatch({ type: 'SET_RECORDINGS', recordings: mockRecordings })
-
-    logger.info('Mock data loaded', {
-      roomsCount: mockRooms.length,
-      recordingsCount: mockRecordings.length
+    logger.info('Mock data loaded from utilities', {
+      roomsCount: MOCK_VOICE_ROOMS.length,
+      recordingsCount: MOCK_VOICE_RECORDINGS.length
     })
     announce('Voice collaboration page loaded', 'polite')
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -642,7 +362,7 @@ export default function VoiceCollaborationPage() {
     try {
       dispatch({ type: 'SET_LOADING', isLoading: true })
 
-      // Note: Using local state - in production, this would POST to /api/voice-rooms
+      // Note: Using local state - in production, this would POST to /api/voice-collaboration/rooms
       const newRoom: VoiceRoom = {
         id: `ROOM-${Date.now()}`,
         name: roomName,
@@ -752,7 +472,7 @@ export default function VoiceCollaborationPage() {
         roomName: room.name
       })
 
-      // Note: Using local state - in production, this would POST to /api/voice-rooms/join
+      // Note: Using local state - in production, this would POST to /api/voice-collaboration/rooms/join
       const newParticipant: VoiceParticipant = {
         id: `PART-${Date.now()}`,
         userId: 'USER-CURRENT',
@@ -815,6 +535,7 @@ export default function VoiceCollaborationPage() {
         participants: room.currentParticipants
       })
 
+      // Note: Using local state - in production, this would DELETE to /api/voice-collaboration/rooms/:id
       dispatch({ type: 'DELETE_ROOM', roomId })
       setShowViewRoomModal(false)
 
@@ -840,7 +561,7 @@ export default function VoiceCollaborationPage() {
       quality: recording.quality
     })
 
-    // Note: Using mock download - in production, this would download from /api/recordings/:id
+    // Note: Using mock download - in production, this would GET from /api/voice-collaboration/recordings/:id/download
     const blob = new Blob(['Mock audio data'], { type: `audio/${recording.format}` })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -871,6 +592,7 @@ export default function VoiceCollaborationPage() {
       participants: recording.participants
     })
 
+    // Note: Using local state - in production, this would POST to /api/voice-collaboration/recordings/:id/play
     // Update view count
     const updatedRecording = { ...recording, viewCount: recording.viewCount + 1 }
     dispatch({ type: 'SELECT_RECORDING', recording: updatedRecording })
@@ -1499,7 +1221,7 @@ export default function VoiceCollaborationPage() {
                       featuresCount: enabledFeatures.length
                     })
 
-                    // Note: Using local state - in production, this would PUT to /api/settings/voice
+                    // Note: Using local state - in production, this would PUT to /api/voice-collaboration/settings
                     toast.success('Voice settings saved', {
                       description: `${roomQuality.toUpperCase()} quality - ${enabledFeatures.length} features enabled`
                     })
