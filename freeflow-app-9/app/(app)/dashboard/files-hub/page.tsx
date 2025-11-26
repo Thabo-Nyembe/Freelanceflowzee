@@ -78,62 +78,52 @@ const PulsingDot = ({ color = 'green' }: { color?: string }) => {
 }
 
 // ============================================================================
-// TYPESCRIPT INTERFACES
+// IMPORTS - SESSION 9 REFACTORED UTILITIES
 // ============================================================================
 
-interface FileItem {
-  id: string
-  name: string
-  type: 'document' | 'image' | 'video' | 'audio' | 'archive' | 'code' | 'other'
-  size: number
-  url: string
-  thumbnailUrl?: string
-  uploadedAt: string
-  uploadedBy: {
-    id: string
-    name: string
-    avatar: string
-  }
-  modifiedAt: string
-  folder: string
-  tags: string[]
-  shared: boolean
-  starred: boolean
-  locked: boolean
-  downloads: number
-  views: number
-  version: number
-  extension: string
-  description?: string
-  sharedWith?: string[]
-  accessLevel?: 'private' | 'team' | 'public'
-}
+import {
+  // Types
+  FileItem,
+  FolderStructure,
+  FilesHubState,
+  FilesHubAction,
 
-interface FilesHubState {
-  files: FileItem[]
-  selectedFile: FileItem | null
-  searchTerm: string
-  filterType: 'all' | 'document' | 'image' | 'video' | 'audio' | 'archive' | 'code' | 'starred'
-  sortBy: 'name' | 'date' | 'size' | 'type' | 'downloads' | 'views'
-  viewMode: 'grid' | 'list'
-  selectedFiles: string[]
-  currentFolder: string
-}
+  // Mock Data
+  MOCK_FILES,
+  MOCK_FOLDERS,
 
-type FilesHubAction =
-  | { type: 'SET_FILES'; files: FileItem[] }
-  | { type: 'ADD_FILE'; file: FileItem }
-  | { type: 'UPDATE_FILE'; file: FileItem }
-  | { type: 'DELETE_FILE'; fileId: string }
-  | { type: 'SELECT_FILE'; file: FileItem | null }
-  | { type: 'SET_SEARCH'; searchTerm: string }
-  | { type: 'SET_FILTER'; filterType: FilesHubState['filterType'] }
-  | { type: 'SET_SORT'; sortBy: FilesHubState['sortBy'] }
-  | { type: 'SET_VIEW_MODE'; viewMode: FilesHubState['viewMode'] }
-  | { type: 'TOGGLE_SELECT_FILE'; fileId: string }
-  | { type: 'CLEAR_SELECTED_FILES' }
-  | { type: 'TOGGLE_STAR'; fileId: string }
-  | { type: 'SET_FOLDER'; folder: string }
+  // Helper Functions
+  formatFileSize,
+  getFileIcon,
+  getFileExtension,
+  getFileType,
+  sortFilesByName,
+  sortFilesByDate,
+  sortFilesBySize,
+  sortFilesByDownloads,
+  sortFilesByViews,
+  filterFilesByType,
+  filterFilesByFolder,
+  searchFiles,
+  getRecentFiles,
+  getSharedFiles,
+  getStarredFiles,
+  getTotalStorageUsed,
+  getStorageByType,
+  getMostDownloadedFiles,
+  getMostViewedFiles,
+  calculateFileAnalytics,
+  calculateStorageStats,
+  formatDate,
+  formatDateTime,
+  getRelativeTime,
+  getFileTypeColor,
+  isImageFile,
+  isVideoFile,
+  isDocumentFile,
+  validateFile,
+  generateFileId
+} from '@/lib/files-hub-utils'
 
 // ============================================================================
 // REDUCER
@@ -221,80 +211,10 @@ function filesHubReducer(state: FilesHubState, action: FilesHubAction): FilesHub
 }
 
 // ============================================================================
-// MOCK DATA
+// MOCK DATA - Now imported from files-hub-utils.tsx
 // ============================================================================
-
-const generateMockFiles = (): FileItem[] => {
-  logger.debug('Generating mock file data')
-
-  const fileTypes: Array<FileItem['type']> = ['document', 'image', 'video', 'audio', 'archive', 'code']
-  const folders = ['Documents', 'Images', 'Videos', 'Downloads', 'Projects', 'Designs', 'Archive', 'Shared']
-  const extensions = {
-    document: ['pdf', 'docx', 'txt', 'xlsx', 'pptx'],
-    image: ['jpg', 'png', 'svg', 'gif', 'webp'],
-    video: ['mp4', 'mov', 'avi', 'mkv'],
-    audio: ['mp3', 'wav', 'flac', 'ogg'],
-    archive: ['zip', 'rar', '7z', 'tar'],
-    code: ['js', 'ts', 'py', 'java', 'cpp']
-  }
-
-  const fileNames = {
-    document: ['Project Proposal', 'Financial Report', 'Meeting Notes', 'Presentation', 'Contract', 'Invoice', 'Resume', 'Business Plan'],
-    image: ['Team Photo', 'Logo Design', 'Product Mockup', 'Screenshot', 'Banner', 'Profile Picture', 'Thumbnail'],
-    video: ['Demo Video', 'Tutorial', 'Conference Recording', 'Webinar', 'Product Launch', 'Interview'],
-    audio: ['Podcast Episode', 'Voice Memo', 'Music Track', 'Sound Effect', 'Audio Book'],
-    archive: ['Backup', 'Project Files', 'Old Documents', 'Export Data', 'Resources'],
-    code: ['Main Script', 'Utility Functions', 'API Handler', 'Component', 'Test Suite', 'Config File']
-  }
-
-  const users = [
-    { id: 'u1', name: 'John Doe', avatar: '/avatars/john.jpg' },
-    { id: 'u2', name: 'Jane Smith', avatar: '/avatars/jane.jpg' },
-    { id: 'u3', name: 'Mike Johnson', avatar: '/avatars/mike.jpg' },
-    { id: 'u4', name: 'Sarah Williams', avatar: '/avatars/sarah.jpg' },
-    { id: 'u5', name: 'David Brown', avatar: '/avatars/david.jpg' }
-  ]
-
-  const files: FileItem[] = []
-
-  for (let i = 1; i <= 60; i++) {
-    const type = fileTypes[Math.floor(Math.random() * fileTypes.length)]
-    const ext = extensions[type][Math.floor(Math.random() * extensions[type].length)]
-    const baseName = fileNames[type][Math.floor(Math.random() * fileNames[type].length)]
-    const name = `${baseName} ${i}.${ext}`
-    const folder = folders[Math.floor(Math.random() * folders.length)]
-    const user = users[Math.floor(Math.random() * users.length)]
-    const daysAgo = Math.floor(Math.random() * 90)
-    const uploadedAt = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000).toISOString()
-
-    files.push({
-      id: `F-${String(i).padStart(3, '0')}`,
-      name,
-      type,
-      size: Math.floor(Math.random() * 100000000) + 10000, // 10KB to 100MB
-      url: `/files/${name}`,
-      thumbnailUrl: type === 'image' || type === 'video' ? `/thumbnails/${name}` : undefined,
-      uploadedAt,
-      uploadedBy: user,
-      modifiedAt: new Date(new Date(uploadedAt).getTime() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      folder,
-      tags: ['tag' + (i % 5), 'project' + (i % 3)],
-      shared: Math.random() > 0.6,
-      starred: Math.random() > 0.8,
-      locked: Math.random() > 0.9,
-      downloads: Math.floor(Math.random() * 100),
-      views: Math.floor(Math.random() * 500),
-      version: Math.floor(Math.random() * 5) + 1,
-      extension: ext,
-      description: Math.random() > 0.7 ? `This is a ${type} file for project work` : undefined,
-      sharedWith: Math.random() > 0.7 ? users.slice(0, Math.floor(Math.random() * 3) + 1).map(u => u.id) : undefined,
-      accessLevel: Math.random() > 0.5 ? 'team' : Math.random() > 0.5 ? 'public' : 'private'
-    })
-  }
-
-  logger.info('Generated mock files', { count: files.length })
-  return files
-}
+// Mock data is now managed in @/lib/files-hub-utils
+// Includes 60+ diverse files and 15+ folders with comprehensive metadata
 
 // ============================================================================
 // MAIN COMPONENT
@@ -345,19 +265,25 @@ export default function FilesHubPage() {
         setIsPageLoading(true)
         setError(null)
 
+        // PRODUCTION: Replace with API call to /api/files
+        // const response = await fetch('/api/files')
+        // const data = await response.json()
+        // dispatch({ type: 'SET_FILES', files: data.files })
+        // dispatch({ type: 'SET_FOLDERS', folders: data.folders })
+
         // Simulate data loading
         await new Promise((resolve) => {
           setTimeout(() => {
             resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
+          }, 500)
         })
 
-        const mockFiles = generateMockFiles()
-        dispatch({ type: 'SET_FILES', files: mockFiles })
+        // Using mock data from files-hub-utils
+        dispatch({ type: 'SET_FILES', files: MOCK_FILES })
 
         setIsPageLoading(false)
         announce('Files loaded successfully', 'polite')
-        logger.info('Files data loaded successfully', { count: mockFiles.length })
+        logger.info('Files data loaded successfully', { count: MOCK_FILES.length })
       } catch (err) {
         const error = err instanceof Error ? err.message : 'Failed to load files'
         logger.error('Files load error', { error })
@@ -491,23 +417,28 @@ export default function FilesHubPage() {
           fileSize: file.size
         })
 
-        const ext = file.name.split('.').pop()?.toLowerCase() || 'other'
-        let type: FileItem['type'] = 'other'
+        const ext = getFileExtension(file.name)
+        const type = getFileType(ext)
 
-        if (['pdf', 'doc', 'docx', 'txt', 'xlsx', 'pptx'].includes(ext)) type = 'document'
-        else if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext)) type = 'image'
-        else if (['mp4', 'mov', 'avi', 'mkv'].includes(ext)) type = 'video'
-        else if (['mp3', 'wav', 'flac', 'ogg'].includes(ext)) type = 'audio'
-        else if (['zip', 'rar', '7z', 'tar'].includes(ext)) type = 'archive'
-        else if (['js', 'ts', 'py', 'java', 'cpp'].includes(ext)) type = 'code'
+        // PRODUCTION: Upload to backend API
+        // const formData = new FormData()
+        // formData.append('file', file)
+        // formData.append('folder', state.currentFolder)
+        // const response = await fetch('/api/files/upload', {
+        //   method: 'POST',
+        //   body: formData
+        // })
+        // const uploadedFile = await response.json()
+        // dispatch({ type: 'ADD_FILE', file: uploadedFile })
 
-        // Note: Using mock upload - in production, this would POST to /api/files
+        // Mock upload - in production, use API endpoint above
         const mockFile: FileItem = {
-          id: `FILE-${Date.now()}-${i}`,
+          id: generateFileId(),
           name: file.name,
           type,
           size: file.size,
           url: URL.createObjectURL(file),
+          extension: ext,
           uploadedAt: new Date().toISOString(),
           uploadedBy: {
             id: 'USER-1',
@@ -522,6 +453,7 @@ export default function FilesHubPage() {
           locked: false,
           downloads: 0,
           views: 0,
+          version: 1,
           accessLevel: 'private'
         }
 
@@ -572,7 +504,10 @@ export default function FilesHubPage() {
     })
 
     try {
-      // Note: Using local state - in production, this would DELETE to /api/files/:id
+      // PRODUCTION: Delete via API
+      // await fetch(`/api/files/${fileId}`, { method: 'DELETE' })
+
+      // Mock delete - in production, use API endpoint above
       dispatch({ type: 'DELETE_FILE', fileId })
 
       logger.info('File deleted successfully', {
@@ -616,7 +551,14 @@ export default function FilesHubPage() {
     try {
       setIsSaving(true)
 
-      // Note: Using local state - in production, this would DELETE to /api/files/bulk
+      // PRODUCTION: Bulk delete via API
+      // await fetch('/api/files/bulk-delete', {
+      //   method: 'DELETE',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ fileIds: state.selectedFiles })
+      // })
+
+      // Mock bulk delete - in production, use API endpoint above
       state.selectedFiles.forEach(fileId => {
         dispatch({ type: 'DELETE_FILE', fileId })
       })
@@ -660,10 +602,22 @@ export default function FilesHubPage() {
       previousDownloads: file.downloads
     })
 
+    // PRODUCTION: Download via API
+    // const response = await fetch(`/api/files/${fileId}/download`)
+    // const blob = await response.blob()
+    // const url = window.URL.createObjectURL(blob)
+    // const a = document.createElement('a')
+    // a.href = url
+    // a.download = file.name
+    // document.body.appendChild(a)
+    // a.click()
+    // document.body.removeChild(a)
+    // window.URL.revokeObjectURL(url)
+
+    // Mock download - in production, use API endpoint above
     const updatedFile = { ...file, downloads: file.downloads + 1 }
     dispatch({ type: 'UPDATE_FILE', file: updatedFile })
 
-    // Note: Using mock download - in production, this would fetch from file.url
     const a = document.createElement('a')
     a.href = file.url
     a.download = file.name
@@ -706,7 +660,14 @@ export default function FilesHubPage() {
     try {
       setIsSaving(true)
 
-      // Note: Using local state - in production, this would POST to /api/files/:id/share
+      // PRODUCTION: Share via API
+      // await fetch(`/api/files/${state.selectedFile.id}/share`, {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ emails, permission: 'view' })
+      // })
+
+      // Mock share - in production, use API endpoint above
       const updatedFile = {
         ...state.selectedFile,
         shared: true,
@@ -760,7 +721,14 @@ export default function FilesHubPage() {
     try {
       setIsSaving(true)
 
-      // Note: Using local state - in production, this would PATCH to /api/files/:id/move
+      // PRODUCTION: Move via API
+      // await fetch(`/api/files/${state.selectedFile.id}/move`, {
+      //   method: 'PUT',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ folderId: moveToFolder })
+      // })
+
+      // Mock move - in production, use API endpoint above
       const previousFolder = state.selectedFile.folder
       const updatedFile = { ...state.selectedFile, folder: moveToFolder }
       dispatch({ type: 'UPDATE_FILE', file: updatedFile })
@@ -807,6 +775,14 @@ export default function FilesHubPage() {
       starred: newStarred
     })
 
+    // PRODUCTION: Toggle star via API
+    // await fetch(`/api/files/${fileId}/star`, {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ starred: newStarred })
+    // })
+
+    // Mock toggle star - in production, use API endpoint above
     dispatch({ type: 'TOGGLE_STAR', fileId })
 
     toast.success(newStarred ? 'Added to favorites' : 'Removed from favorites', {
@@ -835,50 +811,17 @@ export default function FilesHubPage() {
   }
 
   // ============================================================================
-  // FILE TYPE ICON
+  // FILE DISPLAY HELPERS - Using imported utilities
   // ============================================================================
+  // Helper functions now imported from @/lib/files-hub-utils:
+  // - getFileIcon(type) - Returns icon component for file type
+  // - getFileTypeColor(type) - Returns color class for file type
+  // - formatFileSize(bytes) - Formats bytes to readable size
+  // - formatDate(date) - Formats date to readable string
 
-  const getFileIcon = (type: FileItem['type']) => {
-    switch (type) {
-      case 'document': return <FileText className="h-5 w-5" />
-      case 'image': return <FileImage className="h-5 w-5" />
-      case 'video': return <FileVideo className="h-5 w-5" />
-      case 'archive': return <FileArchive className="h-5 w-5" />
-      case 'code': return <FileCode className="h-5 w-5" />
-      default: return <File className="h-5 w-5" />
-    }
-  }
-
-  const getFileTypeColor = (type: FileItem['type']) => {
-    switch (type) {
-      case 'document': return 'text-blue-500'
-      case 'image': return 'text-green-500'
-      case 'video': return 'text-purple-500'
-      case 'audio': return 'text-pink-500'
-      case 'archive': return 'text-yellow-500'
-      case 'code': return 'text-cyan-500'
-      default: return 'text-gray-500'
-    }
-  }
-
-  // ============================================================================
-  // UTILITY FUNCTIONS
-  // ============================================================================
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
-
-  const formatDate = (date: string): string => {
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    })
+  const renderFileIcon = (type: FileItem['type']) => {
+    const IconComponent = getFileIcon(type)
+    return <IconComponent className="h-5 w-5" />
   }
 
   // ============================================================================
@@ -1399,7 +1342,7 @@ export default function FilesHubPage() {
                             onClick={() => handleViewFile(file)}
                           >
                             <div className={`mb-2 ${getFileTypeColor(file.type)}`}>
-                              {getFileIcon(file.type)}
+                              {renderFileIcon(file.type)}
                             </div>
                             <h4 className="font-medium text-sm line-clamp-2 mb-1">{file.name}</h4>
                             <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
@@ -1464,7 +1407,7 @@ export default function FilesHubPage() {
                             />
 
                             <div className={getFileTypeColor(file.type)}>
-                              {getFileIcon(file.type)}
+                              {renderFileIcon(file.type)}
                             </div>
 
                             <div className="flex-1 min-w-0" onClick={() => handleViewFile(file)}>
