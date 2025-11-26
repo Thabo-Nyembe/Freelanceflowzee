@@ -1,468 +1,803 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
-import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
-import {
-  ADMIN_MODULES,
-  SYSTEM_ALERTS,
-  DASHBOARD_STATS,
-  PERFORMANCE_INDICATORS,
-  RECENT_METRICS,
-  TOP_PERFORMERS,
-  getModuleStatusColor,
-  getAlertLevelColor,
-  getPerformanceStatusColor,
-  getTrendIcon,
-  formatMetricValue,
-  getUnreadAlerts,
-  getRecentActivity
-} from '@/lib/admin-dashboard-utils'
-
-// A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+import { NumberFlow } from '@/components/ui/number-flow'
+import {
+  MOCK_DEALS,
+  MOCK_INVOICES,
+  MOCK_LEADS,
+  MOCK_CAMPAIGNS,
+  MOCK_WORKFLOWS,
+  MOCK_PIPELINE_STATS,
+  MOCK_BILLING_STATS,
+  MOCK_MARKETING_STATS,
+  MOCK_AUTOMATION_STATS,
+  formatCurrency,
+  formatPercentage,
+  formatNumber,
+  formatRelativeTime,
+  getHighValueDeals,
+  getOverdueInvoices,
+  getHotLeads,
+  getActiveCampaigns,
+  getActiveWorkflows,
+  calculateTotalPipelineValue,
+  calculateTotalOutstanding
+} from '@/lib/admin-overview-utils'
+import {
+  TrendingUp,
+  TrendingDown,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  DollarSign,
+  Users,
+  Target,
+  Mail,
+  Zap,
+  ExternalLink,
+  Eye,
+  BarChart3,
+  FileText,
+  ArrowRight
+} from 'lucide-react'
+
+const logger = createFeatureLogger('admin-dashboard-overview')
 
 export default function AdminOverviewPage() {
-  // A+++ STATE MANAGEMENT
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
   const { announce } = useAnnouncer()
 
+  // State management
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showAllAlerts, setShowAllAlerts] = useState(false)
-  const unreadAlerts = getUnreadAlerts(SYSTEM_ALERTS)
-  const recentActivity = getRecentActivity(ADMIN_MODULES, 8)
+  const [refreshing, setRefreshing] = useState(false)
 
-  // A+++ LOAD ADMIN OVERVIEW DATA
+  // Calculate metrics
+  const highValueDeals = useMemo(() => getHighValueDeals(MOCK_DEALS, 75000), [])
+  const overdueInvoices = useMemo(() => getOverdueInvoices(MOCK_INVOICES), [])
+  const hotLeads = useMemo(() => getHotLeads(MOCK_LEADS), [])
+  const activeCampaigns = useMemo(() => getActiveCampaigns(MOCK_CAMPAIGNS), [])
+  const activeWorkflows = useMemo(() => getActiveWorkflows(MOCK_WORKFLOWS), [])
+  const totalPipelineValue = useMemo(() => calculateTotalPipelineValue(MOCK_DEALS), [])
+  const totalOutstanding = useMemo(() => calculateTotalOutstanding(MOCK_INVOICES), [])
+
+  // System alerts
+  const alerts = [
+    {
+      id: 'alert-1',
+      level: 'warning',
+      title: 'Overdue Invoices Require Attention',
+      message: `${overdueInvoices.length} invoice${overdueInvoices.length !== 1 ? 's' : ''} totaling ${formatCurrency(overdueInvoices.reduce((sum, inv) => sum + inv.amountDue, 0))} are overdue`,
+      action: 'View Invoicing',
+      path: '/dashboard/admin-overview/invoicing',
+      timestamp: new Date(Date.now() - 3600000)
+    },
+    {
+      id: 'alert-2',
+      level: 'success',
+      title: 'High-Value Deals in Pipeline',
+      message: `${highValueDeals.length} deals worth ${formatCurrency(highValueDeals.reduce((sum, d) => sum + d.value, 0))} are in final stages`,
+      action: 'View CRM',
+      path: '/dashboard/admin-overview/crm',
+      timestamp: new Date(Date.now() - 7200000)
+    },
+    {
+      id: 'alert-3',
+      level: 'info',
+      title: 'Hot Leads Ready for Contact',
+      message: `${hotLeads.length} high-score leads are awaiting follow-up`,
+      action: 'View Marketing',
+      path: '/dashboard/admin-overview/marketing',
+      timestamp: new Date(Date.now() - 10800000)
+    },
+    {
+      id: 'alert-4',
+      level: 'success',
+      title: 'Campaign Performance Exceeds Goals',
+      message: `${activeCampaigns.length} active campaigns showing ${formatPercentage(MOCK_MARKETING_STATS.marketingROI)}+ ROI`,
+      action: 'View Analytics',
+      path: '/dashboard/admin-overview/analytics',
+      timestamp: new Date(Date.now() - 14400000)
+    }
+  ]
+
+  // Load admin overview data
   useEffect(() => {
-    const loadAdminOverviewData = async () => {
+    const loadDashboardData = async () => {
       try {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load admin overview'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        logger.info('Loading admin dashboard overview')
+
+        // Simulate API call
+        await new Promise((resolve) => setTimeout(resolve, 800))
 
         setIsLoading(false)
-        announce('Admin overview loaded successfully', 'polite')
+        announce('Admin dashboard loaded successfully', 'polite')
+        logger.info('Dashboard data loaded', { success: true })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load admin overview')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard'
+        setError(errorMessage)
         setIsLoading(false)
-        announce('Error loading admin overview', 'assertive')
+        announce('Error loading dashboard', 'assertive')
+        logger.error('Dashboard load failed', { error: err })
       }
     }
 
-    loadAdminOverviewData()
+    loadDashboardData()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // A+++ LOADING STATE
+  // Handle refresh dashboard
+  const handleRefreshDashboard = async () => {
+    try {
+      setRefreshing(true)
+      logger.info('Refreshing dashboard data')
+
+      const response = await fetch('/api/admin/dashboard/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timestamp: new Date().toISOString() })
+      })
+
+      if (!response.ok) throw new Error('Failed to refresh dashboard')
+
+      toast.success('Dashboard Refreshed', {
+        description: 'All dashboard widgets have been updated with latest data'
+      })
+      logger.info('Dashboard refresh completed', { success: true })
+      announce('Dashboard refreshed successfully', 'polite')
+    } catch (error) {
+      toast.error('Refresh Failed', {
+        description: error instanceof Error ? error.message : 'Unable to refresh dashboard'
+      })
+      logger.error('Dashboard refresh failed', { error })
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
+  // Handle mark alert as read
+  const handleMarkAlertRead = async (alertId: string) => {
+    try {
+      logger.info('Marking alert as read', { alertId })
+
+      const response = await fetch('/api/admin/alerts/mark-read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alertId })
+      })
+
+      if (!response.ok) throw new Error('Failed to mark alert as read')
+
+      toast.success('Alert Marked as Read', {
+        description: 'The alert has been marked as read'
+      })
+      logger.info('Alert marked as read', { alertId, success: true })
+    } catch (error) {
+      toast.error('Action Failed', {
+        description: error instanceof Error ? error.message : 'Unable to update alert'
+      })
+      logger.error('Mark alert failed', { error })
+    }
+  }
+
+  // Handle dismiss alert
+  const handleDismissAlert = async (alertId: string) => {
+    try {
+      logger.info('Dismissing alert', { alertId })
+
+      const response = await fetch('/api/admin/alerts/dismiss', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alertId })
+      })
+
+      if (!response.ok) throw new Error('Failed to dismiss alert')
+
+      toast.success('Alert Dismissed', {
+        description: 'The alert has been removed from your view'
+      })
+      logger.info('Alert dismissed', { alertId, success: true })
+    } catch (error) {
+      toast.error('Action Failed', {
+        description: error instanceof Error ? error.message : 'Unable to dismiss alert'
+      })
+      logger.error('Dismiss alert failed', { error })
+    }
+  }
+
+  // Handle view module
+  const handleViewModule = (moduleName: string, path: string) => {
+    logger.info('Navigating to module', { module: moduleName, path })
+    router.push(path)
+    toast.info(`Opening ${moduleName}`, {
+      description: 'Navigating to detailed view'
+    })
+  }
+
+  // Get alert level styling
+  const getAlertStyling = (level: string) => {
+    const styles = {
+      info: 'bg-blue-50 border-blue-200 text-blue-700',
+      warning: 'bg-yellow-50 border-yellow-200 text-yellow-700',
+      error: 'bg-red-50 border-red-200 text-red-700',
+      success: 'bg-green-50 border-green-200 text-green-700'
+    }
+    return styles[level as keyof typeof styles] || styles.info
+  }
+
+  // Get alert icon
+  const getAlertIcon = (level: string) => {
+    const icons = {
+      info: <AlertCircle className="w-5 h-5" />,
+      warning: <AlertCircle className="w-5 h-5" />,
+      error: <AlertCircle className="w-5 h-5" />,
+      success: <CheckCircle className="w-5 h-5" />
+    }
+    return icons[level as keyof typeof icons] || icons.info
+  }
+
+  // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="max-w-[1800px] mx-auto space-y-8">
-          <div className="space-y-8">
-            <CardSkeleton />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <CardSkeleton />
-              <CardSkeleton />
-              <CardSkeleton />
-              <CardSkeleton />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-              <CardSkeleton />
-              <CardSkeleton />
-              <CardSkeleton />
-              <CardSkeleton />
-              <CardSkeleton />
-              <CardSkeleton />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <CardSkeleton />
-              <CardSkeleton />
-            </div>
-            <ListSkeleton items={3} />
-          </div>
+      <div className="space-y-8">
+        <CardSkeleton />
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => <CardSkeleton key={i} />)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CardSkeleton />
+          <CardSkeleton />
         </div>
       </div>
     )
   }
 
-  // A+++ ERROR STATE
+  // Error state
   if (error) {
     return (
-      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="max-w-[1800px] mx-auto">
-          <ErrorEmptyState
-            error={error}
-            onRetry={() => window.location.reload()}
-          />
-        </div>
-      </div>
+      <ErrorEmptyState
+        error={error}
+        onRetry={() => window.location.reload()}
+      />
     )
   }
 
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="max-w-[1800px] mx-auto space-y-8">
-        {/* Header */}
+    <div className="space-y-8">
+      {/* System Alerts */}
+      {alerts.length > 0 && (
         <ScrollReveal>
-          <div className="flex items-center justify-between">
-            <div>
-              <TextShimmer className="text-4xl font-bold mb-2">
-                Admin Overview
-              </TextShimmer>
-              <p className="text-muted-foreground">
-                Unified dashboard for all business operations
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-muted-foreground">
-                Last updated: {new Date().toLocaleTimeString()}
-              </span>
-              <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors">
-                Refresh Data
-              </button>
-            </div>
-          </div>
-        </ScrollReveal>
-
-        {/* System Alerts */}
-        {unreadAlerts.length > 0 && (
-          <ScrollReveal delay={0.1}>
-            <LiquidGlassCard>
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    🔔 System Alerts
-                    <span className="text-xs px-2 py-1 rounded-full bg-red-500 text-white">
-                      {unreadAlerts.length}
-                    </span>
-                  </h3>
+          <LiquidGlassCard>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-blue-500" />
+                  System Alerts
+                  <span className="text-xs px-2 py-1 rounded-full bg-blue-500 text-white">
+                    {alerts.length}
+                  </span>
+                </h3>
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => setShowAllAlerts(!showAllAlerts)}
-                    className="text-sm text-blue-500 hover:text-blue-600"
+                    className="text-sm text-blue-500 hover:text-blue-600 font-medium"
                   >
                     {showAllAlerts ? 'Show Less' : 'View All'}
                   </button>
-                </div>
-                <div className="space-y-3">
-                  {(showAllAlerts ? SYSTEM_ALERTS : unreadAlerts.slice(0, 3)).map((alert) => (
-                    <div
-                      key={alert.id}
-                      className={`p-4 rounded-lg border ${getAlertLevelColor(alert.level)}`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="font-semibold mb-1">{alert.title}</div>
-                          <p className="text-sm opacity-90">{alert.message}</p>
-                          <div className="text-xs opacity-75 mt-2">
-                            {new Date(alert.timestamp).toLocaleString()}
-                          </div>
-                        </div>
-                        {alert.actionPath && (
-                          <Link
-                            href={alert.actionPath}
-                            className="px-3 py-1 bg-white/50 dark:bg-black/50 rounded text-sm font-medium hover:bg-white/80 dark:hover:bg-black/80 transition-colors"
-                          >
-                            {alert.actionLabel || 'View'}
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                  <button
+                    onClick={handleRefreshDashboard}
+                    disabled={refreshing}
+                    className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {refreshing ? 'Refreshing...' : 'Refresh'}
+                  </button>
                 </div>
               </div>
-            </LiquidGlassCard>
-          </ScrollReveal>
-        )}
 
-        {/* Key Metrics */}
-        <ScrollReveal delay={0.2}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <LiquidGlassCard>
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="text-sm text-muted-foreground mb-1">Total Revenue</div>
-                    <div className="text-3xl font-bold text-green-500">
-                      ${(DASHBOARD_STATS.totalRevenue / 1000).toFixed(0)}K
-                    </div>
-                  </div>
-                  <div className="text-2xl">💰</div>
-                </div>
-                <div className="text-xs text-green-500">
-                  ↗ +{DASHBOARD_STATS.revenueGrowth.toFixed(1)}% this month
-                </div>
-              </div>
-            </LiquidGlassCard>
-
-            <LiquidGlassCard>
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="text-sm text-muted-foreground mb-1">Active Clients</div>
-                    <div className="text-3xl font-bold text-blue-500">
-                      {DASHBOARD_STATS.activeClients}
-                    </div>
-                  </div>
-                  <div className="text-2xl">👥</div>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  of {DASHBOARD_STATS.totalClients} total
-                </div>
-              </div>
-            </LiquidGlassCard>
-
-            <LiquidGlassCard>
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="text-sm text-muted-foreground mb-1">Hot Leads</div>
-                    <div className="text-3xl font-bold text-red-500">
-                      {DASHBOARD_STATS.hotLeads}
-                    </div>
-                  </div>
-                  <div className="text-2xl">🔥</div>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  of {DASHBOARD_STATS.totalLeads} total leads
-                </div>
-              </div>
-            </LiquidGlassCard>
-
-            <LiquidGlassCard>
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="text-sm text-muted-foreground mb-1">Email Open Rate</div>
-                    <div className="text-3xl font-bold text-purple-500">
-                      {DASHBOARD_STATS.emailOpenRate.toFixed(1)}%
-                    </div>
-                  </div>
-                  <div className="text-2xl">📧</div>
-                </div>
-                <div className="text-xs text-green-500">
-                  Above industry average
-                </div>
-              </div>
-            </LiquidGlassCard>
-          </div>
-        </ScrollReveal>
-
-        {/* Admin Modules Grid */}
-        <ScrollReveal delay={0.3}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {ADMIN_MODULES.map((module, index) => (
-              <LiquidGlassCard key={module.id}>
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="text-3xl">{module.icon}</div>
-                      <div>
-                        <h3 className="font-semibold">{module.name}</h3>
-                        <p className="text-xs text-muted-foreground">{module.description}</p>
-                      </div>
-                    </div>
-                    <span className={`text-xs px-2 py-1 rounded ${getModuleStatusColor(module.status)}`}>
-                      {module.status}
-                    </span>
-                  </div>
-
-                  {/* Module Metrics */}
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    {module.metrics.slice(0, 2).map((metric) => (
-                      <div key={metric.id} className="bg-muted/30 rounded-lg p-3">
-                        <div className="text-xs text-muted-foreground mb-1">{metric.label}</div>
-                        <div className="text-lg font-bold" style={{ color: metric.color }}>
-                          {formatMetricValue(metric.value, metric.format)}
-                        </div>
-                        {metric.trend && (
-                          <div className={`text-xs ${metric.trend === 'up' ? 'text-green-500' : metric.trend === 'down' ? 'text-red-500' : 'text-gray-500'}`}>
-                            {getTrendIcon(metric.trend)} {metric.changePercent ? `${metric.changePercent.toFixed(1)}%` : ''}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Recent Activity */}
-                  {module.recentActivity.length > 0 && (
-                    <div className="border-t pt-3 mb-3">
-                      <div className="text-xs text-muted-foreground mb-2">Recent Activity</div>
-                      {module.recentActivity.slice(0, 1).map((activity) => (
-                        <div key={activity.id} className="text-sm">
-                          <div className="font-medium">{activity.title}</div>
-                          <div className="text-xs text-muted-foreground">{activity.description}</div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Quick Actions */}
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href={module.path}
-                      className="flex-1 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors text-center"
-                    >
-                      Open {module.name}
-                    </Link>
-                    {module.quickActions.length > 0 && (
-                      <button className="px-3 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors">
-                        {module.quickActions[0].icon}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </LiquidGlassCard>
-            ))}
-          </div>
-        </ScrollReveal>
-
-        {/* Performance Indicators & Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Performance Indicators */}
-          <ScrollReveal delay={0.4}>
-            <LiquidGlassCard>
-              <div className="p-6">
-                <h3 className="text-lg font-semibold mb-6">Performance Indicators</h3>
-                <div className="space-y-4">
-                  {PERFORMANCE_INDICATORS.map((indicator) => (
-                    <div key={indicator.id}>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">{indicator.name}</span>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-sm font-bold ${getPerformanceStatusColor(indicator.status)}`}>
-                            {indicator.value.toFixed(1)}%
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            / {indicator.target}%
-                          </span>
-                        </div>
-                      </div>
-                      <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${Math.min((indicator.value / indicator.target) * 100, 100)}%` }}
-                          transition={{ duration: 0.5 }}
-                          className={`h-full ${
-                            indicator.status === 'excellent' ? 'bg-green-500' :
-                            indicator.status === 'good' ? 'bg-blue-500' :
-                            indicator.status === 'fair' ? 'bg-yellow-500' :
-                            'bg-red-500'
-                          }`}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </LiquidGlassCard>
-          </ScrollReveal>
-
-          {/* Recent Activity */}
-          <ScrollReveal delay={0.5}>
-            <LiquidGlassCard>
-              <div className="p-6">
-                <h3 className="text-lg font-semibold mb-6">Recent Activity</h3>
-                <div className="space-y-4">
-                  {recentActivity.map((activity) => {
-                    const module = ADMIN_MODULES.find(m => m.id === activity.moduleId)
-                    return (
-                      <div key={activity.id} className="flex items-start gap-3">
-                        <div className="text-xl">{module?.icon}</div>
-                        <div className="flex-1">
-                          <div className="font-medium text-sm">{activity.title}</div>
-                          <div className="text-xs text-muted-foreground">{activity.description}</div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {new Date(activity.timestamp).toLocaleTimeString()}
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </LiquidGlassCard>
-          </ScrollReveal>
-        </div>
-
-        {/* Metrics Chart & Top Performers */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Weekly Metrics */}
-          <ScrollReveal delay={0.6}>
-            <LiquidGlassCard className="lg:col-span-2">
-              <div className="p-6">
-                <h3 className="text-lg font-semibold mb-6">Weekly Overview</h3>
-                <div className="h-64 flex items-end justify-between gap-2">
-                  {RECENT_METRICS.map((data, index) => {
-                    const maxRevenue = Math.max(...RECENT_METRICS.map(d => d.revenue))
-                    const height = (data.revenue / maxRevenue) * 100
-                    return (
-                      <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                        <motion.div
-                          initial={{ height: 0 }}
-                          animate={{ height: `${height}%` }}
-                          transition={{ delay: index * 0.1 }}
-                          className="w-full rounded-t-lg bg-gradient-to-t from-green-600 to-emerald-400 relative group cursor-pointer"
-                        >
-                          <div className="absolute -top-16 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/90 text-white text-xs px-3 py-2 rounded-lg whitespace-nowrap shadow-lg">
-                            <div className="font-bold">${(data.revenue / 1000).toFixed(1)}K</div>
-                            <div className="text-gray-300">{data.leads} leads</div>
-                            <div className="text-gray-300">{data.clients} clients</div>
-                          </div>
-                        </motion.div>
-                        <div className="text-xs text-muted-foreground font-medium">{data.date}</div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </LiquidGlassCard>
-          </ScrollReveal>
-
-          {/* Top Performers */}
-          <ScrollReveal delay={0.7}>
-            <LiquidGlassCard>
-              <div className="p-6">
-                <h3 className="text-lg font-semibold mb-6">Top Performers</h3>
-                <div className="space-y-4">
-                  {TOP_PERFORMERS.map((performer, index) => (
-                    <div key={performer.id} className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
-                        {index + 1}
+              <div className="space-y-3">
+                {(showAllAlerts ? alerts : alerts.slice(0, 3)).map((alert) => (
+                  <div
+                    key={alert.id}
+                    className={`p-4 rounded-lg border ${getAlertStyling(alert.level)}`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5">
+                        {getAlertIcon(alert.level)}
                       </div>
                       <div className="flex-1">
-                        <div className="font-semibold text-sm">{performer.name}</div>
-                        <div className="text-xs text-muted-foreground capitalize">
-                          {performer.category} • {performer.metric}
+                        <div className="font-semibold mb-1">{alert.title}</div>
+                        <p className="text-sm opacity-90 mb-2">{alert.message}</p>
+                        <div className="flex items-center gap-3 text-xs">
+                          <span className="opacity-75">
+                            {formatRelativeTime(alert.timestamp.toISOString())}
+                          </span>
+                          {alert.path && (
+                            <button
+                              onClick={() => handleViewModule(alert.action, alert.path)}
+                              className="font-medium hover:underline"
+                            >
+                              {alert.action} →
+                            </button>
+                          )}
                         </div>
                       </div>
-                      <div className="text-lg font-bold text-blue-500">
-                        {performer.category === 'campaign' || performer.category === 'project'
-                          ? `${performer.value}%`
-                          : performer.metric === 'Revenue'
-                          ? `$${(performer.value / 1000).toFixed(0)}K`
-                          : performer.value}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleMarkAlertRead(alert.id)}
+                          className="p-1.5 hover:bg-white/50 rounded transition-colors"
+                          title="Mark as read"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDismissAlert(alert.id)}
+                          className="p-1.5 hover:bg-white/50 rounded transition-colors"
+                          title="Dismiss"
+                        >
+                          ✕
+                        </button>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </LiquidGlassCard>
+        </ScrollReveal>
+      )}
+
+      {/* Module Cards Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {/* Analytics Module */}
+        <ScrollReveal delay={0.1}>
+          <LiquidGlassCard>
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                    <BarChart3 className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Business Intelligence</h3>
+                    <p className="text-xs text-gray-600">Revenue & Analytics</p>
+                  </div>
+                </div>
+                <span className="text-xs px-2 py-1 rounded bg-green-100 text-green-700 border border-green-200">
+                  Active
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100">
+                  <div className="text-xs text-blue-600 mb-1">Revenue</div>
+                  <div className="text-lg font-bold text-blue-700">
+                    <NumberFlow
+                      value={284500}
+                      format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                    />
+                  </div>
+                  <div className="text-xs text-green-600 flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    +16.2%
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-3 border border-purple-100">
+                  <div className="text-xs text-purple-600 mb-1">Conversion</div>
+                  <div className="text-lg font-bold text-purple-700">3.8%</div>
+                  <div className="text-xs text-green-600 flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    +18.7%
+                  </div>
                 </div>
               </div>
-            </LiquidGlassCard>
-          </ScrollReveal>
-        </div>
+
+              <div className="border-t pt-3 mb-3">
+                <div className="text-xs text-gray-600 mb-2">Recent Insight</div>
+                <div className="text-sm font-medium text-gray-800">
+                  Revenue trending 8% above projections
+                </div>
+                <div className="text-xs text-gray-500">Consider scaling operations</div>
+              </div>
+
+              <button
+                onClick={() => handleViewModule('Analytics', '/dashboard/admin-overview/analytics')}
+                className="w-full px-4 py-2.5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                Open Analytics
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </LiquidGlassCard>
+        </ScrollReveal>
+
+        {/* CRM Module */}
+        <ScrollReveal delay={0.2}>
+          <LiquidGlassCard>
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">CRM & Sales Pipeline</h3>
+                    <p className="text-xs text-gray-600">Deals & Contacts</p>
+                  </div>
+                </div>
+                <span className="text-xs px-2 py-1 rounded bg-green-100 text-green-700 border border-green-200">
+                  Active
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3 border border-green-100">
+                  <div className="text-xs text-green-600 mb-1">Pipeline</div>
+                  <div className="text-lg font-bold text-green-700">
+                    <NumberFlow
+                      value={totalPipelineValue}
+                      format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                    />
+                  </div>
+                  <div className="text-xs text-gray-600">{MOCK_DEALS.length} deals</div>
+                </div>
+
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100">
+                  <div className="text-xs text-blue-600 mb-1">Win Rate</div>
+                  <div className="text-lg font-bold text-blue-700">
+                    {formatPercentage(MOCK_PIPELINE_STATS.winRate)}
+                  </div>
+                  <div className="text-xs text-green-600 flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    Strong
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-3 mb-3">
+                <div className="text-xs text-gray-600 mb-2">Hot Deals</div>
+                <div className="text-sm font-medium text-gray-800">
+                  {highValueDeals.length} high-value deals in final stages
+                </div>
+                <div className="text-xs text-gray-500">
+                  Worth {formatCurrency(highValueDeals.reduce((sum, d) => sum + d.value, 0))}
+                </div>
+              </div>
+
+              <button
+                onClick={() => handleViewModule('CRM', '/dashboard/admin-overview/crm')}
+                className="w-full px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                Open CRM
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </LiquidGlassCard>
+        </ScrollReveal>
+
+        {/* Invoicing Module */}
+        <ScrollReveal delay={0.3}>
+          <LiquidGlassCard>
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Billing Management</h3>
+                    <p className="text-xs text-gray-600">Invoices & Payments</p>
+                  </div>
+                </div>
+                <span className="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-700 border border-yellow-200">
+                  {overdueInvoices.length} Overdue
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3 border border-green-100">
+                  <div className="text-xs text-green-600 mb-1">Paid</div>
+                  <div className="text-lg font-bold text-green-700">
+                    <NumberFlow
+                      value={MOCK_BILLING_STATS.totalPaid}
+                      format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                    />
+                  </div>
+                  <div className="text-xs text-gray-600">On time</div>
+                </div>
+
+                <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg p-3 border border-red-100">
+                  <div className="text-xs text-red-600 mb-1">Outstanding</div>
+                  <div className="text-lg font-bold text-red-700">
+                    <NumberFlow
+                      value={totalOutstanding}
+                      format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                    />
+                  </div>
+                  <div className="text-xs text-red-600">{overdueInvoices.length} overdue</div>
+                </div>
+              </div>
+
+              <div className="border-t pt-3 mb-3">
+                <div className="text-xs text-gray-600 mb-2">Action Required</div>
+                <div className="text-sm font-medium text-gray-800">
+                  {overdueInvoices.length} overdue invoice{overdueInvoices.length !== 1 ? 's' : ''} need follow-up
+                </div>
+                <div className="text-xs text-gray-500">Send payment reminders</div>
+              </div>
+
+              <button
+                onClick={() => handleViewModule('Invoicing', '/dashboard/admin-overview/invoicing')}
+                className="w-full px-4 py-2.5 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                Open Invoicing
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </LiquidGlassCard>
+        </ScrollReveal>
+
+        {/* Marketing Module */}
+        <ScrollReveal delay={0.4}>
+          <LiquidGlassCard>
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
+                    <Target className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Lead Gen & Marketing</h3>
+                    <p className="text-xs text-gray-600">Leads & Campaigns</p>
+                  </div>
+                </div>
+                <span className="text-xs px-2 py-1 rounded bg-green-100 text-green-700 border border-green-200">
+                  Active
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg p-3 border border-red-100">
+                  <div className="text-xs text-red-600 mb-1">Hot Leads</div>
+                  <div className="text-lg font-bold text-red-700">
+                    <NumberFlow value={hotLeads.length} />
+                  </div>
+                  <div className="text-xs text-gray-600">Ready to convert</div>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-3 border border-purple-100">
+                  <div className="text-xs text-purple-600 mb-1">ROI</div>
+                  <div className="text-lg font-bold text-purple-700">
+                    {formatPercentage(MOCK_MARKETING_STATS.marketingROI, 0)}
+                  </div>
+                  <div className="text-xs text-green-600 flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    Excellent
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-3 mb-3">
+                <div className="text-xs text-gray-600 mb-2">Active Campaigns</div>
+                <div className="text-sm font-medium text-gray-800">
+                  {activeCampaigns.length} campaigns generating strong results
+                </div>
+                <div className="text-xs text-gray-500">
+                  {formatNumber(MOCK_MARKETING_STATS.totalReach)} total reach
+                </div>
+              </div>
+
+              <button
+                onClick={() => handleViewModule('Marketing', '/dashboard/admin-overview/marketing')}
+                className="w-full px-4 py-2.5 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                Open Marketing
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </LiquidGlassCard>
+        </ScrollReveal>
+
+        {/* Operations Module */}
+        <ScrollReveal delay={0.5}>
+          <LiquidGlassCard>
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">User Management</h3>
+                    <p className="text-xs text-gray-600">Team & Permissions</p>
+                  </div>
+                </div>
+                <span className="text-xs px-2 py-1 rounded bg-green-100 text-green-700 border border-green-200">
+                  Active
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100">
+                  <div className="text-xs text-blue-600 mb-1">Team</div>
+                  <div className="text-lg font-bold text-blue-700">
+                    <NumberFlow value={6} />
+                  </div>
+                  <div className="text-xs text-gray-600">5 active</div>
+                </div>
+
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3 border border-green-100">
+                  <div className="text-xs text-green-600 mb-1">Productivity</div>
+                  <div className="text-lg font-bold text-green-700">90.2%</div>
+                  <div className="text-xs text-green-600 flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    High
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-3 mb-3">
+                <div className="text-xs text-gray-600 mb-2">Status</div>
+                <div className="text-sm font-medium text-gray-800">
+                  1 pending invite awaiting acceptance
+                </div>
+                <div className="text-xs text-gray-500">All roles configured</div>
+              </div>
+
+              <button
+                onClick={() => handleViewModule('Operations', '/dashboard/admin-overview/operations')}
+                className="w-full px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                Open Operations
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </LiquidGlassCard>
+        </ScrollReveal>
+
+        {/* Automation Module */}
+        <ScrollReveal delay={0.6}>
+          <LiquidGlassCard>
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center">
+                    <Zap className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">Business Automation</h3>
+                    <p className="text-xs text-gray-600">Workflows & Integrations</p>
+                  </div>
+                </div>
+                <span className="text-xs px-2 py-1 rounded bg-green-100 text-green-700 border border-green-200">
+                  {activeWorkflows.length} Active
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-lg p-3 border border-purple-100">
+                  <div className="text-xs text-purple-600 mb-1">Workflows</div>
+                  <div className="text-lg font-bold text-purple-700">
+                    <NumberFlow value={activeWorkflows.length} />
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    {formatPercentage(MOCK_AUTOMATION_STATS.successRate)} success
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3 border border-green-100">
+                  <div className="text-xs text-green-600 mb-1">Time Saved</div>
+                  <div className="text-lg font-bold text-green-700">94h</div>
+                  <div className="text-xs text-green-600 flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    This month
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-3 mb-3">
+                <div className="text-xs text-gray-600 mb-2">Integrations</div>
+                <div className="text-sm font-medium text-gray-800">
+                  5 integrations connected and syncing
+                </div>
+                <div className="text-xs text-gray-500">
+                  {formatNumber(MOCK_AUTOMATION_STATS.totalRuns)} total runs
+                </div>
+              </div>
+
+              <button
+                onClick={() => handleViewModule('Automation', '/dashboard/admin-overview/automation')}
+                className="w-full px-4 py-2.5 bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+              >
+                Open Automation
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </LiquidGlassCard>
+        </ScrollReveal>
+      </div>
+
+      {/* Quick Stats Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <ScrollReveal delay={0.7}>
+          <LiquidGlassCard>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm text-gray-600">Pipeline Value</div>
+                <DollarSign className="w-5 h-5 text-green-500" />
+              </div>
+              <div className="text-2xl font-bold text-gray-800 mb-1">
+                <NumberFlow
+                  value={totalPipelineValue}
+                  format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
+                />
+              </div>
+              <div className="text-xs text-gray-500">{MOCK_DEALS.length} active deals</div>
+            </div>
+          </LiquidGlassCard>
+        </ScrollReveal>
+
+        <ScrollReveal delay={0.75}>
+          <LiquidGlassCard>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm text-gray-600">Active Campaigns</div>
+                <Mail className="w-5 h-5 text-purple-500" />
+              </div>
+              <div className="text-2xl font-bold text-gray-800 mb-1">
+                <NumberFlow value={activeCampaigns.length} />
+              </div>
+              <div className="text-xs text-gray-500">
+                {formatPercentage(MOCK_MARKETING_STATS.marketingROI, 0)} ROI
+              </div>
+            </div>
+          </LiquidGlassCard>
+        </ScrollReveal>
+
+        <ScrollReveal delay={0.8}>
+          <LiquidGlassCard>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm text-gray-600">Automation Runs</div>
+                <Zap className="w-5 h-5 text-yellow-500" />
+              </div>
+              <div className="text-2xl font-bold text-gray-800 mb-1">
+                <NumberFlow value={MOCK_AUTOMATION_STATS.totalRuns} />
+              </div>
+              <div className="text-xs text-gray-500">
+                {formatPercentage(MOCK_AUTOMATION_STATS.successRate)} success
+              </div>
+            </div>
+          </LiquidGlassCard>
+        </ScrollReveal>
+
+        <ScrollReveal delay={0.85}>
+          <LiquidGlassCard>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-sm text-gray-600">Time Saved</div>
+                <Clock className="w-5 h-5 text-blue-500" />
+              </div>
+              <div className="text-2xl font-bold text-gray-800 mb-1">
+                <NumberFlow value={MOCK_AUTOMATION_STATS.timeSaved} suffix="h" />
+              </div>
+              <div className="text-xs text-gray-500">This month</div>
+            </div>
+          </LiquidGlassCard>
+        </ScrollReveal>
       </div>
     </div>
   )
