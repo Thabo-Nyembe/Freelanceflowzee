@@ -260,41 +260,79 @@ export default function FilesHubPage() {
 
   useEffect(() => {
     const loadFilesData = async () => {
-      logger.info('Loading files data')
+      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
       try {
         setIsPageLoading(true)
         setError(null)
 
-        // PRODUCTION: Replace with API call to /api/files
-        // const response = await fetch('/api/files')
-        // const data = await response.json()
-        // dispatch({ type: 'SET_FILES', files: data.files })
-        // dispatch({ type: 'SET_FOLDERS', folders: data.folders })
+        logger.info('Loading files from Supabase', { userId })
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
+        // Dynamic import for code splitting
+        const { getFiles, getFolders } = await import('@/lib/files-hub-queries')
+
+        const { data: filesData, error: filesError } = await getFiles(
+          userId,
+          undefined, // no filters
+          { field: 'uploaded_at', direction: 'desc' }, // sort by newest
+          100 // limit
+        )
+
+        if (filesError) throw new Error(filesError.message)
+
+        // Transform database format to UI format
+        const transformedFiles: FileItem[] = filesData.map((f) => ({
+          id: f.id,
+          name: f.name,
+          type: f.type,
+          size: f.size,
+          url: f.url,
+          extension: f.extension,
+          uploadedAt: f.uploaded_at,
+          uploadedBy: {
+            id: f.user_id,
+            name: 'Current User',
+            avatar: ''
+          },
+          modifiedAt: f.updated_at,
+          folder: f.folder_id || 'All Files',
+          tags: [],
+          shared: f.is_shared,
+          starred: f.is_starred,
+          locked: false,
+          downloads: f.downloads,
+          views: f.views,
+          version: 1,
+          accessLevel: f.access_level
+        }))
+
+        dispatch({ type: 'SET_FILES', files: transformedFiles })
+
+        setIsPageLoading(false)
+        announce(`${transformedFiles.length} files loaded from database`, 'polite')
+
+        toast.success('Files loaded', {
+          description: `${transformedFiles.length} files from Supabase - ${formatFileSize(filesData.reduce((sum, f) => sum + f.size, 0))} total`
         })
 
-        // Using mock data from files-hub-utils
-        dispatch({ type: 'SET_FILES', files: MOCK_FILES })
-
-        setIsPageLoading(false)
-        announce('Files loaded successfully', 'polite')
-        logger.info('Files data loaded successfully', { count: MOCK_FILES.length })
+        logger.info('Files loaded successfully', {
+          count: transformedFiles.length,
+          userId
+        })
       } catch (err) {
-        const error = err instanceof Error ? err.message : 'Failed to load files'
-        logger.error('Files load error', { error })
-        setError(error)
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load files'
+        logger.error('Failed to load files', { error: err, userId })
+        setError(errorMessage)
         setIsPageLoading(false)
         announce('Error loading files', 'assertive')
+        toast.error('Failed to load files', {
+          description: errorMessage
+        })
       }
     }
 
     loadFilesData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // COMPUTED STATS
@@ -385,6 +423,8 @@ export default function FilesHubPage() {
   // ============================================================================
 
   const handleUploadFiles = async () => {
+    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
     if (!uploadFiles || uploadFiles.length === 0) {
       logger.warn('Upload validation failed', { reason: 'No files selected' })
       toast.error('No files selected', { description: 'Please select at least one file to upload' })
@@ -394,15 +434,19 @@ export default function FilesHubPage() {
     const totalSize = Array.from(uploadFiles).reduce((sum, f) => sum + f.size, 0)
     const fileTypes = Array.from(uploadFiles).map(f => f.name.split('.').pop()?.toLowerCase() || 'unknown')
 
-    logger.info('Starting file upload', {
+    logger.info('Starting file upload to Supabase', {
       fileCount: uploadFiles.length,
       totalSize,
       fileTypes: [...new Set(fileTypes)],
-      targetFolder: state.currentFolder
+      targetFolder: state.currentFolder,
+      userId
     })
 
     try {
       setIsSaving(true)
+
+      // Dynamic import
+      const { createFile } = await import('@/lib/files-hub-queries')
 
       const uploadedFiles: string[] = []
       const uploadedTypes: string[] = []
@@ -420,46 +464,65 @@ export default function FilesHubPage() {
         const ext = getFileExtension(file.name)
         const type = getFileType(ext)
 
-        // PRODUCTION: Upload to backend API
-        // const formData = new FormData()
-        // formData.append('file', file)
-        // formData.append('folder', state.currentFolder)
-        // const response = await fetch('/api/files/upload', {
-        //   method: 'POST',
-        //   body: formData
-        // })
-        // const uploadedFile = await response.json()
-        // dispatch({ type: 'ADD_FILE', file: uploadedFile })
+        // PRODUCTION: Upload to Supabase Storage
+        // 1. Upload file to Supabase Storage
+        // const { data: storageData, error: storageError } = await supabase.storage
+        //   .from('files')
+        //   .upload(`${userId}/${file.name}`, file)
+        // 2. Get public URL
+        // const { data: { publicUrl } } = supabase.storage
+        //   .from('files')
+        //   .getPublicUrl(storageData.path)
 
-        // Mock upload - in production, use API endpoint above
-        const mockFile: FileItem = {
-          id: generateFileId(),
+        // For now, create file record in database
+        const { data: createdFile, error } = await createFile(userId, {
           name: file.name,
-          type,
-          size: file.size,
-          url: URL.createObjectURL(file),
+          type: type as any,
           extension: ext,
-          uploadedAt: new Date().toISOString(),
+          size: file.size,
+          url: URL.createObjectURL(file), // In production, use Supabase Storage URL
+          mime_type: file.type,
+          folder_id: state.currentFolder !== 'All Files' ? state.currentFolder : null,
+          access_level: 'private'
+        })
+
+        if (error) throw new Error(error.message)
+
+        // Transform to UI format
+        const uiFile: FileItem = {
+          id: createdFile!.id,
+          name: createdFile!.name,
+          type: createdFile!.type,
+          size: createdFile!.size,
+          url: createdFile!.url,
+          extension: createdFile!.extension,
+          uploadedAt: createdFile!.uploaded_at,
           uploadedBy: {
-            id: 'USER-1',
+            id: userId,
             name: 'Current User',
             avatar: ''
           },
-          modifiedAt: new Date().toISOString(),
-          folder: state.currentFolder,
+          modifiedAt: createdFile!.updated_at,
+          folder: createdFile!.folder_id || 'All Files',
           tags: [],
-          shared: false,
-          starred: false,
+          shared: createdFile!.is_shared,
+          starred: createdFile!.is_starred,
           locked: false,
-          downloads: 0,
-          views: 0,
+          downloads: createdFile!.downloads,
+          views: createdFile!.views,
           version: 1,
-          accessLevel: 'private'
+          accessLevel: createdFile!.access_level
         }
 
-        dispatch({ type: 'ADD_FILE', file: mockFile })
+        dispatch({ type: 'ADD_FILE', file: uiFile })
         uploadedFiles.push(file.name)
         uploadedTypes.push(type)
+
+        logger.info('File uploaded to database', {
+          fileId: createdFile!.id,
+          fileName: file.name,
+          fileType: type
+        })
       }
 
       setIsUploadModalOpen(false)
@@ -472,13 +535,14 @@ export default function FilesHubPage() {
         targetFolder: state.currentFolder
       })
 
-      toast.success('Files uploaded', {
-        description: `${uploadFiles.length} files - ${Math.round(totalSize / 1024)}KB - ${[...new Set(uploadedTypes)].join(', ')} - Folder: ${state.currentFolder}`
+      toast.success('✅ Files uploaded!', {
+        description: `${uploadFiles.length} files - ${Math.round(totalSize / 1024)}KB - ${[...new Set(uploadedTypes)].join(', ')}`
       })
     } catch (error: any) {
       logger.error('File upload failed', {
         error: error.message,
-        fileCount: uploadFiles.length
+        fileCount: uploadFiles.length,
+        userId
       })
       toast.error('Failed to upload files', {
         description: error.message || 'Please try again later'
@@ -496,7 +560,7 @@ export default function FilesHubPage() {
       return
     }
 
-    logger.info('Deleting file', {
+    logger.info('Deleting file from Supabase', {
       fileId,
       fileName: file.name,
       fileType: file.type,
@@ -504,10 +568,13 @@ export default function FilesHubPage() {
     })
 
     try {
-      // PRODUCTION: Delete via API
-      // await fetch(`/api/files/${fileId}`, { method: 'DELETE' })
+      // Dynamic import
+      const { deleteFile } = await import('@/lib/files-hub-queries')
 
-      // Mock delete - in production, use API endpoint above
+      const { error } = await deleteFile(fileId)
+
+      if (error) throw new Error(error.message)
+
       dispatch({ type: 'DELETE_FILE', fileId })
 
       logger.info('File deleted successfully', {
@@ -542,7 +609,7 @@ export default function FilesHubPage() {
     const fileNames = filesToDelete.map(f => f.name)
     const totalSize = filesToDelete.reduce((sum, f) => sum + f.size, 0)
 
-    logger.info('Bulk delete initiated', {
+    logger.info('Bulk delete initiated in Supabase', {
       fileCount: state.selectedFiles.length,
       fileNames: fileNames.slice(0, 5),
       totalSize
@@ -551,14 +618,13 @@ export default function FilesHubPage() {
     try {
       setIsSaving(true)
 
-      // PRODUCTION: Bulk delete via API
-      // await fetch('/api/files/bulk-delete', {
-      //   method: 'DELETE',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ fileIds: state.selectedFiles })
-      // })
+      // Dynamic import
+      const { bulkDeleteFiles } = await import('@/lib/files-hub-queries')
 
-      // Mock bulk delete - in production, use API endpoint above
+      const { error } = await bulkDeleteFiles(state.selectedFiles)
+
+      if (error) throw new Error(error.message)
+
       state.selectedFiles.forEach(fileId => {
         dispatch({ type: 'DELETE_FILE', fileId })
       })
@@ -759,7 +825,7 @@ export default function FilesHubPage() {
     }
   }
 
-  const handleToggleStar = (fileId: string) => {
+  const handleToggleStar = async (fileId: string) => {
     const file = state.files.find(f => f.id === fileId)
 
     if (!file) {
@@ -769,25 +835,35 @@ export default function FilesHubPage() {
 
     const newStarred = !file.starred
 
-    logger.info(newStarred ? 'File starred' : 'File unstarred', {
+    logger.info(newStarred ? 'Starring file in Supabase' : 'Unstarring file in Supabase', {
       fileId,
       fileName: file.name,
       starred: newStarred
     })
 
-    // PRODUCTION: Toggle star via API
-    // await fetch(`/api/files/${fileId}/star`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ starred: newStarred })
-    // })
+    try {
+      // Dynamic import
+      const { toggleFileStar } = await import('@/lib/files-hub-queries')
 
-    // Mock toggle star - in production, use API endpoint above
-    dispatch({ type: 'TOGGLE_STAR', fileId })
+      const { error } = await toggleFileStar(fileId, newStarred)
 
-    toast.success(newStarred ? 'Added to favorites' : 'Removed from favorites', {
-      description: `${file.name} - ${file.type}`
-    })
+      if (error) throw new Error(error.message)
+
+      dispatch({ type: 'TOGGLE_STAR', fileId })
+
+      toast.success(newStarred ? 'Added to favorites' : 'Removed from favorites', {
+        description: `${file.name} - ${file.type}`
+      })
+    } catch (error: any) {
+      logger.error('Toggle star failed', {
+        error: error.message,
+        fileId,
+        fileName: file.name
+      })
+      toast.error('Failed to update favorite', {
+        description: error.message || 'Please try again later'
+      })
+    }
   }
 
   const handleViewFile = (file: FileItem) => {
