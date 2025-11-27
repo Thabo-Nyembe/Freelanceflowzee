@@ -213,45 +213,61 @@ export default function DashboardPage() {
     router.push(`/dashboard/${path}`)
   }
 
-  // A+++ Initial Data Loading Effect
+  // A+++ Initial Data Loading Effect - REAL SUPABASE DATA
   useEffect(() => {
     const loadDashboardData = async () => {
+      if (!userId) {
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
 
-        // Fetch real dashboard data from API
-        const response = await fetch('/api/analytics/reports', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            reportType: 'dashboard',
-            period: {
-              start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-              end: new Date().toISOString().split('T')[0]
-            }
-          })
+        // Import dashboard stats utility
+        const { getDashboardStats, getRecentActivity } = await import('@/lib/dashboard-stats')
+
+        // Fetch real dashboard data from Supabase
+        const [stats, activities] = await Promise.all([
+          getDashboardStats(userId),
+          getRecentActivity(userId, 10)
+        ])
+
+        // Update state with real data
+        setLiveActivities(activities.map((act: any) => ({
+          id: act.id,
+          type: act.type,
+          message: `${act.type === 'project' ? 'Project' : act.type === 'task' ? 'Task' : 'File'}: ${act.name || act.title}`,
+          time: new Date(act.updated_at).toLocaleTimeString(),
+          status: 'success',
+          impact: 'medium'
+        })))
+
+        logger.info('Dashboard data loaded from Supabase', {
+          projects: stats.projects.total,
+          clients: stats.clients.total,
+          revenue: stats.revenue.total,
+          tasks: stats.tasks.total
         })
 
-        const result = await response.json()
-
-        if (result.success) {
-          // Dashboard data loaded successfully from API
-          logger.info('Dashboard data loaded from API', { data: result.data })
-          announce('Dashboard loaded successfully', 'polite')
-        }
+        announce(`Dashboard loaded: ${stats.projects.total} projects, ${stats.clients.total} clients`, 'polite')
+        toast.success('Dashboard updated', {
+          description: `${stats.projects.active} active projects • ${stats.tasks.inProgress} tasks in progress`
+        })
 
         setIsLoading(false)
       } catch (err) {
         logger.error('Failed to load dashboard data', { error: err })
         setError(err instanceof Error ? err.message : 'Failed to load dashboard data')
         announce('Error loading dashboard', 'assertive')
+        toast.error('Failed to load dashboard data')
         setIsLoading(false)
       }
     }
 
     loadDashboardData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
