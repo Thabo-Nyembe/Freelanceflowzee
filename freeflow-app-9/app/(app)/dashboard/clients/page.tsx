@@ -499,36 +499,76 @@ export default function ClientsPage() {
   // ============================================================================
 
   useEffect(() => {
-    logger.info('Loading clients')
     const loadClients = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
+        logger.info('Loading clients from Supabase', { userId })
         setIsLoading(true)
         setError(null)
 
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.98) {
-              reject(new Error('Failed to load clients'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
+        // Import clients queries utility
+        const { getClients } = await import('@/lib/clients-queries')
+
+        // Fetch clients from Supabase
+        const { data: clientsData, error: clientsError, count } = await getClients(userId)
+
+        if (clientsError) {
+          throw new Error(clientsError.message || 'Failed to load clients')
+        }
+
+        // Transform database clients to UI format
+        const transformedClients = (clientsData || []).map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          email: c.email,
+          phone: c.phone || '',
+          company: c.company || '',
+          position: c.position || '',
+          status: c.status || 'lead',
+          avatar: c.avatar || '',
+          totalRevenue: c.total_revenue || 0,
+          projectCount: c.projects_count || 0,
+          lastContact: c.last_contact || new Date().toISOString(),
+          tags: c.tags || [],
+          notes: c.notes || '',
+          industry: c.industry || '',
+          location: c.city || '',
+          healthScore: c.health_score || 50,
+          priority: c.priority || 'medium',
+          source: 'database',
+          createdAt: c.created_at,
+          updatedAt: c.updated_at
+        }))
+
+        logger.info('Clients loaded from Supabase', {
+          count: transformedClients.length,
+          total: count
         })
 
-        dispatch({ type: 'SET_CLIENTS', clients: mockClients })
+        dispatch({ type: 'SET_CLIENTS', clients: transformedClients })
         setIsLoading(false)
-        logger.info('Clients loaded successfully', { count: mockClients.length })
-        announce(`${mockClients.length} clients loaded successfully`, 'polite')
+        announce(`${transformedClients.length} clients loaded successfully`, 'polite')
+        toast.success('Clients loaded', {
+          description: `${transformedClients.length} clients from database`
+        })
       } catch (err) {
-        logger.error('Failed to load clients', { error: err })
+        logger.error('Failed to load clients', { error: err, userId })
         setError(err instanceof Error ? err.message : 'Failed to load clients')
         setIsLoading(false)
         announce('Error loading clients', 'assertive')
+        toast.error('Failed to load clients', {
+          description: err instanceof Error ? err.message : 'Please try again'
+        })
       }
     }
 
     loadClients()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // HANDLERS
@@ -546,51 +586,77 @@ export default function ClientsPage() {
       return
     }
 
-    logger.info('Adding new client', {
+    logger.info('Adding new client to Supabase', {
       name: formData.name,
       email: formData.email,
-      company: formData.company
+      company: formData.company,
+      userId
     })
 
     try {
       setIsSaving(true)
 
-      const response = await fetch('/api/clients', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'create',
-          data: formData
-        })
+      // Import clients queries utility
+      const { createClient } = await import('@/lib/clients-queries')
+
+      // Create client in Supabase
+      const { data: createdClient, error: createError } = await createClient(userId, {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        company: formData.company,
+        position: formData.position,
+        status: formData.status || 'lead',
+        notes: formData.notes
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to create client')
+      if (createError || !createdClient) {
+        throw new Error(createError?.message || 'Failed to create client')
       }
 
-      const result = await response.json()
-
-      if (result.success) {
-        logger.info('Client created successfully', {
-          clientId: result.client.id,
-          name: result.client.name
-        })
-        dispatch({ type: 'ADD_CLIENT', client: result.client })
-
-        setIsAddClientModalOpen(false)
-        setFormData({})
-
-        toast.success('✅ Client added', {
-          description: `${result.client.name} has been added to your client list`
-        })
-      } else {
-        throw new Error(result.error || 'Failed to create client')
+      // Transform to UI format
+      const uiClient = {
+        id: createdClient.id,
+        name: createdClient.name,
+        email: createdClient.email,
+        phone: createdClient.phone || '',
+        company: createdClient.company || '',
+        position: createdClient.position || '',
+        status: createdClient.status,
+        avatar: '',
+        totalRevenue: 0,
+        projectCount: 0,
+        lastContact: new Date().toISOString(),
+        tags: [],
+        notes: createdClient.notes || '',
+        industry: '',
+        location: '',
+        healthScore: 50,
+        priority: 'medium',
+        source: 'database',
+        createdAt: createdClient.created_at,
+        updatedAt: createdClient.updated_at
       }
+
+      logger.info('Client created successfully in Supabase', {
+        clientId: createdClient.id,
+        name: createdClient.name
+      })
+
+      dispatch({ type: 'ADD_CLIENT', client: uiClient })
+      setIsAddClientModalOpen(false)
+      setFormData({})
+
+      toast.success('✅ Client added', {
+        description: `${createdClient.name} has been added to your client list`
+      })
+      announce(`Client ${createdClient.name} added successfully`, 'polite')
     } catch (error: any) {
-      logger.error('Failed to add client', { error, name: formData.name })
+      logger.error('Failed to add client', { error, name: formData.name, userId })
       toast.error('Failed to add client', {
         description: error.message || 'Please try again later'
       })
+      announce('Error adding client', 'assertive')
     } finally {
       setIsSaving(false)
     }
