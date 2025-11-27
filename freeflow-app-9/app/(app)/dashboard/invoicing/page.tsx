@@ -47,16 +47,64 @@ export default function InvoicingPage() {
   // A+++ LOAD INVOICING DATA
   useEffect(() => {
     const loadInvoicingData = async () => {
+      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
       try {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        // Dynamic import for code splitting
+        const { getInvoices, getBillingStats } = await import('@/lib/invoicing-queries')
+
+        // Load invoices and stats in parallel
+        const [invoicesResult, statsResult] = await Promise.all([
+          getInvoices(userId),
+          getBillingStats(userId)
+        ])
+
+        if (invoicesResult.error || statsResult.error) {
+          throw new Error('Failed to load invoicing data')
+        }
+
+        // Update state with real data if available, otherwise use mock data
+        if (invoicesResult.data.length > 0) {
+          setSelectedInvoices(invoicesResult.data.map(inv => ({
+            id: inv.id,
+            invoiceNumber: inv.invoice_number,
+            status: inv.status as any,
+            clientId: inv.client_id || '',
+            clientName: inv.client_name,
+            clientEmail: inv.client_email,
+            clientAddress: inv.client_address as any,
+            items: inv.items as any,
+            subtotal: inv.subtotal,
+            taxRate: inv.tax_rate,
+            taxAmount: inv.tax_amount,
+            discount: inv.discount,
+            total: inv.total,
+            currency: inv.currency as any,
+            dueDate: new Date(inv.due_date),
+            issueDate: new Date(inv.issue_date),
+            paidDate: inv.paid_date ? new Date(inv.paid_date) : undefined,
+            notes: inv.notes,
+            terms: inv.terms,
+            createdBy: inv.created_by || 'Unknown',
+            createdAt: new Date(inv.created_at),
+            updatedAt: new Date(inv.updated_at),
+            sentAt: inv.sent_at ? new Date(inv.sent_at) : undefined,
+            viewedAt: inv.viewed_at ? new Date(inv.viewed_at) : undefined,
+            paymentMethod: inv.payment_method as any,
+            paymentDetails: undefined,
+            recurringConfig: inv.is_recurring ? inv.recurring_config as any : undefined,
+            metadata: {
+              remindersSent: inv.reminders_sent,
+              lastReminderDate: inv.last_reminder_at ? new Date(inv.last_reminder_at) : undefined,
+              autoPayEnabled: false,
+              latePaymentFee: 0,
+              earlyPaymentDiscount: 0
+            }
+          })))
+        }
 
         setIsLoading(false)
         announce('Invoicing dashboard loaded successfully', 'polite')
@@ -68,7 +116,7 @@ export default function InvoicingPage() {
     }
 
     loadInvoicingData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [announce])
 
   const viewModes = [
     { id: 'overview', label: 'Overview', icon: '📊' },
