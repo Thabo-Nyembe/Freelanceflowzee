@@ -62,28 +62,22 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { createClient } from "@/lib/supabase/client";
+import {
+  getCollaborationAnalytics,
+  getTeamMemberStats,
+  getCollaborationStats,
+  exportCollaborationReport,
+  type CollaborationAnalyticsData,
+  type TeamMemberStats as TeamMemberStatsType,
+  type CollaborationStats as CollaborationStatsType,
+} from "@/lib/collaboration-analytics-queries";
 
 const logger = createFeatureLogger("CollaborationAnalytics");
 
-interface AnalyticsData {
-  period: string;
-  messages: number;
-  meetings: number;
-  canvasProjects: number;
-  feedback: number;
-  activeUsers: number;
-  engagement: number;
-}
-
-interface TeamMemberStats {
-  id: string;
-  name: string;
-  avatar?: string;
-  messagesCount: number;
-  meetingsAttended: number;
-  projectsCreated: number;
-  engagementScore: number;
-}
+// Use types from collaboration-analytics-queries
+type AnalyticsData = CollaborationAnalyticsData;
+type TeamMemberStats = TeamMemberStatsType;
 
 export default function AnalyticsPage() {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData[]>([]);
@@ -111,132 +105,78 @@ export default function AnalyticsPage() {
   const fetchAnalyticsData = async () => {
     try {
       setLoading(true);
-      logger.info("Fetching analytics data", { dateRange });
+      logger.info("Fetching collaboration analytics", { dateRange });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Get current user
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      const mockData: AnalyticsData[] = [
-        {
-          period: "Mon",
-          messages: 145,
-          meetings: 8,
-          canvasProjects: 5,
-          feedback: 12,
-          activeUsers: 23,
-          engagement: 78,
-        },
-        {
-          period: "Tue",
-          messages: 167,
-          meetings: 12,
-          canvasProjects: 7,
-          feedback: 15,
-          activeUsers: 28,
-          engagement: 82,
-        },
-        {
-          period: "Wed",
-          messages: 198,
-          meetings: 10,
-          canvasProjects: 9,
-          feedback: 18,
-          activeUsers: 31,
-          engagement: 85,
-        },
-        {
-          period: "Thu",
-          messages: 156,
-          meetings: 14,
-          canvasProjects: 6,
-          feedback: 20,
-          activeUsers: 27,
-          engagement: 80,
-        },
-        {
-          period: "Fri",
-          messages: 189,
-          meetings: 11,
-          canvasProjects: 8,
-          feedback: 16,
-          activeUsers: 29,
-          engagement: 83,
-        },
-        {
-          period: "Sat",
-          messages: 98,
-          meetings: 4,
-          canvasProjects: 3,
-          feedback: 8,
-          activeUsers: 15,
-          engagement: 65,
-        },
-        {
-          period: "Sun",
-          messages: 76,
-          meetings: 2,
-          canvasProjects: 2,
-          feedback: 5,
-          activeUsers: 12,
-          engagement: 58,
-        },
-      ];
+      if (!user) {
+        logger.warn("No authenticated user found");
+        toast.error("Please log in to view analytics");
+        return;
+      }
 
-      const mockTeamStats: TeamMemberStats[] = [
-        {
-          id: "1",
-          name: "John Doe",
-          messagesCount: 234,
-          meetingsAttended: 18,
-          projectsCreated: 12,
-          engagementScore: 92,
-        },
-        {
-          id: "2",
-          name: "Sarah Johnson",
-          messagesCount: 198,
-          meetingsAttended: 15,
-          projectsCreated: 9,
-          engagementScore: 88,
-        },
-        {
-          id: "3",
-          name: "Mike Chen",
-          messagesCount: 167,
-          meetingsAttended: 12,
-          projectsCreated: 7,
-          engagementScore: 85,
-        },
-      ];
+      // Fetch real analytics data from Supabase
+      const { data: analyticsData, error: analyticsError } =
+        await getCollaborationAnalytics(
+          user.id,
+          dateRange as "7days" | "30days" | "90days" | "year"
+        );
 
-      setAnalyticsData(mockData);
-      setTeamStats(mockTeamStats);
+      if (analyticsError || !analyticsData) {
+        logger.error("Failed to fetch analytics data", {
+          error: analyticsError,
+        });
+        toast.error("Failed to load analytics");
+        return;
+      }
 
-      const totalMessages = mockData.reduce((sum, d) => sum + d.messages, 0);
-      const totalMeetings = mockData.reduce((sum, d) => sum + d.meetings, 0);
-      const totalProjects = mockData.reduce(
-        (sum, d) => sum + d.canvasProjects,
-        0
-      );
-      const avgEngagement = Math.round(
-        mockData.reduce((sum, d) => sum + d.engagement, 0) / mockData.length
-      );
+      // Fetch team member stats
+      const { data: teamStatsData, error: teamStatsError } =
+        await getTeamMemberStats(
+          user.id,
+          dateRange as "7days" | "30days" | "90days" | "year"
+        );
 
-      setStats({
-        totalMessages,
-        totalMeetings,
-        totalProjects,
-        avgEngagement,
-        messagesChange: 12.5,
-        meetingsChange: 8.3,
-        projectsChange: -2.1,
-        engagementChange: 5.7,
+      if (teamStatsError) {
+        logger.warn("Failed to fetch team stats", { error: teamStatsError });
+      }
+
+      // Fetch collaboration stats summary
+      const { data: statsData, error: statsError } =
+        await getCollaborationStats(
+          user.id,
+          dateRange as "7days" | "30days" | "90days" | "year"
+        );
+
+      if (statsError) {
+        logger.warn("Failed to fetch stats summary", { error: statsError });
+      }
+
+      // Update state with real data
+      setAnalyticsData(analyticsData);
+      setTeamStats(teamStatsData || []);
+
+      if (statsData) {
+        setStats(statsData);
+      }
+
+      logger.info("Collaboration analytics fetched successfully", {
+        analyticsCount: analyticsData.length,
+        teamStatsCount: teamStatsData?.length || 0,
+        totalMessages: statsData?.totalMessages || 0,
       });
 
-      logger.info("Analytics data fetched successfully");
-      toast.success("Analytics loaded");
+      toast.success(
+        `Analytics loaded: ${statsData?.totalMessages || 0} messages, ${
+          statsData?.totalMeetings || 0
+        } meetings`
+      );
     } catch (error) {
-      logger.error("Failed to fetch analytics data", { error });
+      logger.error("Exception in fetchAnalyticsData", { error });
       toast.error("Failed to load analytics");
     } finally {
       setLoading(false);
@@ -245,15 +185,52 @@ export default function AnalyticsPage() {
 
   const handleExportReport = async () => {
     try {
-      logger.info("Exporting analytics report");
+      logger.info("Exporting collaboration analytics report");
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Get current user
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      logger.info("Report exported successfully");
-      toast.success("Analytics report exported");
+      if (!user) {
+        toast.error("Please log in to export report");
+        return;
+      }
+
+      // Generate CSV report from real data
+      const { data: csvData, error } = await exportCollaborationReport(
+        user.id,
+        dateRange as "7days" | "30days" | "90days" | "year",
+        "csv"
+      );
+
+      if (error || !csvData) {
+        logger.error("Failed to generate report", { error });
+        toast.error("Failed to export report");
+        return;
+      }
+
+      // Create downloadable file
+      const blob = new Blob([csvData], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `collaboration-analytics-${dateRange}-${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      logger.info("Report exported successfully", {
+        size: csvData.length,
+        dateRange,
+      });
+      toast.success(`Analytics report exported (${csvData.length} bytes)`);
     } catch (error) {
-      logger.error("Failed to export report", { error });
+      logger.error("Exception in handleExportReport", { error });
       toast.error("Failed to export report");
     }
   };
