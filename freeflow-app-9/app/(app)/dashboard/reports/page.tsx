@@ -418,21 +418,53 @@ export default function ReportsPage() {
   // ============================================================================
 
   useEffect(() => {
-    logger.info('Loading reports and financial data')
-
     const loadData = async () => {
+      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
       try {
         setIsLoading(true)
 
-        // Load reports
-        const response = await fetch('/api/reports')
-        const result = await response.json()
+        logger.info('Loading reports from Supabase', { userId })
 
-        if (result.success && result.reports) {
-          dispatch({ type: 'SET_REPORTS', reports: result.reports })
-          logger.info('Reports loaded successfully', { count: result.reports.length })
+        // Dynamic import for code splitting
+        const { getReports } = await import('@/lib/reports-queries')
+
+        // Load reports from Supabase
+        const { data: reportsData, error: reportsError } = await getReports(userId)
+
+        if (reportsError) {
+          logger.warn('Failed to load reports from Supabase, using mock data', { error: reportsError })
+          const mockReports = generateMockReports()
+          dispatch({ type: 'SET_REPORTS', reports: mockReports })
+        } else if (reportsData.length === 0) {
+          logger.info('No reports found in Supabase, using mock data')
+          const mockReports = generateMockReports()
+          dispatch({ type: 'SET_REPORTS', reports: mockReports })
         } else {
-          throw new Error(result.error || 'Failed to load reports')
+          // Transform database format to UI format
+          const transformedReports: Report[] = reportsData.map(report => ({
+            id: report.id,
+            name: report.name,
+            type: report.type,
+            status: report.status,
+            description: report.description || '',
+            createdAt: report.created_at,
+            updatedAt: report.updated_at,
+            createdBy: report.created_by || 'Unknown',
+            dateRange: {
+              start: report.date_range_start || new Date().toISOString(),
+              end: report.date_range_end || new Date().toISOString()
+            },
+            frequency: report.frequency,
+            nextRun: report.next_run_at,
+            dataPoints: report.data_points,
+            fileSize: report.file_size,
+            recipients: report.recipients,
+            tags: report.tags
+          }))
+
+          dispatch({ type: 'SET_REPORTS', reports: transformedReports })
+          logger.info('Reports loaded successfully from Supabase', { count: transformedReports.length })
         }
 
         // Load financial analytics (using mock data for now)
@@ -445,16 +477,25 @@ export default function ReportsPage() {
         })
 
         announce('Reports and financial analytics loaded', 'polite')
+        toast.success('Reports loaded', {
+          description: `${reportsData.length} reports loaded from database`
+        })
       } catch (error) {
-        logger.error('Failed to load data', { error })
-        toast.error('Failed to load dashboard data')
+        logger.error('Failed to load data', { error, userId })
+        toast.error('Failed to load dashboard data', {
+          description: error instanceof Error ? error.message : 'Unknown error occurred'
+        })
+
+        // Fallback to mock data on error
+        const mockReports = generateMockReports()
+        dispatch({ type: 'SET_REPORTS', reports: mockReports })
       } finally {
         setIsLoading(false)
       }
     }
 
     loadData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [announce])
 
   // ============================================================================
   // COMPUTED VALUES
@@ -533,40 +574,65 @@ export default function ReportsPage() {
       return
     }
 
+    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
     logger.info('Creating new report', {
       name: reportForm.name,
       type: reportForm.type,
       description: reportForm.description,
-      frequency: reportForm.frequency
+      frequency: reportForm.frequency,
+      userId
     })
 
     try {
       setIsSaving(true)
 
-      const response = await fetch('/api/reports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'create',
-          data: {
-            name: reportForm.name,
-            type: reportForm.type,
-            description: reportForm.description,
-            frequency: reportForm.frequency
-          }
-        })
+      // Dynamic import for code splitting
+      const { createReport } = await import('@/lib/reports-queries')
+
+      // Create report in Supabase
+      const { data: newReport, error } = await createReport(userId, {
+        name: reportForm.name,
+        type: reportForm.type,
+        description: reportForm.description,
+        frequency: reportForm.frequency,
+        status: 'draft',
+        created_by: 'Demo User', // TODO: Replace with real user name
       })
 
-      const result = await response.json()
-      logger.debug('Create API response received', { success: result.success })
+      if (error) {
+        throw new Error(error.message || 'Failed to create report')
+      }
 
-      if (result.success) {
-        dispatch({ type: 'ADD_REPORT', report: result.report })
+      if (newReport) {
+        // Transform database format to UI format
+        const transformedReport: Report = {
+          id: newReport.id,
+          name: newReport.name,
+          type: newReport.type,
+          status: newReport.status,
+          description: newReport.description || '',
+          createdAt: newReport.created_at,
+          updatedAt: newReport.updated_at,
+          createdBy: newReport.created_by || 'Unknown',
+          dateRange: {
+            start: newReport.date_range_start || new Date().toISOString(),
+            end: newReport.date_range_end || new Date().toISOString()
+          },
+          frequency: newReport.frequency,
+          nextRun: newReport.next_run_at,
+          dataPoints: newReport.data_points,
+          fileSize: newReport.file_size,
+          recipients: newReport.recipients,
+          tags: newReport.tags
+        }
+
+        dispatch({ type: 'ADD_REPORT', report: transformedReport })
 
         logger.info('Report created successfully', {
-          reportId: result.report.id,
-          name: result.report.name,
-          type: result.report.type
+          reportId: newReport.id,
+          name: newReport.name,
+          type: newReport.type
         })
 
         toast.success('Report created successfully', {
@@ -574,14 +640,14 @@ export default function ReportsPage() {
         })
         setIsCreateModalOpen(false)
         setReportForm({ name: '', type: 'analytics', description: '', frequency: 'once' })
-      } else {
-        throw new Error(result.error || 'Failed to create report')
+        announce(`Report ${reportForm.name} created successfully`, 'polite')
       }
     } catch (error: any) {
-      logger.error('Failed to create report', { error: error instanceof Error ? error.message : String(error) })
+      logger.error('Failed to create report', { error: error instanceof Error ? error.message : String(error), userId })
       toast.error('Failed to create report', {
         description: error.message || 'Please try again later'
       })
+      announce('Failed to create report', 'assertive')
     } finally {
       setIsSaving(false)
     }
@@ -658,29 +724,29 @@ export default function ReportsPage() {
   }
 
   const handleDeleteReport = async (reportId: string) => {
+    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
     const report = state.reports.find(r => r.id === reportId)
 
     logger.info('Deleting report', {
       reportId,
       name: report?.name,
       type: report?.type,
-      status: report?.status
+      status: report?.status,
+      userId
     })
 
     try {
-      const response = await fetch('/api/reports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'delete',
-          reportId
-        })
-      })
+      // Dynamic import for code splitting
+      const { deleteReport } = await import('@/lib/reports-queries')
 
-      const result = await response.json()
-      logger.debug('Delete API response received', { success: result.success })
+      // Delete report from Supabase
+      const { success, error } = await deleteReport(reportId, userId)
 
-      if (result.success) {
+      if (error) {
+        throw new Error(error.message || 'Failed to delete report')
+      }
+
+      if (success) {
         dispatch({ type: 'DELETE_REPORT', reportId })
 
         logger.info('Report deleted successfully', {
@@ -693,9 +759,10 @@ export default function ReportsPage() {
           description: `${report?.name} - ${report?.type} report - Removed from dashboard`
         })
         setIsDeleteModalOpen(false)
+        announce(`Report ${report?.name} deleted successfully`, 'polite')
 
       } else {
-        throw new Error(result.error || 'Failed to delete report')
+        throw new Error('Failed to delete report')
       }
     } catch (error: any) {
       logger.error('Failed to delete report', { error: error instanceof Error ? error.message : String(error) })
