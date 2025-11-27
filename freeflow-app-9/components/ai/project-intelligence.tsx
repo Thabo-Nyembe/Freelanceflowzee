@@ -19,6 +19,11 @@ import {
   Loader2
 } from 'lucide-react'
 import { analyzeProjectIntelligence } from '@/lib/ai/business-intelligence'
+import { createClient } from '@/lib/supabase/client'
+import {
+  createProjectAnalysis,
+  bulkCreateInsights
+} from '@/lib/ai-business-queries'
 
 export function ProjectIntelligence() {
   const [loading, setLoading] = useState(false)
@@ -41,6 +46,17 @@ export function ProjectIntelligence() {
     setLoading(true)
 
     try {
+      // Get authenticated user
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        toast.error('Please log in to use AI Business Advisor')
+        setLoading(false)
+        return
+      }
+
+      // Run AI analysis
       const result = await analyzeProjectIntelligence({
         id: `project-${Date.now()}`,
         name: projectData.name,
@@ -50,10 +66,43 @@ export function ProjectIntelligence() {
         scope: projectData.scope
       })
 
+      // Save analysis to Supabase
+      const { data: analysis, error: analysisError } = await createProjectAnalysis(user.id, {
+        project_name: projectData.name,
+        budget: parseFloat(projectData.budget),
+        timeline: parseInt(projectData.timeline),
+        client_type: projectData.clientType,
+        scope: projectData.scope,
+        profitability_score: result.profitabilityScore,
+        risk_score: result.riskScore,
+        estimated_profit: result.estimatedProfit,
+        estimated_margin: result.estimatedMargin,
+        recommendations: result.recommendations
+      })
+
+      if (analysisError || !analysis) {
+        throw new Error('Failed to save analysis')
+      }
+
+      // Save insights to Supabase
+      if (result.insights && result.insights.length > 0) {
+        const insightsToSave = result.insights.map((insight: any) => ({
+          analysis_id: analysis.id,
+          category: insight.category,
+          title: insight.title,
+          description: insight.description,
+          impact: insight.impact,
+          is_actionable: insight.actionable,
+          recommendation: insight.recommendation
+        }))
+
+        await bulkCreateInsights(insightsToSave)
+      }
+
       setInsights(result)
 
       toast.success('Analysis complete', {
-        description: `Profitability score: ${result.profitabilityScore}/100`
+        description: `Profitability: ${result.profitabilityScore}/100 • Risk: ${result.riskScore}/100 • Saved to database`
       })
     } catch (error) {
       toast.error('Analysis failed', {
