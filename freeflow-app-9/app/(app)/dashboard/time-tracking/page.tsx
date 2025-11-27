@@ -81,20 +81,82 @@ export default function TimeTrackingPage() {
   // A+++ LOAD TIME TRACKING DATA
   useEffect(() => {
     const loadTimeTrackingData = async () => {
+      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
       try {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        logger.info('Loading time tracking data from Supabase', { userId })
+
+        // Dynamic import for code splitting
+        const {
+          getTimeEntries,
+          getRunningTimeEntry,
+          getTimeTrackingSummary
+        } = await import('@/lib/time-tracking-queries')
+
+        // Load current running timer and recent entries in parallel
+        const [runningResult, entriesResult, summaryResult] = await Promise.all([
+          getRunningTimeEntry(userId),
+          getTimeEntries(userId, {
+            startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // Last 7 days
+          }),
+          getTimeTrackingSummary(userId)
+        ])
+
+        if (runningResult.error || entriesResult.error || summaryResult.error) {
+          throw new Error('Failed to load time tracking data')
+        }
+
+        // Set running timer if exists
+        if (runningResult.data) {
+          const runningEntry = runningResult.data
+          const startTime = new Date(runningEntry.start_time)
+          const elapsed = Math.floor((Date.now() - startTime.getTime()) / 1000) + runningEntry.duration
+
+          setActiveTimer({
+            id: runningEntry.id,
+            projectId: runningEntry.project_id || '',
+            taskId: runningEntry.task_id || '',
+            description: runningEntry.description,
+            startTime: startTime,
+            duration: runningEntry.duration,
+            isRunning: true
+          })
+          setElapsedTime(elapsed)
+
+          logger.info('Running timer restored', {
+            entryId: runningEntry.id,
+            elapsed: elapsed
+          })
+        }
+
+        // Transform and set time entries
+        if (entriesResult.data.length > 0) {
+          const transformedEntries = entriesResult.data.map(entry => ({
+            id: entry.id,
+            projectId: entry.project_id || '',
+            taskId: entry.task_id || '',
+            description: entry.description,
+            startTime: new Date(entry.start_time),
+            endTime: entry.end_time ? new Date(entry.end_time) : undefined,
+            duration: entry.duration,
+            isRunning: entry.status === 'running'
+          }))
+
+          setTimeEntries(transformedEntries)
+
+          logger.info('Time entries loaded', {
+            count: transformedEntries.length,
+            totalHours: summaryResult.data?.total_hours || 0
+          })
+        }
 
         setIsLoading(false)
-        announce('Time tracking dashboard loaded successfully', 'polite')
+        announce(`Time tracking dashboard loaded with ${entriesResult.data.length} entries`, 'polite')
       } catch (err) {
+        logger.error('Failed to load time tracking data', { error: err })
         setError(err instanceof Error ? err.message : 'Failed to load time tracking data')
         setIsLoading(false)
         announce('Error loading time tracking dashboard', 'assertive')
@@ -123,41 +185,112 @@ export default function TimeTrackingPage() {
       .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  const startTimer = () => {
+  const startTimer = async () => {
     if (!selectedProject || !selectedTask) return
 
-    const newEntry: TimeEntry = {
-      id: Date.now().toString(),
-      projectId: selectedProject,
-      taskId: selectedTask,
-      description,
-      startTime: new Date(),
-      duration: 0,
-      isRunning: true,
-    }
+    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+    const projectObj = projects.find(p => p.id === selectedProject)
+    const taskObj = projectObj?.tasks.find(t => t.id === selectedTask)
 
-    setActiveTimer(newEntry)
-    setTimeEntries((prev) => [...prev, newEntry])
-    setElapsedTime(0)
+    try {
+      logger.info('Starting timer', {
+        projectId: selectedProject,
+        taskId: selectedTask,
+        description
+      })
+
+      // Dynamic import for code splitting
+      const { createTimeEntry } = await import('@/lib/time-tracking-queries')
+
+      const { data, error } = await createTimeEntry(userId, {
+        project_id: selectedProject,
+        project_name: projectObj?.name || 'Unknown Project',
+        task_id: selectedTask,
+        task_name: taskObj?.name || 'Unknown Task',
+        description: description || 'Working on task',
+        is_billable: true,
+        hourly_rate: 0,
+        tags: []
+      })
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to start timer')
+      }
+
+      const newEntry: TimeEntry = {
+        id: data.id,
+        projectId: selectedProject,
+        taskId: selectedTask,
+        description: description || 'Working on task',
+        startTime: new Date(data.start_time),
+        duration: 0,
+        isRunning: true,
+      }
+
+      setActiveTimer(newEntry)
+      setTimeEntries((prev) => [newEntry, ...prev])
+      setElapsedTime(0)
+
+      logger.info('Timer started successfully', { entryId: data.id })
+      toast.success('Timer Started', {
+        description: `Tracking time for ${projectObj?.name} - ${taskObj?.name}`
+      })
+    } catch (error) {
+      logger.error('Failed to start timer', { error })
+      toast.error('Failed to Start Timer', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }
 
-  const stopTimer = () => {
+  const stopTimer = async () => {
     if (!activeTimer) return
 
-    const endedEntry = {
-      ...activeTimer,
-      endTime: new Date(),
-      duration: elapsedTime,
-      isRunning: false,
-    }
+    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
 
-    setTimeEntries((prev) =>
-      prev.map((entry) =>
-        entry.id === activeTimer.id ? endedEntry : entry
+    try {
+      logger.info('Stopping timer', { entryId: activeTimer.id, duration: elapsedTime })
+
+      // Dynamic import for code splitting
+      const { stopTimeEntry } = await import('@/lib/time-tracking-queries')
+
+      const { data, error } = await stopTimeEntry(activeTimer.id, userId)
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to stop timer')
+      }
+
+      const endedEntry = {
+        ...activeTimer,
+        endTime: new Date(data.end_time!),
+        duration: data.duration,
+        isRunning: false,
+      }
+
+      setTimeEntries((prev) =>
+        prev.map((entry) =>
+          entry.id === activeTimer.id ? endedEntry : entry
+        )
       )
-    )
-    setActiveTimer(null)
-    setElapsedTime(0)
+      setActiveTimer(null)
+      setElapsedTime(0)
+
+      const hours = (data.duration / 3600).toFixed(2)
+      logger.info('Timer stopped successfully', {
+        entryId: data.id,
+        duration: data.duration,
+        hours
+      })
+
+      toast.success('Timer Stopped', {
+        description: `Tracked ${hours} hours${data.is_billable ? ` • $${data.total_amount.toFixed(2)}` : ''}`
+      })
+    } catch (error) {
+      logger.error('Failed to stop timer', { error })
+      toast.error('Failed to Stop Timer', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }
 
   const handleEditEntry = (entry: TimeEntry) => {
@@ -182,17 +315,35 @@ export default function TimeTrackingPage() {
     }
   }
 
-  const handleDeleteEntry = (entryId: string) => {
+  const handleDeleteEntry = async (entryId: string) => {
+    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
     logger.info('Delete entry initiated', { entryId })
     if (confirm('⚠️ Delete Time Entry?\n\nThis action cannot be undone.\n\nAre you sure?')) {
-      setTimeEntries((prev) => prev.filter((e) => e.id !== entryId))
-      logger.info('Entry deleted successfully', {
-        entryId,
-        remainingEntries: timeEntries.length - 1
-      })
-      toast.success('Entry Deleted', {
-        description: 'Time entry has been permanently removed from your records'
-      })
+      try {
+        // Dynamic import for code splitting
+        const { deleteTimeEntry } = await import('@/lib/time-tracking-queries')
+
+        const { success, error } = await deleteTimeEntry(entryId, userId)
+
+        if (error || !success) {
+          throw new Error(error?.message || 'Failed to delete entry')
+        }
+
+        setTimeEntries((prev) => prev.filter((e) => e.id !== entryId))
+        logger.info('Entry deleted successfully', {
+          entryId,
+          remainingEntries: timeEntries.length - 1
+        })
+        toast.success('Entry Deleted', {
+          description: 'Time entry has been permanently removed from your records'
+        })
+      } catch (error) {
+        logger.error('Failed to delete entry', { error, entryId })
+        toast.error('Failed to Delete Entry', {
+          description: error instanceof Error ? error.message : 'Please try again'
+        })
+      }
     }
   }
 
