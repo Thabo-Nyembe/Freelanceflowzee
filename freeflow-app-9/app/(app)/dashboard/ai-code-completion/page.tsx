@@ -16,6 +16,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 
+// SUPABASE & QUERIES
+import { createClient } from '@/lib/supabase/client'
+import {
+  getCodeCompletions,
+  getCodeSnippets,
+  createCodeCompletion,
+  createCodeSnippet,
+  getAICodeStats,
+  getCompletionStats,
+  getCodeQualityTrend,
+  type CodeCompletion as DBCompletion,
+  type CodeSnippet as DBSnippet,
+  type ProgrammingLanguage
+} from '@/lib/ai-code-queries'
+
 const logger = createFeatureLogger('AICodeCompletion')
 
 const PROGRAMMING_LANGUAGES = [
@@ -134,6 +149,64 @@ export default function AICodeCompletionPage() {
   const [snippets, setSnippets] = useState<CodeSnippet[]>([])
   const [versionHistory, setVersionHistory] = useState<CodeVersion[]>([])
   const [originalCode, setOriginalCode] = useState('')
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Load data from Supabase
+  useEffect(() => {
+    const loadAICodeData = async () => {
+      try {
+        setIsLoading(true)
+        logger.info('Loading AI Code Completion data from Supabase')
+
+        const supabase = createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+          logger.warn('No authenticated user found')
+          toast.error('Please log in to use AI Code Completion')
+          setIsLoading(false)
+          return
+        }
+
+        // Load completions, snippets, and stats
+        const [completionsResult, snippetsResult, statsResult] = await Promise.all([
+          getCodeCompletions(user.id, { language: selectedLanguage as ProgrammingLanguage }),
+          getCodeSnippets(user.id, { language: selectedLanguage as ProgrammingLanguage }),
+          getAICodeStats(user.id)
+        ])
+
+        // Transform DB snippets to UI format
+        if (snippetsResult.data) {
+          const uiSnippets: CodeSnippet[] = snippetsResult.data.map(s => ({
+            id: s.id,
+            name: s.name,
+            code: s.code,
+            language: s.language,
+            createdAt: s.created_at
+          }))
+          setSnippets(uiSnippets)
+        }
+
+        logger.info('AI Code data loaded', {
+          completions: completionsResult.data?.length || 0,
+          snippets: snippetsResult.data?.length || 0
+        })
+
+        toast.success('AI Code Completion loaded', {
+          description: `${completionsResult.data?.length || 0} completions • ${snippetsResult.data?.length || 0} snippets`
+        })
+
+        setIsLoading(false)
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load AI Code data'
+        logger.error('Exception loading AI Code data', { error: errorMessage })
+        setIsLoading(false)
+        toast.error('Failed to load AI Code Completion')
+      }
+    }
+
+    loadAICodeData()
+  }, [selectedLanguage])
 
   const handleComplete = useCallback(() => {
     setIsCompleting(true)
