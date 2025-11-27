@@ -56,6 +56,42 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 
+// SUPABASE INTEGRATION
+import { createClient } from '@/lib/supabase/client'
+import {
+  getMembers,
+  getMemberByUserId,
+  createMember,
+  updateMember,
+  getPosts,
+  createPost,
+  updatePost,
+  deletePost,
+  togglePostLike,
+  getComments,
+  addComment,
+  deleteComment,
+  getGroups,
+  createGroup,
+  joinGroup,
+  leaveGroup,
+  getEvents,
+  createEvent,
+  rsvpEvent,
+  sendConnectionRequest,
+  acceptConnectionRequest,
+  getConnections,
+  getCommunityStats,
+  type CommunityMember as DBMember,
+  type CommunityPost as DBPost,
+  type CommunityGroup as DBGroup,
+  type CommunityEvent as DBEvent,
+  type PostType,
+  type PostVisibility,
+  type MemberCategory,
+  type MemberAvailability,
+} from '@/lib/community-hub-queries'
+
 const logger = createFeatureLogger('Community-Hub')
 
 interface CommunityMember {
@@ -1609,18 +1645,270 @@ export default function CommunityHubPage() {
 
   useEffect(() => {
     const loadData = async () => {
-      dispatch({ type: 'SET_LOADING', payload: true })
-      
-      setTimeout(() => {
+      try {
+        dispatch({ type: 'SET_LOADING', payload: true })
+        logger.info('Loading Community Hub data from Supabase')
+
+        // Get authenticated user
+        const supabase = createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+          logger.warn('No authenticated user found')
+          toast.error('Please log in to view community')
+          dispatch({ type: 'SET_LOADING', payload: false })
+          return
+        }
+
+        // Fetch all community data in parallel
+        const [membersResult, postsResult, eventsResult, groupsResult, statsResult, currentMemberResult] = await Promise.all([
+          getMembers({}),
+          getPosts({}),
+          getEvents({ upcoming: true }),
+          getGroups({}),
+          getCommunityStats(),
+          getMemberByUserId(user.id)
+        ])
+
+        // Transform members data from Supabase to UI format
+        const transformedMembers = (membersResult.data || []).map((m) => ({
+          id: m.id,
+          name: m.name,
+          avatar: m.avatar,
+          title: m.title,
+          location: m.location,
+          skills: m.skills,
+          rating: Number(m.rating),
+          isOnline: m.is_online,
+          bio: m.bio || '',
+          joinDate: new Date(m.created_at).toISOString().split('T')[0],
+          totalProjects: m.total_projects,
+          totalEarnings: Number(m.total_earnings),
+          completionRate: m.completion_rate,
+          responseTime: m.response_time || 'N/A',
+          languages: m.languages,
+          certifications: m.certifications,
+          portfolioUrl: m.portfolio_url,
+          socialLinks: {},
+          isConnected: m.is_connected,
+          isPremium: m.is_premium,
+          isVerified: m.is_verified,
+          isFollowing: m.is_following,
+          followers: m.followers,
+          following: m.following,
+          posts: m.posts_count,
+          category: m.category as 'freelancer' | 'client' | 'agency' | 'student',
+          availability: m.availability as 'available' | 'busy' | 'away' | 'offline',
+          hourlyRate: m.hourly_rate ? Number(m.hourly_rate) : undefined,
+          currency: m.currency,
+          timezone: m.timezone,
+          lastSeen: m.last_seen,
+          badges: m.badges,
+          achievements: m.achievements,
+          endorsements: m.endorsements,
+          testimonials: m.testimonials,
+          projects: [],
+          tags: []
+        }))
+
+        // Transform posts data
+        const transformedPosts = (postsResult.data || []).map((p) => ({
+          id: p.id,
+          authorId: p.author_id,
+          content: p.content,
+          type: p.type as 'text' | 'image' | 'video' | 'link' | 'poll' | 'event' | 'job' | 'showcase',
+          media: [],
+          showcase: undefined,
+          poll: undefined,
+          job: undefined,
+          event: undefined,
+          createdAt: p.created_at,
+          updatedAt: p.updated_at,
+          likes: p.likes_count,
+          comments: p.comments_count,
+          shares: p.shares_count,
+          bookmarks: p.bookmarks_count,
+          views: p.views_count,
+          isLiked: false,
+          isBookmarked: false,
+          isShared: false,
+          visibility: p.visibility as 'public' | 'connections' | 'private',
+          tags: p.tags,
+          location: '',
+          mentions: p.mentions,
+          hashtags: p.hashtags,
+          isPromoted: p.is_promoted,
+          isPinned: p.is_pinned,
+          isEdited: p.is_edited,
+          editHistory: [],
+          reports: 0,
+          isReported: false,
+          isHidden: false,
+          isArchived: false,
+          engagement: {
+            impressions: p.views_count,
+            clicks: 0,
+            shares: p.shares_count,
+            saves: p.bookmarks_count,
+            comments: p.comments_count,
+            likes: p.likes_count
+          }
+        }))
+
+        // Transform events data
+        const transformedEvents = (eventsResult.data || []).map((e) => ({
+          id: e.id,
+          organizerId: e.organizer_id,
+          title: e.title,
+          description: e.description,
+          category: e.category,
+          type: e.type as 'online' | 'offline' | 'hybrid',
+          date: e.event_date,
+          endDate: e.end_date,
+          location: e.location,
+          maxAttendees: e.max_attendees,
+          price: Number(e.price),
+          currency: e.currency,
+          tags: e.tags,
+          attendees: e.attendee_count,
+          interested: e.interested_count,
+          views: e.views_count,
+          shares: e.shares_count,
+          isAttending: false,
+          isInterested: false,
+          isOrganizer: e.organizer_id === (currentMemberResult.data?.id || ''),
+          isFeatured: false,
+          isPast: new Date(e.event_date) < new Date(),
+          isLive: false,
+          visibility: 'public' as const,
+          media: [],
+          agenda: [],
+          speakers: [],
+          sponsors: [],
+          faqs: [],
+          createdAt: e.created_at,
+          updatedAt: e.updated_at
+        }))
+
+        // Transform groups data
+        const transformedGroups = (groupsResult.data || []).map((g) => ({
+          id: g.id,
+          name: g.name,
+          description: g.description,
+          avatar: g.avatar,
+          coverImage: g.cover_image,
+          category: g.category,
+          type: g.type as 'public' | 'private' | 'secret',
+          members: g.member_count,
+          admins: g.admin_count,
+          posts: g.posts_count,
+          isVerified: g.is_verified,
+          isPremium: g.is_premium,
+          rating: Number(g.rating),
+          tags: g.tags,
+          createdAt: g.created_at,
+          updatedAt: g.updated_at,
+          rules: [],
+          isJoined: false,
+          isPending: false,
+          isInvited: false,
+          activeMembers: g.member_count,
+          weeklyActivity: 0,
+          monthlyActivity: 0,
+          growthRate: 0,
+          engagement: 0,
+          reviews: 0,
+          isFeatured: false,
+          isArchived: false,
+          settings: {
+            allowPosts: true,
+            allowMedia: true,
+            allowPolls: true,
+            allowEvents: true,
+            allowJobs: true,
+            requireApproval: false,
+            moderateContent: true,
+            allowInvites: true,
+            visibility: 'public' as const
+          }
+        }))
+
+        // Set current user (or fall back to mock if no member profile exists)
+        const currentUser = currentMemberResult.data ? {
+          id: currentMemberResult.data.id,
+          name: currentMemberResult.data.name,
+          avatar: currentMemberResult.data.avatar,
+          title: currentMemberResult.data.title,
+          location: currentMemberResult.data.location,
+          skills: currentMemberResult.data.skills,
+          rating: Number(currentMemberResult.data.rating),
+          isOnline: currentMemberResult.data.is_online,
+          bio: currentMemberResult.data.bio || '',
+          joinDate: new Date(currentMemberResult.data.created_at).toISOString().split('T')[0],
+          totalProjects: currentMemberResult.data.total_projects,
+          totalEarnings: Number(currentMemberResult.data.total_earnings),
+          completionRate: currentMemberResult.data.completion_rate,
+          responseTime: currentMemberResult.data.response_time || 'N/A',
+          languages: currentMemberResult.data.languages,
+          certifications: currentMemberResult.data.certifications,
+          portfolioUrl: currentMemberResult.data.portfolio_url,
+          socialLinks: {},
+          isConnected: false,
+          isPremium: currentMemberResult.data.is_premium,
+          isVerified: currentMemberResult.data.is_verified,
+          isFollowing: false,
+          followers: currentMemberResult.data.followers,
+          following: currentMemberResult.data.following,
+          posts: currentMemberResult.data.posts_count,
+          category: currentMemberResult.data.category as 'freelancer' | 'client' | 'agency' | 'student',
+          availability: currentMemberResult.data.availability as 'available' | 'busy' | 'away' | 'offline',
+          hourlyRate: currentMemberResult.data.hourly_rate ? Number(currentMemberResult.data.hourly_rate) : undefined,
+          currency: currentMemberResult.data.currency,
+          timezone: currentMemberResult.data.timezone,
+          lastSeen: currentMemberResult.data.last_seen,
+          badges: currentMemberResult.data.badges,
+          achievements: currentMemberResult.data.achievements,
+          endorsements: currentMemberResult.data.endorsements,
+          testimonials: currentMemberResult.data.testimonials,
+          projects: [],
+          tags: []
+        } : (transformedMembers.length > 0 ? transformedMembers[0] : memoizedMockMembers[0])
+
+        // Dispatch all data to reducer
+        dispatch({ type: 'SET_MEMBERS', payload: transformedMembers.length > 0 ? transformedMembers : memoizedMockMembers })
+        dispatch({ type: 'SET_POSTS', payload: transformedPosts.length > 0 ? transformedPosts : memoizedMockPosts })
+        dispatch({ type: 'SET_EVENTS', payload: transformedEvents.length > 0 ? transformedEvents : memoizedMockEvents })
+        dispatch({ type: 'SET_GROUPS', payload: transformedGroups.length > 0 ? transformedGroups : memoizedMockGroups })
+        dispatch({ type: 'SET_CURRENT_USER', payload: currentUser })
+        dispatch({ type: 'SET_LOADING', payload: false })
+
+        logger.info('Community Hub data loaded successfully', {
+          members: transformedMembers.length,
+          posts: transformedPosts.length,
+          events: transformedEvents.length,
+          groups: transformedGroups.length,
+          stats: statsResult.data
+        })
+
+        if (transformedMembers.length > 0 || transformedPosts.length > 0 || transformedEvents.length > 0 || transformedGroups.length > 0) {
+          toast.success('Community Hub loaded', {
+            description: `${transformedMembers.length} members • ${transformedPosts.length} posts • ${transformedEvents.length} events • ${transformedGroups.length} groups`
+          })
+        }
+      } catch (error: any) {
+        logger.error('Exception loading Community Hub data', { error: error.message })
+        toast.error('Failed to load community data')
+
+        // Fall back to mock data on error
         dispatch({ type: 'SET_MEMBERS', payload: memoizedMockMembers })
         dispatch({ type: 'SET_POSTS', payload: memoizedMockPosts })
         dispatch({ type: 'SET_EVENTS', payload: memoizedMockEvents })
         dispatch({ type: 'SET_GROUPS', payload: memoizedMockGroups })
         dispatch({ type: 'SET_CURRENT_USER', payload: memoizedMockMembers[0] })
         dispatch({ type: 'SET_LOADING', payload: false })
-      }, 1000)
+      }
     }
-    
+
     loadData()
   }, [memoizedMockMembers, memoizedMockPosts, memoizedMockEvents, memoizedMockGroups])
 
