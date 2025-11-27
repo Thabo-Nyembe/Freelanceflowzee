@@ -74,6 +74,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { createClient } from "@/lib/supabase/client";
+import {
+  getMedia,
+  createMedia,
+  updateMedia,
+  deleteMedia,
+  toggleFavorite,
+  shareMedia,
+  incrementViewCount,
+  incrementDownloadCount,
+  getMediaStats,
+  type CollaborationMedia,
+  type MediaType,
+} from "@/lib/collaboration-media-queries";
 
 const logger = createFeatureLogger("CollaborationMedia");
 
@@ -119,96 +133,106 @@ export default function MediaPage() {
   const fetchMediaData = async () => {
     try {
       setLoading(true);
-      logger.info("Fetching media data");
+      logger.info("Fetching media data from Supabase");
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Get current user
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      const mockMedia: MediaItem[] = [
-        {
-          id: "1",
-          name: "Project Banner.png",
-          type: "image",
-          url: "/media/banner.png",
-          thumbnail: "/media/banner-thumb.png",
-          size: "2.4 MB",
-          uploadedBy: "John Doe",
-          uploadedAt: "2024-01-20",
-          tags: ["design", "banner"],
-          isFavorite: true,
-          isShared: true,
-          views: 45,
-          downloads: 12,
-        },
-        {
-          id: "2",
-          name: "Product Demo.mp4",
-          type: "video",
-          url: "/media/demo.mp4",
-          thumbnail: "/media/demo-thumb.png",
-          size: "24.8 MB",
-          duration: "5:32",
-          uploadedBy: "Sarah Johnson",
-          uploadedAt: "2024-01-19",
-          tags: ["video", "demo"],
-          isFavorite: false,
-          isShared: true,
-          views: 128,
-          downloads: 34,
-        },
-        {
-          id: "3",
-          name: "Presentation.pdf",
-          type: "document",
-          url: "/media/presentation.pdf",
-          size: "5.1 MB",
-          uploadedBy: "Mike Chen",
-          uploadedAt: "2024-01-18",
-          tags: ["presentation", "document"],
-          isFavorite: true,
-          isShared: false,
-          views: 67,
-          downloads: 23,
-        },
-        {
-          id: "4",
-          name: "Background Music.mp3",
-          type: "audio",
-          url: "/media/music.mp3",
-          size: "3.2 MB",
-          duration: "3:45",
-          uploadedBy: "Emily Davis",
-          uploadedAt: "2024-01-17",
-          tags: ["audio", "music"],
-          isFavorite: false,
-          isShared: true,
-          views: 89,
-          downloads: 45,
-        },
-      ];
+      if (!user) {
+        logger.warn("No authenticated user found");
+        toast.error("Please log in to view media");
+        setLoading(false);
+        return;
+      }
 
-      setMediaItems(mockMedia);
+      // Fetch real media from Supabase
+      const filters: any = {};
+      if (filterType !== "all") {
+        filters.media_type = filterType as MediaType;
+      }
+      if (searchQuery) {
+        filters.search = searchQuery;
+      }
 
-      const totalSizeMB = mockMedia.reduce((sum, item) => {
-        const size = parseFloat(item.size);
-        return sum + size;
-      }, 0);
+      const { data: mediaData, error: mediaError } = await getMedia(
+        user.id,
+        filters
+      );
 
-      setStats({
-        totalFiles: mockMedia.length,
-        totalSize: Math.round(totalSizeMB),
-        totalViews: mockMedia.reduce((sum, item) => sum + item.views, 0),
-        totalDownloads: mockMedia.reduce((sum, item) => sum + item.downloads, 0),
+      if (mediaError) {
+        logger.error("Failed to fetch media", { error: mediaError });
+        toast.error("Failed to load media");
+        return;
+      }
+
+      // Transform Supabase data to UI format
+      const transformedMedia: MediaItem[] = (mediaData || []).map((media) => ({
+        id: media.id,
+        name: media.name,
+        type: media.media_type,
+        url: media.file_url,
+        thumbnail: media.thumbnail_url,
+        size: formatFileSize(media.file_size),
+        duration: media.duration_seconds
+          ? formatDuration(media.duration_seconds)
+          : undefined,
+        uploadedBy: user.id, // Would need user profile join for name
+        uploadedAt: new Date(media.created_at).toLocaleDateString(),
+        tags: media.tags || [],
+        isFavorite: media.is_favorite,
+        isShared: false, // Would need shares join
+        views: media.view_count,
+        downloads: media.download_count,
+      }));
+
+      setMediaItems(transformedMedia);
+
+      // Fetch stats
+      const { data: statsData, error: statsError } = await getMediaStats(
+        user.id
+      );
+
+      if (!statsError && statsData) {
+        setStats({
+          totalFiles: statsData.total,
+          totalSize: Math.round(statsData.totalSize / (1024 * 1024)), // Convert to MB
+          totalViews: statsData.totalViews,
+          totalDownloads: statsData.totalDownloads,
+        });
+      }
+
+      logger.info("Media data fetched successfully", {
+        count: transformedMedia.length,
+        totalSize: statsData?.totalSize,
       });
 
-      logger.info("Media data fetched successfully");
-      toast.success("Media library loaded");
+      toast.success(
+        `Media library loaded: ${transformedMedia.length} files, ${Math.round(
+          (statsData?.totalSize || 0) / (1024 * 1024)
+        )} MB`
+      );
     } catch (error) {
-      logger.error("Failed to fetch media data", { error });
+      logger.error("Exception in fetchMediaData", { error });
       toast.error("Failed to load media");
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper functions
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const formatDuration = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const handleUploadMedia = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -251,19 +275,31 @@ export default function MediaPage() {
     try {
       logger.info("Downloading media", { mediaId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Increment download count in database
+      await incrementDownloadCount(mediaId);
 
+      // Update UI
       setMediaItems(
         mediaItems.map((m) =>
           m.id === mediaId ? { ...m, downloads: m.downloads + 1 } : m
         )
       );
 
-      logger.info("Media downloaded successfully");
+      // Trigger browser download
+      const media = mediaItems.find((m) => m.id === mediaId);
+      if (media) {
+        const link = document.createElement("a");
+        link.href = media.url;
+        link.download = media.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      logger.info("Media download started", { mediaId });
       toast.success("Download started");
     } catch (error) {
-      logger.error("Failed to download media", { error });
+      logger.error("Exception in handleDownloadMedia", { error });
       toast.error("Failed to download media");
     }
   };
@@ -272,16 +308,49 @@ export default function MediaPage() {
     try {
       logger.info("Toggling favorite", { mediaId });
 
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast.error("Please log in");
+        return;
+      }
+
+      const currentItem = mediaItems.find((m) => m.id === mediaId);
+      if (!currentItem) return;
+
+      const { data, error } = await toggleFavorite(
+        mediaId,
+        user.id,
+        !currentItem.isFavorite
+      );
+
+      if (error) {
+        logger.error("Failed to toggle favorite", { error });
+        toast.error("Failed to update favorite");
+        return;
+      }
+
+      // Update UI
       setMediaItems(
         mediaItems.map((m) =>
           m.id === mediaId ? { ...m, isFavorite: !m.isFavorite } : m
         )
       );
 
-      logger.info("Favorite toggled");
-      toast.success("Favorite updated");
+      logger.info("Favorite toggled successfully", {
+        mediaId,
+        isFavorite: data?.is_favorite,
+      });
+      toast.success(
+        data?.is_favorite
+          ? "Added to favorites"
+          : "Removed from favorites"
+      );
     } catch (error) {
-      logger.error("Failed to toggle favorite", { error });
+      logger.error("Exception in handleToggleFavorite", { error });
       toast.error("Failed to update favorite");
     }
   };
@@ -313,15 +382,37 @@ export default function MediaPage() {
     try {
       logger.info("Deleting media", { mediaId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
+      if (!user) {
+        toast.error("Please log in");
+        return;
+      }
+
+      const { success, error } = await deleteMedia(mediaId, user.id);
+
+      if (error) {
+        logger.error("Failed to delete media", { error });
+        toast.error("Failed to delete media");
+        return;
+      }
+
+      // Update UI
       setMediaItems(mediaItems.filter((m) => m.id !== mediaId));
 
-      logger.info("Media deleted successfully");
+      // Update stats
+      setStats((prev) => ({
+        ...prev,
+        totalFiles: prev.totalFiles - 1,
+      }));
+
+      logger.info("Media deleted successfully", { mediaId });
       toast.success("Media deleted");
     } catch (error) {
-      logger.error("Failed to delete media", { error });
+      logger.error("Exception in handleDeleteMedia", { error });
       toast.error("Failed to delete media");
     }
   };
