@@ -47,7 +47,44 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useKaziAI } from '@/lib/hooks/use-kazi-ai'
 
+// A+++ SUPABASE INTEGRATION
+import { createClient } from '@/lib/supabase/client'
+import {
+  getConversations,
+  getMessages,
+  createConversation,
+  createMessage,
+  rateMessage,
+  getInsights,
+  dismissInsight,
+  implementInsight,
+  getProjectAnalyses,
+  getConversationStats,
+  type AIConversation as DBConversation,
+  type AIMessage as DBMessage,
+  type AIInsight as DBInsight,
+  type ProjectAnalysis as DBProjectAnalysis
+} from '@/lib/ai-assistant-queries'
+
 const logger = createFeatureLogger('AIAssistant')
+
+// Helper function to map insight categories to icons
+function getIconForCategory(category: string): React.ComponentType<{ className?: string }> {
+  switch (category) {
+    case 'productivity':
+      return Clock
+    case 'business':
+      return DollarSign
+    case 'optimization':
+      return TrendingUp
+    case 'opportunity':
+      return Users
+    case 'growth':
+      return Sparkles
+    default:
+      return Lightbulb
+  }
+}
 
 interface Message {
   id: string
@@ -122,24 +159,95 @@ export default function AIAssistantPage() {
       try {
         setIsPageLoading(true)
         setError(null)
+        logger.info('Loading AI Assistant data from Supabase')
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load AI assistant'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Get authenticated user
+        const supabase = createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+          logger.warn('No authenticated user found', { error: authError?.message })
+          toast.error('Please log in to use AI Assistant')
+          setIsPageLoading(false)
+          return
+        }
+
+        // Fetch all AI assistant data in parallel
+        const [conversationsResult, insightsResult, analysesResult, statsResult] = await Promise.all([
+          getConversations(user.id, { status: 'active' }),
+          getInsights(user.id, { status: 'active' }),
+          getProjectAnalyses(user.id),
+          getConversationStats(user.id)
+        ])
+
+        // Transform conversations data
+        if (conversationsResult.data && conversationsResult.data.length > 0) {
+          const transformedConversations: Conversation[] = conversationsResult.data.map((c) => ({
+            id: c.id,
+            title: c.title,
+            preview: c.preview || '',
+            timestamp: new Date(c.last_message_at || c.created_at),
+            tags: c.tags,
+            messageCount: c.message_count
+          }))
+          setConversations(transformedConversations)
+          logger.info('Loaded conversations from Supabase', { count: transformedConversations.length })
+        } else {
+          logger.info('No conversations found, using empty state')
+        }
+
+        // Transform insights data
+        if (insightsResult.data && insightsResult.data.length > 0) {
+          const transformedInsights: AIInsight[] = insightsResult.data.map((i) => ({
+            id: i.id,
+            title: i.title,
+            description: i.description,
+            category: i.category as 'productivity' | 'business' | 'optimization' | 'opportunity',
+            priority: i.priority as 'high' | 'medium' | 'low',
+            action: i.action,
+            icon: getIconForCategory(i.category)
+          }))
+          setAiInsights(transformedInsights)
+          logger.info('Loaded insights from Supabase', { count: transformedInsights.length })
+        }
+
+        // Transform project analyses data
+        if (analysesResult.data && analysesResult.data.length > 0) {
+          const transformedAnalyses: ProjectAnalysis[] = analysesResult.data.map((a) => ({
+            projectName: a.project_name,
+            status: a.status,
+            completion: a.completion,
+            insights: a.insights,
+            recommendations: a.recommendations,
+            nextActions: a.next_actions
+          }))
+          setProjectAnalysis(transformedAnalyses)
+          logger.info('Loaded project analyses from Supabase', { count: transformedAnalyses.length })
+        }
+
+        // Log stats
+        if (statsResult.data) {
+          logger.info('AI Assistant stats', {
+            conversations: statsResult.data.total_conversations,
+            messages: statsResult.data.total_messages,
+            tokens: statsResult.data.total_tokens,
+            avgRating: statsResult.data.avg_rating
+          })
+        }
 
         setIsPageLoading(false)
         announce('AI assistant loaded successfully', 'polite')
+
+        toast.success('AI Assistant loaded', {
+          description: `${conversationsResult.data?.length || 0} conversations • ${insightsResult.data?.length || 0} insights • ${analysesResult.data?.length || 0} analyses`
+        })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load AI assistant')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load AI assistant'
+        logger.error('Exception loading AI Assistant data', { error: errorMessage })
+        setError(errorMessage)
         setIsPageLoading(false)
         announce('Error loading AI assistant', 'assertive')
+        toast.error('Failed to load AI Assistant data')
       }
     }
 
@@ -149,7 +257,7 @@ export default function AIAssistantPage() {
   const [isListening, setIsListening] = useState<boolean>(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const [conversations] = useState<Conversation[]>([
+  const [conversations, setConversations] = useState<Conversation[]>([
     {
       id: '1',
       title: 'Project Optimization Strategy',
@@ -176,7 +284,7 @@ export default function AIAssistantPage() {
     }
   ])
 
-  const [aiInsights] = useState<AIInsight[]>([
+  const [aiInsights, setAiInsights] = useState<AIInsight[]>([
     {
       id: '0',
       title: '🚀 NEW: AI-Powered Growth Engine',
@@ -224,7 +332,7 @@ export default function AIAssistantPage() {
     }
   ])
 
-  const [projectAnalysis] = useState<ProjectAnalysis[]>([
+  const [projectAnalysis, setProjectAnalysis] = useState<ProjectAnalysis[]>([
     {
       projectName: 'E-commerce Redesign',
       status: 'In Progress',
