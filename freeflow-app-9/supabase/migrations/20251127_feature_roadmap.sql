@@ -199,67 +199,77 @@ CREATE INDEX idx_feature_updates_created ON feature_updates(created_at DESC);
 -- TRIGGERS
 CREATE OR REPLACE FUNCTION update_roadmap_vote_count() RETURNS TRIGGER AS $$
 BEGIN
-  IF TG_OP = 'INSERT' THEN
+  IF TG_OP = 'INSERT' AND NEW.roadmap_feature_id IS NOT NULL THEN
     UPDATE roadmap_features
     SET votes_count = votes_count + 1
     WHERE id = NEW.roadmap_feature_id;
-  ELSIF TG_OP = 'DELETE' THEN
+  ELSIF TG_OP = 'DELETE' AND OLD.roadmap_feature_id IS NOT NULL THEN
     UPDATE roadmap_features
     SET votes_count = votes_count - 1
     WHERE id = OLD.roadmap_feature_id;
-  END IF
+  END IF;
 
-;
-  RETURN NEW;
+  IF TG_OP = 'DELETE' THEN
+    RETURN OLD;
+  ELSE
+    RETURN NEW;
+  END IF;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_roadmap_vote_count
 AFTER INSERT OR DELETE ON feature_votes
 FOR EACH ROW
-WHEN (NEW.roadmap_feature_id IS NOT NULL OR OLD.roadmap_feature_id IS NOT NULL)
 EXECUTE FUNCTION update_roadmap_vote_count();
 
 CREATE OR REPLACE FUNCTION update_request_vote_count() RETURNS TRIGGER AS $$
 BEGIN
-  IF TG_OP = 'INSERT' THEN
+  IF TG_OP = 'INSERT' AND NEW.feature_request_id IS NOT NULL THEN
     UPDATE feature_requests
     SET votes_count = votes_count + 1
     WHERE id = NEW.feature_request_id;
-  ELSIF TG_OP = 'DELETE' THEN
+  ELSIF TG_OP = 'DELETE' AND OLD.feature_request_id IS NOT NULL THEN
     UPDATE feature_requests
     SET votes_count = votes_count - 1
     WHERE id = OLD.feature_request_id;
   END IF;
-  RETURN NEW;
+
+  IF TG_OP = 'DELETE' THEN
+    RETURN OLD;
+  ELSE
+    RETURN NEW;
+  END IF;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_request_vote_count
 AFTER INSERT OR DELETE ON feature_votes
 FOR EACH ROW
-WHEN (NEW.feature_request_id IS NOT NULL OR OLD.feature_request_id IS NOT NULL)
 EXECUTE FUNCTION update_request_vote_count();
 
 CREATE OR REPLACE FUNCTION update_subscribers_count() RETURNS TRIGGER AS $$
 BEGIN
-  IF TG_OP = 'INSERT' THEN
+  IF TG_OP = 'INSERT' AND NEW.roadmap_feature_id IS NOT NULL THEN
     UPDATE roadmap_features
     SET subscribers_count = subscribers_count + 1
     WHERE id = NEW.roadmap_feature_id;
-  ELSIF TG_OP = 'DELETE' THEN
+  ELSIF TG_OP = 'DELETE' AND OLD.roadmap_feature_id IS NOT NULL THEN
     UPDATE roadmap_features
     SET subscribers_count = subscribers_count - 1
     WHERE id = OLD.roadmap_feature_id;
   END IF;
-  RETURN NEW;
+
+  IF TG_OP = 'DELETE' THEN
+    RETURN OLD;
+  ELSE
+    RETURN NEW;
+  END IF;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trigger_subscribers_count
 AFTER INSERT OR DELETE ON feature_notifications
 FOR EACH ROW
-WHEN (NEW.roadmap_feature_id IS NOT NULL OR OLD.roadmap_feature_id IS NOT NULL)
 EXECUTE FUNCTION update_subscribers_count();
 
 -- HELPER FUNCTIONS
