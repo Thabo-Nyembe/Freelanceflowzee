@@ -49,6 +49,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { createFeatureLogger } from "@/lib/logger";
 import { NumberFlow } from "@/components/ui/number-flow";
+import { createClient } from "@/lib/supabase/client";
+import {
+  getFolders,
+  getFiles,
+  createFolder as createFolderDB,
+  createFile,
+  updateFolder,
+  updateFile,
+  deleteFolder as deleteFolderDB,
+  deleteFile as deleteFileDB,
+  moveFile,
+  shareFile,
+  getWorkspaceStats,
+  getFolderContents,
+  type WorkspaceFolder,
+  type WorkspaceFile,
+  type FileVisibility,
+} from "@/lib/collaboration-workspace-queries";
 import {
   Select,
   SelectContent,
@@ -119,115 +137,91 @@ export default function WorkspacePage() {
   const fetchWorkspaceData = async () => {
     try {
       setLoading(true);
-      logger.info("Fetching workspace data");
+      logger.info("Fetching workspace data from Supabase");
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Get current user
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      const mockItems: WorkspaceItem[] = [
-        {
-          id: "1",
-          name: "Project Documents",
-          type: "folder",
-          createdBy: "John Doe",
-          createdAt: "2024-01-15",
-          modifiedAt: "2024-01-20",
-          isShared: true,
-          isLocked: false,
-          isFavorite: true,
-          tags: ["important", "project"],
-          permissions: "edit",
-        },
-        {
-          id: "2",
-          name: "Design Assets",
-          type: "folder",
-          createdBy: "Sarah Johnson",
-          createdAt: "2024-01-10",
-          modifiedAt: "2024-01-18",
-          isShared: true,
-          isLocked: false,
-          isFavorite: false,
-          tags: ["design", "assets"],
-          permissions: "view",
-        },
-        {
-          id: "3",
-          name: "Meeting Notes.docx",
-          type: "file",
-          fileType: "document",
-          size: "2.4 MB",
-          createdBy: "Mike Chen",
-          createdAt: "2024-01-12",
-          modifiedAt: "2024-01-19",
-          isShared: false,
-          isLocked: false,
-          isFavorite: true,
-          tags: ["meeting", "notes"],
-          permissions: "edit",
-        },
-        {
-          id: "4",
-          name: "Presentation.pdf",
-          type: "file",
-          fileType: "pdf",
-          size: "5.1 MB",
-          createdBy: "Emily Davis",
-          createdAt: "2024-01-08",
-          modifiedAt: "2024-01-17",
-          isShared: true,
-          isLocked: true,
-          isFavorite: false,
-          tags: ["presentation"],
-          permissions: "view",
-        },
-        {
-          id: "5",
-          name: "Logo Design.png",
-          type: "file",
-          fileType: "image",
-          size: "1.2 MB",
-          createdBy: "Sarah Johnson",
-          createdAt: "2024-01-14",
-          modifiedAt: "2024-01-16",
-          isShared: true,
-          isLocked: false,
-          isFavorite: true,
-          tags: ["design", "logo"],
-          permissions: "edit",
-        },
-        {
-          id: "6",
-          name: "Demo Video.mp4",
-          type: "file",
-          fileType: "video",
-          size: "24.8 MB",
-          createdBy: "John Doe",
-          createdAt: "2024-01-11",
-          modifiedAt: "2024-01-15",
-          isShared: false,
-          isLocked: false,
-          isFavorite: false,
-          tags: ["video", "demo"],
-          permissions: "edit",
-        },
-      ];
+      if (!user) {
+        logger.warn("No authenticated user found");
+        toast.error("Please log in to view workspace");
+        setLoading(false);
+        return;
+      }
 
-      setItems(mockItems);
+      // Fetch folders and files from Supabase
+      const { data: foldersData, error: foldersError } = await getFolders(user.id, null);
+      const { data: filesData, error: filesError } = await getFiles(user.id, {});
 
-      const files = mockItems.filter((item) => item.type === "file");
-      const folders = mockItems.filter((item) => item.type === "folder");
-      const shared = mockItems.filter((item) => item.isShared);
+      if (foldersError) {
+        logger.error("Failed to fetch folders", { error: foldersError.message });
+      }
+      if (filesError) {
+        logger.error("Failed to fetch files", { error: filesError.message });
+      }
 
-      setStats({
-        totalFiles: files.length,
-        totalFolders: folders.length,
-        sharedItems: shared.length,
-        storageUsed: 35,
+      // Helper function to format file size
+      const formatFileSize = (bytes: number): string => {
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+      };
+
+      // Transform folders to UI format
+      const folderItems: WorkspaceItem[] = (foldersData || []).map((folder) => ({
+        id: folder.id,
+        name: folder.name,
+        type: "folder" as const,
+        createdBy: folder.created_by || user.id,
+        createdAt: new Date(folder.created_at).toLocaleDateString(),
+        modifiedAt: new Date(folder.updated_at).toLocaleDateString(),
+        isShared: false, // TODO: Check file_shares table
+        isLocked: false,
+        isFavorite: folder.is_favorite,
+        tags: [],
+        permissions: "edit",
+      }));
+
+      // Transform files to UI format
+      const fileItems: WorkspaceItem[] = (filesData || []).map((file) => ({
+        id: file.id,
+        name: file.name,
+        type: "file" as const,
+        fileType: file.file_type,
+        size: formatFileSize(file.file_size),
+        createdBy: file.uploaded_by || user.id,
+        createdAt: new Date(file.created_at).toLocaleDateString(),
+        modifiedAt: new Date(file.updated_at).toLocaleDateString(),
+        isShared: file.visibility !== "private",
+        isLocked: false,
+        isFavorite: file.is_favorite,
+        tags: file.tags || [],
+        permissions: "edit",
+      }));
+
+      const allItems = [...folderItems, ...fileItems];
+      setItems(allItems);
+
+      // Fetch stats
+      const { data: statsData, error: statsError } = await getWorkspaceStats(user.id);
+
+      if (!statsError && statsData) {
+        setStats({
+          totalFiles: statsData.totalFiles,
+          totalFolders: statsData.totalFolders,
+          sharedItems: statsData.byVisibility.team + statsData.byVisibility.public,
+          storageUsed: Math.round(statsData.totalSize / (1024 * 1024)), // Convert to MB
+        });
+      }
+
+      logger.info("Workspace data fetched successfully", {
+        foldersCount: folderItems.length,
+        filesCount: fileItems.length,
       });
-
-      logger.info("Workspace data fetched successfully");
-      toast.success("Workspace loaded");
+      toast.success(`Loaded ${allItems.length} items`);
     } catch (error) {
       logger.error("Failed to fetch workspace data", { error });
       toast.error("Failed to load workspace");
