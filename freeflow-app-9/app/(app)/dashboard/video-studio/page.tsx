@@ -699,31 +699,74 @@ export default function VideoStudioPage() {
   // ============================================================================
   useEffect(() => {
     const loadVideoProjects = async () => {
+      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
       try {
         setIsLoading(true)
         setError(null)
 
-        // Simulate API call
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        logger.info('Loading video projects from Supabase', { userId })
 
-        setProjects(mockProjects)
+        // Dynamic import for code splitting
+        const { getVideoProjects } = await import('@/lib/video-studio-queries')
+
+        const { data: videoData, error: videoError } = await getVideoProjects(
+          userId,
+          undefined, // no filters
+          { field: 'created_at', ascending: false }, // sort by newest
+          50 // limit
+        )
+
+        if (videoError) throw new Error(videoError.message)
+
+        // Transform database format to UI format
+        const transformedProjects: VideoProject[] = videoData.map((v) => ({
+          id: v.id,
+          title: v.title,
+          description: v.description || '',
+          duration: v.duration,
+          resolution: v.resolution,
+          format: v.format,
+          size: v.file_size ? `${(v.file_size / (1024 * 1024)).toFixed(1)} MB` : '0 MB',
+          created: new Date(v.created_at),
+          modified: new Date(v.updated_at),
+          status: v.status,
+          thumbnail: v.thumbnail_path || '/video-thumbnails/default.jpg',
+          views: v.views,
+          likes: v.likes,
+          comments: 0,
+          client: '',
+          tags: [],
+        }))
+
+        setProjects(transformedProjects)
         setIsLoading(false)
 
         // A+++ Accessibility announcement
-        announce(`${mockProjects.length} video projects loaded successfully`, 'polite')
+        announce(`${transformedProjects.length} video projects loaded from database`, 'polite')
+
+        toast.success('Video projects loaded', {
+          description: `${transformedProjects.length} projects from Supabase`,
+        })
+
+        logger.info('Video projects loaded successfully', {
+          count: transformedProjects.length,
+          userId,
+        })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load video projects')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load video projects'
+        logger.error('Failed to load video projects', { error: err, userId })
+        setError(errorMessage)
         setIsLoading(false)
         announce('Error loading video projects', 'assertive')
+        toast.error('Failed to load video projects', {
+          description: errorMessage,
+        })
       }
     }
 
     loadVideoProjects()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Mock data
   const mockProjects: VideoProject[] = [
@@ -928,49 +971,87 @@ export default function VideoStudioPage() {
   }
 
   const handleCreateProject = async () => {
+    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
     if (!newProject.title.trim()) {
       logger.warn('Project title is required')
+      toast.error('Title is required')
       return
     }
 
     try {
-      const project: VideoProject = {
-        id: Date.now().toString(),
+      setIsCreatingProject(true)
+
+      logger.info('Creating video project in Supabase', {
+        title: newProject.title,
+        userId,
+      })
+
+      // Dynamic import
+      const { createVideoProject } = await import('@/lib/video-studio-queries')
+
+      const { data: createdVideo, error } = await createVideoProject(userId, {
         title: newProject.title,
         description: newProject.description,
-        duration: 0,
         resolution: newProject.resolution,
-        format: newProject.format,
-        size: '0 MB',
-        created: new Date(),
-        modified: new Date(),
+        format: newProject.format as any,
         status: 'draft',
+        duration: 0,
+        file_size: 0,
+      })
+
+      if (error) throw new Error(error.message)
+
+      // Transform to UI format
+      const uiProject: VideoProject = {
+        id: createdVideo!.id,
+        title: createdVideo!.title,
+        description: createdVideo!.description || '',
+        duration: createdVideo!.duration,
+        resolution: createdVideo!.resolution,
+        format: createdVideo!.format,
+        size: '0 MB',
+        created: new Date(createdVideo!.created_at),
+        modified: new Date(createdVideo!.updated_at),
+        status: createdVideo!.status,
         thumbnail: '/video-thumbnails/default.jpg',
         views: 0,
         likes: 0,
         comments: 0,
         client: newProject.client,
-        tags: []
+        tags: [],
       }
 
-      // In a real app, this would be saved to the backend
-      logger.info('Project created', {
-        id: project.id,
-        title: project.title,
-        resolution: project.resolution,
-        format: project.format
+      // Add to local state
+      setProjects([uiProject, ...projects])
+
+      toast.success('✅ Video project created!', {
+        description: `${createdVideo!.title} has been added to your studio`,
+      })
+
+      logger.info('Video project created successfully', {
+        projectId: createdVideo!.id,
+        title: createdVideo!.title,
+        userId,
       })
 
       setIsCreateModalOpen(false)
+      setIsCreatingProject(false)
       setNewProject({
         title: '',
         description: '',
         resolution: '1920x1080',
         format: 'mp4',
-        client: ''
+        client: '',
       })
+
+      announce(`Video project ${createdVideo!.title} created`, 'polite')
     } catch (error) {
-      logger.error('Failed to create project', { error })
+      logger.error('Failed to create video project', { error, userId })
+      toast.error('Failed to create project', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
+      setIsCreatingProject(false)
     }
   }
 
