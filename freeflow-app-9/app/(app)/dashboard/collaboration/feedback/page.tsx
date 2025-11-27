@@ -43,6 +43,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { createFeatureLogger } from "@/lib/logger";
 import { NumberFlow } from "@/components/ui/number-flow";
+import { createClient } from "@/lib/supabase/client";
+import {
+  getFeedback,
+  createFeedback as createFeedbackDB,
+  updateFeedback,
+  deleteFeedback as deleteFeedbackDB,
+  toggleStarred,
+  voteFeedback,
+  getUserVote,
+  getFeedbackReplies,
+  addFeedbackReply,
+  getFeedbackStats,
+  type CollaborationFeedback,
+  type FeedbackCategory,
+  type FeedbackPriority,
+  type FeedbackStatus,
+  type VoteType,
+} from "@/lib/collaboration-feedback-queries";
 import {
   Select,
   SelectContent,
@@ -74,8 +92,8 @@ interface Feedback {
   title: string;
   description: string;
   category: string;
-  priority: "low" | "medium" | "high";
-  status: "open" | "in-progress" | "resolved" | "closed";
+  priority: "low" | "medium" | "high" | "urgent";
+  status: "open" | "in_progress" | "resolved" | "closed";
   author: string;
   authorAvatar?: string;
   createdAt: string;
@@ -85,6 +103,8 @@ interface Feedback {
   tags: string[];
   isStarred: boolean;
   isFlagged: boolean;
+  userVote?: VoteType | null;
+  replyCount?: number;
 }
 
 interface FeedbackReply {
@@ -93,6 +113,7 @@ interface FeedbackReply {
   author: string;
   authorAvatar?: string;
   createdAt: string;
+  isSolution?: boolean;
 }
 
 export default function FeedbackPage() {
@@ -124,90 +145,121 @@ export default function FeedbackPage() {
   const fetchFeedbackData = async () => {
     try {
       setLoading(true);
-      logger.info("Fetching feedback data");
+      logger.info("Fetching feedback data from Supabase");
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Get current user
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      const mockFeedbacks: Feedback[] = [
-        {
-          id: "1",
-          title: "Great collaboration features!",
-          description:
-            "The real-time collaboration tools are excellent. Would love to see more integration options.",
-          category: "Feature Request",
-          priority: "medium",
-          status: "open",
-          author: "John Doe",
-          authorAvatar: "",
-          createdAt: "2024-01-20",
-          upvotes: 15,
-          downvotes: 2,
-          replies: [
-            {
-              id: "r1",
-              content: "Thanks for the feedback! We're working on it.",
-              author: "Admin",
-              authorAvatar: "",
-              createdAt: "2024-01-21",
-            },
-          ],
-          tags: ["collaboration", "feature"],
-          isStarred: true,
-          isFlagged: false,
-        },
-        {
-          id: "2",
-          title: "Bug: Video call disconnects",
-          description:
-            "Video calls disconnect randomly after 10 minutes. This needs urgent attention.",
-          category: "Bug Report",
-          priority: "high",
-          status: "in-progress",
-          author: "Sarah Johnson",
-          authorAvatar: "",
-          createdAt: "2024-01-19",
-          upvotes: 28,
-          downvotes: 1,
-          replies: [],
-          tags: ["bug", "video", "urgent"],
-          isStarred: false,
-          isFlagged: true,
-        },
-        {
-          id: "3",
-          title: "UI improvements needed",
-          description:
-            "The dashboard could use some UI enhancements for better user experience.",
-          category: "Improvement",
-          priority: "low",
-          status: "resolved",
-          author: "Mike Chen",
-          authorAvatar: "",
-          createdAt: "2024-01-18",
-          upvotes: 10,
-          downvotes: 3,
-          replies: [],
-          tags: ["ui", "design"],
-          isStarred: true,
-          isFlagged: false,
-        },
-      ];
+      if (!user) {
+        logger.warn("No authenticated user found");
+        toast.error("Please log in to view feedback");
+        setLoading(false);
+        return;
+      }
 
-      setFeedbacks(mockFeedbacks);
+      // Build filters based on UI state
+      const filters: any = {};
+      if (filterCategory !== "all") {
+        filters.category = filterCategory.toLowerCase() as FeedbackCategory;
+      }
+      if (filterStatus !== "all") {
+        filters.status = filterStatus as FeedbackStatus;
+      }
+      if (filterPriority !== "all") {
+        filters.priority = filterPriority as FeedbackPriority;
+      }
+      if (searchQuery) {
+        filters.search = searchQuery;
+      }
+      if (activeTab === "starred") {
+        filters.is_starred = true;
+      }
 
-      setStats({
-        totalFeedback: mockFeedbacks.length,
-        openFeedback: mockFeedbacks.filter((f) => f.status === "open").length,
-        resolvedFeedback: mockFeedbacks.filter((f) => f.status === "resolved")
-          .length,
-        avgRating: 4.5,
+      // Fetch feedback from Supabase
+      const { data: feedbackData, error: feedbackError } = await getFeedback(
+        user.id,
+        filters
+      );
+
+      if (feedbackError) {
+        logger.error("Failed to fetch feedback", {
+          error: feedbackError.message,
+        });
+        toast.error("Failed to load feedback");
+        setLoading(false);
+        return;
+      }
+
+      // Transform Supabase data to UI format
+      const transformedFeedbacks: Feedback[] = await Promise.all(
+        (feedbackData || []).map(async (fb) => {
+          // Fetch replies for each feedback
+          const { data: repliesData } = await getFeedbackReplies(fb.id);
+
+          // Fetch user's vote
+          const { data: voteData } = await getUserVote(fb.id, user.id);
+
+          return {
+            id: fb.id,
+            title: fb.title,
+            description: fb.description,
+            category: fb.category,
+            priority: fb.priority,
+            status: fb.status,
+            author: user.id, // Temporary: need user profile lookup
+            authorAvatar: "",
+            createdAt: new Date(fb.created_at).toLocaleDateString(),
+            upvotes: fb.upvotes,
+            downvotes: fb.downvotes,
+            replies:
+              repliesData?.map((r) => ({
+                id: r.id,
+                content: r.reply_text,
+                author: r.user_id.slice(0, 8),
+                createdAt: new Date(r.created_at).toLocaleDateString(),
+                isSolution: r.is_solution,
+              })) || [],
+            tags: [],
+            isStarred: fb.is_starred,
+            isFlagged: fb.is_flagged,
+            userVote: voteData?.vote_type || null,
+            replyCount: repliesData?.length || 0,
+          };
+        })
+      );
+
+      setFeedbacks(transformedFeedbacks);
+
+      // Fetch stats
+      const { data: statsData, error: statsError } = await getFeedbackStats(
+        user.id
+      );
+
+      if (!statsError && statsData) {
+        setStats({
+          totalFeedback: statsData.total,
+          openFeedback: statsData.byStatus.open,
+          resolvedFeedback: statsData.byStatus.resolved,
+          avgRating:
+            statsData.total > 0
+              ? (
+                  (statsData.totalUpvotes /
+                    (statsData.totalUpvotes + statsData.totalDownvotes)) *
+                  5
+                ).toFixed(1)
+              : 0,
+        });
+      }
+
+      logger.info("Feedback data fetched successfully", {
+        count: transformedFeedbacks.length,
       });
-
-      logger.info("Feedback data fetched successfully");
-      toast.success("Feedback loaded");
+      toast.success(`Loaded ${transformedFeedbacks.length} feedback items`);
     } catch (error) {
-      logger.error("Failed to fetch feedback data", { error });
+      logger.error("Exception in fetchFeedbackData", { error });
       toast.error("Failed to load feedback");
     } finally {
       setLoading(false);
@@ -221,35 +273,71 @@ export default function FeedbackPage() {
     try {
       logger.info("Creating new feedback");
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
+      if (!user) {
+        toast.error("Please log in to submit feedback");
+        return;
+      }
+
+      const title = formData.get("feedbackTitle") as string;
+      const description = formData.get("feedbackDescription") as string;
+      const category = (formData.get("feedbackCategory") as string).toLowerCase() as FeedbackCategory;
+      const priority = formData.get("feedbackPriority") as FeedbackPriority;
+
+      // Create feedback in Supabase
+      const { data, error } = await createFeedbackDB(user.id, {
+        title,
+        description,
+        category,
+        priority,
+      });
+
+      if (error) {
+        logger.error("Failed to create feedback", { error: error.message });
+        toast.error("Failed to submit feedback");
+        return;
+      }
+
+      // Add to UI
       const newFeedback: Feedback = {
-        id: Date.now().toString(),
-        title: formData.get("feedbackTitle") as string,
-        description: formData.get("feedbackDescription") as string,
-        category: formData.get("feedbackCategory") as string,
-        priority: formData.get("feedbackPriority") as "low" | "medium" | "high",
-        status: "open",
-        author: "Current User",
-        createdAt: new Date().toISOString().split("T")[0],
+        id: data.id,
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        priority: data.priority,
+        status: data.status,
+        author: user.id,
+        createdAt: new Date(data.created_at).toLocaleDateString(),
         upvotes: 0,
         downvotes: 0,
         replies: [],
         tags: [],
         isStarred: false,
         isFlagged: false,
+        userVote: null,
+        replyCount: 0,
       };
 
       setFeedbacks([newFeedback, ...feedbacks]);
+      setStats((prev) => ({
+        ...prev,
+        totalFeedback: prev.totalFeedback + 1,
+        openFeedback: prev.openFeedback + 1,
+      }));
       setIsCreateOpen(false);
 
       logger.info("Feedback created successfully", {
-        feedbackId: newFeedback.id,
+        feedbackId: data.id,
+        category,
+        priority,
       });
-      toast.success("Feedback submitted successfully");
+      toast.success(`Feedback submitted: "${title}"`);
     } catch (error) {
-      logger.error("Failed to create feedback", { error });
+      logger.error("Exception in handleCreateFeedback", { error });
       toast.error("Failed to submit feedback");
     }
   };
@@ -258,16 +346,32 @@ export default function FeedbackPage() {
     try {
       logger.info("Upvoting feedback", { feedbackId });
 
-      setFeedbacks(
-        feedbacks.map((f) =>
-          f.id === feedbackId ? { ...f, upvotes: f.upvotes + 1 } : f
-        )
-      );
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast.error("Please log in to vote");
+        return;
+      }
+
+      // Vote in database (handles toggle logic)
+      const { data, error } = await voteFeedback(feedbackId, user.id, "up");
+
+      if (error) {
+        logger.error("Failed to upvote", { error: error.message });
+        toast.error("Failed to upvote");
+        return;
+      }
+
+      // Refresh feedback to get updated counts
+      await fetchFeedbackData();
 
       logger.info("Feedback upvoted");
-      toast.success("Upvoted");
+      toast.success(data ? "Upvoted" : "Vote removed");
     } catch (error) {
-      logger.error("Failed to upvote", { error });
+      logger.error("Exception in handleUpvote", { error });
       toast.error("Failed to upvote");
     }
   };
@@ -276,16 +380,32 @@ export default function FeedbackPage() {
     try {
       logger.info("Downvoting feedback", { feedbackId });
 
-      setFeedbacks(
-        feedbacks.map((f) =>
-          f.id === feedbackId ? { ...f, downvotes: f.downvotes + 1 } : f
-        )
-      );
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast.error("Please log in to vote");
+        return;
+      }
+
+      // Vote in database (handles toggle logic)
+      const { data, error } = await voteFeedback(feedbackId, user.id, "down");
+
+      if (error) {
+        logger.error("Failed to downvote", { error: error.message });
+        toast.error("Failed to downvote");
+        return;
+      }
+
+      // Refresh feedback to get updated counts
+      await fetchFeedbackData();
 
       logger.info("Feedback downvoted");
-      toast.success("Downvoted");
+      toast.success(data ? "Downvoted" : "Vote removed");
     } catch (error) {
-      logger.error("Failed to downvote", { error });
+      logger.error("Exception in handleDownvote", { error });
       toast.error("Failed to downvote");
     }
   };
@@ -294,16 +414,42 @@ export default function FeedbackPage() {
     try {
       logger.info("Toggling star", { feedbackId });
 
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast.error("Please log in");
+        return;
+      }
+
+      const currentFeedback = feedbacks.find((f) => f.id === feedbackId);
+      if (!currentFeedback) return;
+
+      const { data, error } = await toggleStarred(
+        feedbackId,
+        user.id,
+        !currentFeedback.isStarred
+      );
+
+      if (error) {
+        logger.error("Failed to toggle star", { error: error.message });
+        toast.error("Failed to update star");
+        return;
+      }
+
+      // Update UI
       setFeedbacks(
         feedbacks.map((f) =>
           f.id === feedbackId ? { ...f, isStarred: !f.isStarred } : f
         )
       );
 
-      logger.info("Star toggled");
-      toast.success("Star updated");
+      logger.info("Star toggled", { isStarred: data?.is_starred });
+      toast.success(data?.is_starred ? "Starred" : "Unstarred");
     } catch (error) {
-      logger.error("Failed to toggle star", { error });
+      logger.error("Exception in handleToggleStar", { error });
       toast.error("Failed to update star");
     }
   };
@@ -312,16 +458,40 @@ export default function FeedbackPage() {
     try {
       logger.info("Toggling flag", { feedbackId });
 
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast.error("Please log in");
+        return;
+      }
+
+      const currentFeedback = feedbacks.find((f) => f.id === feedbackId);
+      if (!currentFeedback) return;
+
+      const { data, error } = await updateFeedback(feedbackId, user.id, {
+        is_flagged: !currentFeedback.isFlagged,
+      });
+
+      if (error) {
+        logger.error("Failed to toggle flag", { error: error.message });
+        toast.error("Failed to update flag");
+        return;
+      }
+
+      // Update UI
       setFeedbacks(
         feedbacks.map((f) =>
           f.id === feedbackId ? { ...f, isFlagged: !f.isFlagged } : f
         )
       );
 
-      logger.info("Flag toggled");
-      toast.success("Flag updated");
+      logger.info("Flag toggled", { isFlagged: data?.is_flagged });
+      toast.success(data?.is_flagged ? "Flagged" : "Unflagged");
     } catch (error) {
-      logger.error("Failed to toggle flag", { error });
+      logger.error("Exception in handleToggleFlag", { error });
       toast.error("Failed to update flag");
     }
   };
@@ -333,19 +503,59 @@ export default function FeedbackPage() {
     try {
       logger.info("Changing status", { feedbackId, newStatus });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
+      if (!user) {
+        toast.error("Please log in");
+        return;
+      }
+
+      const { data, error } = await updateFeedback(feedbackId, user.id, {
+        status: newStatus as FeedbackStatus,
+      });
+
+      if (error) {
+        logger.error("Failed to change status", { error: error.message });
+        toast.error("Failed to update status");
+        return;
+      }
+
+      // Update UI
       setFeedbacks(
         feedbacks.map((f) =>
           f.id === feedbackId ? { ...f, status: newStatus } : f
         )
       );
 
-      logger.info("Status changed successfully");
-      toast.success("Status updated");
+      // Update stats
+      const oldStatus = feedbacks.find((f) => f.id === feedbackId)?.status;
+      if (oldStatus === "open" && newStatus !== "open") {
+        setStats((prev) => ({ ...prev, openFeedback: prev.openFeedback - 1 }));
+      } else if (oldStatus !== "open" && newStatus === "open") {
+        setStats((prev) => ({ ...prev, openFeedback: prev.openFeedback + 1 }));
+      }
+      if (oldStatus !== "resolved" && newStatus === "resolved") {
+        setStats((prev) => ({
+          ...prev,
+          resolvedFeedback: prev.resolvedFeedback + 1,
+        }));
+      } else if (oldStatus === "resolved" && newStatus !== "resolved") {
+        setStats((prev) => ({
+          ...prev,
+          resolvedFeedback: prev.resolvedFeedback - 1,
+        }));
+      }
+
+      logger.info("Status changed successfully", {
+        oldStatus,
+        newStatus: data?.status,
+      });
+      toast.success(`Status updated to ${newStatus}`);
     } catch (error) {
-      logger.error("Failed to change status", { error });
+      logger.error("Exception in handleChangeStatus", { error });
       toast.error("Failed to update status");
     }
   };
@@ -356,29 +566,54 @@ export default function FeedbackPage() {
     try {
       logger.info("Adding reply", { feedbackId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
+      if (!user) {
+        toast.error("Please log in to reply");
+        return;
+      }
+
+      const { data, error } = await addFeedbackReply(
+        feedbackId,
+        user.id,
+        replyText
+      );
+
+      if (error) {
+        logger.error("Failed to add reply", { error: error.message });
+        toast.error("Failed to add reply");
+        return;
+      }
+
+      // Update UI
       const newReply: FeedbackReply = {
-        id: Date.now().toString(),
-        content: replyText,
-        author: "Current User",
-        createdAt: new Date().toISOString().split("T")[0],
+        id: data.id,
+        content: data.reply_text,
+        author: user.id.slice(0, 8),
+        createdAt: new Date(data.created_at).toLocaleDateString(),
+        isSolution: data.is_solution,
       };
 
       setFeedbacks(
         feedbacks.map((f) =>
           f.id === feedbackId
-            ? { ...f, replies: [...f.replies, newReply] }
+            ? {
+                ...f,
+                replies: [...f.replies, newReply],
+                replyCount: (f.replyCount || 0) + 1,
+              }
             : f
         )
       );
 
       setReplyText("");
-      logger.info("Reply added successfully");
+      logger.info("Reply added successfully", { replyId: data.id });
       toast.success("Reply added");
     } catch (error) {
-      logger.error("Failed to add reply", { error });
+      logger.error("Exception in handleAddReply", { error });
       toast.error("Failed to add reply");
     }
   };
@@ -387,15 +622,44 @@ export default function FeedbackPage() {
     try {
       logger.info("Deleting feedback", { feedbackId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
+      if (!user) {
+        toast.error("Please log in");
+        return;
+      }
+
+      const { success, error } = await deleteFeedbackDB(feedbackId, user.id);
+
+      if (error) {
+        logger.error("Failed to delete feedback", { error: error.message });
+        toast.error("Failed to delete feedback");
+        return;
+      }
+
+      // Update UI and stats
+      const deletedFeedback = feedbacks.find((f) => f.id === feedbackId);
       setFeedbacks(feedbacks.filter((f) => f.id !== feedbackId));
+      setStats((prev) => ({
+        ...prev,
+        totalFeedback: prev.totalFeedback - 1,
+        openFeedback:
+          deletedFeedback?.status === "open"
+            ? prev.openFeedback - 1
+            : prev.openFeedback,
+        resolvedFeedback:
+          deletedFeedback?.status === "resolved"
+            ? prev.resolvedFeedback - 1
+            : prev.resolvedFeedback,
+      }));
 
-      logger.info("Feedback deleted successfully");
+      logger.info("Feedback deleted successfully", { feedbackId });
       toast.success("Feedback deleted");
     } catch (error) {
-      logger.error("Failed to delete feedback", { error });
+      logger.error("Exception in handleDeleteFeedback", { error });
       toast.error("Failed to delete feedback");
     }
   };
@@ -479,6 +743,7 @@ export default function FeedbackPage() {
     switch (status) {
       case "open":
         return "default";
+      case "in_progress":
       case "in-progress":
         return "default";
       case "resolved":
@@ -549,12 +814,11 @@ export default function FeedbackPage() {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Bug Report">Bug Report</SelectItem>
-                      <SelectItem value="Feature Request">
-                        Feature Request
-                      </SelectItem>
-                      <SelectItem value="Improvement">Improvement</SelectItem>
-                      <SelectItem value="General">General</SelectItem>
+                      <SelectItem value="bug">Bug</SelectItem>
+                      <SelectItem value="feature">Feature</SelectItem>
+                      <SelectItem value="improvement">Improvement</SelectItem>
+                      <SelectItem value="question">Question</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -568,6 +832,7 @@ export default function FeedbackPage() {
                       <SelectItem value="low">Low</SelectItem>
                       <SelectItem value="medium">Medium</SelectItem>
                       <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="urgent">Urgent</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -648,10 +913,11 @@ export default function FeedbackPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="Bug Report">Bug Report</SelectItem>
-              <SelectItem value="Feature Request">Feature Request</SelectItem>
-              <SelectItem value="Improvement">Improvement</SelectItem>
-              <SelectItem value="General">General</SelectItem>
+              <SelectItem value="bug">Bug</SelectItem>
+              <SelectItem value="feature">Feature</SelectItem>
+              <SelectItem value="improvement">Improvement</SelectItem>
+              <SelectItem value="question">Question</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
           <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -661,7 +927,7 @@ export default function FeedbackPage() {
             <SelectContent>
               <SelectItem value="all">All Status</SelectItem>
               <SelectItem value="open">Open</SelectItem>
-              <SelectItem value="in-progress">In Progress</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
               <SelectItem value="resolved">Resolved</SelectItem>
               <SelectItem value="closed">Closed</SelectItem>
             </SelectContent>
@@ -672,6 +938,7 @@ export default function FeedbackPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Priorities</SelectItem>
+              <SelectItem value="urgent">Urgent</SelectItem>
               <SelectItem value="high">High</SelectItem>
               <SelectItem value="medium">Medium</SelectItem>
               <SelectItem value="low">Low</SelectItem>
@@ -809,7 +1076,7 @@ export default function FeedbackPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="open">Open</SelectItem>
-                          <SelectItem value="in-progress">
+                          <SelectItem value="in_progress">
                             In Progress
                           </SelectItem>
                           <SelectItem value="resolved">Resolved</SelectItem>
