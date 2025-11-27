@@ -197,6 +197,18 @@ export default function DashboardPage() {
   const [collaborationUsers, setCollaborationUsers] = useState(0)
   const [showCollaborationFeatures, setShowCollaborationFeatures] = useState(false)
 
+  // REAL DASHBOARD STATS from Supabase
+  const [dashboardStats, setDashboardStats] = useState({
+    earnings: mockData.earnings,
+    activeProjects: mockData.activeProjects,
+    completedProjects: mockData.completedProjects,
+    totalClients: mockData.totalClients,
+    hoursThisMonth: mockData.hoursThisMonth,
+    revenue: { total: 0, growth: 0 },
+    tasks: { total: 0, completed: 0 },
+    files: { total: 0, size: 0 }
+  })
+
   /* ------------------------------------------------------------------
    * Phase 6 hooks – lightweight, client-side, cost-optimised
    * ------------------------------------------------------------------ */
@@ -244,16 +256,38 @@ export default function DashboardPage() {
           impact: 'medium'
         })))
 
+        // Update dashboard stats with real Supabase data
+        setDashboardStats({
+          earnings: stats.revenue.total,
+          activeProjects: stats.projects.active,
+          completedProjects: stats.projects.completed,
+          totalClients: stats.clients.total,
+          hoursThisMonth: 0, // TODO: Add time tracking when implemented
+          revenue: {
+            total: stats.revenue.total,
+            growth: stats.revenue.growth
+          },
+          tasks: {
+            total: stats.tasks.total,
+            completed: stats.tasks.completed
+          },
+          files: {
+            total: stats.files.total,
+            size: stats.files.size
+          }
+        })
+
         logger.info('Dashboard data loaded from Supabase', {
           projects: stats.projects.total,
           clients: stats.clients.total,
           revenue: stats.revenue.total,
-          tasks: stats.tasks.total
+          tasks: stats.tasks.total,
+          files: stats.files.total
         })
 
         announce(`Dashboard loaded: ${stats.projects.total} projects, ${stats.clients.total} clients`, 'polite')
         toast.success('Dashboard updated', {
-          description: `${stats.projects.active} active projects • ${stats.tasks.inProgress} tasks in progress`
+          description: `${stats.projects.active} active projects • ${stats.tasks.inProgress} tasks in progress • $${stats.revenue.total.toLocaleString()} revenue`
         })
 
         setIsLoading(false)
@@ -958,11 +992,13 @@ export default function DashboardPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Earnings</p>
                   <NumberFlow
-                    value={mockData.earnings}
+                    value={dashboardStats.earnings}
                     format="currency"
                     className="text-3xl font-bold text-gray-900 dark:text-gray-100"
                   />
-                  <p className="text-sm text-green-600 dark:text-green-400">+12% from last month</p>
+                  <p className="text-sm text-green-600 dark:text-green-400">
+                    {dashboardStats.revenue.growth > 0 ? '+' : ''}{dashboardStats.revenue.growth.toFixed(1)}% from last month
+                  </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-green-400/20 to-emerald-400/20 dark:from-green-400/10 dark:to-emerald-400/10 rounded-xl backdrop-blur-sm">
                   <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
@@ -977,11 +1013,11 @@ export default function DashboardPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Active Projects</p>
                   <NumberFlow
-                    value={mockData.activeProjects}
+                    value={dashboardStats.activeProjects}
                     className="text-3xl font-bold text-gray-900 dark:text-gray-100"
                   />
                   <p className="text-sm text-blue-600 dark:text-blue-400">
-                    <NumberFlow value={mockData.completedProjects} className="inline-block" /> completed
+                    <NumberFlow value={dashboardStats.completedProjects} className="inline-block" /> completed
                   </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 dark:from-blue-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm">
@@ -997,10 +1033,12 @@ export default function DashboardPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Clients</p>
                   <NumberFlow
-                    value={mockData.totalClients}
+                    value={dashboardStats.totalClients}
                     className="text-3xl font-bold text-gray-900 dark:text-gray-100"
                   />
-                  <p className="text-sm text-purple-600 dark:text-purple-400">+8 this month</p>
+                  <p className="text-sm text-purple-600 dark:text-purple-400">
+                    Active: {dashboardStats.totalClients}
+                  </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-purple-400/20 to-pink-400/20 dark:from-purple-400/10 dark:to-pink-400/10 rounded-xl backdrop-blur-sm">
                   <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
@@ -1015,10 +1053,12 @@ export default function DashboardPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Hours This Month</p>
                   <NumberFlow
-                    value={mockData.hoursThisMonth}
+                    value={dashboardStats.hoursThisMonth}
                     className="text-3xl font-bold text-gray-900 dark:text-gray-100"
                   />
-                  <p className="text-sm text-orange-600 dark:text-orange-400">23h this week</p>
+                  <p className="text-sm text-orange-600 dark:text-orange-400">
+                    {dashboardStats.tasks.total} tasks tracked
+                  </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-orange-400/20 to-amber-400/20 dark:from-orange-400/10 dark:to-amber-400/10 rounded-xl backdrop-blur-sm">
                   <Clock className="h-6 w-6 text-orange-600 dark:text-orange-400" />
