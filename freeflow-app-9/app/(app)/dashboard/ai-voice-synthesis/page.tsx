@@ -46,6 +46,19 @@ import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
+// SUPABASE & QUERIES
+import { createClient } from '@/lib/supabase/client'
+import {
+  getVoices,
+  getVoiceSyntheses,
+  getVoiceProjects,
+  getUserVoiceStats,
+  createVoiceSynthesis,
+  type Voice as DBVoice,
+  type VoiceSynthesis as DBSynthesis,
+  type VoiceProject as DBProject
+} from '@/lib/ai-voice-queries'
+
 type ViewMode = 'synthesize' | 'voices' | 'projects' | 'analytics'
 type LayoutMode = 'grid' | 'list'
 
@@ -77,33 +90,99 @@ export default function AIVoiceSynthesisPage() {
   const [isSynthesizing, setIsSynthesizing] = useState(false)
   const [copiedSSML, setCopiedSSML] = useState(false)
 
+  // Data state
+  const [voices, setVoices] = useState<Voice[]>([])
+  const [syntheses, setSyntheses] = useState<any[]>([])
+  const [projects, setProjects] = useState<any[]>([])
+  const [stats, setStats] = useState<any>(null)
+
   // A+++ LOAD AI VOICE SYNTHESIS DATA
   useEffect(() => {
     const loadAIVoiceSynthesisData = async () => {
       try {
         setIsPageLoading(true)
         setError(null)
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load AI voice synthesis'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
+
+        logger.info('Loading AI Voice Synthesis data from Supabase')
+
+        const supabase = createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+          logger.warn('No authenticated user found', { error: authError?.message })
+          toast.error('Please log in to use AI Voice Synthesis')
+          setIsPageLoading(false)
+          return
+        }
+
+        // Parallel data loading - 4 simultaneous queries
+        const [voicesResult, synthesesResult, projectsResult, statsResult] = await Promise.all([
+          getVoices({ is_public: true }),
+          getVoiceSyntheses(user.id),
+          getVoiceProjects(user.id),
+          getUserVoiceStats(user.id)
+        ])
+
+        // Transform DB voices to UI format
+        if (voicesResult.data) {
+          const uiVoices: Voice[] = voicesResult.data.map(v => ({
+            id: v.id,
+            name: v.name,
+            displayName: v.display_name,
+            language: v.language,
+            languageCode: v.language_code,
+            gender: v.gender,
+            age: v.age,
+            accent: v.accent || undefined,
+            description: v.description,
+            previewUrl: v.preview_url || undefined,
+            isPremium: v.is_premium,
+            isNew: v.is_new,
+            popularity: v.popularity,
+            tags: v.tags
+          }))
+          setVoices(uiVoices)
+          if (uiVoices.length > 0) {
+            setSelectedVoice(uiVoices[0])
+          }
+        }
+
+        // Set syntheses and projects
+        if (synthesesResult.data) {
+          setSyntheses(synthesesResult.data)
+        }
+        if (projectsResult.data) {
+          setProjects(projectsResult.data)
+        }
+        if (statsResult.data) {
+          setStats(statsResult.data)
+        }
+
+        logger.info('AI Voice Synthesis data loaded', {
+          voices: voicesResult.data?.length || 0,
+          syntheses: synthesesResult.data?.length || 0,
+          projects: projectsResult.data?.length || 0
         })
+
+        toast.success('AI Voice Synthesis loaded', {
+          description: `${voicesResult.data?.length || 0} voices • ${synthesesResult.data?.length || 0} syntheses • ${projectsResult.data?.length || 0} projects`
+        })
+
         setIsPageLoading(false)
         announce('AI voice synthesis loaded successfully', 'polite')
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load AI voice synthesis')
+      } catch (err: any) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load AI voice synthesis'
+        logger.error('Exception loading AI Voice Synthesis data', { error: errorMessage })
+        setError(errorMessage)
         setIsPageLoading(false)
         announce('Error loading AI voice synthesis', 'assertive')
+        toast.error('Failed to load AI Voice Synthesis')
       }
     }
     loadAIVoiceSynthesisData()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const filteredVoices = filterVoices(MOCK_VOICES, {
+  const filteredVoices = filterVoices(voices.length > 0 ? voices : MOCK_VOICES, {
     gender: voiceGender !== 'all' ? voiceGender as any : undefined,
     search: voiceSearch || undefined
   })
