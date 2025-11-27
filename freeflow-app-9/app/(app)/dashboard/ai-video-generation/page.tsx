@@ -61,6 +61,27 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 
+// SUPABASE & QUERIES
+import { createClient } from '@/lib/supabase/client'
+import {
+  getGeneratedVideos,
+  getVideoTemplates,
+  createGeneratedVideo,
+  updateGeneratedVideo,
+  deleteGeneratedVideo,
+  updateVideoProgress,
+  getUserVideoStats,
+  getGenerationSettings,
+  getOrCreateGenerationSettings,
+  type GeneratedVideo as DBVideo,
+  type VideoTemplate as DBTemplate,
+  type VideoStyle,
+  type VideoFormat,
+  type VideoQuality,
+  type AIVideoModel,
+  type GenerationStatus as DBGenerationStatus
+} from '@/lib/ai-video-queries'
+
 const logger = createFeatureLogger('AI-Video-Generation')
 
 // ============================================================================
@@ -529,17 +550,90 @@ export default function AIVideoGenerationPage() {
   const [editTitle, setEditTitle] = useState('')
   const [editTags, setEditTags] = useState('')
 
-  // Initialize data
+  // Initialize data from Supabase
   useEffect(() => {
-    logger.info('Component mounted, initializing data')
+    const loadAIVideoData = async () => {
+      try {
+        logger.info('Loading AI Video Generation data from Supabase')
 
-    const videos = generateMockVideos()
-    const templates = generateMockTemplates()
+        const supabase = createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-    dispatch({ type: 'SET_VIDEOS', videos })
-    dispatch({ type: 'SET_TEMPLATES', templates })
+        if (authError || !user) {
+          logger.warn('No authenticated user found')
+          toast.error('Please log in to use AI Video Generation')
+          return
+        }
 
-    logger.info('Data initialization complete', { videoCount: videos.length, templateCount: templates.length })
+        // Load videos, templates, and settings
+        const [videosResult, templatesResult, settingsResult] = await Promise.all([
+          getGeneratedVideos(user.id),
+          getVideoTemplates(),
+          getOrCreateGenerationSettings(user.id)
+        ])
+
+        // Transform DB videos to UI format
+        if (videosResult.data) {
+          const uiVideos = videosResult.data.map(v => ({
+            id: v.id,
+            title: v.title,
+            prompt: v.prompt,
+            style: v.style,
+            format: v.format,
+            quality: v.quality,
+            aiModel: v.ai_model as AIModel,
+            status: v.status,
+            progress: v.progress,
+            videoUrl: v.video_url,
+            thumbnailUrl: v.thumbnail_url || '',
+            duration: v.duration,
+            fileSize: v.file_size,
+            views: v.views,
+            downloads: v.downloads,
+            likes: v.likes,
+            shares: v.shares,
+            isPublic: v.is_public,
+            tags: v.tags,
+            createdAt: v.created_at
+          }))
+          dispatch({ type: 'SET_VIDEOS', videos: uiVideos })
+        }
+
+        // Transform DB templates to UI format
+        if (templatesResult.data) {
+          const uiTemplates = templatesResult.data.map(t => ({
+            id: t.id,
+            name: t.name,
+            description: t.description,
+            thumbnail: t.thumbnail,
+            style: t.style,
+            format: t.format,
+            duration: t.duration,
+            scenes: t.scenes,
+            premium: t.premium,
+            category: t.category,
+            tags: t.tags,
+            price: t.price
+          }))
+          dispatch({ type: 'SET_TEMPLATES', templates: uiTemplates })
+        }
+
+        logger.info('AI Video data loaded', {
+          videos: videosResult.data?.length || 0,
+          templates: templatesResult.data?.length || 0
+        })
+
+        toast.success('AI Video Generation loaded', {
+          description: `${videosResult.data?.length || 0} videos • ${templatesResult.data?.length || 0} templates`
+        })
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load AI Video data'
+        logger.error('Exception loading AI Video data', { error: errorMessage })
+        toast.error('Failed to load AI Video Generation')
+      }
+    }
+
+    loadAIVideoData()
   }, [])
 
   // Calculate stats with useMemo
