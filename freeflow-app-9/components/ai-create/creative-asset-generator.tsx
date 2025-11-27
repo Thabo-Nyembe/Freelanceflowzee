@@ -15,6 +15,27 @@ import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 // TODO: Re-enable when UPS component syntax is fixed
 // import { UniversalPinpointFeedbackSystem } from '@/components/projects-hub/universal-pinpoint-feedback-system'
+
+// A+++ SUPABASE INTEGRATION
+import { createClient } from '@/lib/supabase/client'
+import {
+  getAssets,
+  createAsset,
+  createGeneration,
+  updateGenerationStatus,
+  toggleFavorite,
+  incrementDownloadCount,
+  getPreferences,
+  upsertPreferences,
+  getAssetStats,
+  type AICreateAsset,
+  type CreativeField,
+  type AssetTypeEnum,
+  type AssetFormat,
+  type StylePreset,
+  type ColorScheme
+} from '@/lib/ai-create-queries'
+
 import {
   Camera,
   Video,
@@ -248,24 +269,83 @@ export function CreativeAssetGenerator({ asStandalone = true }: CreativeAssetGen
     })
 
     try {
+      // Get authenticated user
+      const supabase = createClient()
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+      if (authError || !user) {
+        logger.warn('No authenticated user found')
+        toast.error('Please log in to generate assets')
+        setGenerating(false)
+        return
+      }
+
+      // Create generation record in Supabase
+      const assetCount = batchMode ? 3 : 1
+      const { data: generationRecord, error: genError } = await createGeneration(user.id, {
+        creative_field: selectedField as CreativeField,
+        asset_type: selectedAssetType as AssetTypeEnum,
+        style: style.toLowerCase() as StylePreset,
+        color_scheme: colorScheme.toLowerCase() as ColorScheme,
+        custom_prompt: customPrompt || undefined,
+        model_used: selectedModel,
+        batch_mode: batchMode,
+        assets_requested: assetCount,
+        input_file_url: uploadPreview || undefined
+      })
+
+      if (genError) {
+        logger.error('Failed to create generation record', { error: genError })
+      }
+
       // Simulate generation process
       await new Promise(resolve => setTimeout(resolve, 3000))
 
-      // Generate mock assets
-      const assetCount = batchMode ? 3 : 1
+      // Generate and save assets to Supabase
       const newAssets: GeneratedAsset[] = []
 
       for (let i = 0; i < assetCount; i++) {
         const field = CREATIVE_FIELDS.find(f => f.id === selectedField)
         const assetType = field?.assetTypes.find(a => a.id === selectedAssetType)
 
-        newAssets.push({
-          id: `asset-${Date.now()}-${i}`,
-          name: `${assetType?.name} ${i + 1}`,
+        const assetName = `${assetType?.name} ${i + 1}`
+        const fileSize = Math.floor(Math.random() * 5000000 + 1000000) // 1-6 MB in bytes
+
+        // Save to Supabase
+        const { data: savedAsset, error: assetError } = await createAsset(user.id, {
+          name: assetName,
           description: assetType?.description || '',
-          size: `${(Math.random() * 5 + 1).toFixed(1)} MB`,
-          format: '.png',
-          tags: [style.toLowerCase(), colorScheme.toLowerCase(), selectedField]
+          creative_field: selectedField as CreativeField,
+          asset_type: selectedAssetType as AssetTypeEnum,
+          format: 'png' as AssetFormat,
+          file_size: fileSize,
+          tags: [style.toLowerCase(), colorScheme.toLowerCase(), selectedField],
+          style: style.toLowerCase() as StylePreset,
+          color_scheme: colorScheme.toLowerCase() as ColorScheme,
+          custom_prompt: customPrompt || undefined,
+          model_used: selectedModel
+        })
+
+        if (assetError) {
+          logger.error('Failed to save asset', { error: assetError, assetName })
+        } else if (savedAsset) {
+          newAssets.push({
+            id: savedAsset.id,
+            name: savedAsset.name,
+            description: savedAsset.description || '',
+            size: `${(fileSize / 1000000).toFixed(1)} MB`,
+            format: '.png',
+            tags: savedAsset.tags
+          })
+        }
+      }
+
+      // Update generation record status
+      if (generationRecord) {
+        await updateGenerationStatus(generationRecord.id, {
+          status: 'completed',
+          assets_generated: newAssets.length,
+          generation_time_ms: 3000
         })
       }
 
@@ -276,8 +356,8 @@ export function CreativeAssetGenerator({ asStandalone = true }: CreativeAssetGen
         totalSize: newAssets.reduce((sum, a) => sum + parseFloat(a.size), 0).toFixed(2)
       })
 
-      toast.success('Assets Generated', {
-        description: `${newAssets.length} ${assetCount > 1 ? 'assets' : 'asset'} created successfully`
+      toast.success('Assets Generated & Saved', {
+        description: `${newAssets.length} ${assetCount > 1 ? 'assets' : 'asset'} created and saved to library`
       })
     } catch (error: any) {
       logger.error('Generation failed', { error })
@@ -287,13 +367,19 @@ export function CreativeAssetGenerator({ asStandalone = true }: CreativeAssetGen
     } finally {
       setGenerating(false)
     }
-  }, [selectedField, selectedAssetType, uploadedFile, customPrompt, style, colorScheme, selectedModel, batchMode])
+  }, [selectedField, selectedAssetType, uploadedFile, customPrompt, style, colorScheme, selectedModel, batchMode, uploadPreview])
 
-  const handleDownload = useCallback((asset: GeneratedAsset) => {
+  const handleDownload = useCallback(async (asset: GeneratedAsset) => {
     logger.info('Downloading asset', {
       assetId: asset.id,
       assetName: asset.name
     })
+
+    // Increment download count in Supabase
+    const { error } = await incrementDownloadCount(asset.id)
+    if (error) {
+      logger.error('Failed to increment download count', { error })
+    }
 
     toast.success('Download Started', {
       description: `${asset.name} - ${asset.size}`
