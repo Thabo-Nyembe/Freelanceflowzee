@@ -17,6 +17,24 @@ import { createFeatureLogger } from '@/lib/logger'
 const logger = createFeatureLogger('AIDesign')
 
 // ============================================================================
+// A+++ SUPABASE INTEGRATION
+// ============================================================================
+import { createClient } from '@/lib/supabase/client'
+import {
+  getDesignProjects,
+  getAITools,
+  getDesignTemplates,
+  getDesignProjectStats,
+  getAIToolStats,
+  getTemplateStats,
+  type AIDesignProject as DBProject,
+  type AITool as DBTool,
+  type DesignTemplate as DBTemplate,
+  type AIToolType,
+  type ProjectStatus
+} from '@/lib/ai-design-queries'
+
+// ============================================================================
 // A+++ UTILITIES
 // ============================================================================
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
@@ -69,29 +87,78 @@ export default function AIDesignStudioPage() {
   const [generationInProgress, setGenerationInProgress] = useState(false)
 
   // ============================================================================
-  // A+++ LOAD AI DESIGN DATA
+  // A+++ LOAD AI DESIGN DATA FROM SUPABASE
   // ============================================================================
   useEffect(() => {
     const loadAIDesignData = async () => {
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading AI Design Studio data from Supabase')
 
-        // Simulate API call - always succeeds in development
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
+        // Get authenticated user
+        const supabase = createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !user) {
+          logger.warn('No authenticated user found')
+          toast.error('Please log in to use AI Design Studio')
+          setIsLoading(false)
+          return
+        }
+
+        // Fetch all AI Design data in parallel
+        const [
+          toolsResult,
+          templatesResult,
+          projectsResult,
+          projectStatsResult,
+          toolStatsResult,
+          templateStatsResult
+        ] = await Promise.all([
+          getAITools(),
+          getDesignTemplates({ ai_ready: true }),
+          getDesignProjects(user.id, { status: 'active' }),
+          getDesignProjectStats(user.id),
+          getAIToolStats(),
+          getTemplateStats()
+        ])
+
+        // Log results
+        logger.info('AI Design data loaded', {
+          tools: toolsResult.data?.length || 0,
+          templates: templatesResult.data?.length || 0,
+          projects: projectsResult.data?.length || 0
         })
+
+        // Check for errors
+        if (toolsResult.error) {
+          logger.error('Failed to load AI tools', { error: toolsResult.error })
+        }
+        if (templatesResult.error) {
+          logger.error('Failed to load templates', { error: templatesResult.error })
+        }
+        if (projectsResult.error) {
+          logger.error('Failed to load projects', { error: projectsResult.error })
+        }
 
         setIsLoading(false)
 
         // A+++ Accessibility announcement
-        announce(`${aiTools.length} AI design tools loaded successfully`, 'polite')
+        const toolCount = toolsResult.data?.length || 0
+        const templateCount = templatesResult.data?.length || 0
+        announce(`${toolCount} AI tools and ${templateCount} templates loaded successfully`, 'polite')
+
+        toast.success('AI Design Studio loaded', {
+          description: `${toolCount} AI tools • ${templateCount} templates • ${projectsResult.data?.length || 0} projects`
+        })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load AI design tools')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load AI design tools'
+        logger.error('Exception loading AI Design data', { error: errorMessage })
+        setError(errorMessage)
         setIsLoading(false)
         announce('Error loading AI design tools', 'assertive')
+        toast.error('Failed to load AI Design Studio')
       }
     }
 
