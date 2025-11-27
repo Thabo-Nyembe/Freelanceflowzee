@@ -50,31 +50,116 @@ export default function FinancialOverviewPage() {
   }, [])
 
   const loadFinancialOverview = async () => {
+    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
     try {
       setIsLoading(true)
       setError(null)
 
-      logger.info('Loading financial overview')
+      logger.info('Loading financial overview from Supabase', { userId })
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800))
+      // Dynamic import for code splitting
+      const {
+        getTransactions,
+        getFinancialOverview,
+        getFinancialInsights
+      } = await import('@/lib/financial-queries')
 
-      setTransactions(MOCK_TRANSACTIONS)
+      // Load data in parallel
+      const [transactionsResult, overviewResult, insightsResult] = await Promise.all([
+        getTransactions(userId, { startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] }),
+        getFinancialOverview(userId),
+        getFinancialInsights(userId, { status: 'active' })
+      ])
+
+      if (transactionsResult.error || overviewResult.error || insightsResult.error) {
+        throw new Error('Failed to load financial data')
+      }
+
+      // Transform transactions to UI format
+      if (transactionsResult.data.length > 0) {
+        const transformedTransactions = transactionsResult.data.map(t => ({
+          id: t.id,
+          type: t.type as 'income' | 'expense',
+          category: t.category,
+          description: t.description,
+          amount: t.amount,
+          date: t.transaction_date,
+          client: t.client_name,
+          project: t.project_name,
+          vendor: t.vendor_name,
+          status: t.status as any,
+          paymentMethod: t.payment_method as any,
+          invoice: t.invoice_number,
+          recurring: t.is_recurring,
+          nextDue: t.next_due_date,
+          tags: t.tags,
+          notes: t.notes,
+          createdAt: t.created_at,
+          updatedAt: t.updated_at
+        }))
+        setTransactions(transformedTransactions)
+      } else {
+        setTransactions(MOCK_TRANSACTIONS)
+      }
+
+      // Use real overview data if available
+      if (overviewResult.data) {
+        setOverview({
+          totalRevenue: overviewResult.data.total_revenue,
+          monthlyRevenue: overviewResult.data.total_revenue,
+          totalExpenses: overviewResult.data.total_expenses,
+          netProfit: overviewResult.data.net_profit,
+          profitMargin: overviewResult.data.profit_margin,
+          monthlyGrowth: 0,
+          quarterlyGrowth: 0,
+          yearlyGrowth: 0,
+          cashFlow: overviewResult.data.net_profit,
+          accountsReceivable: 0,
+          accountsPayable: 0
+        })
+      } else {
+        setOverview(MOCK_FINANCIAL_OVERVIEW)
+      }
+
+      // Transform insights to UI format
+      if (insightsResult.data.length > 0) {
+        const transformedInsights = insightsResult.data.map(i => ({
+          id: i.id,
+          type: i.type as any,
+          title: i.title,
+          description: i.description,
+          impact: i.impact as any,
+          potentialValue: i.potential_value,
+          actionable: i.is_actionable,
+          confidence: i.confidence,
+          category: i.category as any
+        }))
+        setInsights(transformedInsights)
+      } else {
+        setInsights(MOCK_INSIGHTS)
+      }
+
+      // Use mock invoices for now
       setInvoices(MOCK_INVOICES)
-      setInsights(MOCK_INSIGHTS)
-      setOverview(MOCK_FINANCIAL_OVERVIEW)
 
       setIsLoading(false)
-      logger.info('Financial overview loaded successfully', {
-        transactionCount: MOCK_TRANSACTIONS.length,
-        invoiceCount: MOCK_INVOICES.length,
-        insightCount: MOCK_INSIGHTS.length
+      logger.info('Financial overview loaded successfully from Supabase', {
+        transactionCount: transactionsResult.data.length,
+        insightCount: insightsResult.data.length,
+        userId
       })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load financial overview'
       setError(errorMessage)
       setIsLoading(false)
-      logger.error('Failed to load financial overview', { error: err })
+      logger.error('Failed to load financial overview', { error: err, userId })
+
+      // Fallback to mock data on error
+      setTransactions(MOCK_TRANSACTIONS)
+      setInvoices(MOCK_INVOICES)
+      setInsights(MOCK_INSIGHTS)
+      setOverview(MOCK_FINANCIAL_OVERVIEW)
     }
   }
 
