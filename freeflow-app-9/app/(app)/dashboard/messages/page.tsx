@@ -571,32 +571,59 @@ export default function MessagesPage() {
 
   // Load chats on mount
   useEffect(() => {
-    logger.info('Loading chats on mount')
+    logger.info('Loading chats from Supabase')
     const loadChats = async () => {
+      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
       try {
         setIsLoading(true)
         setError(null)
-        logger.debug('Initiating chat load API call')
 
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.98) {
-              logger.error('Chat load API call failed (simulated)')
-              reject(new Error('Failed to load messages'))
-            } else {
-              logger.debug('Chat load API call successful')
-              resolve(null)
-            }
-          }, 1000)
+        logger.info('Loading chats from Supabase', { userId })
+
+        // Dynamic import for code splitting
+        const { getChats } = await import('@/lib/messages-queries')
+
+        const { data: chatsData, error: chatsError } = await getChats(
+          userId,
+          { is_archived: false }, // Don't load archived by default
+          50 // limit
+        )
+
+        if (chatsError) {
+          throw new Error(chatsError.message || 'Failed to load chats')
+        }
+
+        // Transform Supabase data to UI format
+        const transformedChats: Chat[] = chatsData.map((c) => ({
+          id: c.id,
+          name: c.name,
+          lastMessage: 'No messages yet',
+          unread: c.unread_count,
+          avatar: c.avatar_url || c.name.substring(0, 2).toUpperCase(),
+          type: c.type,
+          isOnline: false,
+          isPinned: c.is_pinned,
+          isMuted: c.is_muted,
+          isArchived: c.is_archived,
+          category: c.type === 'group' || c.type === 'channel' ? 'groups' : 'all'
+        }))
+
+        dispatch({ type: 'SET_CHATS', chats: transformedChats })
+        setIsLoading(false)
+        announce(`${transformedChats.length} conversations loaded from database`, 'polite')
+
+        logger.info('Chats loaded successfully from Supabase', {
+          count: transformedChats.length,
+          userId
         })
 
-        dispatch({ type: 'SET_CHATS', chats: mockChats })
-        setIsLoading(false)
-        logger.info('Chats loaded successfully', { chatCount: mockChats.length })
-        announce(`${mockChats.length} conversations loaded`, 'polite')
+        toast.success('Chats loaded', {
+          description: `${transformedChats.length} conversations from database`
+        })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load messages'
-        logger.error('Failed to load chats', { error: errorMessage })
+        logger.error('Failed to load chats from Supabase', { error: err, userId })
         setError(errorMessage)
         setIsLoading(false)
         announce('Error loading messages', 'assertive')
@@ -609,11 +636,56 @@ export default function MessagesPage() {
   // Load messages when chat selected
   useEffect(() => {
     if (state.selectedChat) {
-      logger.info('Loading messages for selected chat', {
+      logger.info('Loading messages for selected chat from Supabase', {
         chatId: state.selectedChat.id,
         chatName: state.selectedChat.name
       })
-      dispatch({ type: 'SET_MESSAGES', messages: mockMessagesForChat })
+
+      const loadMessages = async () => {
+        try {
+          // Dynamic import
+          const { getMessages } = await import('@/lib/messages-queries')
+
+          const { data: messagesData, error: messagesError } = await getMessages(
+            state.selectedChat!.id,
+            undefined, // no filters
+            50 // limit
+          )
+
+          if (messagesError) {
+            throw new Error(messagesError.message || 'Failed to load messages')
+          }
+
+          // Transform to UI format
+          const transformedMessages: Message[] = messagesData.map((m) => ({
+            id: m.id,
+            text: m.text,
+            sender: m.sender_id === 'demo-user-123' ? 'You' : state.selectedChat!.name,
+            senderId: m.sender_id,
+            timestamp: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            type: m.type,
+            status: m.status,
+            replyTo: m.reply_to_id || undefined,
+            isEdited: m.is_edited,
+            isPinned: m.is_pinned
+          })).reverse() // Reverse to show oldest first in UI
+
+          dispatch({ type: 'SET_MESSAGES', messages: transformedMessages })
+
+          logger.info('Messages loaded successfully from Supabase', {
+            count: transformedMessages.length,
+            chatId: state.selectedChat.id
+          })
+        } catch (error: any) {
+          logger.error('Failed to load messages from Supabase', {
+            error: error.message,
+            chatId: state.selectedChat.id
+          })
+          dispatch({ type: 'SET_MESSAGES', messages: [] })
+        }
+      }
+
+      loadMessages()
 
       // Load draft if exists
       const draft = messageDrafts[state.selectedChat.id]
@@ -622,7 +694,7 @@ export default function MessagesPage() {
         logger.debug('Draft message restored', { chatId: state.selectedChat.id, draftLength: draft.length })
       }
     }
-  }, [state.selectedChat, messageDrafts])
+  }, [state.selectedChat?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -667,6 +739,8 @@ export default function MessagesPage() {
   // ============================================================================
 
   const handleSendMessage = async () => {
+    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
     if (!newMessage.trim() || !state.selectedChat || isSending) {
       logger.warn('Cannot send message', {
         hasMessage: !!newMessage.trim(),
@@ -682,40 +756,59 @@ export default function MessagesPage() {
       return handleSubmitEdit()
     }
 
-    logger.info('Sending message', {
+    logger.info('Sending message to Supabase', {
       chatId: state.selectedChat.id,
       chatName: state.selectedChat.name,
       contentLength: newMessage.length,
-      hasReply: !!replyToMessage
+      hasReply: !!replyToMessage,
+      userId
     })
 
     try {
       setIsSending(true)
 
-      // REAL: Create message with timestamp
-      const timestamp = new Date().toISOString()
-      const localMessage: Message = {
-        id: `msg-${Date.now()}`,
-        text: newMessage,
-        sender: 'You',
-        senderId: 'user-1',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        type: 'text',
-        status: 'sending',
-        replyTo: replyToMessage?.id
+      // Dynamic import
+      const { sendMessage } = await import('@/lib/messages-queries')
+
+      const { data, error } = await sendMessage(
+        state.selectedChat.id,
+        userId,
+        {
+          text: newMessage,
+          type: 'text',
+          status: 'sent',
+          reply_to_id: replyToMessage?.id || null
+        }
+      )
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to send message')
       }
 
-      // REAL: Add message to state immediately (optimistic update)
-      dispatch({ type: 'ADD_MESSAGE', message: localMessage })
+      // Transform and add to UI
+      const uiMessage: Message = {
+        id: data.id,
+        text: data.text,
+        sender: 'You',
+        senderId: userId,
+        timestamp: new Date(data.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        type: data.type,
+        status: data.status,
+        replyTo: data.reply_to_id || undefined,
+        isEdited: data.is_edited,
+        isPinned: data.is_pinned
+      }
 
-      // REAL: Update chat's last message
+      dispatch({ type: 'ADD_MESSAGE', message: uiMessage })
+
+      // Update chat's last message
       dispatch({
         type: 'UPDATE_CHAT',
         chatId: state.selectedChat.id,
         updates: { lastMessage: newMessage.substring(0, 50) }
       })
 
-      // REAL: Clear draft for this chat
+      // Clear draft for this chat
       setMessageDrafts(prev => {
         const updated = { ...prev }
         delete updated[state.selectedChat!.id]
@@ -725,31 +818,22 @@ export default function MessagesPage() {
       setNewMessage('')
       setReplyToMessage(null)
 
-      logger.info('Message sent successfully', {
-        messageId: localMessage.id,
-        timestamp,
-        contentLength: newMessage.length
+      logger.info('Message sent successfully to Supabase', {
+        messageId: data.id,
+        chatId: state.selectedChat.id,
+        contentLength: newMessage.length,
+        userId
       })
 
       toast.success('Message sent', {
-        description: `To ${state.selectedChat.name} at ${localMessage.timestamp}`
+        description: `To ${state.selectedChat.name} at ${uiMessage.timestamp}`
       })
-
-      // Update message status to delivered after delay
-      setTimeout(() => {
-        dispatch({
-          type: 'UPDATE_MESSAGE',
-          messageId: localMessage.id,
-          updates: { status: 'delivered' }
-        })
-        logger.debug('Message status updated to delivered', { messageId: localMessage.id })
-      }, 1000)
 
       // Focus back on input
       messageInputRef.current?.focus()
     } catch (error: any) {
       const errorMessage = error?.message || 'Failed to send message'
-      logger.error('Failed to send message', { error: errorMessage })
+      logger.error('Failed to send message to Supabase', { error: errorMessage, userId })
       toast.error('Failed to send message', {
         description: errorMessage
       })
@@ -960,6 +1044,8 @@ export default function MessagesPage() {
   }
 
   const handleNewChat = async () => {
+    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
     if (!newChatName.trim()) {
       logger.warn('Cannot create chat - empty name')
       toast.error('Chat name required')
@@ -968,54 +1054,75 @@ export default function MessagesPage() {
 
     const memberCount = newChatType === 'group' ? newChatMembers.split(',').length + 1 : undefined
 
-    logger.info('Creating new chat', {
+    logger.info('Creating new chat in Supabase', {
       chatName: newChatName,
       chatType: newChatType,
-      memberCount
+      memberCount,
+      userId
     })
 
     try {
-      // REAL: Create new chat with timestamp
-      const newChat: Chat = {
-        id: `chat-${Date.now()}`,
+      // Dynamic import
+      const { createChat } = await import('@/lib/messages-queries')
+
+      const { data, error } = await createChat(userId, {
         name: newChatName,
+        type: newChatType,
+        description: null,
+        avatar_url: null,
+        is_pinned: false,
+        is_muted: false,
+        is_archived: false
+      })
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to create chat')
+      }
+
+      // Transform to UI format
+      const uiChat: Chat = {
+        id: data.id,
+        name: data.name,
         lastMessage: 'Chat created',
         unread: 0,
         avatar: newChatName.substring(0, 2).toUpperCase(),
-        type: newChatType,
+        type: data.type,
         members: memberCount,
         isOnline: true,
-        isPinned: false,
-        isMuted: false,
-        isArchived: false,
-        category: newChatType === 'group' ? 'groups' : 'all'
+        isPinned: data.is_pinned,
+        isMuted: data.is_muted,
+        isArchived: data.is_archived,
+        category: data.type === 'group' || data.type === 'channel' ? 'groups' : 'all'
       }
 
-      // REAL: Add to chats list (newest first)
-      dispatch({ type: 'SET_CHATS', chats: [newChat, ...state.chats] })
+      // Add to chats list (newest first)
+      dispatch({ type: 'SET_CHATS', chats: [uiChat, ...state.chats] })
 
       setIsNewChatModalOpen(false)
       setNewChatName('')
       setNewChatType('direct')
       setNewChatMembers('')
 
-      logger.info('Chat created successfully', {
-        chatId: newChat.id,
-        chatName: newChat.name,
-        chatType: newChat.type
+      logger.info('Chat created successfully in Supabase', {
+        chatId: data.id,
+        chatName: data.name,
+        chatType: data.type,
+        userId
       })
 
       toast.success('Chat created', {
         description: `New ${newChatType} conversation: ${newChatName}`
       })
 
-      // REAL: Auto-select new chat
-      dispatch({ type: 'SELECT_CHAT', chat: newChat })
+      // Auto-select new chat
+      dispatch({ type: 'SELECT_CHAT', chat: uiChat })
       announce(`New chat created with ${newChatName}`, 'polite')
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create chat'
-      logger.error('Failed to create chat', { error: errorMessage })
-      toast.error('Failed to create chat')
+      logger.error('Failed to create chat in Supabase', { error: errorMessage, userId })
+      toast.error('Failed to create chat', {
+        description: errorMessage
+      })
     }
   }
 
