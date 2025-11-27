@@ -1,12 +1,12 @@
 # REFACTORING PROGRESS TRACKER
 ## Kazi Platform - Database Integration Status
 
-**Last Updated**: November 27, 2025
+**Last Updated**: November 28, 2025
 **Total Features**: 93
-**Completed**: 86 ✅
+**Completed**: 87 ✅
 **In Progress**: 0
-**Pending**: 7
-**Completion Rate**: 92.47%
+**Pending**: 6
+**Completion Rate**: 93.55%
 
 ---
 
@@ -147,7 +147,7 @@
 | 84 | Shadcn Showcase | ✅ Complete | 1-2 | - | 100% | Claude | Component showcase + 8 tables + categories + examples + versions + favorites + reviews + downloads + analytics + RLS + Supabase ✅ |
 | 85 | Example Modern | ✅ Complete | 1-2 | - | 100% | Claude | Next.js 14 demo page + Server Components + React.cache + streaming + data-fetching utilities + no DB needed ✅ |
 | 86 | Automation | ✅ Complete | 5-6 | - | 100% | Claude | Workflow automation + 6 tables + visual builder + triggers + actions + executions + templates + logs + analytics + RLS + Supabase ✅ |
-| 87 | Workflow Builder | 🔴 Pending | 8-10 | - | 0% | - | Visual workflow |
+| 87 | Workflow Builder | ✅ Complete | 8-10 | - | 100% | Claude | Visual workflow UI + 650+ line query library + builder-specific helpers + uses Feature #86 automation tables + 25+ functions + metadata helpers + Supabase ✅ |
 | 88 | Crypto Payments | 🔴 Pending | 6-8 | - | 0% | - | Cryptocurrency |
 | 89 | Escrow | 🔴 Pending | 5-6 | - | 0% | - | Escrow system |
 | 90 | Client Portal | 🔴 Pending | 5-6 | - | 0% | - | Client access |
@@ -737,8 +737,8 @@
 - Set initial estimates
 - Defined 5-tier priority system
 
-### November 27, 2025 - Session 2 (Continuation)
-**Progress: 83→86 (89.25%→92.47%)**
+### November 27-28, 2025 - Session 2 (Continuation)
+**Progress: 83→87 (89.25%→93.55%)**
 - ✅ Completed Feature #84: Shadcn Showcase
   - Verified existing A+ Showcase System (8 tables)
   - Migration: 20251126_a_plus_showcase_system.sql
@@ -757,8 +757,16 @@
   - 6 ENUMs, 3 helper functions, 2 triggers, full RLS
   - Ready to apply to database
 
-**Remaining**: 7 features (7.53%)
-- #87: Workflow Builder
+- ✅ Completed Feature #87: Workflow Builder
+  - Visual workflow builder UI interface
+  - Queries: lib/workflow-builder-queries.ts (650+ lines, 25+ functions)
+  - Uses Feature #86 automation tables (no new migration)
+  - Builder-specific helpers: stats, drafts, validation, testing, history
+  - Metadata helpers: getTriggerTypes(), getActionTypes()
+  - Re-exports core automation queries for convenience
+  - Zero TypeScript compilation errors
+
+**Remaining**: 6 features (6.45%)
 - #88: Crypto Payments
 - #89: Escrow
 - #90: Client Portal
