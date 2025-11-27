@@ -1,6 +1,17 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
+import { createFeatureLogger } from '@/lib/logger'
+import {
+  getMembers,
+  getPosts,
+  createPost,
+  togglePostLike,
+  type CommunityMember as DBMember,
+  type CommunityPost as DBPost
+} from '@/lib/community-hub-queries'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -192,6 +203,8 @@ const MOCK_POSTS: Post[] = [
   }
 ]
 
+const logger = createFeatureLogger('CommunityHub')
+
 export default function CommunityHub({ currentUserId, onPostCreate, onMemberConnect }: CommunityHubProps) {
   const [posts, setPosts] = useState<Post[]>(MOCK_POSTS)
   const [members, setMembers] = useState<CommunityMember[]>(MOCK_MEMBERS)
@@ -201,6 +214,81 @@ export default function CommunityHub({ currentUserId, onPostCreate, onMemberConn
   const [newPostType, setNewPostType] = useState<Post['type']>('text')
   const [newPostTags, setNewPostTags] = useState<any>('')
   const [showCreatePost, setShowCreatePost] = useState<any>(false)
+  const [loading, setLoading] = useState(true)
+
+  // Load real data from Supabase
+  useEffect(() => {
+    const loadCommunityData = async () => {
+      try {
+        setLoading(true)
+        logger.info('Loading community data from Supabase')
+
+        // Fetch members and posts in parallel
+        const [membersResult, postsResult] = await Promise.all([
+          getMembers({}),
+          getPosts({})
+        ])
+
+        // Transform members data
+        if (membersResult.data && membersResult.data.length > 0) {
+          const transformedMembers: CommunityMember[] = membersResult.data.map((m) => ({
+            id: m.id,
+            name: m.name,
+            username: `@${m.name.toLowerCase().replace(/\s+/g, '')}`,
+            avatar: m.avatar,
+            bio: m.bio || '',
+            location: m.location,
+            skills: m.skills.slice(0, 4), // Limit to 4 skills for UI
+            rating: Number(m.rating),
+            projects: m.total_projects,
+            joined: new Date(m.created_at).toISOString().split('T')[0],
+            verified: m.is_verified,
+            online: m.is_online
+          }))
+          setMembers(transformedMembers)
+          logger.info('Members loaded', { count: transformedMembers.length })
+        }
+
+        // Transform posts data
+        if (postsResult.data && postsResult.data.length > 0) {
+          // Get member map for author lookup
+          const memberMap = new Map(members.map(m => [m.id, m]))
+
+          const transformedPosts: Post[] = postsResult.data.map((p) => {
+            const author = memberMap.get(p.author_id) || members[0] || MOCK_MEMBERS[0]
+            return {
+              id: p.id,
+              author,
+              content: p.content,
+              tags: p.tags,
+              likes: p.likes_count,
+              comments: p.comments_count,
+              shares: p.shares_count,
+              bookmarked: false,
+              liked: false,
+              createdAt: p.created_at,
+              type: p.type as 'text' | 'project' | 'question' | 'event' | 'job'
+            }
+          })
+          setPosts(transformedPosts)
+          logger.info('Posts loaded', { count: transformedPosts.length })
+        }
+
+        setLoading(false)
+        toast.success('Community loaded', {
+          description: `${membersResult.data?.length || 0} members • ${postsResult.data?.length || 0} posts`
+        })
+      } catch (error: any) {
+        logger.error('Failed to load community data', { error: error.message })
+        // Fall back to mock data on error
+        setPosts(MOCK_POSTS)
+        setMembers(MOCK_MEMBERS)
+        setLoading(false)
+      }
+    }
+
+    loadCommunityData()
+  }, [])
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
