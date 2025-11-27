@@ -41,6 +41,50 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { createClient } from '@/lib/supabase/client'
+
+// TYPES
+interface TeamMemberUI {
+  id: string
+  name: string
+  email: string
+  avatar?: string
+  bio?: string
+  role: string
+  roleLevel: 'entry' | 'mid' | 'senior' | 'lead' | 'executive'
+  department: string
+  phone?: string
+  location?: string
+  timezone: string
+  status: 'online' | 'offline' | 'busy' | 'away'
+  availability: string
+  lastSeen?: string
+  skills: string[]
+  startDate?: string
+  projects: number
+  tasksCompleted: number
+  rating: number
+  currentProjects: string[]
+}
+
+interface DepartmentUI {
+  name: string
+  type: string
+  description?: string
+  count: number
+  color: string
+  activeProjects: number
+  budget?: number
+}
+
+interface TeamOverview {
+  totalMembers: number
+  onlineMembers: number
+  totalDepartments: number
+  totalProjects: number
+  totalTasksCompleted: number
+  averageRating: number
+}
 
 const logger = createFeatureLogger('TeamHub')
 
@@ -50,169 +94,134 @@ export default function TeamHubPage() {
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
 
-  const [selectedMember, setSelectedMember] = useState<any>(null)
+  const [selectedMember, setSelectedMember] = useState<TeamMemberUI | null>(null)
   const [activeTab, setActiveTab] = useState<string>('overview')
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [filterDepartment, setFilterDepartment] = useState<string>('all')
 
-  // REAL TEAM DATA STATE - Now with useState for CRUD operations
-  const [teamMembers, setTeamMembers] = useState([
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      role: 'Lead Designer',
-      department: 'Design',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
-      status: 'online',
-      email: 'sarah@company.com',
-      phone: '+1 (555) 123-4567',
-      location: 'San Francisco, CA',
-      joinDate: '2023-01-15',
-      projects: 12,
-      tasksCompleted: 156,
-      rating: 4.9,
-      skills: ['UI/UX Design', 'Figma', 'Sketch', 'Adobe Creative Suite'],
-      currentProjects: ['Brand Identity', 'Website Redesign'],
-      availability: 'Available'
-    },
-    {
-      id: 2,
-      name: 'Mike Chen',
-      role: 'Frontend Developer',
-      department: 'Development',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike',
-      status: 'busy',
-      email: 'mike@company.com',
-      phone: '+1 (555) 234-5678',
-      location: 'New York, NY',
-      joinDate: '2023-03-20',
-      projects: 8,
-      tasksCompleted: 203,
-      rating: 4.8,
-      skills: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS'],
-      currentProjects: ['E-commerce Platform', 'Mobile App'],
-      availability: 'Busy until 3 PM'
-    },
-    {
-      id: 3,
-      name: 'Emma Wilson',
-      role: 'Project Manager',
-      department: 'Management',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma',
-      status: 'away',
-      email: 'emma@company.com',
-      phone: '+1 (555) 345-6789',
-      location: 'Austin, TX',
-      joinDate: '2022-11-10',
-      projects: 15,
-      tasksCompleted: 89,
-      rating: 4.7,
-      skills: ['Project Management', 'Agile', 'Scrum', 'Team Leadership'],
-      currentProjects: ['Client Onboarding', 'Team Training'],
-      availability: 'In Meeting'
-    },
-    {
-      id: 4,
-      name: 'David Kim',
-      role: 'Backend Developer',
-      department: 'Development',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David',
-      status: 'offline',
-      email: 'david@company.com',
-      phone: '+1 (555) 456-7890',
-      location: 'Seattle, WA',
-      joinDate: '2023-05-01',
-      projects: 6,
-      tasksCompleted: 134,
-      rating: 4.6,
-      skills: ['Node.js', 'Python', 'PostgreSQL', 'AWS'],
-      currentProjects: ['API Development', 'Database Migration'],
-      availability: 'Offline'
-    },
-    {
-      id: 5,
-      name: 'Lisa Brown',
-      role: 'Content Strategist',
-      department: 'Marketing',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lisa',
-      status: 'online',
-      email: 'lisa@company.com',
-      phone: '+1 (555) 567-8901',
-      location: 'Miami, FL',
-      joinDate: '2023-07-15',
-      projects: 10,
-      tasksCompleted: 67,
-      rating: 4.5,
-      skills: ['Content Strategy', 'SEO', 'Social Media', 'Analytics'],
-      currentProjects: ['Content Calendar', 'Brand Guidelines'],
-      availability: 'Available'
-    },
-    {
-      id: 6,
-      name: 'Alex Rivera',
-      role: 'QA Engineer',
-      department: 'Quality Assurance',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex',
-      status: 'online',
-      email: 'alex@company.com',
-      phone: '+1 (555) 678-9012',
-      location: 'Denver, CO',
-      joinDate: '2023-09-01',
-      projects: 7,
-      tasksCompleted: 98,
-      rating: 4.8,
-      skills: ['Manual Testing', 'Automation', 'Selenium', 'Jest'],
-      currentProjects: ['Test Automation', 'Quality Assurance'],
-      availability: 'Available'
-    }
-  ])
+  // SUPABASE STATE
+  const [userId, setUserId] = useState<string | null>(null)
+  const [teamMembers, setTeamMembers] = useState<TeamMemberUI[]>([])
+  const [departments, setDepartments] = useState<DepartmentUI[]>([])
+  const [teamOverview, setTeamOverview] = useState<TeamOverview | null>(null)
 
-  const [departments, setDepartments] = useState([
-    { name: 'Design', count: 1, color: 'bg-purple-100 text-purple-800' },
-    { name: 'Development', count: 2, color: 'bg-blue-100 text-blue-800' },
-    { name: 'Management', count: 1, color: 'bg-green-100 text-green-800' },
-    { name: 'Marketing', count: 1, color: 'bg-orange-100 text-orange-800' },
-    { name: 'Quality Assurance', count: 1, color: 'bg-red-100 text-red-800' }
-  ])
-
-  // COMPUTED TEAM STATS - Updated dynamically from state
+  // COMPUTED TEAM STATS - Updated dynamically from Supabase data
   const teamStats = {
-    totalMembers: teamMembers.length,
-    onlineMembers: teamMembers.filter(m => m.status === 'online').length,
-    activeProjects: teamMembers.reduce((sum, m) => sum + m.projects, 0),
-    completedTasks: teamMembers.reduce((sum, m) => sum + m.tasksCompleted, 0),
-    averageRating: teamMembers.length > 0 ? teamMembers.reduce((sum, m) => sum + m.rating, 0) / teamMembers.length : 0
+    totalMembers: teamOverview?.totalMembers || teamMembers.length,
+    onlineMembers: teamOverview?.onlineMembers || teamMembers.filter(m => m.status === 'online').length,
+    activeProjects: teamOverview?.totalProjects || teamMembers.reduce((sum, m) => sum + m.projects, 0),
+    completedTasks: teamOverview?.totalTasksCompleted || teamMembers.reduce((sum, m) => sum + m.tasksCompleted, 0),
+    averageRating: teamOverview?.averageRating || (teamMembers.length > 0 ? teamMembers.reduce((sum, m) => sum + m.rating, 0) / teamMembers.length : 0)
   }
 
-  // A+++ LOAD TEAM DATA
+  // A+++ LOAD TEAM DATA FROM SUPABASE
   useEffect(() => {
     const loadTeamData = async () => {
       try {
-        logger.info('Team data loading initiated', {
-          initialMemberCount: teamMembers.length,
-          departments: departments.length
-        })
+        logger.info('Team data loading initiated')
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load team data'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
+        // Get authenticated user
+        const supabase = createClient()
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+        if (userError || !user) {
+          logger.error('Failed to get authenticated user', { error: userError })
+          setError('Please sign in to view team data')
+          setIsLoading(false)
+          return
+        }
+
+        setUserId(user.id)
+
+        // Dynamic imports for code splitting
+        const [
+          { getTeamMembers },
+          { getDepartments },
+          { getTeamOverview }
+        ] = await Promise.all([
+          import('@/lib/team-hub-queries'),
+          import('@/lib/team-hub-queries'),
+          import('@/lib/team-hub-queries')
+        ])
+
+        // Load all data in parallel
+        const [membersResult, depsResult, overviewResult] = await Promise.all([
+          getTeamMembers(user.id),
+          getDepartments(user.id),
+          getTeamOverview(user.id)
+        ])
+
+        if (membersResult.error) {
+          throw new Error(membersResult.error.message || 'Failed to load team members')
+        }
+
+        if (depsResult.error) {
+          throw new Error(depsResult.error.message || 'Failed to load departments')
+        }
+
+        // Transform team members to UI format
+        const transformedMembers: TeamMemberUI[] = (membersResult.data || []).map(member => ({
+          id: member.id,
+          name: member.name,
+          email: member.email,
+          avatar: member.avatar,
+          bio: member.bio,
+          role: member.role,
+          roleLevel: member.role_level,
+          department: member.department,
+          phone: member.phone,
+          location: member.location,
+          timezone: member.timezone,
+          status: member.status,
+          availability: member.availability,
+          lastSeen: member.last_seen,
+          skills: member.skills,
+          startDate: member.start_date,
+          projects: member.projects_count,
+          tasksCompleted: member.tasks_completed,
+          rating: Number(member.rating),
+          currentProjects: [] // Will be populated from project assignments
+        }))
+
+        // Transform departments to UI format
+        const transformedDepartments: DepartmentUI[] = (depsResult.data || []).map(dept => {
+          const colorMap: Record<string, string> = {
+            'design': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+            'development': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+            'management': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+            'marketing': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+            'qa': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+            'content': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+            'operations': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300',
+            'analytics': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-300',
+            'sales': 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300',
+            'support': 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300'
+          }
+
+          return {
+            name: dept.name,
+            type: dept.type,
+            description: dept.description,
+            count: dept.member_count,
+            color: colorMap[dept.type] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
+            activeProjects: dept.active_projects,
+            budget: dept.budget ? Number(dept.budget) : undefined
+          }
         })
+
+        setTeamMembers(transformedMembers)
+        setDepartments(transformedDepartments)
+        setTeamOverview(overviewResult.data)
 
         setIsLoading(false)
         announce('Team data loaded successfully', 'polite')
         logger.info('Team data loaded successfully', {
-          totalMembers: teamMembers.length,
-          onlineMembers: teamMembers.filter(m => m.status === 'online').length,
-          departments: departments.length
+          totalMembers: transformedMembers.length,
+          onlineMembers: transformedMembers.filter(m => m.status === 'online').length,
+          departments: transformedDepartments.length
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load team data'
@@ -224,14 +233,19 @@ export default function TeamHubPage() {
     }
 
     loadTeamData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [announce])
 
   // ============================================================
-  // REAL WORKING CRUD HANDLERS WITH PRODUCTION LOGGER
+  // REAL WORKING CRUD HANDLERS WITH SUPABASE
   // ============================================================
 
   // REAL FEATURE: Add Team Member
-  const handleAddMember = useCallback(() => {
+  const handleAddMember = useCallback(async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to add team members' })
+      return
+    }
+
     logger.info('Add team member initiated', {
       currentTeamSize: teamMembers.length,
       departments: departments.length
@@ -243,67 +257,125 @@ export default function TeamHubPage() {
       return
     }
 
-    const memberRole = prompt('Enter role:') || 'Team Member'
-    const memberDept = prompt('Enter department (Design/Development/Management/Marketing/Quality Assurance):') || 'Development'
-
-    const newMember = {
-      id: Math.max(...teamMembers.map(m => m.id), 0) + 1,
-      name: memberName,
-      role: memberRole,
-      department: memberDept,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${memberName}`,
-      status: 'online',
-      email: `${memberName.toLowerCase().replace(' ', '.')}@company.com`,
-      phone: '+1 (555) ' + Math.floor(Math.random() * 900 + 100) + '-' + Math.floor(Math.random() * 9000 + 1000),
-      location: 'Remote',
-      joinDate: new Date().toISOString().split('T')[0],
-      projects: 0,
-      tasksCompleted: 0,
-      rating: 4.0,
-      skills: [],
-      currentProjects: [],
-      availability: 'Available'
+    const memberEmail = prompt('Enter email:')
+    if (!memberEmail) {
+      logger.debug('Add member cancelled - no email provided')
+      return
     }
 
-    setTeamMembers(prev => [...prev, newMember])
+    const memberRole = prompt('Enter role:') || 'Team Member'
+    const memberDept = prompt('Enter department (design/development/management/marketing/qa/content/operations/analytics/sales/support):') || 'development'
 
-    logger.info('Team member added successfully', {
-      memberId: newMember.id,
-      memberName: newMember.name,
-      role: newMember.role,
-      department: newMember.department,
-      newTeamSize: teamMembers.length + 1
-    })
+    try {
+      const { createTeamMember } = await import('@/lib/team-hub-queries')
 
-    toast.success('Team Member Added', {
-      description: `${memberName} added as ${memberRole}`
-    })
-    announce(`${memberName} added to team`, 'polite')
-  }, [teamMembers, departments, announce])
+      const { data: newMember, error } = await createTeamMember(userId, {
+        name: memberName,
+        email: memberEmail,
+        role: memberRole,
+        department: memberDept as any,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${memberName}`,
+        timezone: 'UTC'
+      })
+
+      if (error || !newMember) {
+        throw new Error(error?.message || 'Failed to create team member')
+      }
+
+      // Add to local state
+      const transformedMember: TeamMemberUI = {
+        id: newMember.id,
+        name: newMember.name,
+        email: newMember.email,
+        avatar: newMember.avatar,
+        bio: newMember.bio,
+        role: newMember.role,
+        roleLevel: newMember.role_level,
+        department: newMember.department,
+        phone: newMember.phone,
+        location: newMember.location,
+        timezone: newMember.timezone,
+        status: newMember.status,
+        availability: newMember.availability,
+        lastSeen: newMember.last_seen,
+        skills: newMember.skills,
+        startDate: newMember.start_date,
+        projects: newMember.projects_count,
+        tasksCompleted: newMember.tasks_completed,
+        rating: Number(newMember.rating),
+        currentProjects: []
+      }
+
+      setTeamMembers(prev => [...prev, transformedMember])
+
+      logger.info('Team member added successfully', {
+        memberId: newMember.id,
+        memberName: newMember.name,
+        role: newMember.role,
+        department: newMember.department,
+        newTeamSize: teamMembers.length + 1
+      })
+
+      toast.success('Team Member Added', {
+        description: `${memberName} added as ${memberRole} in ${memberDept}`
+      })
+      announce(`${memberName} added to team`, 'polite')
+    } catch (error) {
+      logger.error('Failed to add team member', { error })
+      toast.error('Failed to add team member', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      })
+    }
+  }, [userId, teamMembers, departments, announce])
 
   // REAL FEATURE: Remove Team Member
-  const handleRemoveMember = useCallback((memberId: number, memberName: string) => {
+  const handleRemoveMember = useCallback(async (memberId: string, memberName: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to remove team members' })
+      return
+    }
+
     if (!confirm(`Remove ${memberName} from the team?`)) {
       logger.debug('Remove member cancelled', { memberId, memberName })
       return
     }
 
-    setTeamMembers(prev => prev.filter(m => m.id !== memberId))
+    try {
+      const { deleteTeamMember } = await import('@/lib/team-hub-queries')
 
-    logger.info('Team member removed', {
-      memberId,
-      memberName,
-      newTeamSize: teamMembers.length - 1
-    })
+      const { success, error } = await deleteTeamMember(memberId, userId)
 
-    toast.success('Team Member Removed', {
-      description: `${memberName} has been removed from the team`
-    })
-    announce(`${memberName} removed from team`, 'polite')
-  }, [teamMembers, announce])
+      if (error || !success) {
+        throw new Error(error?.message || 'Failed to delete team member')
+      }
+
+      setTeamMembers(prev => prev.filter(m => m.id !== memberId))
+
+      logger.info('Team member removed', {
+        memberId,
+        memberName,
+        newTeamSize: teamMembers.length - 1
+      })
+
+      toast.success('Team Member Removed', {
+        description: `${memberName} has been removed from the team`
+      })
+      announce(`${memberName} removed from team`, 'polite')
+    } catch (error) {
+      logger.error('Failed to remove team member', { error, memberId })
+      toast.error('Failed to remove team member', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      })
+    }
+  }, [userId, teamMembers, announce])
 
   // REAL FEATURE: Update Member Role
-  const handleUpdateRole = useCallback((memberId: number, currentRole: string) => {
+  const handleUpdateRole = useCallback(async (memberId: string, currentRole: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to update roles' })
+      return
+    }
+
     const member = teamMembers.find(m => m.id === memberId)
     if (!member) return
 
@@ -313,25 +385,47 @@ export default function TeamHubPage() {
       return
     }
 
-    setTeamMembers(prev => prev.map(m =>
-      m.id === memberId ? { ...m, role: newRole } : m
-    ))
+    try {
+      const { updateTeamMember } = await import('@/lib/team-hub-queries')
 
-    logger.info('Member role updated', {
-      memberId,
-      memberName: member.name,
-      oldRole: currentRole,
-      newRole
-    })
+      const { data: updatedMember, error } = await updateTeamMember(memberId, userId, {
+        role: newRole
+      })
 
-    toast.success('Role Updated', {
-      description: `${member.name}'s role changed to ${newRole}`
-    })
-    announce(`${member.name} role updated to ${newRole}`, 'polite')
-  }, [teamMembers, announce])
+      if (error || !updatedMember) {
+        throw new Error(error?.message || 'Failed to update member role')
+      }
+
+      setTeamMembers(prev => prev.map(m =>
+        m.id === memberId ? { ...m, role: newRole } : m
+      ))
+
+      logger.info('Member role updated', {
+        memberId,
+        memberName: member.name,
+        oldRole: currentRole,
+        newRole
+      })
+
+      toast.success('Role Updated', {
+        description: `${member.name}'s role changed to ${newRole}`
+      })
+      announce(`${member.name} role updated to ${newRole}`, 'polite')
+    } catch (error) {
+      logger.error('Failed to update member role', { error, memberId })
+      toast.error('Failed to update role', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      })
+    }
+  }, [userId, teamMembers, announce])
 
   // REAL FEATURE: Assign Task to Member
-  const handleAssignTask = useCallback((memberId: number) => {
+  const handleAssignTask = useCallback(async (memberId: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to assign tasks' })
+      return
+    }
+
     const member = teamMembers.find(m => m.id === memberId)
     if (!member) return
 
@@ -341,26 +435,42 @@ export default function TeamHubPage() {
       return
     }
 
-    setTeamMembers(prev => prev.map(m =>
-      m.id === memberId ? {
-        ...m,
-        projects: m.projects + 1,
-        currentProjects: [...m.currentProjects, taskName]
-      } : m
-    ))
+    try {
+      const { updateMemberStats } = await import('@/lib/team-hub-queries')
 
-    logger.info('Task assigned to team member', {
-      memberId,
-      memberName: member.name,
-      taskName,
-      newProjectCount: member.projects + 1
-    })
+      // Increment project count
+      const { success, error } = await updateMemberStats(memberId, true, false)
 
-    toast.success('Task Assigned', {
-      description: `"${taskName}" assigned to ${member.name}`
-    })
-    announce(`Task assigned to ${member.name}`, 'polite')
-  }, [teamMembers, announce])
+      if (error || !success) {
+        throw new Error(error?.message || 'Failed to update member stats')
+      }
+
+      setTeamMembers(prev => prev.map(m =>
+        m.id === memberId ? {
+          ...m,
+          projects: m.projects + 1,
+          currentProjects: [...m.currentProjects, taskName]
+        } : m
+      ))
+
+      logger.info('Task assigned to team member', {
+        memberId,
+        memberName: member.name,
+        taskName,
+        newProjectCount: member.projects + 1
+      })
+
+      toast.success('Task Assigned', {
+        description: `"${taskName}" assigned to ${member.name}`
+      })
+      announce(`Task assigned to ${member.name}`, 'polite')
+    } catch (error) {
+      logger.error('Failed to assign task', { error, memberId })
+      toast.error('Failed to assign task', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      })
+    }
+  }, [userId, teamMembers, announce])
 
   // REAL FEATURE: Export Team Data
   const handleTeamExport = useCallback((format: 'csv' | 'json' = 'csv') => {
@@ -374,18 +484,20 @@ export default function TeamHubPage() {
 
     try {
       if (format === 'csv') {
-        const headers = ['ID', 'Name', 'Role', 'Department', 'Email', 'Phone', 'Status', 'Projects', 'Tasks Completed', 'Rating']
+        const headers = ['ID', 'Name', 'Role', 'Department', 'Email', 'Phone', 'Status', 'Projects', 'Tasks Completed', 'Rating', 'Location', 'Timezone']
         const rows = teamMembers.map(m => [
           m.id,
           m.name,
           m.role,
           m.department,
           m.email,
-          m.phone,
+          m.phone || '',
           m.status,
           m.projects,
           m.tasksCompleted,
-          m.rating
+          m.rating,
+          m.location || '',
+          m.timezone
         ])
         const csv = [headers, ...rows].map(row => row.join(',')).join('\n')
         const blob = new Blob([csv], { type: 'text/csv' })
@@ -395,8 +507,39 @@ export default function TeamHubPage() {
         a.download = `team-data-${new Date().toISOString().split('T')[0]}.csv`
         a.click()
         URL.revokeObjectURL(url)
+
+        logger.info('CSV export completed', {
+          memberCount: teamMembers.length,
+          fileName: `team-data-${new Date().toISOString().split('T')[0]}.csv`
+        })
       } else {
-        const json = JSON.stringify({ teamMembers, teamStats, departments, exportDate: new Date().toISOString() }, null, 2)
+        const exportData = {
+          teamMembers: teamMembers.map(m => ({
+            id: m.id,
+            name: m.name,
+            email: m.email,
+            role: m.role,
+            roleLevel: m.roleLevel,
+            department: m.department,
+            status: m.status,
+            availability: m.availability,
+            projects: m.projects,
+            tasksCompleted: m.tasksCompleted,
+            rating: m.rating,
+            skills: m.skills,
+            location: m.location,
+            timezone: m.timezone
+          })),
+          teamStats,
+          departments: departments.map(d => ({
+            name: d.name,
+            type: d.type,
+            count: d.count,
+            activeProjects: d.activeProjects
+          })),
+          exportDate: new Date().toISOString()
+        }
+        const json = JSON.stringify(exportData, null, 2)
         const blob = new Blob([json], { type: 'application/json' })
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
@@ -404,16 +547,15 @@ export default function TeamHubPage() {
         a.download = `team-data-${new Date().toISOString().split('T')[0]}.json`
         a.click()
         URL.revokeObjectURL(url)
+
+        logger.info('JSON export completed', {
+          memberCount: teamMembers.length,
+          fileName: `team-data-${new Date().toISOString().split('T')[0]}.json`
+        })
       }
 
-      logger.info('Team data export completed', {
-        format,
-        memberCount: teamMembers.length,
-        exportDate: new Date().toISOString()
-      })
-
       toast.success('Export Complete', {
-        description: `Team data exported as ${format.toUpperCase()} (${teamMembers.length} members)`
+        description: `Team data exported as ${format.toUpperCase()} - ${teamMembers.length} members, ${departments.length} departments`
       })
     } catch (error) {
       logger.error('Team data export failed', { error, format })
@@ -1149,30 +1291,32 @@ export default function TeamHubPage() {
                     <div className="flex items-center space-x-3">
                       <Trophy className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
                       <div>
-                        <p className="text-sm kazi-text-tertiary">Avg Performance</p>
+                        <p className="text-sm kazi-text-tertiary">Avg Rating</p>
                         <p className="text-xl font-bold kazi-text-primary">
-                          {Math.round(teamMembers.reduce((acc, member) => acc + member.performance, 0) / teamMembers.length)}%
+                          {teamMembers.length > 0 ? (teamMembers.reduce((acc, member) => acc + member.rating, 0) / teamMembers.length).toFixed(1) : '0.0'}
                         </p>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="kazi-card p-4">
                     <div className="flex items-center space-x-3">
                       <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
                       <div>
-                        <p className="text-sm kazi-text-tertiary">Growth Rate</p>
-                        <p className="text-xl font-bold text-green-600 dark:text-green-400">+12%</p>
+                        <p className="text-sm kazi-text-tertiary">Tasks Completed</p>
+                        <p className="text-xl font-bold text-green-600 dark:text-green-400">
+                          {teamMembers.reduce((acc, member) => acc + member.tasksCompleted, 0)}
+                        </p>
                       </div>
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   <h3 className="font-semibold kazi-text-primary">Top Performers</h3>
                   <div className="space-y-3">
                     {teamMembers
-                      .sort((a, b) => b.performance - a.performance)
+                      .sort((a, b) => b.rating - a.rating)
                       .slice(0, 3)
                       .map((member, index) => (
                       <div key={member.id} className="flex items-center justify-between p-3 rounded-lg kazi-bg-secondary">
@@ -1192,7 +1336,7 @@ export default function TeamHubPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold kazi-text-primary">{member.performance}%</p>
+                          <p className="font-semibold kazi-text-primary">{member.rating.toFixed(1)} ⭐</p>
                           <p className="text-sm kazi-text-tertiary">{member.projects} projects</p>
                         </div>
                       </div>
