@@ -104,192 +104,98 @@ export default function GalleryPage() {
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
   const [generatedImage, setGeneratedImage] = useState<string>('')
 
-  // A+++ LOAD GALLERY DATA
+  // A+++ LOAD GALLERY DATA FROM SUPABASE
   useEffect(() => {
     const loadGalleryData = async () => {
+      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
       try {
         setIsPageLoading(true)
         setError(null)
 
-        logger.info('Loading gallery data')
+        logger.info('Loading gallery from Supabase', { userId })
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load gallery'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Dynamic import for code splitting
+        const { getGalleryImages, getGalleryAlbums } = await import('@/lib/gallery-queries')
 
-        // Initialize with mock data
-        initializeMockData()
+        // Fetch images and albums in parallel
+        const [imagesResult, albumsResult] = await Promise.all([
+          getGalleryImages(userId),
+          getGalleryAlbums(userId)
+        ])
 
+        if (imagesResult.error) {
+          throw new Error(imagesResult.error.message || 'Failed to load images')
+        }
+
+        if (albumsResult.error) {
+          throw new Error(albumsResult.error.message || 'Failed to load albums')
+        }
+
+        // Transform Supabase data to UI format
+        const transformedImages: ImageMetadata[] = (imagesResult.data || []).map(img => ({
+          id: img.id,
+          title: img.title,
+          description: img.description || '',
+          fileName: img.file_name,
+          fileSize: img.file_size,
+          width: img.width,
+          height: img.height,
+          format: img.format,
+          url: img.url,
+          thumbnail: img.thumbnail || img.url,
+          uploadDate: img.created_at,
+          tags: img.tags || [],
+          albumId: img.album_id,
+          isFavorite: img.is_favorite,
+          type: img.type === 'video' ? 'video' : 'image',
+          category: img.category,
+          client: img.client || undefined,
+          project: img.project || undefined,
+          likes: img.likes,
+          comments: 0 // Not in schema yet
+        }))
+
+        const transformedAlbums: Album[] = (albumsResult.data || []).map(album => ({
+          id: album.id,
+          name: album.name,
+          description: album.description || '',
+          coverImage: album.cover_image || '',
+          imageCount: album.image_count,
+          createdDate: album.created_at,
+          totalSize: album.total_size
+        }))
+
+        setImages(transformedImages)
+        setAlbums(transformedAlbums)
         setIsPageLoading(false)
         announce('Gallery loaded successfully', 'polite')
-        logger.info('Gallery loaded successfully', {
-          imageCount: images.length,
-          albumCount: albums.length
+
+        logger.info('Gallery loaded successfully from Supabase', {
+          imageCount: transformedImages.length,
+          albumCount: transformedAlbums.length,
+          userId
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load gallery'
         setError(errorMessage)
         setIsPageLoading(false)
         announce('Error loading gallery', 'assertive')
-        logger.error('Failed to load gallery', { error: err })
+        logger.error('Failed to load gallery from Supabase', { error: err, userId })
       }
     }
 
     loadGalleryData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [announce])
 
-  // Initialize mock data
-  const initializeMockData = () => {
-    const mockImages: ImageMetadata[] = [
-      {
-        id: '1',
-        title: 'Brand Identity Design',
-        description: 'Complete brand identity package',
-        fileName: 'brand-identity.jpg',
-        fileSize: 2457600, // 2.4 MB
-        width: 1920,
-        height: 1080,
-        format: 'jpg',
-        url: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop',
-        thumbnail: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=200&h=150&fit=crop',
-        uploadDate: '2024-01-15T10:30:00Z',
-        tags: ['logo', 'branding', 'identity'],
-        albumId: 'album1',
-        isFavorite: true,
-        type: 'image',
-        category: 'branding',
-        client: 'Acme Corp',
-        project: 'Brand Identity Package',
-        likes: 24,
-        comments: 8
-      },
-      {
-        id: '2',
-        title: 'Website Mockup',
-        description: 'E-commerce platform design',
-        fileName: 'website-mockup.png',
-        fileSize: 3145728, // 3 MB
-        width: 2560,
-        height: 1440,
-        format: 'png',
-        url: 'https://images.unsplash.com/photo-1547658719-da2b51169166?w=400&h=300&fit=crop',
-        thumbnail: 'https://images.unsplash.com/photo-1547658719-da2b51169166?w=200&h=150&fit=crop',
-        uploadDate: '2024-01-12T14:20:00Z',
-        tags: ['web', 'design', 'mockup', 'ui'],
-        albumId: 'album1',
-        isFavorite: false,
-        type: 'image',
-        category: 'web-design',
-        client: 'Tech Startup',
-        project: 'E-commerce Platform',
-        likes: 18,
-        comments: 5
-      },
-      {
-        id: '3',
-        title: 'Mobile App Demo',
-        description: 'iOS app walkthrough video',
-        fileName: 'app-demo.mp4',
-        fileSize: 15728640, // 15 MB
-        width: 1280,
-        height: 720,
-        format: 'mp4',
-        url: 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4',
-        thumbnail: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=200&h=150&fit=crop',
-        uploadDate: '2024-01-10T09:15:00Z',
-        tags: ['mobile', 'app', 'demo', 'video'],
-        albumId: 'album2',
-        isFavorite: true,
-        type: 'video',
-        category: 'mobile',
-        client: 'Mobile Solutions',
-        project: 'iOS App Development',
-        likes: 32,
-        comments: 12
-      },
-      {
-        id: '4',
-        title: 'Social Media Campaign',
-        description: 'Instagram campaign graphics',
-        fileName: 'social-campaign.jpg',
-        fileSize: 1835008, // 1.75 MB
-        width: 1080,
-        height: 1080,
-        format: 'jpg',
-        url: 'https://images.unsplash.com/photo-1611926653458-09294b3142bf?w=400&h=300&fit=crop',
-        thumbnail: 'https://images.unsplash.com/photo-1611926653458-09294b3142bf?w=200&h=150&fit=crop',
-        uploadDate: '2024-01-08T16:45:00Z',
-        tags: ['social', 'campaign', 'graphics', 'instagram'],
-        albumId: null,
-        isFavorite: false,
-        type: 'image',
-        category: 'social',
-        client: 'Social Brand',
-        project: 'Social Media Package',
-        likes: 15,
-        comments: 3
-      },
-      {
-        id: '5',
-        title: 'Print Design Collection',
-        description: 'Brochure and flyer designs',
-        fileName: 'print-collection.pdf',
-        fileSize: 5242880, // 5 MB
-        width: 2480,
-        height: 3508,
-        format: 'pdf',
-        url: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=300&fit=crop',
-        thumbnail: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=200&h=150&fit=crop',
-        uploadDate: '2024-01-05T11:30:00Z',
-        tags: ['print', 'brochure', 'design', 'marketing'],
-        albumId: 'album2',
-        isFavorite: true,
-        type: 'image',
-        category: 'print',
-        client: 'Print Co.',
-        project: 'Marketing Materials',
-        likes: 21,
-        comments: 7
-      }
-    ]
-
-    const mockAlbums: Album[] = [
-      {
-        id: 'album1',
-        name: 'Brand Projects',
-        description: 'Client branding and identity work',
-        coverImage: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=200&h=150&fit=crop',
-        imageCount: 2,
-        createdDate: '2024-01-15T10:00:00Z',
-        totalSize: 5603328 // Sum of images in album
-      },
-      {
-        id: 'album2',
-        name: 'Mobile & Digital',
-        description: 'Mobile apps and digital products',
-        coverImage: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=200&h=150&fit=crop',
-        imageCount: 2,
-        createdDate: '2024-01-10T09:00:00Z',
-        totalSize: 20971520
-      }
-    ]
-
-    setImages(mockImages)
-    setAlbums(mockAlbums)
-  }
 
   // REAL HANDLERS
 
   // Upload Images
-  const handleUploadMedia = () => {
-    logger.info('Upload media initiated')
+  const handleUploadMedia = async () => {
+    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
+    logger.info('Upload media initiated', { userId })
     toast.info('Opening file upload...')
 
     // Simulate file upload
@@ -304,65 +210,120 @@ export default function GalleryPage() {
     const width = 1920
     const height = 1080
 
-    const newImage: ImageMetadata = {
-      id: Date.now().toString(),
-      title,
-      description: '',
-      fileName,
-      fileSize,
-      width,
-      height,
-      format: 'jpg',
-      url: `https://images.unsplash.com/photo-${Date.now()}?w=400&h=300&fit=crop`,
-      thumbnail: `https://images.unsplash.com/photo-${Date.now()}?w=200&h=150&fit=crop`,
-      uploadDate: new Date().toISOString(),
-      tags: [],
-      albumId: null,
-      isFavorite: false,
-      type: 'image',
-      category: 'branding',
-      likes: 0,
-      comments: 0
+    try {
+      const { createGalleryImage } = await import('@/lib/gallery-queries')
+
+      const { data, error } = await createGalleryImage(userId, {
+        title,
+        description: '',
+        file_name: fileName,
+        file_size: fileSize,
+        width,
+        height,
+        format: 'jpg',
+        url: `https://images.unsplash.com/photo-${Date.now()}?w=400&h=300&fit=crop`,
+        thumbnail: `https://images.unsplash.com/photo-${Date.now()}?w=200&h=150&fit=crop`,
+        type: 'image',
+        category: 'branding',
+        tags: [],
+        is_favorite: false,
+        is_public: false,
+        processing_status: 'completed',
+        views: 0,
+        likes: 0,
+        downloads: 0,
+        ai_generated: false
+      })
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to upload image')
+      }
+
+      // Transform and add to UI
+      const newImage: ImageMetadata = {
+        id: data.id,
+        title: data.title,
+        description: data.description || '',
+        fileName: data.file_name,
+        fileSize: data.file_size,
+        width: data.width,
+        height: data.height,
+        format: data.format,
+        url: data.url,
+        thumbnail: data.thumbnail || data.url,
+        uploadDate: data.created_at,
+        tags: data.tags || [],
+        albumId: data.album_id,
+        isFavorite: data.is_favorite,
+        type: data.type === 'video' ? 'video' : 'image',
+        category: data.category,
+        client: data.client || undefined,
+        project: data.project || undefined,
+        likes: data.likes,
+        comments: 0
+      }
+
+      setImages(prev => [newImage, ...prev])
+
+      logger.info('Media uploaded to Supabase successfully', {
+        imageId: data.id,
+        fileName: data.file_name,
+        fileSize: data.file_size,
+        dimensions: `${width}x${height}`,
+        userId
+      })
+
+      toast.success('Media uploaded successfully', {
+        description: `${fileName} (${formatFileSize(fileSize)}, ${width}x${height})`
+      })
+    } catch (err) {
+      logger.error('Failed to upload media', { error: err, userId })
+      toast.error('Failed to upload media', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
     }
-
-    setImages(prev => [newImage, ...prev])
-
-    logger.info('Media uploaded successfully', {
-      imageId: newImage.id,
-      fileName: newImage.fileName,
-      fileSize: newImage.fileSize,
-      dimensions: `${width}x${height}`
-    })
-
-    toast.success('Media uploaded successfully', {
-      description: `${fileName} (${formatFileSize(fileSize)}, ${width}x${height})`
-    })
   }
 
   // Delete Image
-  const handleDeleteImage = (imageId: string) => {
+  const handleDeleteImage = async (imageId: string) => {
     const image = images.find(img => img.id === imageId)
     if (!image) return
 
     logger.info('Delete image initiated', { imageId, fileName: image.fileName })
 
     if (confirm(`Delete "${image.title}"?`)) {
-      setImages(prev => prev.filter(img => img.id !== imageId))
-      setSelectedImages(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(imageId)
-        return newSet
-      })
+      try {
+        const { deleteGalleryImage } = await import('@/lib/gallery-queries')
 
-      logger.info('Image deleted successfully', {
-        imageId,
-        fileName: image.fileName,
-        fileSize: image.fileSize
-      })
+        const { error } = await deleteGalleryImage(imageId)
 
-      toast.success('Image deleted', {
-        description: `${image.fileName} has been removed`
-      })
+        if (error) {
+          throw new Error(error.message || 'Failed to delete image')
+        }
+
+        // Optimistic UI update
+        setImages(prev => prev.filter(img => img.id !== imageId))
+        setSelectedImages(prev => {
+          const newSet = new Set(prev)
+          newSet.delete(imageId)
+          return newSet
+        })
+
+        logger.info('Image deleted from Supabase successfully', {
+          imageId,
+          fileName: image.fileName,
+          fileSize: image.fileSize
+        })
+
+        toast.success('Image deleted', {
+          description: `${image.fileName} has been removed`
+        })
+      } catch (err) {
+        logger.error('Failed to delete image', { error: err, imageId })
+        toast.error('Failed to delete image', {
+          description: err instanceof Error ? err.message : 'Unknown error'
+        })
+      }
     } else {
       logger.debug('Delete cancelled by user', { imageId })
     }
@@ -403,8 +364,10 @@ export default function GalleryPage() {
   }
 
   // Create Album
-  const handleCreateAlbum = () => {
-    logger.info('Create album initiated')
+  const handleCreateAlbum = async () => {
+    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
+    logger.info('Create album initiated', { userId })
 
     const name = prompt('Album name:')
     if (!name) {
@@ -414,26 +377,51 @@ export default function GalleryPage() {
 
     const description = prompt('Album description (optional):') || ''
 
-    const newAlbum: Album = {
-      id: Date.now().toString(),
-      name,
-      description,
-      coverImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&h=150&fit=crop',
-      imageCount: 0,
-      createdDate: new Date().toISOString(),
-      totalSize: 0
+    try {
+      const { createGalleryAlbum } = await import('@/lib/gallery-queries')
+
+      const { data, error } = await createGalleryAlbum(userId, {
+        name,
+        description,
+        cover_image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&h=150&fit=crop',
+        privacy: 'private',
+        image_count: 0,
+        total_size: 0,
+        views: 0
+      })
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to create album')
+      }
+
+      // Transform and add to UI
+      const newAlbum: Album = {
+        id: data.id,
+        name: data.name,
+        description: data.description || '',
+        coverImage: data.cover_image || '',
+        imageCount: data.image_count,
+        createdDate: data.created_at,
+        totalSize: data.total_size
+      }
+
+      setAlbums(prev => [newAlbum, ...prev])
+
+      logger.info('Album created in Supabase successfully', {
+        albumId: data.id,
+        albumName: name,
+        userId
+      })
+
+      toast.success('Album created', {
+        description: `"${name}" is ready for your media`
+      })
+    } catch (err) {
+      logger.error('Failed to create album', { error: err, userId })
+      toast.error('Failed to create album', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
     }
-
-    setAlbums(prev => [newAlbum, ...prev])
-
-    logger.info('Album created successfully', {
-      albumId: newAlbum.id,
-      albumName: name
-    })
-
-    toast.success('Album created', {
-      description: `"${name}" is ready for your media`
-    })
   }
 
   // Add to Album
@@ -526,7 +514,7 @@ export default function GalleryPage() {
   }
 
   // Delete Album
-  const handleDeleteAlbum = (albumId: string) => {
+  const handleDeleteAlbum = async (albumId: string) => {
     const album = albums.find(a => a.id === albumId)
     if (!album) return
 
@@ -537,22 +525,37 @@ export default function GalleryPage() {
     })
 
     if (confirm(`Delete album "${album.name}"? Images will be moved to unorganized.`)) {
-      // Remove album reference from images
-      setImages(prev => prev.map(img =>
-        img.albumId === albumId ? { ...img, albumId: null } : img
-      ))
+      try {
+        const { deleteGalleryAlbum } = await import('@/lib/gallery-queries')
 
-      setAlbums(prev => prev.filter(a => a.id !== albumId))
+        const { error } = await deleteGalleryAlbum(albumId)
 
-      logger.info('Album deleted successfully', {
-        albumId,
-        albumName: album.name,
-        imagesAffected: album.imageCount
-      })
+        if (error) {
+          throw new Error(error.message || 'Failed to delete album')
+        }
 
-      toast.success('Album deleted', {
-        description: `${album.name} - ${album.imageCount} images moved to unorganized`
-      })
+        // Optimistic UI update - remove album reference from images
+        setImages(prev => prev.map(img =>
+          img.albumId === albumId ? { ...img, albumId: null } : img
+        ))
+
+        setAlbums(prev => prev.filter(a => a.id !== albumId))
+
+        logger.info('Album deleted from Supabase successfully', {
+          albumId,
+          albumName: album.name,
+          imagesAffected: album.imageCount
+        })
+
+        toast.success('Album deleted', {
+          description: `${album.name} - ${album.imageCount} images moved to unorganized`
+        })
+      } catch (err) {
+        logger.error('Failed to delete album', { error: err, albumId })
+        toast.error('Failed to delete album', {
+          description: err instanceof Error ? err.message : 'Unknown error'
+        })
+      }
     } else {
       logger.debug('Album deletion cancelled', { albumId })
     }
@@ -595,7 +598,7 @@ export default function GalleryPage() {
   }
 
   // Bulk Operations
-  const handleBulkDelete = () => {
+  const handleBulkDelete = async () => {
     const count = selectedImages.size
     if (count === 0) {
       toast.error('No images selected')
@@ -607,19 +610,37 @@ export default function GalleryPage() {
 
     const imagesToDelete = images.filter(img => selectedImages.has(img.id))
     const totalSize = imagesToDelete.reduce((sum, img) => sum + img.fileSize, 0)
+    const imageIds = Array.from(selectedImages)
 
     if (confirm(`Delete ${count} images?`)) {
-      setImages(prev => prev.filter(img => !selectedImages.has(img.id)))
-      setSelectedImages(new Set())
+      try {
+        const { bulkDeleteGalleryImages } = await import('@/lib/gallery-queries')
 
-      logger.info('Bulk delete successful', {
-        deletedCount: count,
-        totalSize
-      })
+        const { error } = await bulkDeleteGalleryImages(imageIds)
 
-      toast.success('Images deleted', {
-        description: `${count} images removed (${formatFileSize(totalSize)})`
-      })
+        if (error) {
+          throw new Error(error.message || 'Failed to bulk delete images')
+        }
+
+        // Optimistic UI update
+        setImages(prev => prev.filter(img => !selectedImages.has(img.id)))
+        setSelectedImages(new Set())
+
+        logger.info('Bulk delete from Supabase successful', {
+          deletedCount: count,
+          totalSize,
+          imageIds
+        })
+
+        toast.success('Images deleted', {
+          description: `${count} images removed (${formatFileSize(totalSize)})`
+        })
+      } catch (err) {
+        logger.error('Failed to bulk delete images', { error: err, count })
+        toast.error('Failed to delete images', {
+          description: err instanceof Error ? err.message : 'Unknown error'
+        })
+      }
     } else {
       logger.debug('Bulk delete cancelled')
     }
@@ -661,25 +682,41 @@ export default function GalleryPage() {
   }
 
   // Toggle Favorite
-  const handleToggleFavorite = (imageId: string) => {
+  const handleToggleFavorite = async (imageId: string) => {
     const image = images.find(img => img.id === imageId)
     if (!image) return
 
     const newFavoriteStatus = !image.isFavorite
 
-    setImages(prev => prev.map(img =>
-      img.id === imageId ? { ...img, isFavorite: newFavoriteStatus } : img
-    ))
+    try {
+      const { toggleImageFavorite } = await import('@/lib/gallery-queries')
 
-    logger.info('Favorite toggled', {
-      imageId,
-      fileName: image.fileName,
-      isFavorite: newFavoriteStatus
-    })
+      const { error } = await toggleImageFavorite(imageId, newFavoriteStatus)
 
-    toast.success(newFavoriteStatus ? 'Added to favorites' : 'Removed from favorites', {
-      description: image.fileName
-    })
+      if (error) {
+        throw new Error(error.message || 'Failed to toggle favorite')
+      }
+
+      // Optimistic UI update
+      setImages(prev => prev.map(img =>
+        img.id === imageId ? { ...img, isFavorite: newFavoriteStatus } : img
+      ))
+
+      logger.info('Favorite toggled in Supabase', {
+        imageId,
+        fileName: image.fileName,
+        isFavorite: newFavoriteStatus
+      })
+
+      toast.success(newFavoriteStatus ? 'Added to favorites' : 'Removed from favorites', {
+        description: image.fileName
+      })
+    } catch (err) {
+      logger.error('Failed to toggle favorite', { error: err, imageId })
+      toast.error('Failed to update favorite', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
+    }
   }
 
   // SESSION_13: AI Image Generation
