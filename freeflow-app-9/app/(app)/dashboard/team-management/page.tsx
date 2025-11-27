@@ -40,35 +40,185 @@ import {
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+import type { UserRole, RolePermission, UserPermission } from '@/lib/team-management-queries'
+
+const logger = createFeatureLogger('TeamManagement')
+
+// Transform database role to UI member format
+interface TeamMember {
+  id: string
+  name: string
+  role: string
+  email: string
+  phone: string
+  location: string
+  avatar: string
+  status: 'online' | 'offline' | 'busy' | 'away'
+  level: string
+  joinDate: string
+  completedProjects: number
+  activeProjects: number
+  rating: number
+  skills: string[]
+  currentWorkload: number
+  availability: string
+  lastActive: string
+  performance: {
+    tasksCompleted: number
+    onTimeDelivery: number
+    clientSatisfaction: number
+    teamCollaboration: number
+  }
+}
+
+interface TeamStats {
+  totalMembers: number
+  activeMembers: number
+  avgRating: number
+  totalProjects: number
+  completedProjects: number
+  avgWorkload: number
+  teamEfficiency: number
+}
 
 export default function TeamManagementPage() {
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const [activeTab, setActiveTab] = useState('overview')
+  const [searchQuery, setSearchQuery] = useState('')
 
-  // A+++ LOAD TEAM MANAGEMENT DATA
+  // Supabase data state
+  const [userRoles, setUserRoles] = useState<UserRole[]>([])
+  const [rolePermissions, setRolePermissions] = useState<RolePermission[]>([])
+  const [userPermissions, setUserPermissions] = useState<UserPermission[]>([])
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [teamStats, setTeamStats] = useState<TeamStats>({
+    totalMembers: 0,
+    activeMembers: 0,
+    avgRating: 0,
+    totalProjects: 0,
+    completedProjects: 0,
+    avgWorkload: 0,
+    teamEfficiency: 0
+  })
+
+  // A+++ LOAD TEAM MANAGEMENT DATA FROM SUPABASE
   useEffect(() => {
     const loadTeamManagementData = async () => {
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading team management data from Supabase', { action: 'load_start' })
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load team management'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
+        // Dynamic imports for code splitting
+        const [
+          { getUserRoles },
+          { getRolePermissions },
+          { getUserPermissions },
+          { createClient }
+        ] = await Promise.all([
+          import('@/lib/team-management-queries'),
+          import('@/lib/team-management-queries'),
+          import('@/lib/team-management-queries'),
+          import('@/lib/supabase/client')
+        ])
+
+        // Get current user ID
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+          throw new Error('User not authenticated')
+        }
+
+        // Parallel data loading
+        const [rolesResult, permissionsResult, userPermsResult] = await Promise.all([
+          getUserRoles(user.id),
+          getRolePermissions(user.id),
+          getUserPermissions(user.id)
+        ])
+
+        if (rolesResult.error) {
+          logger.error('Failed to load user roles', { error: rolesResult.error })
+          throw new Error('Failed to load user roles')
+        }
+
+        if (permissionsResult.error) {
+          logger.error('Failed to load role permissions', { error: permissionsResult.error })
+          throw new Error('Failed to load role permissions')
+        }
+
+        if (userPermsResult.error) {
+          logger.error('Failed to load user permissions', { error: userPermsResult.error })
+          throw new Error('Failed to load user permissions')
+        }
+
+        setUserRoles(rolesResult.data || [])
+        setRolePermissions(permissionsResult.data || [])
+        setUserPermissions(userPermsResult.data || [])
+
+        // Transform roles to team members display format
+        // Since we don't have team_members table yet, we'll use user_roles as mock data
+        const mockMembers: TeamMember[] = rolesResult.data?.slice(0, 4).map((role, index) => ({
+          id: role.id,
+          name: `Team Member ${index + 1}`,
+          role: role.role_name,
+          email: `member${index + 1}@kazi.com`,
+          phone: `+1 (555) ${String(Math.floor(Math.random() * 900) + 100)}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
+          location: ['New York, USA', 'San Francisco, USA', 'Austin, USA', 'Seattle, USA'][index % 4],
+          avatar: `/avatars/member${index + 1}.jpg`,
+          status: ['online', 'busy', 'away', 'offline'][Math.floor(Math.random() * 4)] as any,
+          level: role.role_name === 'owner' ? 'lead' : role.role_name === 'admin' ? 'senior' : 'mid',
+          joinDate: new Date(role.created_at).toISOString().split('T')[0],
+          completedProjects: Math.floor(Math.random() * 50),
+          activeProjects: Math.floor(Math.random() * 10),
+          rating: 4.5 + Math.random() * 0.5,
+          skills: ['Leadership', 'Project Management', 'Communication'],
+          currentWorkload: Math.floor(Math.random() * 40) + 60,
+          availability: 'full-time',
+          lastActive: `${Math.floor(Math.random() * 60)} minutes ago`,
+          performance: {
+            tasksCompleted: Math.floor(Math.random() * 200) + 50,
+            onTimeDelivery: Math.floor(Math.random() * 10) + 90,
+            clientSatisfaction: 4.5 + Math.random() * 0.5,
+            teamCollaboration: 4.5 + Math.random() * 0.5
+          }
+        })) || []
+
+        setTeamMembers(mockMembers)
+
+        // Calculate stats
+        const stats: TeamStats = {
+          totalMembers: rolesResult.data?.length || 0,
+          activeMembers: rolesResult.data?.filter(r => r.is_active).length || 0,
+          avgRating: mockMembers.length > 0
+            ? mockMembers.reduce((sum, m) => sum + m.rating, 0) / mockMembers.length
+            : 0,
+          totalProjects: mockMembers.reduce((sum, m) => sum + m.completedProjects + m.activeProjects, 0),
+          completedProjects: mockMembers.reduce((sum, m) => sum + m.completedProjects, 0),
+          avgWorkload: mockMembers.length > 0
+            ? mockMembers.reduce((sum, m) => sum + m.currentWorkload, 0) / mockMembers.length
+            : 0,
+          teamEfficiency: 94
+        }
+        setTeamStats(stats)
+
+        logger.info('Team management data loaded successfully', {
+          roles_count: rolesResult.data?.length || 0,
+          permissions_count: permissionsResult.data?.length || 0,
+          user_permissions_count: userPermsResult.data?.length || 0,
+          members_count: mockMembers.length
         })
 
         setIsLoading(false)
         announce('Team management loaded successfully', 'polite')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load team management')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load team management'
+        logger.error('Failed to load team management', { error: err })
+        setError(errorMessage)
         setIsLoading(false)
         announce('Error loading team management', 'assertive')
       }
@@ -76,120 +226,77 @@ export default function TeamManagementPage() {
 
     loadTeamManagementData()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-  const [activeTab, setActiveTab] = useState('overview')
-  const [searchQuery, setSearchQuery] = useState('')
 
-  const teamMembers = [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      role: 'Senior Designer',
-      email: 'sarah@kazi.com',
-      phone: '+1 (555) 123-4567',
-      location: 'New York, USA',
-      avatar: '/avatars/sarah.jpg',
-      status: 'online',
-      level: 'senior',
-      joinDate: '2023-01-15',
-      completedProjects: 24,
-      activeProjects: 3,
-      rating: 4.9,
-      skills: ['UI/UX Design', 'Figma', 'Adobe Creative Suite', 'Prototyping'],
-      currentWorkload: 85,
-      availability: 'full-time',
-      lastActive: '2 minutes ago',
-      performance: {
-        tasksCompleted: 156,
-        onTimeDelivery: 98,
-        clientSatisfaction: 4.8,
-        teamCollaboration: 4.9
+  // A+++ CRUD HANDLERS
+  const handleAddMember = async () => {
+    try {
+      logger.info('Adding new team member', { action: 'add_member' })
+
+      const { createUserRole, createClient } = await import('@/lib/team-management-queries')
+      const supabase = (await import('@/lib/supabase/client')).createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        throw new Error('User not authenticated')
       }
-    },
-    {
-      id: 2,
-      name: 'Michael Chen',
-      role: 'Full Stack Developer',
-      email: 'michael@kazi.com',
-      phone: '+1 (555) 234-5678',
-      location: 'San Francisco, USA',
-      avatar: '/avatars/michael.jpg',
-      status: 'busy',
-      level: 'senior',
-      joinDate: '2022-11-20',
-      completedProjects: 31,
-      activeProjects: 5,
-      rating: 4.8,
-      skills: ['React', 'Node.js', 'TypeScript', 'AWS', 'Database Design'],
-      currentWorkload: 95,
-      availability: 'full-time',
-      lastActive: '1 hour ago',
-      performance: {
-        tasksCompleted: 203,
-        onTimeDelivery: 95,
-        clientSatisfaction: 4.7,
-        teamCollaboration: 4.6
+
+      // Create a new member role
+      const newRole = await createUserRole(user.id, {
+        role_name: 'member',
+        role_description: 'New team member',
+        can_invite_users: false,
+        can_manage_team: false,
+        can_manage_projects: false
+      })
+
+      if (newRole.error) {
+        throw new Error('Failed to create member role')
       }
-    },
-    {
-      id: 3,
-      name: 'Emma Rodriguez',
-      role: 'Project Manager',
-      email: 'emma@kazi.com',
-      phone: '+1 (555) 345-6789',
-      location: 'Austin, USA',
-      avatar: '/avatars/emma.jpg',
-      status: 'online',
-      level: 'lead',
-      joinDate: '2022-08-10',
-      completedProjects: 45,
-      activeProjects: 8,
-      rating: 4.9,
-      skills: ['Project Management', 'Agile', 'Scrum', 'Team Leadership', 'Client Relations'],
-      currentWorkload: 78,
-      availability: 'full-time',
-      lastActive: '5 minutes ago',
-      performance: {
-        tasksCompleted: 278,
-        onTimeDelivery: 99,
-        clientSatisfaction: 4.9,
-        teamCollaboration: 5.0
-      }
-    },
-    {
-      id: 4,
-      name: 'David Kim',
-      role: 'Marketing Specialist',
-      email: 'david@kazi.com',
-      phone: '+1 (555) 456-7890',
-      location: 'Seattle, USA',
-      avatar: '/avatars/david.jpg',
-      status: 'away',
-      level: 'mid',
-      joinDate: '2023-03-05',
-      completedProjects: 18,
-      activeProjects: 2,
-      rating: 4.6,
-      skills: ['Digital Marketing', 'SEO', 'Content Strategy', 'Social Media', 'Analytics'],
-      currentWorkload: 60,
-      availability: 'part-time',
-      lastActive: '3 hours ago',
-      performance: {
-        tasksCompleted: 89,
-        onTimeDelivery: 92,
-        clientSatisfaction: 4.5,
-        teamCollaboration: 4.7
-      }
+
+      logger.info('Team member added successfully', { role_id: newRole.data?.id })
+      announce('Team member added successfully', 'polite')
+
+      // Reload data
+      window.location.reload()
+    } catch (err) {
+      logger.error('Failed to add team member', { error: err })
+      announce('Failed to add team member', 'assertive')
     }
-  ]
+  }
 
-  const teamStats = {
-    totalMembers: 12,
-    activeMembers: 9,
-    avgRating: 4.8,
-    totalProjects: 156,
-    completedProjects: 134,
-    avgWorkload: 79,
-    teamEfficiency: 94
+  const handleExportData = async () => {
+    try {
+      logger.info('Exporting team management data', { action: 'export' })
+
+      const exportData = {
+        roles: userRoles,
+        permissions: rolePermissions,
+        userPermissions: userPermissions,
+        teamStats,
+        exportedAt: new Date().toISOString()
+      }
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: 'application/json'
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `team-management-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      logger.info('Team management data exported successfully', {
+        roles_count: userRoles.length,
+        file_name: a.download
+      })
+      announce('Team data exported successfully', 'polite')
+    } catch (err) {
+      logger.error('Failed to export team data', { error: err })
+      announce('Failed to export team data', 'assertive')
+    }
   }
 
   const getStatusColor = (status: string) => {
@@ -267,11 +374,17 @@ export default function TeamManagementPage() {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+            <Button
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+              onClick={handleAddMember}
+            >
               <UserPlus className="h-4 w-4 mr-2" />
               Add Member
             </Button>
-            <Button variant="outline">
+            <Button
+              variant="outline"
+              onClick={handleExportData}
+            >
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
