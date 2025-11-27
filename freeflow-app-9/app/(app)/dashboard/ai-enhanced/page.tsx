@@ -54,6 +54,25 @@ import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 
+// SUPABASE & QUERIES
+import { createClient } from '@/lib/supabase/client'
+import {
+  getAIEnhancedTools,
+  createAIEnhancedTool,
+  updateAIEnhancedTool,
+  deleteAIEnhancedTool,
+  toggleFavorite as toggleFavoriteDB,
+  incrementUsageCount,
+  bulkDeleteTools,
+  getToolStatistics,
+  type AIEnhancedTool as DBTool,
+  type AIToolType as DBAIToolType,
+  type AIToolCategory as DBAIToolCategory,
+  type AIToolStatus as DBAIToolStatus,
+  type PricingTier as DBPricingTier,
+  type PerformanceLevel as DBPerformanceLevel
+} from '@/lib/ai-enhanced-queries'
+
 const logger = createFeatureLogger('AI-Enhanced')
 
 // ============================================================================
@@ -397,32 +416,68 @@ export default function AIEnhancedPage() {
   // ============================================================================
 
   useEffect(() => {
-    logger.info('Loading AI tools from API')
+    logger.info('Loading AI Enhanced tools from Supabase')
     const loadData = async () => {
       try {
         setIsLoading(true)
         setError(null)
 
-        const response = await fetch('/api/ai-tools')
-        const result = await response.json()
+        const supabase = createClient()
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-        if (result.success) {
-          // Use mock data for richer visualization
-          const mockTools = generateMockAITools()
-          dispatch({ type: 'SET_TOOLS', tools: mockTools })
-
-          logger.info('AI tools loaded from API', { count: result.tools?.length || 0 })
-          announce('AI tools loaded successfully', 'polite')
-        } else {
-          throw new Error(result.error || 'Failed to load tools')
+        if (authError || !user) {
+          logger.warn('No authenticated user found', { error: authError?.message })
+          toast.error('Please log in to use AI Enhanced')
+          setIsLoading(false)
+          return
         }
+
+        // Load tools from Supabase
+        const { data: tools, error: toolsError } = await getAIEnhancedTools(user.id)
+
+        if (toolsError) {
+          throw toolsError
+        }
+
+        // Transform database tools to UI format
+        const uiTools: AITool[] = (tools || []).map(dbTool => ({
+          id: dbTool.id,
+          name: dbTool.name,
+          type: dbTool.type,
+          category: dbTool.category,
+          description: dbTool.description,
+          model: dbTool.model,
+          provider: dbTool.provider,
+          status: dbTool.status,
+          pricingTier: dbTool.pricing_tier,
+          performance: dbTool.performance,
+          usageCount: dbTool.usage_count,
+          successRate: dbTool.success_rate / 100, // DB stores as percentage
+          avgResponseTime: dbTool.avg_response_time / 1000, // DB stores in ms
+          createdAt: dbTool.created_at,
+          lastUsed: dbTool.last_used || dbTool.created_at,
+          features: dbTool.features || [],
+          tags: dbTool.tags || [],
+          isPopular: dbTool.is_popular,
+          isFavorite: dbTool.is_favorite,
+          version: dbTool.version
+        }))
+
+        dispatch({ type: 'SET_TOOLS', tools: uiTools })
+
+        logger.info('AI Enhanced tools loaded from Supabase', { count: uiTools.length })
+        announce('AI Enhanced tools loaded successfully', 'polite')
+
+        toast.success('AI Enhanced loaded', {
+          description: `${uiTools.length} AI tools available`
+        })
 
         setIsLoading(false)
       } catch (err: any) {
-        logger.error('Failed to load AI tools', { error: err.message })
-        setError(err instanceof Error ? err.message : 'Failed to load AI tools')
+        logger.error('Failed to load AI Enhanced tools', { error: err.message })
+        setError(err instanceof Error ? err.message : 'Failed to load AI Enhanced tools')
         setIsLoading(false)
-        announce('Error loading AI tools', 'assertive')
+        announce('Error loading AI Enhanced tools', 'assertive')
       }
     }
 
@@ -537,47 +592,69 @@ export default function AIEnhancedPage() {
     try {
       setIsSaving(true)
 
-      const response = await fetch('/api/ai-tools', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'create',
-          data: {
-            name: toolName,
-            type: toolType,
-            category: toolCategory,
-            description: toolDescription,
-            model: toolModel,
-            provider: toolProvider,
-            tags: ['AI', 'Custom']
-          }
-        })
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data: dbTool, error } = await createAIEnhancedTool(user.id, {
+        name: toolName,
+        type: toolType,
+        category: toolCategory,
+        description: toolDescription,
+        model: toolModel,
+        provider: toolProvider,
+        tags: ['AI', 'Custom']
       })
 
-      const result = await response.json()
-
-      if (result.success) {
-        dispatch({ type: 'ADD_TOOL', tool: result.tool })
-
-        logger.info('AI tool created successfully', {
-          toolId: result.tool.id,
-          name: result.tool.name,
-          type: result.tool.type,
-          category: result.tool.category
-        })
-
-        toast.success('AI tool created', {
-          description: `${result.tool.name} - ${result.tool.type} - ${result.tool.category} - ${result.tool.model} - ${result.tool.provider} - Ready to use`
-        })
-
-        setShowCreateModal(false)
-        setToolName('')
-        setToolDescription('')
-        setToolModel('')
-        setToolProvider('')
-      } else {
-        throw new Error(result.error || 'Failed to create tool')
+      if (error || !dbTool) {
+        throw error || new Error('Failed to create tool')
       }
+
+      // Transform to UI format
+      const uiTool: AITool = {
+        id: dbTool.id,
+        name: dbTool.name,
+        type: dbTool.type,
+        category: dbTool.category,
+        description: dbTool.description,
+        model: dbTool.model,
+        provider: dbTool.provider,
+        status: dbTool.status,
+        pricingTier: dbTool.pricing_tier,
+        performance: dbTool.performance,
+        usageCount: dbTool.usage_count,
+        successRate: dbTool.success_rate / 100,
+        avgResponseTime: dbTool.avg_response_time / 1000,
+        createdAt: dbTool.created_at,
+        lastUsed: dbTool.last_used || dbTool.created_at,
+        features: dbTool.features || [],
+        tags: dbTool.tags || [],
+        isPopular: dbTool.is_popular,
+        isFavorite: dbTool.is_favorite,
+        version: dbTool.version
+      }
+
+      dispatch({ type: 'ADD_TOOL', tool: uiTool })
+
+      logger.info('AI tool created successfully', {
+        toolId: uiTool.id,
+        name: uiTool.name,
+        type: uiTool.type,
+        category: uiTool.category
+      })
+
+      toast.success('AI tool created', {
+        description: `${uiTool.name} - ${uiTool.type} - ${uiTool.category} - ${uiTool.model} - ${uiTool.provider} - Ready to use`
+      })
+
+      setShowCreateModal(false)
+      setToolName('')
+      setToolDescription('')
+      setToolModel('')
+      setToolProvider('')
     } catch (error: any) {
       logger.error('Failed to create AI tool', {
         error: error.message,
@@ -623,34 +700,25 @@ export default function AIEnhancedPage() {
     try {
       setIsSaving(true)
 
-      const response = await fetch('/api/ai-tools', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'delete',
-          toolId
-        })
+      const { error } = await deleteAIEnhancedTool(toolId)
+
+      if (error) {
+        throw error
+      }
+
+      dispatch({ type: 'DELETE_TOOL', toolId })
+
+      logger.info('AI tool deleted successfully', {
+        toolId,
+        name: tool?.name
       })
 
-      const result = await response.json()
+      toast.success('AI tool deleted', {
+        description: `${tool?.name} - ${tool?.type} - ${formatNumber(tool?.usageCount || 0)} uses - Removed from workspace`
+      })
 
-      if (result.success) {
-        dispatch({ type: 'DELETE_TOOL', toolId })
-
-        logger.info('AI tool deleted successfully', {
-          toolId,
-          name: tool?.name
-        })
-
-        toast.success('AI tool deleted', {
-          description: `${tool?.name} - ${tool?.type} - ${formatNumber(tool?.usageCount || 0)} uses - Removed from workspace`
-        })
-
-        setShowDeleteModal(false)
-        setShowViewModal(false)
-      } else {
-        throw new Error(result.error || 'Delete failed')
-      }
+      setShowDeleteModal(false)
+      setShowViewModal(false)
     } catch (error: any) {
       logger.error('Failed to delete AI tool', {
         error: error.message,
@@ -677,35 +745,26 @@ export default function AIEnhancedPage() {
     try {
       setIsSaving(true)
 
-      const response = await fetch('/api/ai-tools', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'bulk-delete',
-          toolIds: state.selectedTools
-        })
+      const { error } = await bulkDeleteTools(state.selectedTools)
+
+      if (error) {
+        throw error
+      }
+
+      state.selectedTools.forEach(id => {
+        dispatch({ type: 'DELETE_TOOL', toolId: id })
       })
 
-      const result = await response.json()
+      logger.info('Bulk delete complete', {
+        deletedCount: state.selectedTools.length,
+        totalUsage
+      })
 
-      if (result.success) {
-        state.selectedTools.forEach(id => {
-          dispatch({ type: 'DELETE_TOOL', toolId: id })
-        })
+      toast.success(`Deleted ${state.selectedTools.length} tool(s)`, {
+        description: `${state.selectedTools.length} AI tools - ${formatNumber(totalUsage)} total uses - Removed from workspace`
+      })
 
-        logger.info('Bulk delete complete', {
-          deletedCount: result.deletedCount,
-          totalUsage
-        })
-
-        toast.success(`Deleted ${result.deletedCount} tool(s)`, {
-          description: `${result.deletedCount} AI tools - ${formatNumber(totalUsage)} total uses - Removed from workspace`
-        })
-
-        dispatch({ type: 'CLEAR_SELECTED_TOOLS' })
-      } else {
-        throw new Error(result.error || 'Bulk delete failed')
-      }
+      dispatch({ type: 'CLEAR_SELECTED_TOOLS' })
     } catch (error: any) {
       logger.error('Bulk delete failed', {
         error: error.message,
@@ -719,7 +778,7 @@ export default function AIEnhancedPage() {
     }
   }
 
-  const handleToggleFavorite = (toolId: string) => {
+  const handleToggleFavorite = async (toolId: string) => {
     const tool = state.tools.find(t => t.id === toolId)
     const newFavoriteState = !tool?.isFavorite
 
@@ -729,11 +788,25 @@ export default function AIEnhancedPage() {
       isFavorite: newFavoriteState
     })
 
-    dispatch({ type: 'TOGGLE_FAVORITE', toolId })
+    try {
+      // Optimistic update
+      dispatch({ type: 'TOGGLE_FAVORITE', toolId })
 
-    toast.success(newFavoriteState ? 'Added to favorites' : 'Removed from favorites', {
-      description: `${tool?.name} - ${tool?.type} - ${newFavoriteState ? '★ Favorited' : '☆ Unfavorited'}`
-    })
+      const { error } = await toggleFavoriteDB(toolId, newFavoriteState)
+
+      if (error) {
+        // Revert on error
+        dispatch({ type: 'TOGGLE_FAVORITE', toolId })
+        throw error
+      }
+
+      toast.success(newFavoriteState ? 'Added to favorites' : 'Removed from favorites', {
+        description: `${tool?.name} - ${tool?.type} - ${newFavoriteState ? '★ Favorited' : '☆ Unfavorited'}`
+      })
+    } catch (error: any) {
+      logger.error('Failed to toggle favorite', { error: error.message, toolId })
+      toast.error('Failed to update favorite status')
+    }
   }
 
   const handleRunTool = async (toolId: string) => {
@@ -757,39 +830,31 @@ export default function AIEnhancedPage() {
     })
 
     try {
-      const response = await fetch('/api/ai-tools', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'execute',
-          toolId
-        })
+      // Increment usage count
+      const { data: dbTool, error } = await incrementUsageCount(toolId)
+
+      if (error || !dbTool) {
+        throw error || new Error('Failed to update usage')
+      }
+
+      // Update local state
+      const updatedTool = {
+        ...tool,
+        usageCount: dbTool.usage_count,
+        lastUsed: dbTool.last_used || new Date().toISOString()
+      }
+
+      dispatch({ type: 'UPDATE_TOOL', tool: updatedTool })
+
+      logger.info('Tool execution complete', {
+        toolId,
+        name: tool.name,
+        newUsageCount: updatedTool.usageCount
       })
 
-      const result = await response.json()
-
-      if (result.success) {
-        const updatedTool = {
-          ...tool,
-          usageCount: tool.usageCount + 1,
-          lastUsed: new Date().toISOString()
-        }
-
-        dispatch({ type: 'UPDATE_TOOL', tool: updatedTool })
-
-        logger.info('Tool execution complete', {
-          toolId,
-          name: tool.name,
-          executionTime: result.result.executionTime,
-          newUsageCount: updatedTool.usageCount
-        })
-
-        toast.success(`${tool.name} completed`, {
-          description: `${tool.type} - ${result.result.executionTime} - ${formatNumber(updatedTool.usageCount)} total uses - ${(tool.successRate * 100).toFixed(1)}% success rate`
-        })
-      } else {
-        throw new Error(result.error || 'Execution failed')
-      }
+      toast.success(`${tool.name} completed`, {
+        description: `${tool.type} - ${formatNumber(updatedTool.usageCount)} total uses - ${(tool.successRate * 100).toFixed(1)}% success rate`
+      })
     } catch (error: any) {
       logger.error('Tool execution failed', {
         error: error.message,
@@ -816,61 +881,46 @@ export default function AIEnhancedPage() {
     try {
       setIsSaving(true)
 
-      const response = await fetch('/api/ai-tools', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'export',
-          exportFormat
-        })
+      // Client-side export
+      let dataStr: string
+      let mimeType: string
+
+      if (exportFormat === 'json') {
+        dataStr = JSON.stringify(filteredAndSortedTools, null, 2)
+        mimeType = 'application/json'
+      } else if (exportFormat === 'csv') {
+        const headers = ['ID', 'Name', 'Type', 'Category', 'Model', 'Provider', 'Status', 'Usage', 'Success Rate', 'Avg Response Time']
+        const rows = filteredAndSortedTools.map(t => [
+          t.id, t.name, t.type, t.category, t.model, t.provider, t.status,
+          t.usageCount, `${(t.successRate * 100).toFixed(1)}%`, formatTime(t.avgResponseTime)
+        ])
+        dataStr = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+        mimeType = 'text/csv'
+      } else {
+        dataStr = JSON.stringify(filteredAndSortedTools, null, 2)
+        mimeType = 'application/pdf'
+      }
+
+      const dataBlob = new Blob([dataStr], { type: mimeType })
+      const url = URL.createObjectURL(dataBlob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `ai-tools-${new Date().toISOString().split('T')[0]}.${exportFormat}`
+      link.click()
+      URL.revokeObjectURL(url)
+
+      logger.info('Export complete', {
+        format: exportFormat,
+        count: filteredAndSortedTools.length,
+        fileSize: dataBlob.size,
+        fileName: link.download
       })
 
-      const result = await response.json()
+      toast.success(`Exported ${filteredAndSortedTools.length} tools`, {
+        description: `${exportFormat.toUpperCase()} - ${Math.round(dataBlob.size / 1024)}KB - ${formatNumber(totalUsage)} total uses - ${(avgSuccessRate * 100).toFixed(1)}% avg success - ${link.download}`
+      })
 
-      if (result.success) {
-        // Client-side download
-        let dataStr: string
-        let mimeType: string
-
-        if (exportFormat === 'json') {
-          dataStr = JSON.stringify(filteredAndSortedTools, null, 2)
-          mimeType = 'application/json'
-        } else if (exportFormat === 'csv') {
-          const headers = ['ID', 'Name', 'Type', 'Category', 'Model', 'Provider', 'Status', 'Usage', 'Success Rate', 'Avg Response Time']
-          const rows = filteredAndSortedTools.map(t => [
-            t.id, t.name, t.type, t.category, t.model, t.provider, t.status,
-            t.usageCount, `${(t.successRate * 100).toFixed(1)}%`, formatTime(t.avgResponseTime)
-          ])
-          dataStr = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
-          mimeType = 'text/csv'
-        } else {
-          dataStr = JSON.stringify(filteredAndSortedTools, null, 2)
-          mimeType = 'application/pdf'
-        }
-
-        const dataBlob = new Blob([dataStr], { type: mimeType })
-        const url = URL.createObjectURL(dataBlob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `ai-tools-${new Date().toISOString().split('T')[0]}.${exportFormat}`
-        link.click()
-        URL.revokeObjectURL(url)
-
-        logger.info('Export complete', {
-          format: exportFormat,
-          count: filteredAndSortedTools.length,
-          fileSize: dataBlob.size,
-          fileName: link.download
-        })
-
-        toast.success(`Exported ${result.toolCount} tools`, {
-          description: `${exportFormat.toUpperCase()} - ${Math.round(dataBlob.size / 1024)}KB - ${formatNumber(totalUsage)} total uses - ${(avgSuccessRate * 100).toFixed(1)}% avg success - ${link.download}`
-        })
-
-        setShowExportModal(false)
-      } else {
-        throw new Error(result.error || 'Export failed')
-      }
+      setShowExportModal(false)
     } catch (error: any) {
       logger.error('Export failed', {
         error: error.message,
