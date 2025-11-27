@@ -72,39 +72,75 @@ export default function UpcomingBookingsPage() {
   const [isCreating, setIsCreating] = useState(false)
   const [bookings, setBookings] = useState<Booking[]>(mockBookings)
 
-  // Load bookings data
+  // Load bookings data from Supabase
   useEffect(() => {
     const loadBookingsData = async () => {
+      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
       try {
         setIsLoading(true)
         setError(null)
 
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load bookings'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
+        logger.info('Loading bookings from Supabase', { userId })
+
+        // Dynamic import for code splitting
+        const { getBookings } = await import('@/lib/bookings-queries')
+
+        const { data: bookingsData, error: bookingsError } = await getBookings(
+          userId,
+          undefined, // no filters
+          { field: 'booking_date', ascending: true }, // sort by date
+          100 // limit
+        )
+
+        if (bookingsError) {
+          throw new Error(bookingsError.message || 'Failed to load bookings')
+        }
+
+        // Transform Supabase data to UI format
+        const transformedBookings: Booking[] = bookingsData.map((b) => ({
+          id: b.id,
+          clientName: b.client_name,
+          service: b.service,
+          date: b.booking_date,
+          time: b.start_time,
+          duration: `${b.duration_minutes} min`,
+          status: b.status as any,
+          payment: b.payment as any,
+          amount: b.amount,
+          email: b.client_email || '',
+          phone: b.client_phone || '',
+          notes: b.notes || ''
+        }))
+
+        setBookings(transformedBookings)
+        setIsLoading(false)
+        announce(`${transformedBookings.length} bookings loaded`, 'polite')
+
+        logger.info('Bookings loaded successfully from Supabase', {
+          count: transformedBookings.length,
+          userId
         })
 
-        setIsLoading(false)
-        announce('Bookings loaded successfully', 'polite')
+        toast.success('Bookings loaded', {
+          description: `${transformedBookings.length} bookings from database`
+        })
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to load bookings'
-        )
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load bookings'
+        setError(errorMessage)
         setIsLoading(false)
         announce('Error loading bookings', 'assertive')
+        logger.error('Failed to load bookings from Supabase', { error: err, userId })
       }
     }
 
     loadBookingsData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [announce])
 
   // Handler Functions
   const handleNewBooking = async () => {
+    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
     setIsCreating(true)
     toast.info('Creating new booking...')
 
@@ -113,8 +149,8 @@ export default function UpcomingBookingsPage() {
         clientName: 'New Client',
         service: 'Consultation',
         date: new Date().toISOString().split('T')[0],
-        time: '10:00 AM',
-        duration: '60 min',
+        time: '10:00:00',
+        duration: 60,
         status: 'pending' as const,
         payment: 'awaiting' as const,
         amount: 150,
@@ -131,46 +167,73 @@ export default function UpcomingBookingsPage() {
         toast.error('Invalid date', {
           description: 'Booking date must be in the future'
         })
+        setIsCreating(false)
         return
       }
 
-      if (checkDoubleBooking(bookings, newBookingData.date, newBookingData.time)) {
-        logger.warn('Double booking detected', {
-          date: newBookingData.date,
-          time: newBookingData.time
-        })
-        toast.error('Time slot unavailable', {
-          description: 'This time slot is already booked. Please choose another time.'
-        })
-        return
+      // Dynamic import
+      const { createBooking } = await import('@/lib/bookings-queries')
+
+      const { data, error } = await createBooking(userId, {
+        client_name: newBookingData.clientName,
+        client_email: newBookingData.email,
+        client_phone: newBookingData.phone,
+        service: newBookingData.service,
+        type: 'consultation',
+        booking_date: newBookingData.date,
+        start_time: newBookingData.time,
+        duration_minutes: newBookingData.duration,
+        status: newBookingData.status,
+        payment: newBookingData.payment,
+        amount: newBookingData.amount,
+        currency: 'USD',
+        notes: newBookingData.notes,
+        tags: [],
+        reminder_sent: false
+      })
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to create booking')
       }
 
+      // Transform and add to UI
       const newBooking: Booking = {
-        id: generateBookingId(bookings),
-        ...newBookingData
+        id: data.id,
+        clientName: data.client_name,
+        service: data.service,
+        date: data.booking_date,
+        time: data.start_time,
+        duration: `${data.duration_minutes} min`,
+        status: data.status as any,
+        payment: data.payment as any,
+        amount: data.amount,
+        email: data.client_email || '',
+        phone: data.client_phone || '',
+        notes: data.notes || ''
       }
 
       setBookings(prev => [...prev, newBooking])
 
-      logger.info('Booking created successfully', {
-        bookingId: newBooking.id,
-        clientName: newBooking.clientName,
-        service: newBooking.service,
-        date: newBooking.date,
-        time: newBooking.time,
-        amount: newBooking.amount
+      logger.info('Booking created in Supabase successfully', {
+        bookingId: data.id,
+        clientName: data.client_name,
+        service: data.service,
+        date: data.booking_date,
+        time: data.start_time,
+        amount: data.amount,
+        userId
       })
 
       const totalBookings = bookings.length + 1
       toast.success('Booking created successfully', {
-        description: `${newBooking.clientName} - ${newBooking.service} on ${newBooking.date} at ${newBooking.time}. Total bookings: ${totalBookings}`
+        description: `${newBooking.clientName} - ${newBooking.service} on ${newBooking.date}. Total: ${totalBookings}`
       })
 
       announce(`New booking created for ${newBooking.clientName}`, 'polite')
     } catch (error: any) {
       logger.error('Failed to create booking', {
         error: error.message,
-        stack: error.stack
+        userId
       })
       toast.error('Failed to create booking', {
         description: error.message || 'Please try again later'
@@ -202,7 +265,7 @@ export default function UpcomingBookingsPage() {
     })
   }
 
-  const handleCancelBooking = (id: string) => {
+  const handleCancelBooking = async (id: string) => {
     const booking = bookings.find(b => b.id === id)
     if (!booking) {
       logger.error('Cancel booking failed', {
@@ -221,35 +284,63 @@ export default function UpcomingBookingsPage() {
     })
 
     if (confirm(`Cancel booking for ${booking.clientName}?`)) {
-      setBookings(prev =>
-        prev.map(b =>
-          b.id === id
-            ? {
-                ...b,
-                status: 'cancelled',
-                payment: b.payment === 'paid' ? 'refunded' : 'awaiting'
-              }
-            : b
+      try {
+        // Dynamic import
+        const { updateBookingStatus, updatePaymentStatus } = await import('@/lib/bookings-queries')
+
+        // Update booking status to cancelled
+        const { error: statusError } = await updateBookingStatus(id, 'cancelled')
+        if (statusError) {
+          throw new Error(statusError.message || 'Failed to cancel booking')
+        }
+
+        // Update payment status if needed
+        if (booking.payment === 'paid') {
+          const { error: paymentError } = await updatePaymentStatus(id, 'refunded')
+          if (paymentError) {
+            throw new Error(paymentError.message || 'Failed to process refund')
+          }
+        }
+
+        // Optimistic UI update
+        setBookings(prev =>
+          prev.map(b =>
+            b.id === id
+              ? {
+                  ...b,
+                  status: 'cancelled',
+                  payment: b.payment === 'paid' ? 'refunded' : 'awaiting'
+                }
+              : b
+          )
         )
-      )
 
-      const refundAmount = booking.payment === 'paid' ? booking.amount : 0
-      logger.info('Booking cancelled successfully', {
-        bookingId: id,
-        clientName: booking.clientName,
-        refundAmount,
-        previousStatus: booking.status
-      })
+        const refundAmount = booking.payment === 'paid' ? booking.amount : 0
+        logger.info('Booking cancelled in Supabase successfully', {
+          bookingId: id,
+          clientName: booking.clientName,
+          refundAmount,
+          previousStatus: booking.status
+        })
 
-      const cancelled = countByStatus(bookings, 'cancelled') + 1
-      toast.success('Booking cancelled', {
-        description:
-          refundAmount > 0
-            ? `$${refundAmount} refund processed for ${booking.clientName}. Total cancelled: ${cancelled}`
-            : `Booking cancelled for ${booking.clientName}. Total cancelled: ${cancelled}`
-      })
+        const cancelled = countByStatus(bookings, 'cancelled') + 1
+        toast.success('Booking cancelled', {
+          description:
+            refundAmount > 0
+              ? `$${refundAmount} refund processed for ${booking.clientName}. Total cancelled: ${cancelled}`
+              : `Booking cancelled for ${booking.clientName}. Total cancelled: ${cancelled}`
+        })
 
-      announce(`Booking cancelled for ${booking.clientName}`, 'polite')
+        announce(`Booking cancelled for ${booking.clientName}`, 'polite')
+      } catch (error: any) {
+        logger.error('Failed to cancel booking', {
+          error: error.message,
+          bookingId: id
+        })
+        toast.error('Failed to cancel booking', {
+          description: error.message || 'Please try again later'
+        })
+      }
     }
   }
 
