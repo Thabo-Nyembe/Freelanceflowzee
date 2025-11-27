@@ -248,118 +248,207 @@ export default function ProjectsOverviewPage() {
       return
     }
 
-    logger.info('Project creation started', { title: newProject.title })
+    logger.info('Project creation started', { title: newProject.title, userId })
 
     try {
-      const response = await fetch('/api/projects/manage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'create',
-          data: {
-            title: newProject.title,
-            description: newProject.description,
-            client_name: newProject.client_name,
-            budget: parseFloat(newProject.budget) || 0,
-            end_date: newProject.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-            priority: newProject.priority as 'low' | 'medium' | 'high' | 'urgent',
-            category: newProject.category
-          }
-        })
+      // Import projects queries utility
+      const { createProject } = await import('@/lib/projects-hub-queries')
+
+      // Create project in Supabase
+      const { data: createdProject, error: createError } = await createProject(userId, {
+        name: newProject.title,
+        description: newProject.description,
+        client: newProject.client_name,
+        budget: parseFloat(newProject.budget) || 0,
+        deadline: newProject.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        start_date: newProject.start_date || new Date().toISOString(),
+        priority: newProject.priority as 'low' | 'medium' | 'high' | 'urgent',
+        category: newProject.category,
+        tags: [],
+        status: 'Not Started',
+        progress: 0
       })
 
-      if (!response.ok) throw new Error('Failed to create project')
-
-      const result = await response.json()
-
-      if (result.success) {
-        logger.info('Project created successfully', { projectId: result.projectId })
-        setProjects([...projects, result.project])
-        setIsCreateModalOpen(false)
-        setNewProject({
-          title: '',
-          description: '',
-          client_name: '',
-          budget: '',
-          end_date: '',
-          start_date: '',
-          priority: 'medium',
-          category: 'web-development',
-          team_members: [],
-          initial_files: [],
-          milestones: [],
-          permissions: 'private'
-        })
-        toast.success('Project created successfully!', {
-          description: result.project.title + ' - Ready to add milestones and team members'
-        })
+      if (createError || !createdProject) {
+        throw new Error(createError?.message || 'Failed to create project')
       }
+
+      // Transform to UI format
+      const uiProject = {
+        id: createdProject.id,
+        title: createdProject.name,
+        description: createdProject.description || '',
+        status: 'draft' as const,
+        progress: 0,
+        client_name: createdProject.client,
+        budget: createdProject.budget,
+        spent: 0,
+        start_date: createdProject.start_date,
+        end_date: createdProject.deadline,
+        team_members: [],
+        priority: createdProject.priority,
+        comments_count: 0,
+        attachments: [],
+        category: createdProject.category,
+        tags: []
+      }
+
+      logger.info('Project created successfully in Supabase', { projectId: createdProject.id })
+
+      setProjects([...projects, uiProject])
+      setIsCreateModalOpen(false)
+      setNewProject({
+        title: '',
+        description: '',
+        client_name: '',
+        budget: '',
+        end_date: '',
+        start_date: '',
+        priority: 'medium',
+        category: 'web-development',
+        team_members: [],
+        initial_files: [],
+        milestones: [],
+        permissions: 'private'
+      })
+
+      toast.success('Project created successfully!', {
+        description: `${newProject.title} - Ready to add milestones and team members`
+      })
+      announce(`Project ${newProject.title} created successfully`, 'polite')
     } catch (error: any) {
-      logger.error('Failed to create project', { error })
+      logger.error('Failed to create project', { error, userId })
       toast.error('Failed to create project', {
         description: error.message || 'Please try again later'
       })
+      announce('Error creating project', 'assertive')
     }
   }
 
   const handleUpdateProjectStatus = async (projectId: string, newStatus: string) => {
     const project = projects.find(p => p.id === projectId)
-    logger.info('Project status update started', { projectId, newStatus })
+    logger.info('Project status update started', { projectId, newStatus, projectName: project?.title })
 
     try {
-      const response = await fetch('/api/projects/manage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update-status',
-          projectId,
-          data: { status: newStatus }
-        })
+      // Import projects queries utility
+      const { updateProjectStatus } = await import('@/lib/projects-hub-queries')
+
+      // Map UI status to database status
+      const dbStatus = newStatus === 'active' ? 'In Progress' :
+                      newStatus === 'completed' ? 'Completed' :
+                      newStatus === 'paused' ? 'On Hold' :
+                      newStatus === 'cancelled' ? 'Cancelled' : 'Not Started'
+
+      // Update status in Supabase
+      const { data: updatedProject, error: updateError } = await updateProjectStatus(
+        projectId,
+        dbStatus as any
+      )
+
+      if (updateError || !updatedProject) {
+        throw new Error(updateError?.message || 'Failed to update project status')
+      }
+
+      logger.info('Project status updated successfully in Supabase', {
+        projectId,
+        newStatus: dbStatus,
+        projectName: project?.title
       })
 
-      if (!response.ok) throw new Error('Failed to update project status')
+      // Update local state
+      setProjects(projects.map(p =>
+        p.id === projectId ? {
+          ...p,
+          status: newStatus as Project['status'],
+          progress: newStatus === 'completed' ? 100 : p.progress
+        } : p
+      ))
 
-      const result = await response.json()
-
-      if (result.success) {
-        logger.info('Project status updated successfully', { projectId, newStatus })
-        setProjects(projects.map(p =>
-          p.id === projectId ? { ...p, status: newStatus as Project['status'], progress: newStatus === 'completed' ? 100 : p.progress } : p
-        ))
-        toast.success(result.message)
-      }
+      toast.success(`Project status updated to ${newStatus}`, {
+        description: `${project?.title || 'Project'} is now ${newStatus}`
+      })
+      announce(`Project status changed to ${newStatus}`, 'polite')
     } catch (error: any) {
       logger.error('Failed to update project status', { error, projectId })
       toast.error('Failed to update project status', {
         description: error.message || 'Please try again later'
       })
+      announce('Error updating project status', 'assertive')
     }
   }
 
   useEffect(() => {
     const loadProjects = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setLoading(false)
+        return
+      }
+
       try {
-        logger.info('Loading projects')
+        logger.info('Loading projects from Supabase', { userId })
         setLoading(true)
         setError(null)
 
-        await new Promise((resolve) => setTimeout(resolve, 500))
+        // Import projects queries utility
+        const { getProjects } = await import('@/lib/projects-hub-queries')
 
-        logger.info('Projects loaded', { count: mockProjects.length })
-        setProjects(mockProjects)
-        setFilteredProjects(mockProjects)
+        // Fetch projects from Supabase
+        const { data: projectsData, error: projectsError, count } = await getProjects(userId)
+
+        if (projectsError) {
+          throw new Error(projectsError.message || 'Failed to load projects')
+        }
+
+        // Transform database projects to UI format
+        const transformedProjects = (projectsData || []).map((p: any) => ({
+          id: p.id,
+          title: p.name,
+          description: p.description || '',
+          status: p.status === 'In Progress' ? 'active' :
+                  p.status === 'Completed' ? 'completed' :
+                  p.status === 'On Hold' ? 'paused' :
+                  p.status === 'Cancelled' ? 'cancelled' : 'draft',
+          progress: p.progress,
+          client_name: p.client,
+          budget: p.budget,
+          spent: p.spent,
+          start_date: p.start_date,
+          end_date: p.deadline,
+          team_members: [], // TODO: Fetch from team_project_members table
+          priority: p.priority,
+          comments_count: 0, // TODO: Implement comments
+          attachments: [], // TODO: Implement attachments
+          category: p.category,
+          tags: p.tags || []
+        }))
+
+        logger.info('Projects loaded from Supabase', {
+          count: transformedProjects.length,
+          total: count
+        })
+
+        setProjects(transformedProjects)
+        setFilteredProjects(transformedProjects)
         setLoading(false)
-        announce(`${mockProjects.length} projects loaded successfully`, 'polite')
+
+        announce(`${transformedProjects.length} projects loaded successfully`, 'polite')
+        toast.success('Projects loaded', {
+          description: `${transformedProjects.length} projects from database`
+        })
       } catch (err) {
-        logger.error('Failed to load projects', { error: err })
+        logger.error('Failed to load projects', { error: err, userId })
         setError(err instanceof Error ? err.message : 'Failed to load projects')
         setLoading(false)
         announce('Error loading projects', 'assertive')
+        toast.error('Failed to load projects', {
+          description: err instanceof Error ? err.message : 'Please try again'
+        })
       }
     }
 
     loadProjects()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const filtered = filterProjects(projects, searchTerm, statusFilter, priorityFilter)
