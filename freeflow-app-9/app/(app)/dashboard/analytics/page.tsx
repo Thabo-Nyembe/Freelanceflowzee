@@ -89,38 +89,96 @@ export default function AnalyticsOverviewPage() {
   const [aiMode, setAiMode] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
 
-  // A+++ LOAD ANALYTICS DATA
+  // A+++ LOAD ANALYTICS DATA FROM SUPABASE
+  const [analyticsData, setAnalyticsData] = useState(KAZI_ANALYTICS_DATA)
+
   useEffect(() => {
     const loadAnalyticsData = async () => {
+      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
       try {
         setIsLoading(true)
         setError(null)
 
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500)
+        logger.info('Loading analytics from Supabase', { userId })
+
+        // Dynamic import for code splitting
+        const {
+          getAnalyticsOverview,
+          getMonthlyRevenue,
+          getProjectCategories,
+          getTopClients,
+          getPerformanceMetrics
+        } = await import('@/lib/analytics-queries')
+
+        // Load all analytics data in parallel
+        const [overviewResult, monthlyResult, categoriesResult, clientsResult, performanceResult] = await Promise.all([
+          getAnalyticsOverview(userId),
+          getMonthlyRevenue(userId, 6),
+          getProjectCategories(userId),
+          getTopClients(userId, 3),
+          getPerformanceMetrics(userId)
+        ])
+
+        if (overviewResult.error || monthlyResult.error || categoriesResult.error || clientsResult.error || performanceResult.error) {
+          throw new Error('Failed to load some analytics data')
+        }
+
+        // Update analytics data with real values
+        const updatedData = {
+          overview: overviewResult.data || KAZI_ANALYTICS_DATA.overview,
+          revenue: {
+            monthly: monthlyResult.data || KAZI_ANALYTICS_DATA.revenue.monthly,
+            forecast: KAZI_ANALYTICS_DATA.revenue.forecast // Keep forecast as-is for now
+          },
+          projectCategories: categoriesResult.data.length > 0 ? categoriesResult.data : KAZI_ANALYTICS_DATA.projectCategories,
+          insights: KAZI_ANALYTICS_DATA.insights, // Keep insights as-is for now
+          clients: {
+            topPerformers: clientsResult.data.length > 0 ? clientsResult.data : KAZI_ANALYTICS_DATA.clients.topPerformers,
+            retention: KAZI_ANALYTICS_DATA.clients.retention,
+            averageLifetimeValue: KAZI_ANALYTICS_DATA.clients.averageLifetimeValue,
+            churnRate: KAZI_ANALYTICS_DATA.clients.churnRate
+          },
+          performance: performanceResult.data || KAZI_ANALYTICS_DATA.performance
+        }
+
+        setAnalyticsData(updatedData)
+        setIsLoading(false)
+        announce('Analytics loaded successfully from database', 'polite')
+
+        logger.info('Analytics loaded successfully from Supabase', {
+          userId,
+          hasOverview: !!overviewResult.data,
+          monthlyCount: monthlyResult.data.length,
+          categoriesCount: categoriesResult.data.length,
+          clientsCount: clientsResult.data.length
         })
 
-        setIsLoading(false)
-        announce('Analytics loaded successfully', 'polite')
+        toast.success('Analytics loaded', {
+          description: 'Dashboard updated with latest data'
+        })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load analytics')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load analytics'
+        logger.error('Failed to load analytics from Supabase', { error: err, userId })
+        setError(errorMessage)
         setIsLoading(false)
         announce('Error loading analytics', 'assertive')
+        toast.error('Failed to load analytics', {
+          description: errorMessage
+        })
       }
     }
 
     loadAnalyticsData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // FILTERED DATA
   const filteredCategories = useMemo(() => {
     if (!searchTerm) {
-      return KAZI_ANALYTICS_DATA.projectCategories
+      return analyticsData.projectCategories
     }
 
-    const filtered = KAZI_ANALYTICS_DATA.projectCategories.filter(cat =>
+    const filtered = analyticsData.projectCategories.filter(cat =>
       cat.category.toLowerCase().includes(searchTerm.toLowerCase())
     )
 
@@ -130,7 +188,7 @@ export default function AnalyticsOverviewPage() {
     })
 
     return filtered
-  }, [searchTerm])
+  }, [searchTerm, analyticsData.projectCategories])
 
   // HANDLERS
   const handleRefreshAnalytics = async () => {
@@ -391,12 +449,12 @@ export default function AnalyticsOverviewPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-700">Total Revenue</p>
                   <NumberFlow
-                    value={KAZI_ANALYTICS_DATA.overview.monthlyRevenue}
+                    value={analyticsData.overview.monthlyRevenue}
                     format="currency"
                     className="text-3xl font-bold text-gray-900"
                   />
                   <p className="text-sm text-green-600 font-medium">
-                    +<NumberFlow value={KAZI_ANALYTICS_DATA.overview.revenueGrowth} decimals={1} className="inline-block" />% from last month
+                    +<NumberFlow value={analyticsData.overview.revenueGrowth} decimals={1} className="inline-block" />% from last month
                   </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-xl backdrop-blur-sm">
@@ -418,11 +476,11 @@ export default function AnalyticsOverviewPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-700">Active Projects</p>
                   <NumberFlow
-                    value={KAZI_ANALYTICS_DATA.overview.activeProjects}
+                    value={analyticsData.overview.activeProjects}
                     className="text-3xl font-bold text-gray-900"
                   />
                   <p className="text-sm text-gray-500">
-                    <NumberFlow value={KAZI_ANALYTICS_DATA.overview.totalProjects} className="inline-block" /> total projects
+                    <NumberFlow value={analyticsData.overview.totalProjects} className="inline-block" /> total projects
                   </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-xl backdrop-blur-sm">
@@ -444,11 +502,11 @@ export default function AnalyticsOverviewPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-700">Total Clients</p>
                   <NumberFlow
-                    value={KAZI_ANALYTICS_DATA.overview.totalClients}
+                    value={analyticsData.overview.totalClients}
                     className="text-3xl font-bold text-gray-900"
                   />
                   <p className="text-sm text-blue-600 font-medium">
-                    <NumberFlow value={KAZI_ANALYTICS_DATA.overview.newClients} className="inline-block" /> new this month
+                    <NumberFlow value={analyticsData.overview.newClients} className="inline-block" /> new this month
                   </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-xl backdrop-blur-sm">
@@ -471,13 +529,13 @@ export default function AnalyticsOverviewPage() {
                   <p className="text-sm font-medium text-gray-700">Efficiency</p>
                   <div className="flex items-baseline">
                     <NumberFlow
-                      value={KAZI_ANALYTICS_DATA.overview.efficiency}
+                      value={analyticsData.overview.efficiency}
                       className="text-3xl font-bold text-gray-900"
                     />
                     <span className="text-3xl font-bold text-gray-900">%</span>
                   </div>
                   <p className="text-sm text-gray-500">
-                    <NumberFlow value={KAZI_ANALYTICS_DATA.overview.billableHours} className="inline-block" />h billable
+                    <NumberFlow value={analyticsData.overview.billableHours} className="inline-block" />h billable
                   </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-orange-400/20 to-amber-400/20 rounded-xl backdrop-blur-sm">
@@ -509,7 +567,7 @@ export default function AnalyticsOverviewPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {KAZI_ANALYTICS_DATA.insights.map((insight, index) => {
+                {analyticsData.insights.map((insight, index) => {
                   const InsightIcon = getKaziInsightIcon(insight.type)
                   return (
                     <motion.div
@@ -573,7 +631,7 @@ export default function AnalyticsOverviewPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {KAZI_ANALYTICS_DATA.revenue.monthly.map((month) => (
+              {analyticsData.revenue.monthly.map((month) => (
                 <div key={month.month} className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1">
                     <span className="text-sm font-medium w-8">{month.month}</span>
