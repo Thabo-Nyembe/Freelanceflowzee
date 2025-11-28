@@ -178,7 +178,7 @@ export default function ProjectImportPage() {
   const simulateImport = () => {
     setImportStatus('importing')
     setImportProgress(0)
-    
+
     const interval = setInterval(() => {
       setImportProgress(prev => {
         if (prev >= 100) {
@@ -189,6 +189,50 @@ export default function ProjectImportPage() {
         return prev + 10
       })
     }, 500)
+  }
+
+  const handleImportSettings = () => {
+    announce('Opening import settings', 'polite')
+    // TODO: Implement import settings dialog
+  }
+
+  const handleDownloadTemplate = () => {
+    announce('Downloading CSV template', 'polite')
+    const csvContent = 'Project Name,Client,Status,Priority,Budget,Start Date,Deadline\nExample Project,Example Client,In Progress,high,50000,2024-01-01,2024-12-31'
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'project-import-template.csv'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const handlePreviewImport = (importItem: any) => {
+    announce(`Previewing import: ${importItem.name}`, 'polite')
+    // TODO: Implement preview dialog
+  }
+
+  const handleRetryImport = (importItem: any) => {
+    announce(`Retrying import: ${importItem.name}`, 'polite')
+    // TODO: Implement retry logic with Supabase
+  }
+
+  const handleViewDetails = (importItem: any) => {
+    announce(`Viewing details for: ${importItem.name}`, 'polite')
+    // TODO: Implement details view
+  }
+
+  const handleDeleteImport = (importItem: any) => {
+    announce(`Deleting import: ${importItem.name}`, 'assertive')
+    // TODO: Implement delete with confirmation
+  }
+
+  const handleConnectSource = (source: string) => {
+    announce(`Connecting to ${source}`, 'polite')
+    // TODO: Implement OAuth connection for integrations
   }
 
   // A+++ LOADING STATE
@@ -222,11 +266,11 @@ export default function ProjectImportPage() {
           <p className="text-gray-600 dark:text-gray-300">Import projects and files from various sources</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleImportSettings}>
             <Settings className="h-4 w-4 mr-2" />
             Settings
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={() => window.location.reload()}>
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
@@ -325,12 +369,12 @@ export default function ProjectImportPage() {
                         <Badge variant="secondary" className="bg-green-100 text-green-800">
                           Connected
                         </Badge>
-                        <Button size="sm">
+                        <Button size="sm" onClick={() => handlePreviewImport(source)}>
                           Import
                         </Button>
                       </>
                     ) : (
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => handleConnectSource(source.name)}>
                         Connect
                       </Button>
                     )}
@@ -377,18 +421,18 @@ export default function ProjectImportPage() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => handleViewDetails(item)}>
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={handleDownloadTemplate}>
                         <Download className="h-4 w-4" />
                       </Button>
                       {item.status === 'failed' && (
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => handleRetryImport(item)}>
                           <RefreshCw className="h-4 w-4" />
                         </Button>
                       )}
-                      <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
+                      <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => handleDeleteImport(item)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
