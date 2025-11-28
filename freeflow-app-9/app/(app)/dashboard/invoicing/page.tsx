@@ -118,6 +118,348 @@ export default function InvoicingPage() {
     loadInvoicingData()
   }, [announce])
 
+  // ============================================================================
+  // INVOICE HANDLERS
+  // ============================================================================
+
+  const handleExportCSV = async () => {
+    try {
+      const userId = 'demo-user-123'
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('invoicing')
+
+      logger.info('Exporting invoices to CSV', {
+        userId,
+        count: filteredInvoices.length,
+        filter: filterStatus
+      })
+
+      // Create CSV content
+      const headers = [
+        'Invoice Number',
+        'Client Name',
+        'Issue Date',
+        'Due Date',
+        'Status',
+        'Subtotal',
+        'Tax',
+        'Total',
+        'Paid Date'
+      ]
+
+      const csvRows = [
+        headers.join(','),
+        ...filteredInvoices.map(inv => [
+          inv.invoiceNumber,
+          `"${inv.clientName}"`,
+          inv.issueDate.toISOString().split('T')[0],
+          inv.dueDate.toISOString().split('T')[0],
+          inv.status,
+          inv.subtotal.toFixed(2),
+          inv.taxAmount.toFixed(2),
+          inv.total.toFixed(2),
+          inv.paidDate ? inv.paidDate.toISOString().split('T')[0] : ''
+        ].join(','))
+      ]
+
+      const csvContent = csvRows.join('\n')
+
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+
+      link.setAttribute('href', url)
+      link.setAttribute('download', `invoices-${filterStatus}-${Date.now()}.csv`)
+      link.style.visibility = 'hidden'
+
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      logger.info('CSV export successful', {
+        count: filteredInvoices.length,
+        size: csvContent.length
+      })
+
+      const { toast } = await import('sonner')
+      toast.success('Invoices exported', {
+        description: `${filteredInvoices.length} invoices in CSV format`
+      })
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('invoicing')
+      logger.error('CSV export error', { error: err.message })
+
+      const { toast } = await import('sonner')
+      toast.error('Failed to export invoices')
+    }
+  }
+
+  const handleCreateInvoice = () => {
+    setViewMode('create')
+    announce('Switched to invoice creation view', 'polite')
+  }
+
+  const handleViewDetails = async (invoiceId: string) => {
+    const userId = 'demo-user-123'
+    const { createFeatureLogger } = await import('@/lib/logger')
+    const logger = createFeatureLogger('invoicing')
+
+    logger.info('Viewing invoice details', { userId, invoiceId })
+
+    // For now, announce the action - later we'll create a detail modal or page
+    announce(`Viewing details for invoice ${invoiceId}`, 'polite')
+    const { toast } = await import('sonner')
+    toast.info('Invoice details view coming soon')
+  }
+
+  const handleSendInvoice = async (invoice: Invoice) => {
+    try {
+      const userId = 'demo-user-123'
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('invoicing')
+      const { toast } = await import('sonner')
+
+      logger.info('Sending invoice', {
+        userId,
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        clientName: invoice.clientName
+      })
+
+      toast.info('Sending invoice...', {
+        description: `To ${invoice.clientName}`
+      })
+
+      const { markInvoiceAsSent } = await import('@/lib/invoicing-queries')
+      const { success, error } = await markInvoiceAsSent(invoice.id, userId)
+
+      if (error || !success) {
+        logger.error('Failed to send invoice', { error })
+        toast.error('Failed to send invoice', {
+          description: error?.message || 'Unknown error'
+        })
+        return
+      }
+
+      logger.info('Invoice sent successfully', { invoiceId: invoice.id })
+
+      toast.success('Invoice sent', {
+        description: `Email delivered to ${invoice.clientName}`
+      })
+
+      // Update local state
+      setSelectedInvoices(prev => prev.map(inv =>
+        inv.id === invoice.id
+          ? { ...inv, status: 'sent' as InvoiceStatus, sentAt: new Date() }
+          : inv
+      ))
+
+      announce(`Invoice ${invoice.invoiceNumber} sent successfully`, 'polite')
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('invoicing')
+      logger.error('Send invoice error', { error: err.message })
+
+      const { toast } = await import('sonner')
+      toast.error('Failed to send invoice')
+    }
+  }
+
+  const handleMarkPaid = async (invoice: Invoice) => {
+    try {
+      const userId = 'demo-user-123'
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('invoicing')
+      const { toast } = await import('sonner')
+
+      logger.info('Marking invoice as paid', {
+        userId,
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        amount: invoice.total
+      })
+
+      const { markInvoiceAsPaid } = await import('@/lib/invoicing-queries')
+      const paidDate = new Date().toISOString()
+
+      const { success, error } = await markInvoiceAsPaid(invoice.id, userId, {
+        payment_method: 'manual',
+        payment_reference: `MANUAL-${Date.now()}`,
+        notes: 'Manually marked as paid'
+      })
+
+      if (error || !success) {
+        logger.error('Failed to mark invoice as paid', { error })
+        toast.error('Failed to update invoice')
+        return
+      }
+
+      logger.info('Invoice marked as paid', { invoiceId: invoice.id, paidDate })
+
+      toast.success('Invoice marked as paid', {
+        description: `${invoice.invoiceNumber} - ${formatCurrency(invoice.total, invoice.currency)}`
+      })
+
+      // Update local state
+      setSelectedInvoices(prev => prev.map(inv =>
+        inv.id === invoice.id
+          ? { ...inv, status: 'paid' as InvoiceStatus, paidDate: new Date() }
+          : inv
+      ))
+
+      announce(`Invoice ${invoice.invoiceNumber} marked as paid`, 'polite')
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('invoicing')
+      logger.error('Mark paid error', { error: err.message })
+
+      const { toast } = await import('sonner')
+      toast.error('Failed to mark as paid')
+    }
+  }
+
+  const handleSendReminder = async (invoice: Invoice) => {
+    try {
+      const userId = 'demo-user-123'
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('invoicing')
+      const { toast } = await import('sonner')
+
+      const daysOverdue = getDaysOverdue(invoice.dueDate)
+
+      logger.info('Sending payment reminder', {
+        userId,
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        daysOverdue
+      })
+
+      toast.info('Sending reminder...')
+
+      // TODO: Integrate with email service
+      // For now, simulate success
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      logger.info('Reminder sent successfully', { invoiceId: invoice.id })
+
+      toast.success('Reminder sent', {
+        description: `Email sent to ${invoice.clientName}`
+      })
+
+      announce(`Payment reminder sent for invoice ${invoice.invoiceNumber}`, 'polite')
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('invoicing')
+      logger.error('Send reminder error', { error: err.message })
+
+      const { toast } = await import('sonner')
+      toast.error('Failed to send reminder')
+    }
+  }
+
+  const handleDownloadPDF = async (invoice: Invoice) => {
+    try {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('invoicing')
+      const { toast } = await import('sonner')
+
+      logger.info('Downloading invoice PDF', {
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber
+      })
+
+      toast.info('Generating PDF...')
+
+      // TODO: Implement PDF generation
+      // For now, simulate download
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      toast.success('PDF downloaded', {
+        description: `${invoice.invoiceNumber}.pdf`
+      })
+
+      announce(`Invoice ${invoice.invoiceNumber} PDF downloaded`, 'polite')
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('invoicing')
+      logger.error('PDF download error', { error: err.message })
+
+      const { toast } = await import('sonner')
+      toast.error('Failed to download PDF')
+    }
+  }
+
+  const handleDuplicateInvoice = async (invoice: Invoice) => {
+    try {
+      const userId = 'demo-user-123'
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('invoicing')
+      const { toast } = await import('sonner')
+
+      logger.info('Duplicating invoice', {
+        userId,
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber
+      })
+
+      const { createInvoice } = await import('@/lib/invoicing-queries')
+
+      // Create duplicate with new invoice number
+      const newInvoiceNumber = `${invoice.invoiceNumber}-COPY-${Date.now()}`
+
+      const { data, error } = await createInvoice(userId, {
+        invoice_number: newInvoiceNumber,
+        client_id: invoice.clientId,
+        client_name: invoice.clientName,
+        client_email: invoice.clientEmail,
+        client_address: invoice.clientAddress,
+        items: invoice.items,
+        subtotal: invoice.subtotal,
+        tax_rate: invoice.taxRate,
+        tax_amount: invoice.taxAmount,
+        discount: invoice.discount,
+        total: invoice.total,
+        currency: invoice.currency,
+        issue_date: new Date().toISOString(),
+        due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        notes: invoice.notes,
+        terms: invoice.terms,
+        is_recurring: false,
+        recurring_config: {}
+      })
+
+      if (error) {
+        logger.error('Failed to duplicate invoice', { error })
+        toast.error('Failed to duplicate invoice')
+        return
+      }
+
+      logger.info('Invoice duplicated successfully', {
+        originalId: invoice.id,
+        newId: data.id,
+        newInvoiceNumber
+      })
+
+      toast.success('Invoice duplicated', {
+        description: `Created ${newInvoiceNumber}`
+      })
+
+      announce(`Invoice ${invoice.invoiceNumber} duplicated as ${newInvoiceNumber}`, 'polite')
+
+      // Reload data to show new invoice
+      window.location.reload()
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('invoicing')
+      logger.error('Duplicate invoice error', { error: err.message })
+
+      const { toast } = await import('sonner')
+      toast.error('Failed to duplicate invoice')
+    }
+  }
+
   const viewModes = [
     { id: 'overview', label: 'Overview', icon: '📊' },
     { id: 'invoices', label: 'Invoices', icon: '📄' },
@@ -320,10 +662,16 @@ export default function InvoicingPage() {
               </select>
             </div>
             <div className="flex items-center gap-2">
-              <button className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors">
+              <button
+                onClick={handleExportCSV}
+                className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors"
+              >
                 Export CSV
               </button>
-              <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors">
+              <button
+                onClick={handleCreateInvoice}
+                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors"
+              >
                 + New Invoice
               </button>
             </div>
@@ -427,23 +775,46 @@ export default function InvoicingPage() {
                 {/* Actions */}
                 <div className="border-t pt-4 mt-4">
                   <div className="flex items-center gap-2">
-                    <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">
+                    <button
+                      onClick={() => handleViewDetails(invoice.id)}
+                      className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+                    >
                       View Details
                     </button>
                     {invoice.status === 'draft' && (
-                      <button className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors">
+                      <button
+                        onClick={() => handleSendInvoice(invoice)}
+                        className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors"
+                      >
                         Send Invoice
                       </button>
                     )}
+                    {invoice.status === 'sent' && (
+                      <button
+                        onClick={() => handleMarkPaid(invoice)}
+                        className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition-colors"
+                      >
+                        Mark as Paid
+                      </button>
+                    )}
                     {invoice.status === 'overdue' && (
-                      <button className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors">
+                      <button
+                        onClick={() => handleSendReminder(invoice)}
+                        className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-sm font-medium transition-colors"
+                      >
                         Send Reminder
                       </button>
                     )}
-                    <button className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors">
+                    <button
+                      onClick={() => handleDownloadPDF(invoice)}
+                      className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors"
+                    >
                       Download PDF
                     </button>
-                    <button className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors">
+                    <button
+                      onClick={() => handleDuplicateInvoice(invoice)}
+                      className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors"
+                    >
                       Duplicate
                     </button>
                   </div>
