@@ -299,6 +299,42 @@ export default function TeamManagementPage() {
     }
   }
 
+  const handleFilterMembers = () => {
+    logger.info('Opening member filters', { action: 'filter' })
+    announce('Member filters coming soon', 'polite')
+    // TODO: Implement filter dialog
+  }
+
+  const handleMessageMember = (member: TeamMember) => {
+    logger.info('Opening message to member', {
+      action: 'message',
+      member_id: member.id,
+      member_name: member.name
+    })
+    announce(`Opening message to ${member.name}`, 'polite')
+    // TODO: Implement messaging dialog or redirect to messaging system
+  }
+
+  const handleEditMember = (member: TeamMember) => {
+    logger.info('Opening member edit', {
+      action: 'edit',
+      member_id: member.id,
+      member_name: member.name
+    })
+    announce(`Opening edit for ${member.name}`, 'polite')
+    // TODO: Implement edit member dialog
+  }
+
+  const handleMemberOptions = (member: TeamMember) => {
+    logger.info('Opening member options', {
+      action: 'options',
+      member_id: member.id,
+      member_name: member.name
+    })
+    announce(`Opening options for ${member.name}`, 'polite')
+    // TODO: Implement member options menu
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'online': return 'bg-green-500'
@@ -555,7 +591,7 @@ export default function TeamManagementPage() {
                     className="pl-10 w-80"
                   />
                 </div>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleFilterMembers}>
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
@@ -593,7 +629,7 @@ export default function TeamManagementPage() {
                             </div>
                           </div>
                         </div>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => handleMemberOptions(member)}>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </div>
@@ -637,11 +673,11 @@ export default function TeamManagementPage() {
                           <span>{member.location}</span>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleMessageMember(member)}>
                             <MessageSquare className="h-3 w-3 mr-1" />
                             Message
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={() => handleEditMember(member)}>
                             <Edit className="h-3 w-3" />
                           </Button>
                         </div>
