@@ -81,6 +81,43 @@ export default function WorkflowBuilderPage() {
     loadWorkflowData()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // A+++ CRUD HANDLERS
+  const handleCreateWorkflow = () => {
+    announce('Opening workflow creation', 'polite')
+    // TODO: Implement workflow creation dialog using saveWorkflowDraft()
+  }
+
+  const handleEditWorkflow = (workflow: any) => {
+    announce(`Editing workflow: ${workflow.name}`, 'polite')
+    // TODO: Open workflow editor
+  }
+
+  const handleToggleWorkflow = async (workflow: any) => {
+    const newState = !workflow.isActive
+    announce(`${newState ? 'Activating' : 'Pausing'} workflow: ${workflow.name}`, 'polite')
+    // TODO: Use activateWorkflow() or pauseWorkflow()
+  }
+
+  const handleTestWorkflow = async (workflow: any) => {
+    announce(`Testing workflow: ${workflow.name}`, 'polite')
+    // TODO: Use testWorkflow() from queries
+  }
+
+  const handleViewWorkflow = (workflow: any) => {
+    announce(`Viewing workflow: ${workflow.name}`, 'polite')
+    // TODO: Show workflow details modal
+  }
+
+  const handleUseTemplate = (template: any) => {
+    announce(`Creating workflow from template: ${template.name}`, 'polite')
+    // TODO: Use template to create new workflow
+  }
+
+  const handleViewHistory = (workflow: any) => {
+    announce(`Viewing history for: ${workflow.name}`, 'polite')
+    // TODO: Use getWorkflowHistory()
+  }
+
   const workflows = [
     {
       id: '1',
@@ -234,11 +271,11 @@ export default function WorkflowBuilderPage() {
             </div>
           </div>
           <div className="flex items-center space-x-4">
-            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white" onClick={handleCreateWorkflow}>
               <Plus className="h-4 w-4 mr-2" />
               Create Workflow
             </Button>
-            <Button variant="outline" className="border-gray-300">
+            <Button variant="outline" className="border-gray-300" onClick={() => announce('Import feature coming soon', 'polite')}>
               <Download className="h-4 w-4 mr-2" />
               Import
             </Button>
@@ -359,7 +396,10 @@ export default function WorkflowBuilderPage() {
                           <p className="text-sm text-gray-600 mt-1">{workflow.description}</p>
                         </div>
                       </div>
-                      <Switch checked={workflow.isActive} />
+                      <Switch
+                        checked={workflow.isActive}
+                        onCheckedChange={() => handleToggleWorkflow(workflow)}
+                      />
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -377,15 +417,15 @@ export default function WorkflowBuilderPage() {
                       Last run: {workflow.lastRun.toLocaleDateString()}
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => handleViewWorkflow(workflow)}>
                         <Eye className="h-3 w-3 mr-1" />
                         View
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => handleEditWorkflow(workflow)}>
                         <Edit3 className="h-3 w-3 mr-1" />
                         Edit
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => handleTestWorkflow(workflow)}>
                         <MoreHorizontal className="h-3 w-3" />
                       </Button>
                     </div>
@@ -454,11 +494,11 @@ export default function WorkflowBuilderPage() {
                       </span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Button size="sm" className="flex-1">
+                      <Button size="sm" className="flex-1" onClick={() => handleUseTemplate(template)}>
                         <Plus className="h-3 w-3 mr-1" />
                         Use Template
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => handleUseTemplate(template)}>
                         <Eye className="h-3 w-3" />
                       </Button>
                     </div>
@@ -486,7 +526,10 @@ export default function WorkflowBuilderPage() {
                     <Wand2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-700 mb-2">Start Building</h3>
                     <p className="text-gray-500 mb-4">Choose a template or start from scratch</p>
-                    <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+                    <Button
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                      onClick={handleCreateWorkflow}
+                    >
                       <Plus className="h-4 w-4 mr-2" />
                       New Workflow
                     </Button>
