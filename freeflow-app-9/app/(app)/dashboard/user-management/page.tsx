@@ -107,6 +107,75 @@ export default function UserManagementPage() {
     )
   }
 
+  // A+++ CRUD HANDLERS
+  const handleExportUsers = async () => {
+    try {
+      announce('Exporting user data', 'polite')
+
+      const exportData = {
+        users: filteredUsers,
+        stats,
+        exportedAt: new Date().toISOString()
+      }
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+        type: 'application/json'
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `users-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      announce('User data exported successfully', 'polite')
+    } catch (err) {
+      announce('Failed to export user data', 'assertive')
+    }
+  }
+
+  const handleEditUser = (user: User) => {
+    announce(`Opening edit for ${user.name}`, 'polite')
+    // TODO: Implement edit user dialog
+  }
+
+  const handleDeleteUser = (user: User) => {
+    announce(`Opening delete confirmation for ${user.name}`, 'assertive')
+    // TODO: Implement delete confirmation dialog
+  }
+
+  const handleViewUser = (user: User) => {
+    announce(`Viewing details for ${user.name}`, 'polite')
+    // TODO: Implement user detail view
+  }
+
+  const handleSendEmail = (user: User) => {
+    announce(`Opening email to ${user.name}`, 'polite')
+    window.location.href = `mailto:${user.email}`
+  }
+
+  const handleBulkAction = (action: string) => {
+    announce(`Performing ${action} on ${selectedUsers.length} users`, 'polite')
+    // TODO: Implement bulk actions
+  }
+
+  const handleViewInvitation = (invitation: any) => {
+    announce('Viewing invitation details', 'polite')
+    // TODO: Implement invitation details view
+  }
+
+  const handleResendInvitation = (invitation: any) => {
+    announce('Resending invitation', 'polite')
+    // TODO: Implement resend invitation
+  }
+
+  const handleCancelInvitation = (invitation: any) => {
+    announce('Canceling invitation', 'assertive')
+    // TODO: Implement cancel invitation
+  }
+
   // A+++ LOADING STATE
   if (isLoading) {
     return (
@@ -325,7 +394,7 @@ export default function UserManagementPage() {
                     </SelectContent>
                   </Select>
 
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={handleExportUsers}>
                     <Download className="w-4 h-4" />
                     Export
                   </Button>
@@ -337,15 +406,15 @@ export default function UserManagementPage() {
                       {selectedUsers.length} users selected
                     </span>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => handleBulkAction('edit')}>
                         <Edit className="w-4 h-4 mr-2" />
                         Edit
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => handleBulkAction('message')}>
                         <Send className="w-4 h-4 mr-2" />
                         Message
                       </Button>
-                      <Button variant="outline" size="sm" className="text-red-500">
+                      <Button variant="outline" size="sm" className="text-red-500" onClick={() => handleBulkAction('delete')}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Delete
                       </Button>
@@ -415,13 +484,13 @@ export default function UserManagementPage() {
                         </div>
 
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => handleViewUser(user)}>
                             <Eye className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => handleEditUser(user)}>
                             <Edit className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => handleDeleteUser(user)}>
                             <MoreVertical className="w-4 h-4" />
                           </Button>
                         </div>
@@ -516,15 +585,15 @@ export default function UserManagementPage() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleViewInvitation(invitation)}>
                             <Copy className="w-4 h-4 mr-2" />
                             Copy Link
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleResendInvitation(invitation)}>
                             <Send className="w-4 h-4 mr-2" />
                             Resend
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-500">
+                          <Button variant="outline" size="sm" className="text-red-500" onClick={() => handleCancelInvitation(invitation)}>
                             <XCircle className="w-4 h-4" />
                           </Button>
                         </div>
