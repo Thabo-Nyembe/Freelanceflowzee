@@ -68,24 +68,39 @@ export default function CRMPage() {
   const [dealSearch, setDealSearch] = useState('')
   const [contactSort, setContactSort] = useState('name')
   const [dealSort, setDealSort] = useState('value')
+  const [contacts, setContacts] = useState<any[]>(MOCK_CONTACTS)
+  const [deals, setDeals] = useState<any[]>(MOCK_DEALS)
+  const [stats, setStats] = useState<any>(MOCK_CRM_STATS)
 
   // A+++ LOAD CRM DATA
   useEffect(() => {
     const loadCRMData = async () => {
+      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
       try {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load CRM data'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Dynamic import for code splitting
+        const { getCRMContacts, getCRMDeals } = await import('@/lib/crm-queries')
+
+        // Load contacts and deals in parallel
+        const [contactsResult, dealsResult] = await Promise.all([
+          getCRMContacts(userId),
+          getCRMDeals(userId)
+        ])
+
+        if (contactsResult.error || dealsResult.error) {
+          throw new Error('Failed to load CRM data')
+        }
+
+        // Update state with real data if available, otherwise use mock data
+        if (contactsResult.data && contactsResult.data.length > 0) {
+          setContacts(contactsResult.data)
+        }
+        if (dealsResult.data && dealsResult.data.length > 0) {
+          setDeals(dealsResult.data)
+        }
 
         setIsLoading(false)
         announce('CRM data loaded successfully', 'polite')
@@ -97,18 +112,125 @@ export default function CRMPage() {
     }
 
     loadCRMData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [announce])
 
-  const stats = MOCK_CRM_STATS
+  // ============================================================================
+  // CRM HANDLERS
+  // ============================================================================
+
+  const handleCreateContact = () => {
+    announce('Opening contact creation form', 'polite')
+    const toast = require('sonner').toast
+    toast.info('Create contact', {
+      description: 'Contact form coming soon'
+    })
+  }
+
+  const handleViewContact = (contact: any) => {
+    announce(`Viewing contact ${contact.name}`, 'polite')
+    const toast = require('sonner').toast
+    toast.info('Contact details', {
+      description: `${contact.name} - ${contact.email}`
+    })
+  }
+
+  const handleEmailContact = async (contact: any) => {
+    try {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('crm')
+      const toast = (await import('sonner')).toast
+
+      logger.info('Opening email to contact', {
+        contactId: contact.id,
+        email: contact.email
+      })
+
+      // Open default email client
+      window.location.href = `mailto:${contact.email}?subject=Follow up`
+
+      toast.success('Email client opened', {
+        description: `To ${contact.email}`
+      })
+
+      announce(`Email opened for ${contact.name}`, 'polite')
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('crm')
+      logger.error('Email contact error', { error: err.message })
+    }
+  }
+
+  const handleViewDeal = (deal: any) => {
+    announce(`Viewing deal ${deal.name}`, 'polite')
+    const toast = require('sonner').toast
+    toast.info('Deal details', {
+      description: `${deal.name} - ${formatCurrency(deal.value)}`
+    })
+  }
+
+  const handleUpdateDealStage = async (deal: any, newStage: string) => {
+    try {
+      const userId = 'demo-user-123'
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('crm')
+      const toast = (await import('sonner')).toast
+
+      logger.info('Updating deal stage', {
+        userId,
+        dealId: deal.id,
+        dealName: deal.name,
+        oldStage: deal.stage,
+        newStage
+      })
+
+      toast.info('Updating deal...', {
+        description: `Moving ${deal.name} to ${newStage}`
+      })
+
+      const { updateCRMDeal } = await import('@/lib/crm-queries')
+      const { data, error } = await updateCRMDeal(deal.id, {
+        stage: newStage as any
+      })
+
+      if (error) {
+        logger.error('Failed to update deal', { error })
+        toast.error('Failed to update deal')
+        return
+      }
+
+      logger.info('Deal stage updated', { dealId: deal.id, newStage })
+
+      toast.success('Deal updated', {
+        description: `${deal.name} moved to ${newStage}`
+      })
+
+      // Update local state
+      setDeals(prev => prev.map(d =>
+        d.id === deal.id
+          ? { ...d, stage: newStage }
+          : d
+      ))
+
+      announce(`Deal ${deal.name} moved to ${newStage}`, 'polite')
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('crm')
+      logger.error('Update deal error', { error: err.message })
+
+      const toast = (await import('sonner')).toast
+      toast.error('Failed to update deal')
+    }
+  }
+
   const pipelineMetrics = calculatePipelineMetrics(MOCK_PIPELINE)
 
   const filteredContacts = sortContacts(
-    filterContacts(MOCK_CONTACTS, { search: contactSearch }),
+    filterContacts(contacts, { search: contactSearch }),
     contactSort
   )
 
   const filteredDeals = sortDeals(
-    filterDeals(MOCK_DEALS, { search: dealSearch }),
+    filterDeals(deals, { search: dealSearch }),
     dealSort
   )
 
@@ -179,7 +301,7 @@ export default function CRMPage() {
                 Manage contacts, track deals, and close more sales
               </p>
             </div>
-            <Button className="gap-2">
+            <Button className="gap-2" onClick={handleCreateContact}>
               <Plus className="w-4 h-4" />
               New Contact
             </Button>
@@ -474,11 +596,11 @@ export default function CRMPage() {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => handleViewContact(contact)}>
                         <Eye className="w-4 h-4 mr-2" />
                         View
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEmailContact(contact)}>
                         <Send className="w-4 h-4 mr-2" />
                         Email
                       </Button>
@@ -584,7 +706,7 @@ export default function CRMPage() {
                         </div>
 
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => handleViewDeal(deal)}>
                             <Edit className="w-4 h-4" />
                           </Button>
                           <Button variant="outline" size="sm">
