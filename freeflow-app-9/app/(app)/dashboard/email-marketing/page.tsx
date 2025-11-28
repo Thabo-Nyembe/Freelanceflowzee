@@ -35,24 +35,43 @@ export default function EmailMarketingPage() {
 
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [filterStatus, setFilterStatus] = useState<CampaignStatus | 'all'>('all')
+  const [campaigns, setCampaigns] = useState<any[]>(MOCK_CAMPAIGNS)
+  const [subscribers, setSubscribers] = useState<any[]>(MOCK_SUBSCRIBERS)
+  const [stats, setStats] = useState<any>(MOCK_EMAIL_STATS)
 
   // A+++ LOAD EMAIL MARKETING DATA
   useEffect(() => {
     const loadEmailMarketingData = async () => {
+      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+
       try {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load email marketing data'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Dynamic import for code splitting
+        const { getEmailCampaigns, getEmailSubscribers, getEmailMarketingStats } = await import('@/lib/email-marketing-queries')
+
+        // Load campaigns, subscribers, and stats in parallel
+        const [campaignsResult, subscribersResult, statsResult] = await Promise.all([
+          getEmailCampaigns(userId),
+          getEmailSubscribers(userId),
+          getEmailMarketingStats(userId)
+        ])
+
+        if (campaignsResult.error || subscribersResult.error || statsResult.error) {
+          throw new Error('Failed to load email marketing data')
+        }
+
+        // Update state with real data if available, otherwise use mock data
+        if (campaignsResult.data && campaignsResult.data.length > 0) {
+          setCampaigns(campaignsResult.data)
+        }
+        if (subscribersResult.data && subscribersResult.data.length > 0) {
+          setSubscribers(subscribersResult.data)
+        }
+        if (statsResult.data) {
+          setStats(statsResult.data)
+        }
 
         setIsLoading(false)
         announce('Email marketing data loaded successfully', 'polite')
@@ -64,7 +83,190 @@ export default function EmailMarketingPage() {
     }
 
     loadEmailMarketingData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [announce])
+
+  // ============================================================================
+  // EMAIL MARKETING HANDLERS
+  // ============================================================================
+
+  const handleCreateCampaign = () => {
+    announce('Switched to campaign creation view', 'polite')
+    // TODO: Open campaign creation modal or navigate to creation page
+    const { toast } = require('sonner')
+    toast.info('Campaign creation coming soon', {
+      description: 'Full email campaign builder in development'
+    })
+  }
+
+  const handleSendCampaign = async (campaign: any) => {
+    try {
+      const userId = 'demo-user-123'
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('email-marketing')
+      const { toast } = await import('sonner')
+
+      logger.info('Sending campaign', {
+        userId,
+        campaignId: campaign.id,
+        campaignName: campaign.name,
+        recipientCount: campaign.recipientCount || campaign.recipient_count
+      })
+
+      toast.info('Sending campaign...', {
+        description: `To ${campaign.recipientCount || campaign.recipient_count} recipients`
+      })
+
+      const { sendCampaign } = await import('@/lib/email-marketing-queries')
+      const { data, error} = await sendCampaign(campaign.id)
+
+      if (error) {
+        logger.error('Failed to send campaign', { error })
+        toast.error('Failed to send campaign')
+        return
+      }
+
+      logger.info('Campaign sent successfully', { campaignId: campaign.id })
+
+      toast.success('Campaign sent', {
+        description: `Sending to ${campaign.recipientCount || campaign.recipient_count} subscribers`
+      })
+
+      // Update local state
+      setCampaigns(prev => prev.map(c =>
+        c.id === campaign.id
+          ? { ...c, status: 'sending' }
+          : c
+      ))
+
+      announce(`Campaign ${campaign.name} sent successfully`, 'polite')
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('email-marketing')
+      logger.error('Send campaign error', { error: err.message })
+
+      const { toast } = await import('sonner')
+      toast.error('Failed to send campaign')
+    }
+  }
+
+  const handleViewReport = (campaign: any) => {
+    announce(`Viewing report for campaign ${campaign.name}`, 'polite')
+    const { toast } = require('sonner')
+    toast.info('Campaign analytics', {
+      description: `Open Rate: ${campaign.openRate || campaign.open_rate}% | Click Rate: ${campaign.clickRate || campaign.click_rate}%`
+    })
+  }
+
+  const handleDuplicateCampaign = async (campaign: any) => {
+    try {
+      const userId = 'demo-user-123'
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('email-marketing')
+      const { toast } = await import('sonner')
+
+      logger.info('Duplicating campaign', {
+        userId,
+        campaignId: campaign.id,
+        campaignName: campaign.name
+      })
+
+      const { createEmailCampaign } = await import('@/lib/email-marketing-queries')
+
+      const newCampaignName = `${campaign.name} (Copy)`
+
+      const { data, error } = await createEmailCampaign(userId, {
+        name: newCampaignName,
+        subject: campaign.subject,
+        from_name: campaign.fromName || campaign.from_name,
+        from_email: campaign.fromEmail || campaign.from_email,
+        html_content: campaign.htmlContent || campaign.html_content || '',
+        type: campaign.type,
+        status: 'draft',
+        recipient_count: 0,
+        sent_count: 0,
+        delivered_count: 0,
+        opened_count: 0,
+        clicked_count: 0,
+        bounced_count: 0,
+        complained_count: 0,
+        unsubscribed_count: 0,
+        open_rate: 0,
+        click_rate: 0,
+        bounce_rate: 0,
+        editor: campaign.editor || 'drag-drop'
+      })
+
+      if (error) {
+        logger.error('Failed to duplicate campaign', { error })
+        toast.error('Failed to duplicate campaign')
+        return
+      }
+
+      logger.info('Campaign duplicated successfully', {
+        originalId: campaign.id,
+        newId: data.id,
+        newName: newCampaignName
+      })
+
+      toast.success('Campaign duplicated', {
+        description: newCampaignName
+      })
+
+      // Add to local state
+      setCampaigns(prev => [data, ...prev])
+
+      announce(`Campaign duplicated as ${newCampaignName}`, 'polite')
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('email-marketing')
+      logger.error('Duplicate campaign error', { error: err.message })
+
+      const { toast } = await import('sonner')
+      toast.error('Failed to duplicate campaign')
+    }
+  }
+
+  const handleAddSubscriber = () => {
+    announce('Opening subscriber creation form', 'polite')
+    const { toast } = require('sonner')
+    toast.info('Add subscriber', {
+      description: 'Subscriber management form coming soon'
+    })
+  }
+
+  const handleCreateAutomation = () => {
+    announce('Opening automation builder', 'polite')
+    const { toast } = require('sonner')
+    toast.info('Automation builder', {
+      description: 'Advanced email automation workflows coming soon'
+    })
+  }
+
+  const handleCreateTemplate = () => {
+    announce('Opening template builder', 'polite')
+    const { toast } = require('sonner')
+    toast.info('Template builder', {
+      description: 'Email template editor coming soon'
+    })
+  }
+
+  const handleUseTemplate = (template: any) => {
+    announce(`Using template: ${template.name}`, 'polite')
+    const { toast } = require('sonner')
+    toast.success('Template selected', {
+      description: `Starting campaign with ${template.name}`
+    })
+    // TODO: Navigate to campaign creation with template pre-loaded
+  }
+
+  const handlePreviewTemplate = (template: any) => {
+    announce(`Previewing template: ${template.name}`, 'polite')
+    const { toast } = require('sonner')
+    toast.info('Template preview', {
+      description: `${template.name} - ${template.category}`
+    })
+    // TODO: Open template preview modal
+  }
 
   const viewModes = [
     { id: 'overview', label: 'Overview', icon: '📊' },
@@ -75,8 +277,8 @@ export default function EmailMarketingPage() {
   ]
 
   const filteredCampaigns = filterStatus === 'all'
-    ? MOCK_CAMPAIGNS
-    : MOCK_CAMPAIGNS.filter(c => c.status === filterStatus)
+    ? campaigns
+    : campaigns.filter(c => c.status === filterStatus)
 
   const renderOverview = () => (
     <div className="space-y-6">
@@ -227,7 +429,10 @@ export default function EmailMarketingPage() {
               <option value="sent">Sent</option>
               <option value="sending">Sending</option>
             </select>
-            <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors">
+            <button
+              onClick={handleCreateCampaign}
+              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors"
+            >
               + New Campaign
             </button>
           </div>
@@ -307,15 +512,24 @@ export default function EmailMarketingPage() {
 
               <div className="border-t pt-4 mt-4">
                 <div className="flex items-center gap-2">
-                  <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">
+                  <button
+                    onClick={() => handleViewReport(campaign)}
+                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+                  >
                     View Report
                   </button>
                   {campaign.status === 'draft' && (
-                    <button className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors">
+                    <button
+                      onClick={() => handleSendCampaign(campaign)}
+                      className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors"
+                    >
                       Send Now
                     </button>
                   )}
-                  <button className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors">
+                  <button
+                    onClick={() => handleDuplicateCampaign(campaign)}
+                    className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors"
+                  >
                     Duplicate
                   </button>
                 </div>
@@ -331,13 +545,16 @@ export default function EmailMarketingPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Subscribers</h2>
-        <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors">
+        <button
+          onClick={handleAddSubscriber}
+          className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors"
+        >
           + Add Subscriber
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {MOCK_SUBSCRIBERS.map((subscriber) => (
+        {subscribers.map((subscriber) => (
           <LiquidGlassCard key={subscriber.id}>
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
@@ -401,7 +618,10 @@ export default function EmailMarketingPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Email Automation</h2>
-        <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors">
+        <button
+          onClick={handleCreateAutomation}
+          className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors"
+        >
           + New Automation
         </button>
       </div>
@@ -469,7 +689,10 @@ export default function EmailMarketingPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Email Templates</h2>
-        <button className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors">
+        <button
+          onClick={handleCreateTemplate}
+          className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors"
+        >
           + New Template
         </button>
       </div>
@@ -491,10 +714,16 @@ export default function EmailMarketingPage() {
               </div>
 
               <div className="flex items-center gap-2">
-                <button className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors">
+                <button
+                  onClick={() => handleUseTemplate(template)}
+                  className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+                >
                   Use Template
                 </button>
-                <button className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors">
+                <button
+                  onClick={() => handlePreviewTemplate(template)}
+                  className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors"
+                >
                   Preview
                 </button>
               </div>
