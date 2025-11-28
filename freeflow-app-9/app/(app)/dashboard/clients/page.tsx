@@ -783,7 +783,11 @@ export default function ClientsPage() {
 
   const handleSendMessage = (client: Client) => {
     logger.info('Send message to client', { clientId: client.id, name: client.name })
-    toast.info('💬 Opening message composer', {
+
+    // Navigate to messages page with client pre-selected
+    router.push(`/dashboard/messages?client=${encodeURIComponent(client.name)}&email=${encodeURIComponent(client.email)}`)
+
+    toast.success('💬 Opening message composer', {
       description: `Starting conversation with ${client.name}`
     })
   }
@@ -796,14 +800,28 @@ export default function ClientsPage() {
 
   const handleCallClient = (client: Client) => {
     logger.info('Call client', { clientId: client.id, phone: client.phone })
-    toast.info('📞 Initiating call', {
-      description: `Calling ${client.name} at ${client.phone}`
-    })
+
+    if (client.phone) {
+      // Use tel: protocol to initiate call
+      window.location.href = `tel:${client.phone}`
+
+      toast.success('📞 Initiating call', {
+        description: `Calling ${client.name} at ${client.phone}`
+      })
+    } else {
+      toast.error('No phone number available', {
+        description: `${client.name} doesn't have a phone number on file`
+      })
+    }
   }
 
   const handleScheduleMeeting = (client: Client) => {
     logger.info('Schedule meeting with client', { clientId: client.id, name: client.name })
-    toast.info('📅 Opening calendar', {
+
+    // Navigate to bookings/calendar with client pre-filled
+    router.push(`/dashboard/bookings?client=${encodeURIComponent(client.name)}&clientId=${client.id}`)
+
+    toast.success('📅 Opening calendar', {
       description: `Scheduling meeting with ${client.name}`
     })
   }
