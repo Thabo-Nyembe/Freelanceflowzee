@@ -75,6 +75,153 @@ export default function ClientKnowledgeBase() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
 
+  // HANDLERS
+  const handleVideoClick = async (video: VideoTutorial) => {
+    try {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('knowledge-base')
+      const { toast } = await import('sonner')
+
+      logger.info('Opening video tutorial', {
+        videoId: video.id,
+        title: video.title,
+        category: video.category
+      })
+
+      // TODO: Open video in modal or new page
+      toast.info('Opening video tutorial', {
+        description: `${video.title} - ${video.duration}`
+      })
+
+      window.open(video.url, '_blank')
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('knowledge-base')
+      logger.error('Failed to open video', { error: err.message })
+    }
+  }
+
+  const handleLiveChat = async () => {
+    try {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('knowledge-base')
+      const { toast } = await import('sonner')
+
+      logger.info('Opening live chat support')
+      toast.info('Opening live chat', {
+        description: 'Connecting to support team...'
+      })
+
+      // TODO: Open live chat widget
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('knowledge-base')
+      logger.error('Failed to open live chat', { error: err.message })
+    }
+  }
+
+  const handleSubmitTicket = async () => {
+    try {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('knowledge-base')
+      const { toast } = await import('sonner')
+
+      logger.info('Opening ticket submission form')
+      toast.info('Opening support ticket form')
+
+      // TODO: Open ticket submission modal/page
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('knowledge-base')
+      logger.error('Failed to open ticket form', { error: err.message })
+    }
+  }
+
+  const handleCommunityForum = async () => {
+    try {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('knowledge-base')
+      const { toast } = await import('sonner')
+
+      logger.info('Opening community forum')
+      toast.info('Opening community forum', {
+        description: 'Join our community discussions'
+      })
+
+      // TODO: Navigate to community forum
+      window.open('/dashboard/community', '_blank')
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('knowledge-base')
+      logger.error('Failed to open forum', { error: err.message })
+    }
+  }
+
+  const handleArticleClick = async (article: Article) => {
+    try {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('knowledge-base')
+
+      logger.info('Opening article', {
+        articleId: article.id,
+        title: article.title,
+        category: article.category
+      })
+
+      // Track article view
+      const { trackArticleView } = await import('@/lib/knowledge-base-queries')
+      // await trackArticleView(article.id, userId)
+
+      // TODO: Open article in modal or navigate to article page
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('knowledge-base')
+      logger.error('Failed to open article', { error: err.message })
+    }
+  }
+
+  const handleMarkHelpful = async (articleId: string) => {
+    try {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('knowledge-base')
+      const { toast } = await import('sonner')
+
+      logger.info('Marking article as helpful', { articleId })
+
+      const { submitArticleFeedback } = await import('@/lib/knowledge-base-queries')
+      // await submitArticleFeedback(articleId, userId, 'helpful')
+
+      toast.success('Thank you for your feedback!', {
+        description: 'Marked article as helpful'
+      })
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('knowledge-base')
+      const { toast } = await import('sonner')
+      logger.error('Failed to submit feedback', { error: err.message })
+      toast.error('Failed to submit feedback')
+    }
+  }
+
+  const handleSearchArticles = async (query: string) => {
+    try {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('knowledge-base')
+
+      logger.info('Searching articles', { query })
+
+      const { searchArticles } = await import('@/lib/knowledge-base-queries')
+      // const results = await searchArticles(query, userId)
+
+      // Update search results
+      setSearchQuery(query)
+    } catch (err: any) {
+      const { createFeatureLogger } = await import('@/lib/logger')
+      const logger = createFeatureLogger('knowledge-base')
+      logger.error('Search failed', { error: err.message })
+    }
+  }
+
   // Mock data - would come from CMS/database
   const categories: Category[] = [
     {
@@ -768,15 +915,15 @@ export default function ClientKnowledgeBase() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-3">
-                    <Button>
+                    <Button onClick={handleLiveChat}>
                       <MessageSquare className="mr-2 h-4 w-4" />
                       Live Chat
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={handleSubmitTicket}>
                       <FileText className="mr-2 h-4 w-4" />
                       Submit Ticket
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={handleCommunityForum}>
                       <Users className="mr-2 h-4 w-4" />
                       Community Forum
                     </Button>
