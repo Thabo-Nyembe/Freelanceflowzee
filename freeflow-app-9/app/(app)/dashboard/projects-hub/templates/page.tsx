@@ -182,6 +182,42 @@ export default function ProjectTemplatesPage() {
     loadTemplatesData()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // A+++ CRUD HANDLERS
+  const handleCreateTemplate = () => {
+    announce('Opening template creation', 'polite')
+    // TODO: Implement template creation dialog
+  }
+
+  const handleUseTemplate = async (template: any) => {
+    announce(`Creating project from template: ${template.title}`, 'polite')
+    // TODO: Implement project creation from template using createProject()
+  }
+
+  const handlePreviewTemplate = (template: any) => {
+    announce(`Previewing template: ${template.title}`, 'polite')
+    // TODO: Implement template preview modal
+  }
+
+  const handleDuplicateTemplate = async (template: any) => {
+    announce(`Duplicating template: ${template.title}`, 'polite')
+    // TODO: Use duplicateTemplate() from queries
+  }
+
+  const handleLikeTemplate = (template: any) => {
+    announce(`Template ${template.title} liked`, 'polite')
+    // TODO: Implement like functionality
+  }
+
+  const handleDownloadTemplate = (template: any) => {
+    announce(`Downloading template: ${template.title}`, 'polite')
+    // TODO: Implement template export as JSON
+  }
+
+  const handleFilterTemplates = () => {
+    announce('Opening template filters', 'polite')
+    // TODO: Implement filter dialog
+  }
+
   const categories = [
     { id: 'all', label: 'All', count: templates.length, icon: Grid },
     { id: 'branding', label: 'Branding', count: templates.filter(t => t.category === 'branding').length, icon: Palette },
@@ -237,7 +273,7 @@ export default function ProjectTemplatesPage() {
             {viewMode === 'grid' ? <List className="h-4 w-4 mr-2" /> : <Grid className="h-4 w-4 mr-2" />}
             {viewMode === 'grid' ? 'List View' : 'Grid View'}
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={handleCreateTemplate}>
             <Layout className="h-4 w-4 mr-2" />
             Create Template
           </Button>
@@ -383,10 +419,10 @@ export default function ProjectTemplatesPage() {
                           </div>
                           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <div className="flex gap-1">
-                              <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
+                              <Button size="sm" variant="secondary" className="h-8 w-8 p-0" onClick={() => handlePreviewTemplate(template)}>
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button size="sm" variant="secondary" className="h-8 w-8 p-0">
+                              <Button size="sm" variant="secondary" className="h-8 w-8 p-0" onClick={() => handleDuplicateTemplate(template)}>
                                 <Copy className="h-4 w-4" />
                               </Button>
                             </div>
@@ -413,7 +449,7 @@ export default function ProjectTemplatesPage() {
                                 {template.likes}
                               </span>
                             </div>
-                            <Button size="sm" className="h-7 text-xs">
+                            <Button size="sm" className="h-7 text-xs" onClick={() => handleUseTemplate(template)}>
                               Use
                             </Button>
                           </div>
@@ -439,11 +475,11 @@ export default function ProjectTemplatesPage() {
                                   <p className="text-gray-600 text-sm">{template.description}</p>
                                 </div>
                                 <div className="flex gap-2">
-                                  <Button size="sm" variant="outline">
+                                  <Button size="sm" variant="outline" onClick={() => handlePreviewTemplate(template)}>
                                     <Eye className="h-4 w-4 mr-2" />
                                     Preview
                                   </Button>
-                                  <Button size="sm">
+                                  <Button size="sm" onClick={() => handleUseTemplate(template)}>
                                     Use Template
                                   </Button>
                                 </div>
