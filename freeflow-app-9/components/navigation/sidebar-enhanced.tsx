@@ -163,8 +163,10 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         visible: true,
         items: [
           { id: 'files-hub', name: 'Files Hub', href: '/dashboard/files-hub', icon: FolderOpen, description: 'File management', badge: 'NewTab' },
+          { id: 'storage', name: 'Storage', href: '/dashboard/storage', icon: Cloud, description: 'Multi-cloud storage', badge: 'New' },
           { id: 'cloud-storage', name: 'Cloud Storage', href: '/dashboard/cloud-storage', icon: Cloud, description: 'Cloud files', badge: 'New' },
-          { id: 'resource-library', name: 'Resource Library', href: '/dashboard/resource-library', icon: BookOpen, description: 'Asset library', badge: 'New' }
+          { id: 'resource-library', name: 'Resource Library', href: '/dashboard/resource-library', icon: BookOpen, description: 'Asset library', badge: 'New' },
+          { id: 'knowledge-base', name: 'Knowledge Base', href: '/dashboard/client-zone/knowledge-base', icon: BookOpen, description: 'Help center & docs', badge: 'New' }
         ]
       }
     ]
