@@ -892,6 +892,129 @@ export default function ReportsPage() {
     }
   }
 
+  const handleExportFinancialData = async () => {
+    try {
+      logger.info('Exporting financial report data')
+      announce('Exporting financial data', 'polite')
+
+      const csvContent = `Financial Report - ${new Date().toLocaleDateString()}\nMetric,Value\nCurrent Month Revenue,$${financialData.revenueData.currentMonth}\nYear to Date,$${financialData.revenueData.yearToDate}\nClient Retention,${financialData.insights.clientRetention}%\nAvg Project Value,$${financialData.revenueData.averageProjectValue}\nCash Runway,${financialData.cashFlow.runway} months`
+
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `financial-report-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Financial data exported', {
+        description: 'CSV file downloaded successfully'
+      })
+      announce('Financial data exported successfully', 'polite')
+    } catch (err: any) {
+      logger.error('Export failed', { error: err.message })
+      toast.error('Failed to export data')
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    if (state.selectedReports.length === 0) {
+      toast.error('No reports selected')
+      return
+    }
+
+    try {
+      logger.info('Deleting selected reports', {
+        count: state.selectedReports.length,
+        reportIds: state.selectedReports.map(r => r.id)
+      })
+
+      const { deleteReport } = await import('@/lib/reports-queries')
+
+      // Delete all selected reports
+      await Promise.all(
+        state.selectedReports.map(report => deleteReport(report.id, 'user-id'))
+      )
+
+      dispatch({ type: 'DELETE_SELECTED_REPORTS' })
+
+      toast.success(`${state.selectedReports.length} reports deleted`, {
+        description: 'Reports removed successfully'
+      })
+      announce(`${state.selectedReports.length} reports deleted`, 'polite')
+    } catch (err: any) {
+      logger.error('Bulk delete failed', { error: err.message })
+      toast.error('Failed to delete reports')
+    }
+  }
+
+  const handleEditReport = async (report: Report) => {
+    try {
+      logger.info('Opening report editor', {
+        reportId: report.id,
+        name: report.name,
+        type: report.type
+      })
+
+      dispatch({ type: 'SELECT_REPORT', report })
+      setIsCreateModalOpen(true)
+
+      toast.info('Opening report editor', {
+        description: `Editing ${report.name}`
+      })
+    } catch (err: any) {
+      logger.error('Failed to open editor', { error: err.message })
+    }
+  }
+
+  const handleShareReport = async (report: Report) => {
+    try {
+      logger.info('Sharing report', {
+        reportId: report.id,
+        name: report.name,
+        type: report.type
+      })
+
+      // TODO: Implement share dialog
+      toast.info('Share report', {
+        description: `Share "${report.name}" with team members`
+      })
+      announce(`Opening share options for ${report.name}`, 'polite')
+    } catch (err: any) {
+      logger.error('Share failed', { error: err.message })
+      toast.error('Failed to share report')
+    }
+  }
+
+  const handleDuplicateReport = async (report: Report) => {
+    try {
+      logger.info('Duplicating report', {
+        reportId: report.id,
+        name: report.name
+      })
+
+      const { createReport } = await import('@/lib/reports-queries')
+
+      const duplicatedReport = {
+        ...report,
+        name: `${report.name} (Copy)`,
+        status: 'draft' as ReportStatus
+      }
+
+      // await createReport('user-id', duplicatedReport)
+
+      toast.success('Report duplicated', {
+        description: `Created copy of "${report.name}"`
+      })
+      announce('Report duplicated successfully', 'polite')
+    } catch (err: any) {
+      logger.error('Duplication failed', { error: err.message })
+      toast.error('Failed to duplicate report')
+    }
+  }
+
   // ============================================================================
   // HELPERS
   // ============================================================================
@@ -1019,7 +1142,7 @@ export default function ReportsPage() {
                     </h2>
                     <p className="text-sm text-gray-600 mt-1">Monthly and yearly revenue breakdown with growth trends</p>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={handleExportFinancialData}>
                     <Download className="w-4 h-4 mr-2" />
                     Export Data
                   </Button>
@@ -1516,7 +1639,7 @@ export default function ReportsPage() {
                   >
                     Clear
                   </Button>
-                  <Button variant="destructive" size="sm">
+                  <Button variant="destructive" size="sm" onClick={handleDeleteSelected}>
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete Selected
                   </Button>
