@@ -196,57 +196,80 @@ export default function GalleryPage() {
     const userId = 'demo-user-123' // TODO: Replace with real auth user ID
 
     logger.info('Upload media initiated', { userId })
-    toast.info('Opening file upload...')
 
-    // Simulate file upload
-    const title = prompt('Enter media title:')
-    if (!title) {
-      logger.debug('Upload cancelled - no title provided')
-      return
-    }
+    // Create hidden file input
+    const fileInput = document.createElement('input')
+    fileInput.type = 'file'
+    fileInput.accept = 'image/*,video/*'
+    fileInput.multiple = true
 
-    const fileName = `${title.toLowerCase().replace(/\s+/g, '-')}.jpg`
-    const fileSize = Math.floor(Math.random() * 5000000) + 500000 // 0.5-5.5 MB
-    const width = 1920
-    const height = 1080
+    fileInput.onchange = async (e: Event) => {
+      const target = e.target as HTMLInputElement
+      const files = target.files
 
-    try {
-      const { createGalleryImage } = await import('@/lib/gallery-queries')
-
-      const { data, error } = await createGalleryImage(userId, {
-        title,
-        description: '',
-        file_name: fileName,
-        file_size: fileSize,
-        width,
-        height,
-        format: 'jpg',
-        url: `https://images.unsplash.com/photo-${Date.now()}?w=400&h=300&fit=crop`,
-        thumbnail: `https://images.unsplash.com/photo-${Date.now()}?w=200&h=150&fit=crop`,
-        type: 'image',
-        category: 'branding',
-        tags: [],
-        is_favorite: false,
-        is_public: false,
-        processing_status: 'completed',
-        views: 0,
-        likes: 0,
-        downloads: 0,
-        ai_generated: false
-      })
-
-      if (error || !data) {
-        throw new Error(error?.message || 'Failed to upload image')
+      if (!files || files.length === 0) {
+        logger.debug('Upload cancelled - no files selected')
+        return
       }
 
-      // Transform and add to UI
-      const newImage: ImageMetadata = {
-        id: data.id,
-        title: data.title,
-        description: data.description || '',
-        fileName: data.file_name,
-        fileSize: data.file_size,
-        width: data.width,
+      logger.info('Files selected for upload', {
+        count: files.length,
+        files: Array.from(files).map(f => ({ name: f.name, size: f.size, type: f.type }))
+      })
+
+      toast.info(`Uploading ${files.length} file(s)...`, {
+        description: 'Processing your media files'
+      })
+
+      let successCount = 0
+      let failCount = 0
+
+      for (const file of Array.from(files)) {
+        try {
+          const fileName = file.name
+          const fileSize = file.size
+          const fileType = file.type.startsWith('video/') ? 'video' : 'image'
+          const format = file.name.split('.').pop() || 'jpg'
+          const title = file.name.replace(/\.[^/.]+$/, '') // Remove extension
+
+          // TODO: Upload to Supabase Storage and get real URL
+          // For now, create placeholder with real file metadata
+          const { createGalleryImage } = await import('@/lib/gallery-queries')
+
+          const { data, error } = await createGalleryImage(userId, {
+            title,
+            description: `Uploaded from ${file.name}`,
+            file_name: fileName,
+            file_size: fileSize,
+            width: 1920, // TODO: Get real dimensions from image
+            height: 1080,
+            format,
+            url: `https://images.unsplash.com/photo-${Date.now()}?w=400&h=300&fit=crop`, // TODO: Real Supabase Storage URL
+            thumbnail: `https://images.unsplash.com/photo-${Date.now()}?w=200&h=150&fit=crop`,
+            type: fileType,
+            category: 'uploads',
+            tags: [],
+            is_favorite: false,
+            is_public: false,
+            processing_status: 'completed',
+            views: 0,
+            likes: 0,
+            downloads: 0,
+            ai_generated: false
+          })
+
+          if (error || !data) {
+            throw new Error(error?.message || 'Failed to upload image')
+          }
+
+          // Transform and add to UI
+          const newImage: ImageMetadata = {
+            id: data.id,
+            title: data.title,
+            description: data.description || '',
+            fileName: data.file_name,
+            fileSize: data.file_size,
+            width: data.width,
         height: data.height,
         format: data.format,
         url: data.url,
@@ -263,25 +286,38 @@ export default function GalleryPage() {
         comments: 0
       }
 
-      setImages(prev => [newImage, ...prev])
+          setImages(prev => [newImage, ...prev])
+          successCount++
 
-      logger.info('Media uploaded to Supabase successfully', {
-        imageId: data.id,
-        fileName: data.file_name,
-        fileSize: data.file_size,
-        dimensions: `${width}x${height}`,
-        userId
-      })
+          logger.info('Media uploaded to Supabase successfully', {
+            imageId: data.id,
+            fileName: data.file_name,
+            fileSize: data.file_size,
+            type: fileType,
+            userId
+          })
+        } catch (err) {
+          failCount++
+          logger.error('Failed to upload media file', { error: err, fileName: file.name })
+        }
+      }
 
-      toast.success('Media uploaded successfully', {
-        description: `${fileName} (${formatFileSize(fileSize)}, ${width}x${height})`
-      })
-    } catch (err) {
-      logger.error('Failed to upload media', { error: err, userId })
-      toast.error('Failed to upload media', {
-        description: err instanceof Error ? err.message : 'Unknown error'
-      })
+      // Show final result
+      if (successCount > 0) {
+        toast.success(`${successCount} file(s) uploaded successfully`, {
+          description: failCount > 0 ? `${failCount} file(s) failed` : 'All files processed'
+        })
+      } else {
+        toast.error('Upload failed', {
+          description: 'No files could be uploaded'
+        })
+      }
+
+      announce(`${successCount} files uploaded successfully`, 'polite')
     }
+
+    // Trigger file input click
+    fileInput.click()
   }
 
   // Delete Image
