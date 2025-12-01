@@ -607,17 +607,7 @@ export default function ClientKnowledgeBase() {
         )
     : []
 
-  const handleArticleClick = (article: Article) => {
-    logger.info('Knowledge base article viewed', {
-      articleId: article.id,
-      title: article.title,
-      category: article.category
-    })
-
-    toast.success('Article opened', {
-      description: article.title
-    })
-  }
+  // handleArticleClick is defined earlier with full functionality (line 160)
 
   const handleVideoClick = (video: VideoTutorial) => {
     logger.info('Video tutorial viewed', {
