@@ -8,6 +8,7 @@
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from './logger'
 
+const supabase = createClient()
 const logger = createFeatureLogger('ClientsQueries')
 
 // ============================================================================
@@ -195,7 +196,7 @@ export async function getClient(clientId: string): Promise<{ data: Client | null
 /**
  * Create a new client
  */
-export async function createClient(
+export async function addClient(
   userId: string,
   clientData: Partial<Client>
 ): Promise<{ data: Client | null; error: any }> {

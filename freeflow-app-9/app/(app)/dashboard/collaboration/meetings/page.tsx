@@ -40,7 +40,7 @@ import {
   MoreVertical,
   ChevronDown,
   ChevronUp,
-  Record,
+  Circle as Record,
   Save,
   FileText,
   CheckCircle,

@@ -608,18 +608,7 @@ export default function ClientKnowledgeBase() {
     : []
 
   // handleArticleClick is defined earlier with full functionality (line 160)
-
-  const handleVideoClick = (video: VideoTutorial) => {
-    logger.info('Video tutorial viewed', {
-      videoId: video.id,
-      title: video.title,
-      category: video.category
-    })
-
-    toast.success('Video opened', {
-      description: video.title
-    })
-  }
+  // handleVideoClick is defined earlier with full functionality (line 79)
 
   const handleArticleHelpful = (articleId: string, helpful: boolean) => {
     logger.info('Article feedback received', {

@@ -507,6 +507,40 @@ logger.info('Bookings utilities initialized', {
   utilityFunctions: 15,
   supportedBookingTypes: 5
 })
-// Simple helper exports to satisfy imports
-export const mockServices = []
-export const getClientBookingCount = () => 0
+
+// Mock services data for booking services page
+export const mockServices = [
+  {
+    id: '1',
+    name: 'Strategy Consultation',
+    description: 'One-on-one strategy session',
+    duration: '60 min',
+    price: 150,
+    status: 'active',
+    bookings: 24
+  },
+  {
+    id: '2',
+    name: 'Design Review',
+    description: 'Comprehensive design feedback',
+    duration: '90 min',
+    price: 200,
+    status: 'active',
+    bookings: 18
+  },
+  {
+    id: '3',
+    name: 'Quick Call',
+    description: 'Brief consultation',
+    duration: '30 min',
+    price: 75,
+    status: 'active',
+    bookings: 42
+  }
+]
+
+export const getClientBookingCount = (clientId?: string) => {
+  if (!clientId) return 0
+  // Mock implementation - in real app would query database
+  return mockBookings.filter(b => b.clientId === clientId).length
+}

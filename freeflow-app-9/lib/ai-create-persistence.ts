@@ -3,6 +3,36 @@
  * LocalStorage management for AI Create Studio
  */
 
+// SSR-safe localStorage helper
+const safeLocalStorage = {
+  getItem: (key: string): string | null => {
+    if (typeof window === 'undefined') return null
+    try {
+      return window.localStorage.getItem(key)
+    } catch {
+      return null
+    }
+  },
+  setItem: (key: string, value: string): boolean => {
+    if (typeof window === 'undefined') return false
+    try {
+      window.localStorage.setItem(key, value)
+      return true
+    } catch {
+      return false
+    }
+  },
+  removeItem: (key: string): boolean => {
+    if (typeof window === 'undefined') return false
+    try {
+      window.localStorage.removeItem(key)
+      return true
+    } catch {
+      return false
+    }
+  }
+}
+
 export interface Generation {
   id: string
   title: string
@@ -60,9 +90,9 @@ const STORAGE_KEYS = {
 export function saveHistory(history: Generation[]): boolean {
   try {
     const serialized = JSON.stringify(history)
-    localStorage.setItem(STORAGE_KEYS.HISTORY, serialized)
-    console.log('💾 Saved', history.length, 'generations to localStorage')
-    return true
+    const saved = safeLocalStorage.setItem(STORAGE_KEYS.HISTORY, serialized)
+    if (saved) console.log('💾 Saved', history.length, 'generations to localStorage')
+    return saved
   } catch (error) {
     console.error('❌ Failed to save history:', error)
     return false
@@ -74,7 +104,7 @@ export function saveHistory(history: Generation[]): boolean {
  */
 export function loadHistory(): Generation[] {
   try {
-    const stored = localStorage.getItem(STORAGE_KEYS.HISTORY)
+    const stored = safeLocalStorage.getItem(STORAGE_KEYS.HISTORY)
     if (!stored) return []
 
     const parsed = JSON.parse(stored)
@@ -101,7 +131,7 @@ export function loadHistory(): Generation[] {
 export function saveCustomTemplates(templates: CustomTemplate[]): boolean {
   try {
     const serialized = JSON.stringify(templates)
-    localStorage.setItem(STORAGE_KEYS.TEMPLATES, serialized)
+    safeLocalStorage.setItem(STORAGE_KEYS.TEMPLATES, serialized)
     console.log('💾 Saved', templates.length, 'custom templates to localStorage')
     return true
   } catch (error) {
@@ -115,7 +145,7 @@ export function saveCustomTemplates(templates: CustomTemplate[]): boolean {
  */
 export function loadCustomTemplates(): CustomTemplate[] {
   try {
-    const stored = localStorage.getItem(STORAGE_KEYS.TEMPLATES)
+    const stored = safeLocalStorage.getItem(STORAGE_KEYS.TEMPLATES)
     if (!stored) return []
 
     const parsed = JSON.parse(stored)
@@ -139,7 +169,7 @@ export function loadCustomTemplates(): CustomTemplate[] {
 export function saveSettings(settings: AICreateSettings): boolean {
   try {
     const serialized = JSON.stringify(settings)
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, serialized)
+    safeLocalStorage.setItem(STORAGE_KEYS.SETTINGS, serialized)
     console.log('💾 Saved settings to localStorage')
     return true
   } catch (error) {
@@ -153,7 +183,7 @@ export function saveSettings(settings: AICreateSettings): boolean {
  */
 export function loadSettings(): AICreateSettings | null {
   try {
-    const stored = localStorage.getItem(STORAGE_KEYS.SETTINGS)
+    const stored = safeLocalStorage.getItem(STORAGE_KEYS.SETTINGS)
     if (!stored) return null
 
     const parsed = JSON.parse(stored)
@@ -171,7 +201,7 @@ export function loadSettings(): AICreateSettings | null {
 export function clearAllData(): boolean {
   try {
     Object.values(STORAGE_KEYS).forEach(key => {
-      localStorage.removeItem(key)
+      safeLocalStorage.removeItem(key)
     })
     console.log('🗑️ Cleared all AI Create data from localStorage')
     return true
@@ -218,9 +248,9 @@ export function importAllData(jsonString: string): boolean {
  * Get localStorage usage stats
  */
 export function getStorageStats() {
-  const history = localStorage.getItem(STORAGE_KEYS.HISTORY) || ''
-  const templates = localStorage.getItem(STORAGE_KEYS.TEMPLATES) || ''
-  const settings = localStorage.getItem(STORAGE_KEYS.SETTINGS) || ''
+  const history = safeLocalStorage.getItem(STORAGE_KEYS.HISTORY) || ''
+  const templates = safeLocalStorage.getItem(STORAGE_KEYS.TEMPLATES) || ''
+  const settings = safeLocalStorage.getItem(STORAGE_KEYS.SETTINGS) || ''
 
   const historySize = new Blob([history]).size
   const templatesSize = new Blob([templates]).size
