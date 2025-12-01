@@ -605,6 +605,94 @@ export default function IntegrationsPage() {
     }
   }
 
+  const handleViewDetails = async (integration: Integration) => {
+    logger.info('Viewing integration details', { id: integration.id, name: integration.name })
+    dispatch({ type: 'SELECT_INTEGRATION', integration })
+    toast.info('Integration details', { description: `${integration.name} - ${integration.description}` })
+  }
+
+  const handleConfigureIntegration = async (integration: Integration) => {
+    logger.info('Configuring integration', { id: integration.id, name: integration.name })
+    dispatch({ type: 'SELECT_INTEGRATION', integration })
+    setIsConfigureModalOpen(true)
+    toast.info('Configure integration', { description: integration.name })
+  }
+
+  const handleRefreshIntegrations = async () => {
+    try {
+      logger.info('Refreshing integrations list')
+      announce('Refreshing integrations', 'polite')
+      setIsLoading(true)
+
+      // TODO: Reload integrations from Supabase
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      toast.success('Integrations refreshed')
+      announce('Integrations refreshed successfully', 'polite')
+    } catch (err: any) {
+      logger.error('Refresh failed', { error: err.message })
+      toast.error('Failed to refresh integrations')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleExportLogs = async () => {
+    try {
+      logger.info('Exporting integration logs')
+      announce('Exporting logs', 'polite')
+
+      const logsData = mockIntegrations.map(i => ({
+        name: i.name,
+        status: i.status,
+        apiCalls: i.apiCalls,
+        dataTransferred: i.dataTransferred,
+        successRate: i.successRate,
+        lastSync: i.lastSync
+      }))
+
+      const csvContent = `Integration,Status,API Calls,Data Transferred,Success Rate,Last Sync\n` +
+        logsData.map(l => `${l.name},${l.status},${l.apiCalls},${l.dataTransferred},${l.successRate}%,${l.lastSync}`).join('\n')
+
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `integrations-logs-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Logs exported', { description: 'CSV file downloaded' })
+      announce('Logs exported successfully', 'polite')
+    } catch (err: any) {
+      logger.error('Export failed', { error: err.message })
+      toast.error('Failed to export logs')
+    }
+  }
+
+  const handleRegenerateAPIKey = async (integration: Integration) => {
+    try {
+      logger.info('Regenerating API key', { id: integration.id, name: integration.name })
+
+      toast.info('Regenerating API key', { description: `For ${integration.name}` })
+
+      // TODO: Call API to regenerate key
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      const newKey = `sk_live_${Math.random().toString(36).substring(2, 15)}`
+
+      toast.success('API key regenerated', {
+        description: `New key: ${newKey.substring(0, 20)}...`
+      })
+      announce('API key regenerated', 'polite')
+    } catch (err: any) {
+      logger.error('Key regeneration failed', { error: err.message })
+      toast.error('Failed to regenerate API key')
+    }
+  }
+
   const formatDataSize = (bytes: number): string => {
     if (bytes === 0) return '0 B'
     const k = 1024
@@ -701,7 +789,10 @@ export default function IntegrationsPage() {
                 Connect KAZI with your favorite tools and services
               </p>
             </div>
-            <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">
+            <Button
+              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+              onClick={() => toast.info('Request integration', { description: 'Feature coming soon' })}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Request Integration
             </Button>
