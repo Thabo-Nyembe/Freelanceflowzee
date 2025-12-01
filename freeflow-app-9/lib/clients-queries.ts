@@ -5,7 +5,7 @@
  * Full CRUD operations for Clients feature
  */
 
-import { supabase } from './supabase'
+import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from './logger'
 
 const logger = createFeatureLogger('ClientsQueries')

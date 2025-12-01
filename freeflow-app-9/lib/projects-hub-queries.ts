@@ -5,7 +5,7 @@
  * Full CRUD operations for Projects Hub feature
  */
 
-import { supabase } from './supabase'
+import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from './logger'
 
 const logger = createFeatureLogger('ProjectsHubQueries')

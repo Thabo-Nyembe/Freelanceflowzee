@@ -4,7 +4,7 @@
  * Supabase queries for file management system
  */
 
-import { supabase } from './supabase'
+import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from './logger'
 
 const logger = createFeatureLogger('FilesHub')
