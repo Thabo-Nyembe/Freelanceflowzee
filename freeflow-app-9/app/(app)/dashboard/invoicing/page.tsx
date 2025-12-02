@@ -240,49 +240,112 @@ export default function InvoicingPage() {
       const logger = createFeatureLogger('invoicing')
       const { toast } = await import('sonner')
 
-      logger.info('Sending invoice', {
+      logger.info('Sending invoice email', {
         userId,
         invoiceId: invoice.id,
         invoiceNumber: invoice.invoiceNumber,
-        clientName: invoice.clientName
+        clientEmail: invoice.clientEmail
       })
 
       toast.info('Sending invoice...', {
-        description: `To ${invoice.clientName}`
+        description: `Preparing email for ${invoice.clientName}`
       })
 
-      const { markInvoiceAsSent } = await import('@/lib/invoicing-queries')
-      const { success, error } = await markInvoiceAsSent(invoice.id, userId)
+      announce('Sending invoice email', 'polite')
 
-      if (error || !success) {
-        logger.error('Failed to send invoice', { error })
-        toast.error('Failed to send invoice', {
-          description: error?.message || 'Unknown error'
+      // Generate PDF attachment
+      const { generateInvoicePDF } = await import('@/lib/invoice-pdf-generator')
+      const pdfBlob = await generateInvoicePDF(invoice)
+
+      // Convert blob to base64 for email attachment
+      const reader = new FileReader()
+      const pdfBase64 = await new Promise<string>((resolve, reject) => {
+        reader.onloadend = () => {
+          const base64 = reader.result as string
+          // Remove data:application/pdf;base64, prefix
+          resolve(base64.split(',')[1])
+        }
+        reader.onerror = reject
+        reader.readAsDataURL(pdfBlob)
+      })
+
+      // Generate email HTML
+      const { generateInvoiceEmailHTML } = await import('@/lib/invoice-email-template')
+      const emailHTML = generateInvoiceEmailHTML(invoice)
+
+      // Call API route to send email
+      const response = await fetch('/api/send-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: invoice.clientEmail,
+          subject: `Invoice ${invoice.invoiceNumber} from KAZI Platform`,
+          html: emailHTML,
+          attachments: [{
+            filename: `Invoice-${invoice.invoiceNumber}.pdf`,
+            content: pdfBase64
+          }]
         })
-        return
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send email')
       }
 
-      logger.info('Invoice sent successfully', { invoiceId: invoice.id })
+      // Update invoice status in database
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
 
-      toast.success('Invoice sent', {
-        description: `Email delivered to ${invoice.clientName}`
+      const { data, error } = await supabase
+        .from('invoices')
+        .update({
+          status: 'sent',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', invoice.id)
+        .eq('user_id', userId)
+        .select()
+        .single()
+
+      if (error) {
+        logger.warn('Invoice sent but status update failed', {
+          invoiceId: invoice.id,
+          error: error.message
+        })
+      } else {
+        // Update local state if database update succeeded
+        setSelectedInvoices(prev => prev.map(inv =>
+          inv.id === invoice.id
+            ? { ...inv, status: 'sent' as InvoiceStatus, sentAt: new Date() }
+            : inv
+        ))
+      }
+
+      logger.info('Invoice sent successfully', {
+        invoiceId: invoice.id,
+        clientEmail: invoice.clientEmail,
+        invoiceNumber: invoice.invoiceNumber
       })
 
-      // Update local state
-      setSelectedInvoices(prev => prev.map(inv =>
-        inv.id === invoice.id
-          ? { ...inv, status: 'sent' as InvoiceStatus, sentAt: new Date() }
-          : inv
-      ))
+      toast.success('Invoice sent!', {
+        description: `Sent to ${invoice.clientEmail}`
+      })
 
       announce(`Invoice ${invoice.invoiceNumber} sent successfully`, 'polite')
     } catch (err: any) {
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('invoicing')
-      logger.error('Send invoice error', { error: err.message })
+      logger.error('Failed to send invoice', {
+        invoiceId: invoice.id,
+        error: err.message
+      })
 
       const { toast } = await import('sonner')
-      toast.error('Failed to send invoice')
+      toast.error('Failed to send invoice', {
+        description: 'Please check email configuration'
+      })
+
+      announce('Failed to send invoice email', 'assertive')
     }
   }
 
@@ -362,29 +425,93 @@ export default function InvoicingPage() {
         userId,
         invoiceId: invoice.id,
         invoiceNumber: invoice.invoiceNumber,
+        clientEmail: invoice.clientEmail,
         daysOverdue
       })
 
-      toast.info('Sending reminder...')
+      toast.info('Sending reminder...', {
+        description: `Preparing reminder for ${invoice.clientName}`
+      })
 
-      // TODO: Integrate with email service
-      // For now, simulate success
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      announce('Sending payment reminder', 'polite')
 
-      logger.info('Reminder sent successfully', { invoiceId: invoice.id })
+      // Generate reminder email HTML
+      const { generateReminderEmailHTML } = await import('@/lib/invoice-email-template')
+      const emailHTML = generateReminderEmailHTML(invoice)
 
-      toast.success('Reminder sent', {
-        description: `Email sent to ${invoice.clientName}`
+      // Call API route to send email
+      const response = await fetch('/api/send-invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: invoice.clientEmail,
+          subject: `Payment Reminder: Invoice ${invoice.invoiceNumber}`,
+          html: emailHTML
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send reminder')
+      }
+
+      // Update reminder count in database
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+
+      const currentReminderCount = invoice.metadata?.remindersSent || 0
+
+      const { data, error } = await supabase
+        .from('invoices')
+        .update({
+          reminders_sent: currentReminderCount + 1,
+          last_reminder_date: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', invoice.id)
+        .eq('user_id', userId)
+        .select()
+        .single()
+
+      if (data) {
+        // Update local state
+        setSelectedInvoices(prev => prev.map(inv =>
+          inv.id === invoice.id
+            ? {
+                ...inv,
+                metadata: {
+                  ...inv.metadata,
+                  remindersSent: currentReminderCount + 1,
+                  lastReminderDate: new Date()
+                }
+              }
+            : inv
+        ))
+      }
+
+      logger.info('Reminder sent successfully', {
+        invoiceId: invoice.id,
+        reminderCount: currentReminderCount + 1
+      })
+
+      toast.success('Reminder sent!', {
+        description: `Sent to ${invoice.clientEmail}`
       })
 
       announce(`Payment reminder sent for invoice ${invoice.invoiceNumber}`, 'polite')
     } catch (err: any) {
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('invoicing')
-      logger.error('Send reminder error', { error: err.message })
+      logger.error('Failed to send reminder', {
+        invoiceId: invoice.id,
+        error: err.message
+      })
 
       const { toast } = await import('sonner')
-      toast.error('Failed to send reminder')
+      toast.error('Failed to send reminder', {
+        description: 'Please try again'
+      })
+
+      announce('Failed to send payment reminder', 'assertive')
     }
   }
 
@@ -394,29 +521,61 @@ export default function InvoicingPage() {
       const logger = createFeatureLogger('invoicing')
       const { toast } = await import('sonner')
 
-      logger.info('Downloading invoice PDF', {
+      logger.info('Starting PDF generation', {
         invoiceId: invoice.id,
         invoiceNumber: invoice.invoiceNumber
       })
 
-      toast.info('Generating PDF...')
-
-      // TODO: Implement PDF generation
-      // For now, simulate download
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      toast.success('PDF downloaded', {
-        description: `${invoice.invoiceNumber}.pdf`
+      toast.info('Generating PDF...', {
+        description: 'Creating your invoice document'
       })
 
-      announce(`Invoice ${invoice.invoiceNumber} PDF downloaded`, 'polite')
+      announce('Generating PDF invoice', 'polite')
+
+      // Generate PDF using the invoice-pdf-generator
+      const { generateInvoicePDF } = await import('@/lib/invoice-pdf-generator')
+      const pdfBlob = await generateInvoicePDF(invoice)
+
+      // Create download link
+      const url = URL.createObjectURL(pdfBlob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `Invoice-${invoice.invoiceNumber}.pdf`
+      a.style.display = 'none'
+      document.body.appendChild(a)
+      a.click()
+
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      }, 100)
+
+      logger.info('PDF downloaded successfully', {
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        fileName: `Invoice-${invoice.invoiceNumber}.pdf`
+      })
+
+      toast.success('Invoice downloaded!', {
+        description: `${invoice.invoiceNumber}.pdf is ready`
+      })
+
+      announce(`Invoice ${invoice.invoiceNumber} PDF downloaded successfully`, 'polite')
     } catch (err: any) {
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('invoicing')
-      logger.error('PDF download error', { error: err.message })
+      logger.error('PDF generation failed', {
+        invoiceId: invoice.id,
+        error: err.message
+      })
 
       const { toast } = await import('sonner')
-      toast.error('Failed to download PDF')
+      toast.error('Failed to generate PDF', {
+        description: 'Please try again'
+      })
+
+      announce('Failed to generate invoice PDF', 'assertive')
     }
   }
 
