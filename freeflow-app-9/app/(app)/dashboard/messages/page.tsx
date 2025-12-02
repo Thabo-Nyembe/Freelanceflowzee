@@ -135,6 +135,7 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // Production Logger
 import { createFeatureLogger } from '@/lib/logger'
@@ -505,6 +506,7 @@ export default function MessagesPage() {
 
   // A+++ Accessibility
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // State Management with Reducer
   const [state, dispatch] = useReducer(messagesReducer, {
@@ -573,7 +575,10 @@ export default function MessagesPage() {
   useEffect(() => {
     logger.info('Loading chats from Supabase')
     const loadChats = async () => {
-      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        return
+      }
 
       try {
         setIsLoading(true)
@@ -631,7 +636,7 @@ export default function MessagesPage() {
     }
 
     loadChats()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load messages when chat selected
   useEffect(() => {
@@ -739,14 +744,18 @@ export default function MessagesPage() {
   // ============================================================================
 
   const handleSendMessage = async () => {
-    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
-
     if (!newMessage.trim() || !state.selectedChat || isSending) {
       logger.warn('Cannot send message', {
         hasMessage: !!newMessage.trim(),
         hasChat: !!state.selectedChat,
         isSending
       })
+      return
+    }
+
+    if (!userId) {
+      toast.error('Please log in to send messages')
+      logger.warn('Send message attempted without authentication')
       return
     }
 
@@ -1044,7 +1053,11 @@ export default function MessagesPage() {
   }
 
   const handleNewChat = async () => {
-    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+    if (!userId) {
+      toast.error('Please log in to create chats')
+      logger.warn('Create chat attempted without authentication')
+      return
+    }
 
     if (!newChatName.trim()) {
       logger.warn('Cannot create chat - empty name')

@@ -7,6 +7,7 @@ import { createFeatureLogger } from '@/lib/logger'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   Calendar,
   Clock,
@@ -65,6 +66,7 @@ export default function UpcomingBookingsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [dateFilter, setDateFilter] = useState<string>('')
@@ -75,7 +77,7 @@ export default function UpcomingBookingsPage() {
   // Load bookings data from Supabase
   useEffect(() => {
     const loadBookingsData = async () => {
-      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+      if (!userId) return
 
       try {
         setIsLoading(true)
@@ -135,11 +137,14 @@ export default function UpcomingBookingsPage() {
     }
 
     loadBookingsData()
-  }, [announce])
+  }, [userId, announce])
 
   // Handler Functions
   const handleNewBooking = async () => {
-    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+    if (!userId) {
+      toast.error('Please log in to create bookings')
+      return
+    }
 
     setIsCreating(true)
     toast.info('Creating new booking...')
@@ -266,6 +271,11 @@ export default function UpcomingBookingsPage() {
   }
 
   const handleCancelBooking = async (id: string) => {
+    if (!userId) {
+      toast.error('Please log in to cancel bookings')
+      return
+    }
+
     const booking = bookings.find(b => b.id === id)
     if (!booking) {
       logger.error('Cancel booking failed', {

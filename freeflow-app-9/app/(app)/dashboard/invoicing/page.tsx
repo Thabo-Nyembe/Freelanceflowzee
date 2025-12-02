@@ -31,6 +31,7 @@ import {
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 type ViewMode = 'overview' | 'invoices' | 'payments' | 'templates' | 'create'
 
@@ -39,6 +40,7 @@ export default function InvoicingPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [selectedInvoices, setSelectedInvoices] = useState<Invoice[]>(MOCK_INVOICES)
@@ -47,7 +49,9 @@ export default function InvoicingPage() {
   // A+++ LOAD INVOICING DATA
   useEffect(() => {
     const loadInvoicingData = async () => {
-      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+      if (!userId) {
+        return
+      }
 
       try {
         setIsLoading(true)
@@ -116,15 +120,20 @@ export default function InvoicingPage() {
     }
 
     loadInvoicingData()
-  }, [announce])
+  }, [userId, announce])
 
   // ============================================================================
   // INVOICE HANDLERS
   // ============================================================================
 
   const handleExportCSV = async () => {
+    if (!userId) {
+      const { toast } = await import('sonner')
+      toast.error('Please log in to export invoices')
+      return
+    }
+
     try {
-      const userId = 'demo-user-123'
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('invoicing')
 
@@ -202,7 +211,12 @@ export default function InvoicingPage() {
   }
 
   const handleViewDetails = async (invoiceId: string) => {
-    const userId = 'demo-user-123'
+    if (!userId) {
+      const { toast } = await import('sonner')
+      toast.error('Please log in to view invoice details')
+      return
+    }
+
     const { createFeatureLogger } = await import('@/lib/logger')
     const logger = createFeatureLogger('invoicing')
 
@@ -215,8 +229,13 @@ export default function InvoicingPage() {
   }
 
   const handleSendInvoice = async (invoice: Invoice) => {
+    if (!userId) {
+      const { toast } = await import('sonner')
+      toast.error('Please log in to send invoices')
+      return
+    }
+
     try {
-      const userId = 'demo-user-123'
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('invoicing')
       const { toast } = await import('sonner')
@@ -268,8 +287,13 @@ export default function InvoicingPage() {
   }
 
   const handleMarkPaid = async (invoice: Invoice) => {
+    if (!userId) {
+      const { toast } = await import('sonner')
+      toast.error('Please log in to mark invoices as paid')
+      return
+    }
+
     try {
-      const userId = 'demo-user-123'
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('invoicing')
       const { toast } = await import('sonner')
@@ -321,8 +345,13 @@ export default function InvoicingPage() {
   }
 
   const handleSendReminder = async (invoice: Invoice) => {
+    if (!userId) {
+      const { toast } = await import('sonner')
+      toast.error('Please log in to send reminders')
+      return
+    }
+
     try {
-      const userId = 'demo-user-123'
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('invoicing')
       const { toast } = await import('sonner')
@@ -392,8 +421,13 @@ export default function InvoicingPage() {
   }
 
   const handleDuplicateInvoice = async (invoice: Invoice) => {
+    if (!userId) {
+      const { toast } = await import('sonner')
+      toast.error('Please log in to duplicate invoices')
+      return
+    }
+
     try {
-      const userId = 'demo-user-123'
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('invoicing')
       const { toast } = await import('sonner')

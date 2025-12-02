@@ -24,6 +24,7 @@ import { CampaignStatus } from '@/lib/email-marketing-types'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 type ViewMode = 'overview' | 'campaigns' | 'subscribers' | 'automation' | 'templates'
 
@@ -32,6 +33,7 @@ export default function EmailMarketingPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [filterStatus, setFilterStatus] = useState<CampaignStatus | 'all'>('all')
@@ -42,7 +44,9 @@ export default function EmailMarketingPage() {
   // A+++ LOAD EMAIL MARKETING DATA
   useEffect(() => {
     const loadEmailMarketingData = async () => {
-      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+      if (!userId) {
+        return
+      }
 
       try {
         setIsLoading(true)
@@ -83,7 +87,7 @@ export default function EmailMarketingPage() {
     }
 
     loadEmailMarketingData()
-  }, [announce])
+  }, [userId, announce])
 
   // ============================================================================
   // EMAIL MARKETING HANDLERS
@@ -99,8 +103,13 @@ export default function EmailMarketingPage() {
   }
 
   const handleSendCampaign = async (campaign: any) => {
+    if (!userId) {
+      const { toast } = await import('sonner')
+      toast.error('Please log in to send campaigns')
+      return
+    }
+
     try {
-      const userId = 'demo-user-123'
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('email-marketing')
       const { toast } = await import('sonner')
@@ -158,8 +167,13 @@ export default function EmailMarketingPage() {
   }
 
   const handleDuplicateCampaign = async (campaign: any) => {
+    if (!userId) {
+      const { toast } = await import('sonner')
+      toast.error('Please log in to duplicate campaigns')
+      return
+    }
+
     try {
-      const userId = 'demo-user-123'
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('email-marketing')
       const { toast } = await import('sonner')

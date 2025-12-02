@@ -85,6 +85,7 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -377,6 +378,7 @@ export default function ReportsPage() {
 
   // A+++ UTILITIES
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // STATE
   const [state, dispatch] = useReducer(reportsReducer, {
@@ -419,9 +421,12 @@ export default function ReportsPage() {
 
   useEffect(() => {
     const loadData = async () => {
-      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        return
+      }
 
-      try {
+      try{
         setIsLoading(true)
 
         logger.info('Loading reports from Supabase', { userId })
@@ -495,7 +500,7 @@ export default function ReportsPage() {
     }
 
     loadData()
-  }, [announce])
+  }, [userId, announce])
 
   // ============================================================================
   // COMPUTED VALUES
@@ -574,7 +579,11 @@ export default function ReportsPage() {
       return
     }
 
-    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+    if (!userId) {
+      toast.error('Please log in to create reports')
+      logger.warn('Create report attempted without authentication')
+      return
+    }
 
     logger.info('Creating new report', {
       name: reportForm.name,
@@ -724,7 +733,12 @@ export default function ReportsPage() {
   }
 
   const handleDeleteReport = async (reportId: string) => {
-    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+    if (!userId) {
+      toast.error('Please log in to delete reports')
+      logger.warn('Delete report attempted without authentication')
+      return
+    }
+
     const report = state.reports.find(r => r.id === reportId)
 
     logger.info('Deleting report', {

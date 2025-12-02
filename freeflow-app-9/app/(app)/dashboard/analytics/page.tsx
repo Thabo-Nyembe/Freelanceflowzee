@@ -94,7 +94,10 @@ export default function AnalyticsOverviewPage() {
 
   useEffect(() => {
     const loadAnalyticsData = async () => {
-      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        return
+      }
 
       try {
         setIsLoading(true)
@@ -170,7 +173,7 @@ export default function AnalyticsOverviewPage() {
     }
 
     loadAnalyticsData()
-  }, [announce]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // FILTERED DATA
   const filteredCategories = useMemo(() => {

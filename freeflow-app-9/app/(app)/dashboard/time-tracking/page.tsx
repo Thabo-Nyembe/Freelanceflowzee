@@ -19,6 +19,7 @@ import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleto
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('TimeTracking')
 
@@ -50,6 +51,7 @@ export default function TimeTrackingPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   const [activeTimer, setActiveTimer] = useState<TimeEntry | null>(null)
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([])
@@ -81,7 +83,10 @@ export default function TimeTrackingPage() {
   // A+++ LOAD TIME TRACKING DATA
   useEffect(() => {
     const loadTimeTrackingData = async () => {
-      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        return
+      }
 
       try {
         setIsLoading(true)
@@ -164,7 +169,7 @@ export default function TimeTrackingPage() {
     }
 
     loadTimeTrackingData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -188,7 +193,12 @@ export default function TimeTrackingPage() {
   const startTimer = async () => {
     if (!selectedProject || !selectedTask) return
 
-    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+    if (!userId) {
+      toast.error('Please log in to start timer')
+      logger.warn('Start timer attempted without authentication')
+      return
+    }
+
     const projectObj = projects.find(p => p.id === selectedProject)
     const taskObj = projectObj?.tasks.find(t => t.id === selectedTask)
 
@@ -246,7 +256,11 @@ export default function TimeTrackingPage() {
   const stopTimer = async () => {
     if (!activeTimer) return
 
-    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+    if (!userId) {
+      toast.error('Please log in to stop timer')
+      logger.warn('Stop timer attempted without authentication')
+      return
+    }
 
     try {
       logger.info('Stopping timer', { entryId: activeTimer.id, duration: elapsedTime })
@@ -316,7 +330,11 @@ export default function TimeTrackingPage() {
   }
 
   const handleDeleteEntry = async (entryId: string) => {
-    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+    if (!userId) {
+      toast.error('Please log in to delete entries')
+      logger.warn('Delete entry attempted without authentication')
+      return
+    }
 
     logger.info('Delete entry initiated', { entryId })
     if (confirm('⚠️ Delete Time Entry?\n\nThis action cannot be undone.\n\nAre you sure?')) {
