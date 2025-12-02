@@ -33,6 +33,7 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('FilesHub')
 
@@ -236,6 +237,10 @@ export default function FilesHubPage() {
     currentFolder: 'All Files'
   })
 
+  // AUTH
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   // LOCAL STATE
   const [isPageLoading, setIsPageLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -260,7 +265,10 @@ export default function FilesHubPage() {
 
   useEffect(() => {
     const loadFilesData = async () => {
-      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        return
+      }
 
       try {
         setIsPageLoading(true)
@@ -332,7 +340,7 @@ export default function FilesHubPage() {
     }
 
     loadFilesData()
-  }, [announce]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // COMPUTED STATS
@@ -423,7 +431,11 @@ export default function FilesHubPage() {
   // ============================================================================
 
   const handleUploadFiles = async () => {
-    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+    if (!userId) {
+      logger.warn('Upload failed', { reason: 'User not authenticated' })
+      toast.error('Authentication required', { description: 'Please log in to upload files' })
+      return
+    }
 
     if (!uploadFiles || uploadFiles.length === 0) {
       logger.warn('Upload validation failed', { reason: 'No files selected' })
