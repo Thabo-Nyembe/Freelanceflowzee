@@ -239,7 +239,6 @@ export default function FilesHubPage() {
 
   // AUTH
   const { userId, loading: userLoading } = useCurrentUser()
-  const { announce } = useAnnouncer()
 
   // LOCAL STATE
   const [isPageLoading, setIsPageLoading] = useState(true)
