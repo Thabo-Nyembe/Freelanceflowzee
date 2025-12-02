@@ -6,14 +6,6 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import {
-  MOCK_METRICS,
-  MOCK_REVENUE_CHART,
-  MOCK_USERS_CHART,
-  MOCK_TRAFFIC_SOURCES,
-  MOCK_CONVERSION_FUNNEL,
-  MOCK_INSIGHTS,
-  MOCK_GOALS,
-  MOCK_ANALYTICS_STATS,
   formatMetricValue,
   formatChange,
   getTrendColor,
@@ -36,6 +28,11 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+
+const logger = createFeatureLogger('AdvancedAnalytics')
 
 type ViewMode = 'overview' | 'revenue' | 'users' | 'conversion' | 'insights' | 'goals'
 
@@ -44,40 +41,111 @@ export default function AdvancedAnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
+  // DATABASE STATE
+  const [metrics, setMetrics] = useState<Metric[]>([])
+  const [revenueChart, setRevenueChart] = useState<ChartData[]>([])
+  const [usersChart, setUsersChart] = useState<ChartData[]>([])
+  const [trafficSources, setTrafficSources] = useState<any[]>([])
+  const [conversionFunnel, setConversionFunnel] = useState<FunnelStage[]>([])
+  const [insights, setInsights] = useState<Insight[]>([])
+  const [goals, setGoals] = useState<Goal[]>([])
+  const [analyticsStats, setAnalyticsStats] = useState<any>(null)
+
+  // UI STATE
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [timeRange, setTimeRange] = useState<TimeRange>('month')
-  const [selectedMetrics, setSelectedMetrics] = useState<Metric[]>(MOCK_METRICS)
+  const [selectedMetrics, setSelectedMetrics] = useState<Metric[]>([])
 
   // A+++ LOAD ADVANCED ANALYTICS DATA
   useEffect(() => {
     const loadAdvancedAnalyticsData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading advanced analytics data', { userId, timeRange })
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load advanced analytics'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Dynamic import for code splitting
+        const {
+          getAnalyticsMetrics,
+          getRevenueChart,
+          getUsersChart,
+          getTrafficSources,
+          getConversionFunnel,
+          getInsights,
+          getGoals,
+          getAnalyticsStats
+        } = await import('@/lib/analytics-queries')
+
+        // Load all analytics data in parallel
+        const [
+          metricsResult,
+          revenueResult,
+          usersResult,
+          trafficResult,
+          funnelResult,
+          insightsResult,
+          goalsResult,
+          statsResult
+        ] = await Promise.all([
+          getAnalyticsMetrics(userId, timeRange),
+          getRevenueChart(userId, timeRange),
+          getUsersChart(userId, timeRange),
+          getTrafficSources(userId, timeRange),
+          getConversionFunnel(userId),
+          getInsights(userId),
+          getGoals(userId),
+          getAnalyticsStats(userId, timeRange)
+        ])
+
+        if (metricsResult.error) {
+          throw new Error(metricsResult.error?.message || 'Failed to load analytics data')
+        }
+
+        // Update state with database results
+        setMetrics(metricsResult.data || [])
+        setSelectedMetrics(metricsResult.data || [])
+        setRevenueChart(revenueResult.data || [])
+        setUsersChart(usersResult.data || [])
+        setTrafficSources(trafficResult.data || [])
+        setConversionFunnel(funnelResult.data || [])
+        setInsights(insightsResult.data || [])
+        setGoals(goalsResult.data || [])
+        setAnalyticsStats(statsResult.data || null)
 
         setIsLoading(false)
         announce('Advanced analytics loaded successfully', 'polite')
+        logger.info('Advanced analytics data loaded successfully', {
+          metricCount: metricsResult.data?.length || 0,
+          insightCount: insightsResult.data?.length || 0,
+          goalCount: goalsResult.data?.length || 0,
+          userId
+        })
+
+        toast.success('Analytics loaded', {
+          description: `${metricsResult.data?.length || 0} metrics analyzed`
+        })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load advanced analytics')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load advanced analytics'
+        logger.error('Failed to load analytics data', { error: errorMessage, userId })
+        setError(errorMessage)
+        toast.error('Failed to load analytics', {
+          description: errorMessage
+        })
         setIsLoading(false)
         announce('Error loading advanced analytics', 'assertive')
       }
     }
 
     loadAdvancedAnalyticsData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, timeRange, announce])
 
   const viewModes = [
     { id: 'overview', label: 'Overview', icon: '📊' },
@@ -124,10 +192,10 @@ export default function AdvancedAnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <LiquidGlassCard>
           <div className="p-6">
-            <h3 className="text-lg font-semibold mb-4">{MOCK_REVENUE_CHART.name}</h3>
+            <h3 className="text-lg font-semibold mb-4">Revenue Trend</h3>
             <div className="h-64 flex items-end justify-between gap-2">
-              {MOCK_REVENUE_CHART.data.map((point, index) => {
-                const maxValue = Math.max(...MOCK_REVENUE_CHART.data.map(d => d.value))
+              {revenueChart.map((point, index) => {
+                const maxValue = Math.max(...revenueChart.map(d => d.value))
                 const height = (point.value / maxValue) * 100
                 return (
                   <div key={index} className="flex-1 flex flex-col items-center gap-2">
@@ -151,13 +219,13 @@ export default function AdvancedAnalyticsPage() {
 
         <LiquidGlassCard>
           <div className="p-6">
-            <h3 className="text-lg font-semibold mb-4">{MOCK_TRAFFIC_SOURCES.name}</h3>
+            <h3 className="text-lg font-semibold mb-4">Traffic Sources</h3>
             <div className="flex items-center justify-center h-64">
               <div className="relative w-48 h-48">
-                {MOCK_TRAFFIC_SOURCES.data.map((source, index) => {
-                  const total = MOCK_TRAFFIC_SOURCES.data.reduce((sum, s) => sum + s.value, 0)
+                {trafficSources.map((source: any, index) => {
+                  const total = trafficSources.reduce((sum: number, s: any) => sum + s.value, 0)
                   const percentage = (source.value / total) * 100
-                  const colors = MOCK_TRAFFIC_SOURCES.config.colors || []
+                  const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
                   return (
                     <div key={index} className="flex items-center gap-3 mb-3">
                       <div
@@ -180,7 +248,7 @@ export default function AdvancedAnalyticsPage() {
         <div className="p-6">
           <h3 className="text-lg font-semibold mb-4">Recent Insights</h3>
           <div className="space-y-3">
-            {MOCK_INSIGHTS.slice(0, 3).map((insight) => (
+            {insights.slice(0, 3).map((insight) => (
               <div key={insight.id} className="flex items-start gap-3 p-4 rounded-lg bg-muted/30">
                 <div className="text-2xl">{getInsightIcon(insight.type)}</div>
                 <div className="flex-1">
@@ -210,10 +278,10 @@ export default function AdvancedAnalyticsPage() {
           <div className="p-6">
             <div className="text-sm text-muted-foreground mb-2">Total Revenue</div>
             <div className="text-2xl font-bold text-green-500">
-              {formatMetricValue(MOCK_ANALYTICS_STATS.totalRevenue, 'currency')}
+              {formatMetricValue(analyticsStats?.totalRevenue || 0, 'currency')}
             </div>
             <div className="text-xs text-green-500 mt-1">
-              +{MOCK_ANALYTICS_STATS.revenueGrowth.toFixed(1)}% vs last period
+              +{(analyticsStats?.revenueGrowth || 0).toFixed(1)}% vs last period
             </div>
           </div>
         </LiquidGlassCard>
@@ -222,7 +290,7 @@ export default function AdvancedAnalyticsPage() {
           <div className="p-6">
             <div className="text-sm text-muted-foreground mb-2">MRR</div>
             <div className="text-2xl font-bold text-blue-500">
-              {formatMetricValue(MOCK_ANALYTICS_STATS.monthlyRecurringRevenue, 'currency')}
+              {formatMetricValue(analyticsStats?.monthlyRecurringRevenue || 0, 'currency')}
             </div>
             <div className="text-xs text-muted-foreground mt-1">Monthly Recurring</div>
           </div>
@@ -232,7 +300,7 @@ export default function AdvancedAnalyticsPage() {
           <div className="p-6">
             <div className="text-sm text-muted-foreground mb-2">ARR</div>
             <div className="text-2xl font-bold text-purple-500">
-              {formatMetricValue(MOCK_ANALYTICS_STATS.annualRecurringRevenue, 'currency')}
+              {formatMetricValue(analyticsStats?.annualRecurringRevenue || 0, 'currency')}
             </div>
             <div className="text-xs text-muted-foreground mt-1">Annual Recurring</div>
           </div>
@@ -242,7 +310,7 @@ export default function AdvancedAnalyticsPage() {
           <div className="p-6">
             <div className="text-sm text-muted-foreground mb-2">Avg Order Value</div>
             <div className="text-2xl font-bold text-orange-500">
-              {formatMetricValue(MOCK_ANALYTICS_STATS.averageOrderValue, 'currency')}
+              {formatMetricValue(analyticsStats?.averageOrderValue || 0, 'currency')}
             </div>
             <div className="text-xs text-muted-foreground mt-1">Per Transaction</div>
           </div>
@@ -286,7 +354,7 @@ export default function AdvancedAnalyticsPage() {
           <div className="p-6">
             <div className="text-sm text-muted-foreground mb-2">Total Users</div>
             <div className="text-2xl font-bold text-blue-500">
-              {formatMetricValue(MOCK_ANALYTICS_STATS.totalUsers, 'number')}
+              {formatMetricValue(analyticsStats?.totalUsers || 0, 'number')}
             </div>
             <div className="text-xs text-blue-500 mt-1">All Time</div>
           </div>
@@ -296,10 +364,10 @@ export default function AdvancedAnalyticsPage() {
           <div className="p-6">
             <div className="text-sm text-muted-foreground mb-2">Active Users</div>
             <div className="text-2xl font-bold text-green-500">
-              {formatMetricValue(MOCK_ANALYTICS_STATS.activeUsers, 'number')}
+              {formatMetricValue(analyticsStats?.activeUsers || 0, 'number')}
             </div>
             <div className="text-xs text-green-500 mt-1">
-              +{MOCK_ANALYTICS_STATS.userGrowth.toFixed(1)}% growth
+              +{(analyticsStats?.userGrowth || 0).toFixed(1)}% growth
             </div>
           </div>
         </LiquidGlassCard>
@@ -308,7 +376,7 @@ export default function AdvancedAnalyticsPage() {
           <div className="p-6">
             <div className="text-sm text-muted-foreground mb-2">Retention Rate</div>
             <div className="text-2xl font-bold text-purple-500">
-              {MOCK_ANALYTICS_STATS.retentionRate.toFixed(1)}%
+              {(analyticsStats?.retentionRate || 0).toFixed(1)}%
             </div>
             <div className="text-xs text-muted-foreground mt-1">Last 30 Days</div>
           </div>
@@ -367,7 +435,7 @@ export default function AdvancedAnalyticsPage() {
             <div className="p-6">
               <div className="text-sm text-muted-foreground mb-2">Conversion Rate</div>
               <div className="text-3xl font-bold text-purple-500">
-                {MOCK_ANALYTICS_STATS.conversionRate.toFixed(1)}%
+                {(analyticsStats?.conversionRate || 0).toFixed(1)}%
               </div>
               <div className="text-xs text-muted-foreground mt-1">
                 Current Period
@@ -439,13 +507,13 @@ export default function AdvancedAnalyticsPage() {
         <h2 className="text-2xl font-bold">AI-Powered Insights</h2>
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">
-            {MOCK_INSIGHTS.filter(i => !i.isRead).length} unread
+            {insights.filter(i => !i.isRead).length} unread
           </span>
         </div>
       </div>
 
       <div className="space-y-4">
-        {MOCK_INSIGHTS.map((insight) => (
+        {insights.map((insight) => (
           <LiquidGlassCard key={insight.id}>
             <div className="p-6">
               <div className="flex items-start gap-4">
