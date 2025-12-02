@@ -6,10 +6,6 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import {
-  MOCK_INVOICES,
-  MOCK_PAYMENTS,
-  MOCK_INVOICE_TEMPLATES,
-  MOCK_BILLING_STATS,
   formatCurrency,
   getInvoiceStatusColor,
   getPaymentStatusColor,
@@ -32,6 +28,10 @@ import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleto
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+
+const logger = createFeatureLogger('InvoicingPage')
 
 type ViewMode = 'overview' | 'invoices' | 'payments' | 'templates' | 'create'
 
@@ -42,20 +42,30 @@ export default function InvoicingPage() {
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
 
+  // DATABASE STATE
+  const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [payments, setPayments] = useState<Payment[]>([])
+  const [templates, setTemplates] = useState<InvoiceTemplate[]>([])
+  const [billingStats, setBillingStats] = useState<any>(null)
+
+  // UI STATE
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
-  const [selectedInvoices, setSelectedInvoices] = useState<Invoice[]>(MOCK_INVOICES)
+  const [selectedInvoices, setSelectedInvoices] = useState<Invoice[]>([])
   const [filterStatus, setFilterStatus] = useState<InvoiceStatus | 'all'>('all')
 
   // A+++ LOAD INVOICING DATA
   useEffect(() => {
     const loadInvoicingData = async () => {
       if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading invoicing data', { userId })
 
         // Dynamic import for code splitting
         const { getInvoices, getBillingStats } = await import('@/lib/invoicing-queries')
@@ -67,53 +77,65 @@ export default function InvoicingPage() {
         ])
 
         if (invoicesResult.error || statsResult.error) {
-          throw new Error('Failed to load invoicing data')
+          throw new Error(invoicesResult.error?.message || statsResult.error?.message || 'Failed to load invoicing data')
         }
 
-        // Update state with real data if available, otherwise use mock data
-        if (invoicesResult.data.length > 0) {
-          setSelectedInvoices(invoicesResult.data.map(inv => ({
-            id: inv.id,
-            invoiceNumber: inv.invoice_number,
-            status: inv.status as any,
-            clientId: inv.client_id || '',
-            clientName: inv.client_name,
-            clientEmail: inv.client_email,
-            clientAddress: inv.client_address as any,
-            items: inv.items as any,
-            subtotal: inv.subtotal,
-            taxRate: inv.tax_rate,
-            taxAmount: inv.tax_amount,
-            discount: inv.discount,
-            total: inv.total,
-            currency: inv.currency as any,
-            dueDate: new Date(inv.due_date),
-            issueDate: new Date(inv.issue_date),
-            paidDate: inv.paid_date ? new Date(inv.paid_date) : undefined,
-            notes: inv.notes,
-            terms: inv.terms,
-            createdBy: inv.created_by || 'Unknown',
-            createdAt: new Date(inv.created_at),
-            updatedAt: new Date(inv.updated_at),
-            sentAt: inv.sent_at ? new Date(inv.sent_at) : undefined,
-            viewedAt: inv.viewed_at ? new Date(inv.viewed_at) : undefined,
-            paymentMethod: inv.payment_method as any,
-            paymentDetails: undefined,
-            recurringConfig: inv.is_recurring ? inv.recurring_config as any : undefined,
-            metadata: {
-              remindersSent: inv.reminders_sent,
-              lastReminderDate: inv.last_reminder_at ? new Date(inv.last_reminder_at) : undefined,
-              autoPayEnabled: false,
-              latePaymentFee: 0,
-              earlyPaymentDiscount: 0
-            }
-          })))
-        }
+        // Map database invoices to UI format
+        const mappedInvoices = (invoicesResult.data || []).map(inv => ({
+          id: inv.id,
+          invoiceNumber: inv.invoice_number,
+          status: inv.status as any,
+          clientId: inv.client_id || '',
+          clientName: inv.client_name,
+          clientEmail: inv.client_email,
+          clientAddress: inv.client_address as any,
+          items: inv.items as any,
+          subtotal: inv.subtotal,
+          taxRate: inv.tax_rate,
+          taxAmount: inv.tax_amount,
+          discount: inv.discount,
+          total: inv.total,
+          currency: inv.currency as any,
+          dueDate: new Date(inv.due_date),
+          issueDate: new Date(inv.issue_date),
+          paidDate: inv.paid_date ? new Date(inv.paid_date) : undefined,
+          notes: inv.notes,
+          terms: inv.terms,
+          createdBy: inv.created_by || 'Unknown',
+          createdAt: new Date(inv.created_at),
+          updatedAt: new Date(inv.updated_at),
+          sentAt: inv.sent_at ? new Date(inv.sent_at) : undefined,
+          viewedAt: inv.viewed_at ? new Date(inv.viewed_at) : undefined,
+          paymentMethod: inv.payment_method as any,
+          paymentDetails: undefined,
+          recurringConfig: inv.is_recurring ? inv.recurring_config as any : undefined,
+          metadata: {
+            remindersSent: inv.reminders_sent,
+            lastReminderDate: inv.last_reminder_at ? new Date(inv.last_reminder_at) : undefined,
+            autoPayEnabled: false,
+            latePaymentFee: 0,
+            earlyPaymentDiscount: 0
+          }
+        }))
 
+        // Update state
+        setInvoices(mappedInvoices)
+        setSelectedInvoices(mappedInvoices)
+        setBillingStats(statsResult.data || null)
         setIsLoading(false)
+
         announce('Invoicing dashboard loaded successfully', 'polite')
+        logger.info('Invoicing data loaded successfully', {
+          invoiceCount: mappedInvoices.length,
+          hasStats: !!statsResult.data
+        })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load invoicing data')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load invoicing data'
+        logger.error('Failed to load invoicing data', { error: errorMessage, userId })
+        setError(errorMessage)
+        toast.error('Failed to load invoicing data', {
+          description: errorMessage
+        })
         setIsLoading(false)
         announce('Error loading invoicing dashboard', 'assertive')
       }
@@ -128,15 +150,12 @@ export default function InvoicingPage() {
 
   const handleExportCSV = async () => {
     if (!userId) {
-      const { toast } = await import('sonner')
       toast.error('Please log in to export invoices')
+      logger.warn('Export attempted without authentication')
       return
     }
 
     try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('invoicing')
-
       logger.info('Exporting invoices to CSV', {
         userId,
         count: filteredInvoices.length,
@@ -191,16 +210,11 @@ export default function InvoicingPage() {
         size: csvContent.length
       })
 
-      const { toast } = await import('sonner')
       toast.success('Invoices exported', {
         description: `${filteredInvoices.length} invoices in CSV format`
       })
     } catch (err: any) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('invoicing')
-      logger.error('CSV export error', { error: err.message })
-
-      const { toast } = await import('sonner')
+      logger.error('CSV export error', { error: err.message, userId })
       toast.error('Failed to export invoices')
     }
   }
@@ -212,33 +226,23 @@ export default function InvoicingPage() {
 
   const handleViewDetails = async (invoiceId: string) => {
     if (!userId) {
-      const { toast } = await import('sonner')
       toast.error('Please log in to view invoice details')
+      logger.warn('View details attempted without authentication')
       return
     }
-
-    const { createFeatureLogger } = await import('@/lib/logger')
-    const logger = createFeatureLogger('invoicing')
-
-    logger.info('Viewing invoice details', { userId, invoiceId })
+      logger.info('Viewing invoice details', { userId, invoiceId })
 
     // For now, announce the action - later we'll create a detail modal or page
     announce(`Viewing details for invoice ${invoiceId}`, 'polite')
-    const { toast } = await import('sonner')
     toast.info('Invoice details view coming soon')
   }
 
   const handleSendInvoice = async (invoice: Invoice) => {
-    if (!userId) {
-      const { toast } = await import('sonner')
-      toast.error('Please log in to send invoices')
+    if (!userId) {toast.error('Please log in to send invoices')
       return
     }
 
-    try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('invoicing')
-      const { toast } = await import('sonner')
+    try {const { toast } = await import('sonner')
 
       logger.info('Sending invoice email', {
         userId,
@@ -320,7 +324,6 @@ export default function InvoicingPage() {
             : inv
         ))
       }
-
       logger.info('Invoice sent successfully', {
         invoiceId: invoice.id,
         clientEmail: invoice.clientEmail,
@@ -333,14 +336,11 @@ export default function InvoicingPage() {
 
       announce(`Invoice ${invoice.invoiceNumber} sent successfully`, 'polite')
     } catch (err: any) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('invoicing')
       logger.error('Failed to send invoice', {
         invoiceId: invoice.id,
         error: err.message
       })
 
-      const { toast } = await import('sonner')
       toast.error('Failed to send invoice', {
         description: 'Please check email configuration'
       })
@@ -350,16 +350,11 @@ export default function InvoicingPage() {
   }
 
   const handleMarkPaid = async (invoice: Invoice) => {
-    if (!userId) {
-      const { toast } = await import('sonner')
-      toast.error('Please log in to mark invoices as paid')
+    if (!userId) {toast.error('Please log in to mark invoices as paid')
       return
     }
 
-    try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('invoicing')
-      const { toast } = await import('sonner')
+    try {const { toast } = await import('sonner')
 
       logger.info('Marking invoice as paid', {
         userId,
@@ -382,7 +377,6 @@ export default function InvoicingPage() {
         toast.error('Failed to update invoice')
         return
       }
-
       logger.info('Invoice marked as paid', { invoiceId: invoice.id, paidDate })
 
       toast.success('Invoice marked as paid', {
@@ -398,26 +392,17 @@ export default function InvoicingPage() {
 
       announce(`Invoice ${invoice.invoiceNumber} marked as paid`, 'polite')
     } catch (err: any) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('invoicing')
       logger.error('Mark paid error', { error: err.message })
-
-      const { toast } = await import('sonner')
       toast.error('Failed to mark as paid')
     }
   }
 
   const handleSendReminder = async (invoice: Invoice) => {
-    if (!userId) {
-      const { toast } = await import('sonner')
-      toast.error('Please log in to send reminders')
+    if (!userId) {toast.error('Please log in to send reminders')
       return
     }
 
-    try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('invoicing')
-      const { toast } = await import('sonner')
+    try {const { toast } = await import('sonner')
 
       const daysOverdue = getDaysOverdue(invoice.dueDate)
 
@@ -487,7 +472,6 @@ export default function InvoicingPage() {
             : inv
         ))
       }
-
       logger.info('Reminder sent successfully', {
         invoiceId: invoice.id,
         reminderCount: currentReminderCount + 1
@@ -499,14 +483,10 @@ export default function InvoicingPage() {
 
       announce(`Payment reminder sent for invoice ${invoice.invoiceNumber}`, 'polite')
     } catch (err: any) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('invoicing')
       logger.error('Failed to send reminder', {
         invoiceId: invoice.id,
         error: err.message
       })
-
-      const { toast } = await import('sonner')
       toast.error('Failed to send reminder', {
         description: 'Please try again'
       })
@@ -516,10 +496,7 @@ export default function InvoicingPage() {
   }
 
   const handleDownloadPDF = async (invoice: Invoice) => {
-    try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('invoicing')
-      const { toast } = await import('sonner')
+    try {const { toast } = await import('sonner')
 
       logger.info('Starting PDF generation', {
         invoiceId: invoice.id,
@@ -563,14 +540,10 @@ export default function InvoicingPage() {
 
       announce(`Invoice ${invoice.invoiceNumber} PDF downloaded successfully`, 'polite')
     } catch (err: any) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('invoicing')
       logger.error('PDF generation failed', {
         invoiceId: invoice.id,
         error: err.message
       })
-
-      const { toast } = await import('sonner')
       toast.error('Failed to generate PDF', {
         description: 'Please try again'
       })
@@ -580,16 +553,11 @@ export default function InvoicingPage() {
   }
 
   const handleDuplicateInvoice = async (invoice: Invoice) => {
-    if (!userId) {
-      const { toast } = await import('sonner')
-      toast.error('Please log in to duplicate invoices')
+    if (!userId) {toast.error('Please log in to duplicate invoices')
       return
     }
 
-    try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('invoicing')
-      const { toast } = await import('sonner')
+    try {const { toast } = await import('sonner')
 
       logger.info('Duplicating invoice', {
         userId,
@@ -628,7 +596,6 @@ export default function InvoicingPage() {
         toast.error('Failed to duplicate invoice')
         return
       }
-
       logger.info('Invoice duplicated successfully', {
         originalId: invoice.id,
         newId: data.id,
@@ -644,11 +611,7 @@ export default function InvoicingPage() {
       // Reload data to show new invoice
       window.location.reload()
     } catch (err: any) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('invoicing')
       logger.error('Duplicate invoice error', { error: err.message })
-
-      const { toast } = await import('sonner')
       toast.error('Failed to duplicate invoice')
     }
   }
@@ -664,8 +627,8 @@ export default function InvoicingPage() {
   const statusOptions: (InvoiceStatus | 'all')[] = ['all', 'draft', 'sent', 'viewed', 'paid', 'overdue', 'cancelled']
 
   const filteredInvoices = filterStatus === 'all'
-    ? MOCK_INVOICES
-    : MOCK_INVOICES.filter(inv => inv.status === filterStatus)
+    ? selectedInvoices
+    : selectedInvoices.filter(inv => inv.status === filterStatus)
 
   const renderOverview = () => (
     <div className="space-y-6">
@@ -677,7 +640,7 @@ export default function InvoicingPage() {
               <div className="flex-1">
                 <div className="text-sm text-muted-foreground mb-1">Total Revenue</div>
                 <div className="text-2xl font-bold text-green-500">
-                  {formatCurrency(MOCK_BILLING_STATS.totalRevenue)}
+                  {formatCurrency((billingStats?.totalRevenue || 0))}
                 </div>
               </div>
               <div className="text-2xl">💰</div>
@@ -694,13 +657,13 @@ export default function InvoicingPage() {
               <div className="flex-1">
                 <div className="text-sm text-muted-foreground mb-1">Pending</div>
                 <div className="text-2xl font-bold text-blue-500">
-                  {formatCurrency(MOCK_BILLING_STATS.pendingAmount)}
+                  {formatCurrency((billingStats?.pendingAmount || 0))}
                 </div>
               </div>
               <div className="text-2xl">⏳</div>
             </div>
             <div className="text-xs text-muted-foreground">
-              {MOCK_BILLING_STATS.pendingInvoices} invoices
+              {(billingStats?.pendingInvoices || 0)} invoices
             </div>
           </div>
         </LiquidGlassCard>
@@ -711,13 +674,13 @@ export default function InvoicingPage() {
               <div className="flex-1">
                 <div className="text-sm text-muted-foreground mb-1">Overdue</div>
                 <div className="text-2xl font-bold text-red-500">
-                  {formatCurrency(MOCK_BILLING_STATS.overdueAmount)}
+                  {formatCurrency((billingStats?.overdueAmount || 0))}
                 </div>
               </div>
               <div className="text-2xl">🚨</div>
             </div>
             <div className="text-xs text-red-500">
-              {MOCK_BILLING_STATS.overdueInvoices} invoices
+              {(billingStats?.overdueInvoices || 0)} invoices
             </div>
           </div>
         </LiquidGlassCard>
@@ -728,7 +691,7 @@ export default function InvoicingPage() {
               <div className="flex-1">
                 <div className="text-sm text-muted-foreground mb-1">Avg Invoice</div>
                 <div className="text-2xl font-bold text-purple-500">
-                  {formatCurrency(MOCK_BILLING_STATS.averageInvoiceValue)}
+                  {formatCurrency((billingStats?.averageInvoiceValue || 0))}
                 </div>
               </div>
               <div className="text-2xl">📈</div>
@@ -746,8 +709,8 @@ export default function InvoicingPage() {
           <div className="p-6">
             <h3 className="text-lg font-semibold mb-6">Revenue by Month</h3>
             <div className="h-64 flex items-end justify-between gap-2">
-              {MOCK_BILLING_STATS.revenueByMonth.map((data, index) => {
-                const maxRevenue = Math.max(...MOCK_BILLING_STATS.revenueByMonth.map(d => d.revenue))
+              {(billingStats?.revenueByMonth || []).map((data, index) => {
+                const maxRevenue = Math.max(...(billingStats?.revenueByMonth || []).map(d => d.revenue))
                 const height = (data.revenue / maxRevenue) * 100
                 return (
                   <div key={index} className="flex-1 flex flex-col items-center gap-2">
@@ -774,7 +737,7 @@ export default function InvoicingPage() {
           <div className="p-6">
             <h3 className="text-lg font-semibold mb-6">Top Clients</h3>
             <div className="space-y-4">
-              {MOCK_BILLING_STATS.revenueByClient.slice(0, 5).map((client, index) => (
+              {(billingStats?.revenueByClient || []).slice(0, 5).map((client, index) => (
                 <div key={client.clientId} className="flex items-center gap-4">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
                     {index + 1}
@@ -789,7 +752,7 @@ export default function InvoicingPage() {
                     <div className="w-32 h-2 bg-muted/30 rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
-                        animate={{ width: `${(client.revenue / MOCK_BILLING_STATS.totalRevenue) * 100}%` }}
+                        animate={{ width: `${(client.revenue / (billingStats?.totalRevenue || 0)) * 100}%` }}
                         transition={{ delay: index * 0.1 }}
                         className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
                       />
@@ -807,7 +770,7 @@ export default function InvoicingPage() {
         <div className="p-6">
           <h3 className="text-lg font-semibold mb-4">Recent Invoices</h3>
           <div className="space-y-3">
-            {MOCK_INVOICES.slice(0, 5).map((invoice) => (
+            {selectedInvoices.slice(0, 5).map((invoice) => (
               <div key={invoice.id} className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer">
                 <div className="flex items-center gap-4">
                   <div>
@@ -1028,10 +991,10 @@ export default function InvoicingPage() {
           <div className="p-6">
             <div className="text-sm text-muted-foreground mb-2">Total Payments</div>
             <div className="text-3xl font-bold text-green-500">
-              {formatCurrency(MOCK_BILLING_STATS.paidAmount)}
+              {formatCurrency((billingStats?.paidAmount || 0))}
             </div>
             <div className="text-xs text-muted-foreground mt-1">
-              {MOCK_BILLING_STATS.paidInvoices} transactions
+              {(billingStats?.paidInvoices || 0)} transactions
             </div>
           </div>
         </LiquidGlassCard>
@@ -1040,7 +1003,7 @@ export default function InvoicingPage() {
           <div className="p-6">
             <div className="text-sm text-muted-foreground mb-2">Success Rate</div>
             <div className="text-3xl font-bold text-blue-500">
-              {MOCK_BILLING_STATS.paymentSuccessRate.toFixed(1)}%
+              {(billingStats?.paymentSuccessRate || 0).toFixed(1)}%
             </div>
             <div className="text-xs text-muted-foreground mt-1">
               Payment success
@@ -1052,7 +1015,7 @@ export default function InvoicingPage() {
           <div className="p-6">
             <div className="text-sm text-muted-foreground mb-2">Avg Payment Time</div>
             <div className="text-3xl font-bold text-purple-500">
-              {MOCK_BILLING_STATS.averagePaymentTime} days
+              {(billingStats?.averagePaymentTime || 0)} days
             </div>
             <div className="text-xs text-muted-foreground mt-1">
               Average time to pay
@@ -1063,7 +1026,7 @@ export default function InvoicingPage() {
 
       {/* Payments List */}
       <div className="space-y-4">
-        {MOCK_PAYMENTS.map((payment) => (
+        {payments.map((payment) => (
           <LiquidGlassCard key={payment.id}>
             <div className="p-6">
               <div className="flex items-start justify-between">
@@ -1125,7 +1088,7 @@ export default function InvoicingPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {MOCK_INVOICE_TEMPLATES.map((template) => {
+        {templates.map((template) => {
           const { subtotal, taxAmount, total } = template.items.reduce(
             (acc, item) => ({
               subtotal: acc.subtotal + item.total,
