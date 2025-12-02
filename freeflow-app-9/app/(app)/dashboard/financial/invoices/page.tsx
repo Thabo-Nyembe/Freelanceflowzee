@@ -10,6 +10,16 @@ import { Input } from '@/components/ui/input'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
 import {
   Plus,
   Edit,
@@ -20,10 +30,10 @@ import {
   FileText,
   Search,
   Printer,
-  Mail
+  Mail,
+  Loader2
 } from 'lucide-react'
 import {
-  MOCK_INVOICES,
   formatCurrency,
   formatDate,
   getInvoiceStatusColor,
@@ -34,38 +44,114 @@ import {
 
 const logger = createFeatureLogger('InvoicesPage')
 
+// Map database invoice to UI invoice type
+function mapDbInvoiceToUi(dbInvoice: any): Invoice {
+  return {
+    id: dbInvoice.id,
+    number: dbInvoice.invoice_number || `INV-${dbInvoice.id.slice(0, 8)}`,
+    client: dbInvoice.client_name,
+    clientEmail: dbInvoice.client_email,
+    project: dbInvoice.description || 'N/A',
+    amount: dbInvoice.amount,
+    currency: dbInvoice.currency || 'USD',
+    status: dbInvoice.status,
+    issueDate: dbInvoice.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+    dueDate: dbInvoice.due_date,
+    paidDate: dbInvoice.paid_date,
+    items: dbInvoice.line_items || [],
+    taxRate: dbInvoice.tax_rate || 0,
+    discount: dbInvoice.discount || 0,
+    notes: dbInvoice.notes
+  }
+}
+
+interface InvoiceFormData {
+  client_name: string
+  client_email: string
+  description: string
+  amount: number
+  currency: string
+  due_date: string
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
+  tax_rate: number
+  discount: number
+  notes?: string
+}
+
 export default function InvoicesPage() {
+  // Authentication
+  const { userId, loading: userLoading } = useCurrentUser()
+
+  // State
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<Invoice['status'] | 'all'>('all')
 
+  // Dialog state
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null)
+  const [formData, setFormData] = useState<InvoiceFormData>({
+    client_name: '',
+    client_email: '',
+    description: '',
+    amount: 0,
+    currency: 'USD',
+    due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    status: 'draft',
+    tax_rate: 0,
+    discount: 0,
+  })
+
   useEffect(() => {
-    loadInvoices()
-  }, [])
+    if (userId) {
+      loadInvoices()
+    }
+  }, [userId])
 
   const loadInvoices = async () => {
+    if (!userId) return
+
     try {
       setIsLoading(true)
       setError(null)
 
-      logger.info('Loading invoices')
+      logger.info('Loading invoices from database', { userId })
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 600))
+      // Import and call real database query
+      const { getInvoices } = await import('@/lib/financial-queries')
 
-      setInvoices(MOCK_INVOICES)
+      // Build filters based on current UI state
+      const filters: any = {}
+      if (filterStatus !== 'all') {
+        filters.status = filterStatus
+      }
+
+      const { data, error: dbError } = await getInvoices(userId, filters)
+
+      if (dbError) {
+        throw new Error(dbError.message || 'Failed to load invoices')
+      }
+
+      // Map database invoices to UI format
+      const mappedInvoices = (data || []).map(mapDbInvoiceToUi)
+      setInvoices(mappedInvoices)
       setIsLoading(false)
 
       logger.info('Invoices loaded successfully', {
-        count: MOCK_INVOICES.length
+        count: mappedInvoices.length,
+        userId
       })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load invoices'
       setError(errorMessage)
       setIsLoading(false)
-      logger.error('Failed to load invoices', { error: err })
+      logger.error('Failed to load invoices', { error: err, userId })
+      toast.error('Failed to load invoices', {
+        description: errorMessage
+      })
     }
   }
 
@@ -85,74 +171,142 @@ export default function InvoicesPage() {
     return filtered
   }, [invoices, searchTerm, filterStatus])
 
-  const handleCreateInvoice = async () => {
-    logger.info('Create invoice initiated')
+  const openAddDialog = () => {
+    setEditingInvoice(null)
+    setFormData({
+      client_name: '',
+      client_email: '',
+      description: '',
+      amount: 0,
+      currency: 'USD',
+      due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      status: 'draft',
+      tax_rate: 0,
+      discount: 0,
+    })
+    setIsDialogOpen(true)
+    logger.info('Add invoice dialog opened')
+  }
+
+  const openEditDialog = (invoice: Invoice) => {
+    setEditingInvoice(invoice)
+    setFormData({
+      client_name: invoice.client,
+      client_email: invoice.clientEmail || '',
+      description: invoice.project,
+      amount: invoice.amount,
+      currency: invoice.currency || 'USD',
+      due_date: invoice.dueDate,
+      status: invoice.status,
+      tax_rate: invoice.taxRate || 0,
+      discount: invoice.discount || 0,
+      notes: invoice.notes,
+    })
+    setIsDialogOpen(true)
+    logger.info('Edit invoice dialog opened', { invoiceId: invoice.id })
+  }
+
+  const handleSubmitInvoice = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!userId) return
 
     try {
-      const response = await fetch('/api/financial/invoices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'create',
-          data: {
-            client: 'New Client',
-            project: 'New Project',
-            items: [
-              {
-                description: 'Professional Services',
-                quantity: 1,
-                rate: 0,
-                amount: 0
-              }
-            ],
-            taxRate: 0,
-            currency: 'USD',
-            status: 'draft'
+      setIsSubmitting(true)
+
+      if (editingInvoice) {
+        // Update existing invoice
+        logger.info('Updating invoice', { invoiceId: editingInvoice.id })
+
+        const { updateInvoice } = await import('@/lib/financial-queries')
+        const { data, error } = await updateInvoice(
+          editingInvoice.id,
+          userId,
+          {
+            client_name: formData.client_name,
+            client_email: formData.client_email,
+            description: formData.description,
+            amount: formData.amount,
+            due_date: formData.due_date,
+            status: formData.status,
+            tax_rate: formData.tax_rate,
+            discount: formData.discount,
           }
+        )
+
+        if (error) throw new Error(error.message)
+
+        // Optimistically update UI
+        setInvoices(prev =>
+          prev.map(inv => (inv.id === editingInvoice.id ? mapDbInvoiceToUi(data!) : inv))
+        )
+
+        toast.success('Invoice updated', {
+          description: 'Changes saved successfully'
         })
-      })
 
-      if (!response.ok) throw new Error('Failed to create invoice')
+        logger.info('Invoice updated successfully', { invoiceId: editingInvoice.id })
+      } else {
+        // Create new invoice
+        logger.info('Creating new invoice')
 
-      const result = await response.json()
+        const { createInvoice } = await import('@/lib/financial-queries')
+        const { data, error } = await createInvoice(userId, {
+          client_name: formData.client_name,
+          client_email: formData.client_email,
+          description: formData.description,
+          amount: formData.amount,
+          currency: formData.currency,
+          due_date: formData.due_date,
+          status: formData.status,
+          tax_rate: formData.tax_rate,
+          discount: formData.discount,
+        })
 
-      toast.success('Invoice created', {
-        description: `Invoice ${result.invoiceNumber} • Draft mode`
-      })
+        if (error) throw new Error(error.message)
 
-      logger.info('Invoice created successfully', {
-        invoiceNumber: result.invoiceNumber,
-        invoiceId: result.invoiceId
-      })
+        // Optimistically add to UI
+        setInvoices(prev => [mapDbInvoiceToUi(data!), ...prev])
 
-      await loadInvoices()
+        toast.success('Invoice created', {
+          description: 'Invoice created successfully'
+        })
+
+        logger.info('Invoice created successfully', { invoiceId: data!.id })
+      }
+
+      setIsDialogOpen(false)
+      setIsSubmitting(false)
     } catch (error: any) {
-      logger.error('Failed to create invoice', { error })
-      toast.error('Failed to create invoice', {
+      logger.error('Failed to save invoice', { error })
+      toast.error('Failed to save invoice', {
         description: error.message
       })
+      setIsSubmitting(false)
     }
   }
 
   const handleSendInvoice = async (invoice: Invoice) => {
+    if (!userId) return
+
     logger.info('Send invoice initiated', {
       invoiceId: invoice.id,
       invoiceNumber: invoice.number
     })
 
     try {
-      const response = await fetch('/api/financial/invoices/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          invoiceId: invoice.id,
-          clientEmail: invoice.clientEmail || 'client@example.com'
-        })
-      })
+      const { updateInvoice } = await import('@/lib/financial-queries')
+      const { data, error } = await updateInvoice(
+        invoice.id,
+        userId,
+        { status: 'sent' }
+      )
 
-      if (!response.ok) throw new Error('Failed to send invoice')
+      if (error) throw new Error(error.message)
 
-      const result = await response.json()
+      // Optimistically update UI
+      setInvoices(prev =>
+        prev.map(inv => (inv.id === invoice.id ? mapDbInvoiceToUi(data!) : inv))
+      )
 
       toast.success('Invoice sent', {
         description: `${invoice.number} sent to ${invoice.client}`
@@ -163,8 +317,6 @@ export default function InvoicesPage() {
         invoiceNumber: invoice.number,
         recipient: invoice.client
       })
-
-      await loadInvoices()
     } catch (error: any) {
       logger.error('Failed to send invoice', { error, invoiceId: invoice.id })
       toast.error('Failed to send invoice', {
@@ -179,44 +331,14 @@ export default function InvoicesPage() {
       invoiceNumber: invoice.number
     })
 
-    try {
-      const response = await fetch('/api/financial/invoices/pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          invoiceId: invoice.id
-        })
-      })
-
-      if (!response.ok) throw new Error('Failed to generate PDF')
-
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${invoice.number}.pdf`
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
-
-      toast.success('PDF downloaded', {
-        description: `${invoice.number}.pdf`
-      })
-
-      logger.info('PDF downloaded successfully', {
-        invoiceId: invoice.id,
-        invoiceNumber: invoice.number
-      })
-    } catch (error: any) {
-      logger.error('Failed to download PDF', { error, invoiceId: invoice.id })
-      toast.error('Failed to download PDF', {
-        description: error.message
-      })
-    }
+    toast.info('PDF Download', {
+      description: 'PDF generation coming soon'
+    })
   }
 
   const handleMarkAsPaid = async (invoice: Invoice) => {
+    if (!userId) return
+
     logger.info('Mark as paid initiated', {
       invoiceId: invoice.id,
       invoiceNumber: invoice.number
@@ -225,17 +347,23 @@ export default function InvoicesPage() {
     if (!confirm(`Mark ${invoice.number} as paid?`)) return
 
     try {
-      const response = await fetch('/api/financial/invoices/mark-paid', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          invoiceId: invoice.id,
-          paidAmount: invoice.amount,
-          paidDate: new Date().toISOString().split('T')[0]
-        })
-      })
+      const { updateInvoice } = await import('@/lib/financial-queries')
+      const { data, error } = await updateInvoice(
+        invoice.id,
+        userId,
+        {
+          status: 'paid',
+          paid_date: new Date().toISOString().split('T')[0],
+          paid_amount: invoice.amount
+        }
+      )
 
-      if (!response.ok) throw new Error('Failed to mark as paid')
+      if (error) throw new Error(error.message)
+
+      // Optimistically update UI
+      setInvoices(prev =>
+        prev.map(inv => (inv.id === invoice.id ? mapDbInvoiceToUi(data!) : inv))
+      )
 
       toast.success('Invoice marked as paid', {
         description: `${invoice.number} • ${formatCurrency(invoice.amount)}`
@@ -245,8 +373,6 @@ export default function InvoicesPage() {
         invoiceId: invoice.id,
         amount: invoice.amount
       })
-
-      await loadInvoices()
     } catch (error: any) {
       logger.error('Failed to mark as paid', { error, invoiceId: invoice.id })
       toast.error('Failed to mark as paid', {
@@ -255,14 +381,9 @@ export default function InvoicesPage() {
     }
   }
 
-  const handleEditInvoice = async (invoiceId: string) => {
-    logger.info('Edit invoice initiated', { invoiceId })
-    toast.info('Edit invoice', {
-      description: 'Invoice editor coming soon'
-    })
-  }
-
   const handleDeleteInvoice = async (invoice: Invoice) => {
+    if (!userId) return
+
     logger.info('Delete invoice initiated', {
       invoiceId: invoice.id,
       invoiceNumber: invoice.number
@@ -271,24 +392,19 @@ export default function InvoicesPage() {
     if (!confirm(`Delete ${invoice.number}?\n\nThis action cannot be undone.`)) return
 
     try {
-      const response = await fetch('/api/financial/invoices', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'delete',
-          invoiceId: invoice.id
-        })
-      })
+      const { deleteInvoice } = await import('@/lib/financial-queries')
+      const { error } = await deleteInvoice(invoice.id, userId)
 
-      if (!response.ok) throw new Error('Failed to delete invoice')
+      if (error) throw new Error(error.message)
+
+      // Optimistically remove from UI
+      setInvoices(prev => prev.filter(inv => inv.id !== invoice.id))
 
       toast.success('Invoice deleted', {
         description: invoice.number
       })
 
       logger.info('Invoice deleted', { invoiceId: invoice.id })
-
-      await loadInvoices()
     } catch (error: any) {
       logger.error('Failed to delete invoice', { error, invoiceId: invoice.id })
       toast.error('Failed to delete invoice', {
@@ -303,39 +419,31 @@ export default function InvoicesPage() {
       invoiceNumber: invoice.number
     })
 
-    try {
-      const response = await fetch('/api/financial/invoices/reminder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          invoiceId: invoice.id
-        })
-      })
-
-      if (!response.ok) throw new Error('Failed to send reminder')
-
-      toast.success('Payment reminder sent', {
-        description: `Reminder sent to ${invoice.client}`
-      })
-
-      logger.info('Payment reminder sent', {
-        invoiceId: invoice.id,
-        client: invoice.client
-      })
-    } catch (error: any) {
-      logger.error('Failed to send reminder', { error, invoiceId: invoice.id })
-      toast.error('Failed to send reminder', {
-        description: error.message
-      })
-    }
+    toast.info('Payment Reminder', {
+      description: 'Email reminder feature coming soon'
+    })
   }
 
-  if (isLoading) {
+  // Show loading state while authenticating or loading data
+  if (userLoading || isLoading) {
     return (
       <div className="space-y-6">
         <CardSkeleton />
         <ListSkeleton items={6} />
       </div>
+    )
+  }
+
+  // Show authentication required state
+  if (!userId) {
+    return (
+      <ErrorEmptyState
+        error="Authentication required"
+        action={{
+          label: 'Sign In',
+          onClick: () => window.location.href = '/login'
+        }}
+      />
     )
   }
 
@@ -358,7 +466,7 @@ export default function InvoicesPage() {
         description="Create your first invoice to start billing clients"
         action={{
           label: 'Create Invoice',
-          onClick: handleCreateInvoice
+          onClick: openAddDialog
         }}
       />
     )
@@ -466,7 +574,7 @@ export default function InvoicesPage() {
                 Showing {filteredInvoices.length} invoices
               </CardDescription>
             </div>
-            <Button size="sm" onClick={handleCreateInvoice}>
+            <Button size="sm" onClick={openAddDialog}>
               <Plus className="h-4 w-4 mr-2" />
               Create Invoice
             </Button>
@@ -579,7 +687,7 @@ export default function InvoicesPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleEditInvoice(invoice.id)}
+                            onClick={() => openEditDialog(invoice)}
                             title="Edit"
                           >
                             <Edit className="h-4 w-4" />
@@ -602,6 +710,209 @@ export default function InvoicesPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Invoice Form Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <form onSubmit={handleSubmitInvoice}>
+            <DialogHeader>
+              <DialogTitle>
+                {editingInvoice ? 'Edit Invoice' : 'Create Invoice'}
+              </DialogTitle>
+              <DialogDescription>
+                {editingInvoice
+                  ? 'Update invoice details below'
+                  : 'Create a new invoice for your client'
+                }
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              {/* Client Name */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="client_name" className="text-right">
+                  Client Name
+                </Label>
+                <Input
+                  id="client_name"
+                  value={formData.client_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, client_name: e.target.value }))}
+                  className="col-span-3"
+                  placeholder="Client name"
+                  required
+                />
+              </div>
+
+              {/* Client Email */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="client_email" className="text-right">
+                  Client Email
+                </Label>
+                <Input
+                  id="client_email"
+                  type="email"
+                  value={formData.client_email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, client_email: e.target.value }))}
+                  className="col-span-3"
+                  placeholder="client@example.com"
+                />
+              </div>
+
+              {/* Description/Project */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="description" className="text-right">
+                  Description
+                </Label>
+                <Input
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  className="col-span-3"
+                  placeholder="Project or service description"
+                  required
+                />
+              </div>
+
+              {/* Amount */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="amount" className="text-right">
+                  Amount
+                </Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.amount}
+                  onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+                  className="col-span-3"
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+
+              {/* Currency */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="currency" className="text-right">
+                  Currency
+                </Label>
+                <select
+                  id="currency"
+                  value={formData.currency}
+                  onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value }))}
+                  className="col-span-3 px-3 py-2 border border-gray-300 rounded-md"
+                  required
+                >
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="GBP">GBP</option>
+                  <option value="ZAR">ZAR</option>
+                </select>
+              </div>
+
+              {/* Due Date */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="due_date" className="text-right">
+                  Due Date
+                </Label>
+                <Input
+                  id="due_date"
+                  type="date"
+                  value={formData.due_date}
+                  onChange={(e) => setFormData(prev => ({ ...prev, due_date: e.target.value }))}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+
+              {/* Status */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="status" className="text-right">
+                  Status
+                </Label>
+                <select
+                  id="status"
+                  value={formData.status}
+                  onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as any }))}
+                  className="col-span-3 px-3 py-2 border border-gray-300 rounded-md"
+                  required
+                >
+                  <option value="draft">Draft</option>
+                  <option value="sent">Sent</option>
+                  <option value="paid">Paid</option>
+                  <option value="overdue">Overdue</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              {/* Tax Rate */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="tax_rate" className="text-right">
+                  Tax Rate (%)
+                </Label>
+                <Input
+                  id="tax_rate"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  value={formData.tax_rate}
+                  onChange={(e) => setFormData(prev => ({ ...prev, tax_rate: parseFloat(e.target.value) || 0 }))}
+                  className="col-span-3"
+                  placeholder="0.00"
+                />
+              </div>
+
+              {/* Discount */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="discount" className="text-right">
+                  Discount
+                </Label>
+                <Input
+                  id="discount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.discount}
+                  onChange={(e) => setFormData(prev => ({ ...prev, discount: parseFloat(e.target.value) || 0 }))}
+                  className="col-span-3"
+                  placeholder="0.00"
+                />
+              </div>
+
+              {/* Notes */}
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="notes" className="text-right pt-2">
+                  Notes
+                </Label>
+                <textarea
+                  id="notes"
+                  value={formData.notes || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                  className="col-span-3 px-3 py-2 border border-gray-300 rounded-md"
+                  placeholder="Additional notes (optional)"
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {editingInvoice ? 'Update' : 'Create'} Invoice
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -747,3 +747,202 @@ export async function updateGoalProgress(
     return { data: null, error }
   }
 }
+
+// ============================================================================
+// INVOICE MANAGEMENT
+// ============================================================================
+
+export async function getInvoices(
+  userId: string,
+  filters?: {
+    status?: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
+    clientName?: string
+    startDate?: string
+    endDate?: string
+    limit?: number
+  }
+): Promise<{ data: any[]; error: any }> {
+  const startTime = performance.now()
+
+  try {
+    const supabase = createClient()
+
+    let query = supabase
+      .from('invoices')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+
+    if (filters?.status) {
+      query = query.eq('status', filters.status)
+    }
+
+    if (filters?.clientName) {
+      query = query.ilike('client_name', `%${filters.clientName}%`)
+    }
+
+    if (filters?.startDate) {
+      query = query.gte('due_date', filters.startDate)
+    }
+
+    if (filters?.endDate) {
+      query = query.lte('due_date', filters.endDate)
+    }
+
+    if (filters?.limit) {
+      query = query.limit(filters.limit)
+    }
+
+    const { data, error } = await query
+
+    const duration = performance.now() - startTime
+    logger.info('Invoices fetched', {
+      userId,
+      count: data?.length || 0,
+      filters,
+      duration: `${duration.toFixed(2)}ms`
+    })
+
+    return { data: data || [], error }
+  } catch (error) {
+    logger.error('Failed to fetch invoices', { error, userId })
+    return { data: [], error }
+  }
+}
+
+export async function getInvoice(
+  invoiceId: string,
+  userId: string
+): Promise<{ data: any | null; error: any }> {
+  const startTime = performance.now()
+
+  try {
+    const supabase = createClient()
+
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('id', invoiceId)
+      .eq('user_id', userId)
+      .single()
+
+    const duration = performance.now() - startTime
+    logger.info('Invoice fetched', { invoiceId, userId, duration: `${duration.toFixed(2)}ms` })
+
+    return { data, error }
+  } catch (error) {
+    logger.error('Failed to fetch invoice', { error, invoiceId, userId })
+    return { data: null, error }
+  }
+}
+
+export async function createInvoice(
+  userId: string,
+  invoiceData: {
+    client_name: string
+    client_email?: string
+    amount: number
+    currency?: string
+    due_date: string
+    description?: string
+    line_items?: any[]
+    tax_rate?: number
+    discount?: number
+    status?: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
+  }
+): Promise<{ data: any | null; error: any }> {
+  const startTime = performance.now()
+
+  try {
+    const supabase = createClient()
+
+    const { data, error } = await supabase
+      .from('invoices')
+      .insert({
+        user_id: userId,
+        ...invoiceData,
+        currency: invoiceData.currency || 'USD',
+        status: invoiceData.status || 'draft'
+      })
+      .select()
+      .single()
+
+    const duration = performance.now() - startTime
+    logger.info('Invoice created', {
+      invoiceId: data?.id,
+      userId,
+      amount: invoiceData.amount,
+      duration: `${duration.toFixed(2)}ms`
+    })
+
+    return { data, error }
+  } catch (error) {
+    logger.error('Failed to create invoice', { error, userId })
+    return { data: null, error }
+  }
+}
+
+export async function updateInvoice(
+  invoiceId: string,
+  userId: string,
+  updates: Partial<{
+    client_name: string
+    client_email: string
+    amount: number
+    due_date: string
+    description: string
+    line_items: any[]
+    tax_rate: number
+    discount: number
+    status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
+    paid_date: string
+    paid_amount: number
+  }>
+): Promise<{ data: any | null; error: any }> {
+  const startTime = performance.now()
+
+  try {
+    const supabase = createClient()
+
+    const { data, error } = await supabase
+      .from('invoices')
+      .update(updates)
+      .eq('id', invoiceId)
+      .eq('user_id', userId)
+      .select()
+      .single()
+
+    const duration = performance.now() - startTime
+    logger.info('Invoice updated', { invoiceId, userId, duration: `${duration.toFixed(2)}ms` })
+
+    return { data, error }
+  } catch (error) {
+    logger.error('Failed to update invoice', { error, invoiceId, userId })
+    return { data: null, error }
+  }
+}
+
+export async function deleteInvoice(
+  invoiceId: string,
+  userId: string
+): Promise<{ error: any }> {
+  const startTime = performance.now()
+
+  try {
+    const supabase = createClient()
+
+    const { error } = await supabase
+      .from('invoices')
+      .delete()
+      .eq('id', invoiceId)
+      .eq('user_id', userId)
+
+    const duration = performance.now() - startTime
+    logger.info('Invoice deleted', { invoiceId, userId, duration: `${duration.toFixed(2)}ms` })
+
+    return { error }
+  } catch (error) {
+    logger.error('Failed to delete invoice', { error, invoiceId, userId })
+    return { error }
+  }
+}
