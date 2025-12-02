@@ -150,8 +150,6 @@ import {
   type MessageAttachment,
   type ChatSettings,
   type ChatPermissions,
-  MOCK_CHATS,
-  MOCK_MESSAGES,
   formatMessageTime,
   formatTime,
   formatDateTime,
