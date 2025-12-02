@@ -21,11 +21,6 @@ import {
 } from 'lucide-react'
 
 import {
-  MOCK_CONTACTS,
-  MOCK_DEALS,
-  MOCK_PIPELINE,
-  MOCK_ACTIVITIES,
-  MOCK_CRM_STATS,
   getContactTypeColor,
   getLeadStatusColor,
   getDealStageColor,
@@ -45,6 +40,10 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+
+const logger = createFeatureLogger('CRMPage')
 
 // AI FEATURES
 import { LeadScoringWidget } from '@/components/ai/lead-scoring-widget'
@@ -68,9 +67,12 @@ export default function CRMPage() {
   const [dealSearch, setDealSearch] = useState('')
   const [contactSort, setContactSort] = useState('name')
   const [dealSort, setDealSort] = useState('value')
-  const [contacts, setContacts] = useState<any[]>(MOCK_CONTACTS)
-  const [deals, setDeals] = useState<any[]>(MOCK_DEALS)
-  const [stats, setStats] = useState<any>(MOCK_CRM_STATS)
+
+  // DATABASE STATE
+  const [contacts, setContacts] = useState<any[]>([])
+  const [deals, setDeals] = useState<any[]>([])
+  const [activities, setActivities] = useState<any[]>([])
+  const [stats, setStats] = useState<any>(null)
 
   // A+++ LOAD CRM DATA
   useEffect(() => {
@@ -88,30 +90,54 @@ export default function CRMPage() {
         logger.info('Loading CRM data', { userId })
 
         // Dynamic import for code splitting
-        const { getCRMContacts, getCRMDeals } = await import('@/lib/crm-queries')
+        const { getCRMContacts, getCRMDeals, getCRMActivities } = await import('@/lib/crm-queries')
 
-        // Load contacts and deals in parallel
-        const [contactsResult, dealsResult] = await Promise.all([
+        // Load all CRM data in parallel
+        const [contactsData, dealsData, activitiesData] = await Promise.all([
           getCRMContacts(userId),
-          getCRMDeals(userId)
+          getCRMDeals(userId),
+          getCRMActivities(userId)
         ])
 
-        if (contactsResult.error || dealsResult.error) {
-          throw new Error('Failed to load CRM data')
-        }
+        logger.info('CRM data loaded', {
+          contacts: contactsData?.length || 0,
+          deals: dealsData?.length || 0,
+          activities: activitiesData?.length || 0
+        })
 
-        // Update state with real data if available, otherwise use mock data
-        if (contactsResult.data && contactsResult.data.length > 0) {
-          setContacts(contactsResult.data)
-        }
-        if (dealsResult.data && dealsResult.data.length > 0) {
-          setDeals(dealsResult.data)
-        }
+        // Update state with database data
+        setContacts(contactsData || [])
+        setDeals(dealsData || [])
+        setActivities(activitiesData || [])
+
+        // Calculate stats from real data
+        const totalRevenue = dealsData?.reduce((sum: number, deal: any) => {
+          return sum + (deal.stage === 'closed-won' ? deal.value : 0)
+        }, 0) || 0
+
+        const pipelineValue = dealsData?.reduce((sum: number, deal: any) => {
+          return sum + (deal.stage !== 'closed-won' && deal.stage !== 'closed-lost' ? deal.value : 0)
+        }, 0) || 0
+
+        setStats({
+          totalContacts: contactsData?.length || 0,
+          totalDeals: dealsData?.length || 0,
+          totalRevenue,
+          pipelineValue,
+          activeLeads: contactsData?.filter((c: any) => c.type === 'lead' && c.lead_status === 'new').length || 0,
+          closedDeals: dealsData?.filter((d: any) => d.stage === 'closed-won').length || 0
+        })
 
         setIsLoading(false)
         announce('CRM data loaded successfully', 'polite')
+        logger.info('CRM data loading complete')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load CRM data')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load CRM data'
+        logger.error('CRM data loading failed', { error: errorMessage })
+        setError(errorMessage)
+        toast.error('Failed to load CRM data', {
+          description: errorMessage
+        })
         setIsLoading(false)
         announce('Error loading CRM data', 'assertive')
       }
@@ -124,17 +150,29 @@ export default function CRMPage() {
   // CRM HANDLERS
   // ============================================================================
 
-  const handleCreateContact = () => {
-    announce('Opening contact creation form', 'polite')
-    const toast = require('sonner').toast
-    toast.info('Create contact', {
-      description: 'Contact form coming soon'
-    })
+  const handleCreateContact = async () => {
+    if (!userId) {
+      toast.error('Please log in to create contacts')
+      logger.warn('Contact creation attempted without authentication')
+      return
+    }
+
+    try {
+      logger.info('Creating contact', { userId })
+      announce('Opening contact creation form', 'polite')
+      toast.info('Create contact', {
+        description: 'Contact form coming soon'
+      })
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create contact'
+      logger.error('Contact creation failed', { error: errorMessage })
+      toast.error('Failed to create contact', { description: errorMessage })
+    }
   }
 
   const handleViewContact = (contact: any) => {
+    logger.info('Viewing contact', { contactId: contact.id, contactName: contact.name })
     announce(`Viewing contact ${contact.name}`, 'polite')
-    const toast = require('sonner').toast
     toast.info('Contact details', {
       description: `${contact.name} - ${contact.email}`
     })
@@ -142,10 +180,6 @@ export default function CRMPage() {
 
   const handleEmailContact = async (contact: any) => {
     try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('crm')
-      const toast = (await import('sonner')).toast
-
       logger.info('Opening email to contact', {
         contactId: contact.id,
         email: contact.email
@@ -159,16 +193,16 @@ export default function CRMPage() {
       })
 
       announce(`Email opened for ${contact.name}`, 'polite')
-    } catch (err: any) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('crm')
-      logger.error('Email contact error', { error: err.message })
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to open email'
+      logger.error('Email contact error', { error: errorMessage })
+      toast.error('Failed to open email', { description: errorMessage })
     }
   }
 
   const handleViewDeal = (deal: any) => {
+    logger.info('Viewing deal', { dealId: deal.id, dealName: deal.name })
     announce(`Viewing deal ${deal.name}`, 'polite')
-    const toast = require('sonner').toast
     toast.info('Deal details', {
       description: `${deal.name} - ${formatCurrency(deal.value)}`
     })
@@ -182,10 +216,6 @@ export default function CRMPage() {
     }
 
     try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('crm')
-      const toast = (await import('sonner')).toast
-
       logger.info('Updating deal stage', {
         userId,
         dealId: deal.id,
@@ -199,15 +229,9 @@ export default function CRMPage() {
       })
 
       const { updateCRMDeal } = await import('@/lib/crm-queries')
-      const { data, error } = await updateCRMDeal(deal.id, {
+      const updatedDeal = await updateCRMDeal(deal.id, {
         stage: newStage as any
       })
-
-      if (error) {
-        logger.error('Failed to update deal', { error })
-        toast.error('Failed to update deal')
-        return
-      }
 
       logger.info('Deal stage updated', { dealId: deal.id, newStage })
 
@@ -223,17 +247,68 @@ export default function CRMPage() {
       ))
 
       announce(`Deal ${deal.name} moved to ${newStage}`, 'polite')
-    } catch (err: any) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('crm')
-      logger.error('Update deal error', { error: err.message })
-
-      const toast = (await import('sonner')).toast
-      toast.error('Failed to update deal')
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update deal'
+      logger.error('Update deal error', { error: errorMessage })
+      toast.error('Failed to update deal', { description: errorMessage })
     }
   }
 
-  const pipelineMetrics = calculatePipelineMetrics(MOCK_PIPELINE)
+  // Calculate pipeline from real deals data
+  const pipeline = {
+    id: 'pipeline-1',
+    name: 'Sales Pipeline',
+    description: 'Main sales pipeline',
+    stages: [
+      {
+        id: 'stage-1',
+        name: 'Discovery',
+        order: 1,
+        probability: 10,
+        color: '#3b82f6',
+        dealCount: deals.filter(d => d.stage === 'discovery').length,
+        totalValue: deals.filter(d => d.stage === 'discovery').reduce((sum, d) => sum + d.value, 0)
+      },
+      {
+        id: 'stage-2',
+        name: 'Qualification',
+        order: 2,
+        probability: 25,
+        color: '#8b5cf6',
+        dealCount: deals.filter(d => d.stage === 'qualification').length,
+        totalValue: deals.filter(d => d.stage === 'qualification').reduce((sum, d) => sum + d.value, 0)
+      },
+      {
+        id: 'stage-3',
+        name: 'Proposal',
+        order: 3,
+        probability: 50,
+        color: '#ec4899',
+        dealCount: deals.filter(d => d.stage === 'proposal').length,
+        totalValue: deals.filter(d => d.stage === 'proposal').reduce((sum, d) => sum + d.value, 0)
+      },
+      {
+        id: 'stage-4',
+        name: 'Negotiation',
+        order: 4,
+        probability: 75,
+        color: '#f59e0b',
+        dealCount: deals.filter(d => d.stage === 'negotiation').length,
+        totalValue: deals.filter(d => d.stage === 'negotiation').reduce((sum, d) => sum + d.value, 0)
+      },
+      {
+        id: 'stage-5',
+        name: 'Closed Won',
+        order: 5,
+        probability: 100,
+        color: '#10b981',
+        dealCount: deals.filter(d => d.stage === 'closed-won').length,
+        totalValue: deals.filter(d => d.stage === 'closed-won').reduce((sum, d) => sum + d.value, 0)
+      }
+    ]
+  }
+
+  const pipelineMetrics = calculatePipelineMetrics(pipeline)
 
   const filteredContacts = sortContacts(
     filterContacts(contacts, { search: contactSearch }),
@@ -405,21 +480,10 @@ export default function CRMPage() {
             className="space-y-6"
           >
             {/* AI LEAD SCORING WIDGET */}
-            {showAIWidget && userId && (
+            {showAIWidget && userId && leads.length > 0 && (
               <LeadScoringWidget
                 userId={userId}
-                leads={leads.length > 0 ? leads : MOCK_CONTACTS.filter(c => c.type === 'lead').map(c => ({
-                  id: c.id,
-                  name: c.name,
-                  company: c.company,
-                  industry: 'business',
-                  email: c.email,
-                  source: 'inbound' as const,
-                  budget: 5000,
-                  projectDescription: 'Potential client',
-                  decisionMaker: true,
-                  painPoints: []
-                }))}
+                leads={leads}
                 compact={false}
               />
             )}
@@ -745,7 +809,7 @@ export default function CRMPage() {
             <LiquidGlassCard>
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold">{MOCK_PIPELINE.name}</h3>
+                  <h3 className="text-lg font-semibold">{pipeline.name}</h3>
                   <div className="flex gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Total Value: </span>
@@ -759,7 +823,7 @@ export default function CRMPage() {
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                  {MOCK_PIPELINE.stages.map((stage) => (
+                  {pipeline.stages.map((stage) => (
                     <Card key={stage.id} className="p-4" style={{ borderColor: stage.color }}>
                       <div className="text-center space-y-2">
                         <div className="font-semibold text-sm">{stage.name}</div>
@@ -793,7 +857,7 @@ export default function CRMPage() {
                 <h3 className="text-lg font-semibold mb-4">Upcoming Activities</h3>
 
                 <div className="space-y-4">
-                  {MOCK_ACTIVITIES.map((activity) => (
+                  {activities.slice(0, 10).map((activity) => (
                     <Card key={activity.id} className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-4">
