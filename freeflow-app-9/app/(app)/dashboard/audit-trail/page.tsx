@@ -6,9 +6,6 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import {
-  MOCK_AUDIT_LOGS,
-  ACTIVITY_SUMMARY,
-  COMPLIANCE_REPORT,
   getSeverityColor,
   getActivityIcon,
   getEntityIcon,
@@ -22,13 +19,29 @@ import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleto
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
+// AUTHENTICATION & LOGGING
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+
+const logger = createFeatureLogger('AuditTrailPage')
+
 type ViewMode = 'overview' | 'logs' | 'compliance' | 'export'
 
 export default function AuditTrailPage() {
+  // AUTHENTICATION
+  const { userId, loading: userLoading } = useCurrentUser()
+
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+
+  // DATABASE STATE
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
+  const [activitySummary, setActivitySummary] = useState<any>(null)
+  const [complianceReports, setComplianceReports] = useState<any[]>([])
+  const [criticalEvents, setCriticalEvents] = useState<AuditLog[]>([])
 
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null)
@@ -47,32 +60,63 @@ export default function AuditTrailPage() {
   // A+++ LOAD AUDIT TRAIL DATA
   useEffect(() => {
     const loadAuditTrailData = async () => {
+      // Wait for authentication
+      if (userLoading) return
+
+      if (!userId) {
+        logger.warn('Audit trail accessed without authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading audit trail data', { userId })
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load audit trail data'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load all audit trail data in parallel
+        const {
+          getAuditLogs,
+          getActivitySummary,
+          getCriticalEvents,
+          getComplianceReports
+        } = await import('@/lib/audit-trail-queries')
+
+        const [logs, summary, critical, reports] = await Promise.all([
+          getAuditLogs(userId, filters.activityTypes.length || filters.entityTypes.length || filters.severityLevels.length ? {
+            activityTypes: filters.activityTypes.length > 0 ? filters.activityTypes : undefined,
+            entityTypes: filters.entityTypes.length > 0 ? filters.entityTypes : undefined,
+            severityLevels: filters.severityLevels.length > 0 ? filters.severityLevels : undefined,
+            searchQuery: filters.searchQuery || undefined
+          } : undefined),
+          getActivitySummary(userId),
+          getCriticalEvents(userId),
+          getComplianceReports(userId, 5)
+        ])
+
+        setAuditLogs(logs)
+        setActivitySummary(summary)
+        setCriticalEvents(critical)
+        setComplianceReports(reports)
 
         setIsLoading(false)
+        logger.info('Audit trail data loaded successfully', {
+          logsCount: logs.length,
+          criticalCount: critical.length,
+          reportsCount: reports.length
+        })
         announce('Audit trail loaded successfully', 'polite')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load audit trail data')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load audit trail data'
+        logger.error('Failed to load audit trail data', { error: err, userId })
+        setError(errorMessage)
         setIsLoading(false)
         announce('Error loading audit trail', 'assertive')
       }
     }
 
     loadAuditTrailData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, userLoading, filters]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const viewTabs = [
     { id: 'overview' as ViewMode, label: 'Overview', icon: '📊' },
@@ -81,8 +125,54 @@ export default function AuditTrailPage() {
     { id: 'export' as ViewMode, label: 'Export', icon: '📥' }
   ]
 
-  const filteredLogs = filterLogs(MOCK_AUDIT_LOGS, filters)
+  const filteredLogs = filterLogs(auditLogs, filters)
   const groupedLogs = groupLogsByDate(filteredLogs)
+
+  // HANDLER: Export audit logs
+  const handleExportLogs = async () => {
+    if (!userId) {
+      toast.error('Please log in to export logs')
+      logger.warn('Export attempted without authentication')
+      return
+    }
+
+    try {
+      logger.info('Exporting audit logs', { userId, filtersCount: Object.keys(filters).length })
+
+      const { exportAuditLogs } = await import('@/lib/audit-trail-queries')
+
+      // Export with current filters
+      const csvData = await exportAuditLogs(
+        userId,
+        filters.activityTypes.length || filters.entityTypes.length || filters.severityLevels.length ? {
+          activityTypes: filters.activityTypes.length > 0 ? filters.activityTypes : undefined,
+          entityTypes: filters.entityTypes.length > 0 ? filters.entityTypes : undefined,
+          severityLevels: filters.severityLevels.length > 0 ? filters.severityLevels : undefined,
+          searchQuery: filters.searchQuery || undefined
+        } : undefined,
+        'csv'
+      )
+
+      // Download CSV file
+      const blob = new Blob([csvData], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Audit logs exported successfully')
+      logger.info('Audit logs exported', { userId, logsCount: auditLogs.length })
+      announce('Audit logs exported successfully', 'polite')
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to export logs'
+      logger.error('Failed to export logs', { error: err, userId })
+      toast.error(errorMessage)
+    }
+  }
 
   // A+++ LOADING STATE
   if (isLoading) {
@@ -170,13 +260,13 @@ export default function AuditTrailPage() {
                       <div className="flex-1">
                         <div className="text-sm text-muted-foreground mb-1">Total Activities</div>
                         <div className="text-3xl font-bold text-blue-500">
-                          {ACTIVITY_SUMMARY.totalActivities.toLocaleString()}
+                          {activitySummary?.totalActivities?.toLocaleString() || '0'}
                         </div>
                       </div>
                       <div className="text-2xl">📊</div>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {ACTIVITY_SUMMARY.todayActivities} today
+                      {activitySummary?.todayActivities || 0} today
                     </div>
                   </div>
                 </LiquidGlassCard>
@@ -187,7 +277,7 @@ export default function AuditTrailPage() {
                       <div className="flex-1">
                         <div className="text-sm text-muted-foreground mb-1">This Week</div>
                         <div className="text-3xl font-bold text-green-500">
-                          {ACTIVITY_SUMMARY.weekActivities}
+                          {activitySummary?.weekActivities || 0}
                         </div>
                       </div>
                       <div className="text-2xl">📅</div>
@@ -204,7 +294,7 @@ export default function AuditTrailPage() {
                       <div className="flex-1">
                         <div className="text-sm text-muted-foreground mb-1">Critical Events</div>
                         <div className="text-3xl font-bold text-red-500">
-                          {ACTIVITY_SUMMARY.bySeverity.critical}
+                          {activitySummary?.bySeverity?.critical || 0}
                         </div>
                       </div>
                       <div className="text-2xl">⚠️</div>
@@ -221,7 +311,7 @@ export default function AuditTrailPage() {
                       <div className="flex-1">
                         <div className="text-sm text-muted-foreground mb-1">Compliance Score</div>
                         <div className="text-3xl font-bold text-purple-500">
-                          {COMPLIANCE_REPORT.complianceScore.toFixed(1)}%
+                          {complianceReports[0]?.complianceScore?.toFixed(1) || '0.0'}%
                         </div>
                       </div>
                       <div className="text-2xl">✅</div>
@@ -241,11 +331,11 @@ export default function AuditTrailPage() {
                   <div className="p-6">
                     <h3 className="text-lg font-semibold mb-6">Activity by Type</h3>
                     <div className="space-y-3">
-                      {Object.entries(ACTIVITY_SUMMARY.byType)
-                        .sort(([, a], [, b]) => b - a)
+                      {activitySummary?.byType && Object.entries(activitySummary.byType)
+                        .sort(([, a], [, b]) => (b as number) - (a as number))
                         .slice(0, 6)
                         .map(([type, count]) => {
-                          const percentage = (count / ACTIVITY_SUMMARY.totalActivities) * 100
+                          const percentage = ((count as number) / (activitySummary.totalActivities || 1)) * 100
                           return (
                             <div key={type}>
                               <div className="flex items-center justify-between mb-2">
@@ -276,7 +366,7 @@ export default function AuditTrailPage() {
                   <div className="p-6">
                     <h3 className="text-lg font-semibold mb-6">Top Users</h3>
                     <div className="space-y-4">
-                      {ACTIVITY_SUMMARY.topUsers.map((user, index) => (
+                      {activitySummary?.topUsers?.map((user: any, index: number) => (
                         <div key={user.userId} className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white font-bold">
                             {index + 1}
@@ -300,7 +390,7 @@ export default function AuditTrailPage() {
             </div>
 
             {/* Recent Critical Events */}
-            {ACTIVITY_SUMMARY.recentCritical.length > 0 && (
+            {criticalEvents.length > 0 && (
               <ScrollReveal delay={0.5}>
                 <LiquidGlassCard>
                   <div className="p-6">
@@ -309,7 +399,7 @@ export default function AuditTrailPage() {
                       <span>Recent Critical Events</span>
                     </h3>
                     <div className="space-y-3">
-                      {ACTIVITY_SUMMARY.recentCritical.map((log) => (
+                      {criticalEvents.map((log) => (
                         <div
                           key={log.id}
                           className="p-4 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800"
@@ -455,14 +545,14 @@ export default function AuditTrailPage() {
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h3 className="text-2xl font-bold">{COMPLIANCE_REPORT.name}</h3>
+                      <h3 className="text-2xl font-bold">{complianceReports[0]?.name || 'Compliance Report'}</h3>
                       <p className="text-sm text-muted-foreground">
-                        Generated: {COMPLIANCE_REPORT.generatedAt.toLocaleDateString()}
+                        Generated: {complianceReports[0]?.generatedAt ? new Date(complianceReports[0].generatedAt).toLocaleDateString() : 'N/A'}
                       </p>
                     </div>
                     <div className="text-center">
                       <div className="text-4xl font-bold text-green-500 mb-1">
-                        {COMPLIANCE_REPORT.complianceScore.toFixed(1)}%
+                        {complianceReports[0]?.complianceScore?.toFixed(1) || '0.0'}%
                       </div>
                       <div className="text-sm text-muted-foreground">Compliance Score</div>
                     </div>
@@ -470,19 +560,19 @@ export default function AuditTrailPage() {
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30">
-                      <div className="text-2xl font-bold text-blue-500">{COMPLIANCE_REPORT.totalLogs}</div>
+                      <div className="text-2xl font-bold text-blue-500">{complianceReports[0]?.totalLogs || 0}</div>
                       <div className="text-xs text-muted-foreground">Total Logs</div>
                     </div>
                     <div className="p-4 rounded-lg bg-red-50 dark:bg-red-950/30">
-                      <div className="text-2xl font-bold text-red-500">{COMPLIANCE_REPORT.criticalEvents}</div>
+                      <div className="text-2xl font-bold text-red-500">{complianceReports[0]?.criticalEvents || 0}</div>
                       <div className="text-xs text-muted-foreground">Critical Events</div>
                     </div>
                     <div className="p-4 rounded-lg bg-green-50 dark:bg-green-950/30">
-                      <div className="text-2xl font-bold text-green-500">{COMPLIANCE_REPORT.userLogins}</div>
+                      <div className="text-2xl font-bold text-green-500">{complianceReports[0]?.userLogins || 0}</div>
                       <div className="text-xs text-muted-foreground">User Logins</div>
                     </div>
                     <div className="p-4 rounded-lg bg-orange-50 dark:bg-orange-950/30">
-                      <div className="text-2xl font-bold text-orange-500">{COMPLIANCE_REPORT.permissionChanges}</div>
+                      <div className="text-2xl font-bold text-orange-500">{complianceReports[0]?.permissionChanges || 0}</div>
                       <div className="text-xs text-muted-foreground">Permission Changes</div>
                     </div>
                   </div>
@@ -490,7 +580,7 @@ export default function AuditTrailPage() {
                   <div className="border-t pt-6">
                     <h4 className="font-semibold mb-4">Compliance Findings</h4>
                     <div className="space-y-4">
-                      {COMPLIANCE_REPORT.findings.map((finding) => (
+                      {complianceReports[0]?.findings?.map((finding: any) => (
                         <div
                           key={finding.id}
                           className={`p-4 rounded-lg border-l-4 ${
@@ -568,7 +658,10 @@ export default function AuditTrailPage() {
                         </label>
                       </div>
                     </div>
-                    <button className="w-full px-4 py-3 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white rounded-lg text-sm font-medium transition-colors">
+                    <button
+                      onClick={handleExportLogs}
+                      className="w-full px-4 py-3 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white rounded-lg text-sm font-medium transition-colors"
+                    >
                       Export Audit Logs
                     </button>
                   </div>
