@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useScreenRecorder } from '@/hooks/use-screen-recorder'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import VideoTemplates from '@/components/video/video-templates'
 import AssetPreviewModal, { Asset } from '@/components/video/asset-preview-modal'
 import EnhancedFileUpload from '@/components/video/enhanced-file-upload'
@@ -146,6 +147,7 @@ interface NewProjectForm {
 
 export default function VideoStudioPage() {
   const router = useRouter()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // ============================================================================
   // A+++ STATE MANAGEMENT
@@ -699,7 +701,11 @@ export default function VideoStudioPage() {
   // ============================================================================
   useEffect(() => {
     const loadVideoProjects = async () => {
-      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
 
       try {
         setIsLoading(true)
@@ -766,7 +772,7 @@ export default function VideoStudioPage() {
     }
 
     loadVideoProjects()
-  }, [announce]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Mock data
   const mockProjects: VideoProject[] = [
@@ -971,7 +977,10 @@ export default function VideoStudioPage() {
   }
 
   const handleCreateProject = async () => {
-    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+    if (!userId) {
+      toast.error('Please log in to create projects')
+      return
+    }
 
     if (!newProject.title.trim()) {
       logger.warn('Project title is required')
