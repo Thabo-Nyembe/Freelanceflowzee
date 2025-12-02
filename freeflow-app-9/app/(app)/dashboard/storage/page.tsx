@@ -354,10 +354,10 @@ export default function StoragePage() {
     logger.debug('Calculating storage stats')
 
     const totalFiles = state.files.length
-    const totalSize = state.files.reduce((sum, f) => sum + f.size, 0)
+    const totalSize = state.files.reduce((sum, f) => sum + (f.size || 0), 0)
     const syncedFiles = state.files.filter(f => f.status === 'synced').length
-    const sharedFiles = state.files.filter(f => f.sharedWith.length > 0 || f.isPublic).length
-    const totalDownloads = state.files.reduce((sum, f) => sum + f.downloadCount, 0)
+    const sharedFiles = state.files.filter(f => (f.sharedWith?.length || 0) > 0 || f.isPublic).length
+    const totalDownloads = state.files.reduce((sum, f) => sum + (f.downloadCount || 0), 0)
 
     const providerStats = {
       aws: state.files.filter(f => f.provider === 'aws').length,
