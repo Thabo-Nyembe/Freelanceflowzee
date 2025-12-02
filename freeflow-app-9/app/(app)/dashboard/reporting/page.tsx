@@ -8,8 +8,6 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import {
   REPORT_TEMPLATES,
-  MOCK_REPORTS,
-  REPORT_METRICS,
   SECTION_TEMPLATES,
   getStatusColor,
   getFormatIcon,
@@ -24,13 +22,29 @@ import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
+// AUTHENTICATION & LOGGING
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+
+const logger = createFeatureLogger('ReportingPage')
+
 type ViewMode = 'overview' | 'templates' | 'my-reports' | 'builder' | 'exports'
 
 export default function ReportingPage() {
+  // AUTHENTICATION
+  const { userId, loading: userLoading } = useCurrentUser()
+
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+
+  // DATABASE STATE
+  const [reports, setReports] = useState<any[]>([])
+  const [reportExports, setReportExports] = useState<any[]>([])
+  const [reportSchedules, setReportSchedules] = useState<any[]>([])
+  const [reportStatistics, setReportStatistics] = useState<any>(null)
 
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
@@ -39,32 +53,213 @@ export default function ReportingPage() {
   // A+++ LOAD REPORTING DATA
   useEffect(() => {
     const loadReportingData = async () => {
+      // Wait for authentication
+      if (userLoading) return
+
+      if (!userId) {
+        logger.warn('Reporting accessed without authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading reporting data', { userId })
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load reporting data'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load all reporting data in parallel
+        const {
+          getReports,
+          getReportStatistics
+        } = await import('@/lib/reports-queries')
+
+        const [reportsData, statsData] = await Promise.all([
+          getReports(userId),
+          getReportStatistics(userId)
+        ])
+
+        if (reportsData.error) throw reportsData.error
+        if (statsData.error) throw statsData.error
+
+        setReports(reportsData.data || [])
+        setReportStatistics(statsData.data)
 
         setIsLoading(false)
+        logger.info('Reporting data loaded successfully', {
+          reportsCount: reportsData.data?.length || 0
+        })
         announce('Reporting dashboard loaded successfully', 'polite')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load reporting data')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load reporting data'
+        logger.error('Failed to load reporting data', { error: err, userId })
+        setError(errorMessage)
         setIsLoading(false)
         announce('Error loading reporting dashboard', 'assertive')
+        toast.error('Failed to load reporting data')
       }
     }
 
     loadReportingData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, userLoading]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // CRUD HANDLERS
+  const handleCreateReport = async (reportData: any) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    try {
+      logger.info('Creating report', { userId, reportData })
+      const { createReport } = await import('@/lib/reports-queries')
+      const { data, error } = await createReport(userId, reportData)
+
+      if (error) throw error
+
+      setReports(prev => [data!, ...prev])
+      logger.info('Report created successfully', { reportId: data!.id })
+      toast.success(`Report "${data!.name}" created successfully`)
+      announce(`Report ${data!.name} created`, 'polite')
+
+      return data
+    } catch (err) {
+      logger.error('Failed to create report', { error: err, userId })
+      toast.error('Failed to create report')
+      throw err
+    }
+  }
+
+  const handleUpdateReport = async (reportId: string, updates: any) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    try {
+      logger.info('Updating report', { userId, reportId, updates })
+      const { updateReport } = await import('@/lib/reports-queries')
+      const { data, error } = await updateReport(reportId, userId, updates)
+
+      if (error) throw error
+
+      setReports(prev => prev.map(r => r.id === reportId ? data! : r))
+      logger.info('Report updated successfully', { reportId })
+      toast.success('Report updated successfully')
+      announce('Report updated', 'polite')
+
+      return data
+    } catch (err) {
+      logger.error('Failed to update report', { error: err, reportId })
+      toast.error('Failed to update report')
+      throw err
+    }
+  }
+
+  const handleDeleteReport = async (reportId: string) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    try {
+      logger.info('Deleting report', { userId, reportId })
+      const { deleteReport } = await import('@/lib/reports-queries')
+      const { success, error } = await deleteReport(reportId, userId)
+
+      if (error || !success) throw error
+
+      setReports(prev => prev.filter(r => r.id !== reportId))
+      logger.info('Report deleted successfully', { reportId })
+      toast.success('Report deleted successfully')
+      announce('Report deleted', 'polite')
+    } catch (err) {
+      logger.error('Failed to delete report', { error: err, reportId })
+      toast.error('Failed to delete report')
+    }
+  }
+
+  const handleDuplicateReport = async (reportId: string) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    try {
+      logger.info('Duplicating report', { userId, reportId })
+      const { duplicateReport } = await import('@/lib/reports-queries')
+      const { data, error } = await duplicateReport(reportId, userId)
+
+      if (error) throw error
+
+      setReports(prev => [data!, ...prev])
+      logger.info('Report duplicated successfully', { reportId, newReportId: data!.id })
+      toast.success('Report duplicated successfully')
+      announce(`Report duplicated`, 'polite')
+
+      return data
+    } catch (err) {
+      logger.error('Failed to duplicate report', { error: err, reportId })
+      toast.error('Failed to duplicate report')
+    }
+  }
+
+  const handleExportReport = async (reportId: string, format: ExportFormat) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    try {
+      logger.info('Exporting report', { userId, reportId, format })
+      const { createReportExport } = await import('@/lib/reports-queries')
+
+      const { data, error } = await createReportExport(userId, reportId, {
+        name: `Report Export ${new Date().toISOString()}`,
+        format
+      })
+
+      if (error) throw error
+
+      setReportExports(prev => [data!, ...prev])
+      logger.info('Report export created', { reportId, exportId: data!.id, format })
+      toast.success(`Report exported as ${format.toUpperCase()}`)
+      announce(`Report exported as ${format}`, 'polite')
+
+      return data
+    } catch (err) {
+      logger.error('Failed to export report', { error: err, reportId, format })
+      toast.error('Failed to export report')
+    }
+  }
+
+  const handleScheduleReport = async (reportId: string, scheduleData: any) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    try {
+      logger.info('Scheduling report', { userId, reportId, scheduleData })
+      const { createReportSchedule } = await import('@/lib/reports-queries')
+
+      const { data, error } = await createReportSchedule(userId, {
+        report_id: reportId,
+        ...scheduleData
+      })
+
+      if (error) throw error
+
+      setReportSchedules(prev => [data!, ...prev])
+      logger.info('Report scheduled successfully', { reportId, scheduleId: data!.id })
+      toast.success('Report scheduled successfully')
+      announce('Report scheduled', 'polite')
+
+      return data
+    } catch (err) {
+      logger.error('Failed to schedule report', { error: err, reportId })
+      toast.error('Failed to schedule report')
+    }
+  }
 
   // View Mode Tabs
   const viewTabs = [
@@ -166,13 +361,13 @@ export default function ReportingPage() {
                       <div className="flex-1">
                         <div className="text-sm text-muted-foreground mb-1">Total Reports</div>
                         <div className="text-3xl font-bold text-blue-500">
-                          {REPORT_METRICS.totalReports}
+                          {reportStatistics?.totalReports || 0}
                         </div>
                       </div>
                       <div className="text-2xl">📊</div>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {REPORT_METRICS.scheduledReports} scheduled
+                      {reportStatistics?.scheduledReports || 0} scheduled
                     </div>
                   </div>
                 </LiquidGlassCard>
@@ -181,15 +376,15 @@ export default function ReportingPage() {
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <div className="text-sm text-muted-foreground mb-1">Generated</div>
+                        <div className="text-sm text-muted-foreground mb-1">This Month</div>
                         <div className="text-3xl font-bold text-green-500">
-                          {REPORT_METRICS.reportsGenerated}
+                          {reportStatistics?.reportsThisMonth || 0}
                         </div>
                       </div>
                       <div className="text-2xl">✅</div>
                     </div>
                     <div className="text-xs text-green-500">
-                      Avg {REPORT_METRICS.averageGenerationTime}s generation time
+                      Generated this month
                     </div>
                   </div>
                 </LiquidGlassCard>
@@ -200,13 +395,13 @@ export default function ReportingPage() {
                       <div className="flex-1">
                         <div className="text-sm text-muted-foreground mb-1">Total Exports</div>
                         <div className="text-3xl font-bold text-purple-500">
-                          {REPORT_METRICS.totalExports}
+                          {reportStatistics?.totalExports || 0}
                         </div>
                       </div>
                       <div className="text-2xl">📥</div>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Most popular: PDF ({REPORT_METRICS.exportsByFormat.pdf})
+                      Total exports created
                     </div>
                   </div>
                 </LiquidGlassCard>
@@ -215,15 +410,15 @@ export default function ReportingPage() {
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <div className="text-sm text-muted-foreground mb-1">Popular Template</div>
+                        <div className="text-sm text-muted-foreground mb-1">By Type</div>
                         <div className="text-lg font-bold text-orange-500">
-                          {REPORT_METRICS.mostUsedTemplate}
+                          {Object.keys(reportStatistics?.reportsByType || {}).length} types
                         </div>
                       </div>
                       <div className="text-2xl">🔥</div>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Most used template
+                      Report categories
                     </div>
                   </div>
                 </LiquidGlassCard>
@@ -236,41 +431,52 @@ export default function ReportingPage() {
                 <div className="p-6">
                   <h3 className="text-lg font-semibold mb-6">Recent Reports</h3>
                   <div className="space-y-4">
-                    {MOCK_REPORTS.map((report) => (
-                      <div
-                        key={report.id}
-                        className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
-                        onClick={() => {
-                          setSelectedReport(report.id)
-                          setViewMode('my-reports')
-                        }}
-                      >
-                        <div className="flex items-center gap-4 flex-1">
-                          <div className="text-3xl">{report.template.icon}</div>
-                          <div className="flex-1">
-                            <div className="font-semibold">{report.name}</div>
-                            <div className="text-sm text-muted-foreground">{report.description}</div>
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {formatScheduleText(report.schedule)}
+                    {reports.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <div className="text-4xl mb-3">📊</div>
+                        <div className="font-medium">No reports yet</div>
+                        <div className="text-sm">Create your first report to get started</div>
+                      </div>
+                    ) : (
+                      reports.slice(0, 5).map((report) => {
+                        const template = REPORT_TEMPLATES.find(t => t.id === report.type) || REPORT_TEMPLATES[0]
+                        return (
+                          <div
+                            key={report.id}
+                            className="flex items-center justify-between p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
+                            onClick={() => {
+                              setSelectedReport(report.id)
+                              setViewMode('my-reports')
+                            }}
+                          >
+                            <div className="flex items-center gap-4 flex-1">
+                              <div className="text-3xl">{template.icon}</div>
+                              <div className="flex-1">
+                                <div className="font-semibold">{report.name}</div>
+                                <div className="text-sm text-muted-foreground">{report.description}</div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {report.frequency} • {report.metrics.length} metrics
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className={`text-xs px-3 py-1 rounded-full ${getStatusColor(report.status)}`}>
+                                {report.status}
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleExportReport(report.id, 'pdf')
+                                }}
+                                className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs font-medium transition-colors"
+                              >
+                                Export
+                              </button>
                             </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className={`text-xs px-3 py-1 rounded-full ${getStatusColor(report.status)}`}>
-                            {report.status}
-                          </span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              exportReport(report, 'pdf')
-                            }}
-                            className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs font-medium transition-colors"
-                          >
-                            Export
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                        )
+                      })
+                    )}
                   </div>
                 </div>
               </LiquidGlassCard>
@@ -352,46 +558,75 @@ export default function ReportingPage() {
                 </div>
 
                 <div className="space-y-3">
-                  {MOCK_REPORTS.map((report) => (
-                    <div
-                      key={report.id}
-                      className={`p-5 rounded-lg border-2 transition-all ${
-                        selectedReport === report.id
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30'
-                          : 'border-transparent bg-muted/30 hover:bg-muted/50'
-                      }`}
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-start gap-4 flex-1">
-                          <div className="text-4xl">{report.template.icon}</div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-bold text-lg">{report.name}</h4>
-                              <span className={`text-xs px-2 py-1 rounded ${getStatusColor(report.status)}`}>
-                                {report.status}
-                              </span>
+                  {reports.length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <div className="text-5xl mb-4">📊</div>
+                      <div className="font-medium text-lg mb-2">No reports yet</div>
+                      <div className="text-sm mb-4">Create your first report using templates or the builder</div>
+                      <button
+                        onClick={() => setViewMode('templates')}
+                        className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors"
+                      >
+                        Browse Templates
+                      </button>
+                    </div>
+                  ) : (
+                    reports.map((report) => {
+                      const template = REPORT_TEMPLATES.find(t => t.id === report.type) || REPORT_TEMPLATES[0]
+                      return (
+                        <div
+                          key={report.id}
+                          className={`p-5 rounded-lg border-2 transition-all ${
+                            selectedReport === report.id
+                              ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30'
+                              : 'border-transparent bg-muted/30 hover:bg-muted/50'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-start gap-4 flex-1">
+                              <div className="text-4xl">{template.icon}</div>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h4 className="font-bold text-lg">{report.name}</h4>
+                                  <span className={`text-xs px-2 py-1 rounded ${getStatusColor(report.status)}`}>
+                                    {report.status}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-muted-foreground mb-2">{report.description}</p>
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                  <span>📅 {report.frequency}</span>
+                                  <span>👥 {report.recipients.length} recipients</span>
+                                  {report.last_run_at && (
+                                    <span>🕒 Last: {new Date(report.last_run_at).toLocaleDateString()}</span>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                            <p className="text-sm text-muted-foreground mb-2">{report.description}</p>
-                            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                              <span>📅 {formatScheduleText(report.schedule)}</span>
-                              <span>👥 {report.recipients.length} recipients</span>
-                              {report.lastGenerated && (
-                                <span>🕒 Last: {report.lastGenerated.toLocaleDateString()}</span>
-                              )}
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleUpdateReport(report.id, { status: 'draft' })}
+                                className="px-3 py-1 bg-muted hover:bg-muted/80 rounded text-sm font-medium transition-colors"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleExportReport(report.id, 'pdf')}
+                                className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm font-medium transition-colors"
+                              >
+                                Generate
+                              </button>
+                              <button
+                                onClick={() => handleDeleteReport(report.id)}
+                                className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded text-sm font-medium transition-colors"
+                              >
+                                Delete
+                              </button>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <button className="px-3 py-1 bg-muted hover:bg-muted/80 rounded text-sm font-medium transition-colors">
-                            Edit
-                          </button>
-                          <button className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm font-medium transition-colors">
-                            Generate
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      )
+                    })
+                  )}
                 </div>
               </div>
             </LiquidGlassCard>
@@ -548,25 +783,37 @@ export default function ReportingPage() {
                 <div className="p-6">
                   <h3 className="text-lg font-semibold mb-6">Export Statistics</h3>
                   <div className="space-y-4">
-                    {Object.entries(REPORT_METRICS.exportsByFormat).map(([format, count]) => (
-                      <div key={format} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl">{getFormatIcon(format as ExportFormat)}</span>
-                          <span className="font-medium uppercase">{format}</span>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-2xl font-bold text-blue-500">{count}</span>
-                          <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${(count / REPORT_METRICS.totalExports) * 100}%` }}
-                              transition={{ duration: 0.5 }}
-                              className="h-full bg-gradient-to-r from-blue-500 to-indigo-500"
-                            />
-                          </div>
-                        </div>
+                    {reportExports.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <div className="text-4xl mb-3">📥</div>
+                        <div className="font-medium">No exports yet</div>
+                        <div className="text-sm">Export a report to see statistics</div>
                       </div>
-                    ))}
+                    ) : (
+                      exportFormats.map((format) => {
+                        const count = reportExports.filter(e => e.format === format).length
+                        const totalExports = reportExports.length
+                        return (
+                          <div key={format} className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{getFormatIcon(format)}</span>
+                              <span className="font-medium uppercase">{format}</span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <span className="text-2xl font-bold text-blue-500">{count}</span>
+                              <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: totalExports > 0 ? `${(count / totalExports) * 100}%` : '0%' }}
+                                  transition={{ duration: 0.5 }}
+                                  className="h-full bg-gradient-to-r from-blue-500 to-indigo-500"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })
+                    )}
                   </div>
                 </div>
               </LiquidGlassCard>
@@ -578,12 +825,16 @@ export default function ReportingPage() {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium mb-2">Select Report</label>
-                      <select className="w-full px-4 py-2 rounded-lg bg-muted text-sm">
-                        {MOCK_REPORTS.map((report) => (
-                          <option key={report.id} value={report.id}>
-                            {report.name}
-                          </option>
-                        ))}
+                      <select className="w-full px-4 py-2 rounded-lg bg-muted text-sm" disabled={reports.length === 0}>
+                        {reports.length === 0 ? (
+                          <option>No reports available</option>
+                        ) : (
+                          reports.map((report) => (
+                            <option key={report.id} value={report.id}>
+                              {report.name}
+                            </option>
+                          ))
+                        )}
                       </select>
                     </div>
 
