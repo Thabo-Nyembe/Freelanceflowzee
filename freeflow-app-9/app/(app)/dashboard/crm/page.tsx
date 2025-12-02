@@ -75,11 +75,17 @@ export default function CRMPage() {
   // A+++ LOAD CRM DATA
   useEffect(() => {
     const loadCRMData = async () => {
-      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
 
       try {
         setIsLoading(true)
         setError(null)
+
+        logger.info('Loading CRM data', { userId })
 
         // Dynamic import for code splitting
         const { getCRMContacts, getCRMDeals } = await import('@/lib/crm-queries')
@@ -112,7 +118,7 @@ export default function CRMPage() {
     }
 
     loadCRMData()
-  }, [announce])
+  }, [userId, announce])
 
   // ============================================================================
   // CRM HANDLERS
@@ -169,8 +175,13 @@ export default function CRMPage() {
   }
 
   const handleUpdateDealStage = async (deal: any, newStage: string) => {
+    if (!userId) {
+      toast.error('Please log in to update deals')
+      logger.warn('Deal update attempted without authentication')
+      return
+    }
+
     try {
-      const userId = 'demo-user-123'
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('crm')
       const toast = (await import('sonner')).toast

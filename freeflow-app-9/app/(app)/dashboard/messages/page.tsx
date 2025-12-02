@@ -665,7 +665,7 @@ export default function MessagesPage() {
           const transformedMessages: Message[] = messagesData.map((m) => ({
             id: m.id,
             text: m.text,
-            sender: m.sender_id === 'demo-user-123' ? 'You' : state.selectedChat!.name,
+            sender: m.sender_id === userId ? 'You' : state.selectedChat!.name,
             senderId: m.sender_id,
             timestamp: new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             type: m.type,
