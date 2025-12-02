@@ -7,9 +7,6 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import {
   WORKFLOW_TEMPLATES,
-  MOCK_WORKFLOWS,
-  MOCK_EXECUTIONS,
-  AUTOMATION_METRICS,
   getStatusColor,
   getTriggerIcon,
   getActionIcon,
@@ -768,8 +765,8 @@ export default function AutomationPage() {
               <div className="p-6">
                 <h3 className="text-lg font-semibold mb-6">Execution History</h3>
                 <div className="space-y-4">
-                  {MOCK_EXECUTIONS.map((execution) => {
-                    const workflow = MOCK_WORKFLOWS.find(w => w.id === execution.workflowId)
+                  {executions.map((execution) => {
+                    const workflow = workflows.find(w => w.id === execution.workflowId)
                     return (
                       <div
                         key={execution.id}
