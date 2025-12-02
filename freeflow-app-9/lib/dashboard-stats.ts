@@ -4,7 +4,7 @@
  * Real-time dashboard data fetching from Supabase
  */
 
-import { supabase } from './supabase'
+import { createClient } from './supabase/client'
 import { createFeatureLogger } from './logger'
 
 const logger = createFeatureLogger('DashboardStats')
@@ -47,15 +47,17 @@ export interface DashboardStats {
 export async function getDashboardStats(userId: string): Promise<DashboardStats> {
   logger.info('Fetching dashboard stats', { userId })
 
+  const supabase = createClient()
+
   try {
     // Fetch all stats in parallel
     const [projects, clients, invoices, tasks, files, team] = await Promise.all([
-      getProjectStats(userId),
-      getClientStats(userId),
-      getRevenueStats(userId),
-      getTaskStats(userId),
-      getFileStats(userId),
-      getTeamStats(userId),
+      getProjectStats(userId, supabase),
+      getClientStats(userId, supabase),
+      getRevenueStats(userId, supabase),
+      getTaskStats(userId, supabase),
+      getFileStats(userId, supabase),
+      getTeamStats(userId, supabase),
     ])
 
     const stats: DashboardStats = {
@@ -80,7 +82,7 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
   }
 }
 
-async function getProjectStats(userId: string) {
+async function getProjectStats(userId: string, supabase: ReturnType<typeof createClient>) {
   const { data, error } = await supabase
     .from('projects')
     .select('id, status')
@@ -96,7 +98,7 @@ async function getProjectStats(userId: string) {
   return { total, active, completed, onHold }
 }
 
-async function getClientStats(userId: string) {
+async function getClientStats(userId: string, supabase: ReturnType<typeof createClient>) {
   const { data, error } = await supabase
     .from('clients')
     .select('id, status, created_at')
@@ -115,7 +117,7 @@ async function getClientStats(userId: string) {
   return { total, active, new: newCount }
 }
 
-async function getRevenueStats(userId: string) {
+async function getRevenueStats(userId: string, supabase: ReturnType<typeof createClient>) {
   const { data, error } = await supabase
     .from('invoices')
     .select('total, status, created_at')
@@ -146,7 +148,7 @@ async function getRevenueStats(userId: string) {
   return { total, pending, thisMonth, lastMonth, growth }
 }
 
-async function getTaskStats(userId: string) {
+async function getTaskStats(userId: string, supabase: ReturnType<typeof createClient>) {
   const { data, error } = await supabase
     .from('tasks')
     .select('id, status, due_date')
@@ -167,7 +169,7 @@ async function getTaskStats(userId: string) {
   return { total, completed, inProgress, overdue }
 }
 
-async function getFileStats(userId: string) {
+async function getFileStats(userId: string, supabase: ReturnType<typeof createClient>) {
   const { data, error } = await supabase
     .from('files')
     .select('id, size')
@@ -181,7 +183,7 @@ async function getFileStats(userId: string) {
   return { total, size }
 }
 
-async function getTeamStats(userId: string) {
+async function getTeamStats(userId: string, supabase: ReturnType<typeof createClient>) {
   const { data, error } = await supabase
     .from('team_members')
     .select('id, status')
@@ -196,10 +198,87 @@ async function getTeamStats(userId: string) {
 }
 
 /**
+ * Get recent projects with full details for dashboard display
+ */
+export async function getRecentProjects(userId: string, limit: number = 3) {
+  logger.info('Fetching recent projects', { userId, limit })
+
+  const supabase = createClient()
+
+  try {
+    const { data, error } = await supabase
+      .from('projects')
+      .select(`
+        id,
+        name,
+        status,
+        budget,
+        deadline,
+        progress,
+        priority,
+        category,
+        client_id,
+        clients (
+          id,
+          name
+        )
+      `)
+      .eq('user_id', userId)
+      .order('updated_at', { ascending: false })
+      .limit(limit)
+
+    if (error) throw error
+
+    // Transform to match the expected format
+    const projects = (data || []).map((project: any) => ({
+      id: project.id,
+      name: project.name,
+      client: project.clients?.name || 'No Client',
+      progress: project.progress || 0,
+      status: project.status || 'active',
+      value: project.budget || 0,
+      priority: project.priority || 'medium',
+      deadline: project.deadline || new Date().toISOString(),
+      category: project.category || 'general',
+      aiAutomation: false, // TODO: Implement AI automation tracking
+      collaboration: 0, // TODO: Implement collaboration count
+      estimatedCompletion: calculateEstimatedCompletion(project.progress, project.deadline)
+    }))
+
+    logger.info('Recent projects fetched', { count: projects.length })
+    return projects
+  } catch (error) {
+    logger.error('Failed to fetch recent projects', { error, userId })
+    return []
+  }
+}
+
+/**
+ * Calculate estimated completion time based on progress and deadline
+ */
+function calculateEstimatedCompletion(progress: number, deadline: string): string {
+  if (progress >= 100) return 'Completed'
+  if (!deadline) return 'Unknown'
+
+  const now = new Date()
+  const deadlineDate = new Date(deadline)
+  const daysRemaining = Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+
+  if (daysRemaining < 0) return 'Overdue'
+  if (daysRemaining === 0) return 'Today'
+  if (daysRemaining === 1) return '1 day'
+  if (daysRemaining < 7) return `${daysRemaining} days`
+  if (daysRemaining < 30) return `${Math.ceil(daysRemaining / 7)} weeks`
+  return `${Math.ceil(daysRemaining / 30)} months`
+}
+
+/**
  * Get recent activity for dashboard feed
  */
 export async function getRecentActivity(userId: string, limit: number = 10) {
   logger.info('Fetching recent activity', { userId, limit })
+
+  const supabase = createClient()
 
   try {
     // Get recent projects, tasks, and files

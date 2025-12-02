@@ -187,9 +187,9 @@ export default function DashboardPage() {
   const [showAIPanel, setShowAIPanel] = useState(true)
 
   // Enhanced state management for full functionality
-  const [liveActivities, setLiveActivities] = useState(mockData.recentActivities)
-  const [projects, setProjects] = useState(mockData.projects)
-  const [insights, setInsights] = useState(mockData.insights)
+  const [liveActivities, setLiveActivities] = useState<any[]>([])
+  const [projects, setProjects] = useState<any[]>([])
+  const [insights, setInsights] = useState(mockData.insights) // Keep mock insights for now (AI feature)
   const [refreshing, setRefreshing] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [notificationCount, setNotificationCount] = useState(5)
@@ -197,13 +197,13 @@ export default function DashboardPage() {
   const [collaborationUsers, setCollaborationUsers] = useState(0)
   const [showCollaborationFeatures, setShowCollaborationFeatures] = useState(false)
 
-  // REAL DASHBOARD STATS from Supabase
+  // REAL DASHBOARD STATS from Supabase (initialized with zeros)
   const [dashboardStats, setDashboardStats] = useState({
-    earnings: mockData.earnings,
-    activeProjects: mockData.activeProjects,
-    completedProjects: mockData.completedProjects,
-    totalClients: mockData.totalClients,
-    hoursThisMonth: mockData.hoursThisMonth,
+    earnings: 0,
+    activeProjects: 0,
+    completedProjects: 0,
+    totalClients: 0,
+    hoursThisMonth: 0,
     revenue: { total: 0, growth: 0 },
     tasks: { total: 0, completed: 0 },
     files: { total: 0, size: 0 }
@@ -238,12 +238,13 @@ export default function DashboardPage() {
         setError(null)
 
         // Import dashboard stats utility
-        const { getDashboardStats, getRecentActivity } = await import('@/lib/dashboard-stats')
+        const { getDashboardStats, getRecentActivity, getRecentProjects } = await import('@/lib/dashboard-stats')
 
         // Fetch real dashboard data from Supabase
-        const [stats, activities] = await Promise.all([
+        const [stats, activities, recentProjects] = await Promise.all([
           getDashboardStats(userId),
-          getRecentActivity(userId, 10)
+          getRecentActivity(userId, 10),
+          getRecentProjects(userId, 3)
         ])
 
         // Update state with real data
@@ -255,6 +256,9 @@ export default function DashboardPage() {
           status: 'success',
           impact: 'medium'
         })))
+
+        // Update projects with real data
+        setProjects(recentProjects)
 
         // Update dashboard stats with real Supabase data
         setDashboardStats({
@@ -279,16 +283,22 @@ export default function DashboardPage() {
 
         logger.info('Dashboard data loaded from Supabase', {
           projects: stats.projects.total,
+          recentProjects: recentProjects.length,
           clients: stats.clients.total,
           revenue: stats.revenue.total,
           tasks: stats.tasks.total,
-          files: stats.files.total
+          files: stats.files.total,
+          activities: activities.length
         })
 
         announce(`Dashboard loaded: ${stats.projects.total} projects, ${stats.clients.total} clients`, 'polite')
-        toast.success('Dashboard updated', {
-          description: `${stats.projects.active} active projects • ${stats.tasks.inProgress} tasks in progress • $${stats.revenue.total.toLocaleString()} revenue`
-        })
+
+        // Only show success toast if we have data
+        if (stats.projects.total > 0 || stats.revenue.total > 0) {
+          toast.success('Dashboard updated', {
+            description: `${stats.projects.active} active projects • ${stats.tasks.inProgress} tasks in progress • $${stats.revenue.total.toLocaleString()} revenue`
+          })
+        }
 
         setIsLoading(false)
       } catch (err) {
