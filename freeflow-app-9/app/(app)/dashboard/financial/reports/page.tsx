@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   PieChart,
   TrendingUp,
@@ -22,7 +23,6 @@ import {
   BarChart3,
   Activity
 } from 'lucide-react'
-import { MOCK_FINANCIAL_OVERVIEW, MOCK_TRANSACTIONS, MOCK_INVOICES } from '@/lib/financial-hub-utils'
 
 const logger = createFeatureLogger('ReportsPage')
 
@@ -33,6 +33,47 @@ interface ReportTemplate {
   icon: React.ReactNode
   color: string
   type: 'profit_loss' | 'cash_flow' | 'tax_summary' | 'expense_report' | 'revenue_analysis' | 'client_report'
+}
+
+interface ReportData {
+  profit_loss?: {
+    revenue: number
+    expenses: number
+    netProfit: number
+    profitMargin: number
+    revenueGrowth?: number
+    expenseGrowth?: number
+  }
+  cash_flow?: {
+    inflows: number
+    outflows: number
+    netCashFlow: number
+    monthlyTrend?: Array<{ month: string; inflow: number; outflow: number }>
+  }
+  tax_summary?: {
+    totalIncome: number
+    totalDeductions: number
+    quarterlyEstimate: number
+    yearToDate: number
+    deductions: Array<{ category: string; amount: number }>
+  }
+  expense_report?: {
+    totalExpenses: number
+    categories: Array<{ category: string; amount: number; percentage: number; count: number }>
+    topExpenses: Array<{ description: string; amount: number; date: string; category: string }>
+  }
+  revenue_analysis?: {
+    totalRevenue: number
+    categories: Array<{ category: string; amount: number; percentage: number; count: number }>
+    topClients: Array<{ client: string; amount: number; transactions: number }>
+    growth: number
+  }
+  client_report?: {
+    totalClients: number
+    totalRevenue: number
+    averageRevenuePerClient: number
+    clients: Array<{ client: string; revenue: number; expenses: number; profit: number; transactions: number }>
+  }
 }
 
 const reportTemplates: ReportTemplate[] = [
@@ -87,16 +128,28 @@ const reportTemplates: ReportTemplate[] = [
 ]
 
 export default function ReportsPage() {
+  const { userId, loading: userLoading } = useCurrentUser()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [generatingReport, setGeneratingReport] = useState<string | null>(null)
+  const [reportData, setReportData] = useState<ReportData>({})
+  const [quickStats, setQuickStats] = useState({
+    revenue: 0,
+    expenses: 0,
+    netProfit: 0,
+    growth: 0
+  })
 
   useEffect(() => {
-    loadReportsData()
     initializeDates()
   }, [])
+
+  useEffect(() => {
+    if (!userId) return
+    loadReportsData()
+  }, [userId, startDate, endDate])
 
   const initializeDates = () => {
     const today = new Date()
@@ -107,14 +160,49 @@ export default function ReportsPage() {
   }
 
   const loadReportsData = async () => {
+    if (!userId) {
+      setIsLoading(false)
+      return
+    }
+
     try {
       setIsLoading(true)
       setError(null)
 
-      logger.info('Loading reports data')
+      logger.info('Loading reports data from Supabase', { userId, startDate, endDate })
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500))
+      // Dynamic import for code splitting
+      const { getFinancialOverview, getMonthlyTrend } = await import('@/lib/financial-queries')
+
+      // Load overview data for quick stats
+      const overviewResult = await getFinancialOverview(userId, startDate, endDate)
+
+      if (overviewResult.error) {
+        throw new Error('Failed to load financial overview')
+      }
+
+      if (overviewResult.data) {
+        setQuickStats({
+          revenue: overviewResult.data.total_revenue,
+          expenses: overviewResult.data.total_expenses,
+          netProfit: overviewResult.data.net_profit,
+          growth: 0 // We'll calculate this from trend data
+        })
+
+        logger.info('Quick stats loaded', { stats: overviewResult.data })
+      }
+
+      // Load trend data to calculate growth
+      const trendResult = await getMonthlyTrend(userId, 2)
+      if (!trendResult.error && trendResult.data && trendResult.data.length >= 2) {
+        const currentMonth = trendResult.data[0]
+        const previousMonth = trendResult.data[1]
+
+        if (previousMonth.revenue > 0) {
+          const growth = ((currentMonth.revenue - previousMonth.revenue) / previousMonth.revenue) * 100
+          setQuickStats(prev => ({ ...prev, growth }))
+        }
+      }
 
       setIsLoading(false)
       logger.info('Reports data loaded successfully')
@@ -123,10 +211,20 @@ export default function ReportsPage() {
       setError(errorMessage)
       setIsLoading(false)
       logger.error('Failed to load reports data', { error: err })
+      toast.error('Failed to load reports data', {
+        description: errorMessage
+      })
     }
   }
 
   const handleGenerateReport = async (template: ReportTemplate, format: 'pdf' | 'csv') => {
+    if (!userId) {
+      toast.error('Authentication required', {
+        description: 'Please log in to generate reports'
+      })
+      return
+    }
+
     logger.info('Generate report initiated', {
       reportType: template.type,
       format,
@@ -136,50 +234,26 @@ export default function ReportsPage() {
     setGeneratingReport(template.id)
 
     try {
-      const response = await fetch('/api/financial/reports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reportType: template.type,
-          format,
-          period: {
-            start: startDate,
-            end: endDate
-          },
-          options: {
-            includeCharts: format === 'pdf',
-            groupByCategory: true
-          }
-        })
-      })
+      // Generate report data from database
+      const data = await generateReportData(template.type)
 
-      if (!response.ok) throw new Error('Report generation failed')
-
-      // Handle different response types
-      if (format === 'csv') {
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `${template.type}-${Date.now()}.${format}`
-        document.body.appendChild(a)
-        a.click()
-        window.URL.revokeObjectURL(url)
-        document.body.removeChild(a)
-
-        toast.success('Report downloaded', {
-          description: `${template.name} exported as ${format.toUpperCase()}`
-        })
-      } else {
-        const result = await response.json()
-
-        if (result.success && result.downloadUrl) {
-          window.open(result.downloadUrl, '_blank')
-          toast.success('Report generated', {
-            description: `${template.name} is ready`
-          })
-        }
+      if (!data) {
+        throw new Error('Failed to generate report data')
       }
+
+      // Store the generated data
+      setReportData(prev => ({ ...prev, [template.type]: data }))
+
+      // Export based on format
+      if (format === 'csv') {
+        exportReportAsCSV(template, data)
+      } else {
+        exportReportAsPDF(template, data)
+      }
+
+      toast.success('Report generated', {
+        description: `${template.name} exported as ${format.toUpperCase()}`
+      })
 
       logger.info('Report generated successfully', {
         reportType: template.type,
@@ -199,28 +273,326 @@ export default function ReportsPage() {
     }
   }
 
+  const generateReportData = async (reportType: string) => {
+    if (!userId) return null
+
+    const {
+      getFinancialOverview,
+      getCategoryBreakdown,
+      getTransactions,
+      getMonthlyTrend
+    } = await import('@/lib/financial-queries')
+
+    switch (reportType) {
+      case 'profit_loss': {
+        const { data, error } = await getFinancialOverview(userId, startDate, endDate)
+        if (error || !data) throw new Error('Failed to load financial overview')
+
+        return {
+          revenue: data.total_revenue,
+          expenses: data.total_expenses,
+          netProfit: data.net_profit,
+          profitMargin: data.profit_margin
+        }
+      }
+
+      case 'cash_flow': {
+        const [overviewResult, trendResult] = await Promise.all([
+          getFinancialOverview(userId, startDate, endDate),
+          getMonthlyTrend(userId, 6)
+        ])
+
+        if (overviewResult.error || !overviewResult.data) {
+          throw new Error('Failed to load cash flow data')
+        }
+
+        return {
+          inflows: overviewResult.data.total_revenue,
+          outflows: overviewResult.data.total_expenses,
+          netCashFlow: overviewResult.data.net_profit,
+          monthlyTrend: trendResult.data?.map(t => ({
+            month: t.month,
+            inflow: t.revenue,
+            outflow: t.expenses
+          })) || []
+        }
+      }
+
+      case 'tax_summary': {
+        const [overviewResult, expenseBreakdownResult] = await Promise.all([
+          getFinancialOverview(userId, startDate, endDate),
+          getCategoryBreakdown(userId, 'expense', startDate, endDate)
+        ])
+
+        if (overviewResult.error || !overviewResult.data) {
+          throw new Error('Failed to load tax data')
+        }
+
+        const deductions = expenseBreakdownResult.data?.map(cat => ({
+          category: cat.category,
+          amount: cat.total_amount
+        })) || []
+
+        const totalDeductions = deductions.reduce((sum, d) => sum + d.amount, 0)
+
+        return {
+          totalIncome: overviewResult.data.total_revenue,
+          totalDeductions,
+          quarterlyEstimate: overviewResult.data.total_revenue * 0.25, // 25% estimate
+          yearToDate: overviewResult.data.total_revenue * 0.3, // 30% estimate
+          deductions
+        }
+      }
+
+      case 'expense_report': {
+        const [breakdownResult, transactionsResult] = await Promise.all([
+          getCategoryBreakdown(userId, 'expense', startDate, endDate),
+          getTransactions(userId, { type: 'expense', startDate, endDate })
+        ])
+
+        if (breakdownResult.error) {
+          throw new Error('Failed to load expense data')
+        }
+
+        const topExpenses = transactionsResult.data
+          ?.sort((a, b) => b.amount - a.amount)
+          .slice(0, 10)
+          .map(t => ({
+            description: t.description,
+            amount: t.amount,
+            date: t.transaction_date,
+            category: t.category
+          })) || []
+
+        const totalExpenses = breakdownResult.data?.reduce((sum, cat) => sum + cat.total_amount, 0) || 0
+
+        return {
+          totalExpenses,
+          categories: breakdownResult.data || [],
+          topExpenses
+        }
+      }
+
+      case 'revenue_analysis': {
+        const [breakdownResult, transactionsResult, overviewResult] = await Promise.all([
+          getCategoryBreakdown(userId, 'income', startDate, endDate),
+          getTransactions(userId, { type: 'income', startDate, endDate }),
+          getFinancialOverview(userId, startDate, endDate)
+        ])
+
+        if (breakdownResult.error || !overviewResult.data) {
+          throw new Error('Failed to load revenue data')
+        }
+
+        // Group by client
+        const clientMap = new Map<string, { amount: number; transactions: number }>()
+        transactionsResult.data?.forEach(t => {
+          const client = t.client_name || 'Unknown'
+          const existing = clientMap.get(client) || { amount: 0, transactions: 0 }
+          clientMap.set(client, {
+            amount: existing.amount + t.amount,
+            transactions: existing.transactions + 1
+          })
+        })
+
+        const topClients = Array.from(clientMap.entries())
+          .map(([client, data]) => ({ client, ...data }))
+          .sort((a, b) => b.amount - a.amount)
+          .slice(0, 10)
+
+        return {
+          totalRevenue: overviewResult.data.total_revenue,
+          categories: breakdownResult.data || [],
+          topClients,
+          growth: 0 // Would need historical data
+        }
+      }
+
+      case 'client_report': {
+        const transactionsResult = await getTransactions(userId, { startDate, endDate })
+
+        if (transactionsResult.error) {
+          throw new Error('Failed to load client data')
+        }
+
+        // Group transactions by client
+        const clientMap = new Map<string, {
+          revenue: number
+          expenses: number
+          transactions: number
+        }>()
+
+        transactionsResult.data?.forEach(t => {
+          const client = t.client_name || (t.type === 'income' ? 'Unknown Client' : null)
+          if (!client) return
+
+          const existing = clientMap.get(client) || { revenue: 0, expenses: 0, transactions: 0 }
+
+          if (t.type === 'income') {
+            existing.revenue += t.amount
+          } else if (t.type === 'expense' && t.client_name) {
+            existing.expenses += t.amount
+          }
+          existing.transactions += 1
+
+          clientMap.set(client, existing)
+        })
+
+        const clients = Array.from(clientMap.entries())
+          .map(([client, data]) => ({
+            client,
+            revenue: data.revenue,
+            expenses: data.expenses,
+            profit: data.revenue - data.expenses,
+            transactions: data.transactions
+          }))
+          .sort((a, b) => b.revenue - a.revenue)
+
+        const totalRevenue = clients.reduce((sum, c) => sum + c.revenue, 0)
+        const totalClients = clients.length
+
+        return {
+          totalClients,
+          totalRevenue,
+          averageRevenuePerClient: totalClients > 0 ? totalRevenue / totalClients : 0,
+          clients
+        }
+      }
+
+      default:
+        return null
+    }
+  }
+
+  const exportReportAsCSV = (template: ReportTemplate, data: any) => {
+    let csvContent = `${template.name}\nGenerated: ${new Date().toLocaleDateString()}\nPeriod: ${startDate} to ${endDate}\n\n`
+
+    // Convert data to CSV format based on report type
+    switch (template.type) {
+      case 'profit_loss':
+        csvContent += 'Metric,Amount\n'
+        csvContent += `Revenue,$${data.revenue.toLocaleString()}\n`
+        csvContent += `Expenses,$${data.expenses.toLocaleString()}\n`
+        csvContent += `Net Profit,$${data.netProfit.toLocaleString()}\n`
+        csvContent += `Profit Margin,${data.profitMargin.toFixed(1)}%\n`
+        break
+
+      case 'cash_flow':
+        csvContent += 'Metric,Amount\n'
+        csvContent += `Cash Inflows,$${data.inflows.toLocaleString()}\n`
+        csvContent += `Cash Outflows,$${data.outflows.toLocaleString()}\n`
+        csvContent += `Net Cash Flow,$${data.netCashFlow.toLocaleString()}\n`
+        if (data.monthlyTrend?.length > 0) {
+          csvContent += '\nMonthly Trend\n'
+          csvContent += 'Month,Inflow,Outflow\n'
+          data.monthlyTrend.forEach((m: any) => {
+            csvContent += `${m.month},$${m.inflow.toLocaleString()},$${m.outflow.toLocaleString()}\n`
+          })
+        }
+        break
+
+      case 'tax_summary':
+        csvContent += 'Metric,Amount\n'
+        csvContent += `Total Income,$${data.totalIncome.toLocaleString()}\n`
+        csvContent += `Total Deductions,$${data.totalDeductions.toLocaleString()}\n`
+        csvContent += `Quarterly Estimate,$${data.quarterlyEstimate.toLocaleString()}\n`
+        csvContent += `Year to Date,$${data.yearToDate.toLocaleString()}\n`
+        if (data.deductions?.length > 0) {
+          csvContent += '\nDeductions by Category\n'
+          csvContent += 'Category,Amount\n'
+          data.deductions.forEach((d: any) => {
+            csvContent += `${d.category},$${d.amount.toLocaleString()}\n`
+          })
+        }
+        break
+
+      case 'expense_report':
+        csvContent += `Total Expenses,$${data.totalExpenses.toLocaleString()}\n\n`
+        csvContent += 'Category Breakdown\n'
+        csvContent += 'Category,Amount,Percentage,Count\n'
+        data.categories.forEach((cat: any) => {
+          csvContent += `${cat.category},$${cat.total_amount.toLocaleString()},${cat.percentage.toFixed(1)}%,${cat.transaction_count}\n`
+        })
+        if (data.topExpenses?.length > 0) {
+          csvContent += '\nTop Expenses\n'
+          csvContent += 'Description,Amount,Date,Category\n'
+          data.topExpenses.forEach((exp: any) => {
+            csvContent += `${exp.description},$${exp.amount.toLocaleString()},${exp.date},${exp.category}\n`
+          })
+        }
+        break
+
+      case 'revenue_analysis':
+        csvContent += `Total Revenue,$${data.totalRevenue.toLocaleString()}\n\n`
+        csvContent += 'Category Breakdown\n'
+        csvContent += 'Category,Amount,Percentage,Count\n'
+        data.categories.forEach((cat: any) => {
+          csvContent += `${cat.category},$${cat.total_amount.toLocaleString()},${cat.percentage.toFixed(1)}%,${cat.transaction_count}\n`
+        })
+        if (data.topClients?.length > 0) {
+          csvContent += '\nTop Clients\n'
+          csvContent += 'Client,Revenue,Transactions\n'
+          data.topClients.forEach((client: any) => {
+            csvContent += `${client.client},$${client.amount.toLocaleString()},${client.transactions}\n`
+          })
+        }
+        break
+
+      case 'client_report':
+        csvContent += `Total Clients,${data.totalClients}\n`
+        csvContent += `Total Revenue,$${data.totalRevenue.toLocaleString()}\n`
+        csvContent += `Average Revenue per Client,$${data.averageRevenuePerClient.toLocaleString()}\n\n`
+        csvContent += 'Client Performance\n'
+        csvContent += 'Client,Revenue,Expenses,Profit,Transactions\n'
+        data.clients.forEach((client: any) => {
+          csvContent += `${client.client},$${client.revenue.toLocaleString()},$${client.expenses.toLocaleString()},$${client.profit.toLocaleString()},${client.transactions}\n`
+        })
+        break
+    }
+
+    // Download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${template.type}-${startDate}-to-${endDate}.csv`
+    document.body.appendChild(a)
+    a.click()
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(a)
+  }
+
+  const exportReportAsPDF = (template: ReportTemplate, data: any) => {
+    // For now, show a toast that PDF export would open in new window
+    toast.info('PDF Export', {
+      description: 'PDF export will be available in the next update. Use CSV export for now.'
+    })
+  }
+
   const handlePrintReport = async (template: ReportTemplate) => {
+    if (!userId) {
+      toast.error('Authentication required', {
+        description: 'Please log in to print reports'
+      })
+      return
+    }
+
     logger.info('Print report initiated', { reportType: template.type })
 
     try {
       // Generate report data
-      const response = await fetch('/api/financial/reports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reportType: template.type,
-          format: 'html',
-          period: { start: startDate, end: endDate }
-        })
-      })
+      const data = await generateReportData(template.type)
 
-      if (!response.ok) throw new Error('Failed to generate report')
+      if (!data) {
+        throw new Error('Failed to generate report data')
+      }
 
-      const result = await response.json()
+      // Store the generated data
+      setReportData(prev => ({ ...prev, [template.type]: data }))
 
       // In production, would open print-friendly view
       toast.success('Opening print preview', {
-        description: template.name
+        description: `${template.name} ready for printing`
       })
 
       logger.info('Print report prepared', { reportType: template.type })
@@ -231,60 +603,32 @@ export default function ReportsPage() {
   }
 
   const handleEmailReport = async (template: ReportTemplate) => {
+    if (!userId) {
+      toast.error('Authentication required', {
+        description: 'Please log in to email reports'
+      })
+      return
+    }
+
     logger.info('Email report initiated', { reportType: template.type })
 
     try {
-      const response = await fetch('/api/financial/reports/email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reportType: template.type,
-          period: { start: startDate, end: endDate },
-          recipient: 'user@example.com' // In production, would get from user settings
-        })
+      // Generate report data
+      const data = await generateReportData(template.type)
+
+      if (!data) {
+        throw new Error('Failed to generate report data')
+      }
+
+      // In production, would send email via API
+      toast.info('Email feature coming soon', {
+        description: 'Use CSV export to share reports for now'
       })
 
-      if (!response.ok) throw new Error('Failed to email report')
-
-      toast.success('Report emailed', {
-        description: `${template.name} sent to your email`
-      })
-
-      logger.info('Report emailed successfully', { reportType: template.type })
+      logger.info('Report email requested', { reportType: template.type })
     } catch (error: any) {
       logger.error('Email failed', { error, reportType: template.type })
       toast.error('Email failed', { description: error.message })
-    }
-  }
-
-  const handleQuickReport = async (reportType: string) => {
-    logger.info('Quick report generated', { reportType })
-
-    const reportData = {
-      profit_loss: {
-        revenue: MOCK_FINANCIAL_OVERVIEW.totalRevenue,
-        expenses: MOCK_FINANCIAL_OVERVIEW.totalExpenses,
-        netProfit: MOCK_FINANCIAL_OVERVIEW.netProfit,
-        profitMargin: MOCK_FINANCIAL_OVERVIEW.profitMargin
-      },
-      cash_flow: {
-        inflows: MOCK_FINANCIAL_OVERVIEW.totalRevenue,
-        outflows: MOCK_FINANCIAL_OVERVIEW.totalExpenses,
-        netCashFlow: MOCK_FINANCIAL_OVERVIEW.cashFlow
-      },
-      tax_summary: {
-        quarterlyEstimate: 18750,
-        yearToDate: 45600,
-        deductions: 11400
-      }
-    }
-
-    const data = reportData[reportType as keyof typeof reportData]
-
-    if (data) {
-      toast.success(`${reportType.replace('_', ' ')} Report Generated`, {
-        description: JSON.stringify(data, null, 2)
-      })
     }
   }
 
@@ -455,7 +799,7 @@ export default function ReportsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Quick Financial Stats</CardTitle>
-          <CardDescription>Current period summary</CardDescription>
+          <CardDescription>Current period summary ({startDate} to {endDate})</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -465,18 +809,13 @@ export default function ReportsPage() {
                 <div>
                   <p className="text-sm text-gray-500">Revenue</p>
                   <p className="text-2xl font-bold text-green-600">
-                    ${MOCK_FINANCIAL_OVERVIEW.totalRevenue.toLocaleString()}
+                    ${quickStats.revenue.toLocaleString()}
                   </p>
                 </div>
               </div>
-              <Button
-                variant="link"
-                size="sm"
-                className="p-0 h-auto"
-                onClick={() => handleQuickReport('profit_loss')}
-              >
-                View Details →
-              </Button>
+              <Badge variant="outline" className="text-xs">
+                Period Total
+              </Badge>
             </div>
 
             <div className="p-4 border rounded-lg">
@@ -485,18 +824,13 @@ export default function ReportsPage() {
                 <div>
                   <p className="text-sm text-gray-500">Expenses</p>
                   <p className="text-2xl font-bold text-red-600">
-                    ${MOCK_FINANCIAL_OVERVIEW.totalExpenses.toLocaleString()}
+                    ${quickStats.expenses.toLocaleString()}
                   </p>
                 </div>
               </div>
-              <Button
-                variant="link"
-                size="sm"
-                className="p-0 h-auto"
-                onClick={() => handleQuickReport('profit_loss')}
-              >
-                View Details →
-              </Button>
+              <Badge variant="outline" className="text-xs">
+                Period Total
+              </Badge>
             </div>
 
             <div className="p-4 border rounded-lg">
@@ -505,38 +839,28 @@ export default function ReportsPage() {
                 <div>
                   <p className="text-sm text-gray-500">Net Profit</p>
                   <p className="text-2xl font-bold text-blue-600">
-                    ${MOCK_FINANCIAL_OVERVIEW.netProfit.toLocaleString()}
+                    ${quickStats.netProfit.toLocaleString()}
                   </p>
                 </div>
               </div>
-              <Button
-                variant="link"
-                size="sm"
-                className="p-0 h-auto"
-                onClick={() => handleQuickReport('profit_loss')}
-              >
-                View Details →
-              </Button>
+              <Badge variant="outline" className="text-xs">
+                Period Total
+              </Badge>
             </div>
 
             <div className="p-4 border rounded-lg">
               <div className="flex items-center gap-3 mb-2">
-                <Activity className="h-8 w-8 text-purple-600" />
+                <Activity className={`h-8 w-8 ${quickStats.growth >= 0 ? 'text-purple-600' : 'text-red-600'}`} />
                 <div>
                   <p className="text-sm text-gray-500">Growth</p>
-                  <p className="text-2xl font-bold text-purple-600">
-                    +{MOCK_FINANCIAL_OVERVIEW.monthlyGrowth.toFixed(1)}%
+                  <p className={`text-2xl font-bold ${quickStats.growth >= 0 ? 'text-purple-600' : 'text-red-600'}`}>
+                    {quickStats.growth >= 0 ? '+' : ''}{quickStats.growth.toFixed(1)}%
                   </p>
                 </div>
               </div>
-              <Button
-                variant="link"
-                size="sm"
-                className="p-0 h-auto"
-                onClick={() => handleQuickReport('cash_flow')}
-              >
-                View Details →
-              </Button>
+              <Badge variant="outline" className="text-xs">
+                Month over Month
+              </Badge>
             </div>
           </div>
         </CardContent>
