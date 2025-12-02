@@ -9,6 +9,16 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 import {
   FolderOpen,
   Plus,
@@ -22,7 +32,8 @@ import {
   ArrowRight,
   TrendingUp,
   Briefcase,
-  Brain
+  Brain,
+  Trash2
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -56,15 +67,22 @@ import {
   formatDate
 } from '@/lib/projects-hub-utils'
 
+// Database operations
+import {
+  updateProject,
+  deleteProject
+} from '@/lib/projects-hub-queries'
+
 // Memoized ProjectCard component
 interface ProjectCardProps {
   project: Project
   onView: (project: Project) => void
   onEdit: (project: Project) => void
+  onDelete: (project: Project) => void
   onUpdateStatus: (id: string, status: string) => void
 }
 
-const ProjectCard = memo(({ project, onView, onEdit, onUpdateStatus }: ProjectCardProps) => {
+const ProjectCard = memo(({ project, onView, onEdit, onDelete, onUpdateStatus }: ProjectCardProps) => {
   return (
     <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
       <CardContent className="p-6">
@@ -138,6 +156,17 @@ const ProjectCard = memo(({ project, onView, onEdit, onUpdateStatus }: ProjectCa
                   Edit
                 </Button>
 
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  onClick={() => onDelete(project)}
+                  data-testid="delete-project-btn"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  Delete
+                </Button>
+
                 {project.status === 'active' && (
                   <Button
                     size="sm"
@@ -178,6 +207,21 @@ export default function ProjectsOverviewPage() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+
+  // NEW: CRUD Modal States
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    description: '',
+    client: '',
+    budget: 0,
+    deadline: '',
+    start_date: '',
+    priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent',
+    category: 'general',
+    status: 'Not Started' as 'Not Started' | 'In Progress' | 'On Hold' | 'Completed' | 'Cancelled'
+  })
   const [newProject, setNewProject] = useState({
     title: '',
     description: '',
@@ -236,10 +280,160 @@ export default function ProjectsOverviewPage() {
     setIsViewModalOpen(true)
   }
 
+  // NEW: Handle Edit Project with CRUD modal
   const handleEditProject = (project: Project) => {
     logger.info('Project edit opened', { projectId: project.id, title: project.title })
     setSelectedProject(project)
-    setIsEditModalOpen(true)
+
+    // Convert UI project to edit form data
+    setEditFormData({
+      name: project.title,
+      description: project.description || '',
+      client: project.client_name || '',
+      budget: project.budget || 0,
+      deadline: project.end_date || '',
+      start_date: project.start_date || '',
+      priority: project.priority || 'medium',
+      category: project.category || 'general',
+      status: project.status === 'active' ? 'In Progress' :
+              project.status === 'completed' ? 'Completed' :
+              project.status === 'paused' ? 'On Hold' :
+              project.status === 'cancelled' ? 'Cancelled' : 'Not Started'
+    })
+
+    setShowEditModal(true)
+  }
+
+  // NEW: Handle Update Project with Database
+  const handleUpdateProject = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!userId || !selectedProject) {
+      toast.error('Please log in to update projects')
+      logger.warn('Project update attempted without authentication')
+      return
+    }
+
+    if (!editFormData.name.trim()) {
+      toast.error('Project name is required')
+      return
+    }
+
+    try {
+      logger.info('Updating project', { projectId: selectedProject.id, userId })
+
+      const { data, error } = await updateProject(selectedProject.id, {
+        name: editFormData.name,
+        description: editFormData.description,
+        client: editFormData.client,
+        budget: editFormData.budget,
+        deadline: editFormData.deadline || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        start_date: editFormData.start_date || new Date().toISOString(),
+        priority: editFormData.priority,
+        category: editFormData.category,
+        status: editFormData.status,
+        updated_at: new Date().toISOString()
+      } as any)
+
+      if (error || !data) {
+        logger.error('Failed to update project', { error, projectId: selectedProject.id })
+        toast.error('Failed to update project', {
+          description: error?.message || 'Please try again'
+        })
+        return
+      }
+
+      // Transform updated data back to UI format
+      const updatedUIProject = {
+        ...selectedProject,
+        title: data.name,
+        description: data.description || '',
+        client_name: data.client,
+        budget: data.budget,
+        end_date: data.deadline,
+        start_date: data.start_date,
+        priority: data.priority,
+        category: data.category,
+        status: data.status === 'In Progress' ? 'active' as const :
+                data.status === 'Completed' ? 'completed' as const :
+                data.status === 'On Hold' ? 'paused' as const :
+                data.status === 'Cancelled' ? 'cancelled' as const : 'draft' as const
+      }
+
+      // Update local state
+      setProjects(projects.map(p =>
+        p.id === selectedProject.id ? updatedUIProject : p
+      ))
+
+      toast.success(`Project "${data.name}" updated!`, {
+        description: `Budget: $${data.budget.toLocaleString()} • Priority: ${data.priority}`
+      })
+
+      logger.info('Project updated successfully', {
+        projectId: data.id,
+        projectName: data.name
+      })
+
+      setShowEditModal(false)
+      setSelectedProject(null)
+
+      announce(`Project ${data.name} updated successfully`, 'polite')
+    } catch (err) {
+      logger.error('Unexpected error updating project', { error: err, projectId: selectedProject.id })
+      toast.error('Unexpected error occurred')
+      announce('Error updating project', 'assertive')
+    }
+  }
+
+  // NEW: Handle Delete Project
+  const handleDeleteProject = (project: Project) => {
+    logger.info('Project delete dialog opened', { projectId: project.id, title: project.title })
+    setSelectedProject(project)
+    setShowDeleteDialog(true)
+  }
+
+  // NEW: Handle Confirm Delete with Database
+  const handleConfirmDelete = async () => {
+    if (!userId || !selectedProject) {
+      toast.error('Please log in to delete projects')
+      logger.warn('Project deletion attempted without authentication')
+      return
+    }
+
+    try {
+      logger.info('Deleting project', { projectId: selectedProject.id, userId })
+
+      const { success, error } = await deleteProject(selectedProject.id)
+
+      if (error || !success) {
+        logger.error('Failed to delete project', { error, projectId: selectedProject.id })
+        toast.error('Failed to delete project', {
+          description: error?.message || 'Please try again'
+        })
+        return
+      }
+
+      // Remove from local state
+      setProjects(projects.filter(p => p.id !== selectedProject.id))
+
+      toast.success(`Project "${selectedProject.title}" deleted`, {
+        description: 'Project has been permanently removed'
+      })
+
+      logger.info('Project deleted successfully', {
+        projectId: selectedProject.id,
+        projectName: selectedProject.title
+      })
+
+      setShowDeleteDialog(false)
+      setSelectedProject(null)
+
+      announce(`Project ${selectedProject.title} deleted`, 'polite')
+    } catch (err) {
+      logger.error('Unexpected error deleting project', { error: err, projectId: selectedProject.id })
+      toast.error('Unexpected error occurred')
+      announce('Error deleting project', 'assertive')
+    }
   }
 
   const handleCreateProject = async () => {
@@ -688,6 +882,7 @@ export default function ProjectsOverviewPage() {
                 project={project}
                 onView={handleViewProject}
                 onEdit={handleEditProject}
+                onDelete={handleDeleteProject}
                 onUpdateStatus={handleUpdateProjectStatus}
               />
             ))}
@@ -718,6 +913,205 @@ export default function ProjectsOverviewPage() {
         wizardStep={wizardStep}
         setWizardStep={setWizardStep}
       />
+
+      {/* EDIT PROJECT MODAL */}
+      {showEditModal && (
+        <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Project</DialogTitle>
+              <DialogDescription>
+                Update project details and settings
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleUpdateProject}>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-name">Project Name *</Label>
+                  <Input
+                    id="edit-name"
+                    placeholder="Website Redesign"
+                    value={editFormData.name}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-description">Description</Label>
+                  <Textarea
+                    id="edit-description"
+                    placeholder="Project description and goals..."
+                    value={editFormData.description}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-client">Client Name</Label>
+                  <Input
+                    id="edit-client"
+                    placeholder="Client or company name"
+                    value={editFormData.client}
+                    onChange={(e) => setEditFormData(prev => ({ ...prev, client: e.target.value }))}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-budget">Budget ($)</Label>
+                    <Input
+                      id="edit-budget"
+                      type="number"
+                      min="0"
+                      step="100"
+                      value={editFormData.budget}
+                      onChange={(e) => setEditFormData(prev => ({ ...prev, budget: parseFloat(e.target.value) || 0 }))}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-status">Status</Label>
+                    <Select
+                      value={editFormData.status}
+                      onValueChange={(value: any) => setEditFormData(prev => ({ ...prev, status: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Not Started">Not Started</SelectItem>
+                        <SelectItem value="In Progress">In Progress</SelectItem>
+                        <SelectItem value="On Hold">On Hold</SelectItem>
+                        <SelectItem value="Completed">Completed</SelectItem>
+                        <SelectItem value="Cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-start-date">Start Date</Label>
+                    <Input
+                      id="edit-start-date"
+                      type="date"
+                      value={editFormData.start_date ? new Date(editFormData.start_date).toISOString().split('T')[0] : ''}
+                      onChange={(e) => setEditFormData(prev => ({ ...prev, start_date: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-deadline">Deadline</Label>
+                    <Input
+                      id="edit-deadline"
+                      type="date"
+                      value={editFormData.deadline ? new Date(editFormData.deadline).toISOString().split('T')[0] : ''}
+                      onChange={(e) => setEditFormData(prev => ({ ...prev, deadline: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-priority">Priority</Label>
+                    <Select
+                      value={editFormData.priority}
+                      onValueChange={(value: any) => setEditFormData(prev => ({ ...prev, priority: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="urgent">Urgent</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-category">Category</Label>
+                    <Select
+                      value={editFormData.category}
+                      onValueChange={(value) => setEditFormData(prev => ({ ...prev, category: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="design">Design</SelectItem>
+                        <SelectItem value="development">Development</SelectItem>
+                        <SelectItem value="marketing">Marketing</SelectItem>
+                        <SelectItem value="consulting">Consulting</SelectItem>
+                        <SelectItem value="web-development">Web Development</SelectItem>
+                        <SelectItem value="mobile-development">Mobile Development</SelectItem>
+                        <SelectItem value="general">General</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">Update Project</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* DELETE CONFIRMATION DIALOG */}
+      {showDeleteDialog && (
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Delete Project</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete &quot;{selectedProject?.title}&quot;? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-sm text-red-800">
+                  <strong>Warning:</strong> This will permanently delete:
+                </p>
+                <ul className="mt-2 text-sm text-red-700 list-disc list-inside space-y-1">
+                  <li>Project details and settings</li>
+                  <li>All associated tasks and milestones</li>
+                  <li>Project files and attachments</li>
+                  <li>Activity history and comments</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowDeleteDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={handleConfirmDelete}
+              >
+                Delete Project
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
