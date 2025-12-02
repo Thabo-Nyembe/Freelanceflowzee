@@ -57,35 +57,270 @@ export default function FinancialHubPage() {
   const [activeTab, setActiveTab] = useState<string>('overview')
   const [showAIWidget, setShowAIWidget] = useState(true)
 
-  // A+++ LOAD FINANCIAL HUB DATA
+  // REAL DATA STATE
+  const [financialData, setFinancialData] = useState({
+    overview: {
+      totalRevenue: 0,
+      totalExpenses: 0,
+      netProfit: 0,
+      monthlyGrowth: 0,
+      yearlyGrowth: 0,
+      profitMargin: 0
+    },
+    invoices: {
+      total: 0,
+      paid: 0,
+      pending: 0,
+      overdue: 0,
+      totalAmount: 0,
+      paidAmount: 0,
+      pendingAmount: 0,
+      overdueAmount: 0
+    },
+    expenses: {
+      total: 0,
+      categories: {} as Record<string, number>
+    },
+    clients: {
+      total: 0,
+      active: 0,
+      new: 0,
+      topClients: [] as Array<{ name: string; revenue: number; projects: number }>
+    },
+    goals: {
+      monthlyTarget: 50000,
+      yearlyTarget: 600000,
+      currentProgress: 0,
+      yearlyProgress: 0
+    }
+  })
+
+  const [recentTransactions, setRecentTransactions] = useState<Array<{
+    id: string | number
+    type: 'income' | 'expense'
+    description: string
+    amount: number
+    date: string
+    status: string
+  }>>([])
+
+  const [upcomingPayments] = useState([
+    { id: 1, client: 'Acme Corp', amount: 12500, dueDate: '2024-01-25', status: 'pending' },
+    { id: 2, client: 'Tech Startup', amount: 8000, dueDate: '2024-01-30', status: 'overdue' },
+    { id: 3, client: 'Local Business', amount: 5500, dueDate: '2024-02-05', status: 'scheduled' }
+  ])
+
+  // A+++ LOAD FINANCIAL HUB DATA FROM DATABASE
   useEffect(() => {
     const loadFinancialHubData = async () => {
+      if (!userId) {
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load financial hub'))
-            } else {
-              resolve(null)
+        logger.info('Loading financial hub data from database', { userId })
+
+        // Dynamic import for code splitting
+        const {
+          getFinancialOverview,
+          getTransactions,
+          getFinancialGoals,
+          getCategoryBreakdown,
+          getMonthlyTrend
+        } = await import('@/lib/financial-queries')
+
+        // Load data in parallel
+        const [overviewResult, transactionsResult, goalsResult, expenseBreakdownResult, trendResult] = await Promise.all([
+          getFinancialOverview(userId),
+          getTransactions(userId, { status: 'completed' }),
+          getFinancialGoals(userId, { status: 'active' }),
+          getCategoryBreakdown(userId, 'expense'),
+          getMonthlyTrend(userId, 2)
+        ])
+
+        // Process overview data
+        if (overviewResult.data) {
+          const overview = overviewResult.data
+
+          // Calculate growth from trend data
+          let monthlyGrowth = 0
+          let yearlyGrowth = 0
+
+          if (trendResult.data && trendResult.data.length >= 2) {
+            const currentMonth = trendResult.data[0]
+            const previousMonth = trendResult.data[1]
+
+            if (previousMonth.revenue > 0) {
+              monthlyGrowth = ((currentMonth.revenue - previousMonth.revenue) / previousMonth.revenue) * 100
             }
-          }, 1000)
-        })
+          }
+
+          setFinancialData(prev => ({
+            ...prev,
+            overview: {
+              totalRevenue: overview.total_revenue,
+              totalExpenses: overview.total_expenses,
+              netProfit: overview.net_profit,
+              monthlyGrowth: monthlyGrowth,
+              yearlyGrowth: yearlyGrowth,
+              profitMargin: overview.profit_margin
+            }
+          }))
+        }
+
+        // Process transactions
+        if (transactionsResult.data && transactionsResult.data.length > 0) {
+          const transformed = transactionsResult.data.slice(0, 5).map(t => ({
+            id: t.id,
+            type: t.type,
+            description: t.description,
+            amount: t.type === 'expense' ? -Math.abs(t.amount) : Math.abs(t.amount),
+            date: t.transaction_date,
+            status: t.status
+          }))
+          setRecentTransactions(transformed)
+
+          // Calculate invoice stats from transactions
+          const incomeTransactions = transactionsResult.data.filter(t => t.type === 'income')
+          const paidInvoices = incomeTransactions.filter(t => t.status === 'completed')
+          const pendingInvoices = incomeTransactions.filter(t => t.status === 'pending')
+
+          setFinancialData(prev => ({
+            ...prev,
+            invoices: {
+              total: incomeTransactions.length,
+              paid: paidInvoices.length,
+              pending: pendingInvoices.length,
+              overdue: 0, // Would need separate query for overdue
+              totalAmount: incomeTransactions.reduce((sum, t) => sum + t.amount, 0),
+              paidAmount: paidInvoices.reduce((sum, t) => sum + t.amount, 0),
+              pendingAmount: pendingInvoices.reduce((sum, t) => sum + t.amount, 0),
+              overdueAmount: 0
+            }
+          }))
+        }
+
+        // Process expense breakdown
+        if (expenseBreakdownResult.data && expenseBreakdownResult.data.length > 0) {
+          const categories: Record<string, number> = {}
+          let total = 0
+
+          expenseBreakdownResult.data.forEach(cat => {
+            categories[cat.category] = cat.total_amount
+            total += cat.total_amount
+          })
+
+          setFinancialData(prev => ({
+            ...prev,
+            expenses: {
+              total,
+              categories
+            }
+          }))
+        }
+
+        // Process goals
+        if (goalsResult.data && goalsResult.data.length > 0) {
+          const monthlyGoal = goalsResult.data.find(g => g.goal_type === 'monthly_revenue')
+          const yearlyGoal = goalsResult.data.find(g => g.goal_type === 'quarterly_growth') // Using as yearly proxy
+
+          setFinancialData(prev => ({
+            ...prev,
+            goals: {
+              monthlyTarget: monthlyGoal?.target_amount || 50000,
+              yearlyTarget: yearlyGoal?.target_amount || 600000,
+              currentProgress: monthlyGoal?.current_amount || prev.overview.totalRevenue,
+              yearlyProgress: prev.overview.totalRevenue
+            }
+          }))
+        }
 
         setIsLoading(false)
         announce('Financial hub loaded successfully', 'polite')
+
+        logger.info('Financial hub data loaded successfully', {
+          userId,
+          transactionCount: transactionsResult.data?.length || 0,
+          goalsCount: goalsResult.data?.length || 0
+        })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load financial hub')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load financial hub'
+        setError(errorMessage)
         setIsLoading(false)
         announce('Error loading financial hub', 'assertive')
+
+        logger.error('Failed to load financial hub data', { error: err, userId })
+
+        toast.error('Failed to load financial data', {
+          description: 'Using demo data. Please check your connection.'
+        })
+
+        // Fallback to mock data
+        setFinancialData({
+          overview: {
+            totalRevenue: 245231,
+            totalExpenses: 98500,
+            netProfit: 146731,
+            monthlyGrowth: 15.2,
+            yearlyGrowth: 28.4,
+            profitMargin: 59.8
+          },
+          invoices: {
+            total: 47,
+            paid: 35,
+            pending: 8,
+            overdue: 4,
+            totalAmount: 198500,
+            paidAmount: 145230,
+            pendingAmount: 42270,
+            overdueAmount: 11000
+          },
+          expenses: {
+            total: 98500,
+            categories: {
+              software: 25000,
+              marketing: 18500,
+              office: 15000,
+              travel: 12000,
+              utilities: 8000,
+              other: 20000
+            }
+          },
+          clients: {
+            total: 24,
+            active: 18,
+            new: 6,
+            topClients: [
+              { name: 'Acme Corp', revenue: 45000, projects: 8 },
+              { name: 'Tech Startup', revenue: 38000, projects: 5 },
+              { name: 'Design Agency', revenue: 32000, projects: 12 },
+              { name: 'Local Business', revenue: 25000, projects: 3 }
+            ]
+          },
+          goals: {
+            monthlyTarget: 50000,
+            yearlyTarget: 600000,
+            currentProgress: 42000,
+            yearlyProgress: 245231
+          }
+        })
+
+        setRecentTransactions([
+          { id: 1, type: 'income', description: 'Project Payment - Acme Corp', amount: 15000, date: '2024-01-15', status: 'completed' },
+          { id: 2, type: 'expense', description: 'Software Subscriptions', amount: -2999, date: '2024-01-14', status: 'completed' },
+          { id: 3, type: 'income', description: 'Design Package - Tech Startup', amount: 8500, date: '2024-01-12', status: 'completed' },
+          { id: 4, type: 'expense', description: 'Marketing Campaign', amount: -3500, date: '2024-01-10', status: 'completed' },
+          { id: 5, type: 'income', description: 'Consultation - Design Agency', amount: 2500, date: '2024-01-08', status: 'pending' }
+        ])
       }
     }
 
     loadFinancialHubData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handler functions with comprehensive logging
   const handleExportReport = () => {
@@ -440,72 +675,13 @@ Overdue: ${financialData.invoices.overdue}
     })
   }
 
-  // Mock comprehensive financial data
-  const financialData = {
-    overview: {
-      totalRevenue: 245231,
-      totalExpenses: 98500,
-      netProfit: 146731,
-      monthlyGrowth: 15.2,
-      yearlyGrowth: 28.4,
-      profitMargin: 59.8
-    },
-    invoices: {
-      total: 47,
-      paid: 35,
-      pending: 8,
-      overdue: 4,
-      totalAmount: 198500,
-      paidAmount: 145230,
-      pendingAmount: 42270,
-      overdueAmount: 11000
-    },
-    expenses: {
-      total: 98500,
-      categories: {
-        software: 25000,
-        marketing: 18500,
-        office: 15000,
-        travel: 12000,
-        utilities: 8000,
-        other: 20000
-      }
-    },
-    clients: {
-      total: 24,
-      active: 18,
-      new: 6,
-      topClients: [
-        { name: 'Acme Corp', revenue: 45000, projects: 8 },
-        { name: 'Tech Startup', revenue: 38000, projects: 5 },
-        { name: 'Design Agency', revenue: 32000, projects: 12 },
-        { name: 'Local Business', revenue: 25000, projects: 3 }
-      ]
-    },
-    goals: {
-      monthlyTarget: 50000,
-      yearlyTarget: 600000,
-      currentProgress: 42000,
-      yearlyProgress: 245231
-    }
-  }
-
-  const recentTransactions = [
-    { id: 1, type: 'income', description: 'Project Payment - Acme Corp', amount: 15000, date: '2024-01-15', status: 'completed' },
-    { id: 2, type: 'expense', description: 'Software Subscriptions', amount: -2999, date: '2024-01-14', status: 'completed' },
-    { id: 3, type: 'income', description: 'Design Package - Tech Startup', amount: 8500, date: '2024-01-12', status: 'completed' },
-    { id: 4, type: 'expense', description: 'Marketing Campaign', amount: -3500, date: '2024-01-10', status: 'completed' },
-    { id: 5, type: 'income', description: 'Consultation - Design Agency', amount: 2500, date: '2024-01-08', status: 'pending' }
-  ]
-
-  const upcomingPayments = [
-    { id: 1, client: 'Acme Corp', amount: 12500, dueDate: '2024-01-25', status: 'pending' },
-    { id: 2, client: 'Tech Startup', amount: 8000, dueDate: '2024-01-30', status: 'overdue' },
-    { id: 3, client: 'Local Business', amount: 5500, dueDate: '2024-02-05', status: 'scheduled' }
-  ]
-
-  const monthlyTargetProgress = (financialData.goals.currentProgress / financialData.goals.monthlyTarget) * 100
-  const yearlyTargetProgress = (financialData.goals.yearlyProgress / financialData.goals.yearlyTarget) * 100
+  // Calculate progress percentages for goals
+  const monthlyTargetProgress = financialData.goals.monthlyTarget > 0
+    ? (financialData.goals.currentProgress / financialData.goals.monthlyTarget) * 100
+    : 0
+  const yearlyTargetProgress = financialData.goals.yearlyTarget > 0
+    ? (financialData.goals.yearlyProgress / financialData.goals.yearlyTarget) * 100
+    : 0
 
   // A+++ LOADING STATE
   if (isLoading) {

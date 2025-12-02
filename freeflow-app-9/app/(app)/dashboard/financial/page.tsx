@@ -11,6 +11,7 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   Brain,
   Target,
@@ -38,6 +39,7 @@ import {
 const logger = createFeatureLogger('FinancialOverview')
 
 export default function FinancialOverviewPage() {
+  const { userId, loading: userLoading } = useCurrentUser()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -46,11 +48,15 @@ export default function FinancialOverviewPage() {
   const [overview, setOverview] = useState(MOCK_FINANCIAL_OVERVIEW)
 
   useEffect(() => {
+    if (!userId) return
     loadFinancialOverview()
-  }, [])
+  }, [userId])
 
   const loadFinancialOverview = async () => {
-    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+    if (!userId) {
+      toast.error('Please log in to view financial data')
+      return
+    }
 
     try {
       setIsLoading(true)
