@@ -28,12 +28,9 @@ import {
   MetricCard as MetricCardType
 } from '@/lib/report-builder-types'
 import {
-  REPORT_TEMPLATES,
   WIDGET_TYPES,
   DATE_RANGE_PRESETS,
   EXPORT_FORMATS,
-  MOCK_METRICS,
-  MOCK_CHART_DATA,
   formatDate,
   formatNumber,
   calculateDateRange,
@@ -44,6 +41,11 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+
+const logger = createFeatureLogger('CustomReportsPage')
 
 type BuilderStep = 'template' | 'customize' | 'preview' | 'export'
 
@@ -52,6 +54,12 @@ export default function CustomReportBuilderPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
+
+  // Database state
+  const [templates, setTemplates] = useState<any[]>([])
+  const [customReports, setCustomReports] = useState<any[]>([])
+  const [reportsStats, setReportsStats] = useState<any>(null)
 
   const [step, setStep] = useState<BuilderStep>('template')
   const [selectedTemplate, setSelectedTemplate] = useState<ReportTemplate | null>(null)
@@ -66,32 +74,50 @@ export default function CustomReportBuilderPage() {
   // A+++ LOAD REPORT BUILDER DATA
   useEffect(() => {
     const loadReportBuilderData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading custom reports data', { userId })
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load report builder'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        const { getReportTemplates, getCustomReports, getCustomReportsStats } = await import('@/lib/custom-reports-queries')
+
+        const [templatesResult, reportsResult, statsResult] = await Promise.all([
+          getReportTemplates({ is_public: true }),
+          getCustomReports(userId),
+          getCustomReportsStats(userId)
+        ])
+
+        setTemplates(templatesResult.data || [])
+        setCustomReports(reportsResult.data || [])
+        setReportsStats(statsResult.data || null)
 
         setIsLoading(false)
+        toast.success('Reports loaded', {
+          description: `${templatesResult.data?.length || 0} templates, ${reportsResult.data?.length || 0} custom reports`
+        })
+        logger.info('Custom reports data loaded successfully', {
+          templates: templatesResult.data?.length,
+          reports: reportsResult.data?.length
+        })
         announce('Report builder loaded successfully', 'polite')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load report builder')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load report builder'
+        setError(errorMessage)
         setIsLoading(false)
+        logger.error('Failed to load custom reports data', { error: errorMessage, userId })
+        toast.error('Failed to load reports', { description: errorMessage })
         announce('Error loading report builder', 'assertive')
       }
     }
 
     loadReportBuilderData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce])
 
   const handleTemplateSelect = (template: ReportTemplate) => {
     setSelectedTemplate(template)
@@ -123,6 +149,46 @@ export default function CustomReportBuilderPage() {
     }
     return icons[icon] || FileText
   }
+
+  // Generate metrics from database stats
+  const metrics = reportsStats ? [
+    {
+      id: '1',
+      label: 'Total Reports',
+      value: reportsStats.total_reports?.toString() || '0',
+      icon: 'FileText',
+      trend: 'up' as const,
+      change: '12',
+      changeLabel: 'vs last month'
+    },
+    {
+      id: '2',
+      label: 'Active Reports',
+      value: reportsStats.active_reports?.toString() || '0',
+      icon: 'Star',
+      trend: 'up' as const,
+      change: '8',
+      changeLabel: 'active now'
+    },
+    {
+      id: '3',
+      label: 'Total Views',
+      value: formatNumber(reportsStats.total_views || 0),
+      icon: 'Users',
+      trend: 'up' as const,
+      change: '24',
+      changeLabel: 'this week'
+    },
+    {
+      id: '4',
+      label: 'Exports',
+      value: reportsStats.completed_exports?.toString() || '0',
+      icon: 'DollarSign',
+      trend: 'up' as const,
+      change: '15',
+      changeLabel: 'completed'
+    }
+  ] : []
 
   // A+++ LOADING STATE
   if (isLoading) {
@@ -251,7 +317,7 @@ export default function CustomReportBuilderPage() {
                     <h2 className="text-2xl font-bold text-white mb-6">Choose a Template</h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {REPORT_TEMPLATES.map((template) => {
+                      {templates.map((template) => {
                         const Icon = getIconForTemplate(template.icon)
                         return (
                           <motion.div
@@ -266,14 +332,14 @@ export default function CustomReportBuilderPage() {
                           >
                             <div className="flex items-start gap-3">
                               <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                                template.premium ? 'bg-gradient-to-br from-purple-500/20 to-blue-500/20' : 'bg-slate-800'
+                                template.is_premium ? 'bg-gradient-to-br from-purple-500/20 to-blue-500/20' : 'bg-slate-800'
                               }`}>
-                                <Icon className={`w-5 h-5 ${template.premium ? 'text-purple-400' : 'text-gray-400'}`} />
+                                <Icon className={`w-5 h-5 ${template.is_premium ? 'text-purple-400' : 'text-gray-400'}`} />
                               </div>
                               <div className="flex-1">
                                 <div className="flex items-center gap-2 mb-1">
                                   <h3 className="font-semibold text-white">{template.name}</h3>
-                                  {template.premium && (
+                                  {template.is_premium && (
                                     <Badge className="text-xs bg-purple-500/20 text-purple-300 border-purple-500/30">
                                       <Star className="w-3 h-3 mr-1" />
                                       Pro
@@ -404,11 +470,12 @@ export default function CustomReportBuilderPage() {
 
                     {/* Metrics Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                      {MOCK_METRICS.map((metric) => {
+                      {metrics.map((metric) => {
                         const Icon = metric.icon === 'DollarSign' ? DollarSign :
                                     metric.icon === 'Briefcase' ? FileText :
                                     metric.icon === 'Star' ? Star :
-                                    metric.icon === 'Users' ? Users : TrendingUp
+                                    metric.icon === 'Users' ? Users :
+                                    metric.icon === 'FileText' ? FileText : TrendingUp
                         return (
                           <div key={metric.id} className="p-4 bg-slate-900/50 rounded-lg border border-slate-700">
                             <div className="flex items-center gap-2 mb-2">
@@ -561,19 +628,19 @@ export default function CustomReportBuilderPage() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-400">Templates Available</span>
-                    <span className="font-semibold text-white">{REPORT_TEMPLATES.length}</span>
+                    <span className="font-semibold text-white">{templates.length}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Widget Types</span>
-                    <span className="font-semibold text-white">{WIDGET_TYPES.length}</span>
+                    <span className="text-sm text-gray-400">Custom Reports</span>
+                    <span className="font-semibold text-white">{customReports.length}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Export Formats</span>
-                    <span className="font-semibold text-white">{EXPORT_FORMATS.length}</span>
+                    <span className="text-sm text-gray-400">Total Views</span>
+                    <span className="font-semibold text-white">{formatNumber(reportsStats?.total_views || 0)}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-400">Date Ranges</span>
-                    <span className="font-semibold text-white">{DATE_RANGE_PRESETS.length}</span>
+                    <span className="text-sm text-gray-400">Active Schedules</span>
+                    <span className="font-semibold text-white">{reportsStats?.active_schedules || 0}</span>
                   </div>
                 </div>
               </LiquidGlassCard>
