@@ -14,6 +14,12 @@ import { motion } from 'framer-motion'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+
+const logger = createFeatureLogger('AudioStudio')
+
 import {
   Music, Mic, Headphones, Radio, Activity, Volume2, VolumeX,
   Play, Pause, SkipBack, SkipForward, Square, Circle,
@@ -45,10 +51,6 @@ import {
   QUALITY_PRESETS,
   AUDIO_EFFECT_PRESETS,
   AUDIO_TEMPLATES,
-  MOCK_AUDIO_PROJECTS,
-  MOCK_AUDIO_FILES,
-  MOCK_AUDIO_LIBRARIES,
-  MOCK_AUDIO_STATS,
   formatDuration,
   formatFileSize,
   formatBitRate,
@@ -66,8 +68,15 @@ export default function AudioStudioPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
-  // Regular state
+  // DATABASE STATE
+  const [audioProjects, setAudioProjects] = useState<AudioProject[]>([])
+  const [audioFiles, setAudioFiles] = useState<AudioFile[]>([])
+  const [audioLibraries, setAudioLibraries] = useState<any[]>([])
+  const [audioStats, setAudioStats] = useState<AudioStats | null>(null)
+
+  // UI STATE
   const [viewMode, setViewMode] = useState<ViewMode>('projects')
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
@@ -81,34 +90,68 @@ export default function AudioStudioPage() {
   // ============================================================================
   useEffect(() => {
     const loadAudioStudioData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading audio studio data', { userId })
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        // Dynamic import for code splitting
+        const { getAudioProjects, getAudioFiles, getAudioLibraries, getAudioStats } = await import('@/lib/audio-studio-queries')
+
+        // Load all audio studio data in parallel
+        const [projectsResult, filesResult, librariesResult, statsResult] = await Promise.all([
+          getAudioProjects(userId),
+          getAudioFiles(userId),
+          getAudioLibraries(userId),
+          getAudioStats(userId)
+        ])
+
+        if (projectsResult.error || filesResult.error) {
+          throw new Error(projectsResult.error?.message || filesResult.error?.message || 'Failed to load audio studio data')
+        }
+
+        // Update state with database results
+        setAudioProjects(projectsResult.data || [])
+        setAudioFiles(filesResult.data || [])
+        setAudioLibraries(librariesResult.data || [])
+        setAudioStats(statsResult.data || null)
 
         setIsLoading(false)
-
-        // A+++ Accessibility announcement
         announce('Audio studio loaded successfully', 'polite')
+        logger.info('Audio studio data loaded successfully', {
+          projectCount: projectsResult.data?.length || 0,
+          fileCount: filesResult.data?.length || 0,
+          hasStats: !!statsResult.data,
+          userId
+        })
+
+        toast.success('Audio studio loaded', {
+          description: `${projectsResult.data?.length || 0} projects, ${filesResult.data?.length || 0} files`
+        })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load audio studio')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load audio studio'
+        logger.error('Failed to load audio studio data', { error: errorMessage, userId })
+        setError(errorMessage)
+        toast.error('Failed to load audio studio', {
+          description: errorMessage
+        })
         setIsLoading(false)
         announce('Error loading audio studio', 'assertive')
       }
     }
 
     loadAudioStudioData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce])
 
   const storagePercentage = calculateStoragePercentage(
-    MOCK_AUDIO_STATS.storageUsed,
-    MOCK_AUDIO_STATS.storageLimit
+    audioStats?.storageUsed || 0,
+    audioStats?.storageLimit || 1
   )
 
   const handleStartRecording = () => {
@@ -174,7 +217,7 @@ export default function AudioStudioPage() {
   // ============================================================================
   // A+++ EMPTY STATE (when no audio projects exist)
   // ============================================================================
-  if (MOCK_AUDIO_PROJECTS.length === 0 && viewMode === 'projects' && !isLoading) {
+  if (audioProjects.length === 0 && viewMode === 'projects' && !isLoading) {
     return (
       <div className="min-h-screen relative overflow-hidden">
         <div className="fixed inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
@@ -240,10 +283,10 @@ export default function AudioStudioPage() {
           <ScrollReveal variant="scale" duration={0.6} delay={0.1}>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {[
-                { label: 'Projects', value: MOCK_AUDIO_STATS.totalProjects, icon: FolderOpen, color: 'orange' },
-                { label: 'Recordings', value: MOCK_AUDIO_STATS.totalRecordings, icon: Mic, color: 'red' },
-                { label: 'Total Time', value: formatDuration(MOCK_AUDIO_STATS.totalDuration), icon: Clock, color: 'purple' },
-                { label: 'Exports', value: MOCK_AUDIO_STATS.exportCount, icon: Download, color: 'green' }
+                { label: 'Projects', value: audioStats?.totalProjects || 0, icon: FolderOpen, color: 'orange' },
+                { label: 'Recordings', value: audioStats?.totalRecordings || 0, icon: Mic, color: 'red' },
+                { label: 'Total Time', value: formatDuration(audioStats?.totalDuration || 0), icon: Clock, color: 'purple' },
+                { label: 'Exports', value: audioStats?.exportCount || 0, icon: Download, color: 'green' }
               ].map((stat, index) => (
                 <LiquidGlassCard key={index} className="p-4">
                   <div className="flex items-center gap-3">
@@ -269,7 +312,7 @@ export default function AudioStudioPage() {
                   <span className="text-sm font-medium text-white">Storage Usage</span>
                 </div>
                 <span className="text-sm text-gray-400">
-                  {formatFileSize(MOCK_AUDIO_STATS.storageUsed)} / {formatFileSize(MOCK_AUDIO_STATS.storageLimit)}
+                  {formatFileSize(audioStats?.storageUsed || 0)} / {formatFileSize(audioStats?.storageLimit || 0)}
                 </span>
               </div>
               <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden">
@@ -327,7 +370,7 @@ export default function AudioStudioPage() {
 
               {/* Projects List */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {MOCK_AUDIO_PROJECTS.map((project) => (
+                {audioProjects.map((project) => (
                   <motion.div key={project.id} whileHover={{ scale: 1.02 }}>
                     <LiquidGlassCard className="p-6">
                       <div className="space-y-4">
@@ -515,12 +558,12 @@ export default function AudioStudioPage() {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold text-white">Recent Recordings</h3>
                   <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/30">
-                    {MOCK_AUDIO_FILES.length}
+                    {audioFiles.length}
                   </Badge>
                 </div>
 
                 <div className="space-y-3">
-                  {MOCK_AUDIO_FILES.map((file) => (
+                  {audioFiles.map((file) => (
                     <div key={file.id} className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg border border-gray-700">
                       <div className="flex items-center gap-3 flex-1">
                         <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center">
@@ -573,7 +616,7 @@ export default function AudioStudioPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {MOCK_AUDIO_LIBRARIES.map((library) => (
+                {audioLibraries.map((library) => (
                   <LiquidGlassCard key={library.id} className="p-6">
                     <div className="space-y-4">
                       <div className="flex items-center gap-3">
