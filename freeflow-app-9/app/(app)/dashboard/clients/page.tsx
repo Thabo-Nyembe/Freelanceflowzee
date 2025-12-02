@@ -921,32 +921,44 @@ export default function ClientsPage() {
       return
     }
 
+    if (!userId) {
+      toast.error('Please log in to delete clients')
+      return
+    }
+
     logger.info('Bulk delete clients requested', { count: state.selectedClients.length })
 
     if (confirm(`⚠️ Delete ${state.selectedClients.length} clients? This action cannot be undone.`)) {
       logger.info('Bulk delete confirmed', { count: state.selectedClients.length })
 
       try {
-        const response = await fetch('/api/clients', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'bulk-delete',
-            clientIds: state.selectedClients
-          })
-        })
+        const { deleteClient } = await import('@/lib/clients-queries')
 
-        const result = await response.json()
+        let deletedCount = 0
+        const failedDeletes: string[] = []
 
-        if (result.success) {
-          state.selectedClients.forEach(id => {
-            dispatch({ type: 'DELETE_CLIENT', clientId: id })
-          })
-          dispatch({ type: 'CLEAR_SELECTED_CLIENTS' })
-          logger.info('Bulk delete completed', { deletedCount: result.deletedCount })
-          toast.success(`🗑️ ${result.deletedCount} clients deleted`)
-        } else {
-          throw new Error(result.error || 'Failed to delete clients')
+        for (const clientId of state.selectedClients) {
+          const { success, error } = await deleteClient(userId, clientId)
+
+          if (success) {
+            dispatch({ type: 'DELETE_CLIENT', clientId })
+            deletedCount++
+          } else {
+            failedDeletes.push(clientId)
+            logger.warn('Failed to delete client in bulk operation', { clientId, error })
+          }
+        }
+
+        dispatch({ type: 'CLEAR_SELECTED_CLIENTS' })
+
+        logger.info('Bulk delete completed', { deletedCount, failedCount: failedDeletes.length })
+
+        if (deletedCount > 0) {
+          toast.success(`🗑️ ${deletedCount} client${deletedCount > 1 ? 's' : ''} deleted`)
+        }
+
+        if (failedDeletes.length > 0) {
+          toast.error(`Failed to delete ${failedDeletes.length} client${failedDeletes.length > 1 ? 's' : ''}`)
         }
       } catch (error: any) {
         logger.error('Failed to bulk delete clients', {
@@ -966,22 +978,19 @@ export default function ClientsPage() {
     const client = state.clients.find(c => c.id === clientId)
     if (!client) return
 
+    if (!userId) {
+      toast.error('Please log in to update status')
+      return
+    }
+
     logger.info('Status change initiated', { clientId, oldStatus: client.status, newStatus })
 
     try {
-      const response = await fetch('/api/clients', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update-status',
-          clientId,
-          data: { status: newStatus }
-        })
-      })
+      const { updateClientStatus } = await import('@/lib/clients-queries')
 
-      const result = await response.json()
+      const { data, error } = await updateClientStatus(userId, clientId, newStatus)
 
-      if (result.success) {
+      if (!error && data) {
         const updatedClient = {
           ...client,
           status: newStatus,
@@ -999,7 +1008,7 @@ export default function ClientsPage() {
           description: `${client.name} is now ${newStatus}`
         })
       } else {
-        throw new Error(result.error || 'Failed to update status')
+        throw new Error(error || 'Failed to update status')
       }
     } catch (error: any) {
       logger.error('Failed to update status', { error, clientId, newStatus })
