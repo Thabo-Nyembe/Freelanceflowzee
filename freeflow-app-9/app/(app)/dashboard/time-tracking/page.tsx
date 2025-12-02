@@ -9,7 +9,7 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Play, Pause, Clock, BarChart3, Calendar, FileText, Edit, Trash2, Plus, Copy, Download, Filter, RotateCcw } from 'lucide-react'
+import { Play, Pause, Clock, BarChart3, Calendar, FileText, Edit, Trash2, Plus, Copy, Download, Filter, RotateCcw, Square } from 'lucide-react'
 import { toast } from 'sonner'
 import { BorderTrail } from '@/components/ui/border-trail'
 import { GlowEffect } from '@/components/ui/glow-effect'
@@ -32,6 +32,7 @@ interface TimeEntry {
   endTime?: Date
   duration: number
   isRunning: boolean
+  isPaused?: boolean
 }
 
 interface Project {
@@ -59,6 +60,7 @@ export default function TimeTrackingPage() {
   const [selectedTask, setSelectedTask] = useState<string>('')
   const [description, setDescription] = useState<any>('')
   const [elapsedTime, setElapsedTime] = useState<any>(0)
+  const [timerDisplay, setTimerDisplay] = useState('00:00:00')
 
   // Mock data - replace with real data from your API
   const projects: Project[] = [
@@ -97,28 +99,46 @@ export default function TimeTrackingPage() {
         // Dynamic import for code splitting
         const {
           getTimeEntries,
-          getRunningTimeEntry,
           getTimeTrackingSummary
         } = await import('@/lib/time-tracking-queries')
 
-        // Load current running timer and recent entries in parallel
-        const [runningResult, entriesResult, summaryResult] = await Promise.all([
-          getRunningTimeEntry(userId),
+        // Load running/paused timer and recent entries in parallel
+        // We need to check both running and paused status
+        const [entriesResult, summaryResult, activeTimerResult] = await Promise.all([
           getTimeEntries(userId, {
             startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] // Last 7 days
           }),
-          getTimeTrackingSummary(userId)
+          getTimeTrackingSummary(userId),
+          // Get any running or paused timer
+          getTimeEntries(userId, {}).then(res => {
+            if (res.error) return { data: null, error: res.error }
+            // Find the most recent running or paused timer
+            const activeTimer = res.data.find(entry => entry.status === 'running' || entry.status === 'paused')
+            return { data: activeTimer || null, error: null }
+          })
         ])
+
+        const runningResult = activeTimerResult
 
         if (runningResult.error || entriesResult.error || summaryResult.error) {
           throw new Error('Failed to load time tracking data')
         }
 
-        // Set running timer if exists
+        // Set running or paused timer if exists
         if (runningResult.data) {
           const runningEntry = runningResult.data
           const startTime = new Date(runningEntry.start_time)
-          const elapsed = Math.floor((Date.now() - startTime.getTime()) / 1000) + runningEntry.duration
+          const isPaused = runningEntry.status === 'paused'
+
+          // Calculate elapsed time
+          let elapsed: number
+          if (isPaused) {
+            // If paused, use the stored duration
+            elapsed = runningEntry.duration
+          } else {
+            // If running, calculate elapsed since start
+            elapsed = Math.floor((Date.now() - startTime.getTime()) / 1000)
+          }
 
           setActiveTimer({
             id: runningEntry.id,
@@ -127,13 +147,15 @@ export default function TimeTrackingPage() {
             description: runningEntry.description,
             startTime: startTime,
             duration: runningEntry.duration,
-            isRunning: true
+            isRunning: !isPaused,
+            isPaused: isPaused
           })
           setElapsedTime(elapsed)
 
-          logger.info('Running timer restored', {
+          logger.info('Timer restored', {
             entryId: runningEntry.id,
-            elapsed: elapsed
+            elapsed: elapsed,
+            status: isPaused ? 'paused' : 'running'
           })
         }
 
@@ -173,13 +195,33 @@ export default function TimeTrackingPage() {
 
   useEffect(() => {
     let interval: NodeJS.Timeout
-    if (activeTimer) {
+    if (activeTimer && !activeTimer.isPaused) {
       interval = setInterval(() => {
-        setElapsedTime((prev) => prev + 1)
+        setElapsedTime((prev: number) => {
+          const newElapsed = prev + 1
+          // Update display
+          const hours = Math.floor(newElapsed / 3600)
+          const minutes = Math.floor((newElapsed % 3600) / 60)
+          const seconds = newElapsed % 60
+          setTimerDisplay(
+            `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+          )
+          return newElapsed
+        })
       }, 1000)
+    } else if (activeTimer && activeTimer.isPaused) {
+      // Update display for paused timer
+      const hours = Math.floor(elapsedTime / 3600)
+      const minutes = Math.floor((elapsedTime % 3600) / 60)
+      const seconds = elapsedTime % 60
+      setTimerDisplay(
+        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+      )
+    } else if (!activeTimer) {
+      setTimerDisplay('00:00:00')
     }
     return () => clearInterval(interval)
-  }, [activeTimer])
+  }, [activeTimer, elapsedTime])
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
@@ -197,6 +239,11 @@ export default function TimeTrackingPage() {
       toast.error('Please log in to start timer')
       logger.warn('Start timer attempted without authentication')
       return
+    }
+
+    // Stop any existing timer first
+    if (activeTimer) {
+      await stopTimer()
     }
 
     const projectObj = projects.find(p => p.id === selectedProject)
@@ -235,6 +282,7 @@ export default function TimeTrackingPage() {
         startTime: new Date(data.start_time),
         duration: 0,
         isRunning: true,
+        isPaused: false
       }
 
       setActiveTimer(newEntry)
@@ -245,11 +293,13 @@ export default function TimeTrackingPage() {
       toast.success('Timer Started', {
         description: `Tracking time for ${projectObj?.name} - ${taskObj?.name}`
       })
+      announce(`Timer started for ${projectObj?.name} - ${taskObj?.name}`, 'polite')
     } catch (error) {
       logger.error('Failed to start timer', { error })
       toast.error('Failed to Start Timer', {
         description: error instanceof Error ? error.message : 'Please try again'
       })
+      announce('Failed to start timer', 'assertive')
     }
   }
 
@@ -279,6 +329,7 @@ export default function TimeTrackingPage() {
         endTime: new Date(data.end_time!),
         duration: data.duration,
         isRunning: false,
+        isPaused: false
       }
 
       setTimeEntries((prev) =>
@@ -288,22 +339,118 @@ export default function TimeTrackingPage() {
       )
       setActiveTimer(null)
       setElapsedTime(0)
+      setTimerDisplay('00:00:00')
 
-      const hours = (data.duration / 3600).toFixed(2)
+      const hours = Math.floor(data.duration / 3600)
+      const minutes = Math.floor((data.duration % 3600) / 60)
+      const durationText = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+
       logger.info('Timer stopped successfully', {
         entryId: data.id,
         duration: data.duration,
-        hours
+        durationText
       })
 
       toast.success('Timer Stopped', {
-        description: `Tracked ${hours} hours${data.is_billable ? ` • $${data.total_amount.toFixed(2)}` : ''}`
+        description: `Duration: ${durationText}${data.is_billable ? ` • $${data.total_amount.toFixed(2)}` : ''}`
       })
+      announce(`Timer stopped. Duration: ${durationText}`, 'polite')
     } catch (error) {
       logger.error('Failed to stop timer', { error })
       toast.error('Failed to Stop Timer', {
         description: error instanceof Error ? error.message : 'Please try again'
       })
+      announce('Failed to stop timer', 'assertive')
+    }
+  }
+
+  const pauseTimer = async () => {
+    if (!activeTimer || !userId) {
+      toast.error('No active timer')
+      logger.warn('Pause timer attempted without active timer')
+      return
+    }
+
+    if (activeTimer.isPaused) {
+      toast.info('Timer is already paused')
+      return
+    }
+
+    try {
+      logger.info('Pausing timer', { timerId: activeTimer.id, elapsed: elapsedTime })
+
+      // Dynamic import for code splitting
+      const { pauseTimeEntry } = await import('@/lib/time-tracking-queries')
+
+      const { data, error } = await pauseTimeEntry(activeTimer.id, userId)
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to pause timer')
+      }
+
+      setActiveTimer(prev => prev ? { ...prev, isPaused: true, isRunning: false, duration: data.duration } : null)
+      setElapsedTime(data.duration)
+
+      toast.info('Timer Paused', {
+        description: `Elapsed: ${timerDisplay}`
+      })
+      announce('Timer paused', 'polite')
+
+      logger.info('Timer paused successfully', { timerId: activeTimer.id, elapsed: data.duration })
+
+    } catch (err) {
+      logger.error('Unexpected error pausing timer', { error: err })
+      toast.error('Failed to Pause Timer', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+      announce('Error pausing timer', 'assertive')
+    }
+  }
+
+  const resumeTimer = async () => {
+    if (!activeTimer || !userId) {
+      toast.error('No timer to resume')
+      logger.warn('Resume timer attempted without paused timer')
+      return
+    }
+
+    if (!activeTimer.isPaused) {
+      toast.info('Timer is already running')
+      return
+    }
+
+    try {
+      logger.info('Resuming timer', { timerId: activeTimer.id })
+
+      // Dynamic import for code splitting
+      const { resumeTimeEntry } = await import('@/lib/time-tracking-queries')
+
+      const { data, error } = await resumeTimeEntry(activeTimer.id, userId)
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to resume timer')
+      }
+
+      setActiveTimer(prev => prev ? {
+        ...prev,
+        isPaused: false,
+        isRunning: true,
+        startTime: new Date(data.start_time) // Use the new start time from database
+      } : null)
+
+      toast.info('Timer Resumed', {
+        description: 'Continue tracking time'
+      })
+      announce('Timer resumed', 'polite')
+
+      logger.info('Timer resumed successfully', { timerId: activeTimer.id })
+
+    } catch (err) {
+      logger.error('Unexpected error resuming timer', { error: err })
+      toast.error('Failed to Resume Timer', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+      announce('Error resuming timer', 'assertive')
     }
   }
 
@@ -874,8 +1021,15 @@ export default function TimeTrackingPage() {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <div className="text-3xl font-mono">
-                      {formatTime(elapsedTime)}
+                    <div className="flex flex-col">
+                      <div className="text-4xl font-mono font-bold tabular-nums">
+                        {timerDisplay}
+                      </div>
+                      {activeTimer && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {activeTimer.isPaused ? 'Paused' : 'Running'}
+                        </p>
+                      )}
                     </div>
                     <div className="flex gap-2">
                       {!activeTimer ? (
@@ -883,6 +1037,7 @@ export default function TimeTrackingPage() {
                           <Button
                             onClick={startTimer}
                             disabled={!selectedProject || !selectedTask}
+                            size="lg"
                           >
                             <Play className="h-4 w-4 mr-2" />
                             Start Timer
@@ -891,16 +1046,30 @@ export default function TimeTrackingPage() {
                             variant="outline"
                             onClick={handleAddManualEntry}
                             disabled={!selectedProject || !selectedTask}
+                            size="lg"
                           >
                             <Plus className="h-4 w-4 mr-2" />
                             Manual Entry
                           </Button>
                         </>
                       ) : (
-                        <Button onClick={stopTimer} variant="destructive">
-                          <Pause className="h-4 w-4 mr-2" />
-                          Stop Timer
-                        </Button>
+                        <>
+                          {activeTimer.isPaused ? (
+                            <Button onClick={resumeTimer} size="lg">
+                              <Play className="h-4 w-4 mr-2" />
+                              Resume
+                            </Button>
+                          ) : (
+                            <Button onClick={pauseTimer} variant="outline" size="lg">
+                              <Pause className="h-4 w-4 mr-2" />
+                              Pause
+                            </Button>
+                          )}
+                          <Button onClick={stopTimer} variant="destructive" size="lg">
+                            <Square className="h-4 w-4 mr-2" />
+                            Stop
+                          </Button>
+                        </>
                       )}
                     </div>
                   </div>
