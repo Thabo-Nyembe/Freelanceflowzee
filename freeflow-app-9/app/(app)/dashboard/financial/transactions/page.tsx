@@ -10,6 +10,16 @@ import { Input } from '@/components/ui/input'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
 import {
   Plus,
   Edit,
@@ -20,20 +30,68 @@ import {
   TrendingUp,
   TrendingDown,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Loader2
 } from 'lucide-react'
 import {
-  MOCK_TRANSACTIONS,
   formatCurrency,
   formatDate,
   getPaymentMethodLabel,
   getTransactionCategories,
   type Transaction
 } from '@/lib/financial-hub-utils'
+import type {
+  FinancialTransaction,
+  TransactionType,
+  TransactionCategory,
+  TransactionStatus,
+  PaymentMethodType
+} from '@/lib/financial-queries'
 
 const logger = createFeatureLogger('TransactionsPage')
 
+// Map database transaction to UI transaction type
+function mapDbTransactionToUi(dbTxn: FinancialTransaction): Transaction {
+  return {
+    id: dbTxn.id,
+    type: dbTxn.type,
+    category: dbTxn.category,
+    description: dbTxn.description,
+    amount: dbTxn.amount,
+    date: dbTxn.transaction_date,
+    client: dbTxn.client_name,
+    project: dbTxn.project_name,
+    vendor: dbTxn.vendor_name,
+    status: dbTxn.status as 'completed' | 'pending' | 'failed',
+    paymentMethod: dbTxn.payment_method as 'bank_transfer' | 'credit_card' | 'paypal' | 'platform' | 'cash',
+    invoice: dbTxn.invoice_number,
+    recurring: dbTxn.is_recurring,
+    nextDue: dbTxn.next_due_date,
+    tags: dbTxn.tags || [],
+    notes: dbTxn.notes,
+    createdAt: dbTxn.created_at,
+    updatedAt: dbTxn.updated_at
+  }
+}
+
+interface TransactionFormData {
+  type: TransactionType
+  category: TransactionCategory
+  description: string
+  amount: number
+  transaction_date: string
+  client_name?: string
+  vendor_name?: string
+  status: TransactionStatus
+  payment_method: PaymentMethodType
+  notes?: string
+}
+
 export default function TransactionsPage() {
+  // Authentication
+  const { userId, loading: userLoading } = useCurrentUser()
+
+  // State
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -43,31 +101,73 @@ export default function TransactionsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
+  // Dialog state
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  const [formData, setFormData] = useState<TransactionFormData>({
+    type: 'income',
+    category: 'project_payment',
+    description: '',
+    amount: 0,
+    transaction_date: new Date().toISOString().split('T')[0],
+    status: 'completed',
+    payment_method: 'bank_transfer',
+  })
+
   useEffect(() => {
-    loadTransactions()
-  }, [])
+    if (userId) {
+      loadTransactions()
+    }
+  }, [userId])
 
   const loadTransactions = async () => {
+    if (!userId) return
+
     try {
       setIsLoading(true)
       setError(null)
 
-      logger.info('Loading transactions')
+      logger.info('Loading transactions from database', { userId })
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 600))
+      // Import and call real database query
+      const { getTransactions } = await import('@/lib/financial-queries')
 
-      setTransactions(MOCK_TRANSACTIONS)
+      // Build filters based on current UI state
+      const filters: any = {}
+      if (filterType !== 'all') {
+        filters.type = filterType
+      }
+      if (filterCategory !== 'all') {
+        filters.category = filterCategory
+      }
+      if (searchTerm) {
+        filters.search = searchTerm
+      }
+
+      const { data, error: dbError } = await getTransactions(userId, filters)
+
+      if (dbError) {
+        throw new Error(dbError.message || 'Failed to load transactions')
+      }
+
+      // Map database transactions to UI format
+      const mappedTransactions = (data || []).map(mapDbTransactionToUi)
+      setTransactions(mappedTransactions)
       setIsLoading(false)
 
       logger.info('Transactions loaded successfully', {
-        count: MOCK_TRANSACTIONS.length
+        count: mappedTransactions.length,
+        userId
       })
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load transactions'
       setError(errorMessage)
       setIsLoading(false)
-      logger.error('Failed to load transactions', { error: err })
+      logger.error('Failed to load transactions', { error: err, userId })
+      toast.error('Failed to load transactions', {
+        description: errorMessage
+      })
     }
   }
 
@@ -92,107 +192,144 @@ export default function TransactionsPage() {
 
   const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage)
 
-  const handleAddTransaction = async (type: 'income' | 'expense') => {
-    logger.info('Add transaction initiated', { type })
-
-    try {
-      const response = await fetch('/api/financial/transactions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'create',
-          data: {
-            type,
-            category: 'uncategorized',
-            description: `New ${type}`,
-            amount: 0,
-            date: new Date().toISOString().split('T')[0],
-            status: 'pending',
-            paymentMethod: 'bank_transfer',
-            tags: []
-          }
-        })
-      })
-
-      if (!response.ok) throw new Error('Failed to create transaction')
-
-      const result = await response.json()
-
-      toast.success(`${type === 'income' ? 'Income' : 'Expense'} added`, {
-        description: 'Transaction created successfully'
-      })
-
-      logger.info('Transaction created', {
-        type,
-        transactionId: result.transactionId
-      })
-
-      // Reload transactions
-      await loadTransactions()
-    } catch (error: any) {
-      logger.error('Failed to create transaction', { error, type })
-      toast.error('Failed to create transaction', {
-        description: error.message
-      })
-    }
+  const openAddDialog = (type: 'income' | 'expense') => {
+    setEditingTransaction(null)
+    setFormData({
+      type,
+      category: type === 'income' ? 'project_payment' : 'software',
+      description: '',
+      amount: 0,
+      transaction_date: new Date().toISOString().split('T')[0],
+      status: 'completed',
+      payment_method: 'bank_transfer',
+    })
+    setIsDialogOpen(true)
+    logger.info('Add transaction dialog opened', { type })
   }
 
-  const handleEditTransaction = async (transactionId: string) => {
-    logger.info('Edit transaction initiated', { transactionId })
+  const openEditDialog = (transaction: Transaction) => {
+    setEditingTransaction(transaction)
+    setFormData({
+      type: transaction.type,
+      category: transaction.category as TransactionCategory,
+      description: transaction.description,
+      amount: transaction.amount,
+      transaction_date: transaction.date,
+      client_name: transaction.client,
+      vendor_name: transaction.vendor,
+      status: transaction.status as TransactionStatus,
+      payment_method: transaction.paymentMethod as PaymentMethodType,
+      notes: transaction.notes,
+    })
+    setIsDialogOpen(true)
+    logger.info('Edit transaction dialog opened', { transactionId: transaction.id })
+  }
+
+  const handleSubmitTransaction = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!userId) return
 
     try {
-      const response = await fetch('/api/financial/transactions', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update',
-          transactionId,
-          data: {
-            // In production, would open a modal with form
-            description: 'Updated transaction'
+      setIsSubmitting(true)
+
+      if (editingTransaction) {
+        // Update existing transaction
+        logger.info('Updating transaction', { transactionId: editingTransaction.id })
+
+        const { updateTransaction } = await import('@/lib/financial-queries')
+        const { data, error } = await updateTransaction(
+          editingTransaction.id,
+          userId,
+          {
+            type: formData.type,
+            category: formData.category,
+            description: formData.description,
+            amount: formData.amount,
+            transaction_date: formData.transaction_date,
+            client_name: formData.client_name,
+            vendor_name: formData.vendor_name,
+            status: formData.status,
+            payment_method: formData.payment_method,
+            notes: formData.notes,
           }
+        )
+
+        if (error) throw new Error(error.message)
+
+        // Optimistically update UI
+        setTransactions(prev =>
+          prev.map(t => (t.id === editingTransaction.id ? mapDbTransactionToUi(data!) : t))
+        )
+
+        toast.success('Transaction updated', {
+          description: 'Changes saved successfully'
         })
-      })
 
-      if (!response.ok) throw new Error('Failed to update transaction')
+        logger.info('Transaction updated successfully', { transactionId: editingTransaction.id })
+      } else {
+        // Create new transaction
+        logger.info('Creating new transaction', { type: formData.type })
 
-      toast.success('Transaction updated', {
-        description: 'Changes saved successfully'
-      })
+        const { createTransaction } = await import('@/lib/financial-queries')
+        const { data, error } = await createTransaction(userId, {
+          type: formData.type,
+          category: formData.category,
+          description: formData.description,
+          amount: formData.amount,
+          transaction_date: formData.transaction_date,
+          client_name: formData.client_name,
+          vendor_name: formData.vendor_name,
+          status: formData.status,
+          payment_method: formData.payment_method,
+          notes: formData.notes,
+        })
 
-      logger.info('Transaction updated', { transactionId })
+        if (error) throw new Error(error.message)
 
-      await loadTransactions()
+        // Optimistically add to UI
+        setTransactions(prev => [mapDbTransactionToUi(data!), ...prev])
+
+        toast.success(`${formData.type === 'income' ? 'Income' : 'Expense'} added`, {
+          description: 'Transaction created successfully'
+        })
+
+        logger.info('Transaction created successfully', { transactionId: data!.id })
+      }
+
+      setIsDialogOpen(false)
+      setIsSubmitting(false)
     } catch (error: any) {
-      logger.error('Failed to update transaction', { error, transactionId })
-      toast.error('Update failed', { description: error.message })
+      logger.error('Failed to save transaction', { error })
+      toast.error('Failed to save transaction', {
+        description: error.message
+      })
+      setIsSubmitting(false)
     }
   }
 
   const handleDeleteTransaction = async (transactionId: string, description: string) => {
+    if (!userId) return
+
     logger.info('Delete transaction initiated', { transactionId })
 
     if (!confirm(`Delete transaction: ${description}?`)) return
 
     try {
-      const response = await fetch('/api/financial/transactions', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'delete',
-          transactionId
-        })
-      })
+      const { deleteTransaction } = await import('@/lib/financial-queries')
+      const { success, error } = await deleteTransaction(transactionId, userId)
 
-      if (!response.ok) throw new Error('Failed to delete transaction')
+      if (error || !success) {
+        throw new Error(error?.message || 'Failed to delete transaction')
+      }
+
+      // Optimistically remove from UI
+      setTransactions(prev => prev.filter(t => t.id !== transactionId))
 
       toast.success('Transaction deleted', {
         description: description
       })
 
-      logger.info('Transaction deleted', { transactionId })
-
-      await loadTransactions()
+      logger.info('Transaction deleted successfully', { transactionId })
     } catch (error: any) {
       logger.error('Failed to delete transaction', { error, transactionId })
       toast.error('Delete failed', { description: error.message })
@@ -238,12 +375,26 @@ export default function TransactionsPage() {
     }
   }
 
-  if (isLoading) {
+  // Show loading state while authenticating or loading data
+  if (userLoading || isLoading) {
     return (
       <div className="space-y-6">
         <CardSkeleton />
         <ListSkeleton items={8} />
       </div>
+    )
+  }
+
+  // Show authentication required state
+  if (!userId) {
+    return (
+      <ErrorEmptyState
+        error="Authentication required"
+        action={{
+          label: 'Sign In',
+          onClick: () => window.location.href = '/login'
+        }}
+      />
     )
   }
 
@@ -266,7 +417,7 @@ export default function TransactionsPage() {
         description="Start tracking your finances by adding your first transaction"
         action={{
           label: 'Add Transaction',
-          onClick: () => handleAddTransaction('income')
+          onClick: () => openAddDialog('income')
         }}
       />
     )
@@ -374,11 +525,11 @@ export default function TransactionsPage() {
                 <Download className="h-4 w-4 mr-2" />
                 Export CSV
               </Button>
-              <Button size="sm" onClick={() => handleAddTransaction('income')}>
+              <Button size="sm" onClick={() => openAddDialog('income')}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Income
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleAddTransaction('expense')}>
+              <Button variant="outline" size="sm" onClick={() => openAddDialog('expense')}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Expense
               </Button>
@@ -446,7 +597,7 @@ export default function TransactionsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleEditTransaction(transaction.id)}
+                        onClick={() => openEditDialog(transaction)}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -492,6 +643,220 @@ export default function TransactionsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Transaction Form Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <form onSubmit={handleSubmitTransaction}>
+            <DialogHeader>
+              <DialogTitle>
+                {editingTransaction ? 'Edit Transaction' : `Add ${formData.type === 'income' ? 'Income' : 'Expense'}`}
+              </DialogTitle>
+              <DialogDescription>
+                {editingTransaction
+                  ? 'Update transaction details below'
+                  : `Create a new ${formData.type} transaction`
+                }
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              {/* Type */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="type" className="text-right">
+                  Type
+                </Label>
+                <select
+                  id="type"
+                  value={formData.type}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    type: e.target.value as TransactionType,
+                    category: e.target.value === 'income' ? 'project_payment' : 'software'
+                  }))}
+                  className="col-span-3 px-3 py-2 border border-gray-300 rounded-md"
+                  disabled={editingTransaction !== null}
+                >
+                  <option value="income">Income</option>
+                  <option value="expense">Expense</option>
+                </select>
+              </div>
+
+              {/* Category */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="category" className="text-right">
+                  Category
+                </Label>
+                <select
+                  id="category"
+                  value={formData.category}
+                  onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as TransactionCategory }))}
+                  className="col-span-3 px-3 py-2 border border-gray-300 rounded-md"
+                  required
+                >
+                  {formData.type === 'income' ? (
+                    <>
+                      <option value="project_payment">Project Payment</option>
+                      <option value="consulting">Consulting</option>
+                      <option value="subscription">Subscription</option>
+                      <option value="other">Other</option>
+                    </>
+                  ) : (
+                    <>
+                      <option value="software">Software</option>
+                      <option value="hardware">Hardware</option>
+                      <option value="marketing">Marketing</option>
+                      <option value="office_expenses">Office Expenses</option>
+                      <option value="professional_services">Professional Services</option>
+                      <option value="taxes">Taxes</option>
+                      <option value="other">Other</option>
+                    </>
+                  )}
+                </select>
+              </div>
+
+              {/* Description */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="description" className="text-right">
+                  Description
+                </Label>
+                <Input
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  className="col-span-3"
+                  placeholder="Transaction description"
+                  required
+                />
+              </div>
+
+              {/* Amount */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="amount" className="text-right">
+                  Amount
+                </Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.amount}
+                  onChange={(e) => setFormData(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
+                  className="col-span-3"
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+
+              {/* Date */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="date" className="text-right">
+                  Date
+                </Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={formData.transaction_date}
+                  onChange={(e) => setFormData(prev => ({ ...prev, transaction_date: e.target.value }))}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+
+              {/* Client/Vendor Name */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="clientVendor" className="text-right">
+                  {formData.type === 'income' ? 'Client' : 'Vendor'}
+                </Label>
+                <Input
+                  id="clientVendor"
+                  value={formData.type === 'income' ? (formData.client_name || '') : (formData.vendor_name || '')}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    ...(formData.type === 'income'
+                      ? { client_name: e.target.value }
+                      : { vendor_name: e.target.value }
+                    )
+                  }))}
+                  className="col-span-3"
+                  placeholder={formData.type === 'income' ? 'Client name' : 'Vendor name'}
+                />
+              </div>
+
+              {/* Payment Method */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="paymentMethod" className="text-right">
+                  Payment Method
+                </Label>
+                <select
+                  id="paymentMethod"
+                  value={formData.payment_method}
+                  onChange={(e) => setFormData(prev => ({ ...prev, payment_method: e.target.value as PaymentMethodType }))}
+                  className="col-span-3 px-3 py-2 border border-gray-300 rounded-md"
+                  required
+                >
+                  <option value="bank_transfer">Bank Transfer</option>
+                  <option value="credit_card">Credit Card</option>
+                  <option value="paypal">PayPal</option>
+                  <option value="platform">Platform Payment</option>
+                  <option value="cash">Cash</option>
+                  <option value="crypto">Crypto</option>
+                  <option value="check">Check</option>
+                </select>
+              </div>
+
+              {/* Status */}
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="status" className="text-right">
+                  Status
+                </Label>
+                <select
+                  id="status"
+                  value={formData.status}
+                  onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as TransactionStatus }))}
+                  className="col-span-3 px-3 py-2 border border-gray-300 rounded-md"
+                  required
+                >
+                  <option value="completed">Completed</option>
+                  <option value="pending">Pending</option>
+                  <option value="failed">Failed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              {/* Notes */}
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="notes" className="text-right pt-2">
+                  Notes
+                </Label>
+                <textarea
+                  id="notes"
+                  value={formData.notes || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                  className="col-span-3 px-3 py-2 border border-gray-300 rounded-md"
+                  placeholder="Additional notes (optional)"
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {editingTransaction ? 'Update' : 'Create'} Transaction
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
