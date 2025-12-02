@@ -256,10 +256,11 @@ export async function addClient(
  * Update an existing client
  */
 export async function updateClient(
+  userId: string,
   clientId: string,
   updates: Partial<Client>
 ): Promise<{ data: Client | null; error: any }> {
-  logger.info('Updating client', { clientId, updates: Object.keys(updates) })
+  logger.info('Updating client', { userId, clientId, updates: Object.keys(updates) })
 
   try {
     const { data, error } = await supabase
@@ -269,18 +270,19 @@ export async function updateClient(
         updated_at: new Date().toISOString(),
       })
       .eq('id', clientId)
+      .eq('user_id', userId) // Security check
       .select()
       .single()
 
     if (error) {
-      logger.error('Failed to update client', { error, clientId })
+      logger.error('Failed to update client', { error, userId, clientId })
       return { data: null, error }
     }
 
-    logger.info('Client updated successfully', { clientId, name: data?.name })
+    logger.info('Client updated successfully', { userId, clientId, name: data?.name })
     return { data, error: null }
   } catch (error) {
-    logger.error('Exception updating client', { error, clientId })
+    logger.error('Exception updating client', { error, userId, clientId })
     return { data: null, error }
   }
 }
@@ -288,24 +290,25 @@ export async function updateClient(
 /**
  * Delete a client
  */
-export async function deleteClient(clientId: string): Promise<{ success: boolean; error: any }> {
-  logger.info('Deleting client', { clientId })
+export async function deleteClient(userId: string, clientId: string): Promise<{ success: boolean; error: any }> {
+  logger.info('Deleting client', { userId, clientId })
 
   try {
     const { error } = await supabase
       .from('clients')
       .delete()
       .eq('id', clientId)
+      .eq('user_id', userId) // Security check
 
     if (error) {
-      logger.error('Failed to delete client', { error, clientId })
+      logger.error('Failed to delete client', { error, userId, clientId })
       return { success: false, error }
     }
 
-    logger.info('Client deleted successfully', { clientId })
+    logger.info('Client deleted successfully', { userId, clientId })
     return { success: true, error: null }
   } catch (error) {
-    logger.error('Exception deleting client', { error, clientId })
+    logger.error('Exception deleting client', { error, userId, clientId })
     return { success: false, error }
   }
 }
@@ -314,36 +317,39 @@ export async function deleteClient(clientId: string): Promise<{ success: boolean
  * Update client status
  */
 export async function updateClientStatus(
+  userId: string,
   clientId: string,
   status: Client['status']
 ): Promise<{ data: Client | null; error: any }> {
-  logger.info('Updating client status', { clientId, status })
+  logger.info('Updating client status', { userId, clientId, status })
 
-  return updateClient(clientId, { status })
+  return updateClient(userId, clientId, { status })
 }
 
 /**
  * Update client health score
  */
 export async function updateClientHealthScore(
+  userId: string,
   clientId: string,
   healthScore: number
 ): Promise<{ data: Client | null; error: any }> {
-  logger.info('Updating client health score', { clientId, healthScore })
+  logger.info('Updating client health score', { userId, clientId, healthScore })
 
-  return updateClient(clientId, { health_score: healthScore })
+  return updateClient(userId, clientId, { health_score: healthScore })
 }
 
 /**
  * Update client lead score
  */
 export async function updateClientLeadScore(
+  userId: string,
   clientId: string,
   leadScore: number
 ): Promise<{ data: Client | null; error: any }> {
-  logger.info('Updating client lead score', { clientId, leadScore })
+  logger.info('Updating client lead score', { userId, clientId, leadScore })
 
-  return updateClient(clientId, { lead_score: leadScore })
+  return updateClient(userId, clientId, { lead_score: leadScore })
 }
 
 /**

@@ -4,6 +4,7 @@
 'use client'
 
 import { useState, useEffect, useReducer, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import {
@@ -394,6 +395,9 @@ const statusConfig: Record<Client['status'], { color: string; icon: any; label: 
 export default function ClientsPage() {
   logger.debug('Clients page mounted')
 
+  // ROUTER
+  const router = useRouter()
+
   // REAL USER AUTH & LEADS DATA
   const { userId, loading: userLoading } = useCurrentUser()
   const { leads: realLeads, scores: leadScores, loading: leadsLoading } = useLeadsData(userId || undefined)
@@ -575,6 +579,11 @@ export default function ClientsPage() {
   // ============================================================================
 
   const handleAddClient = async () => {
+    if (!userId) {
+      toast.error('Please log in')
+      return
+    }
+
     if (!formData.name || !formData.email) {
       logger.warn('Validation failed for add client', {
         hasName: !!formData.name,
@@ -597,10 +606,10 @@ export default function ClientsPage() {
       setIsSaving(true)
 
       // Import clients queries utility
-      const { createClient } = await import('@/lib/clients-queries')
+      const { addClient } = await import('@/lib/clients-queries')
 
       // Create client in Supabase
-      const { data: createdClient, error: createError } = await createClient(userId, {
+      const { data: createdClient, error: createError } = await addClient(userId, {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
@@ -663,105 +672,150 @@ export default function ClientsPage() {
   }
 
   const handleUpdateClient = async () => {
+    if (!userId) {
+      toast.error('Please log in')
+      return
+    }
+
     if (!state.selectedClient || !formData.name || !formData.email) {
       logger.warn('Update validation failed', {
         hasClient: !!state.selectedClient,
         hasName: !!formData.name,
         hasEmail: !!formData.email
       })
-      toast.error('Required fields missing')
+      toast.error('Required fields missing', {
+        description: 'Name and email are required'
+      })
       return
     }
 
-    logger.info('Updating client', {
+    logger.info('Updating client in Supabase', {
       clientId: state.selectedClient.id,
-      name: formData.name
+      name: formData.name,
+      userId
     })
 
     try {
       setIsSaving(true)
 
-      const response = await fetch('/api/clients', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update',
-          clientId: state.selectedClient.id,
-          data: formData
-        })
+      // Import clients queries utility
+      const { updateClient } = await import('@/lib/clients-queries')
+
+      // Update client in Supabase
+      const { data: updatedClient, error: updateError } = await updateClient(
+        userId,
+        state.selectedClient.id,
+        {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          company: formData.company,
+          position: formData.position,
+          status: formData.status,
+          notes: formData.notes
+        }
+      )
+
+      if (updateError || !updatedClient) {
+        throw new Error(updateError?.message || 'Failed to update client')
+      }
+
+      // Transform to UI format
+      const uiClient = {
+        id: updatedClient.id,
+        name: updatedClient.name,
+        email: updatedClient.email,
+        phone: updatedClient.phone || '',
+        company: updatedClient.company || '',
+        position: updatedClient.position || '',
+        status: updatedClient.status,
+        avatar: state.selectedClient.avatar || '',
+        totalRevenue: state.selectedClient.totalRevenue || 0,
+        projectCount: state.selectedClient.projectCount || 0,
+        lastContact: state.selectedClient.lastContact,
+        tags: state.selectedClient.tags || [],
+        notes: updatedClient.notes || '',
+        industry: state.selectedClient.industry || '',
+        location: state.selectedClient.location || '',
+        healthScore: state.selectedClient.healthScore || 50,
+        priority: state.selectedClient.priority || 'medium',
+        source: 'database',
+        createdAt: updatedClient.created_at,
+        updatedAt: updatedClient.updated_at
+      }
+
+      logger.info('Client updated successfully in Supabase', {
+        clientId: updatedClient.id,
+        name: updatedClient.name
       })
 
-      const result = await response.json()
+      dispatch({ type: 'UPDATE_CLIENT', client: uiClient })
+      setIsEditClientModalOpen(false)
+      setFormData({})
 
-      if (result.success) {
-        const updatedClient: Client = {
-          ...state.selectedClient,
-          ...formData,
-          updatedAt: new Date().toISOString()
-        } as Client
-
-        logger.info('Client updated successfully', {
-          clientId: updatedClient.id,
-          name: updatedClient.name
-        })
-        dispatch({ type: 'UPDATE_CLIENT', client: updatedClient })
-
-        setIsEditClientModalOpen(false)
-        setFormData({})
-
-        toast.success('✅ Client updated', {
-          description: `${updatedClient.name}'s information has been updated`
-        })
-      } else {
-        throw new Error(result.error || 'Failed to update client')
-      }
+      toast.success('✅ Client updated', {
+        description: `${updatedClient.name}'s information has been updated`
+      })
+      announce(`Client ${updatedClient.name} updated successfully`, 'polite')
     } catch (error: any) {
       logger.error('Failed to update client', {
         error,
-        clientId: state.selectedClient.id
+        clientId: state.selectedClient.id,
+        userId
       })
       toast.error('Failed to update client', {
         description: error.message || 'Please try again later'
       })
+      announce('Error updating client', 'assertive')
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleDeleteClient = async (clientId: string) => {
+    if (!userId) {
+      toast.error('Please log in')
+      return
+    }
+
     const client = state.clients.find(c => c.id === clientId)
-    logger.info('Delete client requested', { clientId, name: client?.name })
+    logger.info('Delete client requested', { clientId, name: client?.name, userId })
 
     if (confirm(`⚠️ Delete client ${client?.name}? This action cannot be undone.`)) {
       logger.info('Delete client confirmed', { clientId })
 
       try {
-        const response = await fetch('/api/clients', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'delete',
-            clientId
-          })
+        // Import clients queries utility
+        const { deleteClient } = await import('@/lib/clients-queries')
+
+        // Delete client from Supabase
+        const { success, error: deleteError } = await deleteClient(userId, clientId)
+
+        if (deleteError || !success) {
+          throw new Error(deleteError?.message || 'Failed to delete client')
+        }
+
+        dispatch({ type: 'DELETE_CLIENT', clientId })
+        logger.info('Client deleted successfully from Supabase', {
+          clientId,
+          name: client?.name,
+          userId
         })
 
-        const result = await response.json()
-
-        if (result.success) {
-          dispatch({ type: 'DELETE_CLIENT', clientId })
-          logger.info('Client deleted successfully', { clientId, name: client?.name })
-
-          toast.success('🗑️ Client deleted', {
-            description: `${client?.name} has been removed`
-          })
-        } else {
-          throw new Error(result.error || 'Failed to delete client')
-        }
+        toast.success('🗑️ Client deleted', {
+          description: `${client?.name} has been removed from your client list`
+        })
+        announce(`Client ${client?.name} deleted successfully`, 'polite')
       } catch (error: any) {
-        logger.error('Failed to delete client', { error, clientId })
+        logger.error('Failed to delete client', {
+          error,
+          clientId,
+          userId
+        })
         toast.error('Failed to delete client', {
           description: error.message || 'Please try again later'
         })
+        announce('Error deleting client', 'assertive')
       }
     } else {
       logger.debug('Delete client canceled', { clientId })
