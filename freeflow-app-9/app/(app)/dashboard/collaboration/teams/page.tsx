@@ -60,6 +60,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { useCurrentUser } from "@/hooks/use-ai-data";
+import type { Team as DBTeam, TeamType } from "@/lib/collaboration-queries";
 
 const logger = createFeatureLogger("CollaborationTeams");
 
@@ -88,6 +90,7 @@ interface Team {
 }
 
 export default function TeamsPage() {
+  const { userId, loading: userLoading } = useCurrentUser();
   const [teams, setTeams] = useState<Team[]>([]);
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -108,107 +111,67 @@ export default function TeamsPage() {
   });
 
   useEffect(() => {
-    fetchTeamsData();
-  }, []);
+    if (userId) {
+      fetchTeamsData();
+    }
+  }, [userId]);
 
   const fetchTeamsData = async () => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      logger.info("Fetching teams data");
+      logger.info("Fetching teams from Supabase", { userId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const mockTeams: Team[] = [
-        {
-          id: "1",
-          name: "Design Team",
-          description: "Creative design and branding",
-          memberCount: 8,
-          createdDate: "2024-01-15",
-          status: "active",
-          leader: "Sarah Johnson",
-        },
-        {
-          id: "2",
-          name: "Development Team",
-          description: "Software development and engineering",
-          memberCount: 12,
-          createdDate: "2024-01-10",
-          status: "active",
-          leader: "Mike Chen",
-        },
-        {
-          id: "3",
-          name: "Marketing Team",
-          description: "Digital marketing and content creation",
-          memberCount: 6,
-          createdDate: "2024-02-01",
-          status: "active",
-          leader: "Emily Davis",
-        },
-      ];
-
-      const mockMembers: TeamMember[] = [
-        {
-          id: "1",
-          name: "Sarah Johnson",
-          email: "sarah@example.com",
-          role: "Team Lead",
-          avatar: "",
-          status: "online",
-          department: "Design",
-          joinedDate: "2024-01-15",
-          tasksCompleted: 45,
-          performance: 95,
-          isFavorite: true,
-        },
-        {
-          id: "2",
-          name: "Mike Chen",
-          email: "mike@example.com",
-          role: "Developer",
-          avatar: "",
-          status: "online",
-          department: "Development",
-          joinedDate: "2024-01-10",
-          tasksCompleted: 38,
-          performance: 88,
-          isFavorite: false,
-        },
-        {
-          id: "3",
-          name: "Emily Davis",
-          email: "emily@example.com",
-          role: "Marketing Manager",
-          avatar: "",
-          status: "away",
-          department: "Marketing",
-          joinedDate: "2024-02-01",
-          tasksCompleted: 32,
-          performance: 92,
-          isFavorite: true,
-        },
-      ];
-
-      setTeams(mockTeams);
-      setMembers(mockMembers);
-
-      setStats({
-        totalTeams: mockTeams.length,
-        totalMembers: mockMembers.length,
-        activeMembers: mockMembers.filter((m) => m.status === "online").length,
-        avgPerformance: Math.round(
-          mockMembers.reduce((sum, m) => sum + m.performance, 0) /
-            mockMembers.length
-        ),
+      const { getTeams } = await import("@/lib/collaboration-queries");
+      const { data: teamsData, error } = await getTeams(userId, {
+        status: "active",
       });
 
-      logger.info("Teams data fetched successfully");
-      toast.success("Teams data loaded");
-    } catch (error) {
-      logger.error("Failed to fetch teams data", { error });
-      toast.error("Failed to load teams data");
+      if (error) {
+        throw new Error(error.message || "Failed to load teams");
+      }
+
+      if (teamsData) {
+        // Map database teams to UI teams format
+        const mappedTeams: Team[] = teamsData.map((dbTeam: DBTeam) => ({
+          id: dbTeam.id,
+          name: dbTeam.name,
+          description: dbTeam.description || "",
+          memberCount: dbTeam.member_count || 0,
+          createdDate: new Date(dbTeam.created_at).toISOString().split("T")[0],
+          status: dbTeam.status,
+          leader: dbTeam.owner_id || "Unknown",
+        }));
+
+        setTeams(mappedTeams);
+
+        // Calculate stats
+        const totalMembers = teamsData.reduce(
+          (sum, t) => sum + (t.member_count || 0),
+          0
+        );
+
+        setStats({
+          totalTeams: teamsData.length,
+          totalMembers: totalMembers,
+          activeMembers: teamsData.filter((t) => t.status === "active").length,
+          avgPerformance: 85, // TODO: Calculate from real performance data
+        });
+
+        logger.info("Teams loaded successfully", { count: teamsData.length });
+        toast.success("Teams loaded", {
+          description: `${teamsData.length} team${teamsData.length !== 1 ? "s" : ""} found`,
+        });
+      }
+    } catch (error: any) {
+      logger.error("Failed to load teams", { error });
+      toast.error("Failed to load teams", {
+        description: error.message || "Please try again",
+      });
     } finally {
       setLoading(false);
     }
@@ -216,32 +179,65 @@ export default function TeamsPage() {
 
   const handleCreateTeam = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!userId) {
+      toast.error("Please log in to create teams");
+      return;
+    }
+
     const formData = new FormData(e.currentTarget);
+    const name = formData.get("teamName") as string;
+    const description = formData.get("teamDescription") as string;
+    const team_type = (formData.get("teamType") as TeamType) || "project";
+
+    if (!name.trim()) {
+      toast.error("Team name is required");
+      return;
+    }
 
     try {
-      logger.info("Creating new team");
+      logger.info("Creating team", { name, team_type, userId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const { createTeam } = await import("@/lib/collaboration-queries");
+      const { data, error } = await createTeam(userId, {
+        name,
+        description,
+        team_type,
+      });
 
-      const newTeam: Team = {
-        id: Date.now().toString(),
-        name: formData.get("teamName") as string,
-        description: formData.get("teamDescription") as string,
-        memberCount: 0,
-        createdDate: new Date().toISOString().split("T")[0],
-        status: "active",
-        leader: "Current User",
-      };
+      if (error) {
+        throw new Error(error.message || "Failed to create team");
+      }
 
-      setTeams([...teams, newTeam]);
-      setIsCreateTeamOpen(false);
+      if (data) {
+        // Map database team to UI team format
+        const newTeam: Team = {
+          id: data.id,
+          name: data.name,
+          description: data.description || "",
+          memberCount: data.member_count || 0,
+          createdDate: new Date(data.created_at).toISOString().split("T")[0],
+          status: data.status,
+          leader: data.owner_id || userId,
+        };
 
-      logger.info("Team created successfully", { teamId: newTeam.id });
-      toast.success("Team created successfully");
-    } catch (error) {
-      logger.error("Failed to create team", { error });
-      toast.error("Failed to create team");
+        setTeams([newTeam, ...teams]);
+        setIsCreateTeamOpen(false);
+
+        toast.success(`Team "${data.name}" created successfully`);
+        logger.info("Team created", { teamId: data.id, name: data.name });
+
+        // Refresh stats
+        setStats((prev) => ({
+          ...prev,
+          totalTeams: prev.totalTeams + 1,
+        }));
+      }
+    } catch (error: any) {
+      logger.error("Failed to create team", { error, name });
+      toast.error("Failed to create team", {
+        description: error.message || "Please try again",
+      });
     }
   };
 
@@ -394,6 +390,7 @@ export default function TeamsPage() {
   };
 
   const handleRefreshData = async () => {
+    logger.info("Refreshing teams data");
     await fetchTeamsData();
   };
 
@@ -461,8 +458,22 @@ export default function TeamsPage() {
                     id="teamDescription"
                     name="teamDescription"
                     placeholder="Enter team description"
-                    required
                   />
+                </div>
+                <div>
+                  <Label htmlFor="teamType">Team Type</Label>
+                  <Select name="teamType" defaultValue="project">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select team type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="project">Project</SelectItem>
+                      <SelectItem value="department">Department</SelectItem>
+                      <SelectItem value="cross-functional">
+                        Cross-Functional
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <Button type="submit" className="w-full">
                   Create Team
