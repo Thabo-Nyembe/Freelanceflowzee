@@ -39,6 +39,7 @@ const logger = createFeatureLogger('VideoStudio')
 import { DashboardSkeleton, CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { formatFileSize } from '@/lib/video/config'
 import {
   Play,
   Pause,
@@ -99,38 +100,54 @@ interface VideoProject {
   duration: number
   resolution: string
   format: string
-  size: string
-  created: Date
-  modified: Date
-  status: 'draft' | 'processing' | 'ready' | 'published'
-  thumbnail: string
+  file_size: number
+  file_path?: string
+  thumbnail_path: string
+  status: 'draft' | 'processing' | 'ready' | 'published' | 'archived'
   views: number
   likes: number
-  comments: number
-  client?: string
+  comments_count: number
+  shares?: number
+  downloads?: number
+  client_id?: string
   tags: string[]
+  category?: string
+  created_at: string
+  updated_at: string
+  published_at?: string
 }
 
 interface VideoTemplate {
   id: string
   name: string
-  category: string
+  description?: string
+  category?: string
   duration: number
-  thumbnail: string
-  description: string
-  premium: boolean
+  resolution: string
+  thumbnail_path: string
+  preview_url?: string
+  is_premium: boolean
+  price?: number
+  usage_count: number
+  rating?: number
+  reviews_count: number
+  tags: string[]
+  features?: any[]
 }
 
 interface VideoAsset {
   id: string
   name: string
-  type: 'video' | 'audio' | 'image' | 'font' | 'transition'
+  type: 'video' | 'audio' | 'image' | 'font' | 'transition' | 'effect' | 'overlay'
   duration?: number
-  size: string
+  file_size: number
   format: string
-  thumbnail: string
-  created: Date
+  file_path: string
+  thumbnail_path?: string
+  category?: string
   tags: string[]
+  created_at: string
+  updated_at?: string
 }
 
 type TabType = 'projects' | 'templates' | 'assets' | 'analytics'
@@ -155,6 +172,8 @@ export default function VideoStudioPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [projects, setProjects] = useState<VideoProject[]>([])
+  const [templates, setTemplates] = useState<VideoTemplate[]>([])
+  const [assets, setAssets] = useState<VideoAsset[]>([])
   const { announce } = useAnnouncer()
 
   // Regular state
@@ -383,7 +402,7 @@ export default function VideoStudioPage() {
   }
 
   const handleOpenProject = (projectId: string) => {
-    const project = mockProjects.find(p => p.id === projectId)
+    const project = projects.find(p => p.id === projectId)
     logger.info('Project opened', {
       projectId,
       title: project?.title,
@@ -396,7 +415,7 @@ export default function VideoStudioPage() {
   }
 
   const handleDeleteProject = (projectId: string) => {
-    const project = mockProjects.find(p => p.id === projectId)
+    const project = projects.find(p => p.id === projectId)
     logger.info('Project deletion initiated', {
       projectId,
       title: project?.title,
@@ -413,13 +432,13 @@ export default function VideoStudioPage() {
   }
 
   const handleDuplicateProject = (projectId: string) => {
-    const project = mockProjects.find(p => p.id === projectId)
+    const project = projects.find(p => p.id === projectId)
     logger.info('Project duplicated', {
       projectId,
       originalTitle: project?.title,
       newTitle: project?.title + ' (Copy)',
       duration: project?.duration,
-      size: project?.size
+      file_size: project?.file_size
     })
     toast.success(`Project duplicated: ${project?.title} (Copy)`)
     // TODO: Create duplicate in state/database
@@ -441,7 +460,7 @@ export default function VideoStudioPage() {
   }
 
   const handlePublishVideo = (projectId: string) => {
-    const project = mockProjects.find(p => p.id === projectId)
+    const project = projects.find(p => p.id === projectId)
     logger.info('Video published', {
       projectId,
       title: project?.title,
@@ -455,7 +474,7 @@ export default function VideoStudioPage() {
   }
 
   const handleShareVideo = (projectId: string) => {
-    const project = mockProjects.find(p => p.id === projectId)
+    const project = projects.find(p => p.id === projectId)
     const shareLink = `https://kazi.app/video/${projectId}`
     logger.info('Share link generated', {
       projectId,
@@ -535,7 +554,7 @@ export default function VideoStudioPage() {
   }
 
   const handleUseTemplate = (templateId: string) => {
-    const template = mockTemplates.find(t => t.id === templateId)
+    const template = templates.find(t => t.id === templateId)
     logger.info('Template applied', {
       templateId,
       name: template?.name,
@@ -671,20 +690,20 @@ export default function VideoStudioPage() {
   }
 
   const handleAnalytics = (projectId: string) => {
-    const project = mockProjects.find(p => p.id === projectId)
+    const project = projects.find(p => p.id === projectId)
     logger.info('Analytics dashboard opened', {
       projectId,
       title: project?.title,
       views: project?.views,
       likes: project?.likes,
-      comments: project?.comments
+      comments_count: project?.comments_count
     })
     // TODO: Navigate to analytics page
     router.push(`/dashboard/video-studio/analytics?project=${projectId}`)
   }
 
   const handleVersionHistory = (projectId: string) => {
-    const project = mockProjects.find(p => p.id === projectId)
+    const project = projects.find(p => p.id === projectId)
     logger.info('Version history loaded', {
       projectId,
       title: project?.title,
@@ -697,10 +716,10 @@ export default function VideoStudioPage() {
   }
 
   // ============================================================================
-  // A+++ LOAD VIDEO PROJECTS DATA
+  // A+++ LOAD VIDEO STUDIO DATA
   // ============================================================================
   useEffect(() => {
-    const loadVideoProjects = async () => {
+    const loadVideoStudioData = async () => {
       if (!userId) {
         logger.info('Waiting for user authentication')
         setIsLoading(false)
@@ -711,229 +730,90 @@ export default function VideoStudioPage() {
         setIsLoading(true)
         setError(null)
 
-        logger.info('Loading video projects from Supabase', { userId })
+        logger.info('Loading video studio data from Supabase', { userId })
 
-        // Dynamic import for code splitting
+        // Dynamic imports for code splitting
         const { getVideoProjects } = await import('@/lib/video-studio-queries')
+        const { getVideoTemplates } = await import('@/lib/video-studio-queries')
+        const { getVideoAssets } = await import('@/lib/video-assets-queries')
 
-        const { data: videoData, error: videoError } = await getVideoProjects(
+        // Load projects
+        const { data: projectsData, error: projectsError } = await getVideoProjects(
           userId,
           undefined, // no filters
-          { field: 'created_at', ascending: false }, // sort by newest
-          50 // limit
+          { field: 'created_at', ascending: false },
+          50
         )
 
-        if (videoError) throw new Error(videoError.message)
+        if (!projectsError && projectsData) {
+          setProjects(projectsData)
+          logger.info('Video projects loaded', { count: projectsData.length })
+        } else if (projectsError) {
+          logger.error('Failed to load projects', { error: projectsError })
+        }
 
-        // Transform database format to UI format
-        const transformedProjects: VideoProject[] = videoData.map((v) => ({
-          id: v.id,
-          title: v.title,
-          description: v.description || '',
-          duration: v.duration,
-          resolution: v.resolution,
-          format: v.format,
-          size: v.file_size ? `${(v.file_size / (1024 * 1024)).toFixed(1)} MB` : '0 MB',
-          created: new Date(v.created_at),
-          modified: new Date(v.updated_at),
-          status: v.status,
-          thumbnail: v.thumbnail_path || '/video-thumbnails/default.jpg',
-          views: v.views,
-          likes: v.likes,
-          comments: 0,
-          client: '',
-          tags: [],
-        }))
+        // Load templates
+        const { data: templatesData, error: templatesError } = await getVideoTemplates(
+          undefined, // no filters
+          20
+        )
 
-        setProjects(transformedProjects)
+        if (!templatesError && templatesData) {
+          setTemplates(templatesData)
+          logger.info('Video templates loaded', { count: templatesData.length })
+        } else if (templatesError) {
+          logger.error('Failed to load templates', { error: templatesError })
+        }
+
+        // Load assets
+        const { data: assetsData, error: assetsError } = await getVideoAssets(
+          userId,
+          undefined, // no filters
+          { field: 'created_at', ascending: false },
+          50
+        )
+
+        if (!assetsError && assetsData) {
+          setAssets(assetsData)
+          logger.info('Video assets loaded', { count: assetsData.length })
+        } else if (assetsError) {
+          logger.error('Failed to load assets', { error: assetsError })
+        }
+
         setIsLoading(false)
 
         // A+++ Accessibility announcement
-        announce(`${transformedProjects.length} video projects loaded from database`, 'polite')
+        const totalCount = (projectsData?.length || 0) + (templatesData?.length || 0) + (assetsData?.length || 0)
+        announce(`${totalCount} items loaded from database`, 'polite')
 
-        toast.success('Video projects loaded', {
-          description: `${transformedProjects.length} projects from Supabase`,
+        toast.success('Video studio loaded', {
+          description: `${projectsData?.length || 0} projects, ${templatesData?.length || 0} templates, ${assetsData?.length || 0} assets`,
         })
 
-        logger.info('Video projects loaded successfully', {
-          count: transformedProjects.length,
+        logger.info('Video studio data loaded successfully', {
+          projects: projectsData?.length || 0,
+          templates: templatesData?.length || 0,
+          assets: assetsData?.length || 0,
           userId,
         })
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load video projects'
-        logger.error('Failed to load video projects', { error: err, userId })
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load video studio data'
+        logger.error('Failed to load video studio data', { error: err, userId })
         setError(errorMessage)
         setIsLoading(false)
-        announce('Error loading video projects', 'assertive')
-        toast.error('Failed to load video projects', {
+        announce('Error loading video studio data', 'assertive')
+        toast.error('Failed to load video studio data', {
           description: errorMessage,
         })
       }
     }
 
-    loadVideoProjects()
+    loadVideoStudioData()
   }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Mock data
-  const mockProjects: VideoProject[] = [
-    {
-      id: '1',
-      title: 'Product Demo Video',
-      description: 'Comprehensive product walkthrough for new feature release',
-      duration: 180,
-      resolution: '1920x1080',
-      format: 'mp4',
-      size: '124 MB',
-      created: new Date('2024-01-15'),
-      modified: new Date('2024-01-20'),
-      status: 'ready',
-      thumbnail: '/video-thumbnails/product-demo.jpg',
-      views: 1247,
-      likes: 89,
-      comments: 23,
-      client: 'TechCorp Inc.',
-      tags: ['product', 'demo', 'tutorial']
-    },
-    {
-      id: '2',
-      title: 'Brand Story Animation',
-      description: 'Animated brand story for social media campaign',
-      duration: 60,
-      resolution: '1080x1080',
-      format: 'mp4',
-      size: '45 MB',
-      created: new Date('2024-01-10'),
-      modified: new Date('2024-01-18'),
-      status: 'processing',
-      thumbnail: '/video-thumbnails/brand-story.jpg',
-      views: 892,
-      likes: 156,
-      comments: 34,
-      client: 'StartupXYZ',
-      tags: ['animation', 'brand', 'social']
-    },
-    {
-      id: '3',
-      title: 'Training Module Series',
-      description: 'Employee training video series - Part 1 of 5',
-      duration: 420,
-      resolution: '1920x1080',
-      format: 'mp4',
-      size: '298 MB',
-      created: new Date('2024-01-05'),
-      modified: new Date('2024-01-19'),
-      status: 'ready',
-      thumbnail: '/video-thumbnails/training.jpg',
-      views: 2156,
-      likes: 234,
-      comments: 67,
-      client: 'Corporate Learning',
-      tags: ['training', 'education', 'corporate']
-    },
-    {
-      id: '4',
-      title: 'Client Testimonial',
-      description: 'Customer success story and testimonial video',
-      duration: 90,
-      resolution: '1920x1080',
-      format: 'mp4',
-      size: '67 MB',
-      created: new Date('2024-01-12'),
-      modified: new Date('2024-01-21'),
-      status: 'draft',
-      thumbnail: '/video-thumbnails/testimonial.jpg',
-      views: 456,
-      likes: 45,
-      comments: 12,
-      client: 'Marketing Agency',
-      tags: ['testimonial', 'customer', 'success']
-    }
-  ]
-
-  const mockTemplates: VideoTemplate[] = [
-    {
-      id: '1',
-      name: 'Product Launch',
-      category: 'Marketing',
-      duration: 30,
-      thumbnail: '/templates/product-launch.jpg',
-      description: 'Professional product launch video template',
-      premium: true
-    },
-    {
-      id: '2',
-      name: 'Social Media Intro',
-      category: 'Social',
-      duration: 15,
-      thumbnail: '/templates/social-intro.jpg',
-      description: 'Eye-catching social media intro template',
-      premium: false
-    },
-    {
-      id: '3',
-      name: 'Tutorial Series',
-      category: 'Education',
-      duration: 60,
-      thumbnail: '/templates/tutorial.jpg',
-      description: 'Clean tutorial video template',
-      premium: false
-    },
-    {
-      id: '4',
-      name: 'Corporate Presentation',
-      category: 'Business',
-      duration: 120,
-      thumbnail: '/templates/corporate.jpg',
-      description: 'Professional corporate presentation template',
-      premium: true
-    }
-  ]
-
-  const mockAssets: VideoAsset[] = [
-    {
-      id: '1',
-      name: 'Intro Animation',
-      type: 'video',
-      duration: 5,
-      size: '12 MB',
-      format: 'mp4',
-      thumbnail: '/assets/intro-animation.jpg',
-      created: new Date('2024-01-15'),
-      tags: ['intro', 'animation', 'logo']
-    },
-    {
-      id: '2',
-      name: 'Background Music',
-      type: 'audio',
-      duration: 180,
-      size: '8 MB',
-      format: 'mp3',
-      thumbnail: '/assets/audio-wave.jpg',
-      created: new Date('2024-01-10'),
-      tags: ['music', 'background', 'upbeat']
-    },
-    {
-      id: '3',
-      name: 'Brand Logo',
-      type: 'image',
-      size: '2 MB',
-      format: 'png',
-      thumbnail: '/assets/brand-logo.jpg',
-      created: new Date('2024-01-08'),
-      tags: ['logo', 'brand', 'transparent']
-    },
-    {
-      id: '4',
-      name: 'Fade Transition',
-      type: 'transition',
-      duration: 2,
-      size: '1 MB',
-      format: 'mov',
-      thumbnail: '/assets/fade-transition.jpg',
-      created: new Date('2024-01-12'),
-      tags: ['transition', 'fade', 'smooth']
-    }
-  ]
+  // ============================================================================
+  // HELPER FUNCTIONS
+  // ============================================================================
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -1011,28 +891,8 @@ export default function VideoStudioPage() {
 
       if (error) throw new Error(error.message)
 
-      // Transform to UI format
-      const uiProject: VideoProject = {
-        id: createdVideo!.id,
-        title: createdVideo!.title,
-        description: createdVideo!.description || '',
-        duration: createdVideo!.duration,
-        resolution: createdVideo!.resolution,
-        format: createdVideo!.format,
-        size: '0 MB',
-        created: new Date(createdVideo!.created_at),
-        modified: new Date(createdVideo!.updated_at),
-        status: createdVideo!.status,
-        thumbnail: '/video-thumbnails/default.jpg',
-        views: 0,
-        likes: 0,
-        comments: 0,
-        client: newProject.client,
-        tags: [],
-      }
-
-      // Add to local state
-      setProjects([uiProject, ...projects])
+      // Add to local state (data is already in correct format from database)
+      setProjects([createdVideo!, ...projects])
 
       toast.success('✅ Video project created!', {
         description: `${createdVideo!.title} has been added to your studio`,
@@ -1071,13 +931,13 @@ export default function VideoStudioPage() {
     return matchesSearch && matchesFilter
   })
 
-  const filteredTemplates = mockTemplates.filter(template => {
+  const filteredTemplates = templates.filter(template => {
     const matchesSearch = template.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesFilter = filterCategory === 'all' || template.category.toLowerCase() === filterCategory
+    const matchesFilter = filterCategory === 'all' || template.category?.toLowerCase() === filterCategory
     return matchesSearch && matchesFilter
   })
 
-  const filteredAssets = mockAssets.filter(asset => {
+  const filteredAssets = assets.filter(asset => {
     const matchesSearch = asset.name.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesFilter = filterCategory === 'all' || 
                          (filterCategory === 'video' && asset.type === 'video') ||
@@ -1709,9 +1569,9 @@ export default function VideoStudioPage() {
                         <Badge className={getStatusColor(project.status)}>
                           {project.status}
                         </Badge>
-                        {project.client && (
+                        {project.client_id && (
                           <Badge variant="outline" className="text-xs">
-                            {project.client}
+                            {project.client_id}
                           </Badge>
                         )}
                       </div>
@@ -1739,7 +1599,7 @@ export default function VideoStudioPage() {
                       </div>
                       <div>
                         <span className="text-gray-500">Size:</span>
-                        <p className="font-medium">{project.size}</p>
+                        <p className="font-medium">{formatFileSize(project.file_size)}</p>
                       </div>
                       <div>
                         <span className="text-gray-500">Format:</span>
@@ -1759,10 +1619,10 @@ export default function VideoStudioPage() {
                         </span>
                         <span className="flex items-center gap-1">
                           <MessageSquare className="w-4 h-4" />
-                          {project.comments}
+                          {project.comments_count}
                         </span>
                       </div>
-                      <span>{project.modified.toLocaleDateString()}</span>
+                      <span>{new Date(project.updated_at).toLocaleDateString()}</span>
                     </div>
                     
                     <div className="flex gap-2">
@@ -1808,7 +1668,7 @@ export default function VideoStudioPage() {
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <Badge variant="outline">{template.category}</Badge>
-                      {template.premium && (
+                      {template.is_premium && (
                         <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
                           Premium
                         </Badge>
@@ -1932,7 +1792,7 @@ export default function VideoStudioPage() {
                     <div className="text-xs space-y-1">
                       <div className="flex justify-between">
                         <span className="text-gray-500">Size:</span>
-                        <span>{asset.size}</span>
+                        <span>{formatFileSize(asset.file_size)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Format:</span>
@@ -1953,22 +1813,22 @@ export default function VideoStudioPage() {
                         size="sm"
                         className="flex-1 text-xs"
 onClick={() => {
-                          // Create a mock asset for preview
-                          const mockAsset: Asset = {
+                          // Create asset preview from database data
+                          const previewAsset: Asset = {
                             id: asset.id,
                             name: asset.name,
                             type: asset.type as 'video' | 'audio' | 'image',
-                            url: asset.url,
-                            thumbnail: asset.thumbnail,
-                            size: asset.size || 1024000,
+                            url: asset.file_path || '',
+                            thumbnail: asset.thumbnail_path || '',
+                            size: asset.file_size || 0,
                             format: asset.format,
                             tags: asset.tags || [],
                             description: `Professional ${asset.type} asset`,
-                            createdAt: new Date().toISOString(),
+                            createdAt: asset.created_at,
                             duration: asset.duration,
                             dimensions: asset.type === 'image' ? { width: 1920, height: 1080 } : undefined
                           }
-                          setSelectedAsset(mockAsset)
+                          setSelectedAsset(previewAsset)
                           setIsAssetPreviewOpen(true)
                         }}
                       >
@@ -2089,7 +1949,7 @@ onClick={() => {
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-medium text-green-600">{project.likes} likes</p>
-                          <p className="text-xs text-gray-500">{project.comments} comments</p>
+                          <p className="text-xs text-gray-500">{project.comments_count} comments</p>
                         </div>
                       </div>
                     ))}

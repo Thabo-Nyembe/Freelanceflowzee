@@ -569,3 +569,356 @@ export async function duplicateVideoProject(
     return { data: null, error }
   }
 }
+
+// ============================================================================
+// VIDEO TEMPLATE FUNCTIONS
+// ============================================================================
+
+export interface VideoTemplate {
+  id: string
+  name: string
+  description?: string
+  category?: string
+  duration: number
+  resolution: string
+  thumbnail_path?: string
+  preview_url?: string
+  is_premium: boolean
+  price?: number
+  usage_count: number
+  rating?: number
+  reviews_count: number
+  tags: string[]
+  features: any[]
+  created_at: string
+  updated_at: string
+  created_by?: string
+}
+
+export interface TemplateFilters {
+  category?: string
+  is_premium?: boolean
+  search?: string
+  minDuration?: number
+  maxDuration?: number
+  tags?: string[]
+}
+
+/**
+ * Get all video templates with optional filters
+ */
+export async function getVideoTemplates(
+  filters?: TemplateFilters,
+  limit: number = 50,
+  offset: number = 0
+): Promise<{ data: VideoTemplate[]; error: any; count: number }> {
+  logger.info('Fetching video templates', { filters, limit, offset })
+
+  try {
+    let query = supabase
+      .from('video_templates')
+      .select('*', { count: 'exact' })
+
+    // Apply filters
+    if (filters?.category) {
+      query = query.eq('category', filters.category)
+    }
+    if (filters?.is_premium !== undefined) {
+      query = query.eq('is_premium', filters.is_premium)
+    }
+    if (filters?.search) {
+      query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
+    }
+    if (filters?.minDuration) {
+      query = query.gte('duration', filters.minDuration)
+    }
+    if (filters?.maxDuration) {
+      query = query.lte('duration', filters.maxDuration)
+    }
+    if (filters?.tags && filters.tags.length > 0) {
+      query = query.contains('tags', filters.tags)
+    }
+
+    // Default sorting by popularity (usage_count) then rating
+    query = query
+      .order('usage_count', { ascending: false })
+      .order('rating', { ascending: false, nullsFirst: false })
+
+    // Apply pagination
+    query = query.range(offset, offset + limit - 1)
+
+    const { data, error, count } = await query
+
+    if (error) {
+      logger.error('Failed to fetch video templates', { error, filters })
+      return { data: [], error, count: 0 }
+    }
+
+    logger.info('Video templates fetched successfully', {
+      count: data?.length || 0,
+      totalCount: count,
+      filters,
+    })
+
+    return { data: data || [], error: null, count: count || 0 }
+  } catch (error) {
+    logger.error('Exception fetching video templates', { error, filters })
+    return { data: [], error, count: 0 }
+  }
+}
+
+/**
+ * Get a single video template by ID
+ */
+export async function getVideoTemplate(
+  templateId: string
+): Promise<{ data: VideoTemplate | null; error: any }> {
+  logger.info('Fetching video template', { templateId })
+
+  try {
+    const { data, error } = await supabase
+      .from('video_templates')
+      .select('*')
+      .eq('id', templateId)
+      .single()
+
+    if (error) {
+      logger.error('Failed to fetch video template', { error, templateId })
+      return { data: null, error }
+    }
+
+    logger.info('Video template fetched successfully', { templateId })
+    return { data, error: null }
+  } catch (error) {
+    logger.error('Exception fetching video template', { error, templateId })
+    return { data: null, error }
+  }
+}
+
+/**
+ * Create a new video template (admin only)
+ */
+export async function createVideoTemplate(
+  userId: string,
+  templateData: Partial<VideoTemplate>
+): Promise<{ data: VideoTemplate | null; error: any }> {
+  logger.info('Creating video template', { userId, name: templateData.name })
+
+  try {
+    const { data, error } = await supabase
+      .from('video_templates')
+      .insert({
+        name: templateData.name,
+        description: templateData.description,
+        category: templateData.category,
+        duration: templateData.duration || 0,
+        resolution: templateData.resolution || '1920x1080',
+        thumbnail_path: templateData.thumbnail_path,
+        preview_url: templateData.preview_url,
+        is_premium: templateData.is_premium || false,
+        price: templateData.price,
+        usage_count: 0,
+        rating: templateData.rating,
+        reviews_count: 0,
+        tags: templateData.tags || [],
+        features: templateData.features || [],
+        created_by: userId,
+      })
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to create video template', { error, userId })
+      return { data: null, error }
+    }
+
+    logger.info('Video template created successfully', {
+      templateId: data.id,
+      name: data.name,
+      userId,
+    })
+
+    return { data, error: null }
+  } catch (error) {
+    logger.error('Exception creating video template', { error, userId })
+    return { data: null, error }
+  }
+}
+
+/**
+ * Update a video template
+ */
+export async function updateVideoTemplate(
+  templateId: string,
+  updates: Partial<VideoTemplate>
+): Promise<{ data: VideoTemplate | null; error: any }> {
+  logger.info('Updating video template', { templateId, updates })
+
+  try {
+    const { data, error } = await supabase
+      .from('video_templates')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', templateId)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to update video template', { error, templateId })
+      return { data: null, error }
+    }
+
+    logger.info('Video template updated successfully', { templateId })
+    return { data, error: null }
+  } catch (error) {
+    logger.error('Exception updating video template', { error, templateId })
+    return { data: null, error }
+  }
+}
+
+/**
+ * Delete a video template
+ */
+export async function deleteVideoTemplate(
+  templateId: string
+): Promise<{ error: any }> {
+  logger.info('Deleting video template', { templateId })
+
+  try {
+    const { error } = await supabase
+      .from('video_templates')
+      .delete()
+      .eq('id', templateId)
+
+    if (error) {
+      logger.error('Failed to delete video template', { error, templateId })
+      return { error }
+    }
+
+    logger.info('Video template deleted successfully', { templateId })
+    return { error: null }
+  } catch (error) {
+    logger.error('Exception deleting video template', { error, templateId })
+    return { error }
+  }
+}
+
+/**
+ * Increment template usage count
+ */
+export async function incrementTemplateUsage(
+  templateId: string
+): Promise<{ error: any }> {
+  logger.info('Incrementing template usage', { templateId })
+
+  try {
+    const { error } = await supabase.rpc('increment_template_usage', {
+      template_id: templateId,
+    })
+
+    // If RPC doesn't exist, fallback to manual increment
+    if (error?.code === '42883') {
+      const { data: template } = await supabase
+        .from('video_templates')
+        .select('usage_count')
+        .eq('id', templateId)
+        .single()
+
+      if (template) {
+        const { error: updateError } = await supabase
+          .from('video_templates')
+          .update({ usage_count: (template.usage_count || 0) + 1 })
+          .eq('id', templateId)
+
+        if (updateError) {
+          logger.error('Failed to increment usage (fallback)', { error: updateError, templateId })
+          return { error: updateError }
+        }
+
+        logger.info('Template usage incremented (fallback)', { templateId })
+        return { error: null }
+      }
+    }
+
+    if (error) {
+      logger.error('Failed to increment template usage', { error, templateId })
+      return { error }
+    }
+
+    logger.info('Template usage incremented successfully', { templateId })
+    return { error: null }
+  } catch (error) {
+    logger.error('Exception incrementing template usage', { error, templateId })
+    return { error }
+  }
+}
+
+/**
+ * Get templates by category
+ */
+export async function getTemplatesByCategory(
+  category: string,
+  limit: number = 20
+): Promise<{ data: VideoTemplate[]; error: any }> {
+  logger.info('Fetching templates by category', { category, limit })
+
+  try {
+    const { data, error } = await supabase
+      .from('video_templates')
+      .select('*')
+      .eq('category', category)
+      .order('usage_count', { ascending: false })
+      .limit(limit)
+
+    if (error) {
+      logger.error('Failed to fetch templates by category', { error, category })
+      return { data: [], error }
+    }
+
+    logger.info('Templates by category fetched successfully', {
+      category,
+      count: data?.length || 0,
+    })
+
+    return { data: data || [], error: null }
+  } catch (error) {
+    logger.error('Exception fetching templates by category', { error, category })
+    return { data: [], error }
+  }
+}
+
+/**
+ * Search templates by tags
+ */
+export async function searchTemplatesByTags(
+  tags: string[],
+  limit: number = 20
+): Promise<{ data: VideoTemplate[]; error: any }> {
+  logger.info('Searching templates by tags', { tags, limit })
+
+  try {
+    const { data, error } = await supabase
+      .from('video_templates')
+      .select('*')
+      .contains('tags', tags)
+      .order('usage_count', { ascending: false })
+      .limit(limit)
+
+    if (error) {
+      logger.error('Failed to search templates by tags', { error, tags })
+      return { data: [], error }
+    }
+
+    logger.info('Templates search by tags completed', {
+      tags,
+      count: data?.length || 0,
+    })
+
+    return { data: data || [], error: null }
+  } catch (error) {
+    logger.error('Exception searching templates by tags', { error, tags })
+    return { data: [], error }
+  }
+}
