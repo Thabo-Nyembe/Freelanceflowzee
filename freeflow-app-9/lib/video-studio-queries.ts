@@ -4,9 +4,10 @@
  * Supabase queries for video project management
  */
 
-import { supabase } from './supabase'
+import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from './logger'
 
+const supabase = createClient()
 const logger = createFeatureLogger('VideoStudio')
 
 // TypeScript interfaces
