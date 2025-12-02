@@ -46,6 +46,7 @@ const logger = createFeatureLogger('Gallery')
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // TYPES
 interface ImageMetadata {
@@ -59,6 +60,7 @@ interface ImageMetadata {
   format: string
   url: string
   thumbnail: string
+  storagePath?: string
   uploadDate: string
   tags: string[]
   albumId: string | null
@@ -82,6 +84,9 @@ interface Album {
 }
 
 export default function GalleryPage() {
+  // A+++ AUTHENTICATION
+  const { userId, loading: userLoading } = useCurrentUser()
+
   // A+++ STATE MANAGEMENT
   const [isPageLoading, setIsPageLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -107,7 +112,7 @@ export default function GalleryPage() {
   // A+++ LOAD GALLERY DATA FROM SUPABASE
   useEffect(() => {
     const loadGalleryData = async () => {
-      const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+      if (!userId) return
 
       try {
         setIsPageLoading(true)
@@ -144,6 +149,7 @@ export default function GalleryPage() {
           format: img.format,
           url: img.url,
           thumbnail: img.thumbnail || img.url,
+          storagePath: img.storage_path,
           uploadDate: img.created_at,
           tags: img.tags || [],
           albumId: img.album_id,
@@ -186,14 +192,17 @@ export default function GalleryPage() {
     }
 
     loadGalleryData()
-  }, [announce])
+  }, [userId, announce])
 
 
   // REAL HANDLERS
 
   // Upload Images
   const handleUploadMedia = async () => {
-    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+    if (!userId) {
+      toast.error('Please log in to upload images')
+      return
+    }
 
     logger.info('Upload media initiated', { userId })
 
@@ -226,26 +235,74 @@ export default function GalleryPage() {
 
       for (const file of Array.from(files)) {
         try {
+          // Validate file size (50MB limit)
+          if (file.size > 50 * 1024 * 1024) {
+            failCount++
+            logger.warn('File too large', { fileName: file.name, size: file.size })
+            continue
+          }
+
           const fileName = file.name
           const fileSize = file.size
           const fileType = file.type.startsWith('video/') ? 'video' : 'image'
           const format = file.name.split('.').pop() || 'jpg'
           const title = file.name.replace(/\.[^/.]+$/, '') // Remove extension
 
-          // TODO: Upload to Supabase Storage and get real URL
-          // For now, create placeholder with real file metadata
+          // Generate unique storage path
+          const timestamp = Date.now()
+          const randomId = Math.random().toString(36).substring(7)
+          const storagePath = `${userId}/gallery/${timestamp}-${randomId}.${format}`
+
+          // Upload to Supabase Storage
+          const { createClient } = await import('@/lib/supabase/client')
+          const supabase = createClient()
+
+          const { data: uploadData, error: uploadError } = await supabase
+            .storage
+            .from('user-files')
+            .upload(storagePath, file, {
+              cacheControl: '3600',
+              upsert: false
+            })
+
+          if (uploadError) {
+            throw new Error(`Upload failed: ${uploadError.message}`)
+          }
+
+          // Get public URL
+          const { data: { publicUrl } } = supabase
+            .storage
+            .from('user-files')
+            .getPublicUrl(storagePath)
+
+          // Get image dimensions if it's an image
+          let width = 1920
+          let height = 1080
+
+          if (fileType === 'image') {
+            try {
+              const dimensions = await getImageDimensions(file)
+              width = dimensions.width
+              height = dimensions.height
+            } catch (e) {
+              logger.warn('Could not get image dimensions', { error: e })
+            }
+          }
+
+          // Create database record
           const { createGalleryImage } = await import('@/lib/gallery-queries')
 
           const { data, error } = await createGalleryImage(userId, {
             title,
-            description: `Uploaded from ${file.name}`,
+            description: `Uploaded from ${fileName}`,
             file_name: fileName,
             file_size: fileSize,
-            width: 1920, // TODO: Get real dimensions from image
-            height: 1080,
+            width,
+            height,
             format,
-            url: `https://images.unsplash.com/photo-${Date.now()}?w=400&h=300&fit=crop`, // TODO: Real Supabase Storage URL
-            thumbnail: `https://images.unsplash.com/photo-${Date.now()}?w=200&h=150&fit=crop`,
+            url: publicUrl,
+            thumbnail: publicUrl,
+            storage_path: storagePath,
             type: fileType,
             category: 'uploads',
             tags: [],
@@ -259,7 +316,9 @@ export default function GalleryPage() {
           })
 
           if (error || !data) {
-            throw new Error(error?.message || 'Failed to upload image')
+            // Cleanup storage on DB failure
+            await supabase.storage.from('user-files').remove([storagePath])
+            throw new Error(error?.message || 'Failed to save image to database')
           }
 
           // Transform and add to UI
@@ -270,21 +329,22 @@ export default function GalleryPage() {
             fileName: data.file_name,
             fileSize: data.file_size,
             width: data.width,
-        height: data.height,
-        format: data.format,
-        url: data.url,
-        thumbnail: data.thumbnail || data.url,
-        uploadDate: data.created_at,
-        tags: data.tags || [],
-        albumId: data.album_id,
-        isFavorite: data.is_favorite,
-        type: data.type === 'video' ? 'video' : 'image',
-        category: data.category,
-        client: data.client || undefined,
-        project: data.project || undefined,
-        likes: data.likes,
-        comments: 0
-      }
+            height: data.height,
+            format: data.format,
+            url: data.url,
+            thumbnail: data.thumbnail || data.url,
+            storagePath: data.storage_path,
+            uploadDate: data.created_at,
+            tags: data.tags || [],
+            albumId: data.album_id,
+            isFavorite: data.is_favorite,
+            type: data.type === 'video' ? 'video' : 'image',
+            category: data.category,
+            client: data.client || undefined,
+            project: data.project || undefined,
+            likes: data.likes,
+            comments: 0
+          }
 
           setImages(prev => [newImage, ...prev])
           successCount++
@@ -320,6 +380,26 @@ export default function GalleryPage() {
     fileInput.click()
   }
 
+  // Helper function to get image dimensions
+  function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      const url = URL.createObjectURL(file)
+
+      img.onload = () => {
+        URL.revokeObjectURL(url)
+        resolve({ width: img.width, height: img.height })
+      }
+
+      img.onerror = () => {
+        URL.revokeObjectURL(url)
+        reject(new Error('Failed to load image'))
+      }
+
+      img.src = url
+    })
+  }
+
   // Delete Image
   const handleDeleteImage = async (imageId: string) => {
     const image = images.find(img => img.id === imageId)
@@ -329,6 +409,19 @@ export default function GalleryPage() {
 
     if (confirm(`Delete "${image.title}"?`)) {
       try {
+        // Delete from storage if storage_path exists
+        if (image.storagePath) {
+          const { createClient } = await import('@/lib/supabase/client')
+          const supabase = createClient()
+
+          await supabase.storage
+            .from('user-files')
+            .remove([image.storagePath])
+
+          logger.info('Image deleted from storage', { storagePath: image.storagePath })
+        }
+
+        // Delete from database
         const { deleteGalleryImage } = await import('@/lib/gallery-queries')
 
         const { error } = await deleteGalleryImage(imageId)
@@ -366,7 +459,7 @@ export default function GalleryPage() {
   }
 
   // Edit Image
-  const handleEditImage = (imageId: string) => {
+  const handleEditImage = async (imageId: string) => {
     const image = images.find(img => img.id === imageId)
     if (!image) return
 
@@ -381,27 +474,51 @@ export default function GalleryPage() {
     const newDescription = prompt('Enter description:', image.description) || ''
     const newTags = prompt('Enter tags (comma-separated):', image.tags.join(', '))?.split(',').map(t => t.trim()) || image.tags
 
-    setImages(prev => prev.map(img =>
-      img.id === imageId
-        ? { ...img, title: newTitle, description: newDescription, tags: newTags }
-        : img
-    ))
+    try {
+      // Update database
+      const { updateGalleryImage } = await import('@/lib/gallery-queries')
 
-    logger.info('Image updated successfully', {
-      imageId,
-      fileName: image.fileName,
-      title: newTitle,
-      tagsCount: newTags.length
-    })
+      const { data, error } = await updateGalleryImage(imageId, {
+        title: newTitle,
+        description: newDescription,
+        tags: newTags
+      })
 
-    toast.success('Image updated', {
-      description: `${newTitle} - ${newTags.length} tags`
-    })
+      if (error) {
+        throw new Error('Failed to update image')
+      }
+
+      // Update UI only on success
+      setImages(prev => prev.map(img =>
+        img.id === imageId
+          ? { ...img, title: newTitle, description: newDescription, tags: newTags }
+          : img
+      ))
+
+      logger.info('Image updated successfully', {
+        imageId,
+        fileName: image.fileName,
+        title: newTitle,
+        tagsCount: newTags.length
+      })
+
+      toast.success('Image updated', {
+        description: `${newTitle} - ${newTags.length} tags`
+      })
+    } catch (err) {
+      logger.error('Failed to update image', { error: err, imageId })
+      toast.error('Failed to update image', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
+    }
   }
 
   // Create Album
   const handleCreateAlbum = async () => {
-    const userId = 'demo-user-123' // TODO: Replace with real auth user ID
+    if (!userId) {
+      toast.error('Please log in to create albums')
+      return
+    }
 
     logger.info('Create album initiated', { userId })
 
