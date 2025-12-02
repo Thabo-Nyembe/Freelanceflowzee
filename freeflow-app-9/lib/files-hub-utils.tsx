@@ -102,6 +102,7 @@ export interface FilesHubState {
 export type FilesHubAction =
   | { type: 'SET_FILES'; files: FileItem[] }
   | { type: 'ADD_FILE'; file: FileItem }
+  | { type: 'ADD_FILES'; payload: FileItem[] }
   | { type: 'UPDATE_FILE'; file: FileItem }
   | { type: 'DELETE_FILE'; fileId: string }
   | { type: 'SELECT_FILE'; file: FileItem | null }

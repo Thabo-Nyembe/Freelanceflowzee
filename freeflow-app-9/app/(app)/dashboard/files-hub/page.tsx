@@ -34,8 +34,10 @@ import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
+import { createClient } from '@/lib/supabase/client'
 
 const logger = createFeatureLogger('FilesHub')
+const supabase = createClient()
 
 // ============================================================================
 // FRAMER MOTION ANIMATION COMPONENTS
@@ -142,6 +144,10 @@ function filesHubReducer(state: FilesHubState, action: FilesHubAction): FilesHub
       logger.info('File added', { fileId: action.file.id, fileName: action.file.name, fileType: action.file.type })
       return { ...state, files: [action.file, ...state.files] }
 
+    case 'ADD_FILES':
+      logger.info('Multiple files added', { count: action.payload.length })
+      return { ...state, files: [...action.payload, ...state.files] }
+
     case 'UPDATE_FILE':
       logger.info('File updated', { fileId: action.file.id, fileName: action.file.name })
       return {
@@ -244,6 +250,7 @@ export default function FilesHubPage() {
   const [isPageLoading, setIsPageLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
 
   // MODAL STATES
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
@@ -433,6 +440,7 @@ export default function FilesHubPage() {
     if (!userId) {
       logger.warn('Upload failed', { reason: 'User not authenticated' })
       toast.error('Authentication required', { description: 'Please log in to upload files' })
+      announce('Authentication required', 'assertive')
       return
     }
 
@@ -442,170 +450,266 @@ export default function FilesHubPage() {
       return
     }
 
-    const totalSize = Array.from(uploadFiles).reduce((sum, f) => sum + f.size, 0)
-    const fileTypes = Array.from(uploadFiles).map(f => f.name.split('.').pop()?.toLowerCase() || 'unknown')
+    setIsUploading(true)
+    const uploadedFiles: any[] = []
+    const failedFiles: string[] = []
+    const files = Array.from(uploadFiles)
 
-    logger.info('Starting file upload to Supabase', {
-      fileCount: uploadFiles.length,
-      totalSize,
-      fileTypes: [...new Set(fileTypes)],
-      targetFolder: state.currentFolder,
-      userId
+    logger.info('Starting file upload', {
+      fileCount: files.length,
+      totalSize: files.reduce((sum, f) => sum + f.size, 0)
     })
 
-    try {
-      setIsSaving(true)
+    for (const file of files) {
+      try {
+        // 1. Validate file size (50MB limit)
+        const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
+        if (file.size > MAX_FILE_SIZE) {
+          logger.warn('File too large', { fileName: file.name, size: file.size })
+          failedFiles.push(`${file.name} (too large)`)
+          continue
+        }
 
-      // Dynamic import
-      const { createFile } = await import('@/lib/files-hub-queries')
+        // 2. Generate unique file path
+        const fileExt = file.name.split('.').pop() || 'bin'
+        const timestamp = Date.now()
+        const randomId = Math.random().toString(36).substring(7)
+        const storagePath = `${userId}/${timestamp}-${randomId}.${fileExt}`
 
-      const uploadedFiles: string[] = []
-      const uploadedTypes: string[] = []
-
-      for (let i = 0; i < uploadFiles.length; i++) {
-        const file = uploadFiles[i]
-
-        logger.debug('Processing file for upload', {
-          index: i + 1,
-          total: uploadFiles.length,
+        logger.info('Uploading file to storage', {
           fileName: file.name,
-          fileSize: file.size
+          storagePath,
+          size: file.size
         })
 
+        // 3. Upload to Supabase Storage
+        const { data: uploadData, error: uploadError } = await supabase
+          .storage
+          .from('user-files')
+          .upload(storagePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          })
+
+        if (uploadError) {
+          logger.error('Storage upload failed', {
+            error: uploadError,
+            fileName: file.name
+          })
+          failedFiles.push(file.name)
+          continue
+        }
+
+        // 4. Get public URL
+        const { data: { publicUrl } } = supabase
+          .storage
+          .from('user-files')
+          .getPublicUrl(storagePath)
+
+        logger.info('File uploaded to storage', {
+          fileName: file.name,
+          publicUrl
+        })
+
+        // 5. Determine file type
         const ext = getFileExtension(file.name)
         const type = getFileType(ext)
 
-        // PRODUCTION: Upload to Supabase Storage
-        // 1. Upload file to Supabase Storage
-        // const { data: storageData, error: storageError } = await supabase.storage
-        //   .from('files')
-        //   .upload(`${userId}/${file.name}`, file)
-        // 2. Get public URL
-        // const { data: { publicUrl } } = supabase.storage
-        //   .from('files')
-        //   .getPublicUrl(storageData.path)
+        // 6. Create database record
+        const { data: fileRecord, error: dbError } = await supabase
+          .from('files')
+          .insert({
+            user_id: userId,
+            name: file.name,
+            type: type,
+            extension: ext,
+            size: file.size,
+            url: publicUrl,
+            storage_path: storagePath,
+            storage_provider: 'supabase',
+            mime_type: file.type || 'application/octet-stream',
+            is_starred: false,
+            is_shared: false,
+            folder_id: state.currentFolder !== 'All Files' ? state.currentFolder : null,
+            status: 'active',
+            access_level: 'private',
+            downloads: 0,
+            views: 0
+          })
+          .select()
+          .single()
 
-        // For now, create file record in database
-        const { data: createdFile, error } = await createFile(userId, {
-          name: file.name,
-          type: type as any,
-          extension: ext,
-          size: file.size,
-          url: URL.createObjectURL(file), // In production, use Supabase Storage URL
-          mime_type: file.type,
-          folder_id: state.currentFolder !== 'All Files' ? state.currentFolder : null,
-          access_level: 'private'
-        })
+        if (dbError) {
+          logger.error('Database insert failed', {
+            error: dbError,
+            fileName: file.name
+          })
 
-        if (error) throw new Error(error.message)
+          // Clean up storage file since DB insert failed
+          await supabase.storage.from('user-files').remove([storagePath])
+
+          failedFiles.push(file.name)
+          continue
+        }
 
         // Transform to UI format
         const uiFile: FileItem = {
-          id: createdFile!.id,
-          name: createdFile!.name,
-          type: createdFile!.type,
-          size: createdFile!.size,
-          url: createdFile!.url,
-          extension: createdFile!.extension,
-          uploadedAt: createdFile!.uploaded_at,
+          id: fileRecord.id,
+          name: fileRecord.name,
+          type: fileRecord.type,
+          size: fileRecord.size,
+          url: fileRecord.url,
+          extension: fileRecord.extension,
+          uploadedAt: fileRecord.uploaded_at,
           uploadedBy: {
             id: userId,
             name: 'Current User',
             avatar: ''
           },
-          modifiedAt: createdFile!.updated_at,
-          folder: createdFile!.folder_id || 'All Files',
+          modifiedAt: fileRecord.updated_at,
+          folder: fileRecord.folder_id || 'All Files',
           tags: [],
-          shared: createdFile!.is_shared,
-          starred: createdFile!.is_starred,
+          shared: fileRecord.is_shared,
+          starred: fileRecord.is_starred,
           locked: false,
-          downloads: createdFile!.downloads,
-          views: createdFile!.views,
+          downloads: fileRecord.downloads,
+          views: fileRecord.views,
           version: 1,
-          accessLevel: createdFile!.access_level
+          accessLevel: fileRecord.access_level
         }
 
-        dispatch({ type: 'ADD_FILE', file: uiFile })
-        uploadedFiles.push(file.name)
-        uploadedTypes.push(type)
+        uploadedFiles.push(uiFile)
 
-        logger.info('File uploaded to database', {
-          fileId: createdFile!.id,
-          fileName: file.name,
-          fileType: type
+        logger.info('File upload complete', {
+          fileId: fileRecord.id,
+          fileName: file.name
         })
+
+      } catch (error) {
+        logger.error('Unexpected upload error', {
+          error,
+          fileName: file.name
+        })
+        failedFiles.push(file.name)
       }
-
-      setIsUploadModalOpen(false)
-      setUploadFiles(null)
-
-      logger.info('Files uploaded successfully', {
-        uploadedCount: uploadFiles.length,
-        totalSize,
-        uploadedTypes: [...new Set(uploadedTypes)],
-        targetFolder: state.currentFolder
-      })
-
-      toast.success('✅ Files uploaded!', {
-        description: `${uploadFiles.length} files - ${Math.round(totalSize / 1024)}KB - ${[...new Set(uploadedTypes)].join(', ')}`
-      })
-    } catch (error: any) {
-      logger.error('File upload failed', {
-        error: error.message,
-        fileCount: uploadFiles.length,
-        userId
-      })
-      toast.error('Failed to upload files', {
-        description: error.message || 'Please try again later'
-      })
-    } finally {
-      setIsSaving(false)
     }
+
+    setIsUploading(false)
+    setIsUploadModalOpen(false)
+    setUploadFiles(null)
+
+    // Update UI with uploaded files
+    if (uploadedFiles.length > 0) {
+      dispatch({ type: 'ADD_FILES', payload: uploadedFiles })
+
+      const totalSize = uploadedFiles.reduce((sum, f) => sum + f.size, 0)
+      const formattedSize = formatFileSize(totalSize)
+
+      toast.success(`${uploadedFiles.length} file(s) uploaded!`, {
+        description: `Total size: ${formattedSize}`
+      })
+
+      announce(`${uploadedFiles.length} files uploaded successfully`, 'polite')
+    }
+
+    // Show errors for failed files
+    if (failedFiles.length > 0) {
+      toast.error(`${failedFiles.length} file(s) failed to upload`, {
+        description: failedFiles.slice(0, 3).join(', ') +
+          (failedFiles.length > 3 ? '...' : '')
+      })
+
+      announce(`${failedFiles.length} files failed to upload`, 'assertive')
+    }
+
+    logger.info('Upload batch complete', {
+      successful: uploadedFiles.length,
+      failed: failedFiles.length
+    })
   }
 
   const handleDeleteFile = async (fileId: string) => {
-    const file = state.files.find(f => f.id === fileId)
-
-    if (!file) {
-      logger.warn('Delete failed - file not found', { fileId })
+    if (!userId) {
+      toast.error('Please log in to delete files')
       return
     }
 
-    logger.info('Deleting file from Supabase', {
-      fileId,
-      fileName: file.name,
-      fileType: file.type,
-      fileSize: file.size
-    })
+    const file = state.files.find(f => f.id === fileId)
+    if (!file) {
+      toast.error('File not found')
+      return
+    }
 
     try {
-      // Dynamic import
-      const { deleteFile } = await import('@/lib/files-hub-queries')
-
-      const { error } = await deleteFile(fileId)
-
-      if (error) throw new Error(error.message)
-
-      dispatch({ type: 'DELETE_FILE', fileId })
-
-      logger.info('File deleted successfully', {
-        fileId,
-        fileName: file.name,
-        fileType: file.type
-      })
-
-      toast.success('File deleted', {
-        description: `${file.name} - ${file.type} - ${Math.round(file.size / 1024)}KB removed`
-      })
-    } catch (error: any) {
-      logger.error('Delete file failed', {
-        error: error.message,
+      logger.info('Deleting file', {
         fileId,
         fileName: file.name
       })
-      toast.error('Failed to delete file', {
-        description: error.message || 'Please try again later'
+
+      // 1. Get file details from database to get storage_path
+      const { data: fileData, error: fetchError } = await supabase
+        .from('files')
+        .select('storage_path, storage_provider')
+        .eq('id', fileId)
+        .single()
+
+      if (fetchError) {
+        logger.error('Failed to fetch file details', { error: fetchError, fileId })
+        toast.error('Failed to delete file')
+        return
+      }
+
+      // 2. Delete from Supabase Storage (if file has storage_path)
+      if (fileData.storage_path && fileData.storage_provider === 'supabase') {
+        const { error: storageError } = await supabase
+          .storage
+          .from('user-files')
+          .remove([fileData.storage_path])
+
+        if (storageError) {
+          logger.error('Storage deletion failed', {
+            error: storageError,
+            fileId
+          })
+          toast.error('Failed to delete file from storage')
+          return
+        }
+      }
+
+      // 3. Delete from database
+      const { error: dbError } = await supabase
+        .from('files')
+        .delete()
+        .eq('id', fileId)
+        .eq('user_id', userId) // Security: ensure user owns this file
+
+      if (dbError) {
+        logger.error('Database deletion failed', {
+          error: dbError,
+          fileId
+        })
+        toast.error('Failed to delete file record')
+        return
+      }
+
+      // 4. Update local state
+      dispatch({ type: 'DELETE_FILE', fileId })
+
+      toast.success(`Deleted ${file.name}`)
+      announce(`Deleted ${file.name}`, 'polite')
+
+      logger.info('File deleted successfully', {
+        fileId,
+        fileName: file.name
       })
+
+    } catch (error) {
+      logger.error('Deletion error', {
+        error,
+        fileId
+      })
+      toast.error('Failed to delete file')
+      announce('Failed to delete file', 'assertive')
     }
   }
 
@@ -663,54 +767,105 @@ export default function FilesHubPage() {
     }
   }
 
-  const handleDownload = (fileId: string) => {
-    const file = state.files.find(f => f.id === fileId)
+  const handleDownload = async (fileId: string) => {
+    if (!userId) {
+      toast.error('Please log in to download files')
+      return
+    }
 
+    const file = state.files.find(f => f.id === fileId)
     if (!file) {
       logger.warn('Download failed - file not found', { fileId })
       return
     }
 
-    logger.info('File download initiated', {
-      fileId,
-      fileName: file.name,
-      fileType: file.type,
-      fileSize: file.size,
-      previousDownloads: file.downloads
-    })
+    try {
+      logger.info('Downloading file', {
+        fileId: file.id,
+        fileName: file.name
+      })
 
-    // PRODUCTION: Download via API
-    // const response = await fetch(`/api/files/${fileId}/download`)
-    // const blob = await response.blob()
-    // const url = window.URL.createObjectURL(blob)
-    // const a = document.createElement('a')
-    // a.href = url
-    // a.download = file.name
-    // document.body.appendChild(a)
-    // a.click()
-    // document.body.removeChild(a)
-    // window.URL.revokeObjectURL(url)
+      // 1. Get file details from database to get storage_path
+      const { data: fileData, error: fetchError } = await supabase
+        .from('files')
+        .select('storage_path, storage_provider')
+        .eq('id', fileId)
+        .single()
 
-    // Mock download - in production, use API endpoint above
-    const updatedFile = { ...file, downloads: file.downloads + 1 }
-    dispatch({ type: 'UPDATE_FILE', file: updatedFile })
+      if (fetchError) {
+        logger.error('Failed to fetch file details', { error: fetchError, fileId })
+        toast.error('Failed to download file')
+        return
+      }
 
-    const a = document.createElement('a')
-    a.href = file.url
-    a.download = file.name
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
+      // 2. Download file from Supabase Storage
+      if (fileData.storage_path && fileData.storage_provider === 'supabase') {
+        const { data, error } = await supabase
+          .storage
+          .from('user-files')
+          .download(fileData.storage_path)
 
-    logger.info('File download started', {
-      fileId,
-      fileName: file.name,
-      newDownloadCount: file.downloads + 1
-    })
+        if (error) {
+          logger.error('Download failed', {
+            error,
+            fileId: file.id
+          })
+          toast.error(`Failed to download ${file.name}`)
+          announce(`Failed to download ${file.name}`, 'assertive')
+          return
+        }
 
-    toast.success('Download started', {
-      description: `${file.name} - ${Math.round(file.size / 1024)}KB - ${file.type} - Downloads: ${file.downloads + 1}`
-    })
+        // 3. Create blob URL and trigger download
+        const url = URL.createObjectURL(data)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = file.name
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+
+        // 4. Increment download count in database
+        await supabase
+          .from('files')
+          .update({ downloads: file.downloads + 1 })
+          .eq('id', fileId)
+
+        // 5. Update local state
+        const updatedFile = { ...file, downloads: file.downloads + 1 }
+        dispatch({ type: 'UPDATE_FILE', file: updatedFile })
+
+        toast.success(`Downloaded ${file.name}`, {
+          description: `Size: ${formatFileSize(file.size)}`
+        })
+
+        announce(`Downloaded ${file.name}`, 'polite')
+
+        logger.info('File downloaded successfully', {
+          fileId: file.id,
+          fileName: file.name
+        })
+      } else {
+        // Fallback for files without storage_path (e.g., old files)
+        const a = document.createElement('a')
+        a.href = file.url
+        a.download = file.name
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+
+        toast.success(`Downloaded ${file.name}`)
+        announce(`Downloaded ${file.name}`, 'polite')
+      }
+
+    } catch (error) {
+      logger.error('Download error', {
+        error,
+        fileId: file.id
+      })
+      toast.error('Download failed')
+      announce('Download failed', 'assertive')
+    }
   }
 
   const handleShare = async () => {
@@ -1587,11 +1742,11 @@ export default function FilesHubPage() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsUploadModalOpen(false)}>
+            <Button variant="outline" onClick={() => setIsUploadModalOpen(false)} disabled={isUploading}>
               Cancel
             </Button>
-            <Button onClick={handleUploadFiles} disabled={isSaving}>
-              {isSaving ? 'Uploading...' : 'Upload'}
+            <Button onClick={handleUploadFiles} disabled={isUploading}>
+              {isUploading ? 'Uploading...' : 'Upload'}
             </Button>
           </DialogFooter>
         </DialogContent>
