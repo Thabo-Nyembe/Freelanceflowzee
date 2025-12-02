@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
+import { toast } from 'sonner'
 import {
   Users,
   UserPlus,
@@ -33,7 +34,8 @@ import {
   Upload,
   CheckCircle,
   AlertCircle,
-  XCircle
+  XCircle,
+  Trash2
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -41,30 +43,18 @@ import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleto
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
-import type { UserRole, RolePermission, UserPermission } from '@/lib/team-management-queries'
+import type { TeamMember as DatabaseTeamMember } from '@/lib/team-hub-queries'
 
 const logger = createFeatureLogger('TeamManagement')
 
-// Transform database role to UI member format
-interface TeamMember {
-  id: string
-  name: string
-  role: string
-  email: string
-  phone: string
-  location: string
-  avatar: string
-  status: 'online' | 'offline' | 'busy' | 'away'
-  level: string
-  joinDate: string
-  completedProjects: number
-  activeProjects: number
-  rating: number
-  skills: string[]
-  currentWorkload: number
-  availability: string
-  lastActive: string
-  performance: {
+// UI display format for team members
+interface TeamMember extends DatabaseTeamMember {
+  // Additional UI-only fields can be computed from database fields
+  completedProjects?: number
+  activeProjects?: number
+  currentWorkload?: number
+  lastActive?: string
+  performance?: {
     tasksCompleted: number
     onTimeDelivery: number
     clientSatisfaction: number
@@ -90,10 +80,7 @@ export default function TeamManagementPage() {
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Supabase data state
-  const [userRoles, setUserRoles] = useState<UserRole[]>([])
-  const [rolePermissions, setRolePermissions] = useState<RolePermission[]>([])
-  const [userPermissions, setUserPermissions] = useState<UserPermission[]>([])
+  // Database state
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [teamStats, setTeamStats] = useState<TeamStats>({
     totalMembers: 0,
@@ -105,28 +92,29 @@ export default function TeamManagementPage() {
     teamEfficiency: 0
   })
 
-  // A+++ LOAD TEAM MANAGEMENT DATA FROM SUPABASE
+  // Add member form state
+  const [isAddMemberOpen, setIsAddMemberOpen] = useState(false)
+  const [newMember, setNewMember] = useState({
+    name: '',
+    email: '',
+    role: '',
+    department: 'development' as const,
+    phone: '',
+    location: '',
+    bio: '',
+    timezone: 'UTC'
+  })
+
+  // A+++ LOAD REAL TEAM DATA FROM DATABASE
   useEffect(() => {
-    const loadTeamManagementData = async () => {
+    const loadTeamData = async () => {
       try {
         setIsLoading(true)
         setError(null)
-        logger.info('Loading team management data from Supabase', { action: 'load_start' })
+        logger.info('Loading team management data from database', { action: 'load_start' })
 
-        // Dynamic imports for code splitting
-        const [
-          { getUserRoles },
-          { getRolePermissions },
-          { getUserPermissions },
-          { createClient }
-        ] = await Promise.all([
-          import('@/lib/team-management-queries'),
-          import('@/lib/team-management-queries'),
-          import('@/lib/team-management-queries'),
-          import('@/lib/supabase/client')
-        ])
-
-        // Get current user ID
+        // Get current user
+        const { createClient } = await import('@/lib/supabase/client')
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
 
@@ -134,83 +122,71 @@ export default function TeamManagementPage() {
           throw new Error('User not authenticated')
         }
 
-        // Parallel data loading
-        const [rolesResult, permissionsResult, userPermsResult] = await Promise.all([
-          getUserRoles(user.id),
-          getRolePermissions(user.id),
-          getUserPermissions(user.id)
+        // Load real team members from database
+        const { getTeamMembers, getTeamOverview, getDepartments } = await import('@/lib/team-hub-queries')
+
+        const [membersResult, overviewResult, departmentsResult] = await Promise.all([
+          getTeamMembers(user.id),
+          getTeamOverview(user.id),
+          getDepartments(user.id)
         ])
 
-        if (rolesResult.error) {
-          logger.error('Failed to load user roles', { error: rolesResult.error })
-          throw new Error('Failed to load user roles')
+        if (membersResult.error) {
+          logger.error('Failed to load team members', { error: membersResult.error })
+          // Don't throw - just log and continue with empty array
         }
 
-        if (permissionsResult.error) {
-          logger.error('Failed to load role permissions', { error: permissionsResult.error })
-          throw new Error('Failed to load role permissions')
+        if (overviewResult.error) {
+          logger.error('Failed to load team overview', { error: overviewResult.error })
         }
 
-        if (userPermsResult.error) {
-          logger.error('Failed to load user permissions', { error: userPermsResult.error })
-          throw new Error('Failed to load user permissions')
+        if (departmentsResult.error) {
+          logger.error('Failed to load departments', { error: departmentsResult.error })
         }
 
-        setUserRoles(rolesResult.data || [])
-        setRolePermissions(permissionsResult.data || [])
-        setUserPermissions(userPermsResult.data || [])
-
-        // Transform roles to team members display format
-        // Since we don't have team_members table yet, we'll use user_roles as mock data
-        const mockMembers: TeamMember[] = rolesResult.data?.slice(0, 4).map((role, index) => ({
-          id: role.id,
-          name: `Team Member ${index + 1}`,
-          role: role.role_name,
-          email: `member${index + 1}@kazi.com`,
-          phone: `+1 (555) ${String(Math.floor(Math.random() * 900) + 100)}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
-          location: ['New York, USA', 'San Francisco, USA', 'Austin, USA', 'Seattle, USA'][index % 4],
-          avatar: `/avatars/member${index + 1}.jpg`,
-          status: ['online', 'busy', 'away', 'offline'][Math.floor(Math.random() * 4)] as any,
-          level: role.role_name === 'owner' ? 'lead' : role.role_name === 'admin' ? 'senior' : 'mid',
-          joinDate: new Date(role.created_at).toISOString().split('T')[0],
-          completedProjects: Math.floor(Math.random() * 50),
-          activeProjects: Math.floor(Math.random() * 10),
-          rating: 4.5 + Math.random() * 0.5,
-          skills: ['Leadership', 'Project Management', 'Communication'],
-          currentWorkload: Math.floor(Math.random() * 40) + 60,
-          availability: 'full-time',
-          lastActive: `${Math.floor(Math.random() * 60)} minutes ago`,
+        // Set team members with computed UI fields
+        const members = (membersResult.data || []).map(member => ({
+          ...member,
+          // Compute UI-specific fields from database data
+          completedProjects: Math.floor(member.projects_count * 0.7), // Estimate 70% completed
+          activeProjects: Math.ceil(member.projects_count * 0.3), // Estimate 30% active
+          currentWorkload: Math.min(75 + Math.floor(member.projects_count * 5), 100), // Workload based on projects
+          lastActive: member.last_seen
+            ? `${Math.floor((Date.now() - new Date(member.last_seen).getTime()) / 60000)} minutes ago`
+            : 'Never',
           performance: {
-            tasksCompleted: Math.floor(Math.random() * 200) + 50,
-            onTimeDelivery: Math.floor(Math.random() * 10) + 90,
-            clientSatisfaction: 4.5 + Math.random() * 0.5,
-            teamCollaboration: 4.5 + Math.random() * 0.5
+            tasksCompleted: member.tasks_completed,
+            onTimeDelivery: Math.min(85 + Math.floor(member.rating * 3), 100),
+            clientSatisfaction: member.rating,
+            teamCollaboration: Math.min(member.rating + 0.2, 5)
           }
-        })) || []
+        }))
 
-        setTeamMembers(mockMembers)
+        setTeamMembers(members)
+        logger.info('Team members loaded', { count: members.length })
 
-        // Calculate stats
+        // Calculate stats from real data
         const stats: TeamStats = {
-          totalMembers: rolesResult.data?.length || 0,
-          activeMembers: rolesResult.data?.filter(r => r.is_active).length || 0,
-          avgRating: mockMembers.length > 0
-            ? mockMembers.reduce((sum, m) => sum + m.rating, 0) / mockMembers.length
+          totalMembers: members.length,
+          activeMembers: members.filter(m => m.status === 'online' || m.status === 'busy').length,
+          avgRating: members.length > 0
+            ? members.reduce((sum, m) => sum + m.rating, 0) / members.length
             : 0,
-          totalProjects: mockMembers.reduce((sum, m) => sum + m.completedProjects + m.activeProjects, 0),
-          completedProjects: mockMembers.reduce((sum, m) => sum + m.completedProjects, 0),
-          avgWorkload: mockMembers.length > 0
-            ? mockMembers.reduce((sum, m) => sum + m.currentWorkload, 0) / mockMembers.length
+          totalProjects: members.reduce((sum, m) => sum + (m.completedProjects || 0) + (m.activeProjects || 0), 0),
+          completedProjects: members.reduce((sum, m) => sum + (m.completedProjects || 0), 0),
+          avgWorkload: members.length > 0
+            ? members.reduce((sum, m) => sum + (m.currentWorkload || 0), 0) / members.length
             : 0,
-          teamEfficiency: 94
+          teamEfficiency: overviewResult.data?.total_members
+            ? Math.min(85 + Math.floor(overviewResult.data.average_rating * 3), 100)
+            : 94
         }
         setTeamStats(stats)
 
         logger.info('Team management data loaded successfully', {
-          roles_count: rolesResult.data?.length || 0,
-          permissions_count: permissionsResult.data?.length || 0,
-          user_permissions_count: userPermsResult.data?.length || 0,
-          members_count: mockMembers.length
+          members_count: members.length,
+          departments_count: departmentsResult.data?.length || 0,
+          total_members: overviewResult.data?.total_members || 0
         })
 
         setIsLoading(false)
@@ -224,43 +200,120 @@ export default function TeamManagementPage() {
       }
     }
 
-    loadTeamManagementData()
+    loadTeamData()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // A+++ CRUD HANDLERS
   const handleAddMember = async () => {
-    try {
-      logger.info('Adding new team member', { action: 'add_member' })
+    if (!newMember.name || !newMember.email || !newMember.role) {
+      toast.error('Please fill in required fields: name, email, and role')
+      return
+    }
 
-      const { createUserRole, createClient } = await import('@/lib/team-management-queries')
-      const supabase = (await import('@/lib/supabase/client')).createClient()
+    try {
+      logger.info('Adding new team member', { action: 'add_member', member: newMember })
+
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
         throw new Error('User not authenticated')
       }
 
-      // Create a new member role
-      const newRole = await createUserRole(user.id, {
-        role_name: 'member',
-        role_description: 'New team member',
-        can_invite_users: false,
-        can_manage_team: false,
-        can_manage_projects: false
+      const { createTeamMember } = await import('@/lib/team-hub-queries')
+
+      const { data, error } = await createTeamMember(user.id, {
+        name: newMember.name,
+        email: newMember.email,
+        role: newMember.role,
+        department: newMember.department,
+        phone: newMember.phone,
+        location: newMember.location,
+        bio: newMember.bio,
+        timezone: newMember.timezone || 'UTC',
+        role_level: 'mid',
+        skills: []
       })
 
-      if (newRole.error) {
-        throw new Error('Failed to create member role')
+      if (error || !data) {
+        throw new Error('Failed to add team member')
       }
 
-      logger.info('Team member added successfully', { role_id: newRole.data?.id })
-      announce('Team member added successfully', 'polite')
+      // Add to local state with computed fields
+      const newTeamMember = {
+        ...data,
+        completedProjects: 0,
+        activeProjects: 0,
+        currentWorkload: 75,
+        lastActive: 'Just now',
+        performance: {
+          tasksCompleted: 0,
+          onTimeDelivery: 85,
+          clientSatisfaction: 4.5,
+          teamCollaboration: 4.5
+        }
+      }
 
-      // Reload data
-      window.location.reload()
+      setTeamMembers(prev => [newTeamMember, ...prev])
+      toast.success(`${data.name} added to team successfully`)
+      logger.info('Team member added successfully', { member_id: data.id, name: data.name })
+      announce(`${data.name} added to team`, 'polite')
+
+      // Reset form
+      setNewMember({
+        name: '',
+        email: '',
+        role: '',
+        department: 'development',
+        phone: '',
+        location: '',
+        bio: '',
+        timezone: 'UTC'
+      })
+      setIsAddMemberOpen(false)
     } catch (err) {
       logger.error('Failed to add team member', { error: err })
+      toast.error('Failed to add team member')
       announce('Failed to add team member', 'assertive')
+    }
+  }
+
+  const handleDeleteMember = async (memberId: string) => {
+    const member = teamMembers.find(m => m.id === memberId)
+    if (!member) return
+
+    if (!confirm(`Remove ${member.name} from the team? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      logger.info('Deleting team member', { action: 'delete_member', member_id: memberId })
+
+      const { createClient } = await import('@/lib/supabase/client')
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { deleteTeamMember } = await import('@/lib/team-hub-queries')
+
+      const { success, error } = await deleteTeamMember(memberId, user.id)
+
+      if (error || !success) {
+        throw new Error('Failed to remove team member')
+      }
+
+      setTeamMembers(prev => prev.filter(m => m.id !== memberId))
+      toast.success(`${member.name} removed from team`)
+      logger.info('Team member deleted successfully', { member_id: memberId })
+      announce(`${member.name} removed from team`, 'polite')
+    } catch (err) {
+      logger.error('Failed to delete team member', { error: err })
+      toast.error('Failed to remove team member')
+      announce('Failed to remove team member', 'assertive')
     }
   }
 
@@ -269,11 +322,10 @@ export default function TeamManagementPage() {
       logger.info('Exporting team management data', { action: 'export' })
 
       const exportData = {
-        roles: userRoles,
-        permissions: rolePermissions,
-        userPermissions: userPermissions,
+        teamMembers,
         teamStats,
-        exportedAt: new Date().toISOString()
+        exportedAt: new Date().toISOString(),
+        totalMembers: teamMembers.length
       }
 
       const blob = new Blob([JSON.stringify(exportData, null, 2)], {
@@ -289,12 +341,14 @@ export default function TeamManagementPage() {
       URL.revokeObjectURL(url)
 
       logger.info('Team management data exported successfully', {
-        roles_count: userRoles.length,
+        members_count: teamMembers.length,
         file_name: a.download
       })
+      toast.success('Team data exported successfully')
       announce('Team data exported successfully', 'polite')
     } catch (err) {
       logger.error('Failed to export team data', { error: err })
+      toast.error('Failed to export team data')
       announce('Failed to export team data', 'assertive')
     }
   }
@@ -348,8 +402,10 @@ export default function TeamManagementPage() {
   const getLevelBadge = (level: string) => {
     switch (level) {
       case 'lead': return { color: 'bg-purple-100 text-purple-800', icon: Crown }
+      case 'executive': return { color: 'bg-purple-100 text-purple-800', icon: Crown }
       case 'senior': return { color: 'bg-blue-100 text-blue-800', icon: Star }
       case 'mid': return { color: 'bg-green-100 text-green-800', icon: Target }
+      case 'entry': return { color: 'bg-gray-100 text-gray-800', icon: Users }
       case 'junior': return { color: 'bg-gray-100 text-gray-800', icon: Users }
       default: return { color: 'bg-gray-100 text-gray-800', icon: Users }
     }
@@ -358,7 +414,7 @@ export default function TeamManagementPage() {
   const filteredMembers = teamMembers.filter(member =>
     member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     member.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    member.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
+    (member.skills && member.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase())))
   )
 
   // A+++ LOADING STATE
@@ -449,8 +505,8 @@ export default function TeamManagementPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Team Rating</p>
-                  <p className="text-3xl font-bold text-gray-900">{teamStats.avgRating}</p>
-                  <p className="text-sm text-yellow-600">⭐ Excellent</p>
+                  <p className="text-3xl font-bold text-gray-900">{teamStats.avgRating.toFixed(1)}</p>
+                  <p className="text-sm text-yellow-600">⭐ {teamStats.avgRating >= 4.5 ? 'Excellent' : teamStats.avgRating >= 3.5 ? 'Good' : 'Fair'}</p>
                 </div>
                 <div className="p-3 bg-yellow-100 rounded-xl">
                   <Star className="h-6 w-6 text-yellow-600" />
@@ -464,8 +520,8 @@ export default function TeamManagementPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Avg Workload</p>
-                  <p className="text-3xl font-bold text-gray-900">{teamStats.avgWorkload}%</p>
-                  <p className="text-sm text-orange-600">Optimal range</p>
+                  <p className="text-3xl font-bold text-gray-900">{teamStats.avgWorkload.toFixed(0)}%</p>
+                  <p className="text-sm text-orange-600">{teamStats.avgWorkload >= 80 ? 'High' : teamStats.avgWorkload >= 60 ? 'Optimal' : 'Low'}</p>
                 </div>
                 <div className="p-3 bg-orange-100 rounded-xl">
                   <Activity className="h-6 w-6 text-orange-600" />
@@ -600,9 +656,9 @@ export default function TeamManagementPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {filteredMembers.map((member) => {
-                const levelBadge = getLevelBadge(member.level)
+                const levelBadge = getLevelBadge(member.role_level)
                 const LevelIcon = levelBadge.icon
-                
+
                 return (
                   <Card key={member.id} className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
                     <CardHeader className="pb-3">
@@ -621,16 +677,16 @@ export default function TeamManagementPage() {
                             <div className="flex items-center gap-2 mt-2">
                               <Badge className={levelBadge.color}>
                                 <LevelIcon className="h-3 w-3 mr-1" />
-                                {member.level}
+                                {member.role_level}
                               </Badge>
                               <Badge variant="outline" className="bg-white">
-                                ⭐ {member.rating}
+                                ⭐ {member.rating.toFixed(1)}
                               </Badge>
                             </div>
                           </div>
                         </div>
-                        <Button variant="ghost" size="sm" onClick={() => handleMemberOptions(member)}>
-                          <MoreHorizontal className="h-4 w-4" />
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteMember(member.id)}>
+                          <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
                       </div>
                     </CardHeader>
@@ -638,31 +694,39 @@ export default function TeamManagementPage() {
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <p className="text-gray-600">Completed Projects</p>
-                          <p className="font-semibold text-lg">{member.completedProjects}</p>
+                          <p className="font-semibold text-lg">{member.completedProjects || 0}</p>
                         </div>
                         <div>
                           <p className="text-gray-600">Active Projects</p>
-                          <p className="font-semibold text-lg">{member.activeProjects}</p>
+                          <p className="font-semibold text-lg">{member.activeProjects || 0}</p>
                         </div>
                       </div>
-                      
+
                       <div>
                         <div className="flex justify-between text-sm mb-2">
                           <span className="text-gray-600">Current Workload</span>
-                          <span className="font-medium">{member.currentWorkload}%</span>
+                          <span className="font-medium">{member.currentWorkload || 0}%</span>
                         </div>
-                        <Progress value={member.currentWorkload} className="h-2" />
+                        <Progress value={member.currentWorkload || 0} className="h-2" />
                       </div>
 
                       <div className="flex flex-wrap gap-1">
-                        {member.skills.slice(0, 3).map((skill) => (
-                          <Badge key={skill} variant="secondary" className="text-xs">
-                            {skill}
-                          </Badge>
-                        ))}
-                        {member.skills.length > 3 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{member.skills.length - 3} more
+                        {member.skills && member.skills.length > 0 ? (
+                          <>
+                            {member.skills.slice(0, 3).map((skill) => (
+                              <Badge key={skill} variant="secondary" className="text-xs">
+                                {skill}
+                              </Badge>
+                            ))}
+                            {member.skills.length > 3 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{member.skills.length - 3} more
+                              </Badge>
+                            )}
+                          </>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs text-gray-500">
+                            No skills listed
                           </Badge>
                         )}
                       </div>
@@ -670,7 +734,7 @@ export default function TeamManagementPage() {
                       <div className="flex items-center justify-between pt-2">
                         <div className="flex items-center space-x-2 text-sm text-gray-600">
                           <MapPin className="h-3 w-3" />
-                          <span>{member.location}</span>
+                          <span>{member.location || 'Not specified'}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Button size="sm" variant="outline" onClick={() => handleMessageMember(member)}>
@@ -711,33 +775,33 @@ export default function TeamManagementPage() {
                       <div>
                         <div className="flex justify-between text-sm mb-1">
                           <span>Tasks Completed</span>
-                          <span className="font-medium">{member.performance.tasksCompleted}</span>
+                          <span className="font-medium">{member.performance?.tasksCompleted || 0}</span>
                         </div>
-                        <Progress value={Math.min(member.performance.tasksCompleted / 3, 100)} className="h-2" />
+                        <Progress value={Math.min((member.performance?.tasksCompleted || 0) / 3, 100)} className="h-2" />
                       </div>
-                      
+
                       <div>
                         <div className="flex justify-between text-sm mb-1">
                           <span>On-time Delivery</span>
-                          <span className="font-medium">{member.performance.onTimeDelivery}%</span>
+                          <span className="font-medium">{member.performance?.onTimeDelivery || 0}%</span>
                         </div>
-                        <Progress value={member.performance.onTimeDelivery} className="h-2" />
+                        <Progress value={member.performance?.onTimeDelivery || 0} className="h-2" />
                       </div>
-                      
+
                       <div>
                         <div className="flex justify-between text-sm mb-1">
                           <span>Client Satisfaction</span>
-                          <span className="font-medium">⭐ {member.performance.clientSatisfaction}</span>
+                          <span className="font-medium">⭐ {(member.performance?.clientSatisfaction || 0).toFixed(1)}</span>
                         </div>
-                        <Progress value={member.performance.clientSatisfaction * 20} className="h-2" />
+                        <Progress value={(member.performance?.clientSatisfaction || 0) * 20} className="h-2" />
                       </div>
-                      
+
                       <div>
                         <div className="flex justify-between text-sm mb-1">
                           <span>Team Collaboration</span>
-                          <span className="font-medium">⭐ {member.performance.teamCollaboration}</span>
+                          <span className="font-medium">⭐ {(member.performance?.teamCollaboration || 0).toFixed(1)}</span>
                         </div>
-                        <Progress value={member.performance.teamCollaboration * 20} className="h-2" />
+                        <Progress value={(member.performance?.teamCollaboration || 0) * 20} className="h-2" />
                       </div>
                     </div>
                   </CardContent>
