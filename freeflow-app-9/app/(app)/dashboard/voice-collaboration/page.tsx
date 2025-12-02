@@ -67,6 +67,7 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   type VoiceRoom,
   type VoiceRecording,
@@ -76,8 +77,6 @@ import {
   type RoomType,
   type RoomStatus,
   type AudioQuality,
-  MOCK_VOICE_ROOMS,
-  MOCK_VOICE_RECORDINGS,
   formatDuration,
   formatFileSize,
   formatRelativeTime,
@@ -201,6 +200,7 @@ export default function VoiceCollaborationPage() {
   logger.info('Voice collaboration page mounting')
 
   const announce = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // State Management
   const [state, dispatch] = useReducer(voiceCollaborationReducer, {
@@ -242,19 +242,102 @@ export default function VoiceCollaborationPage() {
     autoGainControl: true
   })
 
-  // Load mock data
+  // Load voice collaboration data from database
   useEffect(() => {
-    logger.debug('Loading mock data from utilities')
+    const loadVoiceCollaborationData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        dispatch({ type: 'SET_LOADING', isLoading: false })
+        return
+      }
 
-    dispatch({ type: 'SET_ROOMS', rooms: MOCK_VOICE_ROOMS })
-    dispatch({ type: 'SET_RECORDINGS', recordings: MOCK_VOICE_RECORDINGS })
+      try {
+        dispatch({ type: 'SET_LOADING', isLoading: true })
+        dispatch({ type: 'SET_ERROR', error: null })
+        logger.info('Loading voice collaboration data', { userId })
 
-    logger.info('Mock data loaded from utilities', {
-      roomsCount: MOCK_VOICE_ROOMS.length,
-      recordingsCount: MOCK_VOICE_RECORDINGS.length
-    })
-    announce('Voice collaboration page loaded', 'polite')
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+        const { getVoiceRooms, getVoiceRecordings } = await import('@/lib/voice-collaboration-queries')
+
+        const [roomsResult, recordingsResult] = await Promise.all([
+          getVoiceRooms(userId),
+          getVoiceRecordings(userId)
+        ])
+
+        // Map database rooms to match client-side interface
+        const mappedRooms: VoiceRoom[] = (roomsResult.data || []).map((room: any) => ({
+          id: room.id,
+          name: room.name,
+          description: room.description || '',
+          type: room.type as RoomType,
+          status: room.status as RoomStatus,
+          hostId: room.host_id,
+          hostName: 'Host', // Would be fetched from user profile
+          participants: [],
+          currentParticipants: room.current_participants || 0,
+          capacity: room.capacity || 10,
+          quality: room.quality as AudioQuality,
+          isLocked: room.is_locked || false,
+          password: undefined,
+          isRecording: room.is_recording || false,
+          features: {
+            recording: room.recording_enabled || false,
+            transcription: room.transcription_enabled || false,
+            spatialAudio: room.spatial_audio_enabled || false,
+            noiseCancellation: room.noise_cancellation_enabled || true,
+            echoCancellation: room.echo_cancellation_enabled || true,
+            autoGainControl: room.auto_gain_control_enabled || true
+          },
+          category: room.category || 'General',
+          tags: room.tags || [],
+          duration: room.duration_seconds || 0,
+          createdAt: room.created_at,
+          updatedAt: room.updated_at
+        }))
+
+        // Map database recordings to match client-side interface
+        const mappedRecordings: VoiceRecording[] = (recordingsResult.data || []).map((rec: any) => ({
+          id: rec.id,
+          roomId: rec.room_id,
+          roomName: 'Recording Room', // Would be fetched via join
+          title: rec.title,
+          description: rec.description || '',
+          participants: 0, // Would be counted from participants table
+          duration: rec.duration_seconds || 0,
+          fileSize: rec.file_size_bytes || 0,
+          format: rec.format,
+          quality: rec.quality as AudioQuality,
+          status: rec.status,
+          transcriptionAvailable: rec.has_transcription || false,
+          viewCount: rec.play_count || 0,
+          downloadCount: rec.download_count || 0,
+          isPublic: rec.is_public || false,
+          startTime: rec.created_at,
+          endTime: rec.created_at,
+          createdAt: rec.created_at
+        }))
+
+        dispatch({ type: 'SET_ROOMS', rooms: mappedRooms })
+        dispatch({ type: 'SET_RECORDINGS', recordings: mappedRecordings })
+
+        toast.success('Voice collaboration loaded', {
+          description: `${mappedRooms.length} rooms, ${mappedRecordings.length} recordings from database`
+        })
+        logger.info('Voice collaboration data loaded successfully', {
+          roomsCount: mappedRooms.length,
+          recordingsCount: mappedRecordings.length
+        })
+        announce('Voice collaboration page loaded', 'polite')
+      } catch (error: any) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to load voice collaboration data'
+        logger.error('Failed to load voice collaboration data', { error: errorMessage, userId })
+        toast.error('Failed to load voice collaboration', { description: errorMessage })
+        dispatch({ type: 'SET_ERROR', error: errorMessage })
+        announce('Error loading voice collaboration', 'assertive')
+      }
+    }
+
+    loadVoiceCollaborationData()
+  }, [userId, announce])
 
   // Computed Stats
   const stats = useMemo(() => {
