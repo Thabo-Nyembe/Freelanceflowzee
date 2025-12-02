@@ -184,6 +184,7 @@
     "embla-carousel-react": "8.5.1",
     "emoji-picker-react": "^4.12.3",
     "framer-motion": "^12.23.24",
+    "ics": "^3.8.1",
     "input-otp": "1.4.1",
     "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^9.0.2",

@@ -1,42 +1,259 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { format } from 'date-fns'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+import {
+  generateCalendarDays,
+  getPreviousMonth,
+  getNextMonth,
+  getMonthYearString,
+  getTodaysBookings,
+  formatBookingTime,
+  type CalendarDay
+} from '@/lib/calendar-date-utils'
+import {
+  generateICalendarFile,
+  downloadICalendar,
+  getGoogleCalendarURL,
+  getOutlookCalendarURL,
+  type BookingEvent
+} from '@/lib/icalendar-export'
+import { createClient } from '@/lib/supabase/client'
 import {
   Calendar,
   ChevronLeft,
   ChevronRight,
   Globe,
-  Plus
+  Plus,
+  Clock
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { mockBookings } from '@/lib/bookings-utils'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
 
 const logger = createFeatureLogger('BookingsCalendar')
 
 export default function CalendarPage() {
-  const [currentMonth, setCurrentMonth] = useState('January 2025')
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [calendarDays, setCalendarDays] = useState<CalendarDay[]>([])
+  const [bookings, setBookings] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [selectedBooking, setSelectedBooking] = useState<any | null>(null)
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+  const supabase = createClient()
 
-  const handleAddToCalendar = (id: string) => {
-    const booking = mockBookings.find(b => b.id === id)
-    if (!booking) {
-      toast.error('Booking not found')
-      return
+  // Load bookings from database
+  useEffect(() => {
+    const loadBookings = async () => {
+      if (!userId) return
+
+      try {
+        setIsLoading(true)
+        logger.info('Loading bookings for calendar', { userId })
+
+        const { data, error } = await supabase
+          .from('bookings')
+          .select('*')
+          .eq('user_id', userId)
+          .order('booking_date', { ascending: true })
+
+        if (error) throw error
+
+        setBookings(data || [])
+        logger.info('Bookings loaded', { count: data?.length || 0 })
+        announce(`${data?.length || 0} bookings loaded`)
+      } catch (error) {
+        logger.error('Failed to load bookings', { error })
+        toast.error('Failed to load bookings')
+      } finally {
+        setIsLoading(false)
+      }
     }
 
-    logger.info('Add to calendar', {
-      bookingId: id,
-      clientName: booking.clientName,
-      date: booking.date,
-      time: booking.time
+    loadBookings()
+  }, [userId])
+
+  // Generate calendar days when date or bookings change
+  useEffect(() => {
+    if (!isLoading) {
+      const days = generateCalendarDays(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        bookings
+      )
+      setCalendarDays(days)
+      logger.debug('Calendar days generated', {
+        month: getMonthYearString(currentDate),
+        daysCount: days.length
+      })
+    }
+  }, [currentDate, bookings, isLoading])
+
+  const handlePreviousMonth = () => {
+    const newDate = getPreviousMonth(currentDate)
+    setCurrentDate(newDate)
+    logger.info('Navigate to previous month', {
+      month: getMonthYearString(newDate)
+    })
+    announce(`Showing ${getMonthYearString(newDate)}`)
+  }
+
+  const handleNextMonth = () => {
+    const newDate = getNextMonth(currentDate)
+    setCurrentDate(newDate)
+    logger.info('Navigate to next month', { month: getMonthYearString(newDate) })
+    announce(`Showing ${getMonthYearString(newDate)}`)
+  }
+
+  const handleToday = () => {
+    setCurrentDate(new Date())
+    logger.info('Navigate to today')
+    announce('Showing current month')
+  }
+
+  const handleDayClick = (day: CalendarDay) => {
+    if (!day.isCurrentMonth) return
+
+    setSelectedDate(day.date)
+    logger.info('Day selected', {
+      date: day.dateString,
+      bookingsCount: day.bookingsCount
     })
 
-    toast.info('Add to Calendar', {
-      description: `${booking.clientName} - ${booking.date} at ${booking.time}. Choose calendar: Google, Apple, or Outlook`
+    if (day.bookingsCount > 0) {
+      announce(
+        `${day.bookingsCount} booking${day.bookingsCount > 1 ? 's' : ''} on ${format(day.date, 'MMMM d')}`
+      )
+      toast.info(
+        `${day.bookingsCount} booking${day.bookingsCount > 1 ? 's' : ''}`,
+        {
+          description: `View bookings for ${format(day.date, 'MMMM d, yyyy')}`
+        }
+      )
+    } else {
+      announce(`No bookings on ${format(day.date, 'MMMM d')}`)
+    }
+  }
+
+  const handleAddToCalendar = (booking: any) => {
+    setSelectedBooking(booking)
+    setShowExportDialog(true)
+    logger.info('Add to calendar dialog opened', { bookingId: booking.id })
+  }
+
+  const handleExportToGoogle = () => {
+    if (!selectedBooking) return
+
+    const bookingEvent: BookingEvent = {
+      id: selectedBooking.id,
+      title: `Booking: ${selectedBooking.service_name || 'Service'}`,
+      description: selectedBooking.notes || '',
+      location: selectedBooking.location || 'Virtual',
+      startDate: new Date(
+        selectedBooking.booking_date +
+          'T' +
+          (selectedBooking.start_time || '09:00')
+      ),
+      endDate: new Date(
+        selectedBooking.booking_date +
+          'T' +
+          (selectedBooking.end_time || '10:00')
+      ),
+      clientName: selectedBooking.client_name,
+      clientEmail: selectedBooking.client_email
+    }
+
+    const url = getGoogleCalendarURL(bookingEvent)
+    window.open(url, '_blank')
+
+    logger.info('Exported to Google Calendar', {
+      bookingId: selectedBooking.id
     })
+    toast.success('Opening Google Calendar')
+    announce('Exported to Google Calendar')
+    setShowExportDialog(false)
+  }
+
+  const handleExportToOutlook = () => {
+    if (!selectedBooking) return
+
+    const bookingEvent: BookingEvent = {
+      id: selectedBooking.id,
+      title: `Booking: ${selectedBooking.service_name || 'Service'}`,
+      description: selectedBooking.notes || '',
+      location: selectedBooking.location || 'Virtual',
+      startDate: new Date(
+        selectedBooking.booking_date +
+          'T' +
+          (selectedBooking.start_time || '09:00')
+      ),
+      endDate: new Date(
+        selectedBooking.booking_date +
+          'T' +
+          (selectedBooking.end_time || '10:00')
+      ),
+      clientName: selectedBooking.client_name,
+      clientEmail: selectedBooking.client_email
+    }
+
+    const url = getOutlookCalendarURL(bookingEvent)
+    window.open(url, '_blank')
+
+    logger.info('Exported to Outlook Calendar', {
+      bookingId: selectedBooking.id
+    })
+    toast.success('Opening Outlook Calendar')
+    announce('Exported to Outlook Calendar')
+    setShowExportDialog(false)
+  }
+
+  const handleDownloadICS = async () => {
+    if (!selectedBooking) return
+
+    try {
+      const bookingEvent: BookingEvent = {
+        id: selectedBooking.id,
+        title: `Booking: ${selectedBooking.service_name || 'Service'}`,
+        description: selectedBooking.notes || '',
+        location: selectedBooking.location || 'Virtual',
+        startDate: new Date(
+          selectedBooking.booking_date +
+            'T' +
+            (selectedBooking.start_time || '09:00')
+        ),
+        endDate: new Date(
+          selectedBooking.booking_date +
+            'T' +
+            (selectedBooking.end_time || '10:00')
+        ),
+        clientName: selectedBooking.client_name,
+        clientEmail: selectedBooking.client_email
+      }
+
+      const icsBlob = await generateICalendarFile(bookingEvent)
+      downloadICalendar(icsBlob, `booking-${selectedBooking.id}.ics`)
+
+      logger.info('Downloaded ICS file', { bookingId: selectedBooking.id })
+      toast.success('Calendar file downloaded')
+      announce('Calendar file downloaded')
+      setShowExportDialog(false)
+    } catch (error) {
+      logger.error('Failed to generate ICS file', { error })
+      toast.error('Failed to download calendar file')
+    }
   }
 
   const handleSetAvailability = () => {
@@ -56,6 +273,7 @@ export default function CalendarPage() {
           <Button
             variant="outline"
             size="sm"
+            onClick={handleToday}
             data-testid="calendar-today-btn"
           >
             Today
@@ -84,12 +302,14 @@ export default function CalendarPage() {
       {/* Calendar Grid */}
       <div className="border rounded-lg p-4 bg-white">
         <div className="flex items-center justify-between mb-4">
-          <h4 className="font-semibold text-lg">{currentMonth}</h4>
+          <h4 className="font-semibold text-lg">
+            {getMonthYearString(currentDate)}
+          </h4>
           <div className="flex gap-2">
             <Button
               variant="outline"
               size="icon"
-              onClick={() => setCurrentMonth('December 2024')}
+              onClick={handlePreviousMonth}
               data-testid="calendar-prev-month-btn"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -97,7 +317,7 @@ export default function CalendarPage() {
             <Button
               variant="outline"
               size="icon"
-              onClick={() => setCurrentMonth('February 2025')}
+              onClick={handleNextMonth}
               data-testid="calendar-next-month-btn"
             >
               <ChevronRight className="h-4 w-4" />
@@ -115,67 +335,104 @@ export default function CalendarPage() {
               {day}
             </div>
           ))}
-          {Array.from({ length: 35 }).map((_, i) => {
-            const dayNum = i - 2
-            const hasBooking = [7, 8, 10, 12, 15].includes(dayNum)
-            return (
+
+          {isLoading ? (
+            <div className="col-span-7 text-center py-8 text-muted-foreground">
+              Loading calendar...
+            </div>
+          ) : (
+            calendarDays.map((day, index) => (
               <div
-                key={i}
-                className={`p-2 border rounded text-center cursor-pointer hover:bg-blue-50 ${
-                  dayNum < 1 || dayNum > 31 ? 'bg-gray-50 text-gray-400' : ''
-                } ${hasBooking ? 'bg-blue-100 border-blue-300' : ''}`}
-                onClick={() =>
-                  hasBooking &&
-                  handleAddToCalendar(`B-2025-${String(dayNum).padStart(3, '0')}`)
-                }
+                key={index}
+                className={`p-2 border rounded text-center cursor-pointer transition-colors
+                  ${!day.isCurrentMonth ? 'bg-gray-50 text-gray-400' : 'hover:bg-blue-50'}
+                  ${day.isToday ? 'border-blue-500 bg-blue-50' : ''}
+                  ${day.bookingsCount > 0 ? 'bg-blue-100 border-blue-300' : ''}
+                `}
+                onClick={() => handleDayClick(day)}
+                data-testid={`calendar-day-${day.dateString}`}
               >
-                {dayNum > 0 && dayNum <= 31 && (
-                  <div>
-                    <div className="text-sm font-medium">{dayNum}</div>
-                    {hasBooking && (
-                      <div className="mt-1">
-                        <Badge className="text-[10px] py-0 px-1 bg-blue-600">
-                          2 bookings
-                        </Badge>
-                      </div>
-                    )}
+                <div>
+                  <div
+                    className={`text-sm font-medium ${day.isToday ? 'font-bold text-blue-600' : ''}`}
+                  >
+                    {day.dayNumber}
                   </div>
-                )}
+                  {day.bookingsCount > 0 && (
+                    <div className="mt-1">
+                      <Badge className="text-[10px] py-0 px-1 bg-blue-600">
+                        {day.bookingsCount}{' '}
+                        {day.bookingsCount === 1 ? 'booking' : 'bookings'}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
               </div>
-            )
-          })}
+            ))
+          )}
         </div>
       </div>
 
       {/* Today's Schedule */}
-      <div className="border rounded-lg p-4 bg-white">
-        <h4 className="font-semibold mb-3">Today's Schedule - Jan 12, 2025</h4>
-        <div className="space-y-2">
-          {mockBookings.slice(0, 3).map(booking => (
-            <div
-              key={booking.id}
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-            >
-              <div>
-                <p className="font-medium">
-                  {booking.time} - {booking.service}
-                </p>
-                <p className="text-sm text-gray-600">
-                  {booking.clientName} • {booking.duration}
-                </p>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Today's Bookings
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {(() => {
+            const todayBookings = getTodaysBookings(bookings)
+
+            if (isLoading) {
+              return (
+                <div className="text-center py-8 text-muted-foreground">
+                  Loading today's bookings...
+                </div>
+              )
+            }
+
+            if (todayBookings.length === 0) {
+              return (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Calendar className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p>No bookings scheduled for today</p>
+                </div>
+              )
+            }
+
+            return (
+              <div className="space-y-3">
+                {todayBookings.map(booking => (
+                  <div
+                    key={booking.id}
+                    className="flex items-center justify-between p-3 border rounded hover:bg-gray-50"
+                  >
+                    <div className="flex-1">
+                      <p className="font-medium">
+                        {booking.service_name || 'Service'}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {booking.client_name || 'Client'} •{' '}
+                        {formatBookingTime(booking.start_time || '')}
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleAddToCalendar(booking)}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add to Calendar
+                    </Button>
+                  </div>
+                ))}
               </div>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => handleAddToCalendar(booking.id)}
-                data-testid={`add-to-cal-${booking.id}-btn`}
-              >
-                Add to Calendar
-              </Button>
-            </div>
-          ))}
-        </div>
-      </div>
+            )
+          })()}
+        </CardContent>
+      </Card>
 
       {/* Time Zone Selector */}
       <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-sm">
@@ -187,13 +444,68 @@ export default function CalendarPage() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600">
-            Current Time Zone: Eastern Standard Time (EST)
+            Current Time Zone: {Intl.DateTimeFormat().resolvedOptions().timeZone}
           </p>
           <Button variant="outline" size="sm" className="mt-2">
             Change Time Zone
           </Button>
         </CardContent>
       </Card>
+
+      {/* Add to Calendar Dialog */}
+      {showExportDialog && selectedBooking && (
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Add to Calendar</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <p className="text-sm font-medium">
+                  Choose your calendar application:
+                </p>
+
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={handleExportToGoogle}
+                >
+                  <Globe className="mr-2 h-4 w-4" />
+                  Google Calendar
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={handleExportToOutlook}
+                >
+                  <Globe className="mr-2 h-4 w-4" />
+                  Outlook Calendar
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={handleDownloadICS}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  Download (.ics file)
+                </Button>
+              </div>
+
+              <div className="text-xs text-muted-foreground">
+                <p className="font-medium mb-1">Booking Details:</p>
+                <p>Service: {selectedBooking.service_name || 'N/A'}</p>
+                <p>Date: {selectedBooking.booking_date}</p>
+                <p>
+                  Time: {formatBookingTime(selectedBooking.start_time || '')}
+                </p>
+                <p>Client: {selectedBooking.client_name || 'N/A'}</p>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
