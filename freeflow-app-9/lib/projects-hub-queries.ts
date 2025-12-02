@@ -8,6 +8,7 @@
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from './logger'
 
+const supabase = createClient()
 const logger = createFeatureLogger('ProjectsHubQueries')
 
 // ============================================================================

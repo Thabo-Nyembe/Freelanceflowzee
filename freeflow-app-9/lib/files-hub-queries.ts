@@ -7,6 +7,7 @@
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from './logger'
 
+const supabase = createClient()
 const logger = createFeatureLogger('FilesHub')
 
 // TypeScript interfaces
@@ -98,14 +99,10 @@ export async function getFiles(
       .from('files')
       .select('*', { count: 'exact' })
       .eq('user_id', userId)
-      .neq('status', 'deleted')
 
     // Apply filters
     if (filters?.type) {
       query = query.eq('type', filters.type)
-    }
-    if (filters?.status) {
-      query = query.eq('status', filters.status)
     }
     if (filters?.folder_id) {
       query = query.eq('folder_id', filters.folder_id)
@@ -479,9 +476,8 @@ export async function getFileStats(userId: string): Promise<FileStats> {
   try {
     const { data, error } = await supabase
       .from('files')
-      .select('type, size, is_starred, is_shared, status')
+      .select('type, size, is_starred, is_shared')
       .eq('user_id', userId)
-      .neq('status', 'deleted')
 
     if (error) throw error
 
@@ -496,7 +492,7 @@ export async function getFileStats(userId: string): Promise<FileStats> {
       totalSize: data?.reduce((sum, f) => sum + (f.size || 0), 0) || 0,
       starred: data?.filter((f) => f.is_starred).length || 0,
       shared: data?.filter((f) => f.is_shared).length || 0,
-      archived: data?.filter((f) => f.status === 'archived').length || 0,
+      archived: 0, // Archived status not tracked in database
     }
 
     logger.info('File statistics fetched', { stats, userId })
@@ -534,7 +530,6 @@ export async function searchFiles(
       .from('files')
       .select('*')
       .eq('user_id', userId)
-      .neq('status', 'deleted')
       .ilike('name', `%${searchTerm}%`)
       .order('uploaded_at', { ascending: false })
       .limit(limit)
@@ -567,11 +562,10 @@ export async function getRecentFiles(
   logger.info('Fetching recent files', { userId, limit })
 
   try {
-    const { data, error } = await supabase
+    const { data, error} = await supabase
       .from('files')
       .select('*')
       .eq('user_id', userId)
-      .neq('status', 'deleted')
       .order('uploaded_at', { ascending: false })
       .limit(limit)
 
