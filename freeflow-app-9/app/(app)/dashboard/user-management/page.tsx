@@ -17,6 +17,12 @@ import { Switch } from '@/components/ui/switch'
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+
+const logger = createFeatureLogger('UserManagement')
+
 import {
   Users, UserPlus, Mail, MoreVertical, Search, Filter, Download,
   Edit, Trash2, Shield, Activity, Clock, MapPin, Phone,
@@ -26,11 +32,6 @@ import {
 } from 'lucide-react'
 
 import {
-  MOCK_USERS,
-  MOCK_USER_STATS,
-  MOCK_INVITATIONS,
-  MOCK_ACTIVITIES,
-  MOCK_DEPARTMENTS,
   ROLE_TEMPLATES,
   getRoleBadgeColor,
   getStatusColor,
@@ -49,7 +50,16 @@ export default function UserManagementPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
+  // DATABASE STATE
+  const [users, setUsers] = useState<User[]>([])
+  const [userStats, setUserStats] = useState<any>(null)
+  const [invitations, setInvitations] = useState<any[]>([])
+  const [activities, setActivities] = useState<any[]>([])
+  const [departments, setDepartments] = useState<any[]>([])
+
+  // UI STATE
   const [viewMode, setViewMode] = useState<ViewMode>('users')
   const [searchQuery, setSearchQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<string>('all')
@@ -61,35 +71,68 @@ export default function UserManagementPage() {
   // A+++ LOAD USER MANAGEMENT DATA
   useEffect(() => {
     const loadUserManagementData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading user management data', { userId })
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load user management data'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Dynamic import for code splitting
+        const { getUsers, getUserStats, getInvitations, getActivities, getDepartments } = await import('@/lib/user-management-queries')
+
+        // Load all user management data in parallel
+        const [usersResult, statsResult, invitationsResult, activitiesResult, departmentsResult] = await Promise.all([
+          getUsers(userId),
+          getUserStats(userId),
+          getInvitations(userId),
+          getActivities(userId),
+          getDepartments(userId)
+        ])
+
+        if (usersResult.error || statsResult.error) {
+          throw new Error(usersResult.error?.message || statsResult.error?.message || 'Failed to load user management data')
+        }
+
+        // Update state with database results
+        setUsers(usersResult.data || [])
+        setUserStats(statsResult.data || null)
+        setInvitations(invitationsResult.data || [])
+        setActivities(activitiesResult.data || [])
+        setDepartments(departmentsResult.data || [])
 
         setIsLoading(false)
         announce('User management dashboard loaded successfully', 'polite')
+        logger.info('User management data loaded successfully', {
+          userCount: usersResult.data?.length || 0,
+          hasStats: !!statsResult.data,
+          userId
+        })
+
+        toast.success('User management loaded', {
+          description: `${usersResult.data?.length || 0} users from database`
+        })
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load user management data')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load user management data'
+        logger.error('Failed to load user management data', { error: errorMessage, userId })
+        setError(errorMessage)
+        toast.error('Failed to load user management', {
+          description: errorMessage
+        })
         setIsLoading(false)
         announce('Error loading user management dashboard', 'assertive')
       }
     }
 
     loadUserManagementData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce])
 
   const filteredUsers = sortUsers(
-    filterUsers(MOCK_USERS, {
+    filterUsers(users, {
       role: roleFilter !== 'all' ? [roleFilter] : [],
       status: statusFilter !== 'all' ? [statusFilter] : [],
       search: searchQuery
@@ -97,7 +140,7 @@ export default function UserManagementPage() {
     sortBy
   )
 
-  const stats = MOCK_USER_STATS
+  const stats = userStats
 
   const toggleUserSelection = (userId: string) => {
     setSelectedUsers(prev =>
@@ -297,7 +340,7 @@ export default function UserManagementPage() {
           <div className="p-6">
             <div className="flex items-center justify-between mb-2">
               <Mail className="w-8 h-8 text-blue-500" />
-              <Badge variant="secondary">{MOCK_INVITATIONS.length}</Badge>
+              <Badge variant="secondary">{invitations.length}</Badge>
             </div>
             <div className="text-3xl font-bold mb-1">{stats.newUsersThisMonth}</div>
             <div className="text-sm text-muted-foreground">New This Month</div>
@@ -543,7 +586,7 @@ export default function UserManagementPage() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {MOCK_DEPARTMENTS.map((dept) => (
+                  {departments.map((dept) => (
                     <Card key={dept.id} className="p-4">
                       <h4 className="font-semibold mb-2">{dept.name}</h4>
                       <p className="text-sm text-muted-foreground mb-4">{dept.description}</p>
@@ -573,7 +616,7 @@ export default function UserManagementPage() {
                 <h3 className="text-lg font-semibold mb-4">Pending Invitations</h3>
 
                 <div className="space-y-4">
-                  {MOCK_INVITATIONS.map((invitation) => (
+                  {invitations.map((invitation) => (
                     <Card key={invitation.id} className="p-4">
                       <div className="flex items-center justify-between">
                         <div>
@@ -620,7 +663,7 @@ export default function UserManagementPage() {
                 <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
 
                 <div className="space-y-4">
-                  {MOCK_ACTIVITIES.map((activity) => (
+                  {activities.map((activity) => (
                     <div key={activity.id} className="flex items-start gap-4 p-4 bg-muted/50 rounded-lg">
                       <Activity className="w-5 h-5 text-indigo-500 mt-0.5" />
                       <div className="flex-1">
