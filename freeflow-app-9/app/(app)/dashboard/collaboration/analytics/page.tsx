@@ -62,7 +62,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { createClient } from "@/lib/supabase/client";
+import { useCurrentUser } from "@/hooks/use-ai-data";
+import { useAnnouncer } from "@/lib/accessibility";
 import {
   getCollaborationAnalytics,
   getTeamMemberStats,
@@ -80,6 +81,10 @@ type AnalyticsData = CollaborationAnalyticsData;
 type TeamMemberStats = TeamMemberStatsType;
 
 export default function AnalyticsPage() {
+  // A+++ Hooks
+  const { userId, loading: userLoading } = useCurrentUser();
+  const { announce } = useAnnouncer();
+
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData[]>([]);
   const [teamStats, setTeamStats] = useState<TeamMemberStats[]>([]);
   const [dateRange, setDateRange] = useState("7days");
@@ -100,60 +105,56 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     fetchAnalyticsData();
-  }, [dateRange]);
+  }, [userId, dateRange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchAnalyticsData = async () => {
+    if (!userId) {
+      logger.info("Waiting for user authentication");
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      logger.info("Fetching collaboration analytics", { dateRange });
-
-      // Get current user
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        logger.warn("No authenticated user found");
-        toast.error("Please log in to view analytics");
-        return;
-      }
+      logger.info("Fetching collaboration analytics", { userId, dateRange });
 
       // Fetch real analytics data from Supabase
       const { data: analyticsData, error: analyticsError } =
         await getCollaborationAnalytics(
-          user.id,
+          userId,
           dateRange as "7days" | "30days" | "90days" | "year"
         );
 
       if (analyticsError || !analyticsData) {
         logger.error("Failed to fetch analytics data", {
           error: analyticsError,
+          userId
         });
         toast.error("Failed to load analytics");
+        announce("Error loading analytics", "assertive");
         return;
       }
 
       // Fetch team member stats
       const { data: teamStatsData, error: teamStatsError } =
         await getTeamMemberStats(
-          user.id,
+          userId,
           dateRange as "7days" | "30days" | "90days" | "year"
         );
 
       if (teamStatsError) {
-        logger.warn("Failed to fetch team stats", { error: teamStatsError });
+        logger.warn("Failed to fetch team stats", { error: teamStatsError, userId });
       }
 
       // Fetch collaboration stats summary
       const { data: statsData, error: statsError } =
         await getCollaborationStats(
-          user.id,
+          userId,
           dateRange as "7days" | "30days" | "90days" | "year"
         );
 
       if (statsError) {
-        logger.warn("Failed to fetch stats summary", { error: statsError });
+        logger.warn("Failed to fetch stats summary", { error: statsError, userId });
       }
 
       // Update state with real data
@@ -168,6 +169,7 @@ export default function AnalyticsPage() {
         analyticsCount: analyticsData.length,
         teamStatsCount: teamStatsData?.length || 0,
         totalMessages: statsData?.totalMessages || 0,
+        userId
       });
 
       toast.success(
@@ -175,39 +177,33 @@ export default function AnalyticsPage() {
           statsData?.totalMeetings || 0
         } meetings`
       );
+      announce(`Analytics loaded successfully: ${statsData?.totalMessages || 0} messages`, "polite");
     } catch (error) {
-      logger.error("Exception in fetchAnalyticsData", { error });
+      logger.error("Exception in fetchAnalyticsData", { error, userId });
       toast.error("Failed to load analytics");
+      announce("Error loading analytics", "assertive");
     } finally {
       setLoading(false);
     }
   };
 
   const handleExportReport = async () => {
+    if (!userId) return;
+
     try {
-      logger.info("Exporting collaboration analytics report");
-
-      // Get current user
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error("Please log in to export report");
-        return;
-      }
+      logger.info("Exporting collaboration analytics report", { userId, dateRange });
 
       // Generate CSV report from real data
       const { data: csvData, error } = await exportCollaborationReport(
-        user.id,
+        userId,
         dateRange as "7days" | "30days" | "90days" | "year",
         "csv"
       );
 
       if (error || !csvData) {
-        logger.error("Failed to generate report", { error });
+        logger.error("Failed to generate report", { error, userId });
         toast.error("Failed to export report");
+        announce("Error exporting report", "assertive");
         return;
       }
 
@@ -227,11 +223,14 @@ export default function AnalyticsPage() {
       logger.info("Report exported successfully", {
         size: csvData.length,
         dateRange,
+        userId
       });
       toast.success(`Analytics report exported (${csvData.length} bytes)`);
+      announce("Analytics report exported successfully", "polite");
     } catch (error) {
-      logger.error("Exception in handleExportReport", { error });
+      logger.error("Exception in handleExportReport", { error, userId });
       toast.error("Failed to export report");
+      announce("Error exporting report", "assertive");
     }
   };
 
