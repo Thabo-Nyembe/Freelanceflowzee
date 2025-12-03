@@ -10,10 +10,8 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
-  MOCK_TEAM_MEMBERS,
-  MOCK_ROLES,
-  MOCK_OPERATIONS_STATS,
   formatRelativeTime,
   getUserRoleColor,
   getUserStatusColor,
@@ -42,7 +40,8 @@ import {
   CheckCircle,
   AlertCircle,
   Clock,
-  Eye
+  Eye,
+  Plus
 } from 'lucide-react'
 
 const logger = createFeatureLogger('admin-operations')
@@ -50,12 +49,13 @@ const logger = createFeatureLogger('admin-operations')
 export default function OperationsPage() {
   const router = useRouter()
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // State management
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(MOCK_TEAM_MEMBERS)
-  const [roles, setRoles] = useState<Role[]>(MOCK_ROLES)
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [roles, setRoles] = useState<Role[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<UserStatus | 'all'>('all')
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
@@ -83,30 +83,57 @@ export default function OperationsPage() {
   const activeMembers = useMemo(() => getActiveTeamMembers(teamMembers), [teamMembers])
   const avgProductivity = useMemo(() => calculateAverageProductivity(teamMembers), [teamMembers])
 
+  // Calculate operations stats from data
+  const operationsStats = useMemo(() => {
+    const totalMembers = teamMembers.length
+    const pendingInvites = 0 // Placeholder - would need invite tracking
+    const totalPermissions = roles.reduce((sum, role) => sum + (role.permissions?.length || 0), 0)
+    const activeRoles = roles.filter(r => r.isActive !== false).length
+
+    return { totalMembers, pendingInvites, totalPermissions, activeRoles }
+  }, [teamMembers, roles])
+
   // Load operations data
   useEffect(() => {
     const loadOperations = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
-        logger.info('Loading operations data')
+        logger.info('Loading operations data', { userId })
 
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Note: Team members and roles will be loaded from user management queries
+        // when available. For now, initializing with empty arrays.
+        setTeamMembers([])
+        setRoles([])
 
         setIsLoading(false)
         announce('Operations data loaded successfully', 'polite')
-        logger.info('Operations loaded', { success: true })
+        toast.success('Operations loaded', {
+          description: 'Team and role data initialized'
+        })
+        logger.info('Operations loaded', {
+          success: true,
+          memberCount: 0,
+          roleCount: 0
+        })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load operations'
         setError(errorMessage)
         setIsLoading(false)
+        toast.error('Failed to load operations', { description: errorMessage })
         announce('Error loading operations', 'assertive')
         logger.error('Operations load failed', { error: err })
       }
     }
 
     loadOperations()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce])
 
   // Button 1: Invite User
   const handleInviteUser = async () => {
@@ -334,9 +361,6 @@ export default function OperationsPage() {
       })
       logger.info('Operations refresh completed', { success: true })
       announce('Operations refreshed successfully', 'polite')
-
-      setTeamMembers([...MOCK_TEAM_MEMBERS])
-      setRoles([...MOCK_ROLES])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
       toast.error('Refresh Failed', { description: message })
@@ -429,7 +453,7 @@ export default function OperationsPage() {
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
                 <div className="text-sm text-blue-600 mb-1">Total Members</div>
                 <div className="text-2xl font-bold text-blue-700">
-                  <NumberFlow value={MOCK_OPERATIONS_STATS.totalMembers} />
+                  <NumberFlow value={operationsStats.totalMembers} />
                 </div>
                 <div className="text-xs text-gray-600">{activeMembers.length} active</div>
               </div>
@@ -448,7 +472,7 @@ export default function OperationsPage() {
               <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg p-4 border border-yellow-100">
                 <div className="text-sm text-yellow-600 mb-1">Pending Invites</div>
                 <div className="text-2xl font-bold text-yellow-700">
-                  <NumberFlow value={MOCK_OPERATIONS_STATS.pendingInvites} />
+                  <NumberFlow value={operationsStats.pendingInvites} />
                 </div>
                 <div className="text-xs text-gray-600">Awaiting acceptance</div>
               </div>
@@ -456,7 +480,7 @@ export default function OperationsPage() {
               <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-100">
                 <div className="text-sm text-purple-600 mb-1">Total Permissions</div>
                 <div className="text-2xl font-bold text-purple-700">
-                  <NumberFlow value={MOCK_OPERATIONS_STATS.totalPermissions} />
+                  <NumberFlow value={operationsStats.totalPermissions} />
                 </div>
                 <div className="text-xs text-gray-600">{roles.length} roles</div>
               </div>
