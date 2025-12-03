@@ -60,6 +60,7 @@ export default function OperationsPage() {
   const [statusFilter, setStatusFilter] = useState<UserStatus | 'all'>('all')
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
   const [showActivityLog, setShowActivityLog] = useState(false)
+  const [activityData, setActivityData] = useState<any[]>([])
 
   // Filtered members
   const filteredMembers = useMemo(() => {
@@ -138,8 +139,14 @@ export default function OperationsPage() {
 
   // Button 1: Invite User
   const handleInviteUser = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to invite users' })
+      announce('Authentication required', 'assertive')
+      return
+    }
+
     try {
-      logger.info('Inviting new user')
+      logger.info('Inviting new user', { userId })
 
       const newUser = {
         email: 'newuser@company.com',
@@ -147,231 +154,282 @@ export default function OperationsPage() {
         department: 'General'
       }
 
-      const response = await fetch('/api/admin/operations/users/invite', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newUser)
+      const { sendInvitation } = await import('@/lib/user-management-queries')
+      await sendInvitation({
+        email: newUser.email,
+        role: newUser.role,
+        message: 'You have been invited to join the team',
+        invited_by: userId
       })
-
-      if (!response.ok) throw new Error('Failed to invite user')
-      const result = await response.json()
 
       toast.success('Invitation Sent', {
         description: `Invitation email sent to ${newUser.email} successfully`
       })
-      logger.info('User invited', { success: true, result })
+      logger.info('User invited', { success: true, email: newUser.email })
       announce('User invitation sent', 'polite')
 
-      setTeamMembers(prev => [...prev, {
-        id: `user-${Date.now()}`,
-        name: 'Pending User',
-        email: newUser.email,
-        role: newUser.role,
-        status: 'pending',
-        department: newUser.department,
-        joinDate: new Date().toISOString(),
-        lastActive: '',
-        permissions: [],
-        assignedProjects: 0,
-        completedTasks: 0,
-        productivityScore: 0
-      }])
+      // Reload team members
+      const { getAllUsers } = await import('@/lib/user-management-queries')
+      const users = await getAllUsers()
+      setTeamMembers(users || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Invite failed'
       toast.error('Invite Failed', { description: message })
-      logger.error('Invite user failed', { error: message })
+      logger.error('Invite user failed', { error })
       announce('Failed to send invitation', 'assertive')
     }
   }
 
   // Button 2: Edit User
-  const handleEditUser = async (userId: string) => {
-    try {
-      logger.info('Editing user', { userId })
+  const handleEditUser = async (targetUserId: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to edit users' })
+      announce('Authentication required', 'assertive')
+      return
+    }
 
-      const response = await fetch(`/api/admin/operations/users/${userId}`, {
+    try {
+      logger.info('Editing user', { targetUserId })
+
+      // Note: Using getUserById and updating profile
+      // Future: Create updateUser function in user-management-queries
+      const { getUserById } = await import('@/lib/user-management-queries')
+      const user = await getUserById(targetUserId)
+
+      if (!user) {
+        throw new Error('User not found')
+      }
+
+      // For now, using API call - can be replaced with updateUser function when available
+      const response = await fetch(`/api/admin/operations/users/${targetUserId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ department: 'Engineering', location: 'Remote' })
       })
 
       if (!response.ok) throw new Error('Failed to edit user')
-      const result = await response.json()
 
       toast.success('User Updated', {
         description: 'User information has been updated successfully'
       })
-      logger.info('User edited', { success: true, userId, result })
+      logger.info('User edited', { success: true, targetUserId })
       announce('User updated successfully', 'polite')
 
-      setTeamMembers(prev => prev.map(m => m.id === userId ? { ...m, department: 'Engineering', location: 'Remote' } : m))
+      // Reload team members
+      const { getAllUsers } = await import('@/lib/user-management-queries')
+      const users = await getAllUsers()
+      setTeamMembers(users || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Edit failed'
       toast.error('Edit Failed', { description: message })
-      logger.error('Edit user failed', { error: message })
+      logger.error('Edit user failed', { error })
       announce('Failed to edit user', 'assertive')
     }
   }
 
   // Button 3: Delete User
-  const handleDeleteUser = async (userId: string, userName: string) => {
+  const handleDeleteUser = async (targetUserId: string, userName: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to delete users' })
+      announce('Authentication required', 'assertive')
+      return
+    }
+
     if (!confirm(`Are you sure you want to delete ${userName}? This action cannot be undone.`)) {
       return
     }
 
     try {
-      logger.info('Deleting user', { userId })
+      logger.info('Deleting user', { targetUserId, userId })
 
-      const response = await fetch(`/api/admin/operations/users/${userId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      })
-
-      if (!response.ok) throw new Error('Failed to delete user')
+      const { deleteUser } = await import('@/lib/user-management-queries')
+      await deleteUser(targetUserId)
 
       toast.success('User Deleted', {
         description: `${userName} has been permanently removed from the team`
       })
-      logger.info('User deleted', { success: true, userId })
+      logger.info('User deleted', { success: true, targetUserId })
       announce('User deleted successfully', 'polite')
 
-      setTeamMembers(prev => prev.filter(m => m.id !== userId))
+      // Reload team members
+      const { getAllUsers } = await import('@/lib/user-management-queries')
+      const users = await getAllUsers()
+      setTeamMembers(users || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
       toast.error('Delete Failed', { description: message })
-      logger.error('Delete user failed', { error: message })
+      logger.error('Delete user failed', { error })
       announce('Failed to delete user', 'assertive')
     }
   }
 
   // Button 4: Deactivate User
-  const handleDeactivateUser = async (userId: string, userName: string) => {
+  const handleDeactivateUser = async (targetUserId: string, userName: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to deactivate users' })
+      announce('Authentication required', 'assertive')
+      return
+    }
+
     try {
-      logger.info('Deactivating user', { userId })
+      logger.info('Deactivating user', { targetUserId, userId })
 
-      const response = await fetch(`/api/admin/operations/users/${userId}/deactivate`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' }
-      })
-
-      if (!response.ok) throw new Error('Failed to deactivate user')
-      const result = await response.json()
+      const { deactivateUser } = await import('@/lib/user-management-queries')
+      await deactivateUser(targetUserId)
 
       toast.success('User Deactivated', {
         description: `${userName} has been deactivated and will no longer have access`
       })
-      logger.info('User deactivated', { success: true, userId, result })
+      logger.info('User deactivated', { success: true, targetUserId })
       announce('User deactivated successfully', 'polite')
 
-      setTeamMembers(prev => prev.map(m => m.id === userId ? { ...m, status: 'inactive' } : m))
+      // Reload team members
+      const { getAllUsers } = await import('@/lib/user-management-queries')
+      const users = await getAllUsers()
+      setTeamMembers(users || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Deactivate failed'
       toast.error('Deactivate Failed', { description: message })
-      logger.error('Deactivate user failed', { error: message })
+      logger.error('Deactivate user failed', { error })
       announce('Failed to deactivate user', 'assertive')
     }
   }
 
   // Button 5: Change Role
-  const handleChangeRole = async (userId: string, userName: string, newRole: UserRole) => {
+  const handleChangeRole = async (targetUserId: string, userName: string, newRole: UserRole) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to change roles' })
+      announce('Authentication required', 'assertive')
+      return
+    }
+
     try {
-      logger.info('Changing user role', { userId, newRole })
+      logger.info('Changing user role', { targetUserId, newRole, userId })
 
-      const response = await fetch(`/api/admin/operations/users/${userId}/role`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: newRole })
-      })
-
-      if (!response.ok) throw new Error('Failed to change role')
-      const result = await response.json()
+      const { updateUserRole } = await import('@/lib/user-management-queries')
+      await updateUserRole(targetUserId, newRole)
 
       toast.success('Role Changed', {
         description: `${userName} has been assigned the ${newRole} role`
       })
-      logger.info('User role changed', { success: true, userId, newRole, result })
+      logger.info('User role changed', { success: true, targetUserId, newRole })
       announce(`User role changed to ${newRole}`, 'polite')
 
-      setTeamMembers(prev => prev.map(m => m.id === userId ? { ...m, role: newRole } : m))
+      // Reload team members
+      const { getAllUsers } = await import('@/lib/user-management-queries')
+      const users = await getAllUsers()
+      setTeamMembers(users || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Role change failed'
       toast.error('Role Change Failed', { description: message })
-      logger.error('Change role failed', { error: message })
+      logger.error('Change role failed', { error })
       announce('Failed to change role', 'assertive')
     }
   }
 
   // Button 6: Set Permissions
   const handleSetPermissions = async (roleId: string, roleName: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to set permissions' })
+      announce('Authentication required', 'assertive')
+      return
+    }
+
     try {
-      logger.info('Setting permissions', { roleId })
+      logger.info('Setting permissions', { roleId, userId })
 
-      const response = await fetch(`/api/admin/operations/permissions/${roleId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          permissions: ['projects.view', 'tasks.manage', 'files.upload', 'comments.create']
-        })
+      // Using team-management-queries for role permissions
+      const { updateRolePermission } = await import('@/lib/team-management-queries')
+
+      // Update permissions for the role
+      await updateRolePermission(roleId, userId, {
+        allowed_actions: ['create', 'read', 'update', 'delete'],
+        is_active: true
       })
-
-      if (!response.ok) throw new Error('Failed to set permissions')
-      const result = await response.json()
 
       toast.success('Permissions Updated', {
         description: `Permissions for ${roleName} role have been updated successfully`
       })
-      logger.info('Permissions set', { success: true, roleId, result })
+      logger.info('Permissions set', { success: true, roleId })
       announce('Permissions updated successfully', 'polite')
 
-      setRoles(prev => prev.map(r => r.id === roleId ? {
-        ...r,
-        permissions: ['projects.view', 'tasks.manage', 'files.upload', 'comments.create']
-      } : r))
+      // Reload roles (if needed)
+      // Note: Future enhancement - add getRoles to reload role data
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Update failed'
       toast.error('Update Failed', { description: message })
-      logger.error('Set permissions failed', { error: message })
+      logger.error('Set permissions failed', { error })
       announce('Failed to update permissions', 'assertive')
     }
   }
 
   // Button 7: View Activity Log
-  const handleViewActivityLog = () => {
-    logger.info('Opening activity log')
-    setShowActivityLog(!showActivityLog)
-    toast.info('Activity Log', {
-      description: showActivityLog ? 'Hiding activity log' : 'Showing recent team activity'
-    })
-    announce(showActivityLog ? 'Activity log hidden' : 'Activity log shown', 'polite')
+  const handleViewActivityLog = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to view activity' })
+      announce('Authentication required', 'assertive')
+      return
+    }
+
+    const willShow = !showActivityLog
+
+    try {
+      logger.info('Opening activity log', { userId })
+
+      if (willShow) {
+        // Load activity data when opening
+        const { getRecentActivity } = await import('@/lib/user-management-queries')
+        const activity = await getRecentActivity(50)
+        setActivityData(activity || [])
+
+        toast.info('Activity Log', {
+          description: `Showing ${activity?.length || 0} recent activities`
+        })
+      } else {
+        toast.info('Activity Log', {
+          description: 'Hiding activity log'
+        })
+      }
+
+      setShowActivityLog(willShow)
+      announce(willShow ? 'Activity log shown' : 'Activity log hidden', 'polite')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load activity'
+      toast.error('Load Failed', { description: message })
+      logger.error('Load activity failed', { error })
+      announce('Failed to load activity log', 'assertive')
+    }
   }
 
   // Button 8: Refresh Operations
   const handleRefreshOperations = async () => {
     if (!userId) {
       toast.error('Authentication required', { description: 'Please sign in to refresh operations' })
+      announce('Authentication required', 'assertive')
       return
     }
 
     try {
-      logger.info('Refreshing operations data')
+      logger.info('Refreshing operations data', { userId })
 
-      const { getTeamMembers } = await import('@/lib/admin-overview-queries')
+      // Use getAllUsers from user-management-queries
+      const { getAllUsers } = await import('@/lib/user-management-queries')
+      const users = await getAllUsers()
 
-      const teamResult = await getTeamMembers(userId)
-      setTeamMembers(teamResult.data || [])
+      setTeamMembers(users || [])
 
       toast.success('Operations Refreshed', {
-        description: `Reloaded ${teamResult.data?.length || 0} team members`
+        description: `Reloaded ${users?.length || 0} team members successfully`
       })
       logger.info('Operations refresh completed', {
         success: true,
-        memberCount: teamResult.data?.length || 0
+        memberCount: users?.length || 0
       })
       announce('Operations refreshed successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
       toast.error('Refresh Failed', { description: message })
-      logger.error('Operations refresh failed', { error: message })
+      logger.error('Operations refresh failed', { error })
       announce('Failed to refresh operations', 'assertive')
     }
   }
@@ -735,36 +793,45 @@ export default function OperationsPage() {
                 </div>
 
                 <div className="space-y-3">
-                  {[
-                    { user: 'Michael Chen', action: 'Updated deal: Enterprise Platform Migration', time: '2 minutes ago', type: 'update' },
-                    { user: 'Lisa Anderson', action: 'Created campaign: Q1 Product Launch', time: '15 minutes ago', type: 'create' },
-                    { user: 'James Rodriguez', action: 'Completed task: Project review', time: '1 hour ago', type: 'complete' },
-                    { user: 'Sarah Williams', action: 'Uploaded file: Design mockups v2', time: '2 hours ago', type: 'upload' },
-                    { user: 'David Kim', action: 'Joined workspace', time: '3 hours ago', type: 'join' }
-                  ].map((activity, index) => (
-                    <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        activity.type === 'create' ? 'bg-green-500' :
-                        activity.type === 'update' ? 'bg-blue-500' :
-                        activity.type === 'complete' ? 'bg-purple-500' :
-                        activity.type === 'upload' ? 'bg-orange-500' :
-                        'bg-gray-500'
-                      }`}>
-                        {activity.type === 'complete' ? (
-                          <CheckCircle className="w-4 h-4 text-white" />
-                        ) : activity.type === 'create' ? (
-                          <Plus className="w-4 h-4 text-white" />
-                        ) : (
-                          <Eye className="w-4 h-4 text-white" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-800">{activity.user}</div>
-                        <div className="text-sm text-gray-600">{activity.action}</div>
-                        <div className="text-xs text-gray-500 mt-1">{activity.time}</div>
-                      </div>
+                  {activityData.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <Activity className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                      <p className="text-sm">No recent activity to display</p>
+                      <p className="text-xs mt-1">Activity will appear here as team members interact with the platform</p>
                     </div>
-                  ))}
+                  ) : (
+                    activityData.map((activity, index) => (
+                      <div key={activity.id || index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          activity.activity_type === 'create' ? 'bg-green-500' :
+                          activity.activity_type === 'update' ? 'bg-blue-500' :
+                          activity.activity_type === 'delete' ? 'bg-red-500' :
+                          activity.activity_type === 'invite' ? 'bg-purple-500' :
+                          activity.activity_type === 'access' ? 'bg-orange-500' :
+                          'bg-gray-500'
+                        }`}>
+                          {activity.activity_type === 'create' ? (
+                            <Plus className="w-4 h-4 text-white" />
+                          ) : activity.activity_type === 'delete' ? (
+                            <Trash2 className="w-4 h-4 text-white" />
+                          ) : activity.activity_type === 'invite' ? (
+                            <UserPlus className="w-4 h-4 text-white" />
+                          ) : (
+                            <Eye className="w-4 h-4 text-white" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-gray-800">
+                            {activity.user_name || 'Unknown User'}
+                          </div>
+                          <div className="text-sm text-gray-600">{activity.description}</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {formatRelativeTime(activity.created_at)}
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </LiquidGlassCard>
