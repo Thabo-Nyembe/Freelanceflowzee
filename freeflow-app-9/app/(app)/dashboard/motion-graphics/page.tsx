@@ -36,9 +36,6 @@ import {
   EASING_FUNCTIONS,
   MOTION_TEMPLATES,
   MOTION_PRESETS,
-  MOCK_MOTION_PROJECTS,
-  MOCK_MOTION_ASSETS,
-  MOCK_MOTION_STATS,
   formatDuration,
   formatFileSize,
   formatResolution,
@@ -51,6 +48,11 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+
+const logger = createFeatureLogger('MotionGraphicsPage')
 
 type ViewMode = 'projects' | 'editor' | 'templates' | 'assets'
 type EditorPanel = 'layers' | 'timeline' | 'properties' | 'effects'
@@ -60,6 +62,12 @@ export default function MotionGraphicsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
+
+  // Database state
+  const [motionProjects, setMotionProjects] = useState<any[]>([])
+  const [motionStats, setMotionStats] = useState<any>(null)
+  const [motionAssets, setMotionAssets] = useState<any[]>([])
 
   const [viewMode, setViewMode] = useState<ViewMode>('projects')
   const [selectedProject, setSelectedProject] = useState<MotionProject | null>(null)
@@ -70,39 +78,54 @@ export default function MotionGraphicsPage() {
   const [zoomLevel, setZoomLevel] = useState([100])
 
   const storagePercentage = calculateStoragePercentage(
-    MOCK_MOTION_STATS.storageUsed,
-    MOCK_MOTION_STATS.storageLimit
+    motionStats?.storageUsed || 0,
+    motionStats?.storageLimit || 1
   )
 
   // A+++ LOAD MOTION GRAPHICS DATA
   useEffect(() => {
     const loadMotionGraphicsData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading motion graphics data', { userId })
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load motion graphics studio'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        const { getMotionProjects, getMotionStats } = await import('@/lib/motion-graphics-queries')
+
+        const [projectsResult, statsResult] = await Promise.all([
+          getMotionProjects(userId),
+          getMotionStats(userId)
+        ])
+
+        setMotionProjects(projectsResult.data || [])
+        setMotionStats(statsResult.data || null)
 
         setIsLoading(false)
+        toast.success('Motion graphics loaded', {
+          description: `${projectsResult.data?.length || 0} projects from database`
+        })
+        logger.info('Motion graphics data loaded successfully', {
+          projectsCount: projectsResult.data?.length
+        })
         announce('Motion graphics studio loaded successfully', 'polite')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load motion graphics studio')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load motion graphics studio'
+        setError(errorMessage)
         setIsLoading(false)
+        logger.error('Failed to load motion graphics data', { error: errorMessage, userId })
+        toast.error('Failed to load motion graphics', { description: errorMessage })
         announce('Error loading motion graphics studio', 'assertive')
       }
     }
 
     loadMotionGraphicsData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce])
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying)
@@ -221,9 +244,9 @@ export default function MotionGraphicsPage() {
           <ScrollReveal variant="scale" duration={0.6} delay={0.1}>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {[
-                { label: 'Projects', value: MOCK_MOTION_STATS.totalProjects, icon: Film, color: 'violet' },
-                { label: 'Animations', value: MOCK_MOTION_STATS.totalAnimations, icon: Zap, color: 'purple' },
-                { label: 'Exports', value: MOCK_MOTION_STATS.totalExports, icon: Download, color: 'fuchsia' },
+                { label: 'Projects', value: motionStats?.totalProjects || 0, icon: Film, color: 'violet' },
+                { label: 'Animations', value: motionStats?.totalAnimations || 0, icon: Zap, color: 'purple' },
+                { label: 'Exports', value: motionStats?.totalExports || 0, icon: Download, color: 'fuchsia' },
                 { label: 'Templates', value: MOTION_TEMPLATES.length, icon: Grid3x3, color: 'pink' }
               ].map((stat, index) => (
                 <LiquidGlassCard key={index} className="p-4">
@@ -250,7 +273,7 @@ export default function MotionGraphicsPage() {
                   <span className="text-sm font-medium text-white">Storage Usage</span>
                 </div>
                 <span className="text-sm text-gray-400">
-                  {formatFileSize(MOCK_MOTION_STATS.storageUsed)} / {formatFileSize(MOCK_MOTION_STATS.storageLimit)}
+                  {formatFileSize(motionStats?.storageUsed || 0)} / {formatFileSize(motionStats?.storageLimit || 0)}
                 </span>
               </div>
               <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden">
@@ -308,7 +331,7 @@ export default function MotionGraphicsPage() {
 
               {/* Projects Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {MOCK_MOTION_PROJECTS.map((project) => (
+                {motionProjects.map((project) => (
                   <motion.div key={project.id} whileHover={{ scale: 1.02 }}>
                     <LiquidGlassCard className="p-6">
                       <div className="space-y-4">
@@ -626,7 +649,7 @@ export default function MotionGraphicsPage() {
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {MOCK_MOTION_ASSETS.map((asset) => (
+                {motionAssets.map((asset) => (
                   <motion.div key={asset.id} whileHover={{ scale: 1.05 }}>
                     <LiquidGlassCard className="p-4">
                       <div className="space-y-3">
