@@ -53,6 +53,7 @@ import { toast } from 'sonner'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('ML-Insights')
@@ -402,9 +403,11 @@ export default function MLInsightsPage() {
   logger.debug('Component mounting')
 
   // A+++ STATE MANAGEMENT
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { announce } = useAnnouncer()
 
   // REDUCER STATE
   const [state, dispatch] = useReducer(mlInsightsReducer, {
@@ -441,31 +444,42 @@ export default function MLInsightsPage() {
   // ============================================================================
 
   useEffect(() => {
-    logger.info('Loading ML insights from API')
     const loadData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
+      logger.info('Loading ML insights from database', { userId })
       try {
         setIsLoading(true)
         setError(null)
 
-        const response = await fetch('/api/ml-insights')
-        const result = await response.json()
+        // Dynamic import for code splitting
+        const { getMLInsights } = await import('@/lib/ml-insights-queries')
 
-        if (result.success) {
-          // Use mock data for richer visualization
-          const mockInsights = generateMockInsights()
-          dispatch({ type: 'SET_INSIGHTS', insights: mockInsights })
+        const { data: insights, error: insightsError } = await getMLInsights(userId)
 
-          logger.info('ML insights loaded from API', { count: result.insights?.length || 0 })
-          announce('ML insights loaded successfully', 'polite')
-        } else {
-          throw new Error(result.error || 'Failed to load insights')
-        }
+        if (insightsError) throw insightsError
+
+        // If no insights in database, use mock data
+        const insightsToUse = (insights && insights.length > 0) ? insights : generateMockInsights()
+        dispatch({ type: 'SET_INSIGHTS', insights: insightsToUse as MLInsight[] })
+
+        logger.info('ML insights loaded successfully', {
+          userId,
+          count: insightsToUse.length,
+          source: (insights && insights.length > 0) ? 'database' : 'mock'
+        })
+        announce(`${insightsToUse.length} ML insights loaded successfully`, 'polite')
 
         setIsLoading(false)
       } catch (err) {
         logger.error('ML insights load error', {
           error: err instanceof Error ? err.message : 'Unknown error',
-          errorObject: err
+          errorObject: err,
+          userId
         })
         setError(err instanceof Error ? err.message : 'Failed to load ML insights')
         setIsLoading(false)
@@ -474,7 +488,7 @@ export default function MLInsightsPage() {
     }
 
     loadData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // COMPUTED VALUES
