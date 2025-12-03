@@ -36,11 +36,46 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+import { useEffect } from 'react'
 
 const logger = createFeatureLogger('SystemInsights')
 
 export default function SystemInsightsPage() {
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [loading, setLoading] = useState(false)
+  const [systemMetrics, setSystemMetrics] = useState<any>(null)
+
+  useEffect(() => {
+    const loadSystemMetrics = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        return
+      }
+
+      try {
+        logger.info('Loading system insights metrics', { userId })
+
+        // Dynamic import for code splitting
+        const { getSystemMetrics } = await import('@/lib/system-insights-queries')
+
+        const { data, error } = await getSystemMetrics(userId)
+
+        if (error) throw error
+
+        setSystemMetrics(data)
+        logger.info('System metrics loaded successfully', { userId, hasMetrics: !!data })
+        announce('System insights loaded', 'polite')
+      } catch (err) {
+        logger.error('Failed to load system metrics', { error: err, userId })
+      }
+    }
+
+    loadSystemMetrics()
+  }, [userId, announce])
 
   // Demo: Success Toast with Data
   const showSuccessToast = () => {
