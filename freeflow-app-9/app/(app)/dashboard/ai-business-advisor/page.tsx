@@ -1,12 +1,27 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Brain, DollarSign, TrendingUp, Zap } from 'lucide-react'
 import { ProjectIntelligence } from '@/components/ai/project-intelligence'
 import { PricingIntelligence } from '@/components/ai/pricing-intelligence'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('AIBusinessAdvisor')
 
 export default function AIBusinessAdvisorPage() {
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
+  useEffect(() => {
+    if (userId) {
+      logger.info('AI Business Advisor page loaded', { userId })
+      announce('AI Business Advisor loaded', 'polite')
+    }
+  }, [userId, announce])
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
