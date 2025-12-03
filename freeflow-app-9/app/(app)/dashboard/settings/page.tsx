@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -13,56 +13,122 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { Camera, Mail, Phone, MapPin, Globe, Briefcase, Trash2 } from 'lucide-react'
 import { UserProfile, defaultProfile } from '@/lib/settings-utils'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
 
 const logger = createFeatureLogger('Settings:Profile')
 
 export default function ProfilePage() {
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [profile, setProfile] = useState<UserProfile>(defaultProfile)
   const [isLoading, setIsLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setLoading(false)
+        return
+      }
+
+      try {
+        setLoading(true)
+        logger.info('Loading profile', { userId })
+
+        // Dynamic import for code splitting
+        const { getProfileSettings } = await import('@/lib/profile-settings-queries')
+
+        const { data, error } = await getProfileSettings(userId)
+        if (error) throw new Error(error.message)
+
+        if (data) {
+          const mappedProfile: UserProfile = {
+            firstName: data.first_name || '',
+            lastName: data.last_name || '',
+            email: data.email || '',
+            phone: data.phone || '',
+            bio: data.bio || '',
+            location: data.location || '',
+            website: data.website || '',
+            company: data.company || '',
+            position: data.position || '',
+            avatar: data.avatar_url || ''
+          }
+          setProfile(mappedProfile)
+        }
+
+        logger.info('Profile loaded', { userId })
+        announce('Profile loaded successfully', 'polite')
+      } catch (error) {
+        logger.error('Failed to load profile', { error, userId })
+        toast.error('Failed to load profile')
+        announce('Error loading profile', 'assertive')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadProfile()
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleUpdateProfile = async () => {
+    if (!userId) {
+      toast.error('Please log in')
+      announce('Authentication required', 'assertive')
+      return
+    }
+
     logger.info('Profile update initiated', {
       email: profile.email,
-      name: `${profile.firstName} ${profile.lastName}`
+      name: `${profile.firstName} ${profile.lastName}`,
+      userId
     })
 
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/settings/profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          category: 'profile',
-          action: 'update',
-          data: profile
-        })
+      const { updateProfileSettings } = await import('@/lib/profile-settings-queries')
+
+      const { error } = await updateProfileSettings(userId, {
+        first_name: profile.firstName,
+        last_name: profile.lastName,
+        email: profile.email,
+        phone: profile.phone,
+        bio: profile.bio,
+        location: profile.location,
+        website: profile.website,
+        company: profile.company,
+        position: profile.position,
+        avatar_url: profile.avatar
       })
 
-      const result = await response.json()
+      if (error) throw new Error(error.message)
 
-      if (result.success) {
-        logger.info('Profile updated successfully', {
-          email: profile.email,
-          name: `${profile.firstName} ${profile.lastName}`,
-          company: profile.company
-        })
+      logger.info('Profile updated successfully', {
+        email: profile.email,
+        name: `${profile.firstName} ${profile.lastName}`,
+        company: profile.company,
+        userId
+      })
 
-        toast.success('Profile Updated!', {
-          description: `${profile.firstName} ${profile.lastName} - ${profile.company} - ${profile.position}`
-        })
-      } else {
-        throw new Error(result.error || 'Failed to update profile')
-      }
+      toast.success('Profile Updated!', {
+        description: `${profile.firstName} ${profile.lastName} - ${profile.company} - ${profile.position}`
+      })
+      announce('Profile updated successfully', 'polite')
     } catch (error: any) {
       logger.error('Profile update failed', {
         email: profile.email,
-        error: error.message
+        error: error.message,
+        userId
       })
 
       toast.error('Failed to update profile', {
         description: error.message || 'Please try again later'
       })
+      announce('Error updating profile', 'assertive')
     } finally {
       setIsLoading(false)
     }
@@ -246,7 +312,7 @@ export default function ProfilePage() {
             </div>
 
             <div className="pt-4">
-              <Button onClick={handleUpdateProfile} disabled={isLoading}>
+              <Button onClick={handleUpdateProfile} disabled={loading || isLoading}>
                 {isLoading ? 'Saving...' : 'Update Profile'}
               </Button>
             </div>
@@ -267,11 +333,11 @@ export default function ProfilePage() {
               </Avatar>
 
               <div className="space-y-2 w-full">
-                <Button variant="outline" className="w-full" onClick={handleUploadPhoto}>
+                <Button variant="outline" className="w-full" onClick={handleUploadPhoto} disabled={loading || isLoading}>
                   <Camera className="w-4 h-4 mr-2" />
                   Upload Photo
                 </Button>
-                <Button variant="ghost" className="w-full text-red-600 hover:text-red-700" onClick={handleRemovePhoto}>
+                <Button variant="ghost" className="w-full text-red-600 hover:text-red-700" onClick={handleRemovePhoto} disabled={loading || isLoading}>
                   <Trash2 className="w-4 h-4 mr-2" />
                   Remove Photo
                 </Button>
