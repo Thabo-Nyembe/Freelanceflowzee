@@ -238,24 +238,27 @@ export default function AutomationPage() {
 
   // Button 4: Enable Workflow
   const handleEnableWorkflow = async (workflowId: string, workflowName: string) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
     try {
-      logger.info('Enabling workflow', { workflowId })
+      logger.info('Enabling workflow', { workflowId, userId })
 
-      const response = await fetch(`/api/admin/automation/workflows/${workflowId}/enable`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' }
-      })
+      const { updateWorkflow, getWorkflows } = await import('@/lib/automation-queries')
 
-      if (!response.ok) throw new Error('Failed to enable workflow')
-      const result = await response.json()
+      await updateWorkflow(workflowId, { status: 'active' })
 
       toast.success('Workflow Enabled', {
         description: `"${workflowName}" is now active and will run automatically`
       })
-      logger.info('Workflow enabled', { success: true, workflowId, result })
+      logger.info('Workflow enabled', { success: true, workflowId })
       announce('Workflow enabled successfully', 'polite')
 
-      setWorkflows(prev => prev.map(w => w.id === workflowId ? { ...w, status: 'active' } : w))
+      // Reload workflows
+      const workflowsResult = await getWorkflows(userId)
+      setWorkflows(workflowsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Enable failed'
       toast.error('Enable Failed', { description: message })
@@ -266,24 +269,27 @@ export default function AutomationPage() {
 
   // Button 5: Disable Workflow
   const handleDisableWorkflow = async (workflowId: string, workflowName: string) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
     try {
-      logger.info('Disabling workflow', { workflowId })
+      logger.info('Disabling workflow', { workflowId, userId })
 
-      const response = await fetch(`/api/admin/automation/workflows/${workflowId}/disable`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' }
-      })
+      const { updateWorkflow, getWorkflows } = await import('@/lib/automation-queries')
 
-      if (!response.ok) throw new Error('Failed to disable workflow')
-      const result = await response.json()
+      await updateWorkflow(workflowId, { status: 'paused' })
 
       toast.success('Workflow Disabled', {
         description: `"${workflowName}" has been paused and will not run`
       })
-      logger.info('Workflow disabled', { success: true, workflowId, result })
+      logger.info('Workflow disabled', { success: true, workflowId })
       announce('Workflow disabled successfully', 'polite')
 
-      setWorkflows(prev => prev.map(w => w.id === workflowId ? { ...w, status: 'paused' } : w))
+      // Reload workflows
+      const workflowsResult = await getWorkflows(userId)
+      setWorkflows(workflowsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Disable failed'
       toast.error('Disable Failed', { description: message })
@@ -293,10 +299,18 @@ export default function AutomationPage() {
   }
 
   // Button 6: Test Workflow
+  // NOTE: Workflow execution requires backend execution engine (action processing, conditions, etc.)
+  // Keeping as API call - this is correct implementation for workflow execution
   const handleTestWorkflow = async (workflowId: string, workflowName: string) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
     try {
       logger.info('Testing workflow', { workflowId })
 
+      // Workflow execution requires backend API for processing actions and conditions
       const response = await fetch(`/api/admin/automation/workflows/${workflowId}/test`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -311,6 +325,7 @@ export default function AutomationPage() {
       logger.info('Workflow tested', { success: true, workflowId, result })
       announce('Workflow test completed', 'polite')
 
+      // Optimistic update - ideally reload from database
       setWorkflows(prev => prev.map(w => w.id === workflowId ? { ...w, runsCount: w.runsCount + 1 } : w))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Test failed'
@@ -321,10 +336,18 @@ export default function AutomationPage() {
   }
 
   // Button 7: Connect Integration
+  // NOTE: Integration connections require OAuth flows and API key management
+  // Keeping as API call - this is correct implementation for OAuth operations
   const handleConnectIntegration = async (integrationId: string, integrationName: string) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
     try {
       logger.info('Connecting integration', { integrationId })
 
+      // OAuth and API integration requires backend API for secure credential management
       const response = await fetch('/api/admin/automation/integrations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -340,6 +363,7 @@ export default function AutomationPage() {
       logger.info('Integration connected', { success: true, integrationId, result })
       announce('Integration connected successfully', 'polite')
 
+      // Optimistic update - ideally reload from database
       setIntegrations(prev => prev.map(i => i.id === integrationId ? {
         ...i,
         status: 'connected',
@@ -354,14 +378,22 @@ export default function AutomationPage() {
   }
 
   // Button 8: Disconnect Integration
+  // NOTE: Integration disconnection requires OAuth token revocation
+  // Keeping as API call - this is correct implementation for OAuth revocation
   const handleDisconnectIntegration = async (integrationId: string, integrationName: string) => {
     if (!confirm(`Are you sure you want to disconnect ${integrationName}?`)) {
+      return
+    }
+
+    if (!userId) {
+      toast.error('Authentication required')
       return
     }
 
     try {
       logger.info('Disconnecting integration', { integrationId })
 
+      // OAuth token revocation requires backend API for secure credential management
       const response = await fetch(`/api/admin/automation/integrations/${integrationId}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' }
@@ -375,6 +407,7 @@ export default function AutomationPage() {
       logger.info('Integration disconnected', { success: true, integrationId })
       announce('Integration disconnected successfully', 'polite')
 
+      // Optimistic update - ideally reload from database
       setIntegrations(prev => prev.map(i => i.id === integrationId ? {
         ...i,
         status: 'disconnected',
@@ -390,10 +423,18 @@ export default function AutomationPage() {
   }
 
   // Button 9: Test Webhook
+  // NOTE: Webhook testing requires HTTP request sending and response verification
+  // Keeping as API call - this is correct implementation for HTTP testing operations
   const handleTestWebhook = async () => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
     try {
       logger.info('Testing webhook')
 
+      // Webhook testing requires backend API for HTTP request sending and validation
       const response = await fetch('/api/admin/automation/webhooks/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

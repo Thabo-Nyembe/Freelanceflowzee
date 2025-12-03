@@ -180,9 +180,20 @@ export default function CRMPage() {
   }
 
   // Button 2: Edit Deal
+  // NOTE: No updateDeal function in admin-overview-queries.ts yet
+  // Keeping as API call for now - would need backend endpoint
   const handleEditDeal = async (dealId: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to edit deals' })
+      return
+    }
+
     try {
       logger.info('Editing deal', { dealId })
+
+      // TODO: When updateDeal function is added to admin-overview-queries.ts, use:
+      // const { updateDeal, getDeals } = await import('@/lib/admin-overview-queries')
+      // await updateDeal(dealId, { deal_value: 150000, probability: 85 })
 
       const response = await fetch(`/api/admin/crm/deals/${dealId}`, {
         method: 'PUT',
@@ -199,6 +210,7 @@ export default function CRMPage() {
       logger.info('Deal edited', { success: true, dealId, result })
       announce('Deal updated successfully', 'polite')
 
+      // Optimistic update - ideally reload from database
       setDeals(prev => prev.map(d => d.id === dealId ? { ...d, value: 150000, probability: 85 } : d))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Edit failed'
@@ -209,13 +221,24 @@ export default function CRMPage() {
   }
 
   // Button 3: Delete Deal
+  // NOTE: No deleteDeal function in admin-overview-queries.ts yet
+  // Keeping as API call for now - would need backend endpoint
   const handleDeleteDeal = async (dealId: string, dealTitle: string) => {
     if (!confirm(`Are you sure you want to delete "${dealTitle}"? This action cannot be undone.`)) {
       return
     }
 
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to delete deals' })
+      return
+    }
+
     try {
       logger.info('Deleting deal', { dealId })
+
+      // TODO: When deleteDeal function is added to admin-overview-queries.ts, use:
+      // const { deleteDeal } = await import('@/lib/admin-overview-queries')
+      // await deleteDeal(dealId)
 
       const response = await fetch(`/api/admin/crm/deals/${dealId}`, {
         method: 'DELETE',
@@ -230,6 +253,7 @@ export default function CRMPage() {
       logger.info('Deal deleted', { success: true, dealId })
       announce('Deal deleted successfully', 'polite')
 
+      // Optimistic update - ideally reload from database
       setDeals(prev => prev.filter(d => d.id !== dealId))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
@@ -311,9 +335,20 @@ export default function CRMPage() {
   }
 
   // Button 6: Edit Contact
+  // NOTE: No updateContact function in admin-overview-queries.ts yet
+  // Keeping as API call for now - would need backend endpoint
   const handleEditContact = async (contactId: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to edit contacts' })
+      return
+    }
+
     try {
       logger.info('Editing contact', { contactId })
+
+      // TODO: When updateContact function is added to admin-overview-queries.ts, use:
+      // const { updateContact, getContacts } = await import('@/lib/admin-overview-queries')
+      // await updateContact(contactId, { position: 'Senior Manager' })
 
       const response = await fetch(`/api/admin/crm/contacts/${contactId}`, {
         method: 'PUT',
@@ -330,6 +365,7 @@ export default function CRMPage() {
       logger.info('Contact edited', { success: true, contactId, result })
       announce('Contact updated successfully', 'polite')
 
+      // Optimistic update - ideally reload from database
       setContacts(prev => prev.map(c => c.id === contactId ? { ...c, position: 'Senior Manager' } : c))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Edit failed'
@@ -340,13 +376,24 @@ export default function CRMPage() {
   }
 
   // Button 7: Delete Contact
+  // NOTE: No deleteContact function in admin-overview-queries.ts yet
+  // Keeping as API call for now - would need backend endpoint
   const handleDeleteContact = async (contactId: string, contactName: string) => {
     if (!confirm(`Are you sure you want to delete "${contactName}"? This action cannot be undone.`)) {
       return
     }
 
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to delete contacts' })
+      return
+    }
+
     try {
       logger.info('Deleting contact', { contactId })
+
+      // TODO: When deleteContact function is added to admin-overview-queries.ts, use:
+      // const { deleteContact } = await import('@/lib/admin-overview-queries')
+      // await deleteContact(contactId)
 
       const response = await fetch(`/api/admin/crm/contacts/${contactId}`, {
         method: 'DELETE',
@@ -361,6 +408,7 @@ export default function CRMPage() {
       logger.info('Contact deleted', { success: true, contactId })
       announce('Contact deleted successfully', 'polite')
 
+      // Optimistic update - ideally reload from database
       setContacts(prev => prev.filter(c => c.id !== contactId))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
@@ -371,10 +419,18 @@ export default function CRMPage() {
   }
 
   // Button 8: Send Email
+  // NOTE: Email functionality requires backend email service integration (SendGrid, AWS SES, etc.)
+  // Keeping as API call - this is correct implementation for email operations
   const handleSendEmail = async (contactEmail: string, contactName: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to send emails' })
+      return
+    }
+
     try {
       logger.info('Sending email', { contactEmail })
 
+      // Email operations require backend API for actual email delivery
       const response = await fetch('/api/admin/crm/email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -402,10 +458,18 @@ export default function CRMPage() {
   }
 
   // Button 9: Schedule Call
+  // NOTE: Calendar integration requires backend API (Google Calendar, Outlook, etc.)
+  // Keeping as API call - this is correct implementation for calendar operations
   const handleScheduleCall = async (contactId: string, contactName: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to schedule calls' })
+      return
+    }
+
     try {
       logger.info('Scheduling call', { contactId })
 
+      // Calendar operations require backend API for calendar service integration
       const response = await fetch('/api/admin/crm/schedule', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -444,10 +508,18 @@ export default function CRMPage() {
   }
 
   // Button 11: Export Pipeline
+  // NOTE: CSV generation requires backend processing (formatting, file creation)
+  // Keeping as API call - this is correct implementation for export operations
   const handleExportPipeline = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to export pipeline' })
+      return
+    }
+
     try {
       logger.info('Exporting pipeline')
 
+      // CSV/Excel export requires backend API for file generation and download
       const response = await fetch('/api/admin/crm/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
