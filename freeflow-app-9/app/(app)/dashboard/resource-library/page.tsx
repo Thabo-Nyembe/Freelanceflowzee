@@ -53,30 +53,71 @@ import {
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ResourceLibrary')
 
 export default function ResourceLibraryPage() {
   // A+++ STATE MANAGEMENT
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { announce } = useAnnouncer()
+  const [resources, setResources] = useState<any[]>([])
+  const [libraryStats, setLibraryStats] = useState({
+    totalResources: 0,
+    totalDownloads: 0,
+    avgRating: 0,
+    totalAuthors: 0
+  })
 
   // A+++ LOAD RESOURCE LIBRARY DATA
   useEffect(() => {
     const loadResourceLibraryData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading resource library data', { userId })
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
+        // Dynamic import for code splitting
+        const { getResources, getResourceLibraryStats } = await import('@/lib/resource-library-queries')
+
+        // Load resources and stats in parallel
+        const [resourcesResult, statsResult] = await Promise.all([
+          getResources(userId, { limit: 50 }),
+          getResourceLibraryStats()
+        ])
+
+        if (resourcesResult.error) throw resourcesResult.error
+        if (statsResult.error) throw statsResult.error
+
+        setResources(resourcesResult.data || [])
+        setLibraryStats({
+          totalResources: statsResult.data?.total_resources || 0,
+          totalDownloads: statsResult.data?.total_downloads || 0,
+          avgRating: statsResult.data?.avg_rating || 0,
+          totalAuthors: statsResult.data?.total_authors || 0
         })
 
         setIsLoading(false)
-        announce('Resource library loaded successfully', 'polite')
+
+        logger.info('Resource library data loaded successfully', {
+          userId,
+          resourcesCount: resourcesResult.data?.length || 0,
+          totalResources: statsResult.data?.total_resources || 0
+        })
+
+        announce(`Resource library loaded with ${resourcesResult.data?.length || 0} resources`, 'polite')
       } catch (err) {
+        logger.error('Failed to load resource library data', { error: err, userId })
         setError(err instanceof Error ? err.message : 'Failed to load resource library')
         setIsLoading(false)
         announce('Error loading resource library', 'assertive')
@@ -84,14 +125,15 @@ export default function ResourceLibraryPage() {
     }
 
     loadResourceLibraryData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const [activeTab, setActiveTab] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState('grid')
   const [selectedCategory, setSelectedCategory] = useState('all')
 
-  const resources = [
+  // Mock resources for UI display (will be replaced by database resources)
+  const mockResources = [
     {
       id: 1,
       title: 'Complete UI/UX Design System',
@@ -273,10 +315,13 @@ export default function ResourceLibraryPage() {
     }
   }
 
-  const filteredResources = resources.filter(resource => {
+  // Use database resources if available, otherwise fall back to mock data
+  const displayResources = resources.length > 0 ? resources : mockResources
+
+  const filteredResources = displayResources.filter((resource: any) => {
     const matchesSearch = resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          resource.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         resource.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+                         (resource.tags && resource.tags.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase())))
     const matchesCategory = selectedCategory === 'all' || resource.category === selectedCategory
     return matchesSearch && matchesCategory
   })
