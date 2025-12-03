@@ -12,6 +12,7 @@ import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
 import {
   Brain,
   Target,
@@ -25,10 +26,6 @@ import {
   PieChart
 } from 'lucide-react'
 import {
-  MOCK_TRANSACTIONS,
-  MOCK_INVOICES,
-  MOCK_INSIGHTS,
-  MOCK_FINANCIAL_OVERVIEW,
   formatCurrency,
   getInsightImpactColor,
   type Transaction,
@@ -40,12 +37,13 @@ const logger = createFeatureLogger('FinancialOverview')
 
 export default function FinancialOverviewPage() {
   const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [insights, setInsights] = useState<FinancialInsight[]>([])
-  const [overview, setOverview] = useState(MOCK_FINANCIAL_OVERVIEW)
+  const [overview, setOverview] = useState<any>(null)
 
   useEffect(() => {
     if (!userId) return
@@ -83,89 +81,77 @@ export default function FinancialOverviewPage() {
       }
 
       // Transform transactions to UI format
-      if (transactionsResult.data.length > 0) {
-        const transformedTransactions = transactionsResult.data.map(t => ({
-          id: t.id,
-          type: t.type as 'income' | 'expense',
-          category: t.category,
-          description: t.description,
-          amount: t.amount,
-          date: t.transaction_date,
-          client: t.client_name,
-          project: t.project_name,
-          vendor: t.vendor_name,
-          status: t.status as any,
-          paymentMethod: t.payment_method as any,
-          invoice: t.invoice_number,
-          recurring: t.is_recurring,
-          nextDue: t.next_due_date,
-          tags: t.tags,
-          notes: t.notes,
-          createdAt: t.created_at,
-          updatedAt: t.updated_at
-        }))
-        setTransactions(transformedTransactions)
-      } else {
-        setTransactions(MOCK_TRANSACTIONS)
-      }
+      const transformedTransactions = (transactionsResult.data || []).map(t => ({
+        id: t.id,
+        type: t.type as 'income' | 'expense',
+        category: t.category,
+        description: t.description,
+        amount: t.amount,
+        date: t.transaction_date,
+        client: t.client_name,
+        project: t.project_name,
+        vendor: t.vendor_name,
+        status: t.status as any,
+        paymentMethod: t.payment_method as any,
+        invoice: t.invoice_number,
+        recurring: t.is_recurring,
+        nextDue: t.next_due_date,
+        tags: t.tags,
+        notes: t.notes,
+        createdAt: t.created_at,
+        updatedAt: t.updated_at
+      }))
+      setTransactions(transformedTransactions)
 
-      // Use real overview data if available
-      if (overviewResult.data) {
-        setOverview({
-          totalRevenue: overviewResult.data.total_revenue,
-          monthlyRevenue: overviewResult.data.total_revenue,
-          totalExpenses: overviewResult.data.total_expenses,
-          netProfit: overviewResult.data.net_profit,
-          profitMargin: overviewResult.data.profit_margin,
-          monthlyGrowth: 0,
-          quarterlyGrowth: 0,
-          yearlyGrowth: 0,
-          cashFlow: overviewResult.data.net_profit,
-          accountsReceivable: 0,
-          accountsPayable: 0
-        })
-      } else {
-        setOverview(MOCK_FINANCIAL_OVERVIEW)
-      }
+      // Use real overview data
+      setOverview(overviewResult.data ? {
+        totalRevenue: overviewResult.data.total_revenue || 0,
+        monthlyRevenue: overviewResult.data.total_revenue || 0,
+        totalExpenses: overviewResult.data.total_expenses || 0,
+        netProfit: overviewResult.data.net_profit || 0,
+        profitMargin: overviewResult.data.profit_margin || 0,
+        monthlyGrowth: 0,
+        quarterlyGrowth: 0,
+        yearlyGrowth: 0,
+        cashFlow: overviewResult.data.net_profit || 0,
+        accountsReceivable: 0,
+        accountsPayable: 0
+      } : null)
 
       // Transform insights to UI format
-      if (insightsResult.data.length > 0) {
-        const transformedInsights = insightsResult.data.map(i => ({
-          id: i.id,
-          type: i.type as any,
-          title: i.title,
-          description: i.description,
-          impact: i.impact as any,
-          potentialValue: i.potential_value,
-          actionable: i.is_actionable,
-          confidence: i.confidence,
-          category: i.category as any
-        }))
-        setInsights(transformedInsights)
-      } else {
-        setInsights(MOCK_INSIGHTS)
-      }
+      const transformedInsights = (insightsResult.data || []).map(i => ({
+        id: i.id,
+        type: i.type as any,
+        title: i.title,
+        description: i.description,
+        impact: i.impact as any,
+        potentialValue: i.potential_value,
+        actionable: i.is_actionable,
+        confidence: i.confidence,
+        category: i.category as any
+      }))
+      setInsights(transformedInsights)
 
-      // Use mock invoices for now
-      setInvoices(MOCK_INVOICES)
+      // Invoices can be added when getInvoices query is available
+      setInvoices([])
 
       setIsLoading(false)
+      toast.success('Financial data loaded', {
+        description: `${transformedTransactions.length} transactions, ${transformedInsights.length} insights`
+      })
       logger.info('Financial overview loaded successfully from Supabase', {
-        transactionCount: transactionsResult.data.length,
-        insightCount: insightsResult.data.length,
+        transactionCount: transformedTransactions.length,
+        insightCount: transformedInsights.length,
         userId
       })
+      announce('Financial overview loaded successfully', 'polite')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load financial overview'
       setError(errorMessage)
       setIsLoading(false)
       logger.error('Failed to load financial overview', { error: err, userId })
-
-      // Fallback to mock data on error
-      setTransactions(MOCK_TRANSACTIONS)
-      setInvoices(MOCK_INVOICES)
-      setInsights(MOCK_INSIGHTS)
-      setOverview(MOCK_FINANCIAL_OVERVIEW)
+      toast.error('Failed to load financial data', { description: errorMessage })
+      announce('Error loading financial overview', 'assertive')
     }
   }
 
