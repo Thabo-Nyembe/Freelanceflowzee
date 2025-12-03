@@ -8,12 +8,26 @@ import { Plus, Heart, Star, Send, Download, Play } from 'lucide-react'
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('UIShowcase')
 
 export default function UIShowcasePage() {
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
+  React.useEffect(() => {
+    if (userId) {
+      logger.info('UI Showcase loaded', { userId })
+      announce('UI showcase loaded', 'polite')
+    }
+  }, [userId, announce])
+
+
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { announce } = useAnnouncer()
 
   const [dynamicIslandExpanded, setDynamicIslandExpanded] = useState(false)
   const [morphingLoading, setMorphingLoading] = useState(false)
