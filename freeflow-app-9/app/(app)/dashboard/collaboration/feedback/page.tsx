@@ -43,7 +43,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { createFeatureLogger } from "@/lib/logger";
 import { NumberFlow } from "@/components/ui/number-flow";
-import { createClient } from "@/lib/supabase/client";
+import { useCurrentUser } from "@/hooks/use-ai-data";
+import { useAnnouncer } from "@/lib/accessibility";
 import {
   getFeedback,
   createFeedback as createFeedbackDB,
@@ -117,6 +118,10 @@ interface FeedbackReply {
 }
 
 export default function FeedbackPage() {
+  // A+++ Hooks
+  const { userId, loading: userLoading } = useCurrentUser();
+  const { announce } = useAnnouncer();
+
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
@@ -140,25 +145,18 @@ export default function FeedbackPage() {
 
   useEffect(() => {
     fetchFeedbackData();
-  }, []);
+  }, [userId, filterCategory, filterStatus, filterPriority, activeTab, searchQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchFeedbackData = async () => {
+    if (!userId) {
+      logger.info("Waiting for user authentication");
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      logger.info("Fetching feedback data from Supabase");
-
-      // Get current user
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        logger.warn("No authenticated user found");
-        toast.error("Please log in to view feedback");
-        setLoading(false);
-        return;
-      }
+      logger.info("Fetching feedback data from Supabase", { userId });
 
       // Build filters based on UI state
       const filters: any = {};
@@ -180,15 +178,17 @@ export default function FeedbackPage() {
 
       // Fetch feedback from Supabase
       const { data: feedbackData, error: feedbackError } = await getFeedback(
-        user.id,
+        userId,
         filters
       );
 
       if (feedbackError) {
         logger.error("Failed to fetch feedback", {
           error: feedbackError.message,
+          userId
         });
         toast.error("Failed to load feedback");
+        announce("Error loading feedback", "assertive");
         setLoading(false);
         return;
       }
@@ -200,7 +200,7 @@ export default function FeedbackPage() {
           const { data: repliesData } = await getFeedbackReplies(fb.id);
 
           // Fetch user's vote
-          const { data: voteData } = await getUserVote(fb.id, user.id);
+          const { data: voteData } = await getUserVote(fb.id, userId);
 
           return {
             id: fb.id,
@@ -209,7 +209,7 @@ export default function FeedbackPage() {
             category: fb.category,
             priority: fb.priority,
             status: fb.status,
-            author: user.id, // Temporary: need user profile lookup
+            author: userId, // Temporary: need user profile lookup
             authorAvatar: "",
             createdAt: new Date(fb.created_at).toLocaleDateString(),
             upvotes: fb.upvotes,
@@ -235,7 +235,7 @@ export default function FeedbackPage() {
 
       // Fetch stats
       const { data: statsData, error: statsError } = await getFeedbackStats(
-        user.id
+        userId
       );
 
       if (!statsError && statsData) {
@@ -256,11 +256,14 @@ export default function FeedbackPage() {
 
       logger.info("Feedback data fetched successfully", {
         count: transformedFeedbacks.length,
+        userId
       });
       toast.success(`Loaded ${transformedFeedbacks.length} feedback items`);
+      announce(`${transformedFeedbacks.length} feedback items loaded successfully`, "polite");
     } catch (error) {
-      logger.error("Exception in fetchFeedbackData", { error });
+      logger.error("Exception in fetchFeedbackData", { error, userId });
       toast.error("Failed to load feedback");
+      announce("Error loading feedback", "assertive");
     } finally {
       setLoading(false);
     }
@@ -268,20 +271,12 @@ export default function FeedbackPage() {
 
   const handleCreateFeedback = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!userId) return;
+
     const formData = new FormData(e.currentTarget);
 
     try {
-      logger.info("Creating new feedback");
-
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error("Please log in to submit feedback");
-        return;
-      }
+      logger.info("Creating new feedback", { userId });
 
       const title = formData.get("feedbackTitle") as string;
       const description = formData.get("feedbackDescription") as string;
@@ -289,7 +284,7 @@ export default function FeedbackPage() {
       const priority = formData.get("feedbackPriority") as FeedbackPriority;
 
       // Create feedback in Supabase
-      const { data, error } = await createFeedbackDB(user.id, {
+      const { data, error } = await createFeedbackDB(userId, {
         title,
         description,
         category,
@@ -297,8 +292,9 @@ export default function FeedbackPage() {
       });
 
       if (error) {
-        logger.error("Failed to create feedback", { error: error.message });
+        logger.error("Failed to create feedback", { error: error.message, userId });
         toast.error("Failed to submit feedback");
+        announce("Error submitting feedback", "assertive");
         return;
       }
 
@@ -310,7 +306,7 @@ export default function FeedbackPage() {
         category: data.category,
         priority: data.priority,
         status: data.status,
-        author: user.id,
+        author: userId,
         createdAt: new Date(data.created_at).toLocaleDateString(),
         upvotes: 0,
         downvotes: 0,
@@ -332,110 +328,96 @@ export default function FeedbackPage() {
 
       logger.info("Feedback created successfully", {
         feedbackId: data.id,
+        userId,
         category,
         priority,
       });
       toast.success(`Feedback submitted: "${title}"`);
+      announce("Feedback submitted successfully", "polite");
     } catch (error) {
-      logger.error("Exception in handleCreateFeedback", { error });
+      logger.error("Exception in handleCreateFeedback", { error, userId });
       toast.error("Failed to submit feedback");
+      announce("Error submitting feedback", "assertive");
     }
   };
 
   const handleUpvote = async (feedbackId: string) => {
+    if (!userId) return;
+
     try {
-      logger.info("Upvoting feedback", { feedbackId });
-
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error("Please log in to vote");
-        return;
-      }
+      logger.info("Upvoting feedback", { feedbackId, userId });
 
       // Vote in database (handles toggle logic)
-      const { data, error } = await voteFeedback(feedbackId, user.id, "up");
+      const { data, error } = await voteFeedback(feedbackId, userId, "up");
 
       if (error) {
-        logger.error("Failed to upvote", { error: error.message });
+        logger.error("Failed to upvote", { error: error.message, userId });
         toast.error("Failed to upvote");
+        announce("Error voting on feedback", "assertive");
         return;
       }
 
       // Refresh feedback to get updated counts
       await fetchFeedbackData();
 
-      logger.info("Feedback upvoted");
+      logger.info("Feedback upvoted", { userId });
       toast.success(data ? "Upvoted" : "Vote removed");
+      announce(data ? "Upvoted" : "Vote removed", "polite");
     } catch (error) {
-      logger.error("Exception in handleUpvote", { error });
+      logger.error("Exception in handleUpvote", { error, userId });
       toast.error("Failed to upvote");
+      announce("Error voting on feedback", "assertive");
     }
   };
 
   const handleDownvote = async (feedbackId: string) => {
+    if (!userId) return;
+
     try {
-      logger.info("Downvoting feedback", { feedbackId });
-
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error("Please log in to vote");
-        return;
-      }
+      logger.info("Downvoting feedback", { feedbackId, userId });
 
       // Vote in database (handles toggle logic)
-      const { data, error } = await voteFeedback(feedbackId, user.id, "down");
+      const { data, error } = await voteFeedback(feedbackId, userId, "down");
 
       if (error) {
-        logger.error("Failed to downvote", { error: error.message });
+        logger.error("Failed to downvote", { error: error.message, userId });
         toast.error("Failed to downvote");
+        announce("Error voting on feedback", "assertive");
         return;
       }
 
       // Refresh feedback to get updated counts
       await fetchFeedbackData();
 
-      logger.info("Feedback downvoted");
+      logger.info("Feedback downvoted", { userId });
       toast.success(data ? "Downvoted" : "Vote removed");
+      announce(data ? "Downvoted" : "Vote removed", "polite");
     } catch (error) {
-      logger.error("Exception in handleDownvote", { error });
+      logger.error("Exception in handleDownvote", { error, userId });
       toast.error("Failed to downvote");
+      announce("Error voting on feedback", "assertive");
     }
   };
 
   const handleToggleStar = async (feedbackId: string) => {
+    if (!userId) return;
+
     try {
-      logger.info("Toggling star", { feedbackId });
-
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error("Please log in");
-        return;
-      }
+      logger.info("Toggling star", { feedbackId, userId });
 
       const currentFeedback = feedbacks.find((f) => f.id === feedbackId);
       if (!currentFeedback) return;
 
       const { data, error } = await toggleStarred(
         feedbackId,
-        user.id,
+        userId,
         !currentFeedback.isStarred
       );
 
       if (error) {
-        logger.error("Failed to toggle star", { error: error.message });
+        logger.error("Failed to toggle star", { error: error.message, userId });
         toast.error("Failed to update star");
+        announce("Error updating star", "assertive");
         return;
       }
 
@@ -446,38 +428,33 @@ export default function FeedbackPage() {
         )
       );
 
-      logger.info("Star toggled", { isStarred: data?.is_starred });
+      logger.info("Star toggled", { isStarred: data?.is_starred, userId });
       toast.success(data?.is_starred ? "Starred" : "Unstarred");
+      announce(data?.is_starred ? "Starred" : "Unstarred", "polite");
     } catch (error) {
-      logger.error("Exception in handleToggleStar", { error });
+      logger.error("Exception in handleToggleStar", { error, userId });
       toast.error("Failed to update star");
+      announce("Error updating star", "assertive");
     }
   };
 
   const handleToggleFlag = async (feedbackId: string) => {
+    if (!userId) return;
+
     try {
-      logger.info("Toggling flag", { feedbackId });
-
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error("Please log in");
-        return;
-      }
+      logger.info("Toggling flag", { feedbackId, userId });
 
       const currentFeedback = feedbacks.find((f) => f.id === feedbackId);
       if (!currentFeedback) return;
 
-      const { data, error } = await updateFeedback(feedbackId, user.id, {
+      const { data, error } = await updateFeedback(feedbackId, userId, {
         is_flagged: !currentFeedback.isFlagged,
       });
 
       if (error) {
-        logger.error("Failed to toggle flag", { error: error.message });
+        logger.error("Failed to toggle flag", { error: error.message, userId });
         toast.error("Failed to update flag");
+        announce("Error updating flag", "assertive");
         return;
       }
 
@@ -488,11 +465,13 @@ export default function FeedbackPage() {
         )
       );
 
-      logger.info("Flag toggled", { isFlagged: data?.is_flagged });
+      logger.info("Flag toggled", { isFlagged: data?.is_flagged, userId });
       toast.success(data?.is_flagged ? "Flagged" : "Unflagged");
+      announce(data?.is_flagged ? "Flagged" : "Unflagged", "polite");
     } catch (error) {
-      logger.error("Exception in handleToggleFlag", { error });
+      logger.error("Exception in handleToggleFlag", { error, userId });
       toast.error("Failed to update flag");
+      announce("Error updating flag", "assertive");
     }
   };
 
