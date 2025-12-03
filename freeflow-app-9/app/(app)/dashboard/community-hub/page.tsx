@@ -55,9 +55,9 @@ import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // SUPABASE INTEGRATION
-import { createClient } from '@/lib/supabase/client'
 import {
   getMembers,
   getMemberByUserId,
@@ -742,6 +742,9 @@ function communityReducer(state: CommunityState, action: CommunityAction): Commu
 }
 
 export default function CommunityHubPage() {
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [state, dispatch] = useReducer(communityReducer, initialState)
   const [activeTab, setActiveTab] = useState<string>('feed')
 
@@ -1645,20 +1648,15 @@ export default function CommunityHubPage() {
 
   useEffect(() => {
     const loadData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        dispatch({ type: 'SET_LOADING', payload: false })
+        return
+      }
+
       try {
         dispatch({ type: 'SET_LOADING', payload: true })
-        logger.info('Loading Community Hub data from Supabase')
-
-        // Get authenticated user
-        const supabase = createClient()
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-          logger.warn('No authenticated user found')
-          toast.error('Please log in to view community')
-          dispatch({ type: 'SET_LOADING', payload: false })
-          return
-        }
+        logger.info('Loading Community Hub data from Supabase', { userId })
 
         // Fetch all community data in parallel
         const [membersResult, postsResult, eventsResult, groupsResult, statsResult, currentMemberResult] = await Promise.all([
@@ -1667,7 +1665,7 @@ export default function CommunityHubPage() {
           getEvents({ upcoming: true }),
           getGroups({}),
           getCommunityStats(),
-          getMemberByUserId(user.id)
+          getMemberByUserId(userId)
         ])
 
         // Transform members data from Supabase to UI format
@@ -1887,17 +1885,20 @@ export default function CommunityHubPage() {
           posts: transformedPosts.length,
           events: transformedEvents.length,
           groups: transformedGroups.length,
-          stats: statsResult.data
+          stats: statsResult.data,
+          userId
         })
 
         if (transformedMembers.length > 0 || transformedPosts.length > 0 || transformedEvents.length > 0 || transformedGroups.length > 0) {
           toast.success('Community Hub loaded', {
             description: `${transformedMembers.length} members • ${transformedPosts.length} posts • ${transformedEvents.length} events • ${transformedGroups.length} groups`
           })
+          announce('Community Hub loaded successfully', 'polite')
         }
       } catch (error: any) {
-        logger.error('Exception loading Community Hub data', { error: error.message })
+        logger.error('Exception loading Community Hub data', { error: error.message, userId })
         toast.error('Failed to load community data')
+        announce('Failed to load community data', 'assertive')
 
         // Fall back to mock data on error
         dispatch({ type: 'SET_MEMBERS', payload: memoizedMockMembers })
@@ -1910,7 +1911,7 @@ export default function CommunityHubPage() {
     }
 
     loadData()
-  }, [memoizedMockMembers, memoizedMockPosts, memoizedMockEvents, memoizedMockGroups])
+  }, [userId, announce, memoizedMockMembers, memoizedMockPosts, memoizedMockEvents, memoizedMockGroups]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const filteredMembers = state.members.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
