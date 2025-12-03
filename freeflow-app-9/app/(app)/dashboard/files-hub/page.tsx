@@ -34,10 +34,8 @@ import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { createClient } from '@/lib/supabase/client'
 
 const logger = createFeatureLogger('FilesHub')
-const supabase = createClient()
 
 // ============================================================================
 // FRAMER MOTION ANIMATION COMPONENTS
@@ -451,9 +449,14 @@ export default function FilesHubPage() {
     const failedFiles: string[] = []
     const files = Array.from(uploadFiles)
 
+    // Create supabase client for storage operations
+    const { createClient } = await import('@/lib/supabase/client')
+    const supabase = createClient()
+
     logger.info('Starting file upload', {
       fileCount: files.length,
-      totalSize: files.reduce((sum, f) => sum + f.size, 0)
+      totalSize: files.reduce((sum, f) => sum + f.size, 0),
+      userId
     })
 
     for (const file of files) {
