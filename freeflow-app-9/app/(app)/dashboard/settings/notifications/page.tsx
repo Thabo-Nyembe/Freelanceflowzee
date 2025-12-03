@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
@@ -8,21 +8,89 @@ import { Label } from '@/components/ui/label'
 import { Mail, Bell, Smartphone } from 'lucide-react'
 import { NotificationSettings, defaultNotifications } from '@/lib/settings-utils'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
 
 const logger = createFeatureLogger('Settings:Notifications')
 
 export default function NotificationsPage() {
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [notifications, setNotifications] = useState<NotificationSettings>(defaultNotifications)
+  const [loading, setLoading] = useState(true)
 
-  const handleToggleNotification = (notificationType: string, enabled: boolean) => {
-    logger.info('Notification setting toggled', {
-      notificationType,
-      enabled
-    })
+  useEffect(() => {
+    const loadNotificationSettings = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setLoading(false)
+        return
+      }
 
-    toast.success(`Notification ${enabled ? 'Enabled' : 'Disabled'}`, {
-      description: `${notificationType} notifications are now ${enabled ? 'ON' : 'OFF'}`
-    })
+      try {
+        setLoading(true)
+        logger.info('Loading notification settings', { userId })
+
+        // Dynamic import for code splitting
+        const { getNotificationPreferences } = await import('@/lib/notification-settings-queries')
+
+        const { data, error } = await getNotificationPreferences(userId)
+        if (error) throw new Error(error.message)
+
+        // Map database preferences to UI state
+        const preferences = data || []
+        const mappedSettings: NotificationSettings = {
+          emailNotifications: preferences.some(p => p.channel === 'email' && p.is_enabled),
+          pushNotifications: preferences.some(p => p.channel === 'push' && p.is_enabled),
+          smsNotifications: preferences.some(p => p.channel === 'sms' && p.is_enabled),
+          projectUpdates: preferences.some(p => p.category === 'project_updates' && p.is_enabled),
+          clientMessages: preferences.some(p => p.category === 'client_messages' && p.is_enabled),
+          paymentAlerts: preferences.some(p => p.category === 'payment_alerts' && p.is_enabled),
+          marketingEmails: preferences.some(p => p.category === 'marketing' && p.is_enabled),
+          weeklyDigest: preferences.some(p => p.category === 'weekly_digest' && p.is_enabled)
+        }
+
+        setNotifications(mappedSettings)
+        logger.info('Notification settings loaded', { count: preferences.length, userId })
+        announce('Notification settings loaded successfully', 'polite')
+      } catch (error) {
+        logger.error('Failed to load notification settings', { error, userId })
+        toast.error('Failed to load notification settings')
+        announce('Error loading notification settings', 'assertive')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadNotificationSettings()
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleToggleNotification = async (notificationType: string, category: string, channel: string, enabled: boolean) => {
+    if (!userId) {
+      toast.error('Please log in')
+      announce('Authentication required', 'assertive')
+      return
+    }
+
+    try {
+      logger.info('Toggling notification setting', { notificationType, category, channel, enabled, userId })
+
+      const { toggleNotificationPreference } = await import('@/lib/notification-settings-queries')
+      const { error } = await toggleNotificationPreference(userId, category, channel as any, enabled)
+
+      if (error) throw new Error(error.message)
+
+      logger.info('Notification setting updated', { notificationType, enabled, userId })
+      toast.success(`Notification ${enabled ? 'Enabled' : 'Disabled'}`, {
+        description: `${notificationType} notifications are now ${enabled ? 'ON' : 'OFF'}`
+      })
+      announce(`${notificationType} notifications ${enabled ? 'enabled' : 'disabled'}`, 'polite')
+    } catch (error) {
+      logger.error('Failed to toggle notification', { error, notificationType, userId })
+      toast.error('Failed to update notification setting')
+      announce('Error updating notification setting', 'assertive')
+    }
   }
 
   return (
@@ -44,9 +112,10 @@ export default function NotificationsPage() {
               <Switch
                 id="email-notifications"
                 checked={notifications.emailNotifications}
+                disabled={loading}
                 onCheckedChange={(checked) => {
                   setNotifications({ ...notifications, emailNotifications: checked })
-                  handleToggleNotification('Email', checked)
+                  handleToggleNotification('Email', 'email', 'email', checked)
                 }}
               />
             </div>
@@ -62,9 +131,10 @@ export default function NotificationsPage() {
               <Switch
                 id="push-notifications"
                 checked={notifications.pushNotifications}
+                disabled={loading}
                 onCheckedChange={(checked) => {
                   setNotifications({ ...notifications, pushNotifications: checked })
-                  handleToggleNotification('Push', checked)
+                  handleToggleNotification('Push', 'push', 'push', checked)
                 }}
               />
             </div>
@@ -80,9 +150,10 @@ export default function NotificationsPage() {
               <Switch
                 id="sms-notifications"
                 checked={notifications.smsNotifications}
+                disabled={loading}
                 onCheckedChange={(checked) => {
                   setNotifications({ ...notifications, smsNotifications: checked })
-                  handleToggleNotification('SMS', checked)
+                  handleToggleNotification('SMS', 'sms', 'sms', checked)
                 }}
               />
             </div>
@@ -102,9 +173,10 @@ export default function NotificationsPage() {
               <Switch
                 id="project-updates"
                 checked={notifications.projectUpdates}
+                disabled={loading}
                 onCheckedChange={(checked) => {
                   setNotifications({ ...notifications, projectUpdates: checked })
-                  handleToggleNotification('Project Updates', checked)
+                  handleToggleNotification('Project Updates', 'project_updates', 'email', checked)
                 }}
               />
             </div>
@@ -117,9 +189,10 @@ export default function NotificationsPage() {
               <Switch
                 id="client-messages"
                 checked={notifications.clientMessages}
+                disabled={loading}
                 onCheckedChange={(checked) => {
                   setNotifications({ ...notifications, clientMessages: checked })
-                  handleToggleNotification('Client Messages', checked)
+                  handleToggleNotification('Client Messages', 'client_messages', 'email', checked)
                 }}
               />
             </div>
@@ -132,9 +205,10 @@ export default function NotificationsPage() {
               <Switch
                 id="payment-alerts"
                 checked={notifications.paymentAlerts}
+                disabled={loading}
                 onCheckedChange={(checked) => {
                   setNotifications({ ...notifications, paymentAlerts: checked })
-                  handleToggleNotification('Payment Alerts', checked)
+                  handleToggleNotification('Payment Alerts', 'payment_alerts', 'email', checked)
                 }}
               />
             </div>
@@ -147,9 +221,10 @@ export default function NotificationsPage() {
               <Switch
                 id="marketing-emails"
                 checked={notifications.marketingEmails}
+                disabled={loading}
                 onCheckedChange={(checked) => {
                   setNotifications({ ...notifications, marketingEmails: checked })
-                  handleToggleNotification('Marketing Emails', checked)
+                  handleToggleNotification('Marketing Emails', 'marketing', 'email', checked)
                 }}
               />
             </div>
@@ -162,9 +237,10 @@ export default function NotificationsPage() {
               <Switch
                 id="weekly-digest"
                 checked={notifications.weeklyDigest}
+                disabled={loading}
                 onCheckedChange={(checked) => {
                   setNotifications({ ...notifications, weeklyDigest: checked })
-                  handleToggleNotification('Weekly Digest', checked)
+                  handleToggleNotification('Weekly Digest', 'weekly_digest', 'email', checked)
                 }}
               />
             </div>
