@@ -69,6 +69,7 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { EmptyState } from '@/components/ui/empty-states'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { createFeatureLogger } from '@/lib/logger'
@@ -448,7 +449,8 @@ const getStatusColor = (status: SessionStatus): string => {
 export default function ARCollaborationPage() {
   logger.debug('Component mounting')
 
-  const announce = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
 
   // State Management
   const [state, dispatch] = useReducer(arCollaborationReducer, {
@@ -488,14 +490,19 @@ export default function ARCollaborationPage() {
 
   // Load mock data
   useEffect(() => {
-    logger.info('Loading initial data')
+    if (!userId) {
+      logger.info('Waiting for user authentication')
+      return
+    }
+
+    logger.info('Loading initial data', { userId })
 
     const mockSessions = generateMockSessions()
     dispatch({ type: 'SET_SESSIONS', sessions: mockSessions })
 
-    logger.info('Initial data loaded', { sessionCount: mockSessions.length })
+    logger.info('Initial data loaded', { sessionCount: mockSessions.length, userId })
     announce('AR collaboration page loaded', 'polite')
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Computed Stats
   const stats = useMemo(() => {
