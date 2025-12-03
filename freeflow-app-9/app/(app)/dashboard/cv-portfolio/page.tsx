@@ -42,6 +42,7 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
 
 // CV PORTFOLIO UTILITIES - World-Class A+++ System
@@ -170,9 +171,10 @@ interface Template {
 
 export default function CVPortfolioPage() {
   // A+++ STATE MANAGEMENT
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { announce } = useAnnouncer()
 
   const [activeTab, setActiveTab] = useState<string>('overview')
   const [isExporting, setIsExporting] = useState<boolean>(false)
@@ -406,8 +408,15 @@ export default function CVPortfolioPage() {
   // A+++ LOAD CV PORTFOLIO DATA
   useEffect(() => {
     const loadCVPortfolioData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         logger.info('Loading CV portfolio data', {
+          userId,
           hasProjects: projects.length > 0,
           hasSkills: skills.length > 0,
           hasExperience: experience.length > 0
@@ -416,19 +425,13 @@ export default function CVPortfolioPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load CV portfolio'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // In production, load from database with userId
+        // For now, use existing mock data but log userId
+        await new Promise((resolve) => setTimeout(resolve, 500))
 
         const completeness = calculateCompleteness()
         logger.info('CV portfolio loaded successfully', {
+          userId,
           completenessScore: completeness,
           projectCount: projects.length,
           skillCount: skills.length,
@@ -440,7 +443,7 @@ export default function CVPortfolioPage() {
         announce('CV portfolio loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load CV portfolio'
-        logger.error('Failed to load CV portfolio', { error: errorMessage })
+        logger.error('Failed to load CV portfolio', { error: errorMessage, userId })
         setError(errorMessage)
         setIsLoading(false)
         announce('Error loading CV portfolio', 'assertive')
@@ -448,7 +451,7 @@ export default function CVPortfolioPage() {
     }
 
     loadCVPortfolioData()
-  }, [])
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ==================== PROJECT HANDLERS ====================
 
