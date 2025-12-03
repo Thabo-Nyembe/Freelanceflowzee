@@ -284,13 +284,6 @@ export default function ResourceLibraryPage() {
     { id: 'templates', name: 'Templates', icon: FileText, count: 10 }
   ]
 
-  const libraryStats = {
-    totalResources: 156,
-    totalDownloads: 12847,
-    avgRating: 4.7,
-    totalAuthors: 24
-  }
-
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'design-system': return Palette

@@ -142,39 +142,6 @@ export default function WorkflowBuilderPage() {
     // TODO: Use getWorkflowHistory()
   }
 
-  const workflows = [
-    {
-      id: '1',
-      name: 'Auto Invoice Generation',
-      description: 'Automatically generate invoices when projects are completed',
-      isActive: true,
-      lastRun: new Date('2024-01-15'),
-      totalRuns: 45,
-      successRate: 98,
-      createdAt: new Date('2024-01-01')
-    },
-    {
-      id: '2',
-      name: 'Client Check-in Reminder',
-      description: 'Send weekly check-in emails to active clients',
-      isActive: true,
-      lastRun: new Date('2024-01-14'),
-      totalRuns: 12,
-      successRate: 100,
-      createdAt: new Date('2024-01-08')
-    },
-    {
-      id: '3',
-      name: 'Project Deadline Alert',
-      description: 'Alert team members 2 days before project deadlines',
-      isActive: false,
-      lastRun: new Date('2024-01-10'),
-      totalRuns: 8,
-      successRate: 87,
-      createdAt: new Date('2024-01-05')
-    }
-  ]
-
   const templates = [
     {
       id: '1',

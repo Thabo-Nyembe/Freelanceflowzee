@@ -109,7 +109,6 @@ import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('MicroFeaturesShowcase')
 
@@ -119,8 +118,6 @@ import {
   RefreshCw, CheckCircle, AlertTriangle, Info, Keyboard,
   MousePointer, Layers, Wand2, Boxes, Grid3x3, Clock, Shield
 } from 'lucide-react'
-
-const logger = createFeatureLogger('Micro-Features-Showcase')
 
 export default function MicroFeaturesShowcase() {
   // A+++ STATE MANAGEMENT
