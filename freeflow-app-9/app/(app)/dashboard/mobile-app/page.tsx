@@ -29,6 +29,7 @@ const logger = createFeatureLogger('Mobile-App')
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const DEVICE_PRESETS = [
   { id: 'iphone-15-pro', name: 'iPhone 15 Pro', width: 393, height: 852, ratio: '19.5:9', category: 'phone' },
@@ -531,36 +532,72 @@ export default function MobileAppPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
+
+  // Database state
+  const [devices, setDevices] = useState<any[]>([])
+  const [screens, setScreens] = useState<any[]>([])
+  const [builds, setBuilds] = useState<any[]>([])
+  const [templates, setTemplates] = useState<any[]>([])
 
   // A+++ LOAD MOBILE APP DATA
   useEffect(() => {
     const loadMobileAppData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading mobile app data', { userId })
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load mobile app studio'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Dynamic import for code splitting
+        const {
+          getDevicesByUser,
+          getScreensByUser,
+          getBuildsByUser,
+          getTemplatesByUser
+        } = await import('@/lib/mobile-app-queries')
+
+        // Load mobile app data in parallel
+        const [devicesResult, screensResult, buildsResult, templatesResult] = await Promise.all([
+          getDevicesByUser(userId),
+          getScreensByUser(userId),
+          getBuildsByUser(userId),
+          getTemplatesByUser(userId)
+        ])
+
+        setDevices(devicesResult.data || [])
+        setScreens(screensResult.data || [])
+        setBuilds(buildsResult.data || [])
+        setTemplates(templatesResult.data || [])
 
         setIsLoading(false)
+        toast.success('Mobile app studio loaded', {
+          description: `${devicesResult.data?.length || 0} devices, ${screensResult.data?.length || 0} screens, ${buildsResult.data?.length || 0} builds`
+        })
+        logger.info('Mobile app data loaded successfully', {
+          devicesCount: devicesResult.data?.length,
+          screensCount: screensResult.data?.length,
+          buildsCount: buildsResult.data?.length,
+          templatesCount: templatesResult.data?.length
+        })
         announce('Mobile app studio loaded successfully', 'polite')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load mobile app studio')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load mobile app studio'
+        setError(errorMessage)
         setIsLoading(false)
+        logger.error('Failed to load mobile app data', { error: errorMessage, userId })
+        toast.error('Failed to load mobile app studio', { description: errorMessage })
         announce('Error loading mobile app studio', 'assertive')
       }
     }
 
     loadMobileAppData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // A+++ LOADING STATE
   if (isLoading) {
