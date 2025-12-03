@@ -15,11 +15,11 @@ const logger = createFeatureLogger('ProjectsHub:Active')
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // Shared utilities
 import {
   Project,
-  mockProjects,
   formatDate
 } from '@/lib/projects-hub-utils'
 
@@ -30,24 +30,39 @@ export default function ActiveProjectsPage() {
 
   // A+++ Accessibility
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   useEffect(() => {
     const loadProjects = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setLoading(false)
+        return
+      }
+
       try {
-        logger.info('Loading active projects')
+        logger.info('Loading active projects', { userId })
         setLoading(true)
         setError(null)
 
-        await new Promise((resolve) => setTimeout(resolve, 500))
+        // Dynamic import for code splitting
+        const { getProjects } = await import('@/lib/projects-hub-queries')
 
-        const activeProjects = mockProjects.filter(p => p.status === 'active')
+        // Load active projects from database
+        const result = await getProjects(userId, { status: 'active' })
 
-        logger.info('Active projects loaded', { count: activeProjects.length })
+        if (result.error) {
+          throw new Error(result.error.message || 'Failed to load projects')
+        }
+
+        const activeProjects = result.data || []
+
+        logger.info('Active projects loaded', { count: activeProjects.length, userId })
         setProjects(activeProjects)
         setLoading(false)
         announce(`${activeProjects.length} active projects loaded successfully`, 'polite')
       } catch (err) {
-        logger.error('Failed to load active projects', { error: err })
+        logger.error('Failed to load active projects', { error: err, userId })
         setError(err instanceof Error ? err.message : 'Failed to load active projects')
         setLoading(false)
         announce('Error loading active projects', 'assertive')
@@ -55,7 +70,7 @@ export default function ActiveProjectsPage() {
     }
 
     loadProjects()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
     return (
