@@ -15,9 +15,10 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
 
 // SUPABASE & QUERIES
-import { createClient } from '@/lib/supabase/client'
 import {
   getCodeCompletions,
   getCodeSnippets,
@@ -138,6 +139,9 @@ interface CodeVersion {
 }
 
 export default function AICodeCompletionPage() {
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const codeRef = useRef<HTMLTextAreaElement>(null)
   const [codeInput, setCodeInput] = useState('')
   const [completion, setCompletion] = useState('')
@@ -154,25 +158,21 @@ export default function AICodeCompletionPage() {
   // Load data from Supabase
   useEffect(() => {
     const loadAICodeData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
-        logger.info('Loading AI Code Completion data from Supabase')
-
-        const supabase = createClient()
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-          logger.warn('No authenticated user found')
-          toast.error('Please log in to use AI Code Completion')
-          setIsLoading(false)
-          return
-        }
+        logger.info('Loading AI Code Completion data from Supabase', { userId, language: selectedLanguage })
 
         // Load completions, snippets, and stats
         const [completionsResult, snippetsResult, statsResult] = await Promise.all([
-          getCodeCompletions(user.id, { language: selectedLanguage as ProgrammingLanguage }),
-          getCodeSnippets(user.id, { language: selectedLanguage as ProgrammingLanguage }),
-          getAICodeStats(user.id)
+          getCodeCompletions(userId, { language: selectedLanguage as ProgrammingLanguage }),
+          getCodeSnippets(userId, { language: selectedLanguage as ProgrammingLanguage }),
+          getAICodeStats(userId)
         ])
 
         // Transform DB snippets to UI format
@@ -189,24 +189,28 @@ export default function AICodeCompletionPage() {
 
         logger.info('AI Code data loaded', {
           completions: completionsResult.data?.length || 0,
-          snippets: snippetsResult.data?.length || 0
+          snippets: snippetsResult.data?.length || 0,
+          userId,
+          language: selectedLanguage
         })
 
         toast.success('AI Code Completion loaded', {
           description: `${completionsResult.data?.length || 0} completions • ${snippetsResult.data?.length || 0} snippets`
         })
+        announce('AI Code Completion loaded successfully', 'polite')
 
         setIsLoading(false)
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load AI Code data'
-        logger.error('Exception loading AI Code data', { error: errorMessage })
+        logger.error('Exception loading AI Code data', { error: errorMessage, userId, language: selectedLanguage })
         setIsLoading(false)
         toast.error('Failed to load AI Code Completion')
+        announce('Failed to load AI Code Completion', 'assertive')
       }
     }
 
     loadAICodeData()
-  }, [selectedLanguage])
+  }, [userId, announce, selectedLanguage]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleComplete = useCallback(() => {
     setIsCompleting(true)
