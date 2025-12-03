@@ -37,6 +37,7 @@ export default function EmailMarketingPage() {
   const [campaigns, setCampaigns] = useState<any[]>([])
   const [subscribers, setSubscribers] = useState<any[]>([])
   const [stats, setStats] = useState<any>(null)
+  const [templates, setTemplates] = useState<any[]>([])
 
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [filterStatus, setFilterStatus] = useState<CampaignStatus | 'all'>('all')
@@ -56,16 +57,17 @@ export default function EmailMarketingPage() {
         logger.info('Loading email marketing data', { userId })
 
         // Dynamic import for code splitting
-        const { getEmailCampaigns, getEmailSubscribers, getEmailMarketingStats } = await import('@/lib/email-marketing-queries')
+        const { getEmailCampaigns, getEmailSubscribers, getEmailMarketingStats, getEmailTemplates } = await import('@/lib/email-marketing-queries')
 
-        // Load campaigns, subscribers, and stats in parallel
-        const [campaignsResult, subscribersResult, statsResult] = await Promise.all([
+        // Load campaigns, subscribers, stats, and templates in parallel
+        const [campaignsResult, subscribersResult, statsResult, templatesResult] = await Promise.all([
           getEmailCampaigns(userId),
           getEmailSubscribers(userId),
-          getEmailMarketingStats(userId)
+          getEmailMarketingStats(userId),
+          getEmailTemplates(userId)
         ])
 
-        if (campaignsResult.error || subscribersResult.error || statsResult.error) {
+        if (campaignsResult.error || subscribersResult.error || statsResult.error || templatesResult.error) {
           throw new Error('Failed to load email marketing data')
         }
 
@@ -73,14 +75,16 @@ export default function EmailMarketingPage() {
         setCampaigns(campaignsResult.data || [])
         setSubscribers(subscribersResult.data || [])
         setStats(statsResult.data || null)
+        setTemplates(templatesResult.data || [])
 
         setIsLoading(false)
         toast.success('Email marketing loaded', {
-          description: `${campaignsResult.data?.length || 0} campaigns, ${subscribersResult.data?.length || 0} subscribers`
+          description: `${campaignsResult.data?.length || 0} campaigns, ${subscribersResult.data?.length || 0} subscribers, ${templatesResult.data?.length || 0} templates`
         })
         logger.info('Email marketing data loaded successfully', {
           campaignsCount: campaignsResult.data?.length,
-          subscribersCount: subscribersResult.data?.length
+          subscribersCount: subscribersResult.data?.length,
+          templatesCount: templatesResult.data?.length
         })
         announce('Email marketing data loaded successfully', 'polite')
       } catch (err) {
@@ -259,11 +263,51 @@ export default function EmailMarketingPage() {
     })
   }
 
-  const handleCreateTemplate = () => {
-    announce('Opening template builder', 'polite')
-    toast.info('Template builder', {
-      description: 'Email template editor coming soon'
-    })
+  const handleCreateTemplate = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to create templates' })
+      return
+    }
+
+    try {
+      logger.info('Creating email template', { userId })
+
+      const { createEmailTemplate, getEmailTemplates } = await import('@/lib/email-marketing-queries')
+
+      const newTemplate = {
+        name: 'New Email Template',
+        description: 'Customize this template',
+        category: 'custom',
+        html_content: '<div style="padding: 20px;"><h1>New Template</h1><p>Start editing...</p></div>',
+        is_public: false,
+        usage_count: 0
+      }
+
+      const { data, error } = await createEmailTemplate(userId, newTemplate)
+
+      if (error) {
+        logger.error('Failed to create template', { error })
+        toast.error('Failed to create template')
+        announce('Failed to create template', 'assertive')
+        return
+      }
+
+      logger.info('Template created successfully', { templateId: data?.id })
+
+      toast.success('Template Created', {
+        description: 'Start customizing your new template'
+      })
+      announce('Template created successfully', 'polite')
+
+      // Reload templates
+      const templatesResult = await getEmailTemplates(userId)
+      setTemplates(templatesResult.data || [])
+
+    } catch (err: any) {
+      logger.error('Create template error', { error: err.message })
+      toast.error('Failed to create template')
+      announce('Failed to create template', 'assertive')
+    }
   }
 
   const handleUseTemplate = (template: any) => {
@@ -640,62 +684,20 @@ export default function EmailMarketingPage() {
         </button>
       </div>
 
-      <div className="space-y-4">
-        {MOCK_AUTOMATIONS.map((automation) => (
-          <LiquidGlassCard key={automation.id}>
-            <div className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold">{automation.name}</h3>
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      automation.status === 'active' ? 'bg-green-100 text-green-700' :
-                      automation.status === 'paused' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {automation.status}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-3">{automation.description}</p>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span>Trigger: {automation.trigger.replace('-', ' ')}</span>
-                    <span>•</span>
-                    <span>{automation.steps.length} steps</span>
-                    <span>•</span>
-                    <span>{automation.subscriberCount} enrolled</span>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-green-500">{automation.conversionRate.toFixed(1)}%</div>
-                  <div className="text-sm text-muted-foreground">Completion Rate</div>
-                </div>
-              </div>
-
-              <div className="border-t pt-4">
-                <div className="space-y-2">
-                  {automation.steps.map((step, index) => (
-                    <div key={step.id} className="flex items-center gap-3 text-sm">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
-                        {index + 1}
-                      </div>
-                      <span className="capitalize">{step.type.replace('-', ' ')}</span>
-                      {step.delay && (
-                        <span className="text-muted-foreground">
-                          (wait {step.delay} {step.delayUnit})
-                        </span>
-                      )}
-                      <span className="ml-auto text-muted-foreground">
-                        {step.stats.completed.toLocaleString()} completed
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </LiquidGlassCard>
-        ))}
-      </div>
+      <LiquidGlassCard className="p-12">
+        <NoDataEmptyState
+          title="Advanced Email Automation"
+          message="Automated email workflows and drip campaigns are coming soon. Create powerful sequences triggered by subscriber actions."
+          action={{
+            label: "Learn More",
+            onClick: () => {
+              toast.info('Email Automation', {
+                description: 'Advanced workflow automation features in development'
+              })
+            }
+          }}
+        />
+      </LiquidGlassCard>
     </div>
   )
 
@@ -711,40 +713,53 @@ export default function EmailMarketingPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {MOCK_TEMPLATES.map((template) => (
-          <LiquidGlassCard key={template.id}>
-            <div className="p-6">
-              <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg mb-4 flex items-center justify-center">
-                <div className="text-4xl">📧</div>
-              </div>
+      {templates.length === 0 ? (
+        <LiquidGlassCard className="p-12">
+          <NoDataEmptyState
+            title="No Templates Yet"
+            message="Create your first email template to get started"
+            action={{
+              label: "Create Template",
+              onClick: handleCreateTemplate
+            }}
+          />
+        </LiquidGlassCard>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {templates.map((template) => (
+            <LiquidGlassCard key={template.id}>
+              <div className="p-6">
+                <div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-lg mb-4 flex items-center justify-center">
+                  <div className="text-4xl">📧</div>
+                </div>
 
-              <h3 className="text-lg font-semibold mb-2">{template.name}</h3>
-              <p className="text-sm text-muted-foreground mb-4">{template.description}</p>
+                <h3 className="text-lg font-semibold mb-2">{template.name}</h3>
+                <p className="text-sm text-muted-foreground mb-4">{template.description || 'Email template'}</p>
 
-              <div className="flex items-center justify-between mb-4 text-sm">
-                <span className="capitalize text-muted-foreground">{template.category}</span>
-                <span className="text-muted-foreground">{template.usageCount} uses</span>
-              </div>
+                <div className="flex items-center justify-between mb-4 text-sm">
+                  <span className="capitalize text-muted-foreground">{template.category || 'General'}</span>
+                  <span className="text-muted-foreground">{template.usage_count || 0} uses</span>
+                </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleUseTemplate(template)}
-                  className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
-                >
-                  Use Template
-                </button>
-                <button
-                  onClick={() => handlePreviewTemplate(template)}
-                  className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors"
-                >
-                  Preview
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleUseTemplate(template)}
+                    className="flex-1 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
+                  >
+                    Use Template
+                  </button>
+                  <button
+                    onClick={() => handlePreviewTemplate(template)}
+                    className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    Preview
+                  </button>
+                </div>
               </div>
-            </div>
-          </LiquidGlassCard>
-        ))}
-      </div>
+            </LiquidGlassCard>
+          ))}
+        </div>
+      )}
     </div>
   )
 
