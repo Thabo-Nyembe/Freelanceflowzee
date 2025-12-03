@@ -10,11 +10,8 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
-  MOCK_REVENUE_DATA,
-  MOCK_CONVERSION_FUNNEL,
-  MOCK_TRAFFIC_SOURCES,
-  MOCK_ANALYTICS_INSIGHTS,
   formatCurrency,
   formatPercentage,
   formatNumber,
@@ -47,6 +44,7 @@ const logger = createFeatureLogger('admin-analytics')
 export default function AnalyticsPage() {
   const router = useRouter()
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // State management
   const [isLoading, setIsLoading] = useState(true)
@@ -55,10 +53,10 @@ export default function AnalyticsPage() {
   const [showDateDialog, setShowDateDialog] = useState(false)
   const [showRevenueDetails, setShowRevenueDetails] = useState(false)
   const [showConversionDetails, setShowConversionDetails] = useState(false)
-  const [revenueData, setRevenueData] = useState(MOCK_REVENUE_DATA)
-  const [conversionFunnel, setConversionFunnel] = useState(MOCK_CONVERSION_FUNNEL)
-  const [trafficSources, setTrafficSources] = useState(MOCK_TRAFFIC_SOURCES)
-  const [insights, setInsights] = useState(MOCK_ANALYTICS_INSIGHTS)
+  const [revenueData, setRevenueData] = useState<any[]>([])
+  const [conversionFunnel, setConversionFunnel] = useState<any[]>([])
+  const [trafficSources, setTrafficSources] = useState<any[]>([])
+  const [insights, setInsights] = useState<any[]>([])
 
   // Calculate key metrics
   const totalRevenue = useMemo(() => {
@@ -81,28 +79,60 @@ export default function AnalyticsPage() {
   // Load analytics data
   useEffect(() => {
     const loadAnalytics = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
-        logger.info('Loading analytics data', { dateRange })
+        logger.info('Loading analytics data', { dateRange, userId })
 
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Calculate date range
+        const endDate = new Date().toISOString().split('T')[0]
+        const startDate = new Date()
+        const days = dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : dateRange === '90d' ? 90 : 365
+        startDate.setDate(startDate.getDate() - days)
+        const startDateStr = startDate.toISOString().split('T')[0]
+
+        const { getRevenueData, getConversionFunnel, getTrafficSources, getInsights } = await import('@/lib/admin-analytics-queries')
+
+        const [revenueResult, conversionResult, trafficResult, insightsResult] = await Promise.all([
+          getRevenueData(userId, startDateStr, endDate),
+          getConversionFunnel(userId, startDateStr, endDate),
+          getTrafficSources(userId, startDateStr, endDate),
+          getInsights(userId, 50)
+        ])
+
+        setRevenueData(revenueResult.data || [])
+        setConversionFunnel(conversionResult.data || [])
+        setTrafficSources(trafficResult.data || [])
+        setInsights(insightsResult.data || [])
 
         setIsLoading(false)
         announce('Analytics data loaded successfully', 'polite')
-        logger.info('Analytics loaded', { success: true })
+        toast.success('Analytics loaded', {
+          description: `${revenueResult.data?.length || 0} revenue records loaded`
+        })
+        logger.info('Analytics loaded', {
+          success: true,
+          revenueCount: revenueResult.data?.length || 0,
+          conversionCount: conversionResult.data?.length || 0
+        })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load analytics'
         setError(errorMessage)
         setIsLoading(false)
+        toast.error('Failed to load analytics', { description: errorMessage })
         announce('Error loading analytics', 'assertive')
         logger.error('Analytics load failed', { error: err })
       }
     }
 
     loadAnalytics()
-  }, [dateRange]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dateRange, userId, announce])
 
   // Button 1: Refresh Analytics
   const handleRefreshAnalytics = async () => {
@@ -123,9 +153,6 @@ export default function AnalyticsPage() {
       })
       logger.info('Analytics refresh completed', { success: true, result })
       announce('Analytics refreshed successfully', 'polite')
-
-      // Simulate data update
-      setRevenueData([...MOCK_REVENUE_DATA])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
       toast.error('Refresh Failed', { description: message })
@@ -350,9 +377,6 @@ export default function AnalyticsPage() {
       })
       logger.info('Metrics refresh completed', { success: true, result })
       announce('Metrics refreshed successfully', 'polite')
-
-      // Trigger re-render
-      setRevenueData([...MOCK_REVENUE_DATA])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
       toast.error('Refresh Failed', { description: message })
