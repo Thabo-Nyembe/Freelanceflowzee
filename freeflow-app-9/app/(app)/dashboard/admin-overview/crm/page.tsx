@@ -142,37 +142,35 @@ export default function CRMPage() {
 
   // Button 1: Add Deal
   const handleAddDeal = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to add deals' })
+      return
+    }
+
     try {
       logger.info('Adding new deal')
 
-      const newDeal = {
-        title: 'New Business Opportunity',
-        company: 'New Company',
-        contactName: 'Contact Name',
-        contactEmail: 'contact@company.com',
-        value: 50000,
-        stage: 'lead' as DealStage,
+      const { createDeal, getDeals } = await import('@/lib/admin-overview-queries')
+
+      const dealData = {
+        company_name: 'New Business Opportunity',
+        deal_value: 50000,
+        stage: 'lead' as const,
         priority: 'warm' as const,
         probability: 10
       }
 
-      const response = await fetch('/api/admin/crm/deals', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newDeal)
-      })
-
-      if (!response.ok) throw new Error('Failed to add deal')
-      const result = await response.json()
+      const result = await createDeal(userId, dealData)
 
       toast.success('Deal Added', {
-        description: `New deal "${newDeal.title}" has been created successfully`
+        description: `New deal "${dealData.company_name}" has been created successfully`
       })
       logger.info('Deal added', { success: true, result })
       announce('Deal added successfully', 'polite')
 
-      // Optimistically update UI
-      setDeals(prev => [...prev, { ...newDeal, id: `deal-${Date.now()}`, createdAt: new Date().toISOString(), tags: [], assignedTo: '', lastContact: '', nextAction: '', expectedCloseDate: '' }])
+      // Reload deals
+      const dealsResult = await getDeals(userId)
+      setDeals(dealsResult.data || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Add failed'
       toast.error('Add Failed', { description: message })
@@ -243,17 +241,17 @@ export default function CRMPage() {
 
   // Button 4: Move Deal
   const handleMoveDeal = async (dealId: string, newStage: DealStage) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to move deals' })
+      return
+    }
+
     try {
       logger.info('Moving deal', { dealId, newStage })
 
-      const response = await fetch(`/api/admin/crm/deals/${dealId}/move`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stage: newStage })
-      })
+      const { updateDealStage, getDeals } = await import('@/lib/admin-overview-queries')
 
-      if (!response.ok) throw new Error('Failed to move deal')
-      const result = await response.json()
+      const result = await updateDealStage(dealId, newStage)
 
       toast.success('Deal Moved', {
         description: `Deal moved to ${newStage} stage successfully`
@@ -261,7 +259,9 @@ export default function CRMPage() {
       logger.info('Deal moved', { success: true, dealId, newStage, result })
       announce(`Deal moved to ${newStage}`, 'polite')
 
-      setDeals(prev => prev.map(d => d.id === dealId ? { ...d, stage: newStage } : d))
+      // Reload deals
+      const dealsResult = await getDeals(userId)
+      setDeals(dealsResult.data || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Move failed'
       toast.error('Move Failed', { description: message })
@@ -272,33 +272,36 @@ export default function CRMPage() {
 
   // Button 5: Add Contact
   const handleAddContact = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to add contacts' })
+      return
+    }
+
     try {
       logger.info('Adding new contact')
 
-      const newContact = {
-        name: 'New Contact',
+      const { createContact, getContacts } = await import('@/lib/admin-overview-queries')
+
+      const contactData = {
+        first_name: 'New',
+        last_name: 'Contact',
         email: 'new@contact.com',
         phone: '+1 (555) 000-0000',
         company: 'Company Name',
         position: 'Position'
       }
 
-      const response = await fetch('/api/admin/crm/contacts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newContact)
-      })
-
-      if (!response.ok) throw new Error('Failed to add contact')
-      const result = await response.json()
+      const result = await createContact(userId, contactData)
 
       toast.success('Contact Added', {
-        description: `${newContact.name} has been added to your contact list`
+        description: `${contactData.first_name} ${contactData.last_name} has been added to your contact list`
       })
       logger.info('Contact added', { success: true, result })
       announce('Contact added successfully', 'polite')
 
-      setContacts(prev => [...prev, { ...newContact, id: `contact-${Date.now()}`, linkedDeals: [], totalValue: 0, lastContact: '', status: 'active', tags: [], source: 'manual' }])
+      // Reload contacts
+      const contactsResult = await getContacts(userId)
+      setContacts(contactsResult.data || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Add failed'
       toast.error('Add Failed', { description: message })
@@ -469,20 +472,32 @@ export default function CRMPage() {
 
   // Button 12: Refresh CRM
   const handleRefreshCRM = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to refresh CRM' })
+      return
+    }
+
     try {
       logger.info('Refreshing CRM data')
 
-      const response = await fetch('/api/admin/crm/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      })
+      const { getDeals, getContacts } = await import('@/lib/admin-overview-queries')
 
-      if (!response.ok) throw new Error('Failed to refresh CRM')
+      const [dealsResult, contactsResult] = await Promise.all([
+        getDeals(userId),
+        getContacts(userId)
+      ])
+
+      setDeals(dealsResult.data || [])
+      setContacts(contactsResult.data || [])
 
       toast.success('CRM Refreshed', {
-        description: 'All deals and contacts have been reloaded'
+        description: `Reloaded ${dealsResult.data?.length || 0} deals and ${contactsResult.data?.length || 0} contacts`
       })
-      logger.info('CRM refresh completed', { success: true })
+      logger.info('CRM refresh completed', {
+        success: true,
+        dealCount: dealsResult.data?.length || 0,
+        contactCount: contactsResult.data?.length || 0
+      })
       announce('CRM refreshed successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'

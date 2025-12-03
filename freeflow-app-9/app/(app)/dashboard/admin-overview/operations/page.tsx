@@ -107,19 +107,20 @@ export default function OperationsPage() {
         setError(null)
         logger.info('Loading operations data', { userId })
 
-        // Note: Team members and roles will be loaded from user management queries
-        // when available. For now, initializing with empty arrays.
-        setTeamMembers([])
+        const { getTeamMembers } = await import('@/lib/admin-overview-queries')
+
+        const teamResult = await getTeamMembers(userId)
+        setTeamMembers(teamResult.data || [])
         setRoles([])
 
         setIsLoading(false)
         announce('Operations data loaded successfully', 'polite')
         toast.success('Operations loaded', {
-          description: 'Team and role data initialized'
+          description: `${teamResult.data?.length || 0} team members loaded`
         })
         logger.info('Operations loaded', {
           success: true,
-          memberCount: 0,
+          memberCount: teamResult.data?.length || 0,
           roleCount: 0
         })
       } catch (err) {
@@ -346,20 +347,26 @@ export default function OperationsPage() {
 
   // Button 8: Refresh Operations
   const handleRefreshOperations = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to refresh operations' })
+      return
+    }
+
     try {
       logger.info('Refreshing operations data')
 
-      const response = await fetch('/api/admin/operations/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      })
+      const { getTeamMembers } = await import('@/lib/admin-overview-queries')
 
-      if (!response.ok) throw new Error('Failed to refresh operations')
+      const teamResult = await getTeamMembers(userId)
+      setTeamMembers(teamResult.data || [])
 
       toast.success('Operations Refreshed', {
-        description: 'All team members and permissions have been reloaded'
+        description: `Reloaded ${teamResult.data?.length || 0} team members`
       })
-      logger.info('Operations refresh completed', { success: true })
+      logger.info('Operations refresh completed', {
+        success: true,
+        memberCount: teamResult.data?.length || 0
+      })
       announce('Operations refreshed successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'

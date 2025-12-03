@@ -161,34 +161,36 @@ export default function MarketingPage() {
 
   // Button 1: Add Lead
   const handleAddLead = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to add leads' })
+      return
+    }
+
     try {
       logger.info('Adding new lead')
 
-      const newLead = {
+      const { createLead, getLeads } = await import('@/lib/admin-marketing-queries')
+
+      const leadData = {
         name: 'New Lead',
         email: 'lead@company.com',
-        status: 'new' as LeadStatus,
-        score: 'warm' as LeadScore,
-        scoreValue: 60,
-        source: 'manual'
+        status: 'new' as const,
+        score: 'warm' as const,
+        score_value: 60,
+        source: 'manual' as const
       }
 
-      const response = await fetch('/api/admin/marketing/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newLead)
-      })
-
-      if (!response.ok) throw new Error('Failed to add lead')
-      const result = await response.json()
+      const result = await createLead(userId, leadData)
 
       toast.success('Lead Added', {
-        description: `${newLead.name} has been added to your lead list`
+        description: `${leadData.name} has been added to your lead list`
       })
       logger.info('Lead added', { success: true, result })
       announce('Lead added successfully', 'polite')
 
-      setLeads(prev => [...prev, { ...newLead, id: `lead-${Date.now()}`, tags: [], createdAt: new Date().toISOString(), interests: [], engagementLevel: 5 }])
+      // Reload leads
+      const leadsResult = await getLeads(userId)
+      setLeads(leadsResult.data || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Add failed'
       toast.error('Add Failed', { description: message })
@@ -232,15 +234,17 @@ export default function MarketingPage() {
       return
     }
 
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to delete leads' })
+      return
+    }
+
     try {
       logger.info('Deleting lead', { leadId })
 
-      const response = await fetch(`/api/admin/marketing/leads/${leadId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      })
+      const { deleteLead, getLeads } = await import('@/lib/admin-marketing-queries')
 
-      if (!response.ok) throw new Error('Failed to delete lead')
+      await deleteLead(leadId)
 
       toast.success('Lead Deleted', {
         description: `${leadName} has been removed from your leads`
@@ -248,7 +252,9 @@ export default function MarketingPage() {
       logger.info('Lead deleted', { success: true, leadId })
       announce('Lead deleted successfully', 'polite')
 
-      setLeads(prev => prev.filter(l => l.id !== leadId))
+      // Reload leads
+      const leadsResult = await getLeads(userId)
+      setLeads(leadsResult.data || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
       toast.error('Delete Failed', { description: message })
@@ -349,26 +355,26 @@ export default function MarketingPage() {
 
   // Button 7: Create Campaign
   const handleCreateCampaign = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to create campaigns' })
+      return
+    }
+
     try {
       logger.info('Creating new campaign')
 
-      const newCampaign = {
+      const { createCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
+
+      const campaignData = {
         name: 'New Campaign',
         type: 'email' as const,
-        status: 'draft' as CampaignStatus,
-        startDate: new Date().toISOString(),
+        status: 'draft' as const,
+        start_date: new Date().toISOString(),
         budget: 10000,
-        targetAudience: 1000
+        spent: 0
       }
 
-      const response = await fetch('/api/admin/marketing/campaigns', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newCampaign)
-      })
-
-      if (!response.ok) throw new Error('Failed to create campaign')
-      const result = await response.json()
+      const result = await createCampaign(userId, campaignData)
 
       toast.success('Campaign Created', {
         description: 'New campaign has been created as draft'
@@ -376,19 +382,9 @@ export default function MarketingPage() {
       logger.info('Campaign created', { success: true, result })
       announce('Campaign created successfully', 'polite')
 
-      setCampaigns(prev => [...prev, {
-        ...newCampaign,
-        id: `campaign-${Date.now()}`,
-        spent: 0,
-        reached: 0,
-        engaged: 0,
-        conversions: 0,
-        revenue: 0,
-        roi: 0,
-        channels: [],
-        createdBy: 'Admin',
-        createdAt: new Date().toISOString()
-      }])
+      // Reload campaigns
+      const campaignsResult = await getCampaigns(userId)
+      setCampaigns(campaignsResult.data || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Create failed'
       toast.error('Create Failed', { description: message })
@@ -432,15 +428,17 @@ export default function MarketingPage() {
       return
     }
 
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to delete campaigns' })
+      return
+    }
+
     try {
       logger.info('Deleting campaign', { campaignId })
 
-      const response = await fetch(`/api/admin/marketing/campaigns/${campaignId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      })
+      const { deleteCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
 
-      if (!response.ok) throw new Error('Failed to delete campaign')
+      await deleteCampaign(campaignId)
 
       toast.success('Campaign Deleted', {
         description: `"${campaignName}" has been permanently removed`
@@ -448,7 +446,9 @@ export default function MarketingPage() {
       logger.info('Campaign deleted', { success: true, campaignId })
       announce('Campaign deleted successfully', 'polite')
 
-      setCampaigns(prev => prev.filter(c => c.id !== campaignId))
+      // Reload campaigns
+      const campaignsResult = await getCampaigns(userId)
+      setCampaigns(campaignsResult.data || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
       toast.error('Delete Failed', { description: message })
@@ -596,20 +596,32 @@ export default function MarketingPage() {
 
   // Button 15: Refresh Marketing
   const handleRefreshMarketing = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to refresh marketing' })
+      return
+    }
+
     try {
       logger.info('Refreshing marketing data')
 
-      const response = await fetch('/api/admin/marketing/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      })
+      const { getLeads, getCampaigns } = await import('@/lib/admin-marketing-queries')
 
-      if (!response.ok) throw new Error('Failed to refresh marketing')
+      const [leadsResult, campaignsResult] = await Promise.all([
+        getLeads(userId),
+        getCampaigns(userId)
+      ])
+
+      setLeads(leadsResult.data || [])
+      setCampaigns(campaignsResult.data || [])
 
       toast.success('Marketing Refreshed', {
-        description: 'All leads and campaigns have been reloaded'
+        description: `Reloaded ${leadsResult.data?.length || 0} leads and ${campaignsResult.data?.length || 0} campaigns`
       })
-      logger.info('Marketing refresh completed', { success: true })
+      logger.info('Marketing refresh completed', {
+        success: true,
+        leadCount: leadsResult.data?.length || 0,
+        campaignCount: campaignsResult.data?.length || 0
+      })
       announce('Marketing refreshed successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'

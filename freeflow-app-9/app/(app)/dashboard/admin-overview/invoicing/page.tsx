@@ -398,20 +398,26 @@ export default function InvoicingPage() {
 
   // Button 10: Refresh Invoices
   const handleRefreshInvoices = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to refresh invoices' })
+      return
+    }
+
     try {
       logger.info('Refreshing invoices')
 
-      const response = await fetch('/api/admin/invoicing/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      })
+      const { getInvoices } = await import('@/lib/admin-overview-queries')
 
-      if (!response.ok) throw new Error('Failed to refresh invoices')
+      const invoicesResult = await getInvoices(userId)
+      setInvoices(invoicesResult.data || [])
 
       toast.success('Invoices Refreshed', {
-        description: 'All invoice data has been reloaded'
+        description: `Reloaded ${invoicesResult.data?.length || 0} invoices`
       })
-      logger.info('Invoices refresh completed', { success: true })
+      logger.info('Invoices refresh completed', {
+        success: true,
+        invoiceCount: invoicesResult.data?.length || 0
+      })
       announce('Invoices refreshed successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
