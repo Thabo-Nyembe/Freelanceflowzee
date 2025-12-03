@@ -614,6 +614,30 @@ export async function getOverdueInvoices(userId: string) {
   return data as AdminInvoice[]
 }
 
+export async function updateInvoice(invoiceId: string, updates: Partial<AdminInvoice>) {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('admin_invoices')
+    .update(updates)
+    .eq('id', invoiceId)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as AdminInvoice
+}
+
+export async function deleteInvoice(invoiceId: string) {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('admin_invoices')
+    .delete()
+    .eq('id', invoiceId)
+
+  if (error) throw error
+  return { success: true }
+}
+
 export async function updateInvoiceStatus(invoiceId: string, status: AdminInvoice['status']) {
   const supabase = createClient()
   const updates: any = { status }

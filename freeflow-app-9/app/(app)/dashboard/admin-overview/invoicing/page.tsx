@@ -22,6 +22,7 @@ import {
   type Invoice,
   type InvoiceStatus
 } from '@/lib/admin-overview-utils'
+import type { AdminInvoice } from '@/lib/admin-overview-queries'
 import {
   FileText,
   Plus,
@@ -43,6 +44,32 @@ import {
 } from 'lucide-react'
 
 const logger = createFeatureLogger('admin-invoicing')
+
+// Mapper function to convert AdminInvoice (snake_case) to Invoice (camelCase)
+function mapAdminInvoiceToInvoice(adminInvoice: AdminInvoice): Invoice {
+  return {
+    id: adminInvoice.id,
+    number: adminInvoice.invoice_number,
+    clientId: adminInvoice.client_id || '',
+    clientName: adminInvoice.client_name,
+    clientEmail: adminInvoice.client_email,
+    status: adminInvoice.status as InvoiceStatus,
+    issueDate: adminInvoice.issue_date,
+    dueDate: adminInvoice.due_date,
+    paidDate: adminInvoice.paid_date,
+    total: adminInvoice.amount_total,
+    subtotal: adminInvoice.amount_total - (adminInvoice.amount_paid || 0),
+    taxRate: 10,
+    taxAmount: 0,
+    amountPaid: adminInvoice.amount_paid,
+    amountDue: adminInvoice.amount_due,
+    currency: 'USD',
+    items: adminInvoice.items || [],
+    notes: adminInvoice.notes,
+    createdAt: adminInvoice.created_at,
+    remindersSent: 0
+  }
+}
 
 const TABS: { id: InvoiceStatus | 'all'; label: string }[] = [
   { id: 'all', label: 'All' },
@@ -116,16 +143,16 @@ export default function InvoicingPage() {
         const { getInvoices } = await import('@/lib/admin-overview-queries')
         const invoicesResult = await getInvoices(userId)
 
-        setInvoices(invoicesResult.data || [])
+        setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
 
         setIsLoading(false)
         announce('Invoicing data loaded successfully', 'polite')
         toast.success('Invoices loaded', {
-          description: `${invoicesResult.data?.length || 0} invoices loaded`
+          description: `${invoicesResult?.length || 0} invoices loaded`
         })
         logger.info('Invoicing loaded', {
           success: true,
-          invoiceCount: invoicesResult.data?.length || 0
+          invoiceCount: invoicesResult?.length || 0
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load invoicing'
@@ -142,68 +169,80 @@ export default function InvoicingPage() {
 
   // Button 1: Create Invoice
   const handleCreateInvoice = async () => {
+    if (!userId) {
+      toast.error('Authentication required')
+      announce('Authentication required', 'assertive')
+      return
+    }
+
     try {
-      logger.info('Creating new invoice')
+      logger.info('Creating new invoice', { userId })
 
-      const newInvoice = {
-        number: `INV-2024-${String(invoices.length + 1).padStart(3, '0')}`,
-        clientName: 'New Client',
-        clientEmail: 'client@company.com',
-        status: 'draft' as InvoiceStatus,
-        issueDate: new Date().toISOString(),
-        dueDate: new Date(Date.now() + 2592000000).toISOString(),
-        total: 0
-      }
+      const invoiceNumber = `INV-2024-${String(invoices.length + 1).padStart(3, '0')}`
+      const { createInvoice } = await import('@/lib/admin-overview-queries')
 
-      const response = await fetch('/api/admin/invoicing/invoices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newInvoice)
+      const newInvoice = await createInvoice(userId, {
+        invoice_number: invoiceNumber,
+        client_name: 'New Client',
+        client_email: 'client@company.com',
+        amount_total: 0,
+        amount_paid: 0,
+        amount_due: 0,
+        status: 'draft',
+        issue_date: new Date().toISOString(),
+        due_date: new Date(Date.now() + 2592000000).toISOString(),
+        items: []
       })
-
-      if (!response.ok) throw new Error('Failed to create invoice')
-      const result = await response.json()
 
       toast.success('Invoice Created', {
-        description: `Invoice ${newInvoice.number} has been created as draft`
+        description: `Invoice ${invoiceNumber} has been created as draft`
       })
-      logger.info('Invoice created', { success: true, result })
       announce('Invoice created successfully', 'polite')
+      logger.info('Invoice created', { success: true, invoiceId: newInvoice.id })
 
-      setInvoices(prev => [...prev, { ...newInvoice, id: `inv-${Date.now()}`, clientId: '', items: [], subtotal: 0, taxRate: 10, taxAmount: 0, amountPaid: 0, amountDue: 0, currency: 'USD', createdAt: new Date().toISOString(), remindersSent: 0 }])
+      // Reload invoices
+      const { getInvoices } = await import('@/lib/admin-overview-queries')
+      const invoicesResult = await getInvoices(userId)
+      setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Create failed'
       toast.error('Create Failed', { description: message })
-      logger.error('Create invoice failed', { error: message })
+      logger.error('Create invoice failed', { error })
       announce('Failed to create invoice', 'assertive')
     }
   }
 
   // Button 2: Edit Invoice
   const handleEditInvoice = async (invoiceId: string) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      announce('Authentication required', 'assertive')
+      return
+    }
+
     try {
-      logger.info('Editing invoice', { invoiceId })
+      logger.info('Editing invoice', { userId, invoiceId })
 
-      const response = await fetch(`/api/admin/invoicing/invoices/${invoiceId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ total: 50000, notes: 'Updated invoice terms' })
+      const { updateInvoice } = await import('@/lib/admin-overview-queries')
+      await updateInvoice(invoiceId, {
+        amount_total: 50000,
+        notes: 'Updated invoice terms'
       })
-
-      if (!response.ok) throw new Error('Failed to edit invoice')
-      const result = await response.json()
 
       toast.success('Invoice Updated', {
         description: 'Invoice details have been updated successfully'
       })
-      logger.info('Invoice edited', { success: true, invoiceId, result })
       announce('Invoice updated successfully', 'polite')
+      logger.info('Invoice edited', { success: true, invoiceId })
 
-      setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, total: 50000 } : inv))
+      // Reload invoices
+      const { getInvoices } = await import('@/lib/admin-overview-queries')
+      const invoicesResult = await getInvoices(userId)
+      setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Edit failed'
       toast.error('Edit Failed', { description: message })
-      logger.error('Edit invoice failed', { error: message })
+      logger.error('Edit invoice failed', { error })
       announce('Failed to edit invoice', 'assertive')
     }
   }
@@ -214,90 +253,102 @@ export default function InvoicingPage() {
       return
     }
 
+    if (!userId) {
+      toast.error('Authentication required')
+      announce('Authentication required', 'assertive')
+      return
+    }
+
     try {
-      logger.info('Deleting invoice', { invoiceId })
+      logger.info('Deleting invoice', { userId, invoiceId })
 
-      const response = await fetch(`/api/admin/invoicing/invoices/${invoiceId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      })
-
-      if (!response.ok) throw new Error('Failed to delete invoice')
+      const { deleteInvoice } = await import('@/lib/admin-overview-queries')
+      await deleteInvoice(invoiceId)
 
       toast.success('Invoice Deleted', {
         description: `${invoiceNumber} has been permanently removed`
       })
-      logger.info('Invoice deleted', { success: true, invoiceId })
       announce('Invoice deleted successfully', 'polite')
+      logger.info('Invoice deleted', { success: true, invoiceId })
 
-      setInvoices(prev => prev.filter(inv => inv.id !== invoiceId))
+      // Reload invoices
+      const { getInvoices } = await import('@/lib/admin-overview-queries')
+      const invoicesResult = await getInvoices(userId)
+      setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
       toast.error('Delete Failed', { description: message })
-      logger.error('Delete invoice failed', { error: message })
+      logger.error('Delete invoice failed', { error })
       announce('Failed to delete invoice', 'assertive')
     }
   }
 
   // Button 4: Send Invoice
   const handleSendInvoice = async (invoiceId: string, invoiceNumber: string, clientEmail: string) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      announce('Authentication required', 'assertive')
+      return
+    }
+
     try {
-      logger.info('Sending invoice', { invoiceId })
+      logger.info('Sending invoice', { userId, invoiceId })
 
-      const response = await fetch('/api/admin/invoicing/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ invoiceId, recipientEmail: clientEmail })
-      })
-
-      if (!response.ok) throw new Error('Failed to send invoice')
-      const result = await response.json()
+      const { updateInvoiceStatus } = await import('@/lib/admin-overview-queries')
+      await updateInvoiceStatus(invoiceId, 'sent')
 
       toast.success('Invoice Sent', {
         description: `${invoiceNumber} has been sent to ${clientEmail}`
       })
-      logger.info('Invoice sent', { success: true, invoiceId, result })
       announce('Invoice sent successfully', 'polite')
+      logger.info('Invoice sent', { success: true, invoiceId })
 
-      setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, status: 'sent', sentDate: new Date().toISOString() } : inv))
+      // Reload invoices
+      const { getInvoices } = await import('@/lib/admin-overview-queries')
+      const invoicesResult = await getInvoices(userId)
+      setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Send failed'
       toast.error('Send Failed', { description: message })
-      logger.error('Send invoice failed', { error: message })
+      logger.error('Send invoice failed', { error })
       announce('Failed to send invoice', 'assertive')
     }
   }
 
   // Button 5: Mark as Paid
   const handleMarkAsPaid = async (invoiceId: string, invoiceNumber: string) => {
+    if (!userId) {
+      toast.error('Authentication required')
+      announce('Authentication required', 'assertive')
+      return
+    }
+
     try {
-      logger.info('Marking invoice as paid', { invoiceId })
+      logger.info('Marking invoice as paid', { userId, invoiceId })
 
-      const response = await fetch(`/api/admin/invoicing/invoices/${invoiceId}/paid`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paidDate: new Date().toISOString() })
-      })
-
-      if (!response.ok) throw new Error('Failed to mark as paid')
-      const result = await response.json()
+      const { updateInvoiceStatus } = await import('@/lib/admin-overview-queries')
+      await updateInvoiceStatus(invoiceId, 'paid')
 
       toast.success('Invoice Marked as Paid', {
         description: `${invoiceNumber} has been marked as paid and closed`
       })
-      logger.info('Invoice marked as paid', { success: true, invoiceId, result })
       announce('Invoice marked as paid', 'polite')
+      logger.info('Invoice marked as paid', { success: true, invoiceId })
 
-      setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, status: 'paid', paidDate: new Date().toISOString(), amountDue: 0 } : inv))
+      // Reload invoices
+      const { getInvoices } = await import('@/lib/admin-overview-queries')
+      const invoicesResult = await getInvoices(userId)
+      setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Update failed'
       toast.error('Update Failed', { description: message })
-      logger.error('Mark as paid failed', { error: message })
+      logger.error('Mark as paid failed', { error })
       announce('Failed to mark invoice as paid', 'assertive')
     }
   }
 
   // Button 6: Download PDF
+  // NOTE: PDF generation requires server-side processing via API endpoint
   const handleDownloadPDF = async (invoiceId: string, invoiceNumber: string) => {
     try {
       logger.info('Downloading invoice PDF', { invoiceId })
@@ -319,12 +370,13 @@ export default function InvoicingPage() {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Download failed'
       toast.error('Download Failed', { description: message })
-      logger.error('PDF download failed', { error: message })
+      logger.error('PDF download failed', { error })
       announce('Failed to download PDF', 'assertive')
     }
   }
 
   // Button 7: Send Reminder
+  // NOTE: Email sending requires server-side processing via API endpoint
   const handleSendReminder = async (invoiceId: string, invoiceNumber: string, clientEmail: string) => {
     try {
       logger.info('Sending payment reminder', { invoiceId })
@@ -348,7 +400,7 @@ export default function InvoicingPage() {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Send failed'
       toast.error('Send Failed', { description: message })
-      logger.error('Send reminder failed', { error: message })
+      logger.error('Send reminder failed', { error })
       announce('Failed to send reminder', 'assertive')
     }
   }
@@ -359,28 +411,32 @@ export default function InvoicingPage() {
       return
     }
 
+    if (!userId) {
+      toast.error('Authentication required')
+      announce('Authentication required', 'assertive')
+      return
+    }
+
     try {
-      logger.info('Voiding invoice', { invoiceId })
+      logger.info('Voiding invoice', { userId, invoiceId })
 
-      const response = await fetch(`/api/admin/invoicing/invoices/${invoiceId}/void`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' }
-      })
-
-      if (!response.ok) throw new Error('Failed to void invoice')
-      const result = await response.json()
+      const { updateInvoiceStatus } = await import('@/lib/admin-overview-queries')
+      await updateInvoiceStatus(invoiceId, 'cancelled')
 
       toast.success('Invoice Voided', {
         description: `${invoiceNumber} has been voided and cancelled`
       })
-      logger.info('Invoice voided', { success: true, invoiceId, result })
       announce('Invoice voided successfully', 'polite')
+      logger.info('Invoice voided', { success: true, invoiceId })
 
-      setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, status: 'cancelled' } : inv))
+      // Reload invoices
+      const { getInvoices } = await import('@/lib/admin-overview-queries')
+      const invoicesResult = await getInvoices(userId)
+      setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Void failed'
       toast.error('Void Failed', { description: message })
-      logger.error('Void invoice failed', { error: message })
+      logger.error('Void invoice failed', { error })
       announce('Failed to void invoice', 'assertive')
     }
   }
@@ -404,25 +460,25 @@ export default function InvoicingPage() {
     }
 
     try {
-      logger.info('Refreshing invoices')
+      logger.info('Refreshing invoices', { userId })
 
       const { getInvoices } = await import('@/lib/admin-overview-queries')
 
       const invoicesResult = await getInvoices(userId)
-      setInvoices(invoicesResult.data || [])
+      setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
 
       toast.success('Invoices Refreshed', {
-        description: `Reloaded ${invoicesResult.data?.length || 0} invoices`
+        description: `Reloaded ${invoicesResult?.length || 0} invoices`
       })
       logger.info('Invoices refresh completed', {
         success: true,
-        invoiceCount: invoicesResult.data?.length || 0
+        invoiceCount: invoicesResult?.length || 0
       })
       announce('Invoices refreshed successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
       toast.error('Refresh Failed', { description: message })
-      logger.error('Invoices refresh failed', { error: message })
+      logger.error('Invoices refresh failed', { error })
       announce('Failed to refresh invoices', 'assertive')
     }
   }
