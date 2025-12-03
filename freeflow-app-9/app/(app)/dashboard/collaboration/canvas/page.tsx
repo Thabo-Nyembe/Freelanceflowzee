@@ -61,6 +61,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { createFeatureLogger } from "@/lib/logger";
 import { NumberFlow } from "@/components/ui/number-flow";
+import { useCurrentUser } from "@/hooks/use-ai-data";
+import { useAnnouncer } from "@/lib/accessibility";
+import {
+  getCanvasProjects,
+  createCanvasProject as createCanvasProjectDB,
+  updateCanvasProject,
+  deleteCanvasProject,
+} from "@/lib/canvas-collaboration-queries";
 import {
   Select,
   SelectContent,
@@ -119,6 +127,10 @@ interface CanvasState {
 }
 
 export default function CanvasPage() {
+  // A+++ Hooks
+  const { userId, loading: userLoading } = useCurrentUser();
+  const { announce } = useAnnouncer();
+
   const [projects, setProjects] = useState<CanvasProject[]>([]);
   const [activeProject, setActiveProject] = useState<CanvasProject | null>(
     null
@@ -188,7 +200,7 @@ export default function CanvasPage() {
 
   useEffect(() => {
     fetchCanvasData();
-  }, []);
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (activeProject && canvasRef.current) {
@@ -197,60 +209,51 @@ export default function CanvasPage() {
   }, [activeProject]);
 
   const fetchCanvasData = async () => {
+    if (!userId) {
+      logger.info("Waiting for user authentication");
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      logger.info("Fetching canvas data");
+      logger.info("Fetching canvas data", { userId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const { data: projectsData, error } = await getCanvasProjects(userId, {});
 
-      const mockProjects: CanvasProject[] = [
-        {
-          id: "1",
-          name: "Product Wireframe",
-          createdBy: "John Doe",
-          createdAt: "2024-01-20",
-          modifiedAt: "2024-01-22",
-          collaborators: 3,
-          isShared: true,
-        },
-        {
-          id: "2",
-          name: "UI Mockup",
-          createdBy: "Sarah Johnson",
-          createdAt: "2024-01-18",
-          modifiedAt: "2024-01-21",
-          collaborators: 2,
-          isShared: false,
-        },
-        {
-          id: "3",
-          name: "Brainstorming Board",
-          createdBy: "Mike Chen",
-          createdAt: "2024-01-15",
-          modifiedAt: "2024-01-20",
-          collaborators: 5,
-          isShared: true,
-        },
-      ];
+      if (error) {
+        throw new Error(error.message || "Failed to load canvas projects");
+      }
 
-      setProjects(mockProjects);
+      const canvasProjects: CanvasProject[] = (projectsData || []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        createdBy: p.user_id,
+        createdAt: new Date(p.created_at).toLocaleDateString(),
+        modifiedAt: new Date(p.updated_at).toLocaleDateString(),
+        collaborators: p.collaborators || 0,
+        isShared: p.is_shared || false,
+      }));
+
+      setProjects(canvasProjects);
 
       setStats({
-        totalProjects: mockProjects.length,
-        activeCollaborators: mockProjects.reduce(
+        totalProjects: canvasProjects.length,
+        activeCollaborators: canvasProjects.reduce(
           (sum, p) => sum + p.collaborators,
           0
         ),
-        totalDrawings: 156,
-        savedTemplates: 12,
+        totalDrawings: 156, // TODO: Calculate from layers/elements
+        savedTemplates: 12, // TODO: Count templates
       });
 
-      logger.info("Canvas data fetched successfully");
+      logger.info("Canvas data fetched successfully", { count: canvasProjects.length, userId });
       toast.success("Canvas loaded");
+      announce(`${canvasProjects.length} canvas projects loaded successfully`, "polite");
     } catch (error) {
-      logger.error("Failed to fetch canvas data", { error });
+      logger.error("Failed to fetch canvas data", { error, userId });
       toast.error("Failed to load canvas");
+      announce("Error loading canvas", "assertive");
     } finally {
       setLoading(false);
     }
@@ -291,34 +294,46 @@ export default function CanvasPage() {
 
   const handleCreateProject = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!userId) return;
+
     const formData = new FormData(e.currentTarget);
+    const projectName = formData.get("projectName") as string;
 
     try {
-      logger.info("Creating new canvas project");
+      logger.info("Creating new canvas project", { userId, projectName });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const { data, error } = await createCanvasProjectDB(userId, {
+        name: projectName,
+      });
 
-      const newProject: CanvasProject = {
-        id: Date.now().toString(),
-        name: formData.get("projectName") as string,
-        createdBy: "Current User",
-        createdAt: new Date().toISOString().split("T")[0],
-        modifiedAt: new Date().toISOString().split("T")[0],
-        collaborators: 1,
-        isShared: false,
-      };
+      if (error) {
+        throw new Error(error.message || "Failed to create project");
+      }
 
-      setProjects([newProject, ...projects]);
-      setActiveProject(newProject);
-      setIsNewProjectOpen(false);
-      setActiveTab("canvas");
+      if (data) {
+        const newProject: CanvasProject = {
+          id: data.id,
+          name: data.name,
+          createdBy: userId,
+          createdAt: new Date(data.created_at).toLocaleDateString(),
+          modifiedAt: new Date(data.updated_at).toLocaleDateString(),
+          collaborators: 1,
+          isShared: data.is_shared || false,
+        };
 
-      logger.info("Project created successfully", { projectId: newProject.id });
-      toast.success("Canvas project created");
+        setProjects([newProject, ...projects]);
+        setActiveProject(newProject);
+        setIsNewProjectOpen(false);
+        setActiveTab("canvas");
+
+        logger.info("Project created successfully", { projectId: newProject.id, userId });
+        toast.success("Canvas project created");
+        announce("Canvas project created successfully", "polite");
+      }
     } catch (error) {
-      logger.error("Failed to create project", { error });
+      logger.error("Failed to create project", { error, userId });
       toast.error("Failed to create project");
+      announce("Error creating project", "assertive");
     }
   };
 
