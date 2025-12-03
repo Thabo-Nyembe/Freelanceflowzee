@@ -87,6 +87,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
+import { useCurrentUser } from "@/hooks/use-ai-data";
+import { useAnnouncer } from "@/lib/accessibility";
+import {
+  getMeetings,
+  createMeeting,
+  updateMeeting,
+  deleteMeeting,
+  type Meeting as CollaborationMeeting,
+} from "@/lib/collaboration-queries";
 
 const logger = createFeatureLogger("CollaborationMeetings");
 
@@ -128,6 +137,10 @@ interface CallState {
 }
 
 export default function MeetingsPage() {
+  // A+++ Hooks
+  const { userId, loading: userLoading } = useCurrentUser();
+  const { announce } = useAnnouncer();
+
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
@@ -161,116 +174,73 @@ export default function MeetingsPage() {
 
   useEffect(() => {
     fetchMeetingsData();
-  }, []);
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchMeetingsData = async () => {
+    if (!userId) {
+      logger.info("Waiting for user authentication");
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      logger.info("Fetching meetings data");
+      logger.info("Fetching meetings data", { userId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Fetch real meetings from database
+      const { data: meetingsData, error } = await getMeetings(userId);
 
-      const mockMeetings: Meeting[] = [
-        {
-          id: "1",
-          title: "Product Review Meeting",
-          description: "Quarterly product review and planning",
-          scheduledDate: "2024-01-25",
-          scheduledTime: "10:00",
-          duration: 60,
-          type: "video",
-          status: "upcoming",
-          host: "John Doe",
-          participants: [
-            {
-              id: "1",
-              name: "John Doe",
-              email: "john@example.com",
-              isHost: true,
-              isMuted: false,
-              isVideoOff: false,
-              isHandRaised: false,
-            },
-            {
-              id: "2",
-              name: "Sarah Johnson",
-              email: "sarah@example.com",
-              isHost: false,
-              isMuted: false,
-              isVideoOff: false,
-              isHandRaised: false,
-            },
-          ],
-          isRecording: false,
-        },
-        {
-          id: "2",
-          title: "Team Standup",
-          description: "Daily team standup meeting",
-          scheduledDate: "2024-01-24",
-          scheduledTime: "09:00",
-          duration: 15,
-          type: "voice",
-          status: "completed",
-          host: "Mike Chen",
-          participants: [
-            {
-              id: "3",
-              name: "Mike Chen",
-              email: "mike@example.com",
-              isHost: true,
-              isMuted: false,
-              isVideoOff: true,
-              isHandRaised: false,
-            },
-          ],
-          recordingUrl: "/recordings/meeting-2.mp4",
-          isRecording: false,
-        },
-        {
-          id: "3",
-          title: "Client Presentation",
-          description: "Present Q4 results to client",
-          scheduledDate: "2024-01-26",
-          scheduledTime: "14:00",
-          duration: 90,
-          type: "video",
-          status: "upcoming",
-          host: "Emily Davis",
-          participants: [
-            {
-              id: "4",
-              name: "Emily Davis",
-              email: "emily@example.com",
-              isHost: true,
-              isMuted: false,
-              isVideoOff: false,
-              isHandRaised: false,
-            },
-          ],
-          isRecording: false,
-        },
-      ];
+      if (error) {
+        logger.error("Failed to fetch meetings", { error, userId });
+        toast.error("Failed to load meetings");
+        announce("Error loading meetings", "assertive");
+        setLoading(false);
+        return;
+      }
 
-      setMeetings(mockMeetings);
+      // Transform database meetings to UI format
+      const transformedMeetings: Meeting[] = (meetingsData || []).map((meeting) => ({
+        id: meeting.id,
+        title: meeting.title,
+        description: meeting.description || "",
+        scheduledDate: new Date(meeting.scheduled_at).toISOString().split("T")[0],
+        scheduledTime: new Date(meeting.scheduled_at).toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        }),
+        duration: meeting.duration_minutes,
+        type: (meeting.meeting_type as "video" | "voice") || "video",
+        status: meeting.status as "upcoming" | "ongoing" | "completed",
+        host: meeting.host_id,
+        participants: [], // Would need participants join
+        recordingUrl: meeting.recording_url,
+        isRecording: false,
+      }));
 
+      // Calculate stats
+      const upcoming = transformedMeetings.filter(m => m.status === "upcoming");
+      const completed = transformedMeetings.filter(m => m.status === "completed");
+      const totalHours = transformedMeetings.reduce((sum, m) => sum + m.duration, 0) / 60;
+
+      setMeetings(transformedMeetings);
       setStats({
-        totalMeetings: mockMeetings.length,
-        upcomingMeetings: mockMeetings.filter((m) => m.status === "upcoming")
-          .length,
-        completedMeetings: mockMeetings.filter((m) => m.status === "completed")
-          .length,
-        totalHours: Math.round(
-          mockMeetings.reduce((sum, m) => sum + m.duration, 0) / 60
-        ),
+        totalMeetings: transformedMeetings.length,
+        upcomingMeetings: upcoming.length,
+        completedMeetings: completed.length,
+        totalHours: Math.round(totalHours * 10) / 10,
       });
 
-      logger.info("Meetings data fetched successfully");
-      toast.success("Meetings loaded");
+      logger.info("Meetings data fetched successfully", {
+        count: transformedMeetings.length,
+        userId
+      });
+      toast.success(`${transformedMeetings.length} meetings loaded`);
+      announce(`${transformedMeetings.length} meetings loaded successfully`, "polite");
     } catch (error) {
-      logger.error("Failed to fetch meetings data", { error });
+      logger.error("Failed to fetch meetings data", { error, userId });
       toast.error("Failed to load meetings");
+      announce("Error loading meetings", "assertive");
     } finally {
       setLoading(false);
     }
@@ -280,36 +250,64 @@ export default function MeetingsPage() {
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
+    if (!userId) return;
+
     const formData = new FormData(e.currentTarget);
 
     try {
-      logger.info("Scheduling new meeting");
+      logger.info("Scheduling new meeting", { userId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const title = formData.get("meetingTitle") as string;
+      const description = formData.get("meetingDescription") as string;
+      const date = formData.get("meetingDate") as string;
+      const time = formData.get("meetingTime") as string;
+      const duration = parseInt(formData.get("meetingDuration") as string);
+      const type = formData.get("meetingType") as "video" | "voice";
 
-      const newMeeting: Meeting = {
-        id: Date.now().toString(),
-        title: formData.get("meetingTitle") as string,
-        description: formData.get("meetingDescription") as string,
-        scheduledDate: formData.get("meetingDate") as string,
-        scheduledTime: formData.get("meetingTime") as string,
-        duration: parseInt(formData.get("meetingDuration") as string),
-        type: formData.get("meetingType") as "video" | "voice",
+      // Combine date and time into ISO timestamp
+      const scheduledAt = new Date(`${date}T${time}`).toISOString();
+
+      const { data: newMeeting, error } = await createMeeting(userId, {
+        title,
+        description,
+        scheduled_at: scheduledAt,
+        duration_minutes: duration,
+        meeting_type: type,
         status: "upcoming",
-        host: "Current User",
+      });
+
+      if (error) {
+        logger.error("Failed to create meeting", { error, userId });
+        toast.error("Failed to schedule meeting");
+        announce("Error scheduling meeting", "assertive");
+        return;
+      }
+
+      // Transform and add to local state
+      const transformedMeeting: Meeting = {
+        id: newMeeting.id,
+        title: newMeeting.title,
+        description: newMeeting.description || "",
+        scheduledDate: date,
+        scheduledTime: time,
+        duration,
+        type,
+        status: "upcoming",
+        host: newMeeting.host_id,
         participants: [],
         isRecording: false,
       };
 
-      setMeetings([...meetings, newMeeting]);
+      setMeetings([...meetings, transformedMeeting]);
       setIsScheduleOpen(false);
 
-      logger.info("Meeting scheduled successfully", { meetingId: newMeeting.id });
+      logger.info("Meeting scheduled successfully", { meetingId: newMeeting.id, userId });
       toast.success("Meeting scheduled successfully");
+      announce("Meeting scheduled successfully", "polite");
     } catch (error) {
-      logger.error("Failed to schedule meeting", { error });
+      logger.error("Failed to schedule meeting", { error, userId });
       toast.error("Failed to schedule meeting");
+      announce("Error scheduling meeting", "assertive");
     }
   };
 
