@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // A++++ DYNAMIC IMPORTS - Lazy load heavy components for better performance
 const EnhancedDashboardWidget = dynamic(
@@ -99,15 +100,23 @@ const logger = createFeatureLogger('Advanced-Micro-Features')
 
 export default function AdvancedMicroFeaturesPage() {
   // A+++ STATE MANAGEMENT
-  const [isLoading, setIsLoading] = React.useState(true)
-  const [error, setError] = React.useState<string | null>(null)
+  const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
   const [activeTab, setActiveTab] = React.useState('widgets')
 
   // A+++ LOAD ADVANCED MICRO FEATURES DATA
   React.useEffect(() => {
     const loadAdvancedMicroFeaturesData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
+      logger.info('Loading advanced micro features data', { userId })
       try {
         setIsLoading(true)
         setError(null)
@@ -133,7 +142,7 @@ export default function AdvancedMicroFeaturesPage() {
     }
 
     loadAdvancedMicroFeaturesData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // A++++ MEMOIZED MOCK DATA - Prevent re-creation on every render
   const mockUsers = useMemo(() => [
