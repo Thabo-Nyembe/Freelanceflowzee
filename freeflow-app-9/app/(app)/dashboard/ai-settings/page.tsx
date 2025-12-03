@@ -24,6 +24,7 @@ import { createFeatureLogger } from '@/lib/logger'
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('AISettings')
 
@@ -149,7 +150,8 @@ export default function AISettingsPage() {
   // A+++ STATE MANAGEMENT
   const [isPageLoading, setIsPageLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { announce } = useAnnouncer()
+  const { announce} = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   const [providers, setProviders] = useState<AIProvider[]>(AI_PROVIDERS)
   const [features, setFeatures] = useState(FEATURE_CONFIGS)
@@ -617,32 +619,58 @@ export default function AISettingsPage() {
   // A+++ LOAD AI SETTINGS DATA
   useEffect(() => {
     const loadAISettingsData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsPageLoading(false)
+        return
+      }
+
       try {
         setIsPageLoading(true)
         setError(null)
+        logger.info('Loading AI settings data', { userId })
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load AI settings'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Dynamic import for code splitting
+        const { getProviders, getFeatures, getProviderStats } = await import('@/lib/ai-settings-queries')
+
+        // Load AI settings data in parallel
+        const [providersResult, featuresResult, statsResult] = await Promise.all([
+          getProviders(userId),
+          getFeatures(userId),
+          getProviderStats(userId)
+        ])
+
+        // Update providers with database data or fallback to defaults
+        if (providersResult.data && providersResult.data.length > 0) {
+          setProviders(providersResult.data)
+        }
+
+        // Update features with database data or fallback to defaults
+        if (featuresResult.data && featuresResult.data.length > 0) {
+          setFeatures(featuresResult.data)
+        }
 
         setIsPageLoading(false)
+        toast.success('AI settings loaded', {
+          description: `${providersResult.data?.length || AI_PROVIDERS.length} providers configured`
+        })
+        logger.info('AI settings data loaded successfully', {
+          providersCount: providersResult.data?.length,
+          featuresCount: featuresResult.data?.length
+        })
         announce('AI settings loaded successfully', 'polite')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load AI settings')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load AI settings'
+        setError(errorMessage)
         setIsPageLoading(false)
+        logger.error('Failed to load AI settings data', { error: errorMessage, userId })
+        toast.error('Failed to load AI settings', { description: errorMessage })
         announce('Error loading AI settings', 'assertive')
       }
     }
 
     loadAISettingsData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load saved API keys on component mount
   useEffect(() => {
