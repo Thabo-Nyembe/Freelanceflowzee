@@ -1,12 +1,27 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Mail, FileText, Sparkles, Brain } from 'lucide-react'
 import { SmartEmailTemplates } from '@/components/ai/smart-email-templates'
 import { AIProposalGenerator } from '@/components/ai/ai-proposal-generator'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('AIContentStudio')
 
 export default function AIContentStudioPage() {
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
+  useEffect(() => {
+    if (userId) {
+      logger.info('AI Content Studio page loaded', { userId })
+      announce('AI Content Studio loaded', 'polite')
+    }
+  }, [userId, announce])
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
