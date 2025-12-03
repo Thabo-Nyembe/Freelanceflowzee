@@ -19,7 +19,6 @@ const logger = createFeatureLogger('AIDesign')
 // ============================================================================
 // A+++ SUPABASE INTEGRATION
 // ============================================================================
-import { createClient } from '@/lib/supabase/client'
 import {
   getDesignProjects,
   getAITools,
@@ -40,6 +39,7 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   Sparkles,
   Palette,
@@ -80,6 +80,7 @@ export default function AIDesignStudioPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // Regular state
   const [activeTab, setActiveTab] = useState('tools')
@@ -91,21 +92,16 @@ export default function AIDesignStudioPage() {
   // ============================================================================
   useEffect(() => {
     const loadAIDesignData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
-        logger.info('Loading AI Design Studio data from Supabase')
-
-        // Get authenticated user
-        const supabase = createClient()
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-          logger.warn('No authenticated user found')
-          toast.error('Please log in to use AI Design Studio')
-          setIsLoading(false)
-          return
-        }
+        logger.info('Loading AI Design Studio data from Supabase', { userId })
 
         // Fetch all AI Design data in parallel
         const [
@@ -118,8 +114,8 @@ export default function AIDesignStudioPage() {
         ] = await Promise.all([
           getAITools(),
           getDesignTemplates({ ai_ready: true }),
-          getDesignProjects(user.id, { status: 'active' }),
-          getDesignProjectStats(user.id),
+          getDesignProjects(userId, { status: 'active' }),
+          getDesignProjectStats(userId),
           getAIToolStats(),
           getTemplateStats()
         ])
@@ -154,7 +150,7 @@ export default function AIDesignStudioPage() {
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load AI design tools'
-        logger.error('Exception loading AI Design data', { error: errorMessage })
+        logger.error('Exception loading AI Design data', { error: errorMessage, userId })
         setError(errorMessage)
         setIsLoading(false)
         announce('Error loading AI design tools', 'assertive')
@@ -163,7 +159,7 @@ export default function AIDesignStudioPage() {
     }
 
     loadAIDesignData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // AI Tools data
   const aiTools = [
