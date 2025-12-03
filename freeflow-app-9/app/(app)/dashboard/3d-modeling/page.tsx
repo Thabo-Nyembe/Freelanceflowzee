@@ -24,7 +24,6 @@ import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 
 // A+++ SUPABASE INTEGRATION
-import { createClient } from '@/lib/supabase/client'
 import {
   getProjects,
   createProject,
@@ -60,6 +59,7 @@ const logger = createFeatureLogger('3D-Modeling')
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 interface SceneObject {
   id: string
@@ -153,9 +153,10 @@ const LIGHTS: Light[] = [
 
 export default function ModelingStudioPage() {
   // A+++ STATE MANAGEMENT
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { announce } = useAnnouncer()
 
   const [objects, setObjects] = useState<SceneObject[]>(DEMO_OBJECTS)
   const [materials, setMaterials] = useState<Material[]>(MATERIALS)
@@ -173,35 +174,30 @@ export default function ModelingStudioPage() {
   // A+++ LOAD 3D MODELING DATA FROM SUPABASE
   useEffect(() => {
     const load3DModelingData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
 
-        logger.info('Loading 3D Modeling data from Supabase')
+        logger.info('Loading 3D Modeling data from Supabase', { userId })
 
-        // Get authenticated user
-        const supabase = createClient()
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-          logger.warn('No authenticated user found')
-          toast.error('Please log in to use 3D Modeling')
-          setIsLoading(false)
-          return
-        }
-
-        // Parallel data loading - 4 simultaneous queries
+        // Parallel data loading - 2 simultaneous queries
         const [projectsResult, statsResult] = await Promise.all([
-          getProjects(user.id),
-          getProjectStats(user.id)
+          getProjects(userId),
+          getProjectStats(userId)
         ])
 
         if (projectsResult.error) {
-          logger.error('Failed to load projects', { error: projectsResult.error })
+          logger.error('Failed to load projects', { error: projectsResult.error, userId })
         }
 
         if (statsResult.error) {
-          logger.error('Failed to load stats', { error: statsResult.error })
+          logger.error('Failed to load stats', { error: statsResult.error, userId })
         }
 
         // Log successful data load
@@ -209,7 +205,8 @@ export default function ModelingStudioPage() {
           projectsCount: projectsResult.data?.length || 0,
           totalScenes: statsResult.data?.total_scenes || 0,
           totalObjects: statsResult.data?.total_objects || 0,
-          totalRenders: statsResult.data?.total_renders || 0
+          totalRenders: statsResult.data?.total_renders || 0,
+          userId
         })
 
         setIsLoading(false)
@@ -220,7 +217,7 @@ export default function ModelingStudioPage() {
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load 3D modeling studio'
-        logger.error('Exception loading 3D Modeling data', { error: errorMessage })
+        logger.error('Exception loading 3D Modeling data', { error: errorMessage, userId })
         setError(errorMessage)
         setIsLoading(false)
         announce('Error loading 3D modeling studio', 'assertive')
@@ -229,7 +226,7 @@ export default function ModelingStudioPage() {
     }
 
     load3DModelingData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================
   // 3D MODELING HANDLERS
