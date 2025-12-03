@@ -6,12 +6,6 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import {
-  MOCK_LEADS,
-  MOCK_FORMS,
-  MOCK_LANDING_PAGES,
-  MOCK_CAMPAIGNS,
-  MOCK_LEAD_MAGNETS,
-  MOCK_LEAD_GEN_STATS,
   getLeadStatusColor,
   getLeadScoreColor,
   getCampaignStatusColor,
@@ -22,6 +16,11 @@ import {
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+
+const logger = createFeatureLogger('LeadGenerationPage')
 
 type ViewMode = 'overview' | 'leads' | 'forms' | 'pages' | 'campaigns'
 
@@ -30,34 +29,76 @@ export default function LeadGenerationPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
+
+  // Database state
+  const [leads, setLeads] = useState<any[]>([])
+  const [forms, setForms] = useState<any[]>([])
+  const [landingPages, setLandingPages] = useState<any[]>([])
+  const [campaigns, setCampaigns] = useState<any[]>([])
+  const [leadStats, setLeadStats] = useState<any>(null)
 
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
 
   // A+++ LOAD LEAD GENERATION DATA
   useEffect(() => {
     const loadLeadGenerationData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading lead generation data', { userId })
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        const {
+          getLeads,
+          getLeadForms,
+          getLandingPages,
+          getLeadCampaigns,
+          getLeadStats
+        } = await import('@/lib/lead-generation-queries')
+
+        const [leadsResult, formsResult, pagesResult, campaignsResult, statsResult] = await Promise.all([
+          getLeads(userId),
+          getLeadForms(userId),
+          getLandingPages(userId),
+          getLeadCampaigns(userId),
+          getLeadStats(userId)
+        ])
+
+        setLeads(leadsResult.data || [])
+        setForms(formsResult.data || [])
+        setLandingPages(pagesResult.data || [])
+        setCampaigns(campaignsResult.data || [])
+        setLeadStats(statsResult.data || null)
 
         setIsLoading(false)
+        toast.success('Lead generation loaded', {
+          description: `${leadsResult.data?.length || 0} leads, ${formsResult.data?.length || 0} forms from database`
+        })
+        logger.info('Lead generation data loaded successfully', {
+          leadsCount: leadsResult.data?.length,
+          formsCount: formsResult.data?.length,
+          pagesCount: pagesResult.data?.length,
+          campaignsCount: campaignsResult.data?.length
+        })
         announce('Lead generation dashboard loaded successfully', 'polite')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load lead generation data')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load lead generation data'
+        setError(errorMessage)
         setIsLoading(false)
+        logger.error('Failed to load lead generation data', { error: errorMessage, userId })
+        toast.error('Failed to load lead generation', { description: errorMessage })
         announce('Error loading lead generation dashboard', 'assertive')
       }
     }
 
     loadLeadGenerationData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce])
 
   const viewModes = [
     { id: 'overview', label: 'Overview', icon: '📊' },
@@ -76,13 +117,13 @@ export default function LeadGenerationPage() {
               <div className="flex-1">
                 <div className="text-sm text-muted-foreground mb-1">Total Leads</div>
                 <div className="text-3xl font-bold text-blue-500">
-                  {MOCK_LEAD_GEN_STATS.totalLeads}
+                  {leadStats?.totalLeads || 0}
                 </div>
               </div>
               <div className="text-2xl">👥</div>
             </div>
             <div className="text-xs text-green-500">
-              +{MOCK_LEAD_GEN_STATS.newLeadsThisMonth} this month
+              +{leadStats?.newLeadsThisMonth || 0} this month
             </div>
           </div>
         </LiquidGlassCard>
@@ -93,7 +134,7 @@ export default function LeadGenerationPage() {
               <div className="flex-1">
                 <div className="text-sm text-muted-foreground mb-1">Hot Leads</div>
                 <div className="text-3xl font-bold text-red-500">
-                  {MOCK_LEAD_GEN_STATS.hotLeads}
+                  {leadStats?.hotLeads || 0}
                 </div>
               </div>
               <div className="text-2xl">🔥</div>
@@ -110,7 +151,7 @@ export default function LeadGenerationPage() {
               <div className="flex-1">
                 <div className="text-sm text-muted-foreground mb-1">Conversion Rate</div>
                 <div className="text-3xl font-bold text-green-500">
-                  {MOCK_LEAD_GEN_STATS.conversionRate.toFixed(1)}%
+                  {(leadStats?.conversionRate || 0).toFixed(1)}%
                 </div>
               </div>
               <div className="text-2xl">📈</div>
@@ -127,7 +168,7 @@ export default function LeadGenerationPage() {
               <div className="flex-1">
                 <div className="text-sm text-muted-foreground mb-1">Avg Lead Score</div>
                 <div className="text-3xl font-bold text-purple-500">
-                  {MOCK_LEAD_GEN_STATS.averageLeadScore}
+                  {leadStats?.averageLeadScore || 0}
                 </div>
               </div>
               <div className="text-2xl">⭐</div>
@@ -144,7 +185,7 @@ export default function LeadGenerationPage() {
           <div className="p-6">
             <h3 className="text-lg font-semibold mb-6">Leads by Source</h3>
             <div className="space-y-4">
-              {MOCK_LEAD_GEN_STATS.leadsBySource.map((source, index) => (
+              {(leadStats?.leadsBySource || []).map((source, index) => (
                 <div key={source.source}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="capitalize">{source.source.replace('-', ' ')}</span>
@@ -156,7 +197,7 @@ export default function LeadGenerationPage() {
                   <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${(source.count / MOCK_LEAD_GEN_STATS.totalLeads) * 100}%` }}
+                      animate={{ width: `${(source.count / (leadStats?.totalLeads || 1)) * 100}%` }}
                       transition={{ delay: index * 0.1 }}
                       className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
                     />
@@ -171,7 +212,7 @@ export default function LeadGenerationPage() {
           <div className="p-6">
             <h3 className="text-lg font-semibold mb-6">Top Performing Forms</h3>
             <div className="space-y-4">
-              {MOCK_LEAD_GEN_STATS.topPerformingForms.map((form, index) => (
+              {(leadStats?.topPerformingForms || []).map((form, index) => (
                 <div key={form.formId} className="flex items-center gap-4">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
                     {index + 1}
@@ -199,7 +240,7 @@ export default function LeadGenerationPage() {
       </div>
 
       <div className="space-y-4">
-        {MOCK_LEADS.map((lead) => (
+        {leads.map((lead) => (
           <LiquidGlassCard key={lead.id}>
             <div className="p-6">
               <div className="flex items-start justify-between">
@@ -246,7 +287,7 @@ export default function LeadGenerationPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {MOCK_FORMS.map((form) => (
+        {forms.map((form) => (
           <LiquidGlassCard key={form.id}>
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
@@ -296,7 +337,7 @@ export default function LeadGenerationPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {MOCK_LANDING_PAGES.map((page) => (
+        {landingPages.map((page) => (
           <LiquidGlassCard key={page.id}>
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
@@ -349,7 +390,7 @@ export default function LeadGenerationPage() {
       </div>
 
       <div className="space-y-4">
-        {MOCK_CAMPAIGNS.map((campaign) => (
+        {campaigns.map((campaign) => (
           <LiquidGlassCard key={campaign.id}>
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
