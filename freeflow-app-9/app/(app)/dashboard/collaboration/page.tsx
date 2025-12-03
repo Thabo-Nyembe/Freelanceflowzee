@@ -61,6 +61,7 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('Collaboration')
 
@@ -69,34 +70,69 @@ export default function CollaborationPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
+
+  // Database state
+  const [channels, setChannels] = useState<any[]>([])
+  const [teams, setTeams] = useState<any[]>([])
+  const [meetings, setMeetings] = useState<any[]>([])
+  const [workspaceFiles, setWorkspaceFiles] = useState<any[]>([])
 
   const [activeTab, setActiveTab] = useState<any>("chat");
 
   // A+++ LOAD COLLABORATION DATA
   useEffect(() => {
     const loadCollaborationData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading collaboration data', { userId })
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        // Dynamic import for code splitting
+        const { getChannels, getTeams, getMeetings, getWorkspaceFiles } = await import('@/lib/collaboration-queries')
+
+        // Load collaboration data in parallel
+        const [channelsResult, teamsResult, meetingsResult, filesResult] = await Promise.all([
+          getChannels(userId),
+          getTeams(userId),
+          getMeetings(userId),
+          getWorkspaceFiles(userId)
+        ])
+
+        setChannels(channelsResult.data || [])
+        setTeams(teamsResult.data || [])
+        setMeetings(meetingsResult.data || [])
+        setWorkspaceFiles(filesResult.data || [])
 
         setIsLoading(false)
+        toast.success('Collaboration loaded', {
+          description: `${channelsResult.data?.length || 0} channels, ${teamsResult.data?.length || 0} teams, ${meetingsResult.data?.length || 0} meetings`
+        })
+        logger.info('Collaboration data loaded successfully', {
+          channelsCount: channelsResult.data?.length,
+          teamsCount: teamsResult.data?.length,
+          meetingsCount: meetingsResult.data?.length,
+          filesCount: filesResult.data?.length
+        })
         announce('Collaboration data loaded successfully', 'polite')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load collaboration data')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load collaboration data'
+        setError(errorMessage)
         setIsLoading(false)
+        logger.error('Failed to load collaboration data', { error: errorMessage, userId })
+        toast.error('Failed to load collaboration', { description: errorMessage })
         announce('Error loading collaboration data', 'assertive')
       }
     }
 
     loadCollaborationData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handlers with enhanced logging
   const handleStartAudioCall = () => {
