@@ -12,11 +12,12 @@ const logger = createFeatureLogger('ProjectsHub:Analytics')
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { toast } from 'sonner'
 
 // Shared utilities
 import {
-  Project,
-  mockProjects
+  Project
 } from '@/lib/projects-hub-utils'
 
 export default function AnalyticsPage() {
@@ -26,30 +27,47 @@ export default function AnalyticsPage() {
 
   // A+++ Accessibility
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   useEffect(() => {
     const loadProjects = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setLoading(false)
+        return
+      }
+
       try {
-        logger.info('Loading projects analytics')
         setLoading(true)
         setError(null)
+        logger.info('Loading projects analytics', { userId })
 
-        await new Promise((resolve) => setTimeout(resolve, 500))
+        // Dynamic import for code splitting
+        const { getProjects } = await import('@/lib/projects-hub-queries')
 
-        logger.info('Projects analytics loaded')
-        setProjects(mockProjects)
+        // Load all projects for analytics
+        const { data, error: projectsError } = await getProjects(userId)
+
+        if (projectsError) {
+          throw new Error(projectsError.message || 'Failed to load projects')
+        }
+
+        setProjects(data || [])
         setLoading(false)
         announce('Analytics data loaded successfully', 'polite')
+        toast.success(`${data?.length || 0} projects loaded for analytics`)
+        logger.info('Projects analytics loaded', { count: data?.length || 0, userId })
       } catch (err) {
-        logger.error('Failed to load projects analytics', { error: err })
+        logger.error('Failed to load projects analytics', { error: err, userId })
         setError(err instanceof Error ? err.message : 'Failed to load analytics')
         setLoading(false)
         announce('Error loading analytics', 'assertive')
+        toast.error('Failed to load analytics')
       }
     }
 
     loadProjects()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
     return (
