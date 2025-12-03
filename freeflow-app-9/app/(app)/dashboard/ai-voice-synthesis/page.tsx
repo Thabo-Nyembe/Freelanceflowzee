@@ -21,9 +21,7 @@ import {
 } from 'lucide-react'
 
 import {
-  MOCK_VOICES,
   VOICE_CATEGORIES,
-  MOCK_VOICE_STATS,
   SSML_TAGS,
   formatDuration,
   formatFileSize,
@@ -45,9 +43,9 @@ const logger = createFeatureLogger('AI-Voice-Synthesis')
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // SUPABASE & QUERIES
-import { createClient } from '@/lib/supabase/client'
 import {
   getVoices,
   getVoiceSyntheses,
@@ -67,13 +65,14 @@ export default function AIVoiceSynthesisPage() {
   const [isPageLoading, setIsPageLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   const [viewMode, setViewMode] = useState<ViewMode>('synthesize')
   const [layoutMode, setLayoutMode] = useState<LayoutMode>('grid')
 
   // Synthesis state
   const [text, setText] = useState('')
-  const [selectedVoice, setSelectedVoice] = useState<Voice>(MOCK_VOICES[0])
+  const [selectedVoice, setSelectedVoice] = useState<Voice | null>(null)
   const [speed, setSpeed] = useState([1.0])
   const [pitch, setPitch] = useState([1.0])
   const [volume, setVolume] = useState([80])
@@ -99,28 +98,24 @@ export default function AIVoiceSynthesisPage() {
   // A+++ LOAD AI VOICE SYNTHESIS DATA
   useEffect(() => {
     const loadAIVoiceSynthesisData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsPageLoading(false)
+        return
+      }
+
       try {
         setIsPageLoading(true)
         setError(null)
 
-        logger.info('Loading AI Voice Synthesis data from Supabase')
-
-        const supabase = createClient()
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-          logger.warn('No authenticated user found', { error: authError?.message })
-          toast.error('Please log in to use AI Voice Synthesis')
-          setIsPageLoading(false)
-          return
-        }
+        logger.info('Loading AI Voice Synthesis data from Supabase', { userId })
 
         // Parallel data loading - 4 simultaneous queries
         const [voicesResult, synthesesResult, projectsResult, statsResult] = await Promise.all([
           getVoices({ is_public: true }),
-          getVoiceSyntheses(user.id),
-          getVoiceProjects(user.id),
-          getUserVoiceStats(user.id)
+          getVoiceSyntheses(userId),
+          getVoiceProjects(userId),
+          getUserVoiceStats(userId)
         ])
 
         // Transform DB voices to UI format
@@ -180,16 +175,16 @@ export default function AIVoiceSynthesisPage() {
       }
     }
     loadAIVoiceSynthesisData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce])
 
-  const filteredVoices = filterVoices(voices.length > 0 ? voices : MOCK_VOICES, {
+  const filteredVoices = filterVoices(voices, {
     gender: voiceGender !== 'all' ? voiceGender as any : undefined,
     search: voiceSearch || undefined
   })
 
   const characterCount = text.length
   const estimatedDuration = estimateDuration(characterCount, speed[0])
-  const estimatedCost = calculateCost(characterCount, selectedVoice.isPremium)
+  const estimatedCost = calculateCost(characterCount, selectedVoice?.isPremium || false)
 
   const handleSynthesize = () => {
     logger.info('Starting voice synthesis', {
@@ -512,7 +507,7 @@ export default function AIVoiceSynthesisPage() {
                         <FileAudio className="w-4 h-4 text-purple-500" />
                         <span className="text-sm">Total Syntheses</span>
                       </div>
-                      <span className="font-semibold">{MOCK_VOICE_STATS.totalSyntheses}</span>
+                      <span className="font-semibold">{stats?.totalSyntheses || 0}</span>
                     </div>
 
                     <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
@@ -520,7 +515,7 @@ export default function AIVoiceSynthesisPage() {
                         <Clock className="w-4 h-4 text-purple-500" />
                         <span className="text-sm">Total Duration</span>
                       </div>
-                      <span className="font-semibold">{formatDuration(MOCK_VOICE_STATS.totalDuration)}</span>
+                      <span className="font-semibold">{formatDuration(stats?.totalDuration || 0)}</span>
                     </div>
 
                     <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
@@ -528,7 +523,7 @@ export default function AIVoiceSynthesisPage() {
                         <DollarSign className="w-4 h-4 text-purple-500" />
                         <span className="text-sm">Total Cost</span>
                       </div>
-                      <span className="font-semibold">${MOCK_VOICE_STATS.totalCost.toFixed(2)}</span>
+                      <span className="font-semibold">${(stats?.totalCost || 0).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
