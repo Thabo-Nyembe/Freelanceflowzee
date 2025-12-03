@@ -22,7 +22,6 @@ import {
   getOutlookCalendarURL,
   type BookingEvent
 } from '@/lib/icalendar-export'
-import { createClient } from '@/lib/supabase/client'
 import {
   Calendar,
   ChevronLeft,
@@ -53,38 +52,44 @@ export default function CalendarPage() {
   const [selectedBooking, setSelectedBooking] = useState<any | null>(null)
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
-  const supabase = createClient()
 
   // Load bookings from database
   useEffect(() => {
     const loadBookings = async () => {
-      if (!userId) return
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
 
       try {
         setIsLoading(true)
         logger.info('Loading bookings for calendar', { userId })
 
-        const { data, error } = await supabase
-          .from('bookings')
-          .select('*')
-          .eq('user_id', userId)
-          .order('booking_date', { ascending: true })
+        // Dynamic import for code splitting
+        const { getBookings } = await import('@/lib/bookings-queries')
+
+        const { data, error } = await getBookings(userId)
 
         if (error) throw error
 
         setBookings(data || [])
-        logger.info('Bookings loaded', { count: data?.length || 0 })
-        announce(`${data?.length || 0} bookings loaded`)
+        logger.info('Bookings loaded', { count: data?.length || 0, userId })
+        toast.success('Bookings loaded', {
+          description: `${data?.length || 0} bookings for calendar`
+        })
+        announce(`${data?.length || 0} bookings loaded`, 'polite')
       } catch (error) {
-        logger.error('Failed to load bookings', { error })
+        logger.error('Failed to load bookings', { error, userId })
         toast.error('Failed to load bookings')
+        announce('Failed to load bookings', 'assertive')
       } finally {
         setIsLoading(false)
       }
     }
 
     loadBookings()
-  }, [userId])
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Generate calendar days when date or bookings change
   useEffect(() => {
