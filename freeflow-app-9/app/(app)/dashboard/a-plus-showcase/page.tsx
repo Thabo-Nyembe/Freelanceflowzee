@@ -48,6 +48,7 @@ const logger = createFeatureLogger('A-Plus-Showcase')
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   Box,
   Code,
@@ -358,6 +359,9 @@ export default function APlusShowcasePage() {
   // ============================================================================
   // A++++ STATE MANAGEMENT
   // ============================================================================
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [state, dispatch] = useReducer(showcaseReducer, {
     components: [],
     selectedComponent: null,
@@ -372,7 +376,6 @@ export default function APlusShowcasePage() {
 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { announce } = useAnnouncer()
 
   // Modal states
   const [showViewModal, setShowViewModal] = useState(false)
@@ -390,7 +393,13 @@ export default function APlusShowcasePage() {
   // ============================================================================
   useEffect(() => {
     const loadComponents = async () => {
-      logger.info('Loading components')
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
+      logger.info('Loading components', { userId })
       try {
         setIsLoading(true)
         setError(null)
@@ -399,11 +408,14 @@ export default function APlusShowcasePage() {
         const mockComponents = generateMockComponents()
         dispatch({ type: 'SET_COMPONENTS', components: mockComponents })
 
-        logger.info('Components loaded successfully', { count: mockComponents.length })
+        logger.info('Components loaded successfully', { count: mockComponents.length, userId })
         setIsLoading(false)
         announce('Components loaded successfully', 'polite')
       } catch (err) {
-        logger.error('Failed to load components', { error: err instanceof Error ? err.message : String(err) })
+        logger.error('Failed to load components', {
+          error: err instanceof Error ? err.message : String(err),
+          userId
+        })
         setError(err instanceof Error ? err.message : 'Failed to load components')
         setIsLoading(false)
         announce('Error loading components', 'assertive')
@@ -411,7 +423,7 @@ export default function APlusShowcasePage() {
     }
 
     loadComponents()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // A++++ COMPUTED VALUES
