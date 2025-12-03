@@ -5,7 +5,7 @@
  * Complete implementation of multilingual translation features
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Globe, Languages, FileText, Video, MessageSquare, Mic,
@@ -34,10 +34,6 @@ import {
   SUPPORTED_LANGUAGES,
   TRANSLATION_ENGINES,
   QUALITY_PRESETS,
-  MOCK_TRANSLATION_RESULTS,
-  MOCK_LIVE_SESSIONS,
-  MOCK_DOCUMENTS,
-  MOCK_TRANSLATION_STATS,
   formatProcessingTime,
   formatFileSize,
   getLanguageInfo,
@@ -45,9 +41,31 @@ import {
   getConfidenceColor
 } from '@/lib/real-time-translation-utils'
 
+// A+++ UTILITIES
+import { CardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+
+const logger = createFeatureLogger('RealTimeTranslationPage')
+
 type ViewMode = 'translate' | 'live' | 'documents' | 'history'
 
 export default function RealTimeTranslationPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
+
+  // Database state
+  const [translationResults, setTranslationResults] = useState<any[]>([])
+  const [liveSessions, setLiveSessions] = useState<any[]>([])
+  const [documents, setDocuments] = useState<any[]>([])
+  const [translationStats, setTranslationStats] = useState<any>(null)
+
   const [viewMode, setViewMode] = useState<ViewMode>('translate')
   const [sourceLanguage, setSourceLanguage] = useState<Language>('en')
   const [targetLanguage, setTargetLanguage] = useState<Language>('es')
@@ -58,6 +76,62 @@ export default function RealTimeTranslationPage() {
   const [isTranslating, setIsTranslating] = useState(false)
   const [showLanguageSelector, setShowLanguageSelector] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+
+  // A+++ LOAD TRANSLATION DATA
+  useEffect(() => {
+    const loadTranslationData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        setIsLoading(true)
+        setError(null)
+        logger.info('Loading translation data', { userId })
+
+        const {
+          getTranslationHistory,
+          getLiveSessions,
+          getDocumentTranslations,
+          getTranslationStats
+        } = await import('@/lib/realtime-translation-queries')
+
+        const [resultsData, sessionsData, documentsData, statsData] = await Promise.all([
+          getTranslationHistory(userId),
+          getLiveSessions(userId),
+          getDocumentTranslations(userId),
+          getTranslationStats(userId)
+        ])
+
+        setTranslationResults(resultsData.data || [])
+        setLiveSessions(sessionsData.data || [])
+        setDocuments(documentsData.data || [])
+        setTranslationStats(statsData.data || null)
+
+        setIsLoading(false)
+        toast.success('Translation loaded', {
+          description: `${resultsData.data?.length || 0} translations from database`
+        })
+        logger.info('Translation data loaded successfully', {
+          resultsCount: resultsData.data?.length,
+          sessionsCount: sessionsData.data?.length,
+          documentsCount: documentsData.data?.length
+        })
+        announce('Real-time translation loaded successfully', 'polite')
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load translation data'
+        setError(errorMessage)
+        setIsLoading(false)
+        logger.error('Failed to load translation data', { error: errorMessage, userId })
+        toast.error('Failed to load translation', { description: errorMessage })
+        announce('Error loading translation', 'assertive')
+      }
+    }
+
+    loadTranslationData()
+  }, [userId, announce])
 
   const handleTranslate = () => {
     setIsTranslating(true)
@@ -147,9 +221,9 @@ export default function RealTimeTranslationPage() {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {[
                   { label: 'Languages', value: '70+', icon: Globe, color: 'indigo' },
-                  { label: 'Translations', value: MOCK_TRANSLATION_STATS.totalTranslations.toLocaleString(), icon: Languages, color: 'purple' },
-                  { label: 'Accuracy', value: `${(MOCK_TRANSLATION_STATS.averageConfidence * 100).toFixed(1)}%`, icon: CheckCircle, color: 'green' },
-                  { label: 'Avg Speed', value: formatProcessingTime(MOCK_TRANSLATION_STATS.averageProcessingTime), icon: Zap, color: 'yellow' }
+                  { label: 'Translations', value: (translationStats?.totalTranslations || 0).toLocaleString(), icon: Languages, color: 'purple' },
+                  { label: 'Accuracy', value: `${((translationStats?.averageConfidence || 0) * 100).toFixed(1)}%`, icon: CheckCircle, color: 'green' },
+                  { label: 'Avg Speed', value: formatProcessingTime(translationStats?.averageProcessingTime || 0), icon: Zap, color: 'yellow' }
                 ].map((stat, index) => (
                   <LiquidGlassCard key={index} className="p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -346,7 +420,7 @@ export default function RealTimeTranslationPage() {
             <div className="space-y-6">
               {/* Active Sessions */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {MOCK_LIVE_SESSIONS.map((session) => (
+                {liveSessions.map((session) => (
                   <LiquidGlassCard key={session.id} className="p-6">
                     <div className="space-y-4">
                       <div className="flex items-start justify-between">
@@ -466,7 +540,7 @@ export default function RealTimeTranslationPage() {
 
               {/* Document List */}
               <div className="space-y-4">
-                {MOCK_DOCUMENTS.map((doc) => (
+                {documents.map((doc) => (
                   <LiquidGlassCard key={doc.id} className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4 flex-1">
@@ -534,9 +608,9 @@ export default function RealTimeTranslationPage() {
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
-                  { label: 'Total Translations', value: MOCK_TRANSLATION_STATS.totalTranslations.toLocaleString(), icon: Languages },
-                  { label: 'Characters', value: MOCK_TRANSLATION_STATS.charactersTranslated.toLocaleString(), icon: FileText },
-                  { label: 'Success Rate', value: `${(MOCK_TRANSLATION_STATS.successRate * 100).toFixed(1)}%`, icon: CheckCircle }
+                  { label: 'Total Translations', value: (translationStats?.totalTranslations || 0).toLocaleString(), icon: Languages },
+                  { label: 'Characters', value: (translationStats?.charactersTranslated || 0).toLocaleString(), icon: FileText },
+                  { label: 'Success Rate', value: `${((translationStats?.successRate || 0) * 100).toFixed(1)}%`, icon: CheckCircle }
                 ].map((stat, index) => (
                   <LiquidGlassCard key={index} className="p-4">
                     <div className="flex items-center gap-3">
@@ -566,7 +640,7 @@ export default function RealTimeTranslationPage() {
                 </div>
 
                 <div className="space-y-3">
-                  {MOCK_TRANSLATION_RESULTS.map((result) => (
+                  {translationResults.map((result) => (
                     <div
                       key={result.id}
                       className="p-4 bg-slate-900/50 rounded-lg border border-gray-700 hover:border-indigo-500/50 transition-colors"
