@@ -8,7 +8,9 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 import { NumberFlow } from '@/components/ui/number-flow'
-import { MOCK_ADMIN_DASHBOARD_STATS, formatCurrency, formatPercentage } from '@/lib/admin-overview-utils'
+import { formatCurrency, formatPercentage } from '@/lib/admin-overview-utils'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
 import {
   LayoutDashboard,
   BarChart3,
@@ -33,9 +35,56 @@ interface AdminOverviewLayoutProps {
 export default function AdminOverviewLayout({ children }: AdminOverviewLayoutProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const [stats, setStats] = useState(MOCK_ADMIN_DASHBOARD_STATS)
+  const [isLoading, setIsLoading] = useState(true)
+  const [stats, setStats] = useState<any>(null)
   const [lastUpdated, setLastUpdated] = useState(new Date())
+
+  // Load dashboard stats from database
+  useEffect(() => {
+    const loadDashboardStats = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        setIsLoading(true)
+        logger.info('Loading admin dashboard stats', { userId })
+
+        const { getDashboardStats } = await import('@/lib/admin-overview-queries')
+        const statsResult = await getDashboardStats(userId)
+
+        if (statsResult.error) throw statsResult.error
+
+        setStats(statsResult.data)
+        setLastUpdated(new Date())
+        setIsLoading(false)
+
+        announce('Admin dashboard stats loaded', 'polite')
+        toast.success('Dashboard loaded', {
+          description: 'Admin metrics updated successfully'
+        })
+
+        logger.info('Dashboard stats loaded successfully', {
+          userId,
+          hasStats: !!statsResult.data
+        })
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard stats'
+        logger.error('Failed to load dashboard stats', { error: errorMessage, userId })
+        toast.error('Failed to load dashboard', { description: errorMessage })
+        setIsLoading(false)
+        announce('Error loading dashboard stats', 'assertive')
+      }
+    }
+
+    loadDashboardStats()
+  }, [userId, announce])
 
   // Navigation tabs configuration
   const tabs = [
@@ -230,7 +279,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                       <div className="text-sm text-green-600 font-medium mb-1">Total Revenue</div>
                       <div className="text-2xl font-bold text-green-700">
                         <NumberFlow
-                          value={stats.totalRevenue}
+                          value={stats?.totalRevenue || 0}
                           format={{
                             style: 'currency',
                             currency: 'USD',
@@ -247,7 +296,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                   <div className="flex items-center gap-1 text-xs text-green-600">
                     <TrendingUp className="w-3 h-3" />
                     <span className="font-medium">
-                      +{formatPercentage(stats.revenueGrowth)}
+                      +{formatPercentage(stats?.revenueGrowth || 0)}
                     </span>
                     <span className="text-green-500">this month</span>
                   </div>
@@ -259,7 +308,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                     <div>
                       <div className="text-sm text-blue-600 font-medium mb-1">Active Clients</div>
                       <div className="text-2xl font-bold text-blue-700">
-                        <NumberFlow value={stats.activeClients} />
+                        <NumberFlow value={stats?.activeClients || 0} />
                       </div>
                     </div>
                     <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
@@ -269,7 +318,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                   <div className="flex items-center gap-1 text-xs text-blue-600">
                     <TrendingUp className="w-3 h-3" />
                     <span className="font-medium">
-                      +{formatPercentage(stats.clientGrowth)}
+                      +{formatPercentage(stats?.clientGrowth || 0)}
                     </span>
                     <span className="text-blue-500">growth rate</span>
                   </div>
@@ -281,7 +330,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                     <div>
                       <div className="text-sm text-red-600 font-medium mb-1">Hot Leads</div>
                       <div className="text-2xl font-bold text-red-700">
-                        <NumberFlow value={stats.hotLeads} />
+                        <NumberFlow value={stats?.hotLeads || 0} />
                       </div>
                     </div>
                     <div className="w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center">
@@ -291,7 +340,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                   <div className="flex items-center gap-1 text-xs text-red-600">
                     <TrendingUp className="w-3 h-3" />
                     <span className="font-medium">
-                      +{formatPercentage(stats.leadGrowth)}
+                      +{formatPercentage(stats?.leadGrowth || 0)}
                     </span>
                     <span className="text-red-500">conversion ready</span>
                   </div>
@@ -303,7 +352,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                     <div>
                       <div className="text-sm text-purple-600 font-medium mb-1">Email Open Rate</div>
                       <div className="text-2xl font-bold text-purple-700">
-                        <NumberFlow value={stats.emailOpenRate} suffix="%" />
+                        <NumberFlow value={stats?.emailOpenRate || 0} suffix="%" />
                       </div>
                     </div>
                     <div className="w-10 h-10 rounded-lg bg-purple-500 flex items-center justify-center">
@@ -313,7 +362,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                   <div className="flex items-center gap-1 text-xs text-purple-600">
                     <TrendingUp className="w-3 h-3" />
                     <span className="font-medium">
-                      +{formatPercentage(stats.openRateChange)}
+                      +{formatPercentage(stats?.openRateChange || 0)}
                     </span>
                     <span className="text-purple-500">above average</span>
                   </div>
