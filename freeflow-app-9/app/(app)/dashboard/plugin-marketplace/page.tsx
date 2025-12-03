@@ -48,6 +48,7 @@ const logger = createFeatureLogger('Plugin-Marketplace')
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   Package,
   Download,
@@ -435,6 +436,9 @@ export default function PluginMarketplacePage() {
   // ============================================================================
   // A++++ STATE MANAGEMENT
   // ============================================================================
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [state, dispatch] = useReducer(pluginReducer, {
     plugins: [],
     selectedPlugin: null,
@@ -450,7 +454,6 @@ export default function PluginMarketplacePage() {
 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { announce } = useAnnouncer()
 
   // Modal states
   const [showViewModal, setShowViewModal] = useState(false)
@@ -461,17 +464,30 @@ export default function PluginMarketplacePage() {
   // ============================================================================
   useEffect(() => {
     const loadPlugins = async () => {
-      logger.info('Loading plugins from local state')
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
+      logger.info('Loading plugins from database', { userId })
       try {
         setIsLoading(true)
         setError(null)
 
-        // Note: Using mock data - in production, this would fetch from /api/plugins
-        const mockPlugins = generateMockPlugins()
-        dispatch({ type: 'SET_PLUGINS', plugins: mockPlugins })
+        // Dynamic import for code splitting
+        const { getAllPlugins } = await import('@/lib/plugin-marketplace-queries')
 
-        // Pre-install some plugins for demo
-        const preInstalled = mockPlugins.slice(0, 5).map(plugin => ({
+        const { data: plugins, error: pluginsError } = await getAllPlugins()
+
+        if (pluginsError) throw pluginsError
+
+        // If no plugins in database, use mock data
+        const pluginsToUse = (plugins && plugins.length > 0) ? plugins : generateMockPlugins()
+        dispatch({ type: 'SET_PLUGINS', plugins: pluginsToUse as Plugin[] })
+
+        // Pre-install some plugins for demo (first 5)
+        const preInstalled = pluginsToUse.slice(0, 5).map(plugin => ({
           pluginId: plugin.id,
           installedAt: new Date().toISOString(),
           installedVersion: plugin.version,
@@ -480,15 +496,22 @@ export default function PluginMarketplacePage() {
         }))
 
         preInstalled.forEach(install => {
-          const plugin = mockPlugins.find(p => p.id === install.pluginId)!
-          dispatch({ type: 'INSTALL_PLUGIN', plugin })
+          const plugin = pluginsToUse.find(p => p.id === install.pluginId)!
+          dispatch({ type: 'INSTALL_PLUGIN', plugin: plugin as Plugin })
         })
 
-        logger.info('Plugins loaded successfully', { count: mockPlugins.length })
+        logger.info('Plugins loaded successfully', {
+          userId,
+          count: pluginsToUse.length,
+          source: (plugins && plugins.length > 0) ? 'database' : 'mock'
+        })
         setIsLoading(false)
-        announce('Plugins loaded successfully', 'polite')
+        announce(`${pluginsToUse.length} plugins loaded successfully`, 'polite')
       } catch (err) {
-        logger.error('Failed to load plugins', { error: err instanceof Error ? err.message : String(err) })
+        logger.error('Failed to load plugins', {
+          error: err instanceof Error ? err.message : String(err),
+          userId
+        })
         setError(err instanceof Error ? err.message : 'Failed to load plugins')
         setIsLoading(false)
         announce('Error loading plugins', 'assertive')
@@ -496,7 +519,7 @@ export default function PluginMarketplacePage() {
     }
 
     loadPlugins()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // A++++ COMPUTED VALUES
