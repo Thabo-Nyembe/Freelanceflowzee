@@ -41,12 +41,20 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('PerformanceAnalytics')
 
 export default function PerformanceAnalyticsPage() {
   // A+++ STATE MANAGEMENT
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { announce } = useAnnouncer()
+  const [metrics, setMetrics] = useState<any>(null)
+  const [snapshots, setSnapshots] = useState<any[]>([])
 
   const [activeTab, setActiveTab] = useState('overview')
   const [timeRange, setTimeRange] = useState('30d')
@@ -54,20 +62,43 @@ export default function PerformanceAnalyticsPage() {
   // A+++ LOAD PERFORMANCE ANALYTICS DATA
   useEffect(() => {
     const loadPerformanceAnalyticsData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading performance analytics data', { userId, timeRange })
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        // Dynamic import for code splitting
+        const { getPerformanceMetrics, getPerformanceSnapshots } = await import('@/lib/performance-analytics-queries')
+
+        // Load metrics and snapshots in parallel
+        const [metricsResult, snapshotsResult] = await Promise.all([
+          getPerformanceMetrics(userId, { period: timeRange as any }),
+          getPerformanceSnapshots(userId, { period: timeRange as any, limit: 10 })
+        ])
+
+        if (metricsResult.error) throw metricsResult.error
+        if (snapshotsResult.error) throw snapshotsResult.error
+
+        setMetrics(metricsResult.data)
+        setSnapshots(snapshotsResult.data || [])
 
         setIsLoading(false)
+
+        logger.info('Performance analytics data loaded successfully', {
+          userId,
+          hasMetrics: !!metricsResult.data,
+          snapshotsCount: snapshotsResult.data?.length || 0
+        })
+
         announce('Performance analytics loaded successfully', 'polite')
       } catch (err) {
+        logger.error('Failed to load performance analytics data', { error: err, userId })
         setError(err instanceof Error ? err.message : 'Failed to load performance analytics')
         setIsLoading(false)
         announce('Error loading performance analytics', 'assertive')
@@ -75,7 +106,7 @@ export default function PerformanceAnalyticsPage() {
     }
 
     loadPerformanceAnalyticsData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce, timeRange]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const performanceMetrics = {
     revenue: {
