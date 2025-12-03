@@ -108,6 +108,10 @@ const KeyboardShortcutsDialog = dynamic(
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('MicroFeaturesShowcase')
 
 import {
   Sparkles, TrendingUp, Users, MessageSquare, Settings, Palette,
@@ -120,9 +124,18 @@ const logger = createFeatureLogger('Micro-Features-Showcase')
 
 export default function MicroFeaturesShowcase() {
   // A+++ STATE MANAGEMENT
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [isPageLoading, setIsPageLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
-  const { announce } = useAnnouncer()
+
+  React.useEffect(() => {
+    if (userId) {
+      logger.info('Micro Features Showcase loaded', { userId })
+      announce('Micro features showcase loaded', 'polite')
+    }
+  }, [userId, announce])
 
   const [activeTab, setActiveTab] = React.useState('animations')
   const [searchQuery, setSearchQuery] = React.useState('')
