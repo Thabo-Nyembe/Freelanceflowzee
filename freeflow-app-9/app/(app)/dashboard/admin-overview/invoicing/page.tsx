@@ -10,9 +10,8 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
-  MOCK_INVOICES,
-  MOCK_BILLING_STATS,
   formatCurrency,
   formatRelativeTime,
   getInvoiceStatusColor,
@@ -56,11 +55,12 @@ const TABS: { id: InvoiceStatus | 'all'; label: string }[] = [
 export default function InvoicingPage() {
   const router = useRouter()
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // State management
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [invoices, setInvoices] = useState<Invoice[]>(MOCK_INVOICES)
+  const [invoices, setInvoices] = useState<Invoice[]>([])
   const [activeTab, setActiveTab] = useState<InvoiceStatus | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
@@ -89,30 +89,56 @@ export default function InvoicingPage() {
     return filtered
   }, [invoices, activeTab, searchQuery])
 
+  // Calculate billing stats from invoices
+  const billingStats = useMemo(() => {
+    const totalInvoiced = invoices.reduce((sum, inv) => sum + (inv.amount || 0), 0)
+    const totalPaid = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + (inv.amount || 0), 0)
+    const totalOutstanding = invoices.filter(inv => inv.status === 'sent').reduce((sum, inv) => sum + (inv.amount || 0), 0)
+    const overdueAmount = invoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + (inv.amount || 0), 0)
+
+    return { totalInvoiced, totalPaid, totalOutstanding, overdueAmount }
+  }, [invoices])
+
   // Load invoicing data
   useEffect(() => {
     const loadInvoicing = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
-        logger.info('Loading invoicing data')
+        logger.info('Loading invoicing data', { userId })
 
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const { getInvoices } = await import('@/lib/admin-overview-queries')
+        const invoicesResult = await getInvoices(userId)
+
+        setInvoices(invoicesResult.data || [])
 
         setIsLoading(false)
         announce('Invoicing data loaded successfully', 'polite')
-        logger.info('Invoicing loaded', { success: true })
+        toast.success('Invoices loaded', {
+          description: `${invoicesResult.data?.length || 0} invoices loaded`
+        })
+        logger.info('Invoicing loaded', {
+          success: true,
+          invoiceCount: invoicesResult.data?.length || 0
+        })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load invoicing'
         setError(errorMessage)
         setIsLoading(false)
+        toast.error('Failed to load invoices', { description: errorMessage })
         announce('Error loading invoicing', 'assertive')
         logger.error('Invoicing load failed', { error: err })
       }
     }
 
     loadInvoicing()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce])
 
   // Button 1: Create Invoice
   const handleCreateInvoice = async () => {
@@ -387,8 +413,6 @@ export default function InvoicingPage() {
       })
       logger.info('Invoices refresh completed', { success: true })
       announce('Invoices refreshed successfully', 'polite')
-
-      setInvoices([...MOCK_INVOICES])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
       toast.error('Refresh Failed', { description: message })
@@ -474,7 +498,7 @@ export default function InvoicingPage() {
                 <div className="text-sm text-blue-600 mb-1">Total Invoiced</div>
                 <div className="text-2xl font-bold text-blue-700">
                   <NumberFlow
-                    value={MOCK_BILLING_STATS.totalInvoiced}
+                    value={billingStats.totalInvoiced}
                     format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
                   />
                 </div>
@@ -485,18 +509,18 @@ export default function InvoicingPage() {
                 <div className="text-sm text-green-600 mb-1">Total Paid</div>
                 <div className="text-2xl font-bold text-green-700">
                   <NumberFlow
-                    value={MOCK_BILLING_STATS.totalPaid}
+                    value={billingStats.totalPaid}
                     format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
                   />
                 </div>
-                <div className="text-xs text-gray-600">{formatCurrency(MOCK_BILLING_STATS.totalPaid / MOCK_BILLING_STATS.totalInvoiced * 100)}% collected</div>
+                <div className="text-xs text-gray-600">{billingStats.totalInvoiced > 0 ? (billingStats.totalPaid / billingStats.totalInvoiced * 100).toFixed(1) : 0}% collected</div>
               </div>
 
               <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg p-4 border border-yellow-100">
                 <div className="text-sm text-yellow-600 mb-1">Outstanding</div>
                 <div className="text-2xl font-bold text-yellow-700">
                   <NumberFlow
-                    value={MOCK_BILLING_STATS.totalOutstanding}
+                    value={billingStats.totalOutstanding}
                     format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
                   />
                 </div>
@@ -507,7 +531,7 @@ export default function InvoicingPage() {
                 <div className="text-sm text-red-600 mb-1">Overdue</div>
                 <div className="text-2xl font-bold text-red-700">
                   <NumberFlow
-                    value={MOCK_BILLING_STATS.overdueAmount}
+                    value={billingStats.overdueAmount}
                     format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
                   />
                 </div>
