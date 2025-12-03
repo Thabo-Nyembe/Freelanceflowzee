@@ -60,9 +60,9 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // SUPABASE & QUERIES
-import { createClient } from '@/lib/supabase/client'
 import {
   getGeneratedVideos,
   getVideoTemplates,
@@ -516,6 +516,7 @@ const getStatusBadgeColor = (status: GenerationStatus): string => {
 export default function AIVideoGenerationPage() {
   logger.debug('Page rendering')
 
+  const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
   // State management with useReducer
@@ -553,23 +554,20 @@ export default function AIVideoGenerationPage() {
   // Initialize data from Supabase
   useEffect(() => {
     const loadAIVideoData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        dispatch({ type: 'SET_LOADING', isLoading: false })
+        return
+      }
+
       try {
-        logger.info('Loading AI Video Generation data from Supabase')
-
-        const supabase = createClient()
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-          logger.warn('No authenticated user found')
-          toast.error('Please log in to use AI Video Generation')
-          return
-        }
+        logger.info('Loading AI Video Generation data from Supabase', { userId })
 
         // Load videos, templates, and settings
         const [videosResult, templatesResult, settingsResult] = await Promise.all([
-          getGeneratedVideos(user.id),
+          getGeneratedVideos(userId),
           getVideoTemplates(),
-          getOrCreateGenerationSettings(user.id)
+          getOrCreateGenerationSettings(userId)
         ])
 
         // Transform DB videos to UI format
@@ -620,21 +618,24 @@ export default function AIVideoGenerationPage() {
 
         logger.info('AI Video data loaded', {
           videos: videosResult.data?.length || 0,
-          templates: templatesResult.data?.length || 0
+          templates: templatesResult.data?.length || 0,
+          userId
         })
 
         toast.success('AI Video Generation loaded', {
           description: `${videosResult.data?.length || 0} videos • ${templatesResult.data?.length || 0} templates`
         })
+        announce('AI Video Generation loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load AI Video data'
-        logger.error('Exception loading AI Video data', { error: errorMessage })
+        logger.error('Exception loading AI Video data', { error: errorMessage, userId })
         toast.error('Failed to load AI Video Generation')
+        announce('Failed to load AI Video Generation', 'assertive')
       }
     }
 
     loadAIVideoData()
-  }, [])
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Calculate stats with useMemo
   const stats = useMemo(() => {
