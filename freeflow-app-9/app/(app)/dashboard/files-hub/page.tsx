@@ -91,10 +91,6 @@ import {
   FilesHubState,
   FilesHubAction,
 
-  // Mock Data
-  MOCK_FILES,
-  MOCK_FOLDERS,
-
   // Helper Functions
   formatFileSize,
   getFileIcon,
