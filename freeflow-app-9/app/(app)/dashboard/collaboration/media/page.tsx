@@ -74,7 +74,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { createClient } from "@/lib/supabase/client";
+import { useCurrentUser } from "@/hooks/use-ai-data";
+import { useAnnouncer } from "@/lib/accessibility";
 import {
   getMedia,
   createMedia,
@@ -109,6 +110,10 @@ interface MediaItem {
 }
 
 export default function MediaPage() {
+  // A+++ Hooks
+  const { userId, loading: userLoading } = useCurrentUser();
+  const { announce } = useAnnouncer();
+
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
@@ -128,25 +133,18 @@ export default function MediaPage() {
 
   useEffect(() => {
     fetchMediaData();
-  }, []);
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchMediaData = async () => {
+    if (!userId) {
+      logger.info("Waiting for user authentication");
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      logger.info("Fetching media data from Supabase");
-
-      // Get current user
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        logger.warn("No authenticated user found");
-        toast.error("Please log in to view media");
-        setLoading(false);
-        return;
-      }
+      logger.info("Fetching media data from Supabase", { userId });
 
       // Fetch real media from Supabase
       const filters: any = {};
@@ -158,13 +156,14 @@ export default function MediaPage() {
       }
 
       const { data: mediaData, error: mediaError } = await getMedia(
-        user.id,
+        userId,
         filters
       );
 
       if (mediaError) {
-        logger.error("Failed to fetch media", { error: mediaError });
+        logger.error("Failed to fetch media", { error: mediaError, userId });
         toast.error("Failed to load media");
+        announce("Error loading media library", "assertive");
         return;
       }
 
@@ -179,7 +178,7 @@ export default function MediaPage() {
         duration: media.duration_seconds
           ? formatDuration(media.duration_seconds)
           : undefined,
-        uploadedBy: user.id, // Would need user profile join for name
+        uploadedBy: userId, // Would need user profile join for name
         uploadedAt: new Date(media.created_at).toLocaleDateString(),
         tags: media.tags || [],
         isFavorite: media.is_favorite,
@@ -192,7 +191,7 @@ export default function MediaPage() {
 
       // Fetch stats
       const { data: statsData, error: statsError } = await getMediaStats(
-        user.id
+        userId
       );
 
       if (!statsError && statsData) {
@@ -207,6 +206,7 @@ export default function MediaPage() {
       logger.info("Media data fetched successfully", {
         count: transformedMedia.length,
         totalSize: statsData?.totalSize,
+        userId
       });
 
       toast.success(
@@ -214,9 +214,11 @@ export default function MediaPage() {
           (statsData?.totalSize || 0) / (1024 * 1024)
         )} MB`
       );
+      announce(`Media library loaded: ${transformedMedia.length} files`, "polite");
     } catch (error) {
-      logger.error("Exception in fetchMediaData", { error });
+      logger.error("Exception in fetchMediaData", { error, userId });
       toast.error("Failed to load media");
+      announce("Error loading media library", "assertive");
     } finally {
       setLoading(false);
     }
