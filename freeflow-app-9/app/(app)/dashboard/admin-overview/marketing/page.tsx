@@ -10,10 +10,8 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
-  MOCK_LEADS,
-  MOCK_CAMPAIGNS,
-  MOCK_MARKETING_STATS,
   formatCurrency,
   formatNumber,
   formatPercentage,
@@ -58,12 +56,13 @@ const logger = createFeatureLogger('admin-marketing')
 export default function MarketingPage() {
   const router = useRouter()
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // State management
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [leads, setLeads] = useState<Lead[]>(MOCK_LEADS)
-  const [campaigns, setCampaigns] = useState<Campaign[]>(MOCK_CAMPAIGNS)
+  const [leads, setLeads] = useState<Lead[]>([])
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [leadsTab, setLeadsTab] = useState<LeadStatus | 'all'>('all')
   const [campaignsTab, setCampaignsTab] = useState<CampaignStatus | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -101,30 +100,64 @@ export default function MarketingPage() {
 
   const hotLeads = useMemo(() => getHotLeads(leads), [leads])
 
+  // Calculate marketing stats from data
+  const marketingStats = useMemo(() => {
+    const totalLeads = leads.length
+    const convertedLeads = leads.filter(l => l.status === 'converted').length
+    const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0
+    const activeCampaigns = campaigns.filter(c => c.status === 'active').length
+    const totalReach = campaigns.reduce((sum, c) => sum + (c.reach || 0), 0)
+    const marketingROI = 150 // Placeholder - would need revenue tracking
+
+    return { totalLeads, convertedLeads, conversionRate, activeCampaigns, totalReach, marketingROI }
+  }, [leads, campaigns])
+
   // Load marketing data
   useEffect(() => {
     const loadMarketing = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
-        logger.info('Loading marketing data')
+        logger.info('Loading marketing data', { userId })
 
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const { getLeads, getCampaigns } = await import('@/lib/admin-marketing-queries')
+
+        const [leadsResult, campaignsResult] = await Promise.all([
+          getLeads(userId),
+          getCampaigns(userId)
+        ])
+
+        setLeads(leadsResult.data || [])
+        setCampaigns(campaignsResult.data || [])
 
         setIsLoading(false)
         announce('Marketing data loaded successfully', 'polite')
-        logger.info('Marketing loaded', { success: true })
+        toast.success('Marketing loaded', {
+          description: `${leadsResult.data?.length || 0} leads, ${campaignsResult.data?.length || 0} campaigns`
+        })
+        logger.info('Marketing loaded', {
+          success: true,
+          leadCount: leadsResult.data?.length || 0,
+          campaignCount: campaignsResult.data?.length || 0
+        })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load marketing'
         setError(errorMessage)
         setIsLoading(false)
+        toast.error('Failed to load marketing', { description: errorMessage })
         announce('Error loading marketing', 'assertive')
         logger.error('Marketing load failed', { error: err })
       }
     }
 
     loadMarketing()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce])
 
   // Button 1: Add Lead
   const handleAddLead = async () => {
@@ -578,9 +611,6 @@ export default function MarketingPage() {
       })
       logger.info('Marketing refresh completed', { success: true })
       announce('Marketing refreshed successfully', 'polite')
-
-      setLeads([...MOCK_LEADS])
-      setCampaigns([...MOCK_CAMPAIGNS])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
       toast.error('Refresh Failed', { description: message })
@@ -660,7 +690,7 @@ export default function MarketingPage() {
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
                 <div className="text-sm text-blue-600 mb-1">Total Leads</div>
                 <div className="text-2xl font-bold text-blue-700">
-                  <NumberFlow value={MOCK_MARKETING_STATS.totalLeads} />
+                  <NumberFlow value={marketingStats.totalLeads} />
                 </div>
                 <div className="text-xs text-gray-600">{hotLeads.length} hot leads</div>
               </div>
@@ -668,23 +698,23 @@ export default function MarketingPage() {
               <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-100">
                 <div className="text-sm text-green-600 mb-1">Conversion Rate</div>
                 <div className="text-2xl font-bold text-green-700">
-                  <NumberFlow value={MOCK_MARKETING_STATS.conversionRate} suffix="%" />
+                  <NumberFlow value={marketingStats.conversionRate} suffix="%" />
                 </div>
-                <div className="text-xs text-gray-600">{MOCK_MARKETING_STATS.convertedLeads} converted</div>
+                <div className="text-xs text-gray-600">{marketingStats.convertedLeads} converted</div>
               </div>
 
               <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-100">
                 <div className="text-sm text-purple-600 mb-1">Active Campaigns</div>
                 <div className="text-2xl font-bold text-purple-700">
-                  <NumberFlow value={MOCK_MARKETING_STATS.activeCampaigns} />
+                  <NumberFlow value={marketingStats.activeCampaigns} />
                 </div>
-                <div className="text-xs text-gray-600">{formatNumber(MOCK_MARKETING_STATS.totalReach)} reach</div>
+                <div className="text-xs text-gray-600">{formatNumber(marketingStats.totalReach)} reach</div>
               </div>
 
               <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-lg p-4 border border-orange-100">
                 <div className="text-sm text-orange-600 mb-1">Marketing ROI</div>
                 <div className="text-2xl font-bold text-orange-700">
-                  <NumberFlow value={MOCK_MARKETING_STATS.marketingROI} suffix="%" />
+                  <NumberFlow value={marketingStats.marketingROI} suffix="%" />
                 </div>
                 <div className="text-xs text-green-600 flex items-center gap-1">
                   <TrendingUp className="w-3 h-3" />
