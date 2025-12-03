@@ -40,13 +40,20 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+
+const logger = createFeatureLogger('WorkflowBuilder')
 
 export default function WorkflowBuilderPage() {
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
+  const [workflows, setWorkflows] = useState<any[]>([])
   const [activeTab, setActiveTab] = useState('workflows')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -54,32 +61,49 @@ export default function WorkflowBuilderPage() {
   // A+++ LOAD WORKFLOW DATA
   useEffect(() => {
     const loadWorkflowData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading workflow data', { userId })
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load workflows'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Dynamic import for code splitting
+        const { getWorkflowsForBuilder } = await import('@/lib/workflow-builder-queries')
+
+        // Load workflows from database
+        const result = await getWorkflowsForBuilder({ userId })
+
+        if (result.error) {
+          throw new Error(result.error.message || 'Failed to load workflows')
+        }
+
+        const workflowData = result.data || []
+        setWorkflows(workflowData)
 
         setIsLoading(false)
+        toast.success('Workflows loaded', {
+          description: `${workflowData.length} workflows available`
+        })
         announce('Workflows loaded successfully', 'polite')
+        logger.info('Workflow data loaded successfully', { count: workflowData.length, userId })
       } catch (err) {
+        logger.error('Failed to load workflows', { error: err, userId })
         setError(err instanceof Error ? err.message : 'Failed to load workflows')
         setIsLoading(false)
+        toast.error('Failed to load workflows', {
+          description: err instanceof Error ? err.message : 'Please try again'
+        })
         announce('Error loading workflows', 'assertive')
       }
     }
 
     loadWorkflowData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // A+++ CRUD HANDLERS
   const handleCreateWorkflow = () => {
