@@ -41,7 +41,7 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
-import { createClient } from '@/lib/supabase/client'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // TYPES
 interface TeamMemberUI {
@@ -93,6 +93,7 @@ export default function TeamHubPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   const [selectedMember, setSelectedMember] = useState<TeamMemberUI | null>(null)
   const [activeTab, setActiveTab] = useState<string>('overview')
@@ -101,7 +102,6 @@ export default function TeamHubPage() {
   const [filterDepartment, setFilterDepartment] = useState<string>('all')
 
   // SUPABASE STATE
-  const [userId, setUserId] = useState<string | null>(null)
   const [teamMembers, setTeamMembers] = useState<TeamMemberUI[]>([])
   const [departments, setDepartments] = useState<DepartmentUI[]>([])
   const [teamOverview, setTeamOverview] = useState<TeamOverview | null>(null)
@@ -118,23 +118,16 @@ export default function TeamHubPage() {
   // A+++ LOAD TEAM DATA FROM SUPABASE
   useEffect(() => {
     const loadTeamData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
-        logger.info('Team data loading initiated')
         setIsLoading(true)
         setError(null)
-
-        // Get authenticated user
-        const supabase = createClient()
-        const { data: { user }, error: userError } = await supabase.auth.getUser()
-
-        if (userError || !user) {
-          logger.error('Failed to get authenticated user', { error: userError })
-          setError('Please sign in to view team data')
-          setIsLoading(false)
-          return
-        }
-
-        setUserId(user.id)
+        logger.info('Team data loading initiated', { userId })
 
         // Dynamic imports for code splitting
         const [
@@ -149,9 +142,9 @@ export default function TeamHubPage() {
 
         // Load all data in parallel
         const [membersResult, depsResult, overviewResult] = await Promise.all([
-          getTeamMembers(user.id),
-          getDepartments(user.id),
-          getTeamOverview(user.id)
+          getTeamMembers(userId),
+          getDepartments(userId),
+          getTeamOverview(userId)
         ])
 
         if (membersResult.error) {
@@ -218,22 +211,25 @@ export default function TeamHubPage() {
 
         setIsLoading(false)
         announce('Team data loaded successfully', 'polite')
+        toast.success(`${transformedMembers.length} team members loaded`)
         logger.info('Team data loaded successfully', {
           totalMembers: transformedMembers.length,
           onlineMembers: transformedMembers.filter(m => m.status === 'online').length,
-          departments: transformedDepartments.length
+          departments: transformedDepartments.length,
+          userId
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load team data'
         setError(errorMessage)
         setIsLoading(false)
         announce('Error loading team data', 'assertive')
-        logger.error('Failed to load team data', { error: err })
+        toast.error('Failed to load team data')
+        logger.error('Failed to load team data', { error: err, userId })
       }
     }
 
     loadTeamData()
-  }, [announce])
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================
   // REAL WORKING CRUD HANDLERS WITH SUPABASE
