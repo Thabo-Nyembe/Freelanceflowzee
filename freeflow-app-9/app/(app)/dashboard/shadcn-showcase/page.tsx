@@ -91,6 +91,7 @@ import {
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // Sample data for the data table
 const sampleData = [
@@ -125,10 +126,11 @@ const columns = [
 
 export default function ShadcnShowcasePage() {
   // A+++ STATE MANAGEMENT
-  const [isPageLoading, setIsPageLoading] = React.useState(true)
-  const [error, setError] = React.useState<string | null>(null)
+  const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
+  const [isPageLoading, setIsPageLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
   const [date, setDate] = React.useState<Date | undefined>(new Date())
   const [progress, setProgress] = React.useState(65)
   const [isLoading, setIsLoading] = React.useState(false)
@@ -137,6 +139,11 @@ export default function ShadcnShowcasePage() {
   // A+++ LOAD SHADCN SHOWCASE DATA
   React.useEffect(() => {
     const loadShadcnShowcaseData = async () => {
+      if (!userId) {
+        setIsPageLoading(false)
+        return
+      }
+
       try {
         setIsPageLoading(true)
         setError(null)
@@ -162,7 +169,7 @@ export default function ShadcnShowcasePage() {
     }
 
     loadShadcnShowcaseData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const breadcrumbItems = [
     { label: 'Dashboard', href: '/dashboard', title: 'Main Dashboard' },
