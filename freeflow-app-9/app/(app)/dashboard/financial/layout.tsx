@@ -23,7 +23,8 @@ import {
   ArrowDownRight
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { MOCK_FINANCIAL_OVERVIEW, MOCK_INVOICES } from '@/lib/financial-hub-utils'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
 
 const logger = createFeatureLogger('FinancialLayout')
 
@@ -43,7 +44,61 @@ const tabs: Tab[] = [
 export default function FinancialLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
-  const [financialData, setFinancialData] = useState(MOCK_FINANCIAL_OVERVIEW)
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
+  // Database state
+  const [financialData, setFinancialData] = useState<any>(null)
+  const [invoices, setInvoices] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadFinancialLayoutData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        setIsLoading(true)
+        logger.info('Loading financial layout data', { userId })
+
+        const { getFinancialOverview, getInvoices } = await import('@/lib/financial-queries')
+
+        const [overviewResult, invoicesResult] = await Promise.all([
+          getFinancialOverview(userId),
+          getInvoices(userId, {})
+        ])
+
+        if (overviewResult.error) throw overviewResult.error
+        if (invoicesResult.error) throw invoicesResult.error
+
+        setFinancialData(overviewResult.data)
+        setInvoices(invoicesResult.data || [])
+
+        setIsLoading(false)
+        announce('Financial dashboard data loaded', 'polite')
+        toast.success('Financial data loaded', {
+          description: `${invoicesResult.data?.length || 0} invoices loaded`
+        })
+
+        logger.info('Financial layout data loaded successfully', {
+          userId,
+          hasOverview: !!overviewResult.data,
+          invoiceCount: invoicesResult.data?.length || 0
+        })
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load financial data'
+        logger.error('Failed to load financial layout data', { error: errorMessage, userId })
+        toast.error('Failed to load financial data', { description: errorMessage })
+        setIsLoading(false)
+        announce('Error loading financial data', 'assertive')
+      }
+    }
+
+    loadFinancialLayoutData()
+  }, [userId, announce])
 
   useEffect(() => {
     logger.info('Financial Hub Layout mounted', { currentPath: pathname })
@@ -167,8 +222,8 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
     })
   }
 
-  const pendingInvoices = MOCK_INVOICES.filter(i => i.status === 'sent').length
-  const overdueInvoices = MOCK_INVOICES.filter(i => i.status === 'overdue').length
+  const pendingInvoices = invoices.filter(i => i.status === 'sent').length
+  const overdueInvoices = invoices.filter(i => i.status === 'overdue').length
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -223,13 +278,13 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
             </CardHeader>
             <CardContent>
               <NumberFlow
-                value={financialData.totalRevenue}
+                value={financialData?.totalRevenue || 0}
                 format="currency"
                 className="text-3xl font-bold text-emerald-600"
               />
               <p className="text-sm text-green-600 flex items-center gap-1 mt-1">
                 <ArrowUpRight className="h-3 w-3" />
-                +<NumberFlow value={financialData.yearlyGrowth} decimals={1} className="inline-block" />% YoY
+                +<NumberFlow value={financialData?.yearlyGrowth || 0} decimals={1} className="inline-block" />% YoY
               </p>
             </CardContent>
           </Card>
@@ -247,7 +302,7 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
             </CardHeader>
             <CardContent>
               <NumberFlow
-                value={financialData.totalExpenses}
+                value={financialData?.totalExpenses || 0}
                 format="currency"
                 className="text-2xl font-bold text-red-600"
               />
@@ -271,12 +326,12 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
             </CardHeader>
             <CardContent>
               <NumberFlow
-                value={financialData.netProfit}
+                value={financialData?.netProfit || 0}
                 format="currency"
                 className="text-2xl font-bold text-green-600"
               />
               <p className="text-sm text-gray-500 mt-1">
-                Margin: {financialData.profitMargin.toFixed(1)}%
+                Margin: {(financialData?.profitMargin || 0).toFixed(1)}%
               </p>
             </CardContent>
           </Card>
