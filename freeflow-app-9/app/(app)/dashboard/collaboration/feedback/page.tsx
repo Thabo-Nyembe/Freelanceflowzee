@@ -479,20 +479,16 @@ export default function FeedbackPage() {
     feedbackId: string,
     newStatus: Feedback["status"]
   ) => {
+    if (!userId) {
+      toast.error("Please log in");
+      announce("Authentication required", "assertive");
+      return;
+    }
+
     try {
-      logger.info("Changing status", { feedbackId, newStatus });
+      logger.info("Changing status", { feedbackId, newStatus, userId });
 
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error("Please log in");
-        return;
-      }
-
-      const { data, error } = await updateFeedback(feedbackId, user.id, {
+      const { data, error } = await updateFeedback(feedbackId, userId, {
         status: newStatus as FeedbackStatus,
       });
 
@@ -542,28 +538,25 @@ export default function FeedbackPage() {
   const handleAddReply = async (feedbackId: string) => {
     if (!replyText.trim()) return;
 
+    if (!userId) {
+      toast.error("Please log in to reply");
+      announce("Authentication required", "assertive");
+      return;
+    }
+
     try {
-      logger.info("Adding reply", { feedbackId });
-
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error("Please log in to reply");
-        return;
-      }
+      logger.info("Adding reply", { feedbackId, userId });
 
       const { data, error } = await addFeedbackReply(
         feedbackId,
-        user.id,
+        userId,
         replyText
       );
 
       if (error) {
-        logger.error("Failed to add reply", { error: error.message });
+        logger.error("Failed to add reply", { error: error.message, userId });
         toast.error("Failed to add reply");
+        announce("Error adding reply", "assertive");
         return;
       }
 
@@ -571,7 +564,7 @@ export default function FeedbackPage() {
       const newReply: FeedbackReply = {
         id: data.id,
         content: data.reply_text,
-        author: user.id.slice(0, 8),
+        author: userId.slice(0, 8),
         createdAt: new Date(data.created_at).toLocaleDateString(),
         isSolution: data.is_solution,
       };
@@ -598,20 +591,16 @@ export default function FeedbackPage() {
   };
 
   const handleDeleteFeedback = async (feedbackId: string) => {
+    if (!userId) {
+      toast.error("Please log in");
+      announce("Authentication required", "assertive");
+      return;
+    }
+
     try {
-      logger.info("Deleting feedback", { feedbackId });
+      logger.info("Deleting feedback", { feedbackId, userId });
 
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error("Please log in");
-        return;
-      }
-
-      const { success, error } = await deleteFeedbackDB(feedbackId, user.id);
+      const { success, error } = await deleteFeedbackDB(feedbackId, userId);
 
       if (error) {
         logger.error("Failed to delete feedback", { error: error.message });
