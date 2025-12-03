@@ -43,6 +43,7 @@ import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleto
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import type { TeamMember as DatabaseTeamMember } from '@/lib/team-hub-queries'
 
 const logger = createFeatureLogger('TeamManagement')
@@ -77,6 +78,7 @@ export default function TeamManagementPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -108,27 +110,24 @@ export default function TeamManagementPage() {
   // A+++ LOAD REAL TEAM DATA FROM DATABASE
   useEffect(() => {
     const loadTeamData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
-        logger.info('Loading team management data from database', { action: 'load_start' })
-
-        // Get current user
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-
-        if (!user) {
-          throw new Error('User not authenticated')
-        }
+        logger.info('Loading team management data from database', { userId, action: 'load_start' })
 
         // Load real team members from database
         const { getTeamMembers, getTeamOverview, getDepartments } = await import('@/lib/team-hub-queries')
 
         const [membersResult, overviewResult, departmentsResult] = await Promise.all([
-          getTeamMembers(user.id),
-          getTeamOverview(user.id),
-          getDepartments(user.id)
+          getTeamMembers(userId),
+          getTeamOverview(userId),
+          getDepartments(userId)
         ])
 
         if (membersResult.error) {
@@ -190,40 +189,39 @@ export default function TeamManagementPage() {
         })
 
         setIsLoading(false)
+        toast.success(`Team management loaded: ${members.length} members`)
         announce('Team management loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load team management'
-        logger.error('Failed to load team management', { error: err })
+        logger.error('Failed to load team management', { error: err, userId })
         setError(errorMessage)
         setIsLoading(false)
+        toast.error('Failed to load team management')
         announce('Error loading team management', 'assertive')
       }
     }
 
     loadTeamData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // A+++ CRUD HANDLERS
   const handleAddMember = async () => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
     if (!newMember.name || !newMember.email || !newMember.role) {
       toast.error('Please fill in required fields: name, email, and role')
       return
     }
 
     try {
-      logger.info('Adding new team member', { action: 'add_member', member: newMember })
-
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-
-      if (!user) {
-        throw new Error('User not authenticated')
-      }
+      logger.info('Adding new team member', { action: 'add_member', member: newMember, userId })
 
       const { createTeamMember } = await import('@/lib/team-hub-queries')
 
-      const { data, error } = await createTeamMember(user.id, {
+      const { data, error } = await createTeamMember(userId, {
         name: newMember.name,
         email: newMember.email,
         role: newMember.role,
