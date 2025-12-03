@@ -46,9 +46,9 @@ import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useKaziAI } from '@/lib/hooks/use-kazi-ai'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // A+++ SUPABASE INTEGRATION
-import { createClient } from '@/lib/supabase/client'
 import {
   getConversations,
   getMessages,
@@ -131,7 +131,8 @@ export default function AIAssistantPage() {
   const [isPageLoading, setIsPageLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
-  const { chat, loading: aiLoading } = useKaziAI('current-user-123')
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { chat, loading: aiLoading } = useKaziAI(userId || 'anonymous')
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -156,28 +157,23 @@ export default function AIAssistantPage() {
   // A+++ LOAD AI ASSISTANT DATA
   useEffect(() => {
     const loadAIAssistantData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsPageLoading(false)
+        return
+      }
+
       try {
         setIsPageLoading(true)
         setError(null)
-        logger.info('Loading AI Assistant data from Supabase')
-
-        // Get authenticated user
-        const supabase = createClient()
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-          logger.warn('No authenticated user found', { error: authError?.message })
-          toast.error('Please log in to use AI Assistant')
-          setIsPageLoading(false)
-          return
-        }
+        logger.info('Loading AI Assistant data from Supabase', { userId })
 
         // Fetch all AI assistant data in parallel
         const [conversationsResult, insightsResult, analysesResult, statsResult] = await Promise.all([
-          getConversations(user.id, { status: 'active' }),
-          getInsights(user.id, { status: 'active' }),
-          getProjectAnalyses(user.id),
-          getConversationStats(user.id)
+          getConversations(userId, { status: 'active' }),
+          getInsights(userId, { status: 'active' }),
+          getProjectAnalyses(userId),
+          getConversationStats(userId)
         ])
 
         // Transform conversations data
@@ -243,7 +239,7 @@ export default function AIAssistantPage() {
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load AI assistant'
-        logger.error('Exception loading AI Assistant data', { error: errorMessage })
+        logger.error('Exception loading AI Assistant data', { error: errorMessage, userId })
         setError(errorMessage)
         setIsPageLoading(false)
         announce('Error loading AI assistant', 'assertive')
@@ -252,7 +248,7 @@ export default function AIAssistantPage() {
     }
 
     loadAIAssistantData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
   const [isVoiceMode, setIsVoiceMode] = useState<boolean>(false)
   const [isListening, setIsListening] = useState<boolean>(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
