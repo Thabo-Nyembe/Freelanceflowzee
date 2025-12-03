@@ -30,6 +30,7 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('Widgets')
 
@@ -295,6 +296,7 @@ export default function WidgetsPage() {
 
   // A+++ ANNOUNCER
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // REDUCER STATE
   const [state, dispatch] = useReducer(widgetsReducer, {
@@ -335,37 +337,53 @@ export default function WidgetsPage() {
 
   useEffect(() => {
     const loadWidgetsData = async () => {
-      logger.info('Loading widgets data')
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
+      logger.info('Loading widgets data', { userId })
       try {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        // Dynamic import for code splitting
+        const { getWidgetsByUser } = await import('@/lib/widgets-queries')
 
-        const mockWidgets = generateMockWidgets()
-        dispatch({ type: 'SET_WIDGETS', widgets: mockWidgets })
+        // Load widgets from database
+        const result = await getWidgetsByUser(userId)
+
+        if (result.error) {
+          throw new Error(result.error.message || 'Failed to load widgets')
+        }
+
+        const widgets = result.data || []
+        dispatch({ type: 'SET_WIDGETS', widgets })
 
         setIsLoading(false)
+        toast.success('Widgets loaded', {
+          description: `${widgets.length} widgets configured`
+        })
         announce('Widgets loaded successfully', 'polite')
-        logger.info('Widgets data loaded successfully', { count: mockWidgets.length })
+        logger.info('Widgets data loaded successfully', { count: widgets.length, userId })
       } catch (err) {
         logger.error('Widgets load error', {
           error: err instanceof Error ? err.message : 'Unknown error',
-          errorObject: err
+          errorObject: err,
+          userId
         })
         setError(err instanceof Error ? err.message : 'Failed to load widgets')
         setIsLoading(false)
+        toast.error('Failed to load widgets', {
+          description: err instanceof Error ? err.message : 'Please try again'
+        })
         announce('Error loading widgets', 'assertive')
       }
     }
 
     loadWidgetsData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // COMPUTED STATS
