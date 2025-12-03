@@ -321,8 +321,8 @@ export default function AdvancedAnalyticsPage() {
         <div className="p-6">
           <h3 className="text-lg font-semibold mb-6">Revenue Trend</h3>
           <div className="h-80 flex items-end justify-between gap-3">
-            {MOCK_REVENUE_CHART.data.map((point, index) => {
-              const maxValue = Math.max(...MOCK_REVENUE_CHART.data.map(d => d.value))
+            {{ data: revenueChart }.data.map((point, index) => {
+              const maxValue = Math.max(...{ data: revenueChart }.data.map(d => d.value))
               const height = (point.value / maxValue) * 100
               return (
                 <div key={index} className="flex-1 flex flex-col items-center gap-2">
@@ -387,8 +387,8 @@ export default function AdvancedAnalyticsPage() {
         <div className="p-6">
           <h3 className="text-lg font-semibold mb-6">User Growth</h3>
           <div className="h-80 flex items-end justify-between gap-3">
-            {MOCK_USERS_CHART.data.map((point, index) => {
-              const maxValue = Math.max(...MOCK_USERS_CHART.data.map(d => d.value))
+            {{ data: usersChart }.data.map((point, index) => {
+              const maxValue = Math.max(...{ data: usersChart }.data.map(d => d.value))
               const height = (point.value / maxValue) * 100
               return (
                 <div key={index} className="flex-1 flex flex-col items-center gap-2">
@@ -414,7 +414,7 @@ export default function AdvancedAnalyticsPage() {
   )
 
   const renderConversion = () => {
-    const totalConversion = calculateFunnelConversion(MOCK_CONVERSION_FUNNEL)
+    const totalConversion = calculateFunnelConversion(conversionFunnel)
 
     return (
       <div className="space-y-6">
@@ -448,8 +448,8 @@ export default function AdvancedAnalyticsPage() {
           <div className="p-6">
             <h3 className="text-lg font-semibold mb-6">Conversion Funnel</h3>
             <div className="space-y-4">
-              {MOCK_CONVERSION_FUNNEL.map((stage, index) => {
-                const maxCount = MOCK_CONVERSION_FUNNEL[0].count
+              {conversionFunnel.map((stage, index) => {
+                const maxCount = conversionFunnel[0].count
                 const width = (stage.count / maxCount) * 100
 
                 return (
@@ -578,7 +578,7 @@ export default function AdvancedAnalyticsPage() {
           <div className="p-6 text-center">
             <div className="text-sm text-muted-foreground mb-2">On Track</div>
             <div className="text-3xl font-bold text-green-500">
-              {MOCK_GOALS.filter(g => g.status === 'on-track').length}
+              {goals.filter(g => g.status === 'on-track').length}
             </div>
           </div>
         </LiquidGlassCard>
@@ -587,7 +587,7 @@ export default function AdvancedAnalyticsPage() {
           <div className="p-6 text-center">
             <div className="text-sm text-muted-foreground mb-2">At Risk</div>
             <div className="text-3xl font-bold text-yellow-500">
-              {MOCK_GOALS.filter(g => g.status === 'at-risk').length}
+              {goals.filter(g => g.status === 'at-risk').length}
             </div>
           </div>
         </LiquidGlassCard>
@@ -596,14 +596,14 @@ export default function AdvancedAnalyticsPage() {
           <div className="p-6 text-center">
             <div className="text-sm text-muted-foreground mb-2">Completed</div>
             <div className="text-3xl font-bold text-blue-500">
-              {MOCK_GOALS.filter(g => g.status === 'completed').length}
+              {goals.filter(g => g.status === 'completed').length}
             </div>
           </div>
         </LiquidGlassCard>
       </div>
 
       <div className="space-y-4">
-        {MOCK_GOALS.map((goal) => (
+        {goals.map((goal) => (
           <LiquidGlassCard key={goal.id}>
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
