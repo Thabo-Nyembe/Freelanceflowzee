@@ -10,10 +10,8 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
-  MOCK_DEALS,
-  MOCK_CONTACTS,
-  MOCK_PIPELINE_STATS,
   formatCurrency,
   formatNumber,
   formatRelativeTime,
@@ -56,12 +54,13 @@ const STAGES: { id: DealStage; label: string; color: string }[] = [
 export default function CRMPage() {
   const router = useRouter()
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // State management
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [deals, setDeals] = useState<Deal[]>(MOCK_DEALS)
-  const [contacts, setContacts] = useState<Contact[]>(MOCK_CONTACTS)
+  const [deals, setDeals] = useState<Deal[]>([])
+  const [contacts, setContacts] = useState<Contact[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null)
   const [showDealModal, setShowDealModal] = useState(false)
@@ -82,22 +81,56 @@ export default function CRMPage() {
     }
   }, [deals, searchQuery])
 
+  // Calculate pipeline stats from deals
+  const pipelineStats = useMemo(() => {
+    const totalValue = deals.reduce((sum, deal) => sum + (deal.value || 0), 0)
+    const dealCount = deals.length
+    const wonDeals = deals.filter(d => d.stage === 'won').length
+    const winRate = dealCount > 0 ? Math.round((wonDeals / dealCount) * 100) : 0
+    const averageDealSize = dealCount > 0 ? totalValue / dealCount : 0
+    const averageCycleTime = 30 // Placeholder - would need date tracking
+
+    return { totalValue, dealCount, winRate, averageDealSize, averageCycleTime }
+  }, [deals])
+
   // Load CRM data
   useEffect(() => {
     const loadCRM = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
-        logger.info('Loading CRM data')
+        logger.info('Loading CRM data', { userId })
 
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const { getDeals, getContacts } = await import('@/lib/admin-overview-queries')
+
+        const [dealsResult, contactsResult] = await Promise.all([
+          getDeals(userId),
+          getContacts(userId)
+        ])
+
+        setDeals(dealsResult.data || [])
+        setContacts(contactsResult.data || [])
 
         setIsLoading(false)
         announce('CRM data loaded successfully', 'polite')
-        logger.info('CRM loaded', { success: true })
+        toast.success('CRM loaded', {
+          description: `${dealsResult.data?.length || 0} deals, ${contactsResult.data?.length || 0} contacts`
+        })
+        logger.info('CRM loaded', {
+          success: true,
+          dealCount: dealsResult.data?.length || 0,
+          contactCount: contactsResult.data?.length || 0
+        })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load CRM'
         setError(errorMessage)
+        toast.error('Failed to load CRM', { description: errorMessage })
         setIsLoading(false)
         announce('Error loading CRM', 'assertive')
         logger.error('CRM load failed', { error: err })
@@ -105,7 +138,7 @@ export default function CRMPage() {
     }
 
     loadCRM()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce])
 
   // Button 1: Add Deal
   const handleAddDeal = async () => {
@@ -451,9 +484,6 @@ export default function CRMPage() {
       })
       logger.info('CRM refresh completed', { success: true })
       announce('CRM refreshed successfully', 'polite')
-
-      setDeals([...MOCK_DEALS])
-      setContacts([...MOCK_CONTACTS])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
       toast.error('Refresh Failed', { description: message })
@@ -555,17 +585,17 @@ export default function CRMPage() {
                 <div className="text-sm text-blue-600 mb-1">Pipeline Value</div>
                 <div className="text-2xl font-bold text-blue-700">
                   <NumberFlow
-                    value={MOCK_PIPELINE_STATS.totalValue}
+                    value={pipelineStats.totalValue}
                     format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
                   />
                 </div>
-                <div className="text-xs text-gray-600">{MOCK_PIPELINE_STATS.dealCount} deals</div>
+                <div className="text-xs text-gray-600">{pipelineStats.dealCount} deals</div>
               </div>
 
               <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-100">
                 <div className="text-sm text-green-600 mb-1">Win Rate</div>
                 <div className="text-2xl font-bold text-green-700">
-                  <NumberFlow value={MOCK_PIPELINE_STATS.winRate} suffix="%" />
+                  <NumberFlow value={pipelineStats.winRate} suffix="%" />
                 </div>
                 <div className="text-xs text-gray-600">Above average</div>
               </div>
@@ -574,7 +604,7 @@ export default function CRMPage() {
                 <div className="text-sm text-purple-600 mb-1">Avg Deal Size</div>
                 <div className="text-2xl font-bold text-purple-700">
                   <NumberFlow
-                    value={MOCK_PIPELINE_STATS.averageDealSize}
+                    value={pipelineStats.averageDealSize}
                     format={{ style: 'currency', currency: 'USD', notation: 'compact' }}
                   />
                 </div>
@@ -584,7 +614,7 @@ export default function CRMPage() {
               <div className="bg-gradient-to-br from-orange-50 to-red-50 rounded-lg p-4 border border-orange-100">
                 <div className="text-sm text-orange-600 mb-1">Avg Cycle Time</div>
                 <div className="text-2xl font-bold text-orange-700">
-                  <NumberFlow value={MOCK_PIPELINE_STATS.averageCycleTime} suffix=" days" />
+                  <NumberFlow value={pipelineStats.averageCycleTime} suffix=" days" />
                 </div>
                 <div className="text-xs text-gray-600">To close</div>
               </div>
