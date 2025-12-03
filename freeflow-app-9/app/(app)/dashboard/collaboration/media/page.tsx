@@ -307,25 +307,21 @@ export default function MediaPage() {
   };
 
   const handleToggleFavorite = async (mediaId: string) => {
+    if (!userId) {
+      toast.error("Please log in");
+      announce("Authentication required", "assertive");
+      return;
+    }
+
     try {
-      logger.info("Toggling favorite", { mediaId });
-
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error("Please log in");
-        return;
-      }
+      logger.info("Toggling favorite", { mediaId, userId });
 
       const currentItem = mediaItems.find((m) => m.id === mediaId);
       if (!currentItem) return;
 
       const { data, error } = await toggleFavorite(
         mediaId,
-        user.id,
+        userId,
         !currentItem.isFavorite
       );
 
@@ -381,20 +377,16 @@ export default function MediaPage() {
   };
 
   const handleDeleteMedia = async (mediaId: string) => {
+    if (!userId) {
+      toast.error("Please log in");
+      announce("Authentication required", "assertive");
+      return;
+    }
+
     try {
-      logger.info("Deleting media", { mediaId });
+      logger.info("Deleting media", { mediaId, userId });
 
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        toast.error("Please log in");
-        return;
-      }
-
-      const { success, error } = await deleteMedia(mediaId, user.id);
+      const { success, error } = await deleteMedia(mediaId, userId);
 
       if (error) {
         logger.error("Failed to delete media", { error });
