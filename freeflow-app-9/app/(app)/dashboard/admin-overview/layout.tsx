@@ -143,33 +143,34 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
 
   // Handle refresh data
   const handleRefreshData = async () => {
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
     try {
       setIsRefreshing(true)
-      logger.info('Refreshing admin overview data', { timestamp: new Date().toISOString() })
+      logger.info('Refreshing admin overview data', { timestamp: new Date().toISOString(), userId })
 
-      // Simulate API call
-      const response = await fetch('/api/admin/overview/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ timestamp: new Date().toISOString() })
-      })
+      const { getDashboardStats } = await import('@/lib/admin-overview-queries')
+      const statsResult = await getDashboardStats(userId)
 
-      if (!response.ok) {
-        throw new Error('Failed to refresh data')
-      }
+      if (statsResult.error) throw statsResult.error
 
-      // Update last updated time
+      setStats(statsResult.data)
       setLastUpdated(new Date())
 
       toast.success('Data Refreshed', {
         description: 'All admin metrics have been updated successfully'
       })
-      logger.info('Data refresh completed', { success: true })
+      announce('Dashboard data refreshed', 'polite')
+      logger.info('Data refresh completed', { success: true, hasStats: !!statsResult.data })
     } catch (error) {
       toast.error('Refresh Failed', {
         description: error instanceof Error ? error.message : 'Unable to refresh data'
       })
       logger.error('Data refresh failed', { error })
+      announce('Error refreshing dashboard data', 'assertive')
     } finally {
       setIsRefreshing(false)
     }

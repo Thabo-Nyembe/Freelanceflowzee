@@ -217,9 +217,40 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
 
   const handleRefreshData = async () => {
     logger.info('Refresh financial data')
-    toast.success('Data Refreshed', {
-      description: 'Updated with latest transactions'
-    })
+
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
+    try {
+      setIsLoading(true)
+
+      const { getFinancialOverview, getInvoices } = await import('@/lib/financial-queries')
+
+      const [overviewResult, invoicesResult] = await Promise.all([
+        getFinancialOverview(userId),
+        getInvoices(userId, {})
+      ])
+
+      if (overviewResult.error) throw overviewResult.error
+      if (invoicesResult.error) throw invoicesResult.error
+
+      setFinancialData(overviewResult.data)
+      setInvoices(invoicesResult.data || [])
+
+      toast.success('Data Refreshed', {
+        description: `Updated with latest transactions (${invoicesResult.data?.length || 0} invoices)`
+      })
+      announce('Financial data refreshed', 'polite')
+      logger.info('Financial data refreshed', { invoiceCount: invoicesResult.data?.length || 0 })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to refresh data'
+      toast.error('Refresh failed', { description: message })
+      logger.error('Failed to refresh financial data', { error })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const pendingInvoices = invoices.filter(i => i.status === 'sent').length

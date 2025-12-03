@@ -134,30 +134,66 @@ export default function AnalyticsPage() {
     loadAnalytics()
   }, [dateRange, userId, announce])
 
+  // Helper function to reload analytics data
+  const reloadAnalyticsData = async () => {
+    if (!userId) {
+      throw new Error('User authentication required')
+    }
+
+    setIsLoading(true)
+
+    // Calculate date range
+    const endDate = new Date().toISOString().split('T')[0]
+    const startDate = new Date()
+    const days = dateRange === '7d' ? 7 : dateRange === '30d' ? 30 : dateRange === '90d' ? 90 : 365
+    startDate.setDate(startDate.getDate() - days)
+    const startDateStr = startDate.toISOString().split('T')[0]
+
+    const { getRevenueData, getConversionFunnel, getTrafficSources, getInsights } = await import('@/lib/admin-analytics-queries')
+
+    const [revenueResult, conversionResult, trafficResult, insightsResult] = await Promise.all([
+      getRevenueData(userId, startDateStr, endDate),
+      getConversionFunnel(userId, startDateStr, endDate),
+      getTrafficSources(userId, startDateStr, endDate),
+      getInsights(userId, 50)
+    ])
+
+    if (revenueResult.error) throw revenueResult.error
+    if (conversionResult.error) throw conversionResult.error
+    if (trafficResult.error) throw trafficResult.error
+    if (insightsResult.error) throw insightsResult.error
+
+    setRevenueData(revenueResult.data || [])
+    setConversionFunnel(conversionResult.data || [])
+    setTrafficSources(trafficResult.data || [])
+    setInsights(insightsResult.data || [])
+
+    setIsLoading(false)
+
+    return {
+      revenueCount: revenueResult.data?.length || 0,
+      insightsCount: insightsResult.data?.length || 0
+    }
+  }
+
   // Button 1: Refresh Analytics
   const handleRefreshAnalytics = async () => {
     try {
-      logger.info('Refreshing analytics data', { dateRange })
+      logger.info('Refreshing analytics data', { dateRange, userId })
 
-      const response = await fetch('/api/admin/analytics/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dateRange, timestamp: new Date().toISOString() })
-      })
-
-      if (!response.ok) throw new Error('Failed to refresh analytics')
-      const result = await response.json()
+      const result = await reloadAnalyticsData()
 
       toast.success('Analytics Refreshed', {
-        description: `Analytics data updated successfully for ${dateRange} period`
+        description: `Analytics data updated successfully for ${dateRange} period (${result.insightsCount} insights)`
       })
-      logger.info('Analytics refresh completed', { success: true, result })
+      logger.info('Analytics refresh completed', { success: true, ...result })
       announce('Analytics refreshed successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
       toast.error('Refresh Failed', { description: message })
       logger.error('Analytics refresh failed', { error: message })
       announce('Analytics refresh failed', 'assertive')
+      setIsLoading(false)
     }
   }
 
@@ -361,27 +397,21 @@ export default function AnalyticsPage() {
   // Button 10: Refresh Metrics
   const handleRefreshMetrics = async () => {
     try {
-      logger.info('Refreshing metrics')
+      logger.info('Refreshing metrics', { userId })
 
-      const response = await fetch('/api/admin/analytics/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ metricsOnly: true })
-      })
-
-      if (!response.ok) throw new Error('Failed to refresh metrics')
-      const result = await response.json()
+      const result = await reloadAnalyticsData()
 
       toast.success('Metrics Refreshed', {
         description: 'Key performance metrics have been updated with real-time data'
       })
-      logger.info('Metrics refresh completed', { success: true, result })
+      logger.info('Metrics refresh completed', { success: true, ...result })
       announce('Metrics refreshed successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
       toast.error('Refresh Failed', { description: message })
       logger.error('Metrics refresh failed', { error: message })
       announce('Metrics refresh failed', 'assertive')
+      setIsLoading(false)
     }
   }
 
