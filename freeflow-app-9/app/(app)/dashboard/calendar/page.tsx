@@ -33,6 +33,7 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // ============================================================================
 // PRODUCTION LOGGER
@@ -110,9 +111,11 @@ export default function CalendarPage() {
   // ============================================================================
   // A+++ STATE MANAGEMENT
   // ============================================================================
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { announce } = useAnnouncer()
 
   // Regular state
   const [currentDate, setCurrentDate] = useState<Date>(new Date())
@@ -188,27 +191,59 @@ export default function CalendarPage() {
   // ============================================================================
   useEffect(() => {
     const loadCalendarData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading calendar data', { userId, month: format(currentDate, 'yyyy-MM') })
 
-        // Simulate API call with potential failure
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            // Simulate occasional errors (5% failure rate)
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load calendar data'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
+        // Dynamic import for code splitting
+        const { getCalendarEvents } = await import('@/lib/calendar-queries')
+
+        // Get events for current month
+        const startOfMonth = format(currentDate, 'yyyy-MM-01')
+        const endOfMonth = format(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0), 'yyyy-MM-dd')
+
+        const { data: calendarEvents, error: eventsError } = await getCalendarEvents(userId, {
+          startDate: startOfMonth,
+          endDate: endOfMonth
         })
 
+        if (eventsError) throw eventsError
+
+        // Transform database events to UI format
+        const transformedEvents = (calendarEvents || []).map((e: any) => ({
+          id: parseInt(e.id) || 0,
+          title: e.title,
+          date: new Date(e.date),
+          time: e.time,
+          duration: e.duration,
+          type: e.type,
+          location: e.location,
+          attendees: e.attendees,
+          color: e.color,
+          description: e.description || '',
+          reminder: e.reminder
+        }))
+
+        setEvents(transformedEvents)
         setIsLoading(false)
 
+        logger.info('Calendar data loaded successfully', {
+          userId,
+          eventsCount: transformedEvents.length,
+          month: format(currentDate, 'MMMM yyyy')
+        })
+
         // A+++ Accessibility announcement
-        announce(`Calendar loaded for ${format(currentDate, 'MMMM yyyy')}`, 'polite')
+        announce(`Calendar loaded for ${format(currentDate, 'MMMM yyyy')} with ${transformedEvents.length} events`, 'polite')
       } catch (err) {
+        logger.error('Failed to load calendar data', { error: err, userId })
         setError(err instanceof Error ? err.message : 'Failed to load calendar')
         setIsLoading(false)
         announce('Error loading calendar', 'assertive')
@@ -216,7 +251,7 @@ export default function CalendarPage() {
     }
 
     loadCalendarData()
-  }, [announce, currentDate])
+  }, [userId, announce, currentDate]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const generateCalendarDays = () => {
     const year = currentDate.getFullYear()
@@ -339,10 +374,17 @@ export default function CalendarPage() {
   // ============================================================================
 
   const handleCreateEvent = async () => {
+    if (!userId) {
+      toast.error('Please log in to create events')
+      announce('Authentication required', 'assertive')
+      return
+    }
+
     logger.info('Create event initiated', {
       currentMonth: format(currentDate, 'MMMM yyyy'),
       view,
-      aiMode: aiMode ? 'enabled' : 'disabled'
+      aiMode: aiMode ? 'enabled' : 'disabled',
+      userId
     })
 
     const title = prompt('Enter event title:')
@@ -358,49 +400,56 @@ export default function CalendarPage() {
     }
 
     try {
-      // Create new event locally first (optimistic update)
-      const newEvent = {
-        id: events.length + 1,
+      const { createCalendarEvent } = await import('@/lib/calendar-queries')
+
+      const { data: newEvent, error: createError } = await createCalendarEvent(userId, {
         title,
-        date: currentDate,
+        date: format(currentDate, 'yyyy-MM-dd'),
         time,
         duration: '1 hour',
-        type: 'meeting' as const,
+        type: 'meeting',
         location: 'To be determined',
         attendees: 1,
-        color: 'blue' as const,
-        description: 'New calendar event',
+        color: 'blue',
         reminder: 15
-      }
+      })
 
-      setEvents([...events, newEvent])
+      if (createError || !newEvent) throw new Error(createError?.message || 'Failed to create event')
 
-      logger.info('Event created successfully', {
+      // Add to UI state
+      setEvents([...events, {
+        id: parseInt(newEvent.id) || events.length + 1,
+        title: newEvent.title,
+        date: new Date(newEvent.date),
+        time: newEvent.time,
+        duration: newEvent.duration,
+        type: newEvent.type,
+        location: newEvent.location,
+        attendees: newEvent.attendees,
+        color: newEvent.color,
+        description: newEvent.description || '',
+        reminder: newEvent.reminder
+      }])
+
+      logger.info('Event created successfully in database', {
         eventId: newEvent.id,
         title,
         time,
         date: format(currentDate, 'yyyy-MM-dd'),
-        totalEvents: events.length + 1
+        totalEvents: events.length + 1,
+        userId
       })
-
-      // Then sync with API (in background)
-      fetch('/api/calendar/events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'create',
-          data: newEvent
-        })
-      }).catch(err => logger.error('Failed to sync event to server', { error: err }))
 
       toast.success('Event created successfully!', {
         description: `${title} added to ${format(currentDate, 'MMMM d, yyyy')}`
       })
+      announce(`Event ${title} created successfully`, 'polite')
     } catch (error: any) {
-      logger.error('Failed to create event', { error, title })
+      logger.error('Failed to create event', { error, title, userId })
       toast.error('Failed to create event', {
         description: error.message || 'Please try again later'
       })
+      announce('Error creating event', 'assertive')
     }
   }
 
@@ -428,31 +477,56 @@ export default function CalendarPage() {
   // HANDLER 6: EDIT EVENT (with real state update)
   // ============================================================================
 
-  const handleEditEvent = (eventId: number) => {
+  const handleEditEvent = async (eventId: number) => {
+    if (!userId) {
+      toast.error('Please log in to edit events')
+      return
+    }
+
     const event = events.find(e => e.id === eventId)
     if (!event) return
 
     const newTitle = prompt('Edit event title:', event.title)
     if (!newTitle) {
-      logger.debug('Event edit cancelled', { eventId })
+      logger.debug('Event edit cancelled', { eventId, userId })
       return
     }
 
-    // Update event in state
-    setEvents(events.map(e =>
-      e.id === eventId ? { ...e, title: newTitle } : e
-    ))
+    try {
+      const { updateCalendarEvent } = await import('@/lib/calendar-queries')
 
-    logger.info('Event updated', {
-      eventId,
-      oldTitle: event.title,
-      newTitle,
-      totalEvents: events.length
-    })
+      const { data: updatedEvent, error: updateError } = await updateCalendarEvent(
+        userId,
+        eventId.toString(),
+        { title: newTitle }
+      )
 
-    toast.success('Event updated successfully!', {
-      description: `${newTitle} has been updated`
-    })
+      if (updateError || !updatedEvent) throw new Error(updateError?.message || 'Failed to update event')
+
+      // Update event in state
+      setEvents(events.map(e =>
+        e.id === eventId ? { ...e, title: newTitle } : e
+      ))
+
+      logger.info('Event updated in database', {
+        eventId,
+        oldTitle: event.title,
+        newTitle,
+        totalEvents: events.length,
+        userId
+      })
+
+      toast.success('Event updated successfully!', {
+        description: `${newTitle} has been updated`
+      })
+      announce(`Event updated to ${newTitle}`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to update event', { error, eventId, userId })
+      toast.error('Failed to update event', {
+        description: error.message || 'Please try again later'
+      })
+      announce('Error updating event', 'assertive')
+    }
   }
 
   // ============================================================================
@@ -460,43 +534,47 @@ export default function CalendarPage() {
   // ============================================================================
 
   const handleDeleteEvent = async (eventId: number) => {
+    if (!userId) {
+      toast.error('Please log in to delete events')
+      return
+    }
+
     const event = events.find(e => e.id === eventId)
     if (!event) return
 
     const confirmed = confirm(`Delete "${event.title}"?`)
     if (!confirmed) {
-      logger.debug('Event deletion cancelled', { eventId })
+      logger.debug('Event deletion cancelled', { eventId, userId })
       return
     }
 
     try {
-      // Remove from state immediately (optimistic update)
+      const { deleteCalendarEvent } = await import('@/lib/calendar-queries')
+
+      const { success, error: deleteError } = await deleteCalendarEvent(userId, eventId.toString())
+
+      if (!success || deleteError) throw new Error(deleteError?.message || 'Failed to delete event')
+
+      // Remove from state
       setEvents(events.filter(e => e.id !== eventId))
 
-      logger.info('Event deleted', {
+      logger.info('Event deleted from database', {
         eventId,
         title: event.title,
-        remainingEvents: events.length - 1
+        remainingEvents: events.length - 1,
+        userId
       })
-
-      // Sync with API in background
-      fetch('/api/calendar/events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'delete',
-          eventId: eventId.toString()
-        })
-      }).catch(err => logger.error('Failed to sync deletion to server', { error: err }))
 
       toast.success('Event deleted successfully', {
         description: `${event.title} has been removed`
       })
+      announce(`Event ${event.title} deleted successfully`, 'polite')
     } catch (error: any) {
-      logger.error('Failed to delete event', { error, eventId })
+      logger.error('Failed to delete event', { error, eventId, userId })
       toast.error('Failed to delete event', {
         description: error.message || 'Please try again later'
       })
+      announce('Error deleting event', 'assertive')
     }
   }
 
@@ -606,11 +684,17 @@ export default function CalendarPage() {
   // ============================================================================
 
   const handleCreateRecurring = async () => {
+    if (!userId) {
+      toast.error('Please log in to create recurring events')
+      return
+    }
+
     logger.info('Recurring event creation initiated', {
       currentMonth: format(currentDate, 'MMMM yyyy'),
       view,
       aiMode: aiMode ? 'enabled' : 'disabled',
-      currentEventCount: events.length
+      currentEventCount: events.length,
+      userId
     })
 
     const title = prompt('Enter recurring event title:')
@@ -628,82 +712,71 @@ export default function CalendarPage() {
     const occurrencesStr = prompt('How many occurrences? (1-30):', '4')
     const occurrences = Math.min(Math.max(parseInt(occurrencesStr || '4'), 1), 30)
 
-    logger.info('Creating recurring events', {
+    logger.info('Creating recurring events in database', {
       title,
       frequency,
       occurrences,
-      startDate: format(currentDate, 'yyyy-MM-dd')
+      startDate: format(currentDate, 'yyyy-MM-dd'),
+      userId
     })
 
     try {
-      // Generate multiple events based on frequency
-      const newEvents = []
-      const baseDate = new Date(currentDate)
+      const { createRecurringEvents } = await import('@/lib/calendar-queries')
 
-      for (let i = 0; i < occurrences; i++) {
-        const eventDate = new Date(baseDate)
+      const { data: newEvents, error: createError } = await createRecurringEvents(userId, {
+        title,
+        frequency,
+        occurrences,
+        baseDate: format(currentDate, 'yyyy-MM-dd'),
+        time: '10:00 AM',
+        duration: '1 hour',
+        type: 'meeting',
+        location: 'To be determined'
+      })
 
-        if (frequency.toLowerCase() === 'daily') {
-          eventDate.setDate(baseDate.getDate() + i)
-        } else if (frequency.toLowerCase() === 'weekly') {
-          eventDate.setDate(baseDate.getDate() + (i * 7))
-        } else if (frequency.toLowerCase() === 'monthly') {
-          eventDate.setMonth(baseDate.getMonth() + i)
-        }
+      if (createError || !newEvents) throw new Error(createError?.message || 'Failed to create recurring events')
 
-        newEvents.push({
-          id: events.length + newEvents.length + 1,
-          title: `${title} (${i + 1}/${occurrences})`,
-          date: eventDate,
-          time: '10:00 AM',
-          duration: '1 hour',
-          type: 'meeting' as const,
-          location: 'To be determined',
-          attendees: 1,
-          color: 'purple' as const,
-          description: `Recurring ${frequency} event`,
-          reminder: 15
-        })
-      }
+      // Transform and add to UI state
+      const transformedEvents = newEvents.map((e: any) => ({
+        id: parseInt(e.id) || 0,
+        title: e.title,
+        date: new Date(e.date),
+        time: e.time,
+        duration: e.duration,
+        type: e.type,
+        location: e.location,
+        attendees: e.attendees,
+        color: e.color,
+        description: e.description || '',
+        reminder: e.reminder
+      }))
 
-      // Add all recurring events to state
-      setEvents([...events, ...newEvents])
+      setEvents([...events, ...transformedEvents])
 
-      logger.info('Recurring events created successfully', {
+      logger.info('Recurring events created successfully in database', {
         title,
         frequency,
         occurrencesCreated: newEvents.length,
         totalEvents: events.length + newEvents.length,
-        dateRange: `${format(newEvents[0].date, 'yyyy-MM-dd')} to ${format(newEvents[newEvents.length - 1].date, 'yyyy-MM-dd')}`
+        dateRange: newEvents.length > 0 ? `${newEvents[0].date} to ${newEvents[newEvents.length - 1].date}` : 'N/A',
+        userId
       })
-
-      // Sync with API in background
-      fetch('/api/calendar/events', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'create_recurring',
-          data: {
-            title,
-            frequency,
-            occurrences,
-            events: newEvents
-          }
-        })
-      }).catch(err => logger.error('Failed to sync recurring events to server', { error: err }))
 
       toast.success('Recurring event created!', {
-        description: `Created ${newEvents.length} ${frequency} events starting ${format(newEvents[0].date, 'MMM d')}`
+        description: `Created ${newEvents.length} ${frequency} events starting ${format(new Date(newEvents[0].date), 'MMM d')}`
       })
+      announce(`${newEvents.length} recurring events created successfully`, 'polite')
     } catch (error: any) {
       logger.error('Failed to create recurring event', {
         error: error.message,
         title,
-        frequency
+        frequency,
+        userId
       })
       toast.error('Failed to create recurring event', {
         description: error.message || 'Please try again later'
       })
+      announce('Error creating recurring events', 'assertive')
     }
   }
 
