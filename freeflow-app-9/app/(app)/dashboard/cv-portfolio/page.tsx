@@ -46,11 +46,6 @@ import { createFeatureLogger } from '@/lib/logger'
 
 // CV PORTFOLIO UTILITIES - World-Class A+++ System
 import {
-  MOCK_PROJECTS,
-  MOCK_SKILLS,
-  MOCK_EXPERIENCE,
-  MOCK_EDUCATION,
-  MOCK_CERTIFICATIONS,
   sortProjectsByDate,
   sortProjectsByViews,
   getFeaturedProjects,
