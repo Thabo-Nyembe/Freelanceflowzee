@@ -10,10 +10,8 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
-  MOCK_WORKFLOWS,
-  MOCK_INTEGRATIONS,
-  MOCK_AUTOMATION_STATS,
   formatNumber,
   formatPercentage,
   formatRelativeTime,
@@ -55,12 +53,13 @@ const logger = createFeatureLogger('admin-automation')
 export default function AutomationPage() {
   const router = useRouter()
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // State management
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [workflows, setWorkflows] = useState<Workflow[]>(MOCK_WORKFLOWS)
-  const [integrations, setIntegrations] = useState<Integration[]>(MOCK_INTEGRATIONS)
+  const [workflows, setWorkflows] = useState<Workflow[]>([])
+  const [integrations, setIntegrations] = useState<Integration[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<AutomationStatus | 'all'>('all')
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null)
@@ -91,27 +90,45 @@ export default function AutomationPage() {
   // Load automation data
   useEffect(() => {
     const loadAutomation = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
-        logger.info('Loading automation data')
+        logger.info('Loading automation data', { userId })
 
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const { getWorkflows } = await import('@/lib/automation-queries')
+        const workflowsResult = await getWorkflows(userId)
+
+        setWorkflows(workflowsResult || [])
+        // Note: Integrations will be loaded when integration queries are available
+        setIntegrations([])
 
         setIsLoading(false)
         announce('Automation data loaded successfully', 'polite')
-        logger.info('Automation loaded', { success: true })
+        toast.success('Automation loaded', {
+          description: `${workflowsResult?.length || 0} workflows loaded`
+        })
+        logger.info('Automation loaded', {
+          success: true,
+          workflowCount: workflowsResult?.length || 0
+        })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load automation'
         setError(errorMessage)
         setIsLoading(false)
+        toast.error('Failed to load automation', { description: errorMessage })
         announce('Error loading automation', 'assertive')
         logger.error('Automation load failed', { error: err })
       }
     }
 
     loadAutomation()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce])
 
   // Button 1: Create Workflow
   const handleCreateWorkflow = async () => {
@@ -416,9 +433,6 @@ export default function AutomationPage() {
       })
       logger.info('Automation refresh completed', { success: true })
       announce('Automation refreshed successfully', 'polite')
-
-      setWorkflows([...MOCK_WORKFLOWS])
-      setIntegrations([...MOCK_INTEGRATIONS])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
       toast.error('Refresh Failed', { description: message })
@@ -514,7 +528,7 @@ export default function AutomationPage() {
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
                 <div className="text-sm text-blue-600 mb-1">Active Workflows</div>
                 <div className="text-2xl font-bold text-blue-700">
-                  <NumberFlow value={MOCK_AUTOMATION_STATS.activeWorkflows} />
+                  <NumberFlow value={activeWorkflows} />
                 </div>
                 <div className="text-xs text-gray-600">{workflows.length} total</div>
               </div>
@@ -522,7 +536,7 @@ export default function AutomationPage() {
               <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-100">
                 <div className="text-sm text-green-600 mb-1">Success Rate</div>
                 <div className="text-2xl font-bold text-green-700">
-                  <NumberFlow value={MOCK_AUTOMATION_STATS.successRate} suffix="%" />
+                  <NumberFlow value={workflows.length > 0 ? Math.round((workflows.filter(w => w.status === 'active').length / workflows.length) * 100) : 0} suffix="%" />
                 </div>
                 <div className="text-xs text-green-600 flex items-center gap-1">
                   <TrendingUp className="w-3 h-3" />
