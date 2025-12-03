@@ -6,12 +6,6 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import {
-  MOCK_CAMPAIGNS,
-  MOCK_SUBSCRIBERS,
-  MOCK_SEGMENTS,
-  MOCK_TEMPLATES,
-  MOCK_AUTOMATIONS,
-  MOCK_EMAIL_STATS,
   getCampaignStatusColor,
   getSubscriberStatusColor,
   getCampaignTypeIcon,
@@ -25,6 +19,10 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
+import { createFeatureLogger } from '@/lib/logger'
+import { toast } from 'sonner'
+
+const logger = createFeatureLogger('EmailMarketingPage')
 
 type ViewMode = 'overview' | 'campaigns' | 'subscribers' | 'automation' | 'templates'
 
@@ -35,22 +33,27 @@ export default function EmailMarketingPage() {
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
 
+  // Database state
+  const [campaigns, setCampaigns] = useState<any[]>([])
+  const [subscribers, setSubscribers] = useState<any[]>([])
+  const [stats, setStats] = useState<any>(null)
+
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [filterStatus, setFilterStatus] = useState<CampaignStatus | 'all'>('all')
-  const [campaigns, setCampaigns] = useState<any[]>(MOCK_CAMPAIGNS)
-  const [subscribers, setSubscribers] = useState<any[]>(MOCK_SUBSCRIBERS)
-  const [stats, setStats] = useState<any>(MOCK_EMAIL_STATS)
 
   // A+++ LOAD EMAIL MARKETING DATA
   useEffect(() => {
     const loadEmailMarketingData = async () => {
       if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading email marketing data', { userId })
 
         // Dynamic import for code splitting
         const { getEmailCampaigns, getEmailSubscribers, getEmailMarketingStats } = await import('@/lib/email-marketing-queries')
@@ -66,22 +69,26 @@ export default function EmailMarketingPage() {
           throw new Error('Failed to load email marketing data')
         }
 
-        // Update state with real data if available, otherwise use mock data
-        if (campaignsResult.data && campaignsResult.data.length > 0) {
-          setCampaigns(campaignsResult.data)
-        }
-        if (subscribersResult.data && subscribersResult.data.length > 0) {
-          setSubscribers(subscribersResult.data)
-        }
-        if (statsResult.data) {
-          setStats(statsResult.data)
-        }
+        // Update state with database data
+        setCampaigns(campaignsResult.data || [])
+        setSubscribers(subscribersResult.data || [])
+        setStats(statsResult.data || null)
 
         setIsLoading(false)
+        toast.success('Email marketing loaded', {
+          description: `${campaignsResult.data?.length || 0} campaigns, ${subscribersResult.data?.length || 0} subscribers`
+        })
+        logger.info('Email marketing data loaded successfully', {
+          campaignsCount: campaignsResult.data?.length,
+          subscribersCount: subscribersResult.data?.length
+        })
         announce('Email marketing data loaded successfully', 'polite')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load email marketing data')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load email marketing data'
+        setError(errorMessage)
         setIsLoading(false)
+        logger.error('Failed to load email marketing data', { error: errorMessage, userId })
+        toast.error('Failed to load email marketing', { description: errorMessage })
         announce('Error loading email marketing data', 'assertive')
       }
     }
@@ -96,7 +103,6 @@ export default function EmailMarketingPage() {
   const handleCreateCampaign = () => {
     announce('Switched to campaign creation view', 'polite')
     // TODO: Open campaign creation modal or navigate to creation page
-    const { toast } = require('sonner')
     toast.info('Campaign creation coming soon', {
       description: 'Full email campaign builder in development'
     })
@@ -160,7 +166,6 @@ export default function EmailMarketingPage() {
 
   const handleViewReport = (campaign: any) => {
     announce(`Viewing report for campaign ${campaign.name}`, 'polite')
-    const { toast } = require('sonner')
     toast.info('Campaign analytics', {
       description: `Open Rate: ${campaign.openRate || campaign.open_rate}% | Click Rate: ${campaign.clickRate || campaign.click_rate}%`
     })
@@ -242,7 +247,6 @@ export default function EmailMarketingPage() {
 
   const handleAddSubscriber = () => {
     announce('Opening subscriber creation form', 'polite')
-    const { toast } = require('sonner')
     toast.info('Add subscriber', {
       description: 'Subscriber management form coming soon'
     })
@@ -250,7 +254,6 @@ export default function EmailMarketingPage() {
 
   const handleCreateAutomation = () => {
     announce('Opening automation builder', 'polite')
-    const { toast } = require('sonner')
     toast.info('Automation builder', {
       description: 'Advanced email automation workflows coming soon'
     })
@@ -258,7 +261,6 @@ export default function EmailMarketingPage() {
 
   const handleCreateTemplate = () => {
     announce('Opening template builder', 'polite')
-    const { toast } = require('sonner')
     toast.info('Template builder', {
       description: 'Email template editor coming soon'
     })
@@ -266,7 +268,6 @@ export default function EmailMarketingPage() {
 
   const handleUseTemplate = (template: any) => {
     announce(`Using template: ${template.name}`, 'polite')
-    const { toast } = require('sonner')
     toast.success('Template selected', {
       description: `Starting campaign with ${template.name}`
     })
@@ -275,7 +276,6 @@ export default function EmailMarketingPage() {
 
   const handlePreviewTemplate = (template: any) => {
     announce(`Previewing template: ${template.name}`, 'polite')
-    const { toast } = require('sonner')
     toast.info('Template preview', {
       description: `${template.name} - ${template.category}`
     })
@@ -303,13 +303,13 @@ export default function EmailMarketingPage() {
               <div className="flex-1">
                 <div className="text-sm text-muted-foreground mb-1">Total Subscribers</div>
                 <div className="text-3xl font-bold text-blue-500">
-                  {MOCK_EMAIL_STATS.totalSubscribers.toLocaleString()}
+                  {(stats?.totalSubscribers || 0).toLocaleString()}
                 </div>
               </div>
               <div className="text-2xl">👥</div>
             </div>
             <div className="text-xs text-green-500">
-              +{MOCK_EMAIL_STATS.newSubscribersThisMonth} this month
+              +{stats?.newSubscribersThisMonth || 0} this month
             </div>
           </div>
         </LiquidGlassCard>
@@ -320,7 +320,7 @@ export default function EmailMarketingPage() {
               <div className="flex-1">
                 <div className="text-sm text-muted-foreground mb-1">Avg Open Rate</div>
                 <div className="text-3xl font-bold text-green-500">
-                  {formatPercentage(MOCK_EMAIL_STATS.averageOpenRate)}
+                  {formatPercentage(stats?.averageOpenRate || 0)}
                 </div>
               </div>
               <div className="text-2xl">📬</div>
@@ -337,7 +337,7 @@ export default function EmailMarketingPage() {
               <div className="flex-1">
                 <div className="text-sm text-muted-foreground mb-1">Avg Click Rate</div>
                 <div className="text-3xl font-bold text-purple-500">
-                  {formatPercentage(MOCK_EMAIL_STATS.averageClickRate)}
+                  {formatPercentage(stats?.averageClickRate || 0)}
                 </div>
               </div>
               <div className="text-2xl">🖱️</div>
@@ -354,7 +354,7 @@ export default function EmailMarketingPage() {
               <div className="flex-1">
                 <div className="text-sm text-muted-foreground mb-1">Revenue This Month</div>
                 <div className="text-3xl font-bold text-orange-500">
-                  ${(MOCK_EMAIL_STATS.revenueThisMonth / 1000).toFixed(0)}K
+                  ${((stats?.revenueThisMonth || 0) / 1000).toFixed(0)}K
                 </div>
               </div>
               <div className="text-2xl">💰</div>
@@ -371,8 +371,8 @@ export default function EmailMarketingPage() {
           <div className="p-6">
             <h3 className="text-lg font-semibold mb-6">Subscriber Growth</h3>
             <div className="h-64 flex items-end justify-between gap-2">
-              {MOCK_EMAIL_STATS.subscriberGrowth.map((data, index) => {
-                const maxSubs = Math.max(...MOCK_EMAIL_STATS.subscriberGrowth.map(d => d.subscribers))
+              {(stats?.subscriberGrowth || []).map((data, index) => {
+                const maxSubs = Math.max(...(stats?.subscriberGrowth || []).map(d => d.subscribers))
                 const height = (data.subscribers / maxSubs) * 100
                 return (
                   <div key={index} className="flex-1 flex flex-col items-center gap-2">
@@ -399,7 +399,7 @@ export default function EmailMarketingPage() {
           <div className="p-6">
             <h3 className="text-lg font-semibold mb-6">Top Performing Campaigns</h3>
             <div className="space-y-4">
-              {MOCK_EMAIL_STATS.topPerformingCampaigns.map((campaign, index) => (
+              {(stats?.topPerformingCampaigns || []).map((campaign, index) => (
                 <div key={campaign.campaignId} className="flex items-center gap-4">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
                     {index + 1}
