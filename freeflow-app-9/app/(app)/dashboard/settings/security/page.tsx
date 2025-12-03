@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -11,34 +11,100 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Shield, AlertCircle, Download, Key, Eye, EyeOff } from 'lucide-react'
 import { SecuritySettings, defaultSecurity, defaultProfile } from '@/lib/settings-utils'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
 
 const logger = createFeatureLogger('Settings:Security')
 
 export default function SecurityPage() {
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [security, setSecurity] = useState<SecuritySettings>(defaultSecurity)
   const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  const handleEnable2FA = () => {
-    if (!security.twoFactorAuth) {
-      logger.info('Two-Factor Authentication enabled', {
-        previousStatus: security.twoFactorAuth
-      })
-
-      setSecurity({ ...security, twoFactorAuth: true })
-
-      toast.info('Two-Factor Authentication Enabled', {
-        description: 'Setup: Scan QR code with authenticator app, enter code to verify, save backup codes'
-      })
-    } else {
-      if (confirm('⚠️ Disable Two-Factor Authentication?\n\nThis will reduce your account security.')) {
-        logger.info('Two-Factor Authentication disabled')
-
-        setSecurity({ ...security, twoFactorAuth: false })
-
-        toast.success('Two-Factor Authentication Disabled', {
-          description: 'Your account security has been reduced'
-        })
+  useEffect(() => {
+    const loadSecuritySettings = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setLoading(false)
+        return
       }
+
+      try {
+        setLoading(true)
+        logger.info('Loading security settings', { userId })
+
+        // Dynamic import for code splitting
+        const { getSecuritySettings } = await import('@/lib/security-settings-queries')
+
+        const { data, error } = await getSecuritySettings(userId)
+        if (error) throw new Error(error.message)
+
+        if (data) {
+          const mappedSettings: SecuritySettings = {
+            twoFactorAuth: data.two_factor_enabled || false,
+            loginAlerts: data.login_alerts_enabled || false,
+            sessionTimeout: data.session_timeout || '8h',
+            biometricAuth: data.biometric_enabled || false
+          }
+          setSecurity(mappedSettings)
+        }
+
+        logger.info('Security settings loaded', { userId })
+        announce('Security settings loaded successfully', 'polite')
+      } catch (error) {
+        logger.error('Failed to load security settings', { error, userId })
+        toast.error('Failed to load security settings')
+        announce('Error loading security settings', 'assertive')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadSecuritySettings()
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleEnable2FA = async () => {
+    if (!userId) {
+      toast.error('Please log in')
+      announce('Authentication required', 'assertive')
+      return
+    }
+
+    try {
+      const newValue = !security.twoFactorAuth
+
+      if (newValue) {
+        logger.info('Two-Factor Authentication enabled', { userId })
+        setSecurity({ ...security, twoFactorAuth: true })
+
+        const { updateSecuritySettings } = await import('@/lib/security-settings-queries')
+        await updateSecuritySettings(userId, { two_factor_enabled: true })
+
+        toast.info('Two-Factor Authentication Enabled', {
+          description: 'Setup: Scan QR code with authenticator app, enter code to verify, save backup codes'
+        })
+        announce('Two-Factor Authentication enabled', 'polite')
+      } else {
+        if (confirm('⚠️ Disable Two-Factor Authentication?\n\nThis will reduce your account security.')) {
+          logger.info('Two-Factor Authentication disabled', { userId })
+          setSecurity({ ...security, twoFactorAuth: false })
+
+          const { updateSecuritySettings } = await import('@/lib/security-settings-queries')
+          await updateSecuritySettings(userId, { two_factor_enabled: false })
+
+          toast.success('Two-Factor Authentication Disabled', {
+            description: 'Your account security has been reduced'
+          })
+          announce('Two-Factor Authentication disabled', 'assertive')
+        }
+      }
+    } catch (error) {
+      logger.error('Failed to update 2FA setting', { error, userId })
+      toast.error('Failed to update Two-Factor Authentication')
+      announce('Error updating Two-Factor Authentication', 'assertive')
     }
   }
 
@@ -117,9 +183,27 @@ If you lose access to your authenticator app, you can use these codes to sign in
               <Switch
                 id="login-alerts"
                 checked={security.loginAlerts}
-                onCheckedChange={(checked) =>
-                  setSecurity({ ...security, loginAlerts: checked })
-                }
+                disabled={loading}
+                onCheckedChange={async (checked) => {
+                  if (!userId) {
+                    toast.error('Please log in')
+                    return
+                  }
+
+                  try {
+                    setSecurity({ ...security, loginAlerts: checked })
+                    logger.info('Login alerts toggled', { checked, userId })
+
+                    const { updateSecuritySettings } = await import('@/lib/security-settings-queries')
+                    await updateSecuritySettings(userId, { login_alerts_enabled: checked })
+
+                    toast.success(`Login Alerts ${checked ? 'Enabled' : 'Disabled'}`)
+                    announce(`Login alerts ${checked ? 'enabled' : 'disabled'}`, 'polite')
+                  } catch (error) {
+                    logger.error('Failed to update login alerts', { error, userId })
+                    toast.error('Failed to update login alerts')
+                  }
+                }}
               />
             </div>
 
@@ -127,9 +211,27 @@ If you lose access to your authenticator app, you can use these codes to sign in
               <Label htmlFor="session-timeout">Session Timeout</Label>
               <Select
                 value={security.sessionTimeout}
-                onValueChange={(value) =>
-                  setSecurity({ ...security, sessionTimeout: value })
-                }
+                disabled={loading}
+                onValueChange={async (value) => {
+                  if (!userId) {
+                    toast.error('Please log in')
+                    return
+                  }
+
+                  try {
+                    setSecurity({ ...security, sessionTimeout: value })
+                    logger.info('Session timeout updated', { value, userId })
+
+                    const { updateSecuritySettings } = await import('@/lib/security-settings-queries')
+                    await updateSecuritySettings(userId, { session_timeout: value })
+
+                    toast.success('Session Timeout Updated')
+                    announce('Session timeout updated', 'polite')
+                  } catch (error) {
+                    logger.error('Failed to update session timeout', { error, userId })
+                    toast.error('Failed to update session timeout')
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -213,9 +315,27 @@ If you lose access to your authenticator app, you can use these codes to sign in
               <Switch
                 id="biometric"
                 checked={security.biometricAuth}
-                onCheckedChange={(checked) =>
-                  setSecurity({ ...security, biometricAuth: checked })
-                }
+                disabled={loading}
+                onCheckedChange={async (checked) => {
+                  if (!userId) {
+                    toast.error('Please log in')
+                    return
+                  }
+
+                  try {
+                    setSecurity({ ...security, biometricAuth: checked })
+                    logger.info('Biometric authentication toggled', { checked, userId })
+
+                    const { updateSecuritySettings } = await import('@/lib/security-settings-queries')
+                    await updateSecuritySettings(userId, { biometric_enabled: checked })
+
+                    toast.success(`Biometric Authentication ${checked ? 'Enabled' : 'Disabled'}`)
+                    announce(`Biometric authentication ${checked ? 'enabled' : 'disabled'}`, 'polite')
+                  } catch (error) {
+                    logger.error('Failed to update biometric auth', { error, userId })
+                    toast.error('Failed to update biometric authentication')
+                  }
+                }}
               />
             </div>
           </CardContent>
