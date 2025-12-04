@@ -11,6 +11,7 @@ import { TourManager } from '@/components/onboarding/tour-manager'
 import { platformTours } from '@/lib/tours/platform-tours'
 import { ROUTE_LABELS } from '@/lib/route-utils'
 import { ErrorBoundary } from '@/components/error-boundary'
+import { SessionTimeoutProvider } from '@/lib/auth/session-timeout'
 
 interface DashboardLayoutClientProps {
   children: React.ReactNode
@@ -21,9 +22,16 @@ export default function DashboardLayoutClient({
   children, user: _user
 }: DashboardLayoutClientProps) {
   return (
-    <div className="flex h-screen overflow-hidden bg-white">
-      {/* Mobile Navigation */}
-      <MobileAdminNav />
+    <SessionTimeoutProvider
+      config={{
+        timeout: 30 * 60 * 1000, // 30 minutes
+        warningTime: 2 * 60 * 1000, // 2 minutes warning
+        enabled: true,
+      }}
+    >
+      <div className="flex h-screen overflow-hidden bg-white">
+        {/* Mobile Navigation */}
+        <MobileAdminNav />
 
       {/* Desktop Sidebar */}
       <div className="hidden lg:block w-64 flex-shrink-0">
@@ -73,7 +81,8 @@ export default function DashboardLayoutClient({
           // TODO: Track completion analytics
         }}
       />
-    </div>
+      </div>
+    </SessionTimeoutProvider>
   )
 }
 
