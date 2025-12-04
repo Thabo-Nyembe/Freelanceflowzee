@@ -4,8 +4,11 @@
  * Supports: Google, GitHub, LinkedIn, Apple, Figma, GitLab, Notion, Zoom, Slack
  */
 
+-- Drop existing table if it exists (for clean re-run)
+DROP TABLE IF EXISTS user_profiles CASCADE;
+
 -- Create user_profiles table
-CREATE TABLE IF NOT EXISTS user_profiles (
+CREATE TABLE user_profiles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name TEXT,
@@ -18,10 +21,10 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 );
 
 -- Create indexes for performance
-CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_profiles_provider ON user_profiles(provider);
-CREATE INDEX IF NOT EXISTS idx_user_profiles_provider_id ON user_profiles(provider_id);
-CREATE INDEX IF NOT EXISTS idx_user_profiles_metadata ON user_profiles USING GIN(metadata);
+CREATE INDEX idx_user_profiles_user_id ON user_profiles(user_id);
+CREATE INDEX idx_user_profiles_provider ON user_profiles(provider);
+CREATE INDEX idx_user_profiles_provider_id ON user_profiles(provider_id);
+CREATE INDEX idx_user_profiles_metadata ON user_profiles USING GIN(metadata);
 
 -- Enable RLS (Row Level Security)
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
