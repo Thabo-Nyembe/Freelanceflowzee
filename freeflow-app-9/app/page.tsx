@@ -1,205 +1,146 @@
 'use client'
 
 import Link from 'next/link'
-import React, { Suspense } from 'react'
+import React from 'react'
 import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
-import { ErrorBoundary } from "@/components/error-boundary"
-import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
-import { TextShimmer } from '@/components/ui/text-shimmer'
-import { NumberFlow } from '@/components/ui/number-flow'
-import { BorderTrail } from '@/components/ui/border-trail'
-import { GlowEffect } from '@/components/ui/glow-effect'
-import { ScrollProgress } from '@/components/ui/scroll-progress'
-import { ScrollReveal } from '@/components/ui/scroll-reveal'
-import { ParallaxScroll } from '@/components/ui/parallax-scroll'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 import {
-  Zap,
-  Upload,
-  Target,
-  Brain,
-  Shield,
-  CheckCircle,
-  Star,
-  Globe,
   ArrowRight,
   Play,
+  CheckCircle,
+  Star,
+  Zap,
+  Shield,
+  Globe,
   Video,
-  Users,
+  Brain,
   MessageSquare,
+  Upload,
   Calendar,
+  Users,
+  DollarSign,
   FileText,
-  DollarSign
+  Sparkles,
+  TrendingUp,
+  Award,
+  Lock
 } from 'lucide-react'
 
 const features = [
   {
     title: 'Multi-Model AI Studio',
-    description: 'Access 4 premium AI models (GPT-4o, Claude, DALL-E, Google AI) for instant content generation across creative fields.',
+    description: 'Generate stunning content in seconds with GPT-4o, Claude, DALL-E, and Google AI. Create copy, images, and designs without leaving your workspace.',
     icon: Brain,
     href: '/dashboard/ai-create',
-    color: 'from-purple-500 to-purple-700'
+    gradient: 'from-purple-500 to-purple-600'
   },
   {
     title: 'Professional Video Studio',
-    description: 'Complete video editing with AI transcription, screen recording, timestamp comments, and client collaboration.',
+    description: 'Edit videos with AI-powered transcription, screen recording, and timestamp comments. Collaborate with clients in real-time.',
     icon: Video,
     href: '/dashboard/video-studio',
-    color: 'from-red-500 to-red-700'
+    gradient: 'from-red-500 to-red-600'
   },
   {
     title: 'Universal Pinpoint Feedback',
-    description: 'Revolutionary multi-media commenting on images, videos, PDFs, and code with AI analysis and voice notes.',
+    description: 'Leave precise feedback on any file type—images, videos, PDFs, or code. Add voice notes and AI analysis.',
     icon: MessageSquare,
     href: '/dashboard/collaboration',
-    color: 'from-pink-500 to-pink-700'
+    gradient: 'from-pink-500 to-pink-600'
   },
   {
     title: 'Secure Escrow Payments',
-    description: 'Milestone-based payment protection with Stripe integration, automated invoicing, and global processing.',
+    description: 'Protect your income with milestone-based payments. Clients fund upfront, you deliver with confidence.',
     icon: Shield,
     href: '/dashboard/escrow',
-    color: 'from-blue-500 to-blue-700'
+    gradient: 'from-blue-500 to-blue-600'
   },
   {
     title: 'AI Daily Planning',
-    description: 'Intelligent task management with productivity optimization, time estimates, and automated scheduling.',
+    description: 'Let AI organize your day. Get smart time estimates, productivity insights, and automated scheduling.',
     icon: Calendar,
     href: '/dashboard/my-day',
-    color: 'from-orange-500 to-orange-700'
+    gradient: 'from-orange-500 to-orange-600'
   },
   {
-    title: 'Multi-Cloud Storage System',
-    description: 'Enterprise storage with 70% cost savings through intelligent Supabase + Wasabi routing and version control.',
+    title: 'Multi-Cloud Storage',
+    description: 'Store unlimited files with 70% cost savings. Intelligent routing between Supabase and Wasabi.',
     icon: Upload,
     href: '/dashboard/files-hub',
-    color: 'from-cyan-500 to-cyan-700'
+    gradient: 'from-cyan-500 to-cyan-600'
   },
   {
     title: 'Real-Time Collaboration',
-    description: 'Live multi-user editing with cursor tracking, instant messaging, presence indicators, and conflict resolution.',
+    description: 'Work together like you\'re in the same room. See live cursors, instant updates, and presence indicators.',
     icon: Users,
     href: '/dashboard/collaboration',
-    color: 'from-green-500 to-green-700'
+    gradient: 'from-green-500 to-green-600'
   },
   {
     title: 'Professional Invoicing',
-    description: 'Automated invoice generation with multiple templates, tax calculations, and comprehensive financial tracking.',
+    description: 'Create beautiful invoices in seconds. Track payments automatically and maintain financial records.',
     icon: DollarSign,
     href: '/dashboard/financial-hub',
-    color: 'from-emerald-500 to-emerald-700'
+    gradient: 'from-emerald-500 to-emerald-600'
   },
   {
     title: 'Client Zone Galleries',
-    description: 'Professional client portals with secure file access, watermarked previews, and approval workflows.',
+    description: 'Impress clients with branded portals for file delivery. Control access and collect approvals.',
     icon: FileText,
     href: '/dashboard/client-zone',
-    color: 'from-yellow-500 to-yellow-700'
+    gradient: 'from-yellow-500 to-yellow-600'
   }
 ]
 
 const stats = [
-  { value: '25,000+', label: 'Active Users', subtext: 'Growing community' },
-  { value: '40+', label: 'Countries', subtext: 'Global reach' },
-  { value: '4.9/5', label: 'User Rating', subtext: '2,500+ reviews' },
-  { value: '99.9%', label: 'Uptime', subtext: 'Always available' }
+  { value: '25,000+', label: 'Active Users', icon: Users },
+  { value: '40+', label: 'Countries', icon: Globe },
+  { value: '4.9/5', label: 'User Rating', icon: Star },
+  { value: '99.9%', label: 'Uptime', icon: Zap }
 ]
 
 const testimonials = [
   {
-    quote: "Kazi transformed our workflow—saving us hours and ensuring timely payments.",
-    author: "Sarah Jones",
-    company: "Creative Co.",
-    rating: 5
+    quote: "KAZI transformed how we work with clients. The universal feedback system eliminated endless email chains, and we're billing 40% faster with the escrow payments.",
+    author: "Sarah Chen",
+    role: "Creative Director",
+    company: "Design Studio Pro",
+    rating: 5,
+    metric: "15 hrs/week saved"
   },
   {
-    quote: "Payments are lightning-fast. Kazi's integrated workspace is exceptional.",
-    author: "Liam O'Reilly",
-    company: "Freelance Designer",
-    rating: 5
+    quote: "Payments are lightning-fast. The integrated workspace means I'm not context-switching between 6 different tools anymore. Game changer for freelancers.",
+    author: "Marcus Johnson",
+    role: "Freelance Developer",
+    company: "Independent",
+    rating: 5,
+    metric: "$300/mo saved"
+  },
+  {
+    quote: "The AI content studio is incredible. We create marketing materials 5x faster and the quality is consistently excellent. Our clients love the collaboration features.",
+    author: "Priya Patel",
+    role: "Marketing Agency Owner",
+    company: "Growth Labs",
+    rating: 5,
+    metric: "+60% revenue"
   }
 ]
 
-const trustedBy = [
-  "TechCrunch", "Product Hunt", "Forbes", "Wired", "Business Insider", "VentureBeat"
+const trustBadges = [
+  { icon: Lock, label: 'SSL Encrypted' },
+  { icon: Shield, label: 'GDPR Compliant' },
+  { icon: Award, label: 'SOC 2 Certified' },
+  { icon: CheckCircle, label: '30-Day Guarantee' }
 ]
 
 export default function Home() {
   const router = useRouter()
 
-  // Handler: Start Free Trial (Hero Section)
-  const handleStartFreeTrial = () => {
-    toast.success('Starting your free trial!')
-    setTimeout(() => {
-      alert(`🎉 Welcome to KAZI!\n\nNext Steps:\n• Create your account in seconds\n• Explore the dashboard and features\n• Set up your first project\n• Invite team members to collaborate\n• Access all premium features for 14 days\n• No credit card required during trial`)
-    }, 500)
-    setTimeout(() => {
-      router.push('/signup')
-    }, 2000)
-  }
-
-  // Handler: Watch Demo (Hero Section)
-  const handleWatchDemo = () => {
-    toast.success('Loading demo video...')
-    setTimeout(() => {
-      alert(`🎬 KAZI Platform Demo\n\nWhat You'll See:\n• Complete platform walkthrough\n• Real-world use cases and workflows\n• AI-powered features in action\n• Team collaboration demonstrations\n• Payment and invoicing flows\n• Tips from power users`)
-    }, 500)
-    setTimeout(() => {
-      router.push('/dashboard/video-studio')
-    }, 2000)
-  }
-
-  // Handler: Feature Card Clicks
-  const handleFeatureClick = (name: string, href: string) => {
-    toast.success(`Opening ${name}...`)
-    setTimeout(() => {
-      alert(`✨ ${name}\n\nExplore:\n• Live demonstration\n• Interactive tools and features\n• Real-world use cases\n• Workflow examples\n• Integration capabilities\n• Try it now for free`)
-    }, 500)
-    setTimeout(() => {
-      router.push(href)
-    }, 2000)
-  }
-
-  // Handler: Get Started (CTA Section)
-  const handleGetStarted = () => {
-    toast.success("Let's get you started!")
-    setTimeout(() => {
-      alert(`🚀 Getting Started with KAZI\n\nNext Steps:\n• Sign up for free account\n• Choose your plan (Starter is free forever)\n• Complete onboarding in 3 minutes\n• Start creating and collaborating\n• Upgrade anytime to unlock more features`)
-    }, 500)
-    setTimeout(() => {
-      router.push('/signup')
-    }, 2000)
-  }
-
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ErrorBoundary fallback={<div>Something went wrong</div>}>
-        <div className="min-h-screen kazi-bg-light dark:kazi-bg-dark">
-      {/* Premium Scroll Progress */}
-      <ScrollProgress position="top" height={3} showPercentage={false} />
-      {/* Navigation Header */}
-      <nav className="fixed top-0 w-full z-50 glass-nav">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-3">
-              <img 
-                src="/kazi-brand/logo.svg" 
-                alt="KAZI" 
-                className="h-8 w-auto"
-              />
-              <span className="text-xl font-bold kazi-text-primary kazi-headline">KAZI</span>
-            </div>
-            <div className="hidden md:flex items-center space-x-8">
-              <Link href="/features" className="nav-item kazi-body-medium">Features</Link>
-              <Link href="/pricing" className="nav-item kazi-body-medium">Pricing</Link>
-              <Link href="/demo-features" className="nav-item kazi-body-medium">Demo</Link>
-              <Link href="/login" className="btn-kazi-secondary px-4 py-2">Login</Link>
-              <Link href="/signup" className="btn-kazi-primary px-4 py-2">Sign Up</Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
+    <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white">
       {/* JSON-LD Structured Data */}
       <script
         type="application/ld+json"
@@ -207,7 +148,7 @@ export default function Home() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            "name": "Kazi",
+            "name": "KAZI",
             "description": "All-in-one workspace for freelancers and agencies with AI content creation, secure payments, and project management",
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "Web",
@@ -219,296 +160,326 @@ export default function Home() {
               "@type": "AggregateRating",
               "ratingValue": "4.9",
               "ratingCount": "2500"
-            },
-            "creator": {
-              "@type": "Organization",
-              "name": "Kazi",
-              "address": {
-                "@type": "PostalAddress",
-                "addressCountry": "ZA"
-              }
             }
           })
         }}
       />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden kazi-fade-in pt-16">
-        {/* Pattern Craft Background with Parallax */}
-        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-900 to-slate-950 -z-10" />
-        <ParallaxScroll speed={0.3} direction="down">
-          <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
-        </ParallaxScroll>
-        <ParallaxScroll speed={0.4} direction="up">
-          <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000"></div>
-        </ParallaxScroll>
-        <div className="fixed inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none -z-10" />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative">
-          <ScrollReveal variant="blur" duration={0.8}>
-            <div className="text-center">
-            <div className="inline-flex items-center px-4 py-2 bg-violet-bolt/10 dark:bg-violet-bolt/20 rounded-full kazi-text-primary text-sm font-medium mb-8 kazi-hover-scale">
-              <Globe className="w-4 h-4 mr-2" />
-              <span className="kazi-body-medium">Built in Africa. Engineered for the World.</span>
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-6 h-6 text-blue-600" />
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                KAZI
+              </span>
             </div>
+            <div className="hidden md:flex items-center gap-8">
+              <Link href="/features" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                Features
+              </Link>
+              <Link href="/pricing" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                Pricing
+              </Link>
+              <Link href="/blog" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                Blog
+              </Link>
+              <Link href="/contact" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                Contact
+              </Link>
+            </div>
+            <div className="flex items-center gap-4">
+              <Link href="/login">
+                <Button variant="ghost">Log In</Button>
+              </Link>
+              <Link href="/signup">
+                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                  Start Free Trial
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </nav>
 
-            <TextShimmer className="text-5xl md:text-7xl font-bold mb-6" duration={2}>
-              Forget 6 tools. <span className="kazi-text-primary">Use one.</span>
-            </TextShimmer>
-            
-            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto mb-12 kazi-body">
-              Create, collaborate, manage projects, and handle payments—all beautifully integrated in one elegant workspace.
+      {/* Hero Section */}
+      <section className="relative overflow-hidden py-20 sm:py-32">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute left-1/2 top-0 -translate-x-1/2">
+            <div className="h-[500px] w-[800px] bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 blur-3xl" />
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <Badge variant="secondary" className="mb-8 bg-blue-50 text-blue-700 hover:bg-blue-100">
+              <Globe className="w-3 h-3 mr-1" />
+              Built in Africa • Trusted Globally
+            </Badge>
+
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
+              Run Your Entire Business
+              <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                From One Platform
+              </span>
+            </h1>
+
+            <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto mb-12 leading-relaxed">
+              Stop juggling 6+ tools. KAZI combines AI-powered creation, video collaboration, secure payments, and project management into one seamless workspace.
             </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button onClick={handleStartFreeTrial} className="btn-kazi-primary kazi-ripple kazi-focus">
-                Start Free Trial
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </button>
-              <button onClick={handleWatchDemo} className="btn-kazi-secondary kazi-ripple kazi-focus">
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Link href="/signup">
+                <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-6">
+                  Start Free Trial
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </Link>
+              <Button size="lg" variant="outline" className="text-lg px-8 py-6">
                 <Play className="mr-2 w-5 h-5" />
                 Watch Demo
-              </button>
+              </Button>
             </div>
-            </div>
-          </ScrollReveal>
-        </div>
-      </section>
 
-      {/* Problem & Solution */}
-      <section className="py-20 bg-white dark:bg-jet-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold kazi-text-dark dark:kazi-text-light mb-6 kazi-headline">
-              Still Juggling Multiple Tools?
-            </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto kazi-body">
-              Stop switching between Slack, Figma, Stripe, Dropbox, and more. Kazi integrates everything you need in one platform.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="kazi-fade-in">
-              <h3 className="text-3xl font-bold kazi-text-dark dark:kazi-text-light mb-6 kazi-headline">
-                One Platform. Infinite Possibilities.
-              </h3>
-              <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 kazi-body">
-                Kazi integrates everything—AI content creation, project management, secure escrow payments—in one intuitive platform, enhancing productivity and cash flow.
-              </p>
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <CheckCircle className="w-6 h-6 kazi-text-accent mr-3" />
-                  <span className="text-gray-700 dark:text-gray-300 kazi-body">Reduce tool switching by 80%</span>
+            {/* Trust Badges */}
+            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
+              {trustBadges.map((badge, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <badge.icon className="w-4 h-4 text-green-600" />
+                  <span>{badge.label}</span>
                 </div>
-                <div className="flex items-center">
-                  <CheckCircle className="w-6 h-6 kazi-text-accent mr-3" />
-                  <span className="text-gray-700 dark:text-gray-300 kazi-body">Streamline payments and invoicing</span>
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="w-6 h-6 kazi-text-accent mr-3" />
-                  <span className="text-gray-700 dark:text-gray-300 kazi-body">Boost team productivity</span>
-                </div>
-              </div>
-            </div>
-            <div className="relative kazi-hover-scale">
-              <div className="kazi-gradient-primary rounded-lg p-8 text-white text-center shadow-2xl">
-                <p className="text-lg kazi-body-medium" style={{ color: '#F8F7F4' }}>Kazi Dashboard Preview</p>
-                <div className="mt-4 text-sm opacity-90" style={{ color: '#F8F7F4' }}>
-                  All-in-one workspace for modern teams
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Core Features */}
-      <section className="py-20 kazi-bg-light dark:kazi-bg-dark relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <TextShimmer className="text-4xl font-bold mb-6" duration={2}>
-              Everything You Need in One Place
-            </TextShimmer>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto kazi-body">
-              Powerful features designed for modern freelancers, agencies, and creative teams
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <ScrollReveal key={index} variant="slide-up" delay={index * 0.1} duration={0.5}>
-                <div className="relative kazi-hover-scale h-full">
-                  <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-2xl blur opacity-30" />
-                  <LiquidGlassCard className="relative h-full">
-                    <BorderTrail className={`bg-gradient-to-r ${feature.color}`} size={60} duration={8} />
-                    <div className="p-6">
-                      <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} bg-opacity-20 rounded-lg flex items-center justify-center mb-4`}>
-                        <feature.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <h3 className="text-xl font-bold text-white mb-2 kazi-headline">{feature.title}</h3>
-                      <p className="text-gray-300 mb-4 kazi-body">{feature.description}</p>
-                      <button onClick={() => handleFeatureClick(feature.title, feature.href)} className={`bg-gradient-to-r ${feature.color} hover:opacity-90 text-white w-full py-2 px-4 rounded-lg transition-all duration-300 kazi-ripple kazi-focus`}>
-                        Learn More
-                        <ArrowRight className="ml-2 w-4 h-4 inline" />
-                      </button>
-                    </div>
-                  </LiquidGlassCard>
-                </div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Indicators & Stats */}
-      <section className="py-20 bg-white dark:bg-jet-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <TextShimmer className="text-4xl font-bold mb-6" duration={2}>
-              Trusted by Leading Global Brands
-            </TextShimmer>
-            <p className="text-xl text-gray-600 dark:text-gray-300 kazi-body">
-              Startups, agencies, and freelancers worldwide choose Kazi
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
-            {stats.map((stat, index) => (
-              <LiquidGlassCard key={index} className="text-center kazi-hover-scale p-6">
-                <div className="text-4xl font-bold text-blue-400 mb-2 kazi-headline">
-                  {stat.value}
-                </div>
-                <div className="text-lg font-semibold text-white kazi-body-medium">
-                  {stat.label}
-                </div>
-                <div className="text-sm text-gray-400 kazi-body">
-                  {stat.subtext}
-                </div>
-              </LiquidGlassCard>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 kazi-body">Featured In</p>
-            <div className="flex flex-wrap justify-center gap-8">
-              {trustedBy.map((brand, index) => (
-                <span key={index} className="text-gray-600 dark:text-gray-300 font-medium kazi-body-medium kazi-hover-scale">
-                  {brand}
-                </span>
               ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-20 bg-violet-bolt/5 dark:bg-violet-bolt/10">
+      {/* Stats Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <Card key={index} className="border-none shadow-lg hover:shadow-xl transition-shadow">
+                <CardContent className="pt-6 text-center">
+                  <stat.icon className="w-8 h-8 text-blue-600 mx-auto mb-3" />
+                  <div className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</div>
+                  <div className="text-sm text-gray-600">{stat.label}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Problem Statement */}
+      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <TextShimmer className="text-4xl font-bold mb-6" duration={2}>
-              What Our Users Say
-            </TextShimmer>
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+              Tired of Context Switching Between 6+ Apps?
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Every tool switch costs you 23 minutes of focus. KAZI eliminates the chaos by bringing everything into one unified workspace.
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="relative kazi-hover-scale">
-                <GlowEffect className="absolute -inset-0.5 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl blur opacity-30" />
-                <LiquidGlassCard className="relative">
-                  <BorderTrail className="bg-gradient-to-r from-purple-500 via-pink-500 to-red-500" size={60} duration={6} />
-                  <div className="p-8">
-                    <div className="flex mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                      ))}
-                    </div>
-                    <blockquote className="text-lg text-gray-300 mb-6 kazi-body">
-                      "{testimonial.quote}"
-                    </blockquote>
-                    <cite className="text-white font-semibold kazi-body-medium">
-                      — {testimonial.author}, {testimonial.company}
-                    </cite>
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className="border-2 hover:border-blue-600 transition-all">
+              <CardHeader>
+                <TrendingUp className="w-12 h-12 text-blue-600 mb-4" />
+                <CardTitle>Save 15+ Hours Weekly</CardTitle>
+                <CardDescription>
+                  Eliminate tool switching and context loss. Keep everything in one place.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-2 hover:border-purple-600 transition-all">
+              <CardHeader>
+                <Shield className="w-12 h-12 text-purple-600 mb-4" />
+                <CardTitle>Get Paid Faster</CardTitle>
+                <CardDescription>
+                  Automated invoicing and escrow payments mean you get paid on time, every time.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            <Card className="border-2 hover:border-pink-600 transition-all">
+              <CardHeader>
+                <DollarSign className="w-12 h-12 text-pink-600 mb-4" />
+                <CardTitle>Cut Costs by $500/mo</CardTitle>
+                <CardDescription>
+                  Replace multiple subscriptions with one powerful platform that does it all.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <Badge variant="secondary" className="mb-4 bg-purple-50 text-purple-700">
+              Complete Toolkit
+            </Badge>
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+              Everything You Need to Run Your Business
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Enterprise-grade features that grow with you—from solopreneur to agency
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature, index) => (
+              <Card key={index} className="group hover:shadow-xl transition-all border-2 hover:border-blue-600">
+                <CardHeader>
+                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${feature.gradient} flex items-center justify-center mb-4`}>
+                    <feature.icon className="w-6 h-6 text-white" />
                   </div>
-                </LiquidGlassCard>
-              </div>
+                  <CardTitle className="text-xl">{feature.title}</CardTitle>
+                  <CardDescription className="text-base">{feature.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Link href={feature.href}>
+                    <Button variant="ghost" className="w-full group-hover:bg-gray-100">
+                      Learn More
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <Badge variant="secondary" className="mb-4 bg-blue-50 text-blue-700">
+              Customer Stories
+            </Badge>
+            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+              Loved by Freelancers & Agencies Worldwide
+            </h2>
+            <p className="text-xl text-gray-600">
+              See how KAZI transforms workflows and accelerates growth
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="border-2 hover:border-blue-600 transition-all">
+                <CardHeader>
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <Badge variant="secondary" className="w-fit bg-green-50 text-green-700 mb-4">
+                    {testimonial.metric}
+                  </Badge>
+                </CardHeader>
+                <CardContent>
+                  <blockquote className="text-gray-700 mb-6 leading-relaxed">
+                    "{testimonial.quote}"
+                  </blockquote>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500" />
+                    <div>
+                      <div className="font-semibold text-gray-900">{testimonial.author}</div>
+                      <div className="text-sm text-gray-600">{testimonial.role}</div>
+                      <div className="text-sm text-gray-500">{testimonial.company}</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 kazi-gradient-primary">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold mb-6 kazi-headline" style={{ color: '#F8F7F4' }}>
+      <section className="py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
             Ready to Transform Your Workflow?
           </h2>
-          <p className="text-xl mb-8 max-w-2xl mx-auto kazi-body" style={{ color: '#F8F7F4', opacity: 0.9 }}>
-            Join thousands of freelancers and agencies who've streamlined their work with Kazi
+          <p className="text-xl text-white/90 mb-8">
+            Join 25,000+ freelancers and agencies who've streamlined their work with KAZI
           </p>
-          <button onClick={handleGetStarted} className="bg-soft-ivory kazi-text-primary hover:bg-white px-8 py-4 text-lg font-semibold rounded-lg kazi-ripple kazi-focus kazi-hover-scale transition-all duration-300">
-            Start Your Free Trial
-            <ArrowRight className="ml-2 w-5 h-5 inline" />
-          </button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/signup">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-6">
+                Start Your Free Trial
+                <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
+            <Button size="lg" variant="outline" className="bg-transparent border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-6">
+              Schedule a Demo
+            </Button>
+          </div>
+          <p className="text-white/80 mt-6 text-sm">
+            No credit card required • 14-day free trial • Cancel anytime
+          </p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="kazi-bg-dark text-white py-12">
+      <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <div className="flex items-center gap-3 mb-4">
-                <img 
-                  src="/kazi-brand/logo.svg" 
-                  alt="KAZI" 
-                  className="h-8 w-auto"
-                />
-                <span className="text-xl font-bold kazi-text-primary kazi-headline">KAZI</span>
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-6 h-6 text-blue-400" />
+                <span className="text-xl font-bold">KAZI</span>
               </div>
-              <p className="text-gray-300 kazi-body">
+              <p className="text-gray-400">
                 All-in-one workspace for freelancers and agencies
               </p>
             </div>
-            
+
             <div>
-              <h3 className="text-lg font-semibold mb-4 kazi-headline">Product</h3>
+              <h3 className="font-semibold mb-4">Product</h3>
               <div className="space-y-2">
-                <Link href="/features" className="block text-gray-300 hover:text-white kazi-body">Features</Link>
-                <Link href="/pricing" className="block text-gray-300 hover:text-white kazi-body">Pricing</Link>
-                <Link href="/demo-features" className="block text-gray-300 hover:text-white kazi-body">Demo</Link>
-                <Link href="/dashboard" className="block text-gray-300 hover:text-white kazi-body">Dashboard</Link>
+                <Link href="/features" className="block text-gray-400 hover:text-white transition-colors">Features</Link>
+                <Link href="/pricing" className="block text-gray-400 hover:text-white transition-colors">Pricing</Link>
+                <Link href="/demo-features" className="block text-gray-400 hover:text-white transition-colors">Demo</Link>
               </div>
             </div>
-            
+
             <div>
-              <h3 className="text-lg font-semibold mb-4 kazi-headline">Resources</h3>
+              <h3 className="font-semibold mb-4">Resources</h3>
               <div className="space-y-2">
-                <Link href="/blog" className="block text-gray-300 hover:text-white kazi-body">Blog</Link>
-                <Link href="/docs" className="block text-gray-300 hover:text-white kazi-body">Documentation</Link>
-                <Link href="/tutorials" className="block text-gray-300 hover:text-white kazi-body">Tutorials</Link>
-                <Link href="/community" className="block text-gray-300 hover:text-white kazi-body">Community</Link>
+                <Link href="/blog" className="block text-gray-400 hover:text-white transition-colors">Blog</Link>
+                <Link href="/docs" className="block text-gray-400 hover:text-white transition-colors">Docs</Link>
+                <Link href="/tutorials" className="block text-gray-400 hover:text-white transition-colors">Tutorials</Link>
               </div>
             </div>
-            
+
             <div>
-              <h3 className="text-lg font-semibold mb-4 kazi-headline">Company</h3>
+              <h3 className="font-semibold mb-4">Company</h3>
               <div className="space-y-2">
-                <Link href="/contact" className="block text-gray-300 hover:text-white kazi-body">Contact</Link>
-                <Link href="/signup" className="block text-gray-300 hover:text-white kazi-body">Sign Up</Link>
-                <Link href="/login" className="block text-gray-300 hover:text-white kazi-body">Login</Link>
+                <Link href="/contact" className="block text-gray-400 hover:text-white transition-colors">Contact</Link>
+                <Link href="/signup" className="block text-gray-400 hover:text-white transition-colors">Sign Up</Link>
+                <Link href="/login" className="block text-gray-400 hover:text-white transition-colors">Login</Link>
               </div>
             </div>
           </div>
-          
-          <div className="border-t border-gray-700 pt-8 text-center">
-            <p className="text-gray-300 kazi-body">
-              Proudly engineered in South Africa • Serving freelancers, startups, and creative teams in 40+ countries worldwide.
-            </p>
+
+          <Separator className="bg-gray-800 mb-8" />
+
+          <div className="text-center text-gray-400">
+            <p>© 2025 KAZI. Built in South Africa 🇿🇦 • Serving 40+ Countries Worldwide</p>
           </div>
         </div>
       </footer>
     </div>
-          </ErrorBoundary>
-      </Suspense>
-    )
-  }
+  )
+}

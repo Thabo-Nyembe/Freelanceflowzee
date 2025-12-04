@@ -1,0 +1,105 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - region "Notifications alt+T"
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e10]:
+          - generic [ref=e11]: Start Your Freelance Success Story
+          - text: Start Your Freelance Success Story
+        - paragraph [ref=e12]: Join thousands of freelancers who've transformed their business with KAZI's AI-powered platform featuring multi-model studio, universal feedback, real-time collaboration, and secure payment protection.
+      - generic [ref=e13]:
+        - generic [ref=e15]:
+          - img [ref=e17]
+          - generic [ref=e19]:
+            - heading "AI-Powered Project Management" [level=3] [ref=e20]
+            - paragraph [ref=e21]: Automate project workflows, generate content, and streamline client communication with intelligent AI assistance.
+        - generic [ref=e23]:
+          - img [ref=e25]
+          - generic [ref=e27]:
+            - heading "Secure Payment Processing" [level=3] [ref=e28]
+            - paragraph [ref=e29]: Built-in escrow system, milestone payments, and automated invoicing to ensure you get paid on time.
+        - generic [ref=e31]:
+          - img [ref=e33]
+          - generic [ref=e35]:
+            - heading "Advanced Video Studio" [level=3] [ref=e36]
+            - paragraph [ref=e37]: Create professional presentations, record client reviews, and collaborate with AI-enhanced video tools.
+        - generic [ref=e39]:
+          - img [ref=e41]
+          - generic [ref=e43]:
+            - heading "Community & Networking" [level=3] [ref=e44]
+            - paragraph [ref=e45]: Connect with other freelancers, share resources, and grow your professional network.
+      - generic [ref=e47]:
+        - paragraph [ref=e48]:
+          - text: 🎉
+          - strong [ref=e49]: Limited Time Offer
+        - paragraph [ref=e50]: Get 30 days free when you sign up today!
+        - paragraph [ref=e51]: No credit card required. Cancel anytime.
+    - generic [ref=e56]:
+      - generic [ref=e57]:
+        - generic [ref=e59]:
+          - generic [ref=e60]: Create Your Account
+          - text: Create Your Account
+        - paragraph [ref=e61]: Start your free trial and transform your freelance business
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - generic [ref=e64]:
+            - generic [ref=e65]:
+              - text: First Name
+              - generic [ref=e66]:
+                - img [ref=e67]
+                - textbox "First Name" [ref=e70]:
+                  - /placeholder: John
+            - generic [ref=e71]:
+              - text: Last Name
+              - generic [ref=e72]:
+                - img [ref=e73]
+                - textbox "Last Name" [ref=e76]:
+                  - /placeholder: Doe
+          - generic [ref=e77]:
+            - text: Email Address
+            - generic [ref=e78]:
+              - img [ref=e79]
+              - textbox "Email Address" [ref=e82]:
+                - /placeholder: john@example.com
+          - generic [ref=e83]:
+            - text: Password
+            - generic [ref=e84]:
+              - img [ref=e85]
+              - textbox "Password" [ref=e88]:
+                - /placeholder: Create a strong password
+              - button [ref=e89] [cursor=pointer]:
+                - img [ref=e90]
+            - paragraph [ref=e93]: At least 8 characters with numbers and symbols
+          - generic [ref=e94]:
+            - checkbox "I agree to the Terms of Service and Privacy Policy" [ref=e95] [cursor=pointer]
+            - checkbox
+            - generic [ref=e96]:
+              - text: I agree to the
+              - link "Terms of Service" [ref=e97] [cursor=pointer]:
+                - /url: /terms
+              - text: and
+              - link "Privacy Policy" [ref=e98] [cursor=pointer]:
+                - /url: /privacy
+          - generic [ref=e99]:
+            - checkbox "Send me tips, updates, and special offers" [checked] [ref=e100] [cursor=pointer]:
+              - generic:
+                - img
+            - checkbox [checked]
+            - generic [ref=e101]: Send me tips, updates, and special offers
+          - button "Start Free Trial" [ref=e102] [cursor=pointer]:
+            - text: Start Free Trial
+            - img [ref=e103]
+        - paragraph [ref=e106]:
+          - text: Already have an account?
+          - link "Sign in here" [ref=e107] [cursor=pointer]:
+            - /url: /login
+        - paragraph [ref=e109]: 🔒 Your data is protected with enterprise-grade security
+  - button "Context7 Docs" [ref=e110] [cursor=pointer]:
+    - img [ref=e111]
+    - text: Context7 Docs
+  - region "Notifications alt+T"
+  - alert [ref=e113]
+```

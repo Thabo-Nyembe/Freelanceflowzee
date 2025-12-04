@@ -2003,7 +2003,7 @@ export function UniversalPinpointFeedbackSystem({
             />
             {selectedFile.comments.map(renderCommentMarker)}
           </div>
-        )
+        );
       case "video":
         return (
           <div className="relative w-full h-full">
@@ -2081,7 +2081,7 @@ export function UniversalPinpointFeedbackSystem({
                 </div>
               ))}
           </div>
-        )
+        );
       case "audio":
         return (
           <div className="relative w-full h-full flex flex-col items-center justify-center">
@@ -2165,7 +2165,7 @@ export function UniversalPinpointFeedbackSystem({
                 </div>
               ))}
           </div>
-        )
+        );
       case "document":
         return (
           <div className="relative w-full h-full flex flex-col">

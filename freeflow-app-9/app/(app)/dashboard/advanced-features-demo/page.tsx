@@ -34,6 +34,7 @@ import { usePresence, useBroadcast } from '@/hooks/use-realtime'
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
+import { OnboardingTourLauncher } from '@/components/onboarding-tour-launcher'
 
 const logger = createFeatureLogger('AdvancedFeaturesDemo')
 
@@ -44,12 +45,17 @@ export default function AdvancedFeaturesDemo() {
     <div className="min-h-screen p-6 space-y-6">
       {/* Header */}
       <div className="space-y-2">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Advanced Features Demo
-        </h1>
-        <p className="text-muted-foreground">
-          Live demonstration of virtual scrolling, real-time features, PWA capabilities, and AI content generation
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Advanced Features Demo
+            </h1>
+            <p className="text-muted-foreground">
+              Live demonstration of virtual scrolling, real-time features, PWA capabilities, and AI content generation
+            </p>
+          </div>
+          <OnboardingTourLauncher />
+        </div>
       </div>
 
       {/* Feature Tabs */}

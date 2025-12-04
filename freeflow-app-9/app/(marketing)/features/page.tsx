@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
+import { EnhancedNavigation } from '@/components/marketing/enhanced-navigation';
 import { Button } from '@/components/ui/button';
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card';
 import { TextShimmer } from '@/components/ui/text-shimmer';
@@ -30,7 +31,7 @@ const features = [
   {
     title: 'Multi-Model AI Studio',
     description:
-      'Access 4 premium AI models (GPT-4o, Claude, DALL-E, Google AI) for instant content generation across creative fields.',
+      'Generate content faster with GPT-4o, Claude, DALL-E, and Google AI—all in one place. Write, design, and create without leaving your workspace.',
     icon: Brain,
     href: '/dashboard/ai-create',
     color: 'from-purple-500 to-purple-700',
@@ -38,7 +39,7 @@ const features = [
   {
     title: 'Universal Pinpoint Feedback',
     description:
-      'Revolutionary multi-media commenting on images, videos, PDFs, and code with AI analysis and voice notes.',
+      'Leave pixel-perfect feedback on any file type. Click, comment, and collaborate with voice notes and AI-powered analysis—no more endless email threads.',
     icon: MessageSquare,
     href: '/dashboard/collaboration',
     color: 'from-pink-500 to-pink-700',
@@ -46,7 +47,7 @@ const features = [
   {
     title: 'Professional Video Studio',
     description:
-      'Complete video editing with AI transcription, screen recording, timestamp comments, and client collaboration.',
+      'Edit, transcribe, and collaborate on videos in real-time. Screen recording, timestamp comments, and client approval—all built in.',
     icon: Video,
     href: '/dashboard/video-studio',
     color: 'from-red-500 to-red-700',
@@ -54,7 +55,7 @@ const features = [
   {
     title: 'Multi-Cloud Storage System',
     description:
-      'Enterprise storage with 70% cost savings through intelligent Supabase + Wasabi routing and version control.',
+      'Store unlimited files while saving 70% on costs. Intelligent routing between Supabase and Wasabi keeps your data safe and your budget happy.',
     icon: Cloud,
     href: '/dashboard/files-hub',
     color: 'from-cyan-500 to-cyan-700',
@@ -62,7 +63,7 @@ const features = [
   {
     title: 'Secure Escrow Payments',
     description:
-      'Milestone-based payment protection with Stripe integration, automated invoicing, and global processing.',
+      'Get paid on time, every time. Clients fund milestones upfront, you deliver with confidence, and funds release automatically when work is approved.',
     icon: Shield,
     href: '/dashboard/escrow',
     color: 'from-blue-500 to-blue-700',
@@ -70,7 +71,7 @@ const features = [
   {
     title: 'Real-Time Collaboration',
     description:
-      'Live multi-user editing with cursor tracking, instant messaging, presence indicators, and conflict resolution.',
+      'Work together like you\'re in the same room. See live cursors, instant updates, and presence indicators that keep your team in perfect sync.',
     icon: Users,
     href: '/dashboard/collaboration',
     color: 'from-green-500 to-green-700',
@@ -78,7 +79,7 @@ const features = [
   {
     title: 'Creator Community Hub',
     description:
-      'Connect with 2,800+ verified creators through marketplace, social wall, and professional networking.',
+      'Join 2,800+ verified creators. Network, find collaborators, showcase your work on the social wall, and discover opportunities in the marketplace.',
     icon: Globe,
     href: '/dashboard/community',
     color: 'from-indigo-500 to-indigo-700',
@@ -86,7 +87,7 @@ const features = [
   {
     title: 'AI Daily Planning',
     description:
-      'Intelligent task management with productivity optimization, time estimates, and automated scheduling.',
+      'Let AI organize your day. Get smart time estimates, productivity insights, and automated scheduling that learns how you actually work.',
     icon: Calendar,
     href: '/dashboard/my-day',
     color: 'from-orange-500 to-orange-700',
@@ -94,7 +95,7 @@ const features = [
   {
     title: 'Professional Invoicing',
     description:
-      'Automated invoice generation with multiple templates, tax calculations, and comprehensive financial tracking.',
+      'Create stunning invoices in seconds. Automatic tracking, tax calculations, and complete financial records—bookkeeping made effortless.',
     icon: DollarSign,
     href: '/dashboard/financial-hub',
     color: 'from-emerald-500 to-emerald-700',
@@ -119,8 +120,31 @@ const features = [
 
 export default function FeaturesPage() {
   const router = useRouter()
+  const pathname = usePathname()
 
-  const handleStartRevolution = () => {
+  // Analytics tracking helper
+  const trackEvent = async (event: string, label: string, properties?: any) => {
+    try {
+      await fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event,
+          properties: {
+            label,
+            pathname,
+            ...properties,
+            timestamp: new Date().toISOString()
+          }
+        })
+      })
+    } catch (error) {
+      console.error('Analytics error:', error)
+    }
+  }
+
+  const handleStartRevolution = async () => {
+    await trackEvent('button_click', 'Start Revolution - Features Page', { href: '/signup' })
     toast.success('🚀 Join the Creative Revolution', {
       description: 'Creating account - access all enterprise features'
     })
@@ -129,7 +153,8 @@ export default function FeaturesPage() {
     }, 1500)
   }
 
-  const handleViewPricing = () => {
+  const handleViewPricing = async () => {
+    await trackEvent('button_click', 'View Pricing - Features Page', { href: '/pricing' })
     toast.success('💎 Enterprise Pricing', {
       description: 'Loading pricing tiers and feature comparison'
     })
@@ -138,7 +163,8 @@ export default function FeaturesPage() {
     }, 1500)
   }
 
-  const handleFeatureClick = (title: string, href: string) => {
+  const handleFeatureClick = async (title: string, href: string) => {
+    await trackEvent('feature_click', `Features Page - ${title}`, { href })
     toast.success('✨ Opening ' + title, {
       description: 'Loading feature demonstration'
     })
@@ -158,6 +184,8 @@ export default function FeaturesPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 relative">
+      {/* Enhanced Navigation with Analytics */}
+      <EnhancedNavigation />
       {/* Premium Scroll Progress */}
       <ScrollProgress position="top" height={3} showPercentage={true} />
 
@@ -175,23 +203,21 @@ export default function FeaturesPage() {
         <ScrollReveal variant="blur" duration={0.8}>
           <div className="mx-auto max-w-3xl text-center">
             <TextShimmer className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl mb-6" duration={2}>
-              Enterprise Features for{' '}
+              The Only Platform You'll{' '}
               <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Modern Creatives
+                Ever Need
               </span>
             </TextShimmer>
             <p className="mt-6 text-lg text-gray-300">
-              KAZI provides a complete suite of enterprise-grade tools including multi-model AI studio,
-              universal feedback systems, real-time collaboration, and secure payment processing.
-              Built for professionals who demand the best.
+              Everything from AI content creation to secure payments, video collaboration to project management—all in one place. Stop paying for 6+ tools when KAZI gives you the complete toolkit for half the price.
             </p>
             <div className="mt-8 flex justify-center gap-4">
               <Button onClick={handleStartRevolution} size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-                Start Revolution
+                Start Free Trial
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
               <Button onClick={handleViewPricing} variant="outline" size="lg" className="border-slate-700 text-white hover:bg-slate-800">
-                Enterprise Pricing
+                View Pricing
               </Button>
             </div>
           </div>

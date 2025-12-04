@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react'
+import { EnhancedNavigation } from '@/components/marketing/enhanced-navigation'
 import { Button } from '@/components/ui/button'
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -12,6 +14,7 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { GlowEffect } from '@/components/ui/glow-effect'
 import { BorderTrail } from '@/components/ui/border-trail'
+import { ScrollProgress } from '@/components/ui/scroll-progress'
 import { createFeatureLogger } from '@/lib/logger'
 
 // A+++ UTILITIES
@@ -23,9 +26,31 @@ const logger = createFeatureLogger('Contact')
 
 export default function ContactPage() {
   // A+++ STATE MANAGEMENT
+  const pathname = usePathname()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+
+  // Analytics tracking helper
+  const trackEvent = async (event: string, label: string, properties?: any) => {
+    try {
+      await fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event,
+          properties: {
+            label,
+            pathname,
+            ...properties,
+            timestamp: new Date().toISOString()
+          }
+        })
+      })
+    } catch (error) {
+      console.error('Analytics error:', error)
+    }
+  }
 
   const [isSending, setIsSending] = useState(false)
   const [formData, setFormData] = useState({
@@ -71,6 +96,12 @@ export default function ContactPage() {
     e.preventDefault()
     setIsSending(true)
 
+    // Track contact form submission
+    await trackEvent('button_click', 'Contact Form Submit', {
+      subject: formData.subject,
+      hasCompany: !!formData.company
+    })
+
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
@@ -81,6 +112,11 @@ export default function ContactPage() {
       const result = await response.json()
 
       if (result.success) {
+        // Track successful submission
+        await trackEvent('contact_form_complete', 'Contact Form Success', {
+          caseId: result.caseId
+        })
+
         toast.success('Message sent successfully!', {
           description: `Case ID: ${result.caseId}`
         })
@@ -168,6 +204,10 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      {/* Enhanced Navigation with Analytics */}
+      <EnhancedNavigation />
+      {/* Premium Scroll Progress */}
+      <ScrollProgress position="top" height={3} showPercentage={false} />
       {/* Enhanced Pattern Craft Background */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-900 to-slate-950" />
 
@@ -186,10 +226,10 @@ export default function ContactPage() {
           {/* Header */}
           <div className="text-center mb-16">
             <TextShimmer className="text-4xl md:text-5xl font-bold mb-6" duration={2}>
-              Contact Us
+              Let's Talk About Your Success
             </TextShimmer>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Have questions about KAZI? Need support? We&apos;re here to help you succeed in your freelance journey.
+              Questions? Demo requests? Enterprise inquiries? Our team responds within 24 hours to help you transform your workflow.
             </p>
           </div>
 
@@ -205,10 +245,10 @@ export default function ContactPage() {
                 />
               <CardHeader>
                 <TextShimmer className="text-2xl mb-2" duration={2}>
-                  Send us a message
+                  Get in Touch
                 </TextShimmer>
                 <CardDescription className="text-gray-400">
-                  Fill out the form below and we&apos;ll get back to you within 24 hours.
+                  Tell us how we can help. Our team responds within 24 hours—often much faster.
                 </CardDescription>
               </CardHeader>
               <CardContent>

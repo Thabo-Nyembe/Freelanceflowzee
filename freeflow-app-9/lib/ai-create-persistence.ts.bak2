@@ -1,0 +1,282 @@
+/**
+ * AI CREATE A++++ PERSISTENCE LAYER
+ * LocalStorage management for AI Create Studio
+ */
+
+// SSR-safe localStorage helper
+const safeLocalStorage = {
+  getItem: (key: string): string | null => {
+    if (typeof window === 'undefined') return null
+    try {
+      return localStorage.getItem(key)
+    } catch {
+      return null
+    }
+  },
+  setItem: (key: string, value: string): boolean => {
+    if (typeof window === 'undefined') return false
+    try {
+      safeLocalStorage.setItem(key, value)
+      return true
+    } catch {
+      return false
+    }
+  },
+  removeItem: (key: string): boolean => {
+    if (typeof window === 'undefined') return false
+    try {
+      localStorage.removeItem(key)
+      return true
+    } catch {
+      return false
+    }
+  }
+}
+
+export interface Generation {
+  id: string
+  title: string
+  type: string
+  model: string
+  timestamp: Date
+  preview: string
+  content: string
+  tokens: number
+  cost: number
+  temperature: number
+  maxTokens: number
+  version: number
+  iterations: Array<{
+    version: number
+    content: string
+    timestamp: Date
+    changes: string
+  }>
+  tags: string[]
+  favorite: boolean
+  archived: boolean
+}
+
+export interface CustomTemplate {
+  id: string
+  title: string
+  description: string
+  prompt: string
+  category: string
+  tags: string[]
+  createdAt: Date
+  usageCount: number
+}
+
+export interface AICreateSettings {
+  selectedModel: string
+  temperature: number
+  maxTokens: number
+  autoSave: boolean
+  exportFormat: string
+  streamingEnabled: boolean
+}
+
+const STORAGE_KEYS = {
+  HISTORY: 'kazi-ai-create-history-v2',
+  TEMPLATES: 'kazi-ai-create-custom-templates-v2',
+  SETTINGS: 'kazi-ai-create-settings-v2',
+  ANALYTICS: 'kazi-ai-create-analytics-v2'
+}
+
+/**
+ * Save generations history to localStorage
+ */
+export function saveHistory(history: Generation[]): boolean {
+  try {
+    const serialized = JSON.stringify(history)
+    const saved = safeLocalStorage.setItem(STORAGE_KEYS.HISTORY, serialized)
+    if (saved) console.log('💾 Saved', history.length, 'generations to localStorage')
+    return saved
+  } catch (error) {
+    console.error('❌ Failed to save history:', error)
+    return false
+  }
+}
+
+/**
+ * Load generations history from localStorage
+ */
+export function loadHistory(): Generation[] {
+  try {
+    const stored = safeLocalStorage.getItem(STORAGE_KEYS.HISTORY)
+    if (!stored) return []
+
+    const parsed = JSON.parse(stored)
+
+    // Convert date strings back to Date objects
+    parsed.forEach((gen: Generation) => {
+      gen.timestamp = new Date(gen.timestamp)
+      gen.iterations?.forEach(iter => {
+        iter.timestamp = new Date(iter.timestamp)
+      })
+    })
+
+    console.log('✅ Loaded', parsed.length, 'generations from localStorage')
+    return parsed
+  } catch (error) {
+    console.error('❌ Failed to load history:', error)
+    return []
+  }
+}
+
+/**
+ * Save custom templates to localStorage
+ */
+export function saveCustomTemplates(templates: CustomTemplate[]): boolean {
+  try {
+    const serialized = JSON.stringify(templates)
+    safeLocalStorage.setItem(STORAGE_KEYS.TEMPLATES, serialized)
+    console.log('💾 Saved', templates.length, 'custom templates to localStorage')
+    return true
+  } catch (error) {
+    console.error('❌ Failed to save templates:', error)
+    return false
+  }
+}
+
+/**
+ * Load custom templates from localStorage
+ */
+export function loadCustomTemplates(): CustomTemplate[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEYS.TEMPLATES)
+    if (!stored) return []
+
+    const parsed = JSON.parse(stored)
+
+    // Convert date strings back to Date objects
+    parsed.forEach((tpl: CustomTemplate) => {
+      tpl.createdAt = new Date(tpl.createdAt)
+    })
+
+    console.log('✅ Loaded', parsed.length, 'custom templates from localStorage')
+    return parsed
+  } catch (error) {
+    console.error('❌ Failed to load templates:', error)
+    return []
+  }
+}
+
+/**
+ * Save settings to localStorage
+ */
+export function saveSettings(settings: AICreateSettings): boolean {
+  try {
+    const serialized = JSON.stringify(settings)
+    safeLocalStorage.setItem(STORAGE_KEYS.SETTINGS, serialized)
+    console.log('💾 Saved settings to localStorage')
+    return true
+  } catch (error) {
+    console.error('❌ Failed to save settings:', error)
+    return false
+  }
+}
+
+/**
+ * Load settings from localStorage
+ */
+export function loadSettings(): AICreateSettings | null {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEYS.SETTINGS)
+    if (!stored) return null
+
+    const parsed = JSON.parse(stored)
+    console.log('✅ Loaded settings from localStorage')
+    return parsed
+  } catch (error) {
+    console.error('❌ Failed to load settings:', error)
+    return null
+  }
+}
+
+/**
+ * Clear all AI Create data from localStorage
+ */
+export function clearAllData(): boolean {
+  try {
+    Object.values(STORAGE_KEYS).forEach(key => {
+      localStorage.removeItem(key)
+    })
+    console.log('🗑️ Cleared all AI Create data from localStorage')
+    return true
+  } catch (error) {
+    console.error('❌ Failed to clear data:', error)
+    return false
+  }
+}
+
+/**
+ * Export all data as JSON
+ */
+export function exportAllData(): string {
+  const data = {
+    history: loadHistory(),
+    templates: loadCustomTemplates(),
+    settings: loadSettings(),
+    exportedAt: new Date().toISOString(),
+    version: '2.0'
+  }
+  return JSON.stringify(data, null, 2)
+}
+
+/**
+ * Import data from JSON
+ */
+export function importAllData(jsonString: string): boolean {
+  try {
+    const data = JSON.parse(jsonString)
+
+    if (data.history) saveHistory(data.history)
+    if (data.templates) saveCustomTemplates(data.templates)
+    if (data.settings) saveSettings(data.settings)
+
+    console.log('✅ Imported all data successfully')
+    return true
+  } catch (error) {
+    console.error('❌ Failed to import data:', error)
+    return false
+  }
+}
+
+/**
+ * Get localStorage usage stats
+ */
+export function getStorageStats() {
+  const history = localStorage.getItem(STORAGE_KEYS.HISTORY) || ''
+  const templates = localStorage.getItem(STORAGE_KEYS.TEMPLATES) || ''
+  const settings = localStorage.getItem(STORAGE_KEYS.SETTINGS) || ''
+
+  const historySize = new Blob([history]).size
+  const templatesSize = new Blob([templates]).size
+  const settingsSize = new Blob([settings]).size
+  const totalSize = historySize + templatesSize + settingsSize
+
+  // 5MB quota (typical localStorage limit)
+  const quota = 5 * 1024 * 1024
+  const usagePercent = (totalSize / quota) * 100
+
+  return {
+    historySize,
+    templatesSize,
+    settingsSize,
+    totalSize,
+    quota,
+    usagePercent,
+    available: quota - totalSize
+  }
+}
+
+/**
+ * Format file size for display
+ */
+export function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
+}

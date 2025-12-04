@@ -247,6 +247,46 @@ export const onboardingTours: Record<string, OnboardingTour> = {
       value: 'Advanced AI Features',
       description: 'Unlocked: Priority AI processing and extended context windows!'
     }
+  },
+
+  // NEW: Guest Upload Feature Tour
+  guestUploadFeature: {
+    id: 'guest-upload-feature',
+    title: 'Guest File Upload - No Subscription Needed 💎',
+    description: 'Learn how to share big files with a one-time payment',
+    targetRole: 'both',
+    steps: [
+      {
+        id: 'intro',
+        title: 'Share Files Without a Subscription',
+        description: 'Need to share a large file but don\'t want a monthly subscription? Our guest upload feature lets you pay once and share files up to 25GB with anyone. Perfect for occasional file sharing!',
+        position: 'center'
+      },
+      {
+        id: 'pricing',
+        title: 'Simple, Fair Pricing - FREE up to 6GB! 🎉',
+        description: '💚 FREE: 1-6GB (7 days)\n💙 6-10GB: $5 (30 days)\n💜 10-15GB: $10 (30 days)\n💙 15-20GB: $15 (30 days)\n💜 20-25GB: $20 (30 days)\n🔥 25GB+: $25 (30 days)\n\nNo hidden fees, no recurring charges. Up to 10 downloads per link!',
+        position: 'center'
+      },
+      {
+        id: 'how-it-works',
+        title: 'How It Works',
+        description: '1️⃣ Visit /guest-upload and enter your email\n2️⃣ Upload your file (FREE for files up to 6GB!)\n3️⃣ Pay once if needed (or proceed free)\n4️⃣ Get a shareable link instantly\n5️⃣ Recipients can download for 7-30 days (up to 10 times)\n\nSecure, fast, and no subscription required!',
+        action: 'Visit /guest-upload to try it now',
+        position: 'center'
+      },
+      {
+        id: 'benefits',
+        title: 'Perfect For...',
+        description: '📸 Photographers sharing shoots\n🎥 Videographers sending raw footage\n🎨 Designers delivering large project files\n📁 Anyone who needs to share big files occasionally\n\nNo monthly fees, just pay as you go!',
+        position: 'center'
+      }
+    ],
+    completionReward: {
+      type: 'unlock',
+      value: 'Guest Upload Feature Access',
+      description: 'Try your first guest upload with this knowledge! Perfect for sharing large files without the commitment of a subscription.'
+    }
   }
 }
 

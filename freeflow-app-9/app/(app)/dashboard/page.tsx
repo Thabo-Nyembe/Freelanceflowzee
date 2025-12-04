@@ -77,6 +77,9 @@ import { toast } from 'sonner'
 import { AIInsightsPanel } from '@/components/ai/ai-insights-panel'
 import { useCurrentUser, useAIData } from '@/hooks/use-ai-data'
 
+// ONBOARDING
+import { OnboardingTourLauncher } from '@/components/onboarding-tour-launcher'
+
 // Initialize logger
 const logger = createFeatureLogger('Dashboard')
 
@@ -2013,8 +2016,11 @@ export default function DashboardPage() {
                   Your complete creative business platform with 25+ integrated tools
                 </p>
               </div>
-              
+
               <div className="flex items-center gap-4">
+                {/* Onboarding Tour Launcher */}
+                <OnboardingTourLauncher />
+
                 <EnhancedCard variant="glass" className="p-3">
                   <div className="flex items-center gap-2">
                     <Star className="h-4 w-4 text-yellow-500" />

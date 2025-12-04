@@ -24,7 +24,7 @@ const OnboardingContext = createContext<OnboardingContextType | undefined>(undef
 // ONBOARDING PROVIDER
 // ============================================================================
 
-export function OnboardingProvider({ children }: { children: React.node }) {
+export function OnboardingProvider({ children }: { children: React.ReactNode }) {
   const [activeTour, setActiveTour] = useState<OnboardingTour | null>(null)
   const [completedTours, setCompletedTours] = useState<string[]>([])
 

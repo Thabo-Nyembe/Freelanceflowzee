@@ -1919,9 +1919,9 @@ CREATE OR REPLACE FUNCTION get_objects_by_type(p_scene_id UUID, p_type object_ty
 RETURNS TABLE(
   id UUID,
   name TEXT,
-  position JSON,
-  rotation JSON,
-  scale JSON,
+  "position" JSON,
+  "rotation" JSON,
+  "scale" JSON,
   material_id UUID
 ) AS $$
 BEGIN

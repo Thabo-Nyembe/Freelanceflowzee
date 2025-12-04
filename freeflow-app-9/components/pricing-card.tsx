@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { Check, X, Star, LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -25,6 +25,7 @@ interface PricingCardProps {
 
 export function PricingCard({ plan }: PricingCardProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const [isLoading, setIsLoading] = useState(false)
   const Icon = plan.icon
 
@@ -40,6 +41,26 @@ export function PricingCard({ plan }: PricingCardProps) {
         action = 'start_trial'
       } else if (plan.name === 'Enterprise') {
         action = 'contact_sales'
+      }
+
+      // Track checkout start
+      try {
+        await fetch('/api/analytics/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event: 'checkout_start',
+            properties: {
+              plan: plan.name,
+              price: plan.price,
+              action,
+              pathname,
+              timestamp: new Date().toISOString()
+            }
+          })
+        })
+      } catch (error) {
+        console.error('Analytics error:', error)
       }
 
       const response = await fetch('/api/checkout', {

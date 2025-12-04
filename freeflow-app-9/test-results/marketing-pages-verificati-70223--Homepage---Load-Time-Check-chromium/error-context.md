@@ -1,0 +1,224 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - region "Notifications alt+T"
+  - generic [ref=e4]:
+    - navigation [ref=e5]:
+      - link "KAZI KAZI" [ref=e8] [cursor=pointer]:
+        - /url: /
+        - img "KAZI" [ref=e11]
+        - generic [ref=e12]: KAZI
+    - generic [ref=e19]:
+      - generic [ref=e20]:
+        - img [ref=e21]
+        - generic [ref=e24]: Built in Africa. Engineered for the World.
+      - generic [ref=e26]:
+        - generic [ref=e27]: Run Your Entire Business From One Platform
+        - text: Run Your Entire Business From One Platform
+      - paragraph [ref=e28]: Stop juggling 6+ tools. KAZI combines AI-powered creation, video collaboration, secure payments, and project management into one seamless workspace that saves you time and money.
+      - generic [ref=e29]:
+        - button "Start Free Trial" [ref=e30] [cursor=pointer]:
+          - text: Start Free Trial
+          - img [ref=e31]
+        - button "Watch Demo" [ref=e33] [cursor=pointer]:
+          - img [ref=e34]
+          - text: Watch Demo
+    - generic [ref=e37]:
+      - generic [ref=e38]:
+        - heading "Tired of Context Switching Between 6+ Apps?" [level=2] [ref=e39]
+        - paragraph [ref=e40]: Every tool switch costs you 23 minutes of focus. KAZI eliminates the chaos by bringing Slack, Figma, Stripe, Dropbox, and more into one unified workspace—saving you hours every week.
+      - generic [ref=e41]:
+        - generic [ref=e42]:
+          - heading "One Platform. Complete Control." [level=3] [ref=e43]
+          - paragraph [ref=e44]: KAZI brings AI content creation, real-time video collaboration, milestone-based escrow payments, and smart project management together—eliminating subscription fatigue while accelerating your workflow and cash flow.
+          - generic [ref=e45]:
+            - generic [ref=e46]:
+              - img [ref=e47]
+              - generic [ref=e50]: Save 15+ hours weekly by eliminating tool switching
+            - generic [ref=e51]:
+              - img [ref=e52]
+              - generic [ref=e55]: Get paid faster with automated invoicing & escrow
+            - generic [ref=e56]:
+              - img [ref=e57]
+              - generic [ref=e60]: Cut software costs by up to $500/month per team
+        - generic [ref=e62]:
+          - paragraph [ref=e63]: Kazi Dashboard Preview
+          - generic [ref=e64]: All-in-one workspace for modern teams
+    - generic [ref=e66]:
+      - generic [ref=e67]:
+        - generic [ref=e69]:
+          - generic [ref=e70]: Your Complete Business Toolkit
+          - text: Your Complete Business Toolkit
+        - paragraph [ref=e71]: Enterprise-grade features that grow with your business—from solopreneur to agency
+      - generic [ref=e72]:
+        - generic [ref=e79]:
+          - img [ref=e81]
+          - heading "Multi-Model AI Studio" [level=3] [ref=e91]
+          - paragraph [ref=e92]: Generate stunning content in seconds with GPT-4o, Claude, DALL-E, and Google AI. Create copy, images, and designs without leaving your workspace.
+          - button "Learn More" [ref=e93] [cursor=pointer]:
+            - text: Learn More
+            - img [ref=e94]
+        - generic [ref=e102]:
+          - img [ref=e104]
+          - heading "Professional Video Studio" [level=3] [ref=e107]
+          - paragraph [ref=e108]: Edit videos with AI-powered transcription, screen recording, and timestamp comments. Collaborate with clients in real-time without endless email chains.
+          - button "Learn More" [ref=e109] [cursor=pointer]:
+            - text: Learn More
+            - img [ref=e110]
+        - generic [ref=e118]:
+          - img [ref=e120]
+          - heading "Universal Pinpoint Feedback" [level=3] [ref=e122]
+          - paragraph [ref=e123]: Leave precise feedback on any file type—images, videos, PDFs, or code. Add voice notes and AI analysis to eliminate miscommunication.
+          - button "Learn More" [ref=e124] [cursor=pointer]:
+            - text: Learn More
+            - img [ref=e125]
+        - generic [ref=e133]:
+          - img [ref=e135]
+          - heading "Secure Escrow Payments" [level=3] [ref=e137]
+          - paragraph [ref=e138]: Protect your income with milestone-based payments. Clients fund upfront, you deliver with confidence, and funds release automatically.
+          - button "Learn More" [ref=e139] [cursor=pointer]:
+            - text: Learn More
+            - img [ref=e140]
+        - generic [ref=e148]:
+          - img [ref=e150]
+          - heading "AI Daily Planning" [level=3] [ref=e152]
+          - paragraph [ref=e153]: Let AI organize your day. Get smart time estimates, productivity insights, and automated scheduling that adapts to how you actually work.
+          - button "Learn More" [ref=e154] [cursor=pointer]:
+            - text: Learn More
+            - img [ref=e155]
+        - generic [ref=e163]:
+          - img [ref=e165]
+          - heading "Multi-Cloud Storage System" [level=3] [ref=e168]
+          - paragraph [ref=e169]: Store unlimited files with 70% cost savings. Intelligent routing between Supabase and Wasabi keeps your data safe and your budget intact.
+          - button "Learn More" [ref=e170] [cursor=pointer]:
+            - text: Learn More
+            - img [ref=e171]
+        - generic [ref=e179]:
+          - img [ref=e181]
+          - heading "Real-Time Collaboration" [level=3] [ref=e186]
+          - paragraph [ref=e187]: Work together like you're in the same room. See live cursors, instant updates, and presence indicators that keep everyone in sync.
+          - button "Learn More" [ref=e188] [cursor=pointer]:
+            - text: Learn More
+            - img [ref=e189]
+        - generic [ref=e197]:
+          - img [ref=e199]
+          - heading "Professional Invoicing" [level=3] [ref=e201]
+          - paragraph [ref=e202]: Create beautiful invoices in seconds. Track payments automatically, calculate taxes, and maintain complete financial records effortlessly.
+          - button "Learn More" [ref=e203] [cursor=pointer]:
+            - text: Learn More
+            - img [ref=e204]
+        - generic [ref=e212]:
+          - img [ref=e214]
+          - heading "Client Zone Galleries" [level=3] [ref=e217]
+          - paragraph [ref=e218]: Impress clients with branded portals for file delivery. Control access, watermark previews, and collect approvals without chasing emails.
+          - button "Learn More" [ref=e219] [cursor=pointer]:
+            - text: Learn More
+            - img [ref=e220]
+    - generic [ref=e223]:
+      - generic [ref=e224]:
+        - generic [ref=e226]:
+          - generic [ref=e227]: Trusted by Leading Global Brands
+          - text: Trusted by Leading Global Brands
+        - paragraph [ref=e228]: Startups, agencies, and freelancers worldwide choose Kazi
+      - generic [ref=e229]:
+        - generic [ref=e231]:
+          - generic [ref=e232]: 25,000+
+          - generic [ref=e233]: Active Users
+          - generic [ref=e234]: Growing community
+        - generic [ref=e236]:
+          - generic [ref=e237]: 40+
+          - generic [ref=e238]: Countries
+          - generic [ref=e239]: Global reach
+        - generic [ref=e241]:
+          - generic [ref=e242]: 4.9/5
+          - generic [ref=e243]: User Rating
+          - generic [ref=e244]: 2,500+ reviews
+        - generic [ref=e246]:
+          - generic [ref=e247]: 99.9%
+          - generic [ref=e248]: Uptime
+          - generic [ref=e249]: Always available
+      - generic [ref=e250]:
+        - paragraph [ref=e251]: Featured In
+        - generic [ref=e252]:
+          - generic [ref=e253]: TechCrunch
+          - generic [ref=e254]: Product Hunt
+          - generic [ref=e255]: Forbes
+          - generic [ref=e256]: Wired
+          - generic [ref=e257]: Business Insider
+          - generic [ref=e258]: VentureBeat
+    - generic [ref=e260]:
+      - generic [ref=e263]:
+        - generic [ref=e264]: What Our Users Say
+        - text: What Our Users Say
+      - generic [ref=e265]:
+        - generic [ref=e271]:
+          - generic [ref=e272]:
+            - img [ref=e273]
+            - img [ref=e275]
+            - img [ref=e277]
+            - img [ref=e279]
+            - img [ref=e281]
+          - blockquote [ref=e283]: "\"Kazi transformed our workflow—saving us hours and ensuring timely payments.\""
+          - generic [ref=e284]: — Sarah Jones, Creative Co.
+        - generic [ref=e290]:
+          - generic [ref=e291]:
+            - img [ref=e292]
+            - img [ref=e294]
+            - img [ref=e296]
+            - img [ref=e298]
+            - img [ref=e300]
+          - blockquote [ref=e302]: "\"Payments are lightning-fast. Kazi's integrated workspace is exceptional.\""
+          - generic [ref=e303]: — Liam O'Reilly, Freelance Designer
+    - generic [ref=e305]:
+      - heading "Ready to Transform Your Workflow?" [level=2] [ref=e306]
+      - paragraph [ref=e307]: Join thousands of freelancers and agencies who've streamlined their work with Kazi
+      - button "Start Your Free Trial" [ref=e308] [cursor=pointer]:
+        - text: Start Your Free Trial
+        - img [ref=e309]
+    - contentinfo [ref=e311]:
+      - generic [ref=e312]:
+        - generic [ref=e313]:
+          - generic [ref=e314]:
+            - generic [ref=e315]:
+              - img "KAZI" [ref=e316]
+              - generic [ref=e317]: KAZI
+            - paragraph [ref=e318]: All-in-one workspace for freelancers and agencies
+          - generic [ref=e319]:
+            - heading "Product" [level=3] [ref=e320]
+            - generic [ref=e321]:
+              - link "Features" [ref=e322] [cursor=pointer]:
+                - /url: /features
+              - link "Pricing" [ref=e323] [cursor=pointer]:
+                - /url: /pricing
+              - link "Demo" [ref=e324] [cursor=pointer]:
+                - /url: /demo-features
+              - link "Dashboard" [ref=e325] [cursor=pointer]:
+                - /url: /dashboard
+          - generic [ref=e326]:
+            - heading "Resources" [level=3] [ref=e327]
+            - generic [ref=e328]:
+              - link "Blog" [ref=e329] [cursor=pointer]:
+                - /url: /blog
+              - link "Documentation" [ref=e330] [cursor=pointer]:
+                - /url: /docs
+              - link "Tutorials" [ref=e331] [cursor=pointer]:
+                - /url: /tutorials
+              - link "Community" [ref=e332] [cursor=pointer]:
+                - /url: /community
+          - generic [ref=e333]:
+            - heading "Company" [level=3] [ref=e334]
+            - generic [ref=e335]:
+              - link "Contact" [ref=e336] [cursor=pointer]:
+                - /url: /contact
+              - link "Sign Up" [ref=e337] [cursor=pointer]:
+                - /url: /signup
+              - link "Login" [ref=e338] [cursor=pointer]:
+                - /url: /login
+        - paragraph [ref=e340]: Proudly engineered in South Africa • Serving freelancers, startups, and creative teams in 40+ countries worldwide.
+  - button "Context7 Docs" [ref=e341] [cursor=pointer]:
+    - img [ref=e342]
+    - text: Context7 Docs
+  - region "Notifications alt+T"
+  - alert [ref=e344]
+```
