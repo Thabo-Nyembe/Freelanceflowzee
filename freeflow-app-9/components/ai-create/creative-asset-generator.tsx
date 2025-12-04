@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
+import { AIEnhancedInput } from '@/components/ai-create/ai-enhanced-input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -601,12 +602,15 @@ export function CreativeAssetGenerator({ asStandalone = true }: CreativeAssetGen
                   <Label htmlFor="custom-prompt" className="mb-2 block">
                     Custom Prompt (Optional)
                   </Label>
-                  <Textarea
-                    id="custom-prompt"
-                    placeholder="Describe specific requirements or style preferences..."
+                  <AIEnhancedInput
                     value={customPrompt}
-                    onChange={(e) => setCustomPrompt(e.target.value)}
-                    rows={3}
+                    onChange={(text) => setCustomPrompt(text)}
+                    contentType="description"
+                    placeholder="Describe specific requirements or style preferences..."
+                    showSuggestions={true}
+                    showEnhance={true}
+                    showGenerate={true}
+                    minRows={3}
                   />
                 </div>
               </div>

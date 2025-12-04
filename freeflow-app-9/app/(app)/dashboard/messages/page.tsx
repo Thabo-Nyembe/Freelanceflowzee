@@ -113,6 +113,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { AIEnhancedInput } from '@/components/ai-create/ai-enhanced-input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
@@ -1976,38 +1977,16 @@ export default function MessagesPage() {
                         </Button>
                       </div>
                       <div className="flex gap-2">
-                        <Input
-                          ref={messageInputRef}
-                          data-testid="message-input"
-                          placeholder={editingMessageId ? "Edit message..." : "Type a message..."}
+                        <AIEnhancedInput
                           value={newMessage}
-                          onChange={(e) => setNewMessage(e.target.value)}
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              e.preventDefault()
-                              handleSendMessage()
-                            }
-                          }}
-                          className="flex-1"
+                          onChange={(text) => setNewMessage(text)}
+                          onSend={handleSendMessage}
+                          contentType="message"
+                          placeholder={editingMessageId ? "Edit message..." : "Type a message..."}
+                          showSuggestions={true}
+                          showEnhance={true}
                           disabled={isSending}
                         />
-                        <Button
-                          data-testid="send-button"
-                          onClick={handleSendMessage}
-                          disabled={!newMessage.trim() || isSending}
-                          className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                        >
-                          {isSending ? (
-                            <motion.div
-                              animate={{ rotate: 360 }}
-                              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                            >
-                              <Send className="h-4 w-4" />
-                            </motion.div>
-                          ) : (
-                            <Send className="h-4 w-4" />
-                          )}
-                        </Button>
                       </div>
                     </div>
                   </>

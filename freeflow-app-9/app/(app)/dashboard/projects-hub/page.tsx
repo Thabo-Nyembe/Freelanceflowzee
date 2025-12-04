@@ -11,6 +11,7 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
+import { AIEnhancedInput } from '@/components/ai-create/ai-enhanced-input'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -939,12 +940,15 @@ export default function ProjectsOverviewPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="edit-description">Description</Label>
-                  <Textarea
-                    id="edit-description"
+                  <AIEnhancedInput
+                    value={editFormData.description || ''}
+                    onChange={(text) => setEditFormData(prev => ({ ...prev, description: text }))}
+                    contentType="description"
                     placeholder="Project description and goals..."
-                    value={editFormData.description}
-                    onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
-                    rows={3}
+                    showSuggestions={true}
+                    showEnhance={true}
+                    showGenerate={true}
+                    minRows={3}
                   />
                 </div>
 

@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { GlobalPresenceWidget } from '@/components/realtime/presence-indicator'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   BarChart3,
   FolderOpen,
@@ -498,6 +500,7 @@ function SortableSubcategory({
 
 export function SidebarEnhanced() {
   const pathname = usePathname()
+  const { userId } = useCurrentUser()
   const [categories, setCategories] = useState<SidebarCategory[]>(DEFAULT_CATEGORIES)
   const [expandedCategories, setExpandedCategories] = useState<string[]>([
     'ai-creative-suite',
@@ -863,6 +866,11 @@ export function SidebarEnhanced() {
             </span>
           </Link>
         </div>
+      </div>
+
+      {/* Online Presence Widget */}
+      <div className="px-4 pb-4">
+        <GlobalPresenceWidget userId={userId || 'demo-user'} />
       </div>
 
       {/* Customize Navigation - Bottom Section */}
