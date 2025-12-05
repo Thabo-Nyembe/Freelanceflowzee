@@ -59,6 +59,10 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useInfiniteScroll } from '@/lib/hooks/use-infinite-scroll'
 
+// SECURE FILE DELIVERY INTEGRATION
+import { SecureFileUpload } from '@/components/secure-files/secure-file-upload'
+import { Shield, DollarSign } from 'lucide-react'
+
 const logger = createFeatureLogger('Files')
 
 // ============================================================================
@@ -287,6 +291,7 @@ export default function FilesPage() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false)
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false)
+  const [isSecureUploadOpen, setIsSecureUploadOpen] = useState(false) // SECURE FILE UPLOAD
 
   // FORM DATA
   const [uploadFiles, setUploadFiles] = useState<FileList | null>(null)
@@ -898,6 +903,15 @@ export default function FilesPage() {
               <Upload className="h-4 w-4 mr-2" />
               Upload Files
             </Button>
+            <Button
+              size="sm"
+              variant="default"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              onClick={() => setIsSecureUploadOpen(true)}
+            >
+              <Shield className="h-4 w-4 mr-2" />
+              Secure Upload
+            </Button>
             {state.selectedFiles.length > 0 && (
               <Button variant="destructive" size="sm" onClick={handleBulkDelete}>
                 <Trash2 className="h-4 w-4 mr-2" />
@@ -1450,6 +1464,16 @@ export default function FilesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Secure File Upload Dialog */}
+      <SecureFileUpload
+        open={isSecureUploadOpen}
+        onOpenChange={setIsSecureUploadOpen}
+        onSuccess={() => {
+          toast.success('File uploaded securely!')
+          refreshFiles()
+        }}
+      />
     </div>
   )
 }
