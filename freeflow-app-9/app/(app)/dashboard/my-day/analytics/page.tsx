@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useReducer } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import {
   Brain,
   TrendingUp,
@@ -16,6 +17,12 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 
+// A+++ UTILITIES
+import { CardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+
 // MY DAY UTILITIES
 import {
   taskReducer,
@@ -26,17 +33,29 @@ import {
 const logger = createFeatureLogger('MyDay-Analytics')
 
 export default function AnalyticsPage() {
+  // REAL USER AUTH
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [state] = useReducer(taskReducer, initialTaskState)
   const [workPatternAnalytics, setWorkPatternAnalytics] = useState<any>(null)
-  const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false)
+  const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   // Fetch AI Work Pattern Analytics
   useEffect(() => {
     const fetchWorkPatternAnalytics = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoadingAnalytics(false)
+        return
+      }
+
       try {
         setIsLoadingAnalytics(true)
+        setError(null)
 
-        logger.info('Fetching work pattern analytics', {})
+        logger.info('Fetching work pattern analytics', { userId })
 
         const response = await fetch('/api/my-day/analytics?days=30&includeSchedule=true')
         const data = await response.json()
@@ -45,42 +64,90 @@ export default function AnalyticsPage() {
           setWorkPatternAnalytics(data.data)
 
           logger.info('Work pattern analytics loaded', {
-            analyzedTasks: data.data.metadata.analyzedTasks,
-            completionRate: data.data.insights.completionRate
+            userId,
+            analyzedTasks: data.data.metadata?.analyzedTasks || 0,
+            completionRate: data.data.insights?.completionRate || 0
           })
 
-          toast.success('AI Analysis Complete', {
-            description: `Analyzed ${data.data.metadata.analyzedTasks} tasks from the past 30 days`
-          })
+          announce('Productivity analytics loaded', 'polite')
         } else {
           throw new Error(data.error || 'Failed to fetch analytics')
         }
 
         setIsLoadingAnalytics(false)
       } catch (error: any) {
-        logger.error('Failed to fetch work pattern analytics', { error: error.message })
+        logger.error('Failed to fetch work pattern analytics', { error: error.message, userId })
         setIsLoadingAnalytics(false)
-        // Silently fail - use mock data
-        logger.warn('Using mock analytics data')
+        setError(error.message)
+        announce('Error loading analytics', 'assertive')
       }
     }
 
-    if (!workPatternAnalytics) {
-      fetchWorkPatternAnalytics()
+    fetchWorkPatternAnalytics()
+  }, [userId, announce])
+
+  // Refresh handler
+  const handleRefresh = async () => {
+    if (!userId) return
+    setIsLoadingAnalytics(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/my-day/analytics?days=30&includeSchedule=true')
+      const data = await response.json()
+
+      if (data.success) {
+        setWorkPatternAnalytics(data.data)
+        toast.success('Analytics refreshed')
+      } else {
+        throw new Error(data.error || 'Failed to refresh')
+      }
+    } catch (error: any) {
+      toast.error('Failed to refresh analytics')
+      setError(error.message)
+    } finally {
+      setIsLoadingAnalytics(false)
     }
-  }, [workPatternAnalytics])
+  }
+
+  // Loading state
+  if (isLoadingAnalytics || userLoading) {
+    return (
+      <div className="space-y-6">
+        <CardSkeleton />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => <CardSkeleton key={i} />)}
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="p-6">
+        <ErrorEmptyState error={error} onRetry={handleRefresh} />
+      </div>
+    )
+  }
 
   const { totalTasks, completionRate, focusHours, focusMinutes, productivityScore } = calculateMetrics(state, workPatternAnalytics)
 
   return (
     <div className="space-y-6">
       {/* AI-POWERED PRODUCTIVITY INSIGHTS */}
-      <div>
-        <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
-          <Brain className="h-6 w-6 text-purple-600" />
-          AI Productivity Insights
-        </h2>
-        <p className="text-gray-600">Based on your work patterns and performance data</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold mb-2 flex items-center gap-2">
+            <Brain className="h-6 w-6 text-purple-600" />
+            AI Productivity Insights
+          </h2>
+          <p className="text-gray-600">Based on your work patterns and performance data</p>
+        </div>
+        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoadingAnalytics}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingAnalytics ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
 
       {/* Peak Performance Window */}
