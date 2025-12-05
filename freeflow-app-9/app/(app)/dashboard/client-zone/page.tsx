@@ -53,6 +53,24 @@ import { CardSkeleton, ListSkeleton, DashboardSkeleton } from '@/components/ui/l
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+
+// CLIENT ZONE DATABASE QUERIES
+import {
+  getClientZoneDashboard,
+  getClientProjects,
+  getProjectMessages,
+  getProjectFiles,
+  getProjectInvoices,
+  createRevisionRequest,
+  approveDeliverable,
+  sendMessage,
+  submitFeedback,
+  type ClientProject,
+  type ClientMessage,
+  type ClientFile,
+  type ClientInvoice
+} from '@/lib/client-zone-queries'
 
 // NEW CLIENT VALUE COMPONENTS
 import { ClientOnboardingTour } from '@/components/onboarding/client-onboarding-tour'
@@ -86,9 +104,12 @@ const FloatingParticle = ({ delay = 0, color = 'blue' }: { delay?: number; color
 }
 
 // ============================================================================
-// KAZI CLIENT DATA MODEL
+// MOCK DATA - DEPRECATED (Replaced with database queries)
 // ============================================================================
+// NOTE: This mock data is kept for reference but is no longer used.
+// All data is now loaded from the database via getClientZoneDashboard()
 
+/* DEPRECATED - Using real database data instead
 const KAZI_CLIENT_DATA = {
   clientInfo: {
     name: 'Acme Corporation',
@@ -222,6 +243,7 @@ const KAZI_CLIENT_DATA = {
     filesShared: 23
   }
 }
+*/ // End of deprecated KAZI_CLIENT_DATA
 
 // ============================================================================
 // UTILITY FUNCTIONS
@@ -264,6 +286,7 @@ export default function ClientZonePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('projects')
@@ -275,31 +298,56 @@ export default function ClientZonePage() {
   const [userRole, setUserRole] = useState<'freelancer' | 'client' | 'both'>('client')
   const [showRoleSwitcher, setShowRoleSwitcher] = useState(false)
 
-  // A+++ LOAD CLIENT ZONE DATA
+  // CLIENT ZONE DATA STATE (replaces KAZI_CLIENT_DATA)
+  const [dashboardData, setDashboardData] = useState<any>(null)
+  const [projects, setProjects] = useState<ClientProject[]>([])
+  const [messages, setMessages] = useState<ClientMessage[]>([])
+  const [files, setFiles] = useState<ClientFile[]>([])
+  const [invoices, setInvoices] = useState<ClientInvoice[]>([])
+
+  // A+++ LOAD CLIENT ZONE DATA FROM DATABASE
   useEffect(() => {
     const loadClientZoneData = async () => {
+      if (!userId) {
+        logger.info('Waiting for user authentication')
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
+        logger.info('Loading client zone data', { userId })
 
-        // Simulate data loading
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            resolve(null)
-          }, 500) // Reduced from 1000ms to 500ms for faster loading
-        })
+        // Load dashboard data from database
+        const data = await getClientZoneDashboard()
+
+        setDashboardData(data)
+        setProjects(data.recentProjects)
+        setMessages(data.recentMessages)
+        setInvoices(data.pendingInvoices)
 
         setIsLoading(false)
         announce('Client zone loaded successfully', 'polite')
+        logger.info('Client zone data loaded', {
+          projectCount: data.recentProjects.length,
+          messageCount: data.recentMessages.length,
+          invoiceCount: data.pendingInvoices.length,
+          userId
+        })
       } catch (err) {
+        logger.error('Failed to load client zone', { error: err, userId })
         setError(err instanceof Error ? err.message : 'Failed to load client zone data')
         setIsLoading(false)
+        toast.error('Failed to load client zone', {
+          description: err instanceof Error ? err.message : 'Please try again'
+        })
         announce('Error loading client zone', 'assertive')
       }
     }
 
     loadClientZoneData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ============================================================================
   // HANDLER 1: NOTIFICATIONS
