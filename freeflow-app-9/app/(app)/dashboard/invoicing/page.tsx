@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -30,6 +30,7 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 const logger = createFeatureLogger('InvoicingPage')
 
@@ -52,6 +53,10 @@ export default function InvoicingPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [selectedInvoices, setSelectedInvoices] = useState<Invoice[]>([])
   const [filterStatus, setFilterStatus] = useState<InvoiceStatus | 'all'>('all')
+
+  // Invoice Details Modal
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const [detailsInvoice, setDetailsInvoice] = useState<Invoice | null>(null)
 
   // A+++ LOAD INVOICING DATA
   useEffect(() => {
@@ -224,18 +229,24 @@ export default function InvoicingPage() {
     announce('Switched to invoice creation view', 'polite')
   }
 
-  const handleViewDetails = async (invoiceId: string) => {
+  const handleViewDetails = useCallback((invoiceId: string) => {
     if (!userId) {
       toast.error('Please log in to view invoice details')
       logger.warn('View details attempted without authentication')
       return
     }
-      logger.info('Viewing invoice details', { userId, invoiceId })
 
-    // For now, announce the action - later we'll create a detail modal or page
-    announce(`Viewing details for invoice ${invoiceId}`, 'polite')
-    toast.info('Invoice details view coming soon')
-  }
+    const invoice = invoices.find(inv => inv.id === invoiceId)
+    if (!invoice) {
+      toast.error('Invoice not found')
+      return
+    }
+
+    logger.info('Viewing invoice details', { userId, invoiceId })
+    setDetailsInvoice(invoice)
+    setIsDetailsOpen(true)
+    announce(`Viewing details for invoice ${invoice.invoiceNumber}`, 'polite')
+  }, [userId, invoices, announce])
 
   const handleSendInvoice = async (invoice: Invoice) => {
     if (!userId) {toast.error('Please log in to send invoices')
@@ -1371,6 +1382,150 @@ export default function InvoicingPage() {
           {viewMode === 'create' && renderCreate()}
         </ScrollReveal>
       </div>
+
+      {/* Invoice Details Modal */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl">
+              Invoice {detailsInvoice?.invoiceNumber}
+            </DialogTitle>
+            <DialogDescription>
+              Invoice details for {detailsInvoice?.clientName}
+            </DialogDescription>
+          </DialogHeader>
+
+          {detailsInvoice && (
+            <div className="space-y-6 py-4">
+              {/* Status Badge */}
+              <div className="flex items-center gap-3">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getInvoiceStatusColor(detailsInvoice.status)}`}>
+                  {detailsInvoice.status}
+                </span>
+                {isInvoiceOverdue(detailsInvoice) && (
+                  <span className="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-700">
+                    {getDaysOverdue(detailsInvoice.dueDate)} days overdue
+                  </span>
+                )}
+              </div>
+
+              {/* Client Info */}
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                <h4 className="font-semibold text-sm text-muted-foreground">Bill To</h4>
+                <div className="text-lg font-medium">{detailsInvoice.clientName}</div>
+                <div className="text-sm text-muted-foreground">{detailsInvoice.clientEmail}</div>
+              </div>
+
+              {/* Invoice Details Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <div className="text-xs text-muted-foreground mb-1">Issue Date</div>
+                  <div className="font-medium">
+                    {new Date(detailsInvoice.issueDate).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <div className="text-xs text-muted-foreground mb-1">Due Date</div>
+                  <div className="font-medium">
+                    {new Date(detailsInvoice.dueDate).toLocaleDateString()}
+                  </div>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <div className="text-xs text-muted-foreground mb-1">Subtotal</div>
+                  <div className="font-medium">{formatCurrency(detailsInvoice.subtotal)}</div>
+                </div>
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <div className="text-xs text-muted-foreground mb-1">Tax ({detailsInvoice.taxRate}%)</div>
+                  <div className="font-medium">{formatCurrency(detailsInvoice.taxAmount)}</div>
+                </div>
+              </div>
+
+              {/* Line Items */}
+              {detailsInvoice.items && detailsInvoice.items.length > 0 && (
+                <div>
+                  <h4 className="font-semibold mb-3">Line Items</h4>
+                  <div className="border rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted/50">
+                        <tr>
+                          <th className="text-left p-3 font-medium">Description</th>
+                          <th className="text-right p-3 font-medium">Qty</th>
+                          <th className="text-right p-3 font-medium">Rate</th>
+                          <th className="text-right p-3 font-medium">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {detailsInvoice.items.map((item, idx) => (
+                          <tr key={idx} className="border-t">
+                            <td className="p-3">{item.description}</td>
+                            <td className="p-3 text-right">{item.quantity}</td>
+                            <td className="p-3 text-right">{formatCurrency(item.rate)}</td>
+                            <td className="p-3 text-right">{formatCurrency(item.amount)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Total */}
+              <div className="flex justify-end">
+                <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 rounded-lg p-4 text-right">
+                  <div className="text-sm text-muted-foreground mb-1">Total Amount</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {formatCurrency(detailsInvoice.total)}
+                  </div>
+                  {detailsInvoice.amountPaid > 0 && (
+                    <div className="text-sm text-muted-foreground mt-1">
+                      Paid: {formatCurrency(detailsInvoice.amountPaid)} |
+                      Balance: {formatCurrency(detailsInvoice.total - detailsInvoice.amountPaid)}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Notes */}
+              {detailsInvoice.notes && (
+                <div>
+                  <h4 className="font-semibold mb-2">Notes</h4>
+                  <p className="text-sm text-muted-foreground bg-muted/30 rounded-lg p-3">
+                    {detailsInvoice.notes}
+                  </p>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex items-center gap-2 pt-4 border-t">
+                <button
+                  onClick={() => {
+                    handleSendInvoice(detailsInvoice)
+                    setIsDetailsOpen(false)
+                  }}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg text-sm font-medium hover:from-green-600 hover:to-emerald-600 transition-colors"
+                >
+                  📧 Send Invoice
+                </button>
+                <button
+                  onClick={() => {
+                    handleDownloadPDF(detailsInvoice)
+                    setIsDetailsOpen(false)
+                  }}
+                  className="flex-1 px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors"
+                >
+                  📥 Download PDF
+                </button>
+                <button
+                  onClick={() => setIsDetailsOpen(false)}
+                  className="px-4 py-2 border rounded-lg text-sm font-medium hover:bg-muted/50 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

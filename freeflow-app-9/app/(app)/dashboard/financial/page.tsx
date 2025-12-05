@@ -1,11 +1,16 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
@@ -44,6 +49,17 @@ export default function FinancialOverviewPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [insights, setInsights] = useState<FinancialInsight[]>([])
   const [overview, setOverview] = useState<any>(null)
+
+  // Add Transaction Modal State
+  const [isAddTransactionOpen, setIsAddTransactionOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [transactionForm, setTransactionForm] = useState({
+    type: 'income' as 'income' | 'expense',
+    amount: '',
+    category: '',
+    description: '',
+    date: new Date().toISOString().split('T')[0]
+  })
 
   useEffect(() => {
     if (!userId) return
@@ -190,6 +206,67 @@ export default function FinancialOverviewPage() {
     }
   }
 
+  const handleAddTransaction = useCallback(async () => {
+    if (!userId) {
+      toast.error('Please log in to add transactions')
+      return
+    }
+
+    const amount = parseFloat(transactionForm.amount)
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('Please enter a valid amount')
+      return
+    }
+
+    if (!transactionForm.category) {
+      toast.error('Please select a category')
+      return
+    }
+
+    setIsSaving(true)
+    announce('Adding transaction', 'polite')
+
+    try {
+      const { createTransaction } = await import('@/lib/financial-queries')
+
+      const newTransaction = {
+        type: transactionForm.type,
+        amount: transactionForm.type === 'expense' ? -amount : amount,
+        category: transactionForm.category,
+        description: transactionForm.description || `${transactionForm.type} - ${transactionForm.category}`,
+        date: transactionForm.date
+      }
+
+      const { data, error } = await createTransaction(userId, newTransaction)
+
+      if (error) throw error
+
+      // Add to local state
+      setTransactions(prev => [data, ...prev])
+
+      toast.success('Transaction added', {
+        description: `${transactionForm.type === 'income' ? '+' : '-'}${formatCurrency(amount)}`
+      })
+      announce('Transaction added successfully', 'polite')
+
+      // Reset form
+      setTransactionForm({
+        type: 'income',
+        amount: '',
+        category: '',
+        description: '',
+        date: new Date().toISOString().split('T')[0]
+      })
+      setIsAddTransactionOpen(false)
+    } catch (err: any) {
+      logger.error('Failed to add transaction', { error: err })
+      toast.error('Failed to add transaction')
+      announce('Failed to add transaction', 'assertive')
+    } finally {
+      setIsSaving(false)
+    }
+  }, [userId, transactionForm, announce])
+
   const handleImplementInsight = async (insight: FinancialInsight) => {
     logger.info('Implement insight', { insightId: insight.id, title: insight.title })
 
@@ -284,7 +361,7 @@ export default function FinancialOverviewPage() {
         description="Start tracking your finances by adding transactions and invoices"
         action={{
           label: 'Add Transaction',
-          onClick: () => toast.info('Add transaction coming soon')
+          onClick: () => setIsAddTransactionOpen(true)
         }}
       />
     )
@@ -518,6 +595,146 @@ export default function FinancialOverviewPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Add Transaction Dialog */}
+      <Dialog open={isAddTransactionOpen} onOpenChange={setIsAddTransactionOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Add Transaction
+            </DialogTitle>
+            <DialogDescription>
+              Record a new income or expense transaction
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Transaction Type */}
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select
+                value={transactionForm.type}
+                onValueChange={(value: 'income' | 'expense') =>
+                  setTransactionForm(prev => ({ ...prev, type: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="income">
+                    <span className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-green-500" />
+                      Income
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="expense">
+                    <span className="flex items-center gap-2">
+                      <TrendingDown className="h-4 w-4 text-red-500" />
+                      Expense
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Amount */}
+            <div className="space-y-2">
+              <Label htmlFor="amount">Amount</Label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
+                  className="pl-9"
+                  value={transactionForm.amount}
+                  onChange={(e) => setTransactionForm(prev => ({ ...prev, amount: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            {/* Category */}
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select
+                value={transactionForm.category}
+                onValueChange={(value) => setTransactionForm(prev => ({ ...prev, category: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {transactionForm.type === 'income' ? (
+                    <>
+                      <SelectItem value="client_payment">Client Payment</SelectItem>
+                      <SelectItem value="project_revenue">Project Revenue</SelectItem>
+                      <SelectItem value="subscription">Subscription</SelectItem>
+                      <SelectItem value="consulting">Consulting</SelectItem>
+                      <SelectItem value="other_income">Other Income</SelectItem>
+                    </>
+                  ) : (
+                    <>
+                      <SelectItem value="software">Software & Tools</SelectItem>
+                      <SelectItem value="marketing">Marketing</SelectItem>
+                      <SelectItem value="office">Office Expenses</SelectItem>
+                      <SelectItem value="travel">Travel</SelectItem>
+                      <SelectItem value="contractor">Contractor Payments</SelectItem>
+                      <SelectItem value="utilities">Utilities</SelectItem>
+                      <SelectItem value="other_expense">Other Expense</SelectItem>
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Date */}
+            <div className="space-y-2">
+              <Label htmlFor="date">Date</Label>
+              <Input
+                id="date"
+                type="date"
+                value={transactionForm.date}
+                onChange={(e) => setTransactionForm(prev => ({ ...prev, date: e.target.value }))}
+              />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2">
+              <Label htmlFor="description">Description (optional)</Label>
+              <Textarea
+                id="description"
+                placeholder="Add a note about this transaction..."
+                value={transactionForm.description}
+                onChange={(e) => setTransactionForm(prev => ({ ...prev, description: e.target.value }))}
+                rows={2}
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsAddTransactionOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAddTransaction}
+              disabled={isSaving || !transactionForm.amount || !transactionForm.category}
+              className={transactionForm.type === 'income'
+                ? 'bg-green-500 hover:bg-green-600'
+                : 'bg-red-500 hover:bg-red-600'
+              }
+            >
+              {isSaving ? 'Adding...' : `Add ${transactionForm.type === 'income' ? 'Income' : 'Expense'}`}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

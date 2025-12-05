@@ -93,6 +93,17 @@ export default function UserManagementPage() {
     status: 'active' as string
   })
 
+  // BULK EDIT STATE
+  const [isBulkEditOpen, setIsBulkEditOpen] = useState(false)
+  const [bulkEditForm, setBulkEditForm] = useState({
+    updateRole: false,
+    role: 'member' as string,
+    updateDepartment: false,
+    department: '',
+    updateStatus: false,
+    status: 'active' as string
+  })
+
   // A+++ LOAD USER MANAGEMENT DATA
   useEffect(() => {
     const loadUserManagementData = async () => {
@@ -307,7 +318,10 @@ export default function UserManagementPage() {
         window.location.href = `mailto:${emails}`
         toast.success('Email client opened')
       } else if (bulkActionType === 'edit') {
-        toast.info('Bulk edit feature coming soon')
+        // Open bulk edit modal
+        setIsBulkEditOpen(true)
+        setIsBulkActionDialogOpen(false)
+        return // Don't clear selectedUsers yet
       }
 
       setIsBulkActionDialogOpen(false)
@@ -376,6 +390,56 @@ export default function UserManagementPage() {
       setIsProcessing(false)
     }
   }, [announce])
+
+  const handleApplyBulkEdit = useCallback(async () => {
+    if (selectedUsers.length === 0) {
+      toast.error('No users selected')
+      return
+    }
+
+    const updates: any = {}
+    if (bulkEditForm.updateRole) updates.role = bulkEditForm.role
+    if (bulkEditForm.updateDepartment) updates.department = bulkEditForm.department
+    if (bulkEditForm.updateStatus) updates.status = bulkEditForm.status
+
+    if (Object.keys(updates).length === 0) {
+      toast.error('No changes selected')
+      return
+    }
+
+    setIsProcessing(true)
+    announce('Applying bulk edits', 'polite')
+
+    try {
+      const { bulkUpdateUsers } = await import('@/lib/user-management-queries')
+      await bulkUpdateUsers(selectedUsers, updates)
+
+      // Update local state
+      setUsers(prev => prev.map(user =>
+        selectedUsers.includes(user.id) ? { ...user, ...updates } : user
+      ))
+
+      toast.success('Bulk edit applied', {
+        description: `Updated ${selectedUsers.length} users`
+      })
+      announce(`${selectedUsers.length} users updated`, 'polite')
+      setIsBulkEditOpen(false)
+      setSelectedUsers([])
+      setBulkEditForm({
+        updateRole: false,
+        role: 'member',
+        updateDepartment: false,
+        department: '',
+        updateStatus: false,
+        status: 'active'
+      })
+    } catch (err) {
+      toast.error('Failed to apply bulk edit')
+      announce('Bulk edit failed', 'assertive')
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [selectedUsers, bulkEditForm, announce])
 
   // A+++ LOADING STATE
   if (isLoading) {
@@ -1160,6 +1224,160 @@ export default function UserManagementPage() {
               </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Edit Dialog */}
+      <Dialog open={isBulkEditOpen} onOpenChange={setIsBulkEditOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5" />
+              Bulk Edit Users
+            </DialogTitle>
+            <DialogDescription>
+              Apply changes to {selectedUsers.length} selected user(s). Only enabled fields will be updated.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Role Update */}
+            <div className="flex items-center space-x-4">
+              <Switch
+                id="update-role"
+                checked={bulkEditForm.updateRole}
+                onCheckedChange={(checked) => setBulkEditForm(prev => ({ ...prev, updateRole: checked }))}
+              />
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="update-role" className={!bulkEditForm.updateRole ? 'text-muted-foreground' : ''}>
+                  Update Role
+                </Label>
+                <Select
+                  value={bulkEditForm.role}
+                  onValueChange={(value) => setBulkEditForm(prev => ({ ...prev, role: value }))}
+                  disabled={!bulkEditForm.updateRole}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="member">Member</SelectItem>
+                    <SelectItem value="viewer">Viewer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Department Update */}
+            <div className="flex items-center space-x-4">
+              <Switch
+                id="update-department"
+                checked={bulkEditForm.updateDepartment}
+                onCheckedChange={(checked) => setBulkEditForm(prev => ({ ...prev, updateDepartment: checked }))}
+              />
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="update-department" className={!bulkEditForm.updateDepartment ? 'text-muted-foreground' : ''}>
+                  Update Department
+                </Label>
+                <Select
+                  value={bulkEditForm.department}
+                  onValueChange={(value) => setBulkEditForm(prev => ({ ...prev, department: value }))}
+                  disabled={!bulkEditForm.updateDepartment}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.name}>
+                        {dept.name}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="engineering">Engineering</SelectItem>
+                    <SelectItem value="design">Design</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
+                    <SelectItem value="sales">Sales</SelectItem>
+                    <SelectItem value="support">Support</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Status Update */}
+            <div className="flex items-center space-x-4">
+              <Switch
+                id="update-status"
+                checked={bulkEditForm.updateStatus}
+                onCheckedChange={(checked) => setBulkEditForm(prev => ({ ...prev, updateStatus: checked }))}
+              />
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="update-status" className={!bulkEditForm.updateStatus ? 'text-muted-foreground' : ''}>
+                  Update Status
+                </Label>
+                <Select
+                  value={bulkEditForm.status}
+                  onValueChange={(value) => setBulkEditForm(prev => ({ ...prev, status: value }))}
+                  disabled={!bulkEditForm.updateStatus}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="suspended">Suspended</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Selected Users Preview */}
+            <div className="bg-muted/50 rounded-lg p-3">
+              <h4 className="text-sm font-medium mb-2">Selected Users ({selectedUsers.length})</h4>
+              <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                {users
+                  .filter(u => selectedUsers.includes(u.id))
+                  .slice(0, 5)
+                  .map(user => (
+                    <Badge key={user.id} variant="secondary" className="text-xs">
+                      {user.firstName} {user.lastName}
+                    </Badge>
+                  ))}
+                {selectedUsers.length > 5 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{selectedUsers.length - 5} more
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsBulkEditOpen(false)
+                setBulkEditForm({
+                  updateRole: false,
+                  role: 'member',
+                  updateDepartment: false,
+                  department: '',
+                  updateStatus: false,
+                  status: 'active'
+                })
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleApplyBulkEdit}
+              disabled={isProcessing || (!bulkEditForm.updateRole && !bulkEditForm.updateDepartment && !bulkEditForm.updateStatus)}
+            >
+              {isProcessing ? 'Applying...' : 'Apply Changes'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
