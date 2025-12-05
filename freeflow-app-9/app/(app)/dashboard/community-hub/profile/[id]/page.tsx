@@ -40,8 +40,12 @@ import {
   Video,
   Image as ImageIcon,
   Code,
-  Sparkles
+  Sparkles,
+  Send,
+  X
 } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -109,6 +113,10 @@ export default function CommunityProfilePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isFollowing, setIsFollowing] = useState(false)
   const [activeTab, setActiveTab] = useState('portfolio')
+  const [isMessageOpen, setIsMessageOpen] = useState(false)
+  const [messageText, setMessageText] = useState('')
+  const [isSendingMessage, setIsSendingMessage] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<PortfolioProject | null>(null)
 
   // Mock member data
   const member = {
@@ -306,13 +314,46 @@ export default function CommunityProfilePage() {
   }
 
   const handleMessage = () => {
-    toast.info('Opening message composer...')
-    logger.info('Message initiated', { memberId: member.id })
+    setIsMessageOpen(true)
+    setMessageText('')
+    logger.info('Message composer opened', { memberId: member.id })
+    announce('Message composer opened', 'polite')
+  }
+
+  const handleSendMessage = async () => {
+    if (!messageText.trim()) {
+      toast.error('Please enter a message')
+      return
+    }
+
+    setIsSendingMessage(true)
+    logger.info('Sending message', { memberId: member.id, messageLength: messageText.length })
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      toast.success('Message sent!', {
+        description: `Your message to ${member.name} has been delivered`
+      })
+      logger.info('Message sent successfully', { memberId: member.id })
+      announce('Message sent successfully', 'polite')
+
+      setIsMessageOpen(false)
+      setMessageText('')
+    } catch (error) {
+      toast.error('Failed to send message')
+      logger.error('Message send failed', { error, memberId: member.id })
+    } finally {
+      setIsSendingMessage(false)
+    }
   }
 
   const handleHire = () => {
-    toast.success('Redirecting to hire page...')
-    logger.info('Hire initiated', { memberId: member.id })
+    toast.success('Redirecting to hire page...', {
+      description: `Starting a project with ${member.name}`
+    })
+    logger.info('Hire initiated', { memberId: member.id, hourlyRate: member.hourlyRate })
     router.push(`/dashboard/escrow?freelancer=${member.id}`)
   }
 
@@ -328,14 +369,16 @@ export default function CommunityProfilePage() {
       toast.success('Profile link copied to clipboard!')
     }
     logger.info('Profile shared', { memberId: member.id })
+    announce('Profile link copied', 'polite')
   }
 
   const handleProjectClick = (project: PortfolioProject) => {
+    setSelectedProject(project)
     logger.info('Portfolio project clicked', {
       projectId: project.id,
       title: project.title
     })
-    // Navigate to project detail or open modal
+    announce(`Viewing project: ${project.title}`, 'polite')
   }
 
   if (isLoading) {
@@ -790,6 +833,176 @@ export default function CommunityProfilePage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Message Dialog */}
+      <Dialog open={isMessageOpen} onOpenChange={setIsMessageOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-blue-600" />
+              Message {member.name}
+            </DialogTitle>
+            <DialogDescription>
+              Send a direct message. Average response time: {member.responseTime}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <Avatar className="w-10 h-10">
+                <AvatarImage src={member.avatar} alt={member.name} />
+                <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="font-medium">{member.name}</p>
+                <p className="text-sm text-gray-600">{member.title}</p>
+              </div>
+              {member.isOnline && (
+                <Badge className="bg-green-100 text-green-800 ml-auto">Online</Badge>
+              )}
+            </div>
+
+            <Textarea
+              placeholder={`Hi ${member.name.split(' ')[0]}, I'd like to discuss a project with you...`}
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              rows={5}
+              className="resize-none"
+            />
+
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-500">
+                {messageText.length} / 1000 characters
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setIsMessageOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={isSendingMessage || !messageText.trim()}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                >
+                  {isSendingMessage ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Send Message
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Project Preview Dialog */}
+      <Dialog open={!!selectedProject} onOpenChange={(open) => !open && setSelectedProject(null)}>
+        <DialogContent className="sm:max-w-[700px]">
+          {selectedProject && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  {selectedProject.title}
+                  {selectedProject.featured && (
+                    <Badge className="bg-yellow-500">Featured</Badge>
+                  )}
+                </DialogTitle>
+                <DialogDescription>
+                  {selectedProject.category} • {new Date(selectedProject.createdAt).toLocaleDateString()}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4">
+                {/* Thumbnail */}
+                <div className="aspect-video bg-gray-200 rounded-lg relative overflow-hidden">
+                  <ImageIcon className="w-20 h-20 text-gray-400 absolute inset-0 m-auto" />
+                </div>
+
+                {/* Description */}
+                <div>
+                  <h4 className="font-medium mb-2">Description</h4>
+                  <p className="text-gray-600">{selectedProject.description}</p>
+                </div>
+
+                {/* Technologies */}
+                <div>
+                  <h4 className="font-medium mb-2">Technologies Used</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProject.technologies.map(tech => (
+                      <Badge key={tech} variant="outline">{tech}</Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div>
+                  <h4 className="font-medium mb-2">Tags</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProject.tags.map(tag => (
+                      <Badge key={tag} variant="secondary">{tag}</Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="flex items-center gap-6 pt-4 border-t">
+                  <div className="flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-red-500" />
+                    <span className="font-medium">{selectedProject.likes}</span>
+                    <span className="text-gray-500">likes</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Eye className="w-5 h-5 text-blue-500" />
+                    <span className="font-medium">{selectedProject.views}</span>
+                    <span className="text-gray-500">views</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-purple-500" />
+                    <span className="font-medium">{selectedProject.comments}</span>
+                    <span className="text-gray-500">comments</span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 pt-4">
+                  {selectedProject.liveUrl && (
+                    <Button variant="outline" asChild>
+                      <a href={selectedProject.liveUrl} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        View Live
+                      </a>
+                    </Button>
+                  )}
+                  {selectedProject.githubUrl && (
+                    <Button variant="outline" asChild>
+                      <a href={selectedProject.githubUrl} target="_blank" rel="noopener noreferrer">
+                        <Github className="w-4 h-4 mr-2" />
+                        View Code
+                      </a>
+                    </Button>
+                  )}
+                  <Button
+                    className="ml-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                    onClick={() => {
+                      setSelectedProject(null)
+                      handleHire()
+                    }}
+                  >
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Hire for Similar Project
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
