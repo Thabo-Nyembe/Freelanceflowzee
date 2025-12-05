@@ -62,6 +62,8 @@ export default function WorkflowBuilderPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [selectedWorkflow, setSelectedWorkflow] = useState<any>(null)
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [isImporting, setIsImporting] = useState(false)
 
   // A+++ LOAD WORKFLOW DATA
   const loadWorkflowData = async () => {
@@ -115,12 +117,64 @@ export default function WorkflowBuilderPage() {
 
   const handleEditWorkflow = (workflow: any) => {
     announce(`Editing workflow: ${workflow.name}`, 'polite')
-    // Navigate to workflow editor (to be implemented)
-    toast.info('Workflow Editor', {
-      description: 'Visual workflow editor coming soon! For now, you can view workflow details.',
-      duration: 3000
-    })
-    logger.info('User clicked Edit Workflow', { workflowId: workflow.id })
+    setSelectedWorkflow(workflow)
+    setIsEditMode(true)
+    setIsDetailsDialogOpen(true)
+    logger.info('Workflow editor opened', { workflowId: workflow.id, mode: 'edit' })
+  }
+
+  const handleImportWorkflow = async () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+
+      setIsImporting(true)
+      announce('Importing workflow...', 'polite')
+
+      try {
+        const content = await file.text()
+        const workflowData = JSON.parse(content)
+
+        // Validate basic structure
+        if (!workflowData.name || !workflowData.steps) {
+          throw new Error('Invalid workflow file format')
+        }
+
+        // Import the workflow
+        const { createWorkflow } = await import('@/lib/workflow-builder-queries')
+        const newWorkflow = await createWorkflow({
+          userId: userId!,
+          name: workflowData.name + ' (Imported)',
+          description: workflowData.description || 'Imported workflow',
+          trigger_type: workflowData.trigger_type || 'manual',
+          trigger_config: workflowData.trigger_config || {},
+          steps: workflowData.steps,
+          status: 'draft'
+        })
+
+        await loadWorkflowData()
+
+        toast.success('Workflow imported!', {
+          description: `"${workflowData.name}" has been imported successfully`
+        })
+        logger.info('Workflow imported', { workflowName: workflowData.name })
+        announce('Workflow imported successfully', 'polite')
+      } catch (error) {
+        logger.error('Failed to import workflow', { error })
+        toast.error('Import failed', {
+          description: error instanceof Error ? error.message : 'Invalid workflow file'
+        })
+        announce('Import failed', 'assertive')
+      } finally {
+        setIsImporting(false)
+      }
+    }
+
+    input.click()
   }
 
   const handleToggleWorkflow = async (workflow: any) => {
@@ -356,9 +410,23 @@ export default function WorkflowBuilderPage() {
               <Plus className="h-4 w-4 mr-2" />
               Create Workflow
             </Button>
-            <Button variant="outline" className="border-gray-300" onClick={() => announce('Import feature coming soon', 'polite')}>
-              <Download className="h-4 w-4 mr-2" />
-              Import
+            <Button
+              variant="outline"
+              className="border-gray-300"
+              onClick={handleImportWorkflow}
+              disabled={isImporting}
+            >
+              {isImporting ? (
+                <>
+                  <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+                  Importing...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Import
+                </>
+              )}
             </Button>
           </div>
         </div>
