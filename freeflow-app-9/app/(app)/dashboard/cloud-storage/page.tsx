@@ -426,10 +426,76 @@ export default function CloudStoragePage() {
           </CardTitle>
           <CardDescription>Detailed storage usage and analytics</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <BarChart3 className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-            <p className="text-gray-500">Storage analytics and insights coming soon</p>
+        <CardContent className="space-y-6">
+          {/* Usage Trend */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-medium">Monthly Usage Trend</h4>
+              <Badge variant="outline" className="text-xs">Last 6 months</Badge>
+            </div>
+            <div className="h-32 flex items-end justify-between gap-2">
+              {[
+                { month: 'Jul', usage: 45, color: 'bg-blue-500' },
+                { month: 'Aug', usage: 52, color: 'bg-blue-500' },
+                { month: 'Sep', usage: 58, color: 'bg-blue-500' },
+                { month: 'Oct', usage: 65, color: 'bg-blue-500' },
+                { month: 'Nov', usage: 72, color: 'bg-blue-500' },
+                { month: 'Dec', usage: 78, color: 'bg-blue-600' }
+              ].map((data, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <div
+                    className={`w-full ${data.color} rounded-t transition-all hover:opacity-80`}
+                    style={{ height: `${data.usage}%` }}
+                  />
+                  <span className="text-xs text-gray-500">{data.month}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* File Type Breakdown */}
+          <div>
+            <h4 className="text-sm font-medium mb-3">Storage by File Type</h4>
+            <div className="space-y-3">
+              {[
+                { type: 'Documents', size: '2.4 GB', percentage: 35, color: 'bg-blue-500' },
+                { type: 'Images', size: '1.8 GB', percentage: 26, color: 'bg-green-500' },
+                { type: 'Videos', size: '1.5 GB', percentage: 22, color: 'bg-purple-500' },
+                { type: 'Audio', size: '0.8 GB', percentage: 12, color: 'bg-orange-500' },
+                { type: 'Other', size: '0.3 GB', percentage: 5, color: 'bg-gray-500' }
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full ${item.color}`} />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between text-sm mb-1">
+                      <span>{item.type}</span>
+                      <span className="text-gray-500">{item.size}</span>
+                    </div>
+                    <Progress value={item.percentage} className="h-2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-600">1,247</div>
+              <div className="text-xs text-gray-500">Total Files</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">+156</div>
+              <div className="text-xs text-gray-500">This Month</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-600">89</div>
+              <div className="text-xs text-gray-500">Shared Files</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-orange-600">12</div>
+              <div className="text-xs text-gray-500">Team Members</div>
+            </div>
           </div>
         </CardContent>
       </Card>

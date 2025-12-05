@@ -1312,10 +1312,70 @@ export default function PluginMarketplacePage() {
               </TabsContent>
 
               <TabsContent value="reviews" className="space-y-4">
-                <div className="text-center py-8 text-gray-400">
-                  <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Reviews coming soon</p>
+                {/* Review Summary */}
+                <div className="flex items-center gap-4 p-4 bg-slate-800/30 rounded-lg">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-white">{state.selectedPlugin.rating.toFixed(1)}</div>
+                    <div className="flex gap-0.5 mt-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`h-4 w-4 ${star <= Math.round(state.selectedPlugin.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">{state.selectedPlugin.reviewCount} reviews</p>
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    {[5, 4, 3, 2, 1].map((stars) => (
+                      <div key={stars} className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400 w-3">{stars}</span>
+                        <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                        <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-yellow-400 rounded-full"
+                            style={{ width: `${stars === 5 ? 65 : stars === 4 ? 20 : stars === 3 ? 10 : stars === 2 ? 3 : 2}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+
+                {/* Mock Reviews */}
+                <div className="space-y-3">
+                  {[
+                    { name: 'Alex M.', rating: 5, date: '2 days ago', comment: 'Excellent plugin! Works flawlessly with my workflow. Highly recommended.' },
+                    { name: 'Sarah K.', rating: 4, date: '1 week ago', comment: 'Great features, easy to set up. Minor UI improvements needed but overall solid.' },
+                    { name: 'James R.', rating: 5, date: '2 weeks ago', comment: 'This plugin saved me hours of work. The automation features are incredible.' }
+                  ].map((review, i) => (
+                    <div key={i} className="p-3 bg-slate-800/50 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-medium text-sm">
+                            {review.name.charAt(0)}
+                          </div>
+                          <span className="font-medium text-white text-sm">{review.name}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">{review.date}</span>
+                      </div>
+                      <div className="flex gap-0.5 mb-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`h-3 w-3 ${star <= review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-sm text-gray-300">{review.comment}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <Button variant="outline" className="w-full border-slate-600 text-gray-300 hover:bg-slate-700">
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Write a Review
+                </Button>
               </TabsContent>
 
               <TabsContent value="changelog" className="space-y-4">

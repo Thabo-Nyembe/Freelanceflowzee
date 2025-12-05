@@ -1493,22 +1493,137 @@ export default function CalendarPage() {
                 )}
 
                 {view === 'week' && (
-                  <div className="text-center py-12">
-                    <Calendar className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">Week View</h3>
-                    <p className="text-gray-600">
-                      Weekly calendar view coming soon
-                    </p>
+                  <div className="space-y-4">
+                    {/* Week Header */}
+                    <div className="grid grid-cols-7 gap-2">
+                      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => {
+                        const weekDate = new Date(currentDate)
+                        weekDate.setDate(currentDate.getDate() - currentDate.getDay() + i)
+                        const isToday = weekDate.toDateString() === new Date().toDateString()
+                        return (
+                          <div
+                            key={day}
+                            className={`text-center p-2 rounded-lg ${isToday ? 'bg-blue-100 border-2 border-blue-500' : 'bg-gray-50'}`}
+                          >
+                            <div className="text-xs text-gray-500 uppercase">{day}</div>
+                            <div className={`text-lg font-semibold ${isToday ? 'text-blue-600' : 'text-gray-900'}`}>
+                              {weekDate.getDate()}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {/* Time Slots */}
+                    <div className="border rounded-lg overflow-hidden">
+                      {[9, 10, 11, 12, 13, 14, 15, 16, 17].map((hour) => (
+                        <div key={hour} className="grid grid-cols-8 border-b last:border-b-0">
+                          <div className="p-2 text-xs text-gray-500 bg-gray-50 border-r">
+                            {hour > 12 ? `${hour - 12}:00 PM` : hour === 12 ? '12:00 PM' : `${hour}:00 AM`}
+                          </div>
+                          {[0, 1, 2, 3, 4, 5, 6].map((dayOffset) => {
+                            const slotEvent = events.find(e => {
+                              const eventHour = parseInt(e.time.split(':')[0])
+                              const isPM = e.time.includes('PM') && eventHour !== 12
+                              const eventHour24 = isPM ? eventHour + 12 : eventHour
+                              return eventHour24 === hour && dayOffset === 0
+                            })
+                            return (
+                              <div
+                                key={dayOffset}
+                                className={`p-1 min-h-[50px] border-r last:border-r-0 ${dayOffset === new Date().getDay() ? 'bg-blue-50/50' : ''}`}
+                              >
+                                {slotEvent && (
+                                  <div className={`text-xs p-1 rounded bg-${slotEvent.color}-100 text-${slotEvent.color}-800 truncate`}>
+                                    {slotEvent.title}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
 
                 {view === 'day' && (
-                  <div className="text-center py-12">
-                    <Clock className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">Day View</h3>
-                    <p className="text-gray-600">
-                      Daily schedule view coming soon
-                    </p>
+                  <div className="space-y-4">
+                    {/* Day Header */}
+                    <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
+                      <h3 className="text-2xl font-bold text-gray-900">
+                        {format(currentDate, 'EEEE')}
+                      </h3>
+                      <p className="text-gray-600">
+                        {format(currentDate, 'MMMM d, yyyy')}
+                      </p>
+                    </div>
+
+                    {/* Hourly Schedule */}
+                    <div className="border rounded-lg overflow-hidden">
+                      {[8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18].map((hour) => {
+                        const hourEvent = events.find(e => {
+                          const eventHour = parseInt(e.time.split(':')[0])
+                          const isPM = e.time.includes('PM') && eventHour !== 12
+                          const eventHour24 = isPM ? eventHour + 12 : eventHour
+                          return eventHour24 === hour
+                        })
+                        const isCurrentHour = new Date().getHours() === hour && currentDate.toDateString() === new Date().toDateString()
+
+                        return (
+                          <div
+                            key={hour}
+                            className={`flex border-b last:border-b-0 ${isCurrentHour ? 'bg-blue-50' : ''}`}
+                          >
+                            <div className="w-20 p-3 text-sm text-gray-500 bg-gray-50 border-r flex-shrink-0">
+                              {hour > 12 ? `${hour - 12}:00 PM` : hour === 12 ? '12:00 PM' : `${hour}:00 AM`}
+                            </div>
+                            <div className="flex-1 p-2 min-h-[60px]">
+                              {hourEvent && (
+                                <motion.div
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  className={`p-2 rounded-lg bg-${hourEvent.color}-100 border-l-4 border-${hourEvent.color}-500`}
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <h4 className={`font-medium text-${hourEvent.color}-900`}>{hourEvent.title}</h4>
+                                    <Badge variant="outline" className="text-xs">{hourEvent.duration}</Badge>
+                                  </div>
+                                  <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
+                                    <span className="flex items-center gap-1">
+                                      {hourEvent.location.includes('Video') ? <Video className="w-3 h-3" /> : <MapPin className="w-3 h-3" />}
+                                      {hourEvent.location}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Users className="w-3 h-3" />
+                                      {hourEvent.attendees} attendees
+                                    </span>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {/* Day Summary */}
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="p-3 bg-blue-50 rounded-lg text-center">
+                        <div className="text-2xl font-bold text-blue-600">{events.length}</div>
+                        <div className="text-xs text-gray-600">Events Today</div>
+                      </div>
+                      <div className="p-3 bg-green-50 rounded-lg text-center">
+                        <div className="text-2xl font-bold text-green-600">{events.reduce((sum, e) => sum + e.attendees, 0)}</div>
+                        <div className="text-xs text-gray-600">Total Attendees</div>
+                      </div>
+                      <div className="p-3 bg-purple-50 rounded-lg text-center">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {events.filter(e => e.type === 'meeting').length}
+                        </div>
+                        <div className="text-xs text-gray-600">Meetings</div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </CardContent>

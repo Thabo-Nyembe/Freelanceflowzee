@@ -693,11 +693,67 @@ export default function AIVoiceSynthesisPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="text-center py-20"
+            className="space-y-6"
           >
-            <FileAudio className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Voice Synthesis Projects</h3>
-            <p className="text-muted-foreground">Project management coming soon</p>
+            {/* Projects Header */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-semibold">Voice Synthesis Projects</h3>
+                <p className="text-sm text-muted-foreground">Manage your audio generation projects</p>
+              </div>
+              <Button className="bg-gradient-to-r from-purple-500 to-pink-500">
+                <FileAudio className="w-4 h-4 mr-2" />
+                New Project
+              </Button>
+            </div>
+
+            {/* Projects Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                { id: 1, name: 'Marketing Campaign Voiceovers', files: 12, duration: '45:30', status: 'active', lastEdited: '2 hours ago' },
+                { id: 2, name: 'Podcast Intro Series', files: 5, duration: '12:15', status: 'completed', lastEdited: '1 day ago' },
+                { id: 3, name: 'E-Learning Module Narration', files: 24, duration: '2:15:00', status: 'active', lastEdited: '3 hours ago' },
+                { id: 4, name: 'Product Demo Scripts', files: 8, duration: '28:45', status: 'draft', lastEdited: '5 days ago' },
+                { id: 5, name: 'Audiobook Chapter 1-5', files: 5, duration: '4:32:10', status: 'completed', lastEdited: '1 week ago' },
+                { id: 6, name: 'IVR Phone System', files: 15, duration: '18:20', status: 'active', lastEdited: '12 hours ago' }
+              ].map((project) => (
+                <LiquidGlassCard key={project.id} className="p-4 hover:shadow-lg transition-shadow cursor-pointer">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20">
+                      <FileAudio className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <Badge variant={project.status === 'completed' ? 'default' : project.status === 'active' ? 'secondary' : 'outline'}>
+                      {project.status}
+                    </Badge>
+                  </div>
+                  <h4 className="font-semibold mb-1 truncate">{project.name}</h4>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                    <span className="flex items-center gap-1">
+                      <FileAudio className="w-3 h-3" />
+                      {project.files} files
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {project.duration}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                    <span className="text-xs text-muted-foreground">Edited {project.lastEdited}</span>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                        <Play className="w-3 h-3" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                        <Download className="w-3 h-3" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                        <Share2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </LiquidGlassCard>
+              ))}
+            </div>
           </motion.div>
         )}
 
@@ -708,11 +764,124 @@ export default function AIVoiceSynthesisPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="text-center py-20"
+            className="space-y-6"
           >
-            <BarChart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-semibold mb-2">Usage Analytics</h3>
-            <p className="text-muted-foreground">Analytics dashboard coming soon</p>
+            {/* Analytics Header */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-semibold">Usage Analytics</h3>
+                <p className="text-sm text-muted-foreground">Track your voice synthesis usage and performance</p>
+              </div>
+              <Select defaultValue="30days">
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7days">Last 7 days</SelectItem>
+                  <SelectItem value="30days">Last 30 days</SelectItem>
+                  <SelectItem value="90days">Last 90 days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                { label: 'Total Synthesized', value: '245', unit: 'files', icon: FileAudio, color: 'purple', trend: '+12%' },
+                { label: 'Audio Duration', value: '18.5', unit: 'hours', icon: Clock, color: 'blue', trend: '+8%' },
+                { label: 'Characters Used', value: '156K', unit: 'chars', icon: BookOpen, color: 'green', trend: '+23%' },
+                { label: 'Total Cost', value: '$42.50', unit: 'this month', icon: DollarSign, color: 'orange', trend: '-5%' }
+              ].map((stat, i) => (
+                <LiquidGlassCard key={i} className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className={`p-2 rounded-lg bg-${stat.color}-500/20`}>
+                      <stat.icon className={`w-4 h-4 text-${stat.color}-400`} />
+                    </div>
+                    <Badge variant={stat.trend.startsWith('+') ? 'default' : 'secondary'} className="text-xs">
+                      {stat.trend}
+                    </Badge>
+                  </div>
+                  <div className="text-2xl font-bold">{stat.value}</div>
+                  <div className="text-xs text-muted-foreground">{stat.label} • {stat.unit}</div>
+                </LiquidGlassCard>
+              ))}
+            </div>
+
+            {/* Usage Chart Placeholder */}
+            <LiquidGlassCard className="p-6">
+              <h4 className="font-semibold mb-4">Daily Usage Trend</h4>
+              <div className="h-48 flex items-end justify-between gap-2">
+                {[40, 65, 45, 80, 55, 70, 90, 75, 60, 85, 50, 95, 70, 80].map((height, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                    <div
+                      className="w-full bg-gradient-to-t from-purple-500 to-pink-500 rounded-t-sm transition-all hover:opacity-80"
+                      style={{ height: `${height}%` }}
+                    />
+                    <span className="text-[10px] text-muted-foreground">{i + 1}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
+                <span>Dec 1</span>
+                <span>Dec 14</span>
+              </div>
+            </LiquidGlassCard>
+
+            {/* Voice Usage Breakdown */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <LiquidGlassCard className="p-4">
+                <h4 className="font-semibold mb-4">Top Used Voices</h4>
+                <div className="space-y-3">
+                  {[
+                    { name: 'Emily (US)', uses: 78, percentage: 32 },
+                    { name: 'James (UK)', uses: 54, percentage: 22 },
+                    { name: 'Sofia (Spanish)', uses: 45, percentage: 18 },
+                    { name: 'Akira (Japanese)', uses: 38, percentage: 16 },
+                    { name: 'Hans (German)', uses: 30, percentage: 12 }
+                  ].map((voice, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-medium text-white">
+                        {voice.name.charAt(0)}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span>{voice.name}</span>
+                          <span className="text-muted-foreground">{voice.uses} uses</span>
+                        </div>
+                        <div className="h-1.5 bg-muted rounded-full mt-1 overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                            style={{ width: `${voice.percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </LiquidGlassCard>
+
+              <LiquidGlassCard className="p-4">
+                <h4 className="font-semibold mb-4">Recent Activity</h4>
+                <div className="space-y-3">
+                  {[
+                    { action: 'Generated audio', file: 'intro_v3.mp3', time: '5 min ago' },
+                    { action: 'Created project', file: 'Q4 Marketing', time: '1 hour ago' },
+                    { action: 'Downloaded batch', file: '12 files', time: '3 hours ago' },
+                    { action: 'Generated audio', file: 'chapter_05.mp3', time: '5 hours ago' },
+                    { action: 'Updated settings', file: 'Voice preferences', time: '1 day ago' }
+                  ].map((activity, i) => (
+                    <div key={i} className="flex items-center gap-3 text-sm">
+                      <div className="w-2 h-2 rounded-full bg-purple-500" />
+                      <div className="flex-1">
+                        <span className="text-muted-foreground">{activity.action}:</span>{' '}
+                        <span className="font-medium">{activity.file}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{activity.time}</span>
+                    </div>
+                  ))}
+                </div>
+              </LiquidGlassCard>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
