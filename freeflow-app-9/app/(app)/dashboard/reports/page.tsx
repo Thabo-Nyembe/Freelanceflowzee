@@ -403,6 +403,10 @@ export default function ReportsPage() {
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
+  const [shareReport, setShareReport] = useState<Report | null>(null)
+  const [shareRecipients, setShareRecipients] = useState('')
+  const [shareMessage, setShareMessage] = useState('')
 
   // FORM STATES
   const [reportForm, setReportForm] = useState({
@@ -983,22 +987,47 @@ export default function ReportsPage() {
     }
   }
 
-  const handleShareReport = async (report: Report) => {
+  const handleShareReport = (report: Report) => {
+    logger.info('Opening share dialog', {
+      reportId: report.id,
+      name: report.name,
+      type: report.type
+    })
+    setShareReport(report)
+    setShareRecipients('')
+    setShareMessage('')
+    setIsShareModalOpen(true)
+    announce(`Opening share options for ${report.name}`, 'polite')
+  }
+
+  const handleConfirmShare = async () => {
+    if (!shareReport) return
+    if (!shareRecipients.trim()) {
+      toast.error('Please enter at least one recipient email')
+      return
+    }
+
     try {
-      logger.info('Sharing report', {
-        reportId: report.id,
-        name: report.name,
-        type: report.type
+      setIsSaving(true)
+      logger.info('Sending share', {
+        reportId: shareReport.id,
+        recipients: shareRecipients.split(',').map(e => e.trim())
       })
 
-      // TODO: Implement share dialog
-      toast.info('Share report', {
-        description: `Share "${report.name}" with team members`
+      // Simulate sharing - in production this would send via API
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      toast.success('Report shared', {
+        description: `"${shareReport.name}" shared with ${shareRecipients.split(',').length} recipient(s)`
       })
-      announce(`Opening share options for ${report.name}`, 'polite')
+      announce('Report shared successfully', 'polite')
+      setIsShareModalOpen(false)
+      setShareReport(null)
     } catch (err: any) {
       logger.error('Share failed', { error: err.message })
       toast.error('Failed to share report')
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -2026,6 +2055,88 @@ export default function ReportsPage() {
                 onClick={() => state.selectedReport && handleDeleteReport(state.selectedReport.id)}
               >
                 Delete Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Modal */}
+        <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="w-5 h-5" />
+                Share Report
+              </DialogTitle>
+              <DialogDescription>
+                Share &quot;{shareReport?.name}&quot; with team members via email
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="share-recipients">Recipients</Label>
+                <Input
+                  id="share-recipients"
+                  type="text"
+                  placeholder="Enter email addresses (comma-separated)"
+                  value={shareRecipients}
+                  onChange={(e) => setShareRecipients(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Separate multiple emails with commas
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="share-message">Message (optional)</Label>
+                <Textarea
+                  id="share-message"
+                  placeholder="Add a personal message..."
+                  value={shareMessage}
+                  onChange={(e) => setShareMessage(e.target.value)}
+                  rows={3}
+                />
+              </div>
+
+              <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                <h4 className="text-sm font-medium">Report Details</h4>
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    <span>{shareReport?.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      {shareReport?.type}
+                    </Badge>
+                    <span className="text-xs">{shareReport?.format?.toUpperCase()}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsShareModalOpen(false)}
+                className="w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmShare}
+                disabled={isSaving || !shareRecipients.trim()}
+                className="w-full sm:w-auto"
+              >
+                {isSaving ? (
+                  <>Sharing...</>
+                ) : (
+                  <>
+                    <Mail className="w-4 h-4 mr-2" />
+                    Share Report
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>

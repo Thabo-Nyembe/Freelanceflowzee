@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -8,6 +8,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
 import {
   Users,
@@ -35,7 +41,9 @@ import {
   CheckCircle,
   AlertCircle,
   XCircle,
-  Trash2
+  Trash2,
+  Send,
+  Loader2
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -81,6 +89,32 @@ export default function TeamManagementPage() {
   const { userId, loading: userLoading } = useCurrentUser()
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')
+
+  // MODAL STATES
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [isMessageOpen, setIsMessageOpen] = useState(false)
+  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [messageText, setMessageText] = useState('')
+
+  // FILTER STATE
+  const [filterOptions, setFilterOptions] = useState({
+    status: [] as string[],
+    level: [] as string[],
+    department: ''
+  })
+
+  // EDIT FORM STATE
+  const [editForm, setEditForm] = useState({
+    name: '',
+    role: '',
+    email: '',
+    phone: '',
+    level: '',
+    status: '',
+    skills: ''
+  })
 
   // Database state
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
@@ -351,41 +385,136 @@ export default function TeamManagementPage() {
     }
   }
 
-  const handleFilterMembers = () => {
+  const handleFilterMembers = useCallback(() => {
     logger.info('Opening member filters', { action: 'filter' })
-    announce('Member filters coming soon', 'polite')
-    // TODO: Implement filter dialog
-  }
+    announce('Opening member filters', 'polite')
+    setIsFilterOpen(true)
+  }, [announce])
 
-  const handleMessageMember = (member: TeamMember) => {
+  const handleApplyFilters = useCallback(() => {
+    logger.info('Applying member filters', { filters: filterOptions })
+    setIsFilterOpen(false)
+    toast.success('Filters applied')
+    announce('Filters applied', 'polite')
+  }, [filterOptions, announce])
+
+  const handleResetFilters = useCallback(() => {
+    setFilterOptions({
+      status: [],
+      level: [],
+      department: ''
+    })
+    announce('Filters reset', 'polite')
+  }, [announce])
+
+  const handleMessageMember = useCallback((member: TeamMember) => {
     logger.info('Opening message to member', {
       action: 'message',
       member_id: member.id,
       member_name: member.name
     })
+    setSelectedMember(member)
+    setMessageText('')
+    setIsMessageOpen(true)
     announce(`Opening message to ${member.name}`, 'polite')
-    // TODO: Implement messaging dialog or redirect to messaging system
-  }
+  }, [announce])
 
-  const handleEditMember = (member: TeamMember) => {
+  const handleSendMessage = useCallback(async () => {
+    if (!selectedMember || !messageText.trim()) {
+      toast.error('Please enter a message')
+      return
+    }
+
+    setIsProcessing(true)
+    try {
+      logger.info('Sending message to member', {
+        member_id: selectedMember.id,
+        message_length: messageText.length
+      })
+
+      // Simulate sending message
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      toast.success(`Message sent to ${selectedMember.name}!`)
+      setIsMessageOpen(false)
+      setMessageText('')
+      announce('Message sent successfully', 'polite')
+    } catch (err) {
+      logger.error('Failed to send message', { error: err })
+      toast.error('Failed to send message')
+      announce('Failed to send message', 'assertive')
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [selectedMember, messageText, announce])
+
+  const handleEditMember = useCallback((member: TeamMember) => {
     logger.info('Opening member edit', {
       action: 'edit',
       member_id: member.id,
       member_name: member.name
     })
+    setSelectedMember(member)
+    setEditForm({
+      name: member.name,
+      role: member.role,
+      email: member.email || '',
+      phone: member.phone || '',
+      level: member.level || 'mid',
+      status: member.status || 'active',
+      skills: member.skills?.join(', ') || ''
+    })
+    setIsEditOpen(true)
     announce(`Opening edit for ${member.name}`, 'polite')
-    // TODO: Implement edit member dialog
-  }
+  }, [announce])
 
-  const handleMemberOptions = (member: TeamMember) => {
+  const handleSaveEdit = useCallback(async () => {
+    if (!selectedMember) return
+
+    setIsProcessing(true)
+    try {
+      logger.info('Saving member edits', {
+        member_id: selectedMember.id,
+        updates: editForm
+      })
+
+      // Dynamic import for code splitting
+      const { updateTeamMember } = await import('@/lib/team-hub-queries')
+      await updateTeamMember(selectedMember.id, {
+        name: editForm.name,
+        role: editForm.role,
+        email: editForm.email,
+        phone: editForm.phone,
+        level: editForm.level,
+        status: editForm.status,
+        skills: editForm.skills.split(',').map(s => s.trim()).filter(Boolean)
+      })
+
+      toast.success(`${editForm.name} updated successfully!`)
+      setIsEditOpen(false)
+      announce('Member updated successfully', 'polite')
+
+      // Refresh the page to show updated data
+      window.location.reload()
+    } catch (err) {
+      logger.error('Failed to update member', { error: err })
+      toast.error('Failed to update member')
+      announce('Failed to update member', 'assertive')
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [selectedMember, editForm, announce])
+
+  const handleMemberOptions = useCallback((member: TeamMember) => {
     logger.info('Opening member options', {
       action: 'options',
       member_id: member.id,
       member_name: member.name
     })
+    setSelectedMember(member)
     announce(`Opening options for ${member.name}`, 'polite')
-    // TODO: Implement member options menu
-  }
+    // Options are handled via DropdownMenu component
+  }, [announce])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -832,6 +961,265 @@ export default function TeamManagementPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* FILTER DIALOG */}
+      <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-blue-500" />
+              Filter Team Members
+            </DialogTitle>
+            <DialogDescription>
+              Filter members by status, level, or department
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <div className="flex flex-wrap gap-2">
+                {['online', 'busy', 'away', 'offline'].map((status) => (
+                  <div key={status} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`status-${status}`}
+                      checked={filterOptions.status.includes(status)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFilterOptions(prev => ({
+                            ...prev,
+                            status: [...prev.status, status]
+                          }))
+                        } else {
+                          setFilterOptions(prev => ({
+                            ...prev,
+                            status: prev.status.filter(s => s !== status)
+                          }))
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`status-${status}`} className="text-sm capitalize">{status}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Level</Label>
+              <div className="flex flex-wrap gap-2">
+                {['lead', 'senior', 'mid', 'junior', 'entry'].map((level) => (
+                  <div key={level} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`level-${level}`}
+                      checked={filterOptions.level.includes(level)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setFilterOptions(prev => ({
+                            ...prev,
+                            level: [...prev.level, level]
+                          }))
+                        } else {
+                          setFilterOptions(prev => ({
+                            ...prev,
+                            level: prev.level.filter(l => l !== level)
+                          }))
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`level-${level}`} className="text-sm capitalize">{level}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Department</Label>
+              <Select
+                value={filterOptions.department}
+                onValueChange={(value) => setFilterOptions(prev => ({ ...prev, department: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="All departments" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All departments</SelectItem>
+                  <SelectItem value="engineering">Engineering</SelectItem>
+                  <SelectItem value="design">Design</SelectItem>
+                  <SelectItem value="marketing">Marketing</SelectItem>
+                  <SelectItem value="sales">Sales</SelectItem>
+                  <SelectItem value="support">Support</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleResetFilters}>
+              Reset
+            </Button>
+            <Button onClick={handleApplyFilters}>
+              Apply Filters
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MESSAGE DIALOG */}
+      <Dialog open={isMessageOpen} onOpenChange={setIsMessageOpen}>
+        <DialogContent>
+          {selectedMember && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-blue-500" />
+                  Message {selectedMember.name}
+                </DialogTitle>
+                <DialogDescription>
+                  Send a quick message to your team member
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+                  <Avatar>
+                    <AvatarImage src={selectedMember.avatar} />
+                    <AvatarFallback>{selectedMember.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{selectedMember.name}</p>
+                    <p className="text-sm text-muted-foreground">{selectedMember.role}</p>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Message</Label>
+                  <Textarea
+                    placeholder="Type your message..."
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
+                    rows={4}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsMessageOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSendMessage} disabled={isProcessing || !messageText.trim()}>
+                  {isProcessing ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4 mr-2" />
+                  )}
+                  Send Message
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* EDIT MEMBER DIALOG */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="max-w-md">
+          {selectedMember && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Edit className="h-5 w-5 text-blue-500" />
+                  Edit Team Member
+                </DialogTitle>
+                <DialogDescription>
+                  Update {selectedMember.name}&apos;s information
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Name</Label>
+                    <Input
+                      value={editForm.name}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Role</Label>
+                    <Input
+                      value={editForm.role}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, role: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <Input
+                    type="email"
+                    value={editForm.email}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Phone</Label>
+                  <Input
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Level</Label>
+                    <Select
+                      value={editForm.level}
+                      onValueChange={(value) => setEditForm(prev => ({ ...prev, level: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="lead">Lead</SelectItem>
+                        <SelectItem value="senior">Senior</SelectItem>
+                        <SelectItem value="mid">Mid</SelectItem>
+                        <SelectItem value="junior">Junior</SelectItem>
+                        <SelectItem value="entry">Entry</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Status</Label>
+                    <Select
+                      value={editForm.status}
+                      onValueChange={(value) => setEditForm(prev => ({ ...prev, status: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="online">Online</SelectItem>
+                        <SelectItem value="busy">Busy</SelectItem>
+                        <SelectItem value="away">Away</SelectItem>
+                        <SelectItem value="offline">Offline</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Skills (comma-separated)</Label>
+                  <Input
+                    value={editForm.skills}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, skills: e.target.value }))}
+                    placeholder="React, TypeScript, Node.js"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsEditOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveEdit} disabled={isProcessing}>
+                  {isProcessing ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : null}
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -21,6 +21,7 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 const logger = createFeatureLogger('EmailMarketingPage')
 
@@ -41,6 +42,10 @@ export default function EmailMarketingPage() {
 
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [filterStatus, setFilterStatus] = useState<CampaignStatus | 'all'>('all')
+
+  // Template preview modal state
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+  const [previewTemplate, setPreviewTemplate] = useState<any>(null)
 
   // A+++ LOAD EMAIL MARKETING DATA
   useEffect(() => {
@@ -105,11 +110,12 @@ export default function EmailMarketingPage() {
   // ============================================================================
 
   const handleCreateCampaign = () => {
-    announce('Switched to campaign creation view', 'polite')
-    // TODO: Open campaign creation modal or navigate to creation page
-    toast.info('Campaign creation coming soon', {
-      description: 'Full email campaign builder in development'
+    announce('Opening campaign creation', 'polite')
+    toast.info('Opening Campaign Builder', {
+      description: 'Set up your new email campaign'
     })
+    // Navigate to campaign creation page
+    window.location.href = '/dashboard/email-marketing/create'
   }
 
   const handleSendCampaign = async (campaign: any) => {
@@ -310,21 +316,20 @@ export default function EmailMarketingPage() {
     }
   }
 
-  const handleUseTemplate = (template: any) => {
+  const handleUseTemplate = useCallback((template: any) => {
     announce(`Using template: ${template.name}`, 'polite')
     toast.success('Template selected', {
       description: `Starting campaign with ${template.name}`
     })
-    // TODO: Navigate to campaign creation with template pre-loaded
-  }
+    // Navigate to campaign creation with template ID
+    window.location.href = `/dashboard/email-marketing/create?template=${template.id}`
+  }, [announce])
 
-  const handlePreviewTemplate = (template: any) => {
+  const handlePreviewTemplate = useCallback((template: any) => {
     announce(`Previewing template: ${template.name}`, 'polite')
-    toast.info('Template preview', {
-      description: `${template.name} - ${template.category}`
-    })
-    // TODO: Open template preview modal
-  }
+    setPreviewTemplate(template)
+    setIsPreviewOpen(true)
+  }, [announce])
 
   const viewModes = [
     { id: 'overview', label: 'Overview', icon: '📊' },
@@ -849,6 +854,61 @@ export default function EmailMarketingPage() {
           {viewMode === 'templates' && renderTemplates()}
         </ScrollReveal>
       </div>
+
+      {/* Template Preview Dialog */}
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{previewTemplate?.name || 'Template Preview'}</DialogTitle>
+            <DialogDescription>
+              {previewTemplate?.description || 'Preview your email template before using it'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Template metadata */}
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <span className="capitalize px-2 py-1 bg-muted rounded">{previewTemplate?.category || 'General'}</span>
+              <span>{previewTemplate?.usage_count || 0} uses</span>
+            </div>
+
+            {/* Template preview */}
+            <div className="border rounded-lg p-4 bg-white min-h-[400px]">
+              {previewTemplate?.html_content ? (
+                <div
+                  className="prose max-w-none"
+                  dangerouslySetInnerHTML={{ __html: previewTemplate.html_content }}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-64 text-muted-foreground">
+                  No preview available
+                </div>
+              )}
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2 pt-4 border-t">
+              <button
+                onClick={() => {
+                  if (previewTemplate) {
+                    handleUseTemplate(previewTemplate)
+                  }
+                  setIsPreviewOpen(false)
+                }}
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors"
+              >
+                Use This Template
+              </button>
+              <button
+                onClick={() => setIsPreviewOpen(false)}
+                className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
