@@ -8,7 +8,17 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Shield, AlertCircle, Download, Key, Eye, EyeOff } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
+import { Shield, AlertCircle, Download, Key, Eye, EyeOff, AlertTriangle } from 'lucide-react'
 import { SecuritySettings, defaultSecurity, defaultProfile } from '@/lib/settings-utils'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -23,6 +33,7 @@ export default function SecurityPage() {
   const [security, setSecurity] = useState<SecuritySettings>(defaultSecurity)
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [showDisable2FADialog, setShowDisable2FADialog] = useState(false)
 
   useEffect(() => {
     const loadSecuritySettings = async () => {
@@ -88,23 +99,31 @@ export default function SecurityPage() {
         })
         announce('Two-Factor Authentication enabled', 'polite')
       } else {
-        if (confirm('⚠️ Disable Two-Factor Authentication?\n\nThis will reduce your account security.')) {
-          logger.info('Two-Factor Authentication disabled', { userId })
-          setSecurity({ ...security, twoFactorAuth: false })
-
-          const { updateSecuritySettings } = await import('@/lib/security-settings-queries')
-          await updateSecuritySettings(userId, { two_factor_enabled: false })
-
-          toast.success('Two-Factor Authentication Disabled', {
-            description: 'Your account security has been reduced'
-          })
-          announce('Two-Factor Authentication disabled', 'assertive')
-        }
+        setShowDisable2FADialog(true)
       }
     } catch (error) {
       logger.error('Failed to update 2FA setting', { error, userId })
       toast.error('Failed to update Two-Factor Authentication')
       announce('Error updating Two-Factor Authentication', 'assertive')
+    }
+  }
+
+  const confirmDisable2FA = async () => {
+    try {
+      logger.info('Two-Factor Authentication disabled', { userId })
+      setSecurity({ ...security, twoFactorAuth: false })
+
+      const { updateSecuritySettings } = await import('@/lib/security-settings-queries')
+      await updateSecuritySettings(userId!, { two_factor_enabled: false })
+
+      toast.success('Two-Factor Authentication Disabled', {
+        description: 'Your account security has been reduced'
+      })
+      announce('Two-Factor Authentication disabled', 'assertive')
+      setShowDisable2FADialog(false)
+    } catch (error) {
+      logger.error('Failed to disable 2FA', { error, userId })
+      toast.error('Failed to disable Two-Factor Authentication')
     }
   }
 
@@ -341,6 +360,37 @@ If you lose access to your authenticator app, you can use these codes to sign in
           </CardContent>
         </Card>
       </div>
+
+      {/* Disable 2FA Confirmation Dialog */}
+      <AlertDialog open={showDisable2FADialog} onOpenChange={setShowDisable2FADialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-yellow-600">
+              <AlertTriangle className="w-5 h-5" />
+              Disable Two-Factor Authentication?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p className="font-medium text-yellow-700">
+                This will reduce your account security.
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-sm">
+                <li>Your account will only be protected by your password</li>
+                <li>Attackers with your password can access your account</li>
+                <li>You can re-enable 2FA at any time</li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep 2FA Enabled</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDisable2FA}
+              className="bg-yellow-600 hover:bg-yellow-700"
+            >
+              Disable 2FA
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

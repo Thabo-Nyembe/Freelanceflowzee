@@ -6,13 +6,25 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
+import { Input } from '@/components/ui/input'
+import {
   Download,
   Upload,
   RefreshCw,
   Trash2,
   Settings,
   Zap,
-  Key
+  Key,
+  AlertTriangle
 } from 'lucide-react'
 import {
   defaultProfile,
@@ -32,6 +44,14 @@ export default function AdvancedPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [stats, setStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+
+  // AlertDialog states
+  const [showResetDialog, setShowResetDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showFinalDeleteDialog, setShowFinalDeleteDialog] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     const loadAdvancedSettings = async () => {
@@ -284,34 +304,41 @@ export default function AdvancedPage() {
 
   const handleResetSettings = () => {
     logger.info('Reset settings initiated')
+    setShowResetDialog(true)
+  }
 
-    if (confirm('⚠️ Reset All Settings?\n\nThis will restore:\n• Default theme\n• Default notifications\n• Default preferences\n\nYour profile data will not be affected.')) {
-      logger.info('Settings reset to defaults', {
-        resetSections: ['Theme', 'Notifications', 'Preferences']
-      })
+  const confirmResetSettings = () => {
+    logger.info('Settings reset to defaults', {
+      resetSections: ['Theme', 'Notifications', 'Preferences']
+    })
 
-      toast.success('Settings Reset!', {
-        description: 'Theme, Notifications, and Preferences restored to defaults'
-      })
-    }
+    toast.success('Settings Reset!', {
+      description: 'Theme, Notifications, and Preferences restored to defaults'
+    })
+    announce('Settings reset to defaults', 'polite')
+    setShowResetDialog(false)
   }
 
   const handleClearCache = () => {
     logger.info('Clear cache initiated')
+    setShowClearCacheDialog(true)
+  }
 
-    if (confirm('🧹 Clear Application Cache?\n\nThis will:\n• Clear stored preferences\n• Remove cached data\n• Sign you out\n\nYou\'ll need to sign in again.')) {
-      logger.info('Cache cleared successfully', {
-        signOutScheduled: new Date(Date.now() + 3000).toISOString()
-      })
+  const confirmClearCache = () => {
+    logger.info('Cache cleared successfully', {
+      signOutScheduled: new Date(Date.now() + 3000).toISOString()
+    })
 
-      toast.success('Cache Cleared!', {
-        description: 'Application cache cleared. You will be signed out in 3 seconds'
-      })
+    toast.success('Cache Cleared!', {
+      description: 'Application cache cleared. You will be signed out in 3 seconds'
+    })
+    announce('Cache cleared, signing out', 'polite')
 
-      setTimeout(() => {
-        logger.info('Signing out after cache clear')
-      }, 3000)
-    }
+    setTimeout(() => {
+      logger.info('Signing out after cache clear')
+    }, 3000)
+
+    setShowClearCacheDialog(false)
   }
 
   const handleManageIntegrations = () => {
@@ -324,7 +351,7 @@ export default function AdvancedPage() {
     window.location.href = '/dashboard/integrations/setup'
   }
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = () => {
     if (!userId) {
       toast.error('Please log in')
       announce('Authentication required', 'assertive')
@@ -332,41 +359,57 @@ export default function AdvancedPage() {
     }
 
     logger.info('Account deletion initiated', { userId })
+    setShowDeleteDialog(true)
+  }
 
-    if (confirm('⚠️ DELETE ACCOUNT?\n\nThis will permanently delete:\n• Your profile and data\n• All projects and files\n• Payment history\n• Team memberships\n\nThis action CANNOT be undone!')) {
-      if (confirm('⚠️ FINAL CONFIRMATION\n\nType DELETE to confirm account deletion.\n\nAre you absolutely sure?')) {
-        try {
-          const { createAccountDeletionRequest } = await import('@/lib/advanced-settings-queries')
+  const handleFirstDeleteConfirm = () => {
+    setShowDeleteDialog(false)
+    setDeleteConfirmText('')
+    setShowFinalDeleteDialog(true)
+  }
 
-          // Create deletion request with 7-day grace period
-          const { data, error } = await createAccountDeletionRequest(userId, undefined, 7)
+  const confirmDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') {
+      toast.error('Please type DELETE to confirm')
+      return
+    }
 
-          if (error) throw new Error(error.message)
+    setIsDeleting(true)
 
-          const deletionDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()
+    try {
+      const { createAccountDeletionRequest } = await import('@/lib/advanced-settings-queries')
 
-          logger.info('Account deletion confirmed', {
-            deletionId: data?.id,
-            deletionScheduled: data?.scheduled_for,
-            userId
-          })
+      // Create deletion request with 7-day grace period
+      const { data, error } = await createAccountDeletionRequest(userId!, undefined, 7)
 
-          toast.info('Account Deletion Requested', {
-            description: `Confirmation email sent. Account will be deleted on ${deletionDate} unless you cancel`
-          })
-          announce('Account deletion requested', 'assertive')
-        } catch (error: any) {
-          logger.error('Account deletion request failed', {
-            error: error.message,
-            userId
-          })
+      if (error) throw new Error(error.message)
 
-          toast.error('Failed to request account deletion', {
-            description: error.message || 'Please try again later'
-          })
-          announce('Error requesting account deletion', 'assertive')
-        }
-      }
+      const deletionDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()
+
+      logger.info('Account deletion confirmed', {
+        deletionId: data?.id,
+        deletionScheduled: data?.scheduled_for,
+        userId
+      })
+
+      toast.info('Account Deletion Requested', {
+        description: `Confirmation email sent. Account will be deleted on ${deletionDate} unless you cancel`
+      })
+      announce('Account deletion requested', 'assertive')
+      setShowFinalDeleteDialog(false)
+      setDeleteConfirmText('')
+    } catch (error: any) {
+      logger.error('Account deletion request failed', {
+        error: error.message,
+        userId
+      })
+
+      toast.error('Failed to request account deletion', {
+        description: error.message || 'Please try again later'
+      })
+      announce('Error requesting account deletion', 'assertive')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -504,6 +547,137 @@ export default function AdvancedPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Reset Settings Dialog */}
+      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-yellow-500" />
+              Reset All Settings?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>This will restore the following to defaults:</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Theme settings</li>
+                <li>Notification preferences</li>
+                <li>All custom preferences</li>
+              </ul>
+              <p className="text-green-600 font-medium">Your profile data will not be affected.</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmResetSettings}>
+              Reset Settings
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clear Cache Dialog */}
+      <AlertDialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 text-blue-500" />
+              Clear Application Cache?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>This will:</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Clear stored preferences</li>
+                <li>Remove cached data</li>
+                <li>Sign you out</li>
+              </ul>
+              <p className="text-yellow-600 font-medium">You will need to sign in again.</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmClearCache}>
+              Clear Cache
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Account - First Confirmation */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Account?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p className="font-medium text-red-600">This will permanently delete:</p>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Your profile and all personal data</li>
+                <li>All projects and files</li>
+                <li>Payment history and invoices</li>
+                <li>Team memberships and collaborations</li>
+              </ul>
+              <p className="text-red-700 font-bold mt-4">This action CANNOT be undone!</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleFirstDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              I Understand, Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Account - Final Confirmation */}
+      <AlertDialog open={showFinalDeleteDialog} onOpenChange={setShowFinalDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Final Confirmation
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <p className="font-medium">
+                Type <span className="font-mono bg-red-100 px-2 py-1 rounded text-red-700">DELETE</span> to confirm account deletion:
+              </p>
+              <Input
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="Type DELETE here"
+                className="border-red-300 focus:border-red-500"
+              />
+              <p className="text-sm text-gray-500">
+                Your account will be scheduled for deletion with a 7-day grace period.
+                You can cancel during this time.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteConfirmText('')}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteAccount}
+              disabled={deleteConfirmText !== 'DELETE' || isDeleting}
+              className="bg-red-600 hover:bg-red-700 disabled:opacity-50"
+            >
+              {isDeleting ? (
+                <>
+                  <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete My Account'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
