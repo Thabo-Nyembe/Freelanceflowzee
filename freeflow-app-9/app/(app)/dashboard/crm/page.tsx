@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
@@ -10,6 +10,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import {
@@ -67,6 +70,20 @@ export default function CRMPage() {
   const [dealSearch, setDealSearch] = useState('')
   const [contactSort, setContactSort] = useState('name')
   const [dealSort, setDealSort] = useState('value')
+
+  // Contact Form Modal State
+  const [isContactFormOpen, setIsContactFormOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    position: '',
+    type: 'lead' as string,
+    status: 'new' as string,
+    notes: ''
+  })
 
   // DATABASE STATE
   const [contacts, setContacts] = useState<any[]>([])
@@ -150,25 +167,74 @@ export default function CRMPage() {
   // CRM HANDLERS
   // ============================================================================
 
-  const handleCreateContact = async () => {
+  const handleCreateContact = () => {
     if (!userId) {
       toast.error('Please log in to create contacts')
       logger.warn('Contact creation attempted without authentication')
       return
     }
 
-    try {
-      logger.info('Creating contact', { userId })
-      announce('Opening contact creation form', 'polite')
-      toast.info('Create contact', {
-        description: 'Contact form coming soon'
-      })
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create contact'
-      logger.error('Contact creation failed', { error: errorMessage })
-      toast.error('Failed to create contact', { description: errorMessage })
-    }
+    logger.info('Opening contact form', { userId })
+    setContactForm({
+      name: '',
+      email: '',
+      phone: '',
+      company: '',
+      position: '',
+      type: 'lead',
+      status: 'new',
+      notes: ''
+    })
+    setIsContactFormOpen(true)
+    announce('Opening contact creation form', 'polite')
   }
+
+  const handleSubmitContact = useCallback(async () => {
+    if (!userId) {
+      toast.error('Please log in to create contacts')
+      return
+    }
+
+    if (!contactForm.name.trim() || !contactForm.email.trim()) {
+      toast.error('Name and email are required')
+      return
+    }
+
+    setIsSaving(true)
+    announce('Creating contact', 'polite')
+
+    try {
+      const { createContact } = await import('@/lib/crm-queries')
+
+      const newContact = {
+        name: contactForm.name,
+        email: contactForm.email,
+        phone: contactForm.phone || null,
+        company: contactForm.company || null,
+        position: contactForm.position || null,
+        type: contactForm.type,
+        status: contactForm.status,
+        notes: contactForm.notes || null
+      }
+
+      const { data, error } = await createContact(userId, newContact)
+
+      if (error) throw error
+
+      setContacts(prev => [data, ...prev])
+      toast.success('Contact created', {
+        description: `${contactForm.name} added to your CRM`
+      })
+      announce('Contact created successfully', 'polite')
+      setIsContactFormOpen(false)
+    } catch (err: any) {
+      logger.error('Contact creation failed', { error: err })
+      toast.error('Failed to create contact')
+      announce('Failed to create contact', 'assertive')
+    } finally {
+      setIsSaving(false)
+    }
+  }, [userId, contactForm, announce])
 
   const handleViewContact = (contact: any) => {
     logger.info('Viewing contact', { contactId: contact.id, contactName: contact.name })
@@ -901,6 +967,150 @@ export default function CRMPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Contact Form Dialog */}
+      <Dialog open={isContactFormOpen} onOpenChange={setIsContactFormOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Create New Contact
+            </DialogTitle>
+            <DialogDescription>
+              Add a new contact to your CRM. Required fields are marked with *.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Name & Email Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="contact-name">Name *</Label>
+                <Input
+                  id="contact-name"
+                  placeholder="John Doe"
+                  value={contactForm.name}
+                  onChange={(e) => setContactForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contact-email">Email *</Label>
+                <Input
+                  id="contact-email"
+                  type="email"
+                  placeholder="john@example.com"
+                  value={contactForm.email}
+                  onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            {/* Phone & Company Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="contact-phone">Phone</Label>
+                <Input
+                  id="contact-phone"
+                  type="tel"
+                  placeholder="+1 (555) 000-0000"
+                  value={contactForm.phone}
+                  onChange={(e) => setContactForm(prev => ({ ...prev, phone: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contact-company">Company</Label>
+                <Input
+                  id="contact-company"
+                  placeholder="Acme Inc."
+                  value={contactForm.company}
+                  onChange={(e) => setContactForm(prev => ({ ...prev, company: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            {/* Position */}
+            <div className="space-y-2">
+              <Label htmlFor="contact-position">Position / Title</Label>
+              <Input
+                id="contact-position"
+                placeholder="CEO, Marketing Manager, etc."
+                value={contactForm.position}
+                onChange={(e) => setContactForm(prev => ({ ...prev, position: e.target.value }))}
+              />
+            </div>
+
+            {/* Type & Status Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Contact Type</Label>
+                <Select
+                  value={contactForm.type}
+                  onValueChange={(value) => setContactForm(prev => ({ ...prev, type: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="lead">Lead</SelectItem>
+                    <SelectItem value="prospect">Prospect</SelectItem>
+                    <SelectItem value="customer">Customer</SelectItem>
+                    <SelectItem value="partner">Partner</SelectItem>
+                    <SelectItem value="vendor">Vendor</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={contactForm.status}
+                  onValueChange={(value) => setContactForm(prev => ({ ...prev, status: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="new">New</SelectItem>
+                    <SelectItem value="contacted">Contacted</SelectItem>
+                    <SelectItem value="qualified">Qualified</SelectItem>
+                    <SelectItem value="proposal">Proposal Sent</SelectItem>
+                    <SelectItem value="negotiation">Negotiation</SelectItem>
+                    <SelectItem value="won">Won</SelectItem>
+                    <SelectItem value="lost">Lost</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div className="space-y-2">
+              <Label htmlFor="contact-notes">Notes</Label>
+              <Textarea
+                id="contact-notes"
+                placeholder="Add any relevant notes about this contact..."
+                value={contactForm.notes}
+                onChange={(e) => setContactForm(prev => ({ ...prev, notes: e.target.value }))}
+                rows={3}
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsContactFormOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmitContact}
+              disabled={isSaving || !contactForm.name.trim() || !contactForm.email.trim()}
+              className="bg-blue-500 hover:bg-blue-600"
+            >
+              {isSaving ? 'Creating...' : 'Create Contact'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

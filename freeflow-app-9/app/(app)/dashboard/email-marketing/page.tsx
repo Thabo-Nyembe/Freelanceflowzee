@@ -47,6 +47,17 @@ export default function EmailMarketingPage() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [previewTemplate, setPreviewTemplate] = useState<any>(null)
 
+  // Subscriber form modal state
+  const [isSubscriberFormOpen, setIsSubscriberFormOpen] = useState(false)
+  const [isSavingSubscriber, setIsSavingSubscriber] = useState(false)
+  const [subscriberForm, setSubscriberForm] = useState({
+    email: '',
+    firstName: '',
+    lastName: '',
+    tags: [] as string[],
+    source: 'manual' as string
+  })
+
   // A+++ LOAD EMAIL MARKETING DATA
   useEffect(() => {
     const loadEmailMarketingData = async () => {
@@ -256,11 +267,61 @@ export default function EmailMarketingPage() {
   }
 
   const handleAddSubscriber = () => {
-    announce('Opening subscriber creation form', 'polite')
-    toast.info('Add subscriber', {
-      description: 'Subscriber management form coming soon'
+    setSubscriberForm({
+      email: '',
+      firstName: '',
+      lastName: '',
+      tags: [],
+      source: 'manual'
     })
+    setIsSubscriberFormOpen(true)
+    announce('Opening subscriber creation form', 'polite')
   }
+
+  const handleSubmitSubscriber = useCallback(async () => {
+    if (!userId) {
+      toast.error('Please log in to add subscribers')
+      return
+    }
+
+    if (!subscriberForm.email.trim()) {
+      toast.error('Email is required')
+      return
+    }
+
+    setIsSavingSubscriber(true)
+    announce('Adding subscriber', 'polite')
+
+    try {
+      const { addSubscriber } = await import('@/lib/email-marketing-queries')
+
+      const newSubscriber = {
+        email: subscriberForm.email,
+        first_name: subscriberForm.firstName || null,
+        last_name: subscriberForm.lastName || null,
+        tags: subscriberForm.tags,
+        source: subscriberForm.source,
+        status: 'active'
+      }
+
+      const { data, error } = await addSubscriber(userId, newSubscriber)
+
+      if (error) throw error
+
+      setSubscribers(prev => [data, ...prev])
+      toast.success('Subscriber added', {
+        description: `${subscriberForm.email} is now subscribed`
+      })
+      announce('Subscriber added successfully', 'polite')
+      setIsSubscriberFormOpen(false)
+    } catch (err: any) {
+      logger.error('Failed to add subscriber', { error: err })
+      toast.error('Failed to add subscriber')
+      announce('Failed to add subscriber', 'assertive')
+    } finally {
+      setIsSavingSubscriber(false)
+    }
+  }, [userId, subscriberForm, announce])
 
   const handleCreateAutomation = () => {
     announce('Opening automation builder', 'polite')
@@ -906,6 +967,108 @@ export default function EmailMarketingPage() {
                 Close
               </button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Subscriber Form Dialog */}
+      <Dialog open={isSubscriberFormOpen} onOpenChange={setIsSubscriberFormOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              📧 Add Subscriber
+            </DialogTitle>
+            <DialogDescription>
+              Add a new subscriber to your email list
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Email */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Email *</label>
+              <input
+                type="email"
+                placeholder="subscriber@example.com"
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={subscriberForm.email}
+                onChange={(e) => setSubscriberForm(prev => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+
+            {/* Name Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">First Name</label>
+                <input
+                  type="text"
+                  placeholder="John"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={subscriberForm.firstName}
+                  onChange={(e) => setSubscriberForm(prev => ({ ...prev, firstName: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Last Name</label>
+                <input
+                  type="text"
+                  placeholder="Doe"
+                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={subscriberForm.lastName}
+                  onChange={(e) => setSubscriberForm(prev => ({ ...prev, lastName: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            {/* Source */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Source</label>
+              <select
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={subscriberForm.source}
+                onChange={(e) => setSubscriberForm(prev => ({ ...prev, source: e.target.value }))}
+              >
+                <option value="manual">Manual Entry</option>
+                <option value="website">Website Signup</option>
+                <option value="import">Imported</option>
+                <option value="referral">Referral</option>
+                <option value="social">Social Media</option>
+              </select>
+            </div>
+
+            {/* Tags */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Tags (comma-separated)</label>
+              <input
+                type="text"
+                placeholder="newsletter, vip, product-updates"
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={subscriberForm.tags.join(', ')}
+                onChange={(e) => setSubscriberForm(prev => ({
+                  ...prev,
+                  tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean)
+                }))}
+              />
+              <p className="text-xs text-muted-foreground">
+                Add tags to segment your subscribers
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 pt-4 border-t">
+            <button
+              onClick={handleSubmitSubscriber}
+              disabled={isSavingSubscriber || !subscriberForm.email.trim()}
+              className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors disabled:opacity-50"
+            >
+              {isSavingSubscriber ? 'Adding...' : 'Add Subscriber'}
+            </button>
+            <button
+              onClick={() => setIsSubscriberFormOpen(false)}
+              className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors"
+            >
+              Cancel
+            </button>
           </div>
         </DialogContent>
       </Dialog>
