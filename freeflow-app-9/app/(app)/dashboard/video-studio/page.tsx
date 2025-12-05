@@ -414,7 +414,7 @@ export default function VideoStudioPage() {
     router.push(`/dashboard/video-studio/editor?project=${projectId}`)
   }
 
-  const handleDeleteProject = (projectId: string) => {
+  const handleDeleteProject = async (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
     logger.info('Project deletion initiated', {
       projectId,
@@ -423,25 +423,83 @@ export default function VideoStudioPage() {
     })
 
     if (confirm(`Delete "${project?.title}"?\n\nThis action cannot be undone.`)) {
-      logger.info('Project deleted', { projectId, title: project?.title })
-      toast.success(`Project "${project?.title}" deleted`)
-      // TODO: Remove from state/database
+      try {
+        if (userId) {
+          const { deleteVideoProject } = await import('@/lib/video-studio-queries')
+          const result = await deleteVideoProject(userId, projectId)
+
+          if (result.error) {
+            throw new Error(result.error)
+          }
+        }
+
+        // Update local state
+        setProjects(prev => prev.filter(p => p.id !== projectId))
+        logger.info('Project deleted', { projectId, title: project?.title })
+        toast.success(`Project "${project?.title}" deleted`)
+      } catch (error: any) {
+        logger.error('Failed to delete project', { error, projectId })
+        toast.error('Failed to delete project', {
+          description: error.message || 'Please try again'
+        })
+      }
     } else {
       logger.debug('Project deletion cancelled')
     }
   }
 
-  const handleDuplicateProject = (projectId: string) => {
+  const handleDuplicateProject = async (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
-    logger.info('Project duplicated', {
+    logger.info('Project duplication initiated', {
       projectId,
       originalTitle: project?.title,
       newTitle: project?.title + ' (Copy)',
       duration: project?.duration,
       file_size: project?.file_size
     })
-    toast.success(`Project duplicated: ${project?.title} (Copy)`)
-    // TODO: Create duplicate in state/database
+
+    try {
+      let newProject: VideoProject | null = null
+
+      if (userId) {
+        const { duplicateVideoProject } = await import('@/lib/video-studio-queries')
+        const result = await duplicateVideoProject(userId, projectId)
+
+        if (result.error) {
+          throw new Error(result.error)
+        }
+
+        newProject = result.data as VideoProject
+      } else {
+        // Create local copy for non-authenticated state
+        newProject = {
+          ...project!,
+          id: `proj_${Date.now()}`,
+          title: `${project?.title} (Copy)`,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          status: 'draft',
+          views: 0,
+          likes: 0,
+          comments_count: 0
+        }
+      }
+
+      if (newProject) {
+        setProjects(prev => [newProject!, ...prev])
+        logger.info('Project duplicated successfully', {
+          originalId: projectId,
+          newId: newProject.id,
+          newTitle: newProject.title
+        })
+        toast.success(`Project duplicated: ${newProject.title}`)
+      }
+    } catch (error: any) {
+      logger.error('Failed to duplicate project', { error, projectId })
+      toast.error('Failed to duplicate project', {
+        description: error.message || 'Please try again'
+      })
+    }
   }
 
   const handleExportVideo = (format: string) => {
@@ -566,15 +624,53 @@ export default function VideoStudioPage() {
     // TODO: Load template into project
   }
 
-  const handleSaveProject = () => {
-    logger.info('Project saved', {
-      project: selectedProject?.title || 'Current Project',
-      changes: 'Timeline, effects, transitions'
+  const handleSaveProject = async () => {
+    if (!selectedProject) {
+      toast.error('No project selected to save')
+      return
+    }
+
+    logger.info('Saving project', {
+      project: selectedProject.title,
+      projectId: selectedProject.id
     })
-    toast.success('Project saved', {
-      description: 'All changes synced to cloud'
-    })
-    // TODO: Save project state to database
+
+    try {
+      if (userId) {
+        const { updateVideoProject } = await import('@/lib/video-studio-queries')
+        const result = await updateVideoProject(userId, selectedProject.id, {
+          title: selectedProject.title,
+          description: selectedProject.description,
+          status: selectedProject.status,
+          tags: selectedProject.tags,
+          updated_at: new Date().toISOString()
+        })
+
+        if (result.error) {
+          throw new Error(result.error)
+        }
+
+        // Update local state with saved data
+        if (result.data) {
+          setProjects(prev => prev.map(p =>
+            p.id === selectedProject.id ? { ...p, ...result.data } : p
+          ))
+        }
+      }
+
+      logger.info('Project saved successfully', {
+        projectId: selectedProject.id,
+        title: selectedProject.title
+      })
+      toast.success('Project saved', {
+        description: 'All changes synced to cloud'
+      })
+    } catch (error: any) {
+      logger.error('Failed to save project', { error, projectId: selectedProject.id })
+      toast.error('Failed to save project', {
+        description: error.message || 'Please try again'
+      })
+    }
   }
 
   const handleUndo = () => {
