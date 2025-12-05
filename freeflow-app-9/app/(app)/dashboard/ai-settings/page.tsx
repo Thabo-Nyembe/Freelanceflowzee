@@ -1083,15 +1083,168 @@ export default function AISettingsPage() {
             </TabsContent>
 
             <TabsContent value="features" className="space-y-6">
-              <div className="p-6 text-center text-muted-foreground">
-                Feature configuration coming soon
-              </div>
+              {/* AI Features Configuration */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-yellow-500" />
+                  AI Feature Toggles
+                </h3>
+                <div className="space-y-4">
+                  {[
+                    { id: 'text-gen', name: 'Text Generation', description: 'Enable AI-powered text generation across the platform', icon: FileText, enabled: true },
+                    { id: 'image-gen', name: 'Image Generation', description: 'Generate images using DALL-E and Stable Diffusion', icon: Camera, enabled: true },
+                    { id: 'code-assist', name: 'Code Assistant', description: 'AI-powered code completion and suggestions', icon: Code, enabled: false },
+                    { id: 'voice-synth', name: 'Voice Synthesis', description: 'Text-to-speech with natural voices', icon: Mic, enabled: true },
+                    { id: 'auto-translate', name: 'Auto Translation', description: 'Automatic content translation to 50+ languages', icon: Globe, enabled: false }
+                  ].map((feature) => (
+                    <div key={feature.id} className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          <feature.icon className="w-5 h-5 text-primary" />
+                        </div>
+                        <div>
+                          <div className="font-medium">{feature.name}</div>
+                          <div className="text-sm text-muted-foreground">{feature.description}</div>
+                        </div>
+                      </div>
+                      <Switch defaultChecked={feature.enabled} />
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* Model Preferences */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-purple-500" />
+                  Default Model Preferences
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Text Generation Model</Label>
+                    <Select defaultValue="gpt-4-turbo">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="gpt-4-turbo">GPT-4 Turbo (Recommended)</SelectItem>
+                        <SelectItem value="claude-3-opus">Claude 3 Opus</SelectItem>
+                        <SelectItem value="gemini-pro">Gemini Pro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Image Generation Model</Label>
+                    <Select defaultValue="dall-e-3">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="dall-e-3">DALL-E 3</SelectItem>
+                        <SelectItem value="stable-diffusion">Stable Diffusion XL</SelectItem>
+                        <SelectItem value="midjourney">Midjourney</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Response Temperature</Label>
+                    <Select defaultValue="0.7">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0.3">Conservative (0.3)</SelectItem>
+                        <SelectItem value="0.7">Balanced (0.7)</SelectItem>
+                        <SelectItem value="1.0">Creative (1.0)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Max Tokens</Label>
+                    <Select defaultValue="4096">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1024">1,024 tokens</SelectItem>
+                        <SelectItem value="4096">4,096 tokens</SelectItem>
+                        <SelectItem value="8192">8,192 tokens</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </Card>
             </TabsContent>
 
             <TabsContent value="usage" className="space-y-6">
-              <div className="p-6 text-center text-muted-foreground">
-                Usage and billing dashboard coming soon
+              {/* Usage Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {[
+                  { label: 'API Calls', value: '12,847', trend: '+12%', color: 'text-blue-600' },
+                  { label: 'Tokens Used', value: '2.4M', trend: '+8%', color: 'text-green-600' },
+                  { label: 'Images Generated', value: '342', trend: '+23%', color: 'text-purple-600' },
+                  { label: 'Current Bill', value: '$47.82', trend: '-5%', color: 'text-orange-600' }
+                ].map((stat, i) => (
+                  <Card key={i} className="p-4">
+                    <div className="text-sm text-muted-foreground">{stat.label}</div>
+                    <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
+                    <Badge variant={stat.trend.startsWith('+') ? 'default' : 'secondary'} className="text-xs mt-1">
+                      {stat.trend} this month
+                    </Badge>
+                  </Card>
+                ))}
               </div>
+
+              {/* Usage Chart */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Daily API Usage</h3>
+                <div className="h-48 flex items-end justify-between gap-1">
+                  {[45, 62, 38, 75, 55, 82, 90, 68, 54, 78, 85, 60, 72, 88].map((height, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                      <div
+                        className="w-full bg-gradient-to-t from-blue-600 to-blue-400 rounded-t transition-all hover:opacity-80"
+                        style={{ height: `${height}%` }}
+                      />
+                      <span className="text-[10px] text-muted-foreground">{i + 1}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-between text-sm text-muted-foreground mt-2">
+                  <span>Dec 1</span>
+                  <span>Dec 14</span>
+                </div>
+              </Card>
+
+              {/* Billing Details */}
+              <Card className="p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Database className="w-5 h-5" />
+                  Billing Breakdown
+                </h3>
+                <div className="space-y-4">
+                  {[
+                    { provider: 'OpenAI', usage: 'GPT-4 Turbo + DALL-E 3', cost: '$32.50', percentage: 68 },
+                    { provider: 'Anthropic', usage: 'Claude 3 Sonnet', cost: '$10.20', percentage: 21 },
+                    { provider: 'Google', usage: 'Gemini Pro', cost: '$3.12', percentage: 7 },
+                    { provider: 'Replicate', usage: 'Stable Diffusion', cost: '$2.00', percentage: 4 }
+                  ].map((item, i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <div>
+                          <span className="font-medium">{item.provider}</span>
+                          <span className="text-muted-foreground ml-2">• {item.usage}</span>
+                        </div>
+                        <span className="font-semibold">{item.cost}</span>
+                      </div>
+                      <Progress value={item.percentage} className="h-2" />
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center justify-between pt-4 mt-4 border-t">
+                  <span className="font-semibold">Total This Month</span>
+                  <span className="text-xl font-bold text-primary">$47.82</span>
+                </div>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
