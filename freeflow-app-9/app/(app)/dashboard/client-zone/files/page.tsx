@@ -21,7 +21,10 @@ import {
   MoreVertical,
   FolderOpen,
   Archive,
-  Copy
+  Copy,
+  Shield,
+  Lock,
+  DollarSign
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -30,6 +33,13 @@ import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { KAZI_CLIENT_DATA, File } from '@/lib/client-zone-utils'
+
+// SECURE FILE DELIVERY INTEGRATION
+import { SecureFileUpload } from '@/components/secure-files/secure-file-upload'
+import { FileGallery } from '@/components/secure-files/file-gallery'
+import { FileAccessDialog } from '@/components/secure-files/file-access-dialog'
+import { EscrowReleaseDialog } from '@/components/secure-files/escrow-release-dialog'
+import type { FileItem } from '@/components/secure-files/file-gallery'
 
 const logger = createFeatureLogger('ClientZoneFiles')
 
@@ -165,6 +175,13 @@ export default function FilesPage() {
   const [selectedFile, setSelectedFile] = useState<ExtendedFile | null>(null)
   const [filteredFiles, setFilteredFiles] = useState<ExtendedFile[]>(EXTENDED_FILES)
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'size'>('date')
+
+  // SECURE FILE DELIVERY STATE
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [showAccessDialog, setShowAccessDialog] = useState(false)
+  const [showEscrowDialog, setShowEscrowDialog] = useState(false)
+  const [selectedSecureFile, setSelectedSecureFile] = useState<FileItem | null>(null)
+  const [viewMode, setViewMode] = useState<'legacy' | 'secure'>('legacy')
 
   // A+++ LOAD FILE DATA
   useEffect(() => {
@@ -459,6 +476,57 @@ export default function FilesPage() {
     }
   }, [])
 
+  // ============================================================================
+  // SECURE FILE DELIVERY HANDLERS
+  // ============================================================================
+
+  const handleSecureFileClick = useCallback((file: FileItem) => {
+    setSelectedSecureFile(file)
+
+    // If file requires payment or password, show access dialog
+    if (file.requiresPayment || file.accessType === 'password') {
+      setShowAccessDialog(true)
+    } else {
+      // Direct download for public files
+      handleSecureFileDownload(file)
+    }
+  }, [])
+
+  const handleSecureFileDownload = useCallback(async (file: FileItem) => {
+    try {
+      logger.info('Secure file download initiated', { fileName: file.fileName })
+
+      const response = await fetch(`/api/files/delivery/${file.id}/download`)
+      const data = await response.json()
+
+      if (data.success && data.downloadUrl) {
+        window.location.href = data.downloadUrl
+        toast.success('Download started!', {
+          description: file.fileName
+        })
+      } else {
+        throw new Error(data.error || 'Download failed')
+      }
+    } catch (error: any) {
+      logger.error('Failed to download secure file', { error, fileName: file.fileName })
+      toast.error('Failed to download file', {
+        description: error.message
+      })
+    }
+  }, [])
+
+  const handleEscrowRelease = useCallback((deliveryId: string) => {
+    setSelectedSecureFile({ id: deliveryId } as FileItem)
+    setShowEscrowDialog(true)
+  }, [])
+
+  const handleUploadComplete = useCallback(() => {
+    setShowUploadDialog(false)
+    toast.success('File uploaded successfully!')
+    // Refresh secure files list
+    window.location.reload()
+  }, [])
+
   // A+++ LOADING STATE
   if (isLoading) {
     return (
@@ -498,20 +566,74 @@ export default function FilesPage() {
               Download, upload, and manage your project files
             </p>
           </div>
-          <Button
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
-            onClick={handleUploadFile}
-            disabled={isUploading}
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            {isUploading ? 'Uploading...' : 'Upload Files'}
-          </Button>
+          <div className="flex items-center gap-3">
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-2 bg-white rounded-lg p-1 border">
+              <Button
+                size="sm"
+                variant={viewMode === 'legacy' ? 'default' : 'ghost'}
+                onClick={() => setViewMode('legacy')}
+              >
+                <FolderOpen className="h-4 w-4 mr-1" />
+                Legacy
+              </Button>
+              <Button
+                size="sm"
+                variant={viewMode === 'secure' ? 'default' : 'ghost'}
+                onClick={() => setViewMode('secure')}
+              >
+                <Shield className="h-4 w-4 mr-1" />
+                Secure
+              </Button>
+            </div>
+
+            {/* Upload Button */}
+            <Button
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+              onClick={viewMode === 'secure' ? () => setShowUploadDialog(true) : handleUploadFile}
+              disabled={isUploading}
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {isUploading ? 'Uploading...' : 'Upload Files'}
+            </Button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Files List */}
-          <div className="lg:col-span-3 space-y-4">
+        {/* Secure File Delivery View */}
+        {viewMode === 'secure' && (
+          <div className="space-y-6">
             <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-blue-600" />
+                    <CardTitle>Secure File Delivery</CardTitle>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Lock className="h-4 w-4" />
+                    Password Protected
+                    <DollarSign className="h-4 w-4 ml-2" />
+                    Escrow Enabled
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <FileGallery
+                  onFileClick={handleSecureFileClick}
+                  showPricing={true}
+                  allowDownload={true}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Legacy Files View */}
+        {viewMode === 'legacy' && (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Files List */}
+            <div className="lg:col-span-3 space-y-4">
+              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
               <CardHeader>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -795,6 +917,42 @@ export default function FilesPage() {
             </Card>
           </div>
         </div>
+        )}
+
+        {/* Secure File Delivery Dialogs */}
+        {showUploadDialog && (
+          <SecureFileUpload
+            open={showUploadDialog}
+            onOpenChange={setShowUploadDialog}
+            onSuccess={handleUploadComplete}
+          />
+        )}
+
+        {selectedSecureFile && showAccessDialog && (
+          <FileAccessDialog
+            deliveryId={selectedSecureFile.id}
+            open={showAccessDialog}
+            onOpenChange={setShowAccessDialog}
+            onDownloaded={() => {
+              setShowAccessDialog(false)
+              toast.success('File downloaded successfully!')
+            }}
+          />
+        )}
+
+        {selectedSecureFile && showEscrowDialog && (
+          <EscrowReleaseDialog
+            deliveryId={selectedSecureFile.id}
+            open={showEscrowDialog}
+            onOpenChange={setShowEscrowDialog}
+            onReleased={() => {
+              setShowEscrowDialog(false)
+              toast.success('Escrow released successfully!')
+              // Refresh files list
+              window.location.reload()
+            }}
+          />
+        )}
       </div>
     </div>
   )

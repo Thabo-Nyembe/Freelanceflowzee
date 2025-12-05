@@ -3,10 +3,12 @@
 import Link from 'next/link'
 import React from 'react'
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { LiquidGlassCard, LiquidGlassCardHeader, LiquidGlassCardTitle, LiquidGlassCardContent } from '@/components/ui/liquid-glass-card'
 import {
   ArrowRight,
   Play,
@@ -98,13 +100,13 @@ const features = [
 const stats = [
   { value: '25,000+', label: 'Active Users', icon: Users },
   { value: '40+', label: 'Countries', icon: Globe },
-  { value: '4.9/5', label: 'User Rating', icon: Star },
-  { value: '99.9%', label: 'Uptime', icon: Zap }
+  { value: '98%', label: 'Satisfaction', icon: Star },
+  { value: '$2.5M+', label: 'Processed', icon: TrendingUp }
 ]
 
 const testimonials = [
   {
-    quote: "KAZI transformed how we work with clients. The universal feedback system eliminated endless email chains, and we're billing 40% faster with the escrow payments.",
+    quote: "KAZI transformed how we work. The Universal Feedback system alone saved us 15 hours per week. Our clients love the professional galleries and real-time collaboration.",
     author: "Sarah Chen",
     role: "Creative Director",
     company: "Design Studio Pro",
@@ -112,18 +114,18 @@ const testimonials = [
     metric: "15 hrs/week saved"
   },
   {
-    quote: "Payments are lightning-fast. The integrated workspace means I'm not context-switching between 6 different tools anymore. Game changer for freelancers.",
-    author: "Marcus Johnson",
-    role: "Freelance Developer",
-    company: "Independent",
+    quote: "The escrow system gives us peace of mind. Clients fund projects upfront, and we deliver knowing we're protected. The AI daily planner keeps our team on track.",
+    author: "Marcus Rodriguez",
+    role: "Agency Owner",
+    company: "Digital Collective",
     rating: 5,
     metric: "$300/mo saved"
   },
   {
-    quote: "The AI content studio is incredible. We create marketing materials 5x faster and the quality is consistently excellent. Our clients love the collaboration features.",
-    author: "Priya Patel",
-    role: "Marketing Agency Owner",
-    company: "Growth Labs",
+    quote: "Switched from juggling 6 different apps to just KAZI. The video studio with AI transcription and the multi-model AI content generator are game-changers for our workflow.",
+    author: "Priya Sharma",
+    role: "Freelance Videographer",
+    company: "Sharma Productions",
     rating: 5,
     metric: "+60% revenue"
   }
@@ -136,298 +138,509 @@ const trustBadges = [
   { icon: CheckCircle, label: '30-Day Guarantee' }
 ]
 
-export default function Home() {
+export default function HomePage() {
   const router = useRouter()
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white">
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
-            "name": "KAZI",
-            "description": "All-in-one workspace for freelancers and agencies with AI content creation, secure payments, and project management",
-            "applicationCategory": "BusinessApplication",
-            "operatingSystem": "Web",
-            "offers": {
-              "@type": "Offer",
-              "priceCurrency": "USD"
-            },
-            "aggregateRating": {
-              "@type": "AggregateRating",
-              "ratingValue": "4.9",
-              "ratingCount": "2500"
-            }
-          })
+    <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">
+      {/* Animated Background Blobs */}
+      <motion.div
+        className="absolute top-0 -left-40 w-96 h-96 bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 rounded-full blur-3xl pointer-events-none"
+        animate={{
+          x: [0, 50, 0],
+          y: [0, -50, 0],
+          scale: [1, 1.2, 1]
+        }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: 'easeInOut'
+        }}
+      />
+      <motion.div
+        className="absolute top-1/2 -right-40 w-96 h-96 bg-gradient-to-r from-purple-400/20 via-pink-400/20 to-orange-400/20 rounded-full blur-3xl pointer-events-none"
+        animate={{
+          x: [0, -50, 0],
+          y: [0, 50, 0],
+          scale: [1.2, 1, 1.2]
+        }}
+        transition={{
+          duration: 25,
+          repeat: Infinity,
+          ease: 'easeInOut',
+          delay: 5
         }}
       />
 
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+      <motion.nav
+        className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200"
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.6 }}
+        role="navigation"
+        aria-label="Main navigation"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-6 h-6 text-blue-600" />
+            <Link
+              href="/"
+              className="flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg px-2 py-1"
+              aria-label="KAZI Homepage"
+            >
+              <Sparkles className="w-6 h-6 text-blue-600" aria-hidden="true" />
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 KAZI
               </span>
-            </div>
-            <div className="hidden md:flex items-center gap-8">
-              <Link href="/features" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+            </Link>
+            <div className="hidden md:flex items-center gap-8" role="menubar">
+              <Link
+                href="/features"
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
+                role="menuitem"
+                aria-label="View all features"
+              >
                 Features
               </Link>
-              <Link href="/pricing" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+              <Link
+                href="/pricing"
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
+                role="menuitem"
+                aria-label="View pricing plans"
+              >
                 Pricing
               </Link>
-              <Link href="/blog" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+              <Link
+                href="/blog"
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
+                role="menuitem"
+                aria-label="Read our blog"
+              >
                 Blog
               </Link>
-              <Link href="/contact" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+              <Link
+                href="/contact"
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
+                role="menuitem"
+                aria-label="Contact us"
+              >
                 Contact
               </Link>
             </div>
             <div className="flex items-center gap-4">
               <Link href="/login">
-                <Button variant="ghost">Log In</Button>
+                <Button
+                  variant="ghost"
+                  aria-label="Log in to your account"
+                  className="focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  Log In
+                </Button>
               </Link>
               <Link href="/signup">
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                <Button
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Start your free trial"
+                >
                   Start Free Trial
                 </Button>
               </Link>
             </div>
           </div>
         </div>
-      </nav>
+      </motion.nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 sm:py-32">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute left-1/2 top-0 -translate-x-1/2">
-            <div className="h-[500px] w-[800px] bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 blur-3xl" />
-          </div>
-        </div>
-
+      <section className="relative py-20 overflow-hidden" aria-labelledby="hero-heading">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <Badge variant="secondary" className="mb-8 bg-blue-50 text-blue-700 hover:bg-blue-100">
-              <Globe className="w-3 h-3 mr-1" />
-              Built in Africa • Trusted Globally
-            </Badge>
+          <div className="text-center relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <Badge
+                variant="secondary"
+                className="mb-6 bg-purple-50 text-purple-700 text-sm px-4 py-2"
+                role="status"
+                aria-label="Trusted by over 25,000 professionals"
+              >
+                <Sparkles className="w-4 h-4 inline mr-2" aria-hidden="true" />
+                Trusted by 25,000+ Professionals
+              </Badge>
+            </motion.div>
 
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
+            <motion.h1
+              id="hero-heading"
+              className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
               Run Your Entire Business
               <span className="block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
                 From One Platform
               </span>
-            </h1>
+            </motion.h1>
 
-            <p className="text-xl sm:text-2xl text-gray-600 max-w-3xl mx-auto mb-12 leading-relaxed">
-              Stop juggling 6+ tools. KAZI combines AI-powered creation, video collaboration, secure payments, and project management into one seamless workspace.
-            </p>
+            <motion.p
+              className="text-xl text-gray-600 max-w-3xl mx-auto mb-12"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+            >
+              Stop juggling 6+ apps. KAZI combines project management, AI content creation, secure payments,
+              client collaboration, and professional file delivery in one beautiful workspace.
+            </motion.p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              role="group"
+              aria-label="Primary actions"
+            >
               <Link href="/signup">
-                <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-6">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8 py-6 shadow-xl hover:shadow-2xl transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Start your free trial - No credit card required"
+                >
                   Start Free Trial
-                  <ArrowRight className="ml-2 w-5 h-5" />
+                  <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6">
-                <Play className="mr-2 w-5 h-5" />
-                Watch Demo
-              </Button>
-            </div>
+              <Link href="/demo-features">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="text-lg px-8 py-6 border-2 hover:border-blue-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Watch interactive demo of KAZI platform"
+                >
+                  <Play className="mr-2 w-5 h-5" aria-hidden="true" />
+                  Watch Demo
+                </Button>
+              </Link>
+            </motion.div>
 
-            {/* Trust Badges */}
-            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
+            <motion.div
+              className="flex flex-wrap justify-center gap-6 mt-8 text-sm text-gray-600"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+              role="region"
+              aria-label="Security and trust badges"
+            >
               {trustBadges.map((badge, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <badge.icon className="w-4 h-4 text-green-600" />
+                <div
+                  key={index}
+                  className="flex items-center gap-2"
+                  role="status"
+                  aria-label={badge.label}
+                >
+                  <badge.icon className="w-4 h-4 text-green-600" aria-hidden="true" />
                   <span>{badge.label}</span>
                 </div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-white">
+      <section
+        className="py-12 bg-white/60 backdrop-blur-sm"
+        aria-labelledby="stats-heading"
+        role="region"
+      >
+        <h2 id="stats-heading" className="sr-only">Platform statistics and achievements</h2>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((stat, index) => (
-              <Card key={index} className="border-none shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="pt-6 text-center">
-                  <stat.icon className="w-8 h-8 text-blue-600 mx-auto mb-3" />
-                  <div className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</div>
-                  <div className="text-sm text-gray-600">{stat.label}</div>
-                </CardContent>
-              </Card>
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Card
+                  className="text-center border-2 hover:border-blue-600 transition-all hover:shadow-xl"
+                  role="status"
+                  aria-label={`${stat.label}: ${stat.value}`}
+                >
+                  <CardContent className="p-6">
+                    <stat.icon className="w-8 h-8 mx-auto mb-3 text-blue-600" aria-hidden="true" />
+                    <div className="text-3xl font-bold text-gray-900 mb-1" role="status">{stat.value}</div>
+                    <div className="text-sm text-gray-600">{stat.label}</div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Problem Statement */}
-      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+      <section
+        className="py-20"
+        aria-labelledby="problem-heading"
+        role="region"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+          <div className="text-center mb-12">
+            <h2 id="problem-heading" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
               Tired of Context Switching Between 6+ Apps?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Every tool switch costs you 23 minutes of focus. KAZI eliminates the chaos by bringing everything into one unified workspace.
+              Freelancers and agencies waste hours every day switching between project management, file storage,
+              invoicing, communication, and payment platforms.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="border-2 hover:border-blue-600 transition-all">
-              <CardHeader>
-                <TrendingUp className="w-12 h-12 text-blue-600 mb-4" />
-                <CardTitle>Save 15+ Hours Weekly</CardTitle>
-                <CardDescription>
-                  Eliminate tool switching and context loss. Keep everything in one place.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border-2 hover:border-purple-600 transition-all">
-              <CardHeader>
-                <Shield className="w-12 h-12 text-purple-600 mb-4" />
-                <CardTitle>Get Paid Faster</CardTitle>
-                <CardDescription>
-                  Automated invoicing and escrow payments mean you get paid on time, every time.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border-2 hover:border-pink-600 transition-all">
-              <CardHeader>
-                <DollarSign className="w-12 h-12 text-pink-600 mb-4" />
-                <CardTitle>Cut Costs by $500/mo</CardTitle>
-                <CardDescription>
-                  Replace multiple subscriptions with one powerful platform that does it all.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto" role="list">
+            {[
+              { title: 'One Workspace', description: 'Everything in one place—no more tab chaos or lost files across platforms.' },
+              { title: 'Save 15+ Hours/Week', description: 'Automate repetitive tasks with AI and streamline your entire workflow.' },
+              { title: 'Get Paid Faster', description: 'Secure escrow payments mean you get paid on time, every time.' }
+            ].map((benefit, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                role="listitem"
+              >
+                <LiquidGlassCard
+                  variant="tinted"
+                  hoverEffect
+                  role="article"
+                  aria-label={`${benefit.title}: ${benefit.description}`}
+                >
+                  <LiquidGlassCardHeader>
+                    <CheckCircle className="w-12 h-12 text-green-600 mb-4" aria-hidden="true" />
+                    <LiquidGlassCardTitle>{benefit.title}</LiquidGlassCardTitle>
+                  </LiquidGlassCardHeader>
+                  <LiquidGlassCardContent>
+                    <p className="text-gray-700">{benefit.description}</p>
+                  </LiquidGlassCardContent>
+                </LiquidGlassCard>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Features Grid */}
-      <section className="py-20 bg-white">
+      <section
+        className="py-20 bg-gradient-to-b from-gray-50 to-white"
+        aria-labelledby="features-heading"
+        role="region"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <Badge variant="secondary" className="mb-4 bg-purple-50 text-purple-700">
-              Complete Toolkit
+            <Badge
+              variant="secondary"
+              className="mb-4 bg-blue-50 text-blue-700"
+              role="status"
+              aria-label="Powerful Features section"
+            >
+              Powerful Features
             </Badge>
-            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-              Everything You Need to Run Your Business
+            <h2 id="features-heading" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+              Everything You Need to Scale
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Enterprise-grade features that grow with you—from solopreneur to agency
+              From AI-powered content creation to secure payments, KAZI has every tool you need to run a successful creative business.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8" role="list">
             {features.map((feature, index) => (
-              <Card key={index} className="group hover:shadow-xl transition-all border-2 hover:border-blue-600">
-                <CardHeader>
-                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${feature.gradient} flex items-center justify-center mb-4`}>
-                    <feature.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <CardTitle className="text-xl">{feature.title}</CardTitle>
-                  <CardDescription className="text-base">{feature.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link href={feature.href}>
-                    <Button variant="ghost" className="w-full group-hover:bg-gray-100">
-                      Learn More
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.05 }}
+                role="listitem"
+              >
+                <Card
+                  className="group h-full border-2 hover:border-blue-600 transition-all hover:shadow-xl focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2"
+                  role="article"
+                  aria-label={`${feature.title}: ${feature.description}`}
+                >
+                  <CardHeader>
+                    <div
+                      className={`w-12 h-12 rounded-lg bg-gradient-to-r ${feature.gradient} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}
+                      aria-hidden="true"
+                    >
+                      <feature.icon className="w-6 h-6 text-white" aria-hidden="true" />
+                    </div>
+                    <CardTitle className="text-xl">{feature.title}</CardTitle>
+                    <CardDescription className="text-base">{feature.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Link href={feature.href}>
+                      <Button
+                        variant="ghost"
+                        className="w-full group-hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        aria-label={`Learn more about ${feature.title}`}
+                      >
+                        Learn More
+                        <ArrowRight className="ml-2 w-4 h-4" aria-hidden="true" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+      <section
+        className="py-20"
+        aria-labelledby="testimonials-heading"
+        role="region"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <Badge variant="secondary" className="mb-4 bg-blue-50 text-blue-700">
-              Customer Stories
+            <Badge
+              variant="secondary"
+              className="mb-4 bg-purple-50 text-purple-700"
+              role="status"
+              aria-label="Success Stories section"
+            >
+              Success Stories
             </Badge>
-            <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
-              Loved by Freelancers & Agencies Worldwide
+            <h2 id="testimonials-heading" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+              Loved by 25,000+ Professionals
             </h2>
-            <p className="text-xl text-gray-600">
-              See how KAZI transforms workflows and accelerates growth
-            </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8" role="list">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="border-2 hover:border-blue-600 transition-all">
-                <CardHeader>
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <Badge variant="secondary" className="w-fit bg-green-50 text-green-700 mb-4">
-                    {testimonial.metric}
-                  </Badge>
-                </CardHeader>
-                <CardContent>
-                  <blockquote className="text-gray-700 mb-6 leading-relaxed">
-                    "{testimonial.quote}"
-                  </blockquote>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500" />
-                    <div>
-                      <div className="font-semibold text-gray-900">{testimonial.author}</div>
-                      <div className="text-sm text-gray-600">{testimonial.role}</div>
-                      <div className="text-sm text-gray-500">{testimonial.company}</div>
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                role="listitem"
+              >
+                <LiquidGlassCard
+                  variant="gradient"
+                  className="h-full"
+                  role="article"
+                  aria-label={`Testimonial from ${testimonial.author}, ${testimonial.role} at ${testimonial.company}`}
+                >
+                  <LiquidGlassCardHeader>
+                    <div
+                      className="flex gap-1 mb-4"
+                      role="img"
+                      aria-label={`${testimonial.rating} out of 5 stars`}
+                    >
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" aria-hidden="true" />
+                      ))}
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    <Badge
+                      className="mb-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+                      role="status"
+                      aria-label={`Result: ${testimonial.metric}`}
+                    >
+                      {testimonial.metric}
+                    </Badge>
+                  </LiquidGlassCardHeader>
+                  <LiquidGlassCardContent>
+                    <p className="text-gray-700 mb-6 leading-relaxed">{testimonial.quote}</p>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold"
+                        aria-hidden="true"
+                      >
+                        {testimonial.author.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-900">{testimonial.author}</div>
+                        <div className="text-sm text-gray-600">{testimonial.role}</div>
+                        <div className="text-xs text-gray-500">{testimonial.company}</div>
+                      </div>
+                    </div>
+                  </LiquidGlassCardContent>
+                </LiquidGlassCard>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-6">
-            Ready to Transform Your Workflow?
-          </h2>
-          <p className="text-xl text-white/90 mb-8">
-            Join 25,000+ freelancers and agencies who've streamlined their work with KAZI
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-6">
-                Start Your Free Trial
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
-            <Button size="lg" variant="outline" className="bg-transparent border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-6">
-              Schedule a Demo
-            </Button>
-          </div>
-          <p className="text-white/80 mt-6 text-sm">
-            No credit card required • 14-day free trial • Cancel anytime
-          </p>
+      {/* Final CTA */}
+      <section
+        className="py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 relative overflow-hidden"
+        aria-labelledby="final-cta-heading"
+        role="region"
+      >
+        <motion.div
+          className="absolute inset-0 opacity-30"
+          animate={{
+            backgroundPosition: ['0% 0%', '100% 100%'],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            repeatType: 'reverse'
+          }}
+          style={{
+            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+            backgroundSize: '50px 50px'
+          }}
+          aria-hidden="true"
+        />
+
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <h2 id="final-cta-heading" className="text-4xl sm:text-5xl font-bold text-white mb-6">
+              Ready to Streamline Your Workflow?
+            </h2>
+            <p className="text-xl text-white/90 mb-8">
+              Join 25,000+ professionals who've ditched the app chaos. Start your free trial today—no credit card required.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center" role="group" aria-label="Call to action buttons">
+              <Link href="/signup">
+                <Button
+                  size="lg"
+                  className="bg-white text-blue-600 hover:bg-gray-100 text-lg px-8 py-6 shadow-2xl focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
+                  aria-label="Start your free 14-day trial - No credit card required"
+                >
+                  Start Free Trial
+                  <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
+                </Button>
+              </Link>
+              <Link href="/pricing">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="bg-transparent border-2 border-white text-white hover:bg-white/10 text-lg px-8 py-6 focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-purple-600"
+                  aria-label="View pricing plans and features"
+                >
+                  View Pricing
+                </Button>
+              </Link>
+            </div>
+            <p className="text-white/80 mt-6 text-sm" role="status">
+              ✓ 14-day free trial • ✓ No credit card required • ✓ Cancel anytime
+            </p>
+          </motion.div>
         </div>
       </section>
 

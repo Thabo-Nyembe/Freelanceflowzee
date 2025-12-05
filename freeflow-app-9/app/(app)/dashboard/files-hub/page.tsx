@@ -35,6 +35,14 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
+// CLOUD STORAGE INTEGRATION COMPONENTS
+import { StorageProvidersCard } from '@/components/storage/storage-providers-card'
+import { UnifiedFileBrowser } from '@/components/storage/unified-file-browser'
+import { StorageQuotaCard } from '@/components/storage/storage-quota-card'
+import { StorageActivityLog } from '@/components/storage/storage-activity-log'
+import { StorageOnboardingWizard } from '@/components/storage/storage-onboarding-wizard'
+import { useStorageOnboarding } from '@/lib/hooks/use-storage-onboarding'
+
 const logger = createFeatureLogger('FilesHub')
 
 // ============================================================================
@@ -239,6 +247,14 @@ export default function FilesHubPage() {
 
   // AUTH
   const { userId, loading: userLoading } = useCurrentUser()
+
+  // STORAGE ONBOARDING WIZARD
+  const {
+    showWizard,
+    setShowWizard,
+    handleComplete: handleOnboardingComplete,
+    handleSkip: handleOnboardingSkip
+  } = useStorageOnboarding()
 
   // LOCAL STATE
   const [isPageLoading, setIsPageLoading] = useState(true)
@@ -1131,6 +1147,13 @@ export default function FilesHubPage() {
       <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0" />
       <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-teal-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0" />
 
+      {/* Storage Onboarding Wizard */}
+      <StorageOnboardingWizard
+        open={showWizard}
+        onOpenChange={setShowWizard}
+        onComplete={handleOnboardingComplete}
+      />
+
       <div className="relative p-6 space-y-6">
         {/* Header */}
         <ScrollReveal>
@@ -1461,6 +1484,62 @@ export default function FilesHubPage() {
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        </ScrollReveal>
+
+        {/* CLOUD STORAGE PROVIDERS - Real OAuth Integration */}
+        <ScrollReveal delay={0.6}>
+          <Card className="bg-gradient-to-br from-blue-50 via-cyan-50 to-sky-50 border-blue-200 dark:from-blue-950/30 dark:via-cyan-950/30 dark:to-sky-950/30">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2 text-2xl">
+                    <Cloud className="w-7 h-7 text-blue-600" />
+                    Cloud Storage Integration
+                  </CardTitle>
+                  <CardDescription className="mt-2">
+                    Connect Google Drive, Dropbox, OneDrive, and more to access all your files in one unified interface
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowWizard(true)}
+                  className="gap-2 whitespace-nowrap"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  Setup Wizard
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="providers" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="providers">Providers</TabsTrigger>
+                  <TabsTrigger value="files">All Files</TabsTrigger>
+                  <TabsTrigger value="activity">Activity</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="providers" className="space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2">
+                      <StorageProvidersCard />
+                    </div>
+                    <div>
+                      <StorageQuotaCard />
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="files">
+                  <UnifiedFileBrowser />
+                </TabsContent>
+
+                <TabsContent value="activity">
+                  <StorageActivityLog />
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </ScrollReveal>

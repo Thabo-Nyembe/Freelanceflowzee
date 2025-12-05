@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { DemoModal } from '@/components/demo-modal'
 import { 
   Mail, 
   Send, 
@@ -77,13 +76,55 @@ const benefits = [
 export default function NewsletterPage() {
   const [email, setEmail] = useState<any>('')
   const [isSubscribed, setIsSubscribed] = useState<any>(false)
-  const [showDemoModal, setShowDemoModal] = useState<any>(false)
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (email) {
-      setIsSubscribed(true)
-      setEmail('')
+    if (!email) return
+
+    setIsSubmitting(true)
+    setErrorMessage('')
+
+    try {
+      const response = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          source: 'newsletter_page',
+          metadata: {
+            page: 'newsletter',
+            timestamp: new Date().toISOString()
+          }
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setIsSubscribed(true)
+        setEmail('')
+
+        // Show success alert with next steps
+        setTimeout(() => {
+          const message = result.alreadySubscribed
+            ? `✅ Already Subscribed\n\n${result.message}\n\nYou're all set! Keep an eye on your inbox for our weekly insights.`
+            : result.reactivated
+            ? `✅ Welcome Back!\n\n${result.message}\n\nNext Steps:\n${result.nextSteps.map((step: string) => `• ${step}`).join('\n')}`
+            : `✅ Successfully Subscribed!\n\n${result.message}\n\nNext Steps:\n${result.nextSteps.map((step: string) => `• ${step}`).join('\n')}`
+
+          alert(message)
+        }, 500)
+      } else {
+        setErrorMessage(result.error || 'Failed to subscribe')
+      }
+    } catch (error) {
+      console.error('Newsletter subscription error:', error)
+      setErrorMessage('Connection error. Please try again.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -109,27 +150,40 @@ export default function NewsletterPage() {
 
               {/* Subscription Form */}
               {!isSubscribed ? (
-                <form onSubmit={handleSubscribe} className="max-w-md mx-auto flex gap-3">
-                  <Input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="flex-1 bg-white text-gray-900 border-0"
-                    required
-                  />"
-                  <Button type="submit" size="lg" className="bg-orange-500 hover:bg-orange-600 text-white">
-                    <Send className="w-4 h-4 mr-2" />
-                    Subscribe
-                  </Button>
-                </form>
+                <div className="max-w-md mx-auto">
+                  <form onSubmit={handleSubscribe} className="flex gap-3">
+                    <Input
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="flex-1 bg-white text-gray-900 border-0"
+                      required
+                      disabled={isSubmitting}
+                    />
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="bg-orange-500 hover:bg-orange-600 text-white"
+                      disabled={isSubmitting}
+                    >
+                      <Send className="w-4 h-4 mr-2" />
+                      {isSubmitting ? 'Subscribing...' : 'Subscribe'}
+                    </Button>
+                  </form>
+                  {errorMessage && (
+                    <div className="mt-3 text-red-300 text-sm text-center">
+                      {errorMessage}
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="flex items-center justify-center gap-3 bg-green-500/20 rounded-lg p-4 max-w-md mx-auto">
                   <CheckCircle className="w-5 h-5 text-green-300" />
                   <span className="text-green-100">Thanks for subscribing! Check your email for confirmation.</span>
                 </div>
               )}
-              
+
               <p className="text-blue-200 text-sm mt-4">
                 Join 2,500+ creators • No spam, unsubscribe anytime
               </p>
@@ -204,11 +258,29 @@ export default function NewsletterPage() {
                         </div>
                         
                         <div className="flex items-center gap-2">
-                          <Button size="sm" variant="outline">
-                            <Eye className="w-4 h-4 mr-1" />
-                            Read
-                          </Button>
-                          <Button size="sm" variant="outline">
+                          <Link href="/blog">
+                            <Button size="sm" variant="outline">
+                              <Eye className="w-4 h-4 mr-1" />
+                              Read Articles
+                            </Button>
+                          </Link>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              if (navigator.share) {
+                                navigator.share({
+                                  title: 'KAZI Newsletter',
+                                  text: 'Check out the latest KAZI newsletter!',
+                                  url: window.location.href
+                                }).catch(() => {
+                                  navigator.clipboard.writeText(window.location.href)
+                                })
+                              } else {
+                                navigator.clipboard.writeText(window.location.href)
+                              }
+                            }}
+                          >
                             <Share2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -279,19 +351,27 @@ export default function NewsletterPage() {
                     Don&apos;t miss out on the latest creative insights and industry updates.
                   </p>
                   {!isSubscribed ? (
-                    <form onSubmit={handleSubscribe} className="space-y-3">
-                      <Input
-                        type="email"
-                        placeholder="Your email address"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                      <Button type="submit" className="w-full">
-                        <Send className="w-4 h-4 mr-2" />
-                        Subscribe Now
-                      </Button>
-                    </form>
+                    <div>
+                      <form onSubmit={handleSubscribe} className="space-y-3">
+                        <Input
+                          type="email"
+                          placeholder="Your email address"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                          disabled={isSubmitting}
+                        />
+                        <Button type="submit" className="w-full" disabled={isSubmitting}>
+                          <Send className="w-4 h-4 mr-2" />
+                          {isSubmitting ? 'Subscribing...' : 'Subscribe Now'}
+                        </Button>
+                      </form>
+                      {errorMessage && (
+                        <div className="mt-2 text-red-600 text-xs text-center">
+                          {errorMessage}
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div className="text-center py-4">
                       <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
@@ -313,14 +393,15 @@ export default function NewsletterPage() {
                   <p className="text-gray-600 text-sm mb-4">
                     Access our complete newsletter archive with 24+ issues of creative insights.
                   </p>
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => setShowDemoModal(true)}
-                  >"
-                    <Eye className="w-4 h-4 mr-2" />
-                    Browse Archive
-                  </Button>
+                  <Link href="/blog">
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Browse Articles
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
 
@@ -333,35 +414,18 @@ export default function NewsletterPage() {
             <p className="text-purple-100 mb-6">
               Join thousands of creators who rely on our weekly insights to stay ahead of the curve.
             </p>
-            {!isSubscribed ? (
-              <Button 
-                size="lg" 
+            <Link href="/blog">
+              <Button
+                size="lg"
                 className="bg-white text-purple-600 hover:bg-gray-100"
-                onClick={() => setShowDemoModal(true)}
-              >"
-                <Mail className="w-5 h-5 mr-2" />
-                Subscribe for Free
-              </Button>
-            ) : (
-              <Button 
-                size="lg" 
-                className="bg-white text-purple-600 hover:bg-gray-100"
-                onClick={() => setShowDemoModal(true)}
-              >"
+              >
                 <Eye className="w-5 h-5 mr-2" />
-                Read Latest Issue
+                {isSubscribed ? 'Read Latest Articles' : 'Browse Articles'}
               </Button>
-            )}
+            </Link>
           </div>
         </div>
       </main>
-
-      <DemoModal 
-        isOpen={showDemoModal} 
-        onClose={() => setShowDemoModal(false)} 
-        title="Newsletter Archive
-        description="Browse our complete collection of creative insights and industry updates
-      />
     </div>
   )
 }

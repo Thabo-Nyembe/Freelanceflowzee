@@ -172,8 +172,6 @@ export default function ApiDocsPage() {
       case "Setup Webhooks":
         setActiveSection('webhooks')
         break
-      default:
-        alert(`${action} functionality coming soon!`)
     }
   }
 
