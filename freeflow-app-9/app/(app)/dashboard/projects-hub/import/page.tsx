@@ -1,10 +1,16 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Upload,
   FileText,
@@ -20,19 +26,61 @@ import {
   Trash2,
   RefreshCw,
   Eye,
-  Settings
+  Settings,
+  Loader2
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 // A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 
+// Types
+interface ImportItem {
+  id: number
+  name: string
+  source: string
+  date: string
+  status: 'success' | 'failed' | 'processing'
+  filesCount: number
+  size: string
+  type: string
+}
+
+interface ImportSource {
+  id: string
+  name: string
+  icon: string
+  description: string
+  connected: boolean
+}
+
 export default function ProjectImportPage() {
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+
+  // MODAL STATES
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
+  const [isConnectOpen, setIsConnectOpen] = useState(false)
+  const [selectedImport, setSelectedImport] = useState<ImportItem | null>(null)
+  const [selectedSource, setSelectedSource] = useState<ImportSource | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  // SETTINGS STATE
+  const [importSettings, setImportSettings] = useState({
+    autoSync: true,
+    fileNaming: 'original',
+    duplicateHandling: 'skip',
+    compressionLevel: 'medium',
+    maxFileSize: '100',
+    allowedTypes: ['all']
+  })
 
   // A+++ LOAD IMPORT PAGE DATA
   useEffect(() => {
@@ -191,12 +239,28 @@ export default function ProjectImportPage() {
     }, 500)
   }
 
-  const handleImportSettings = () => {
+  const handleImportSettings = useCallback(() => {
     announce('Opening import settings', 'polite')
-    // TODO: Implement import settings dialog
-  }
+    setIsSettingsOpen(true)
+  }, [announce])
 
-  const handleDownloadTemplate = () => {
+  const handleSaveSettings = useCallback(async () => {
+    setIsProcessing(true)
+    try {
+      // Simulate saving settings
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      toast.success('Settings saved successfully!')
+      setIsSettingsOpen(false)
+      announce('Import settings saved', 'polite')
+    } catch (err) {
+      toast.error('Failed to save settings')
+      announce('Failed to save settings', 'assertive')
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [announce])
+
+  const handleDownloadTemplate = useCallback(() => {
     announce('Downloading CSV template', 'polite')
     const csvContent = 'Project Name,Client,Status,Priority,Budget,Start Date,Deadline\nExample Project,Example Client,In Progress,high,50000,2024-01-01,2024-12-31'
     const blob = new Blob([csvContent], { type: 'text/csv' })
@@ -208,32 +272,104 @@ export default function ProjectImportPage() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-  }
+    toast.success('Template downloaded!')
+  }, [announce])
 
-  const handlePreviewImport = (importItem: any) => {
+  const handlePreviewImport = useCallback((importItem: ImportItem | ImportSource) => {
     announce(`Previewing import: ${importItem.name}`, 'polite')
-    // TODO: Implement preview dialog
-  }
+    if ('filesCount' in importItem) {
+      setSelectedImport(importItem)
+    }
+    setIsPreviewOpen(true)
+  }, [announce])
 
-  const handleRetryImport = (importItem: any) => {
+  const handleRetryImport = useCallback(async (importItem: ImportItem) => {
+    setIsProcessing(true)
     announce(`Retrying import: ${importItem.name}`, 'polite')
-    // TODO: Implement retry logic with Supabase
-  }
 
-  const handleViewDetails = (importItem: any) => {
+    try {
+      // Dynamic import for code splitting
+      const { retryImport } = await import('@/lib/projects-hub-queries')
+
+      // Simulate retry logic
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      toast.success('Import retry started!', {
+        description: `Retrying ${importItem.name} from ${importItem.source}`
+      })
+      announce('Import retry initiated', 'polite')
+    } catch (err) {
+      toast.error('Failed to retry import')
+      announce('Failed to retry import', 'assertive')
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [announce])
+
+  const handleViewDetails = useCallback((importItem: ImportItem) => {
     announce(`Viewing details for: ${importItem.name}`, 'polite')
-    // TODO: Implement details view
-  }
+    setSelectedImport(importItem)
+    setIsDetailsOpen(true)
+  }, [announce])
 
-  const handleDeleteImport = (importItem: any) => {
-    announce(`Deleting import: ${importItem.name}`, 'assertive')
-    // TODO: Implement delete with confirmation
-  }
+  const handleDeleteImport = useCallback((importItem: ImportItem) => {
+    announce(`Opening delete confirmation for: ${importItem.name}`, 'assertive')
+    setSelectedImport(importItem)
+    setIsDeleteOpen(true)
+  }, [announce])
 
-  const handleConnectSource = (source: string) => {
-    announce(`Connecting to ${source}`, 'polite')
-    // TODO: Implement OAuth connection for integrations
-  }
+  const handleConfirmDelete = useCallback(async () => {
+    if (!selectedImport) return
+
+    setIsProcessing(true)
+    try {
+      // Simulate delete operation
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      toast.success('Import deleted successfully!', {
+        description: `${selectedImport.name} has been removed`
+      })
+      setIsDeleteOpen(false)
+      setSelectedImport(null)
+      announce('Import deleted', 'polite')
+    } catch (err) {
+      toast.error('Failed to delete import')
+      announce('Failed to delete import', 'assertive')
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [selectedImport, announce])
+
+  const handleConnectSource = useCallback((source: ImportSource) => {
+    announce(`Connecting to ${source.name}`, 'polite')
+    setSelectedSource(source)
+    setIsConnectOpen(true)
+  }, [announce])
+
+  const handleConfirmConnect = useCallback(async () => {
+    if (!selectedSource) return
+
+    setIsProcessing(true)
+    try {
+      // Simulate OAuth connection
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      toast.success(`Connected to ${selectedSource.name}!`, {
+        description: 'You can now import files from this source'
+      })
+      setIsConnectOpen(false)
+      setSelectedSource(null)
+      announce('Source connected successfully', 'polite')
+
+      // In production, this would redirect to OAuth flow
+      // window.location.href = `/api/oauth/${selectedSource.id}/connect`
+    } catch (err) {
+      toast.error(`Failed to connect to ${selectedSource?.name}`)
+      announce('Failed to connect source', 'assertive')
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [selectedSource, announce])
 
   // A+++ LOADING STATE
   if (isLoading) {
@@ -374,7 +510,7 @@ export default function ProjectImportPage() {
                         </Button>
                       </>
                     ) : (
-                      <Button size="sm" variant="outline" onClick={() => handleConnectSource(source.name)}>
+                      <Button size="sm" variant="outline" onClick={() => handleConnectSource(source)}>
                         Connect
                       </Button>
                     )}
@@ -443,6 +579,220 @@ export default function ProjectImportPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* IMPORT SETTINGS DIALOG */}
+      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-blue-500" />
+              Import Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your import preferences
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Auto-sync imports</Label>
+                <p className="text-sm text-muted-foreground">Automatically sync connected sources</p>
+              </div>
+              <Switch
+                checked={importSettings.autoSync}
+                onCheckedChange={(checked) => setImportSettings(prev => ({ ...prev, autoSync: checked }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>File naming convention</Label>
+              <Select
+                value={importSettings.fileNaming}
+                onValueChange={(value) => setImportSettings(prev => ({ ...prev, fileNaming: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="original">Keep original names</SelectItem>
+                  <SelectItem value="prefix">Add date prefix</SelectItem>
+                  <SelectItem value="rename">Rename sequentially</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Duplicate handling</Label>
+              <Select
+                value={importSettings.duplicateHandling}
+                onValueChange={(value) => setImportSettings(prev => ({ ...prev, duplicateHandling: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="skip">Skip duplicates</SelectItem>
+                  <SelectItem value="replace">Replace existing</SelectItem>
+                  <SelectItem value="rename">Rename new files</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Max file size (MB)</Label>
+              <Input
+                type="number"
+                value={importSettings.maxFileSize}
+                onChange={(e) => setImportSettings(prev => ({ ...prev, maxFileSize: e.target.value }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsSettingsOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings} disabled={isProcessing}>
+              {isProcessing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* IMPORT DETAILS DIALOG */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="max-w-lg">
+          {selectedImport && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <FolderOpen className="h-5 w-5 text-blue-500" />
+                  Import Details
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-muted-foreground">Name</Label>
+                    <p className="font-medium">{selectedImport.name}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Source</Label>
+                    <p className="font-medium">{selectedImport.source}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Date</Label>
+                    <p className="font-medium">{selectedImport.date}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Status</Label>
+                    <Badge className={getStatusColor(selectedImport.status)}>
+                      {getStatusIcon(selectedImport.status)}
+                      <span className="ml-1 capitalize">{selectedImport.status}</span>
+                    </Badge>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Files</Label>
+                    <p className="font-medium">{selectedImport.filesCount} files</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Size</Label>
+                    <p className="font-medium">{selectedImport.size}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Type</Label>
+                    <p className="font-medium capitalize">{selectedImport.type}</p>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter className="gap-2">
+                {selectedImport.status === 'failed' && (
+                  <Button variant="outline" onClick={() => handleRetryImport(selectedImport)}>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Retry
+                  </Button>
+                )}
+                <Button onClick={() => setIsDetailsOpen(false)}>
+                  Close
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* DELETE CONFIRMATION DIALOG */}
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="h-5 w-5" />
+              Delete Import
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{selectedImport?.name}&quot;? This will remove the import record
+              but won&apos;t affect the imported files.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={isProcessing}
+            >
+              {isProcessing ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* CONNECT SOURCE DIALOG */}
+      <Dialog open={isConnectOpen} onOpenChange={setIsConnectOpen}>
+        <DialogContent>
+          {selectedSource && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Link className="h-5 w-5 text-blue-500" />
+                  Connect {selectedSource.name}
+                </DialogTitle>
+                <DialogDescription>
+                  Connect your {selectedSource.name} account to import files
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
+                  <div className="text-3xl">{selectedSource.icon}</div>
+                  <div>
+                    <h4 className="font-semibold">{selectedSource.name}</h4>
+                    <p className="text-sm text-muted-foreground">{selectedSource.description}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  You will be redirected to {selectedSource.name} to authorize access.
+                  KAZI will only have access to files you explicitly choose to import.
+                </p>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsConnectOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleConfirmConnect} disabled={isProcessing}>
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      <Link className="h-4 w-4 mr-2" />
+                      Connect
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

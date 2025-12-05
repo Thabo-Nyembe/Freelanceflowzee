@@ -78,90 +78,81 @@ export default function ClientKnowledgeBase() {
   // HANDLERS
   const handleVideoClick = async (video: VideoTutorial) => {
     try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')
-      const { toast } = await import('sonner')
-
       logger.info('Opening video tutorial', {
         videoId: video.id,
         title: video.title,
         category: video.category
       })
 
-      // TODO: Open video in modal or new page
+      // Show loading toast and open video
       toast.info('Opening video tutorial', {
         description: `${video.title} - ${video.duration}`
       })
 
-      window.open(video.url, '_blank')
+      // Open video in new tab or modal
+      if (video.url.startsWith('http')) {
+        window.open(video.url, '_blank', 'noopener,noreferrer')
+      } else {
+        // Navigate to video player page
+        window.location.href = `/dashboard/video-player?video=${video.id}&title=${encodeURIComponent(video.title)}`
+      }
     } catch (err: any) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')
       logger.error('Failed to open video', { error: err.message })
+      toast.error('Failed to open video tutorial')
     }
   }
 
   const handleLiveChat = async () => {
     try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')
-      const { toast } = await import('sonner')
-
       logger.info('Opening live chat support')
       toast.info('Opening live chat', {
         description: 'Connecting to support team...'
       })
 
-      // TODO: Open live chat widget
+      // Open live chat widget - integrate with Intercom, Crisp, or similar
+      // For now, open support page
+      if (typeof window !== 'undefined' && (window as any).Intercom) {
+        (window as any).Intercom('show')
+      } else {
+        // Fallback: open support contact form
+        window.location.href = '/support?chat=true'
+      }
     } catch (err: any) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')
       logger.error('Failed to open live chat', { error: err.message })
+      toast.error('Failed to open live chat. Please try our support page.')
     }
   }
 
   const handleSubmitTicket = async () => {
     try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')
-      const { toast } = await import('sonner')
-
       logger.info('Opening ticket submission form')
       toast.info('Opening support ticket form')
 
-      // TODO: Open ticket submission modal/page
+      // Navigate to support ticket page
+      window.location.href = '/support?action=new-ticket'
     } catch (err: any) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')
       logger.error('Failed to open ticket form', { error: err.message })
+      toast.error('Failed to open support form')
     }
   }
 
   const handleCommunityForum = async () => {
     try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')
-      const { toast } = await import('sonner')
-
       logger.info('Opening community forum')
       toast.info('Opening community forum', {
         description: 'Join our community discussions'
       })
 
-      // TODO: Navigate to community forum
-      window.open('/dashboard/community', '_blank')
+      // Navigate to community forum
+      window.location.href = '/dashboard/collaboration/workspace'
     } catch (err: any) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')
       logger.error('Failed to open forum', { error: err.message })
+      toast.error('Failed to open community forum')
     }
   }
 
   const handleArticleClick = async (article: Article) => {
     try {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')
-
       logger.info('Opening article', {
         articleId: article.id,
         title: article.title,
@@ -169,14 +160,24 @@ export default function ClientKnowledgeBase() {
       })
 
       // Track article view
-      const { trackArticleView } = await import('@/lib/knowledge-base-queries')
-      // await trackArticleView(article.id, userId)
+      try {
+        const { trackArticleView } = await import('@/lib/knowledge-base-queries')
+        // await trackArticleView(article.id, userId)
+      } catch (trackErr) {
+        // Silently fail tracking
+        logger.warn('Failed to track article view', { error: trackErr })
+      }
 
-      // TODO: Open article in modal or navigate to article page
+      // Open article detail view
+      toast.info(`Opening: ${article.title}`, {
+        description: `${article.readTime} min read`
+      })
+
+      // Navigate to article page
+      window.location.href = `/dashboard/client-zone/knowledge-base/article/${article.id}`
     } catch (err: any) {
-      const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')
       logger.error('Failed to open article', { error: err.message })
+      toast.error('Failed to open article')
     }
   }
 

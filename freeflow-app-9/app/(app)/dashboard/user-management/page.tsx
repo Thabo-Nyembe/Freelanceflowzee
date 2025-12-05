@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
@@ -12,6 +12,10 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
 // A+++ UTILITIES
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
@@ -67,6 +71,27 @@ export default function UserManagementPage() {
   const [sortBy, setSortBy] = useState<'name' | 'email' | 'role' | 'joined' | 'active'>('name')
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
   const [showInviteModal, setShowInviteModal] = useState(false)
+
+  // MODAL STATES
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [isBulkActionDialogOpen, setIsBulkActionDialogOpen] = useState(false)
+  const [isInvitationDetailsOpen, setIsInvitationDetailsOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [selectedInvitation, setSelectedInvitation] = useState<any>(null)
+  const [bulkActionType, setBulkActionType] = useState<string>('')
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  // EDIT USER FORM STATE
+  const [editForm, setEditForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    role: 'member' as string,
+    department: '',
+    status: 'active' as string
+  })
 
   // A+++ LOAD USER MANAGEMENT DATA
   useEffect(() => {
@@ -179,45 +204,178 @@ export default function UserManagementPage() {
     }
   }
 
-  const handleEditUser = (user: User) => {
+  const handleEditUser = useCallback((user: User) => {
     announce(`Opening edit for ${user.name}`, 'polite')
-    // TODO: Implement edit user dialog
-  }
+    setSelectedUser(user)
+    setEditForm({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+      department: user.department || '',
+      status: user.status
+    })
+    setIsEditDialogOpen(true)
+  }, [announce])
 
-  const handleDeleteUser = (user: User) => {
+  const handleSaveUserEdit = useCallback(async () => {
+    if (!selectedUser) return
+
+    setIsProcessing(true)
+    try {
+      // Dynamic import for code splitting
+      const { updateUser } = await import('@/lib/user-management-queries')
+      await updateUser(selectedUser.id, editForm)
+
+      toast.success('User updated successfully!', {
+        description: `${editForm.firstName} ${editForm.lastName} has been updated`
+      })
+      setIsEditDialogOpen(false)
+      announce('User updated successfully', 'polite')
+
+      // Refresh users list
+      window.location.reload()
+    } catch (err) {
+      toast.error('Failed to update user')
+      announce('Failed to update user', 'assertive')
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [selectedUser, editForm, announce])
+
+  const handleDeleteUser = useCallback((user: User) => {
     announce(`Opening delete confirmation for ${user.name}`, 'assertive')
-    // TODO: Implement delete confirmation dialog
-  }
+    setSelectedUser(user)
+    setIsDeleteDialogOpen(true)
+  }, [announce])
 
-  const handleViewUser = (user: User) => {
+  const handleConfirmDelete = useCallback(async () => {
+    if (!selectedUser) return
+
+    setIsProcessing(true)
+    try {
+      // Dynamic import for code splitting
+      const { deleteUser } = await import('@/lib/user-management-queries')
+      await deleteUser(selectedUser.id)
+
+      toast.success('User deleted successfully!', {
+        description: `${selectedUser.name} has been removed`
+      })
+      setIsDeleteDialogOpen(false)
+      setSelectedUsers(prev => prev.filter(id => id !== selectedUser.id))
+      announce('User deleted successfully', 'polite')
+
+      // Refresh users list
+      window.location.reload()
+    } catch (err) {
+      toast.error('Failed to delete user')
+      announce('Failed to delete user', 'assertive')
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [selectedUser, announce])
+
+  const handleViewUser = useCallback((user: User) => {
     announce(`Viewing details for ${user.name}`, 'polite')
-    // TODO: Implement user detail view
-  }
+    setSelectedUser(user)
+    setIsViewDialogOpen(true)
+  }, [announce])
 
-  const handleSendEmail = (user: User) => {
+  const handleSendEmail = useCallback((user: User) => {
     announce(`Opening email to ${user.name}`, 'polite')
     window.location.href = `mailto:${user.email}`
-  }
+  }, [announce])
 
-  const handleBulkAction = (action: string) => {
+  const handleBulkAction = useCallback((action: string) => {
     announce(`Performing ${action} on ${selectedUsers.length} users`, 'polite')
-    // TODO: Implement bulk actions
-  }
+    setBulkActionType(action)
+    setIsBulkActionDialogOpen(true)
+  }, [selectedUsers.length, announce])
 
-  const handleViewInvitation = (invitation: any) => {
+  const handleConfirmBulkAction = useCallback(async () => {
+    setIsProcessing(true)
+    try {
+      // Dynamic import for code splitting
+      const { bulkUpdateUsers, bulkDeleteUsers } = await import('@/lib/user-management-queries')
+
+      if (bulkActionType === 'delete') {
+        await bulkDeleteUsers(selectedUsers)
+        toast.success(`${selectedUsers.length} users deleted`)
+      } else if (bulkActionType === 'message') {
+        // Open mailto with all selected user emails
+        const emails = users.filter(u => selectedUsers.includes(u.id)).map(u => u.email).join(',')
+        window.location.href = `mailto:${emails}`
+        toast.success('Email client opened')
+      } else if (bulkActionType === 'edit') {
+        toast.info('Bulk edit feature coming soon')
+      }
+
+      setIsBulkActionDialogOpen(false)
+      setSelectedUsers([])
+      announce('Bulk action completed', 'polite')
+    } catch (err) {
+      toast.error(`Failed to ${bulkActionType} users`)
+      announce('Bulk action failed', 'assertive')
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [bulkActionType, selectedUsers, users, announce])
+
+  const handleViewInvitation = useCallback((invitation: any) => {
     announce('Viewing invitation details', 'polite')
-    // TODO: Implement invitation details view
-  }
+    setSelectedInvitation(invitation)
+    setIsInvitationDetailsOpen(true)
+  }, [announce])
 
-  const handleResendInvitation = (invitation: any) => {
+  const handleCopyInviteLink = useCallback((invitation: any) => {
+    const inviteLink = `${window.location.origin}/invite/${invitation.id}`
+    navigator.clipboard.writeText(inviteLink)
+    toast.success('Invite link copied to clipboard!')
+    announce('Invite link copied', 'polite')
+  }, [announce])
+
+  const handleResendInvitation = useCallback(async (invitation: any) => {
+    setIsProcessing(true)
     announce('Resending invitation', 'polite')
-    // TODO: Implement resend invitation
-  }
 
-  const handleCancelInvitation = (invitation: any) => {
+    try {
+      // Dynamic import for code splitting
+      const { resendInvitation } = await import('@/lib/user-management-queries')
+      await resendInvitation(invitation.id)
+
+      toast.success('Invitation resent!', {
+        description: `New invitation email sent to ${invitation.email}`
+      })
+      announce('Invitation resent successfully', 'polite')
+    } catch (err) {
+      toast.error('Failed to resend invitation')
+      announce('Failed to resend invitation', 'assertive')
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [announce])
+
+  const handleCancelInvitation = useCallback(async (invitation: any) => {
+    setIsProcessing(true)
     announce('Canceling invitation', 'assertive')
-    // TODO: Implement cancel invitation
-  }
+
+    try {
+      // Dynamic import for code splitting
+      const { cancelInvitation } = await import('@/lib/user-management-queries')
+      await cancelInvitation(invitation.id)
+
+      toast.success('Invitation canceled', {
+        description: `Invitation to ${invitation.email} has been revoked`
+      })
+      setInvitations(prev => prev.filter(inv => inv.id !== invitation.id))
+      announce('Invitation canceled', 'polite')
+    } catch (err) {
+      toast.error('Failed to cancel invitation')
+      announce('Failed to cancel invitation', 'assertive')
+    } finally {
+      setIsProcessing(false)
+    }
+  }, [announce])
 
   // A+++ LOADING STATE
   if (isLoading) {
@@ -681,6 +839,329 @@ export default function UserManagementPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* EDIT USER DIALOG */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5 text-blue-500" />
+              Edit User
+            </DialogTitle>
+            <DialogDescription>
+              Update user information and permissions
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  value={editForm.firstName}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, firstName: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  value={editForm.lastName}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, lastName: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={editForm.email}
+                onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="role">Role</Label>
+                <Select
+                  value={editForm.role}
+                  onValueChange={(value) => setEditForm(prev => ({ ...prev, role: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="owner">Owner</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="member">Member</SelectItem>
+                    <SelectItem value="guest">Guest</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={editForm.status}
+                  onValueChange={(value) => setEditForm(prev => ({ ...prev, status: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="suspended">Suspended</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="department">Department</Label>
+              <Input
+                id="department"
+                value={editForm.department}
+                onChange={(e) => setEditForm(prev => ({ ...prev, department: e.target.value }))}
+                placeholder="e.g., Engineering, Design"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveUserEdit} disabled={isProcessing}>
+              {isProcessing ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* DELETE CONFIRMATION DIALOG */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="h-5 w-5" />
+              Delete User
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedUser?.name}? This action cannot be undone.
+              All associated data will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={isProcessing}
+            >
+              {isProcessing ? 'Deleting...' : 'Delete User'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* VIEW USER DETAILS DIALOG */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          {selectedUser && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Eye className="h-5 w-5 text-blue-500" />
+                  User Details
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-6 py-4">
+                <div className="flex items-center gap-4">
+                  <Avatar className="w-16 h-16">
+                    <AvatarImage src={selectedUser.avatar} />
+                    <AvatarFallback className="text-xl">
+                      {selectedUser.firstName[0]}{selectedUser.lastName[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="text-xl font-semibold">{selectedUser.displayName}</h3>
+                    <p className="text-muted-foreground">{selectedUser.email}</p>
+                    <div className="flex gap-2 mt-2">
+                      <Badge className={getRoleBadgeColor(selectedUser.role)}>
+                        {selectedUser.role}
+                      </Badge>
+                      <Badge className={getStatusColor(selectedUser.status)}>
+                        {selectedUser.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <Card className="p-4">
+                    <div className="text-sm text-muted-foreground mb-1">Department</div>
+                    <div className="font-medium">{selectedUser.department || 'Not assigned'}</div>
+                  </Card>
+                  <Card className="p-4">
+                    <div className="text-sm text-muted-foreground mb-1">Location</div>
+                    <div className="font-medium">{selectedUser.location || 'Not specified'}</div>
+                  </Card>
+                  <Card className="p-4">
+                    <div className="text-sm text-muted-foreground mb-1">Last Active</div>
+                    <div className="font-medium">{formatLastActive(selectedUser.lastActive)}</div>
+                  </Card>
+                  <Card className="p-4">
+                    <div className="text-sm text-muted-foreground mb-1">Joined</div>
+                    <div className="font-medium">{formatLastActive(selectedUser.createdAt)}</div>
+                  </Card>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold mb-3">Activity Stats</h4>
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="text-center p-3 bg-muted rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600">{selectedUser.metadata.totalProjects}</div>
+                      <div className="text-xs text-muted-foreground">Projects</div>
+                    </div>
+                    <div className="text-center p-3 bg-muted rounded-lg">
+                      <div className="text-2xl font-bold text-green-600">{selectedUser.metadata.totalTasks}</div>
+                      <div className="text-xs text-muted-foreground">Tasks</div>
+                    </div>
+                    <div className="text-center p-3 bg-muted rounded-lg">
+                      <div className="text-2xl font-bold text-purple-600">{selectedUser.metadata.completionRate}%</div>
+                      <div className="text-xs text-muted-foreground">Completion</div>
+                    </div>
+                    <div className="text-center p-3 bg-muted rounded-lg">
+                      <div className="text-2xl font-bold text-orange-600">{formatBytes(selectedUser.metadata.storageUsed)}</div>
+                      <div className="text-xs text-muted-foreground">Storage</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter className="gap-2">
+                <Button variant="outline" onClick={() => handleSendEmail(selectedUser)}>
+                  <Mail className="h-4 w-4 mr-2" />
+                  Send Email
+                </Button>
+                <Button variant="outline" onClick={() => {
+                  setIsViewDialogOpen(false)
+                  handleEditUser(selectedUser)
+                }}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit User
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* BULK ACTION CONFIRMATION DIALOG */}
+      <AlertDialog open={isBulkActionDialogOpen} onOpenChange={setIsBulkActionDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {bulkActionType === 'delete' ? 'Delete Selected Users' :
+               bulkActionType === 'message' ? 'Send Message to Users' :
+               'Bulk Edit Users'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {bulkActionType === 'delete'
+                ? `Are you sure you want to delete ${selectedUsers.length} users? This action cannot be undone.`
+                : bulkActionType === 'message'
+                ? `Send an email to ${selectedUsers.length} selected users?`
+                : `Apply bulk changes to ${selectedUsers.length} selected users?`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmBulkAction}
+              className={bulkActionType === 'delete' ? 'bg-red-600 hover:bg-red-700' : ''}
+              disabled={isProcessing}
+            >
+              {isProcessing ? 'Processing...' : 'Confirm'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* INVITATION DETAILS DIALOG */}
+      <Dialog open={isInvitationDetailsOpen} onOpenChange={setIsInvitationDetailsOpen}>
+        <DialogContent>
+          {selectedInvitation && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Mail className="h-5 w-5 text-blue-500" />
+                  Invitation Details
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <div className="p-2 bg-muted rounded-md">{selectedInvitation.email}</div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Role</Label>
+                    <Badge variant="outline">{selectedInvitation.role}</Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Status</Label>
+                    <Badge variant="secondary">{selectedInvitation.status || 'Pending'}</Badge>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Invited</Label>
+                    <div className="text-sm">{formatLastActive(selectedInvitation.invitedAt)}</div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Expires</Label>
+                    <div className="text-sm">{formatLastActive(selectedInvitation.expiresAt)}</div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Invite Link</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      readOnly
+                      value={`${typeof window !== 'undefined' ? window.location.origin : ''}/invite/${selectedInvitation.id}`}
+                      className="flex-1"
+                    />
+                    <Button variant="outline" size="sm" onClick={() => handleCopyInviteLink(selectedInvitation)}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter className="gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => handleResendInvitation(selectedInvitation)}
+                  disabled={isProcessing}
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Resend
+                </Button>
+                <Button
+                  variant="outline"
+                  className="text-red-500"
+                  onClick={() => {
+                    setIsInvitationDetailsOpen(false)
+                    handleCancelInvitation(selectedInvitation)
+                  }}
+                  disabled={isProcessing}
+                >
+                  <XCircle className="h-4 w-4 mr-2" />
+                  Cancel Invitation
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
