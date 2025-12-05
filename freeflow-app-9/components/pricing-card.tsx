@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { memo, useState, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { Check, X, Star, LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -23,7 +23,27 @@ interface PricingCardProps {
   }
 }
 
-export function PricingCard({ plan }: PricingCardProps) {
+// Memoized feature list items
+const FeatureItem = memo(function FeatureItem({ feature }: { feature: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+      <span className="text-gray-700">{feature}</span>
+    </div>
+  )
+})
+
+const LimitationItem = memo(function LimitationItem({ limitation }: { limitation: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <X className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
+      <span className="text-gray-500">{limitation}</span>
+    </div>
+  )
+})
+
+// Memoized pricing card component
+export const PricingCard = memo(function PricingCard({ plan }: PricingCardProps) {
   const router = useRouter()
   const pathname = usePathname()
   const [isLoading, setIsLoading] = useState(false)
@@ -133,16 +153,10 @@ export function PricingCard({ plan }: PricingCardProps) {
       <CardContent className="space-y-6">
         <div className="space-y-3">
           {plan.features.map((feature, idx) => (
-            <div key={idx} className="flex items-start gap-3">
-              <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-700">{feature}</span>
-            </div>
+            <FeatureItem key={idx} feature={feature} />
           ))}
           {plan.limitations.map((limitation, idx) => (
-            <div key={idx} className="flex items-start gap-3">
-              <X className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-500">{limitation}</span>
-            </div>
+            <LimitationItem key={idx} limitation={limitation} />
           ))}
         </div>
 

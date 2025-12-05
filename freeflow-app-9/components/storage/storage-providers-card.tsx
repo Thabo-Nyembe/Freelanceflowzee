@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { memo, useState, useEffect, useCallback, useMemo } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -21,12 +21,130 @@ const PROVIDER_INFO: Record<StorageProvider, { name: string; icon: string; color
   'local': { name: 'Local', icon: '💾', color: 'bg-gray-500' }
 }
 
+// Memoized format bytes helper
+const formatBytes = (bytes: number) => {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
+}
+
+// Memoized connection card item
+interface ConnectionCardProps {
+  connection: StorageConnection
+  onDisconnect: (connectionId: string, providerName: string) => void
+  onRefresh: () => void
+  isDisconnecting: boolean
+}
+
+const ConnectionCard = memo(function ConnectionCard({
+  connection,
+  onDisconnect,
+  onRefresh,
+  isDisconnecting
+}: ConnectionCardProps) {
+  const providerInfo = PROVIDER_INFO[connection.provider]
+
+  const usagePercentage = useMemo(() => {
+    return connection.total_space
+      ? (connection.used_space / connection.total_space) * 100
+      : 0
+  }, [connection.used_space, connection.total_space])
+
+  const handleDisconnect = useCallback(() => {
+    onDisconnect(connection.id, providerInfo.name)
+  }, [onDisconnect, connection.id, providerInfo.name])
+
+  return (
+    <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-lg ${providerInfo.color} flex items-center justify-center text-xl`}>
+            {providerInfo.icon}
+          </div>
+          <div>
+            <h3 className="font-semibold">{providerInfo.name}</h3>
+            <p className="text-xs text-muted-foreground">{connection.account_email}</p>
+          </div>
+        </div>
+        <Badge
+          variant={connection.connected ? 'default' : 'secondary'}
+          className="gap-1"
+        >
+          {connection.connected ? (
+            <>
+              <CheckCircle2 className="w-3 h-3" />
+              Connected
+            </>
+          ) : (
+            <>
+              <XCircle className="w-3 h-3" />
+              Disconnected
+            </>
+          )}
+        </Badge>
+      </div>
+
+      {connection.total_space > 0 && (
+        <div className="mb-3">
+          <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+            <span>Storage Used</span>
+            <span>{Math.round(usagePercentage)}%</span>
+          </div>
+          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-blue-500 transition-all duration-500"
+              style={{ width: `${Math.min(usagePercentage, 100)}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
+            <span>{formatBytes(connection.used_space)} used</span>
+            <span>{formatBytes(connection.total_space)} total</span>
+          </div>
+        </div>
+      )}
+
+      {connection.last_sync && (
+        <p className="text-xs text-muted-foreground mb-3">
+          Last synced {formatDistanceToNow(new Date(connection.last_sync), { addSuffix: true })}
+        </p>
+      )}
+
+      <div className="flex items-center gap-2">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={onRefresh}
+          className="flex-1"
+        >
+          <RefreshCw className="w-3 h-3 mr-1" />
+          Refresh
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleDisconnect}
+          disabled={isDisconnecting}
+          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+        >
+          {isDisconnecting ? (
+            <Loader2 className="w-3 h-3 animate-spin" />
+          ) : (
+            <Trash2 className="w-3 h-3" />
+          )}
+        </Button>
+      </div>
+    </div>
+  )
+})
+
 export function StorageProvidersCard() {
   const [connections, setConnections] = useState<StorageConnection[]>([])
   const [loading, setLoading] = useState(true)
   const [disconnecting, setDisconnecting] = useState<string | null>(null)
 
-  const loadConnections = async () => {
+  const loadConnections = useCallback(async () => {
     try {
       setLoading(true)
       const supabase = createClient()
@@ -42,7 +160,7 @@ export function StorageProvidersCard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     loadConnections()
@@ -60,9 +178,9 @@ export function StorageProvidersCard() {
       // Reload connections
       loadConnections()
     }
-  }, [])
+  }, [loadConnections])
 
-  const handleDisconnect = async (connectionId: string, providerName: string) => {
+  const handleDisconnect = useCallback(async (connectionId: string, providerName: string) => {
     if (!confirm(`Are you sure you want to disconnect from ${providerName}? This will not delete your files.`)) {
       return
     }
@@ -78,15 +196,7 @@ export function StorageProvidersCard() {
     } finally {
       setDisconnecting(null)
     }
-  }
-
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
-  }
+  }, [loadConnections])
 
   if (loading) {
     return (
@@ -124,97 +234,15 @@ export function StorageProvidersCard() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {connections.map((connection) => {
-            const providerInfo = PROVIDER_INFO[connection.provider]
-            const usagePercentage = connection.total_space
-              ? (connection.used_space / connection.total_space) * 100
-              : 0
-
-            return (
-              <div
-                key={connection.id}
-                className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg ${providerInfo.color} flex items-center justify-center text-xl`}>
-                      {providerInfo.icon}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{providerInfo.name}</h3>
-                      <p className="text-xs text-muted-foreground">{connection.account_email}</p>
-                    </div>
-                  </div>
-                  <Badge
-                    variant={connection.connected ? 'default' : 'secondary'}
-                    className="gap-1"
-                  >
-                    {connection.connected ? (
-                      <>
-                        <CheckCircle2 className="w-3 h-3" />
-                        Connected
-                      </>
-                    ) : (
-                      <>
-                        <XCircle className="w-3 h-3" />
-                        Disconnected
-                      </>
-                    )}
-                  </Badge>
-                </div>
-
-                {connection.total_space > 0 && (
-                  <div className="mb-3">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                      <span>Storage Used</span>
-                      <span>{Math.round(usagePercentage)}%</span>
-                    </div>
-                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-blue-500 transition-all duration-500"
-                        style={{ width: `${Math.min(usagePercentage, 100)}%` }}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
-                      <span>{formatBytes(connection.used_space)} used</span>
-                      <span>{formatBytes(connection.total_space)} total</span>
-                    </div>
-                  </div>
-                )}
-
-                {connection.last_sync && (
-                  <p className="text-xs text-muted-foreground mb-3">
-                    Last synced {formatDistanceToNow(new Date(connection.last_sync), { addSuffix: true })}
-                  </p>
-                )}
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => loadConnections()}
-                    className="flex-1"
-                  >
-                    <RefreshCw className="w-3 h-3 mr-1" />
-                    Refresh
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDisconnect(connection.id, providerInfo.name)}
-                    disabled={disconnecting === connection.id}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    {disconnecting === connection.id ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Trash2 className="w-3 h-3" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-            )
-          })}
+          {connections.map((connection) => (
+            <ConnectionCard
+              key={connection.id}
+              connection={connection}
+              onDisconnect={handleDisconnect}
+              onRefresh={loadConnections}
+              isDisconnecting={disconnecting === connection.id}
+            />
+          ))}
         </div>
       )}
     </Card>
