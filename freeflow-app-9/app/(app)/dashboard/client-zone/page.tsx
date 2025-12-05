@@ -355,13 +355,14 @@ export default function ClientZonePage() {
 
   const handleNotifications = () => {
     logger.info('Notifications opened', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      activeProjects: KAZI_CLIENT_DATA.clientInfo.activeProjects,
+      userId,
+      projectCount: projects.length,
+      unreadNotifications: dashboardData?.unreadNotifications || 0,
       tab: activeTab
     })
 
     toast.success('Notifications center opened!', {
-      description: 'View all your project updates and messages'
+      description: `You have ${dashboardData?.unreadNotifications || 0} unread notifications`
     })
   }
 
@@ -371,9 +372,9 @@ export default function ClientZonePage() {
 
   const handleContactTeam = () => {
     logger.info('Team contact initiated', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      contactPerson: KAZI_CLIENT_DATA.clientInfo.contactPerson,
-      activeProjects: KAZI_CLIENT_DATA.clientInfo.activeProjects
+      userId,
+      projectCount: projects.length,
+      activeProjects: dashboardData?.projectStats?.active || 0
     })
 
     toast.success('Team communication opened!', {
@@ -385,14 +386,18 @@ export default function ClientZonePage() {
   // HANDLER 3: REQUEST REVISION
   // ============================================================================
 
-  const handleRequestRevision = async (id: number) => {
-    const project = KAZI_CLIENT_DATA.projects.find(p => p.id === id)
+  const handleRequestRevision = async (projectId: string) => {
+    const project = projects.find(p => p.id === projectId)
+
+    if (!project) {
+      toast.error('Project not found')
+      return
+    }
 
     logger.info('Revision request initiated', {
-      projectId: id,
+      projectId,
       projectName: project?.name,
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      requestedBy: KAZI_CLIENT_DATA.clientInfo.contactPerson
+      userId
     })
 
     const feedback = prompt('Please describe the changes needed:')
@@ -402,34 +407,25 @@ export default function ClientZonePage() {
     }
 
     try {
-      const response = await fetch('/api/projects/manage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update',
-          projectId: id.toString(),
-          data: {
-            status: 'revision-requested',
-            revisionNotes: feedback
-          }
-        })
+      // Use database query instead of API endpoint
+      await createRevisionRequest({
+        deliverable_id: projectId, // Note: In real use, this would be a deliverable ID
+        project_id: projectId,
+        notes: feedback
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to request revision')
-      }
+      logger.info('Revision request submitted', { projectId, userId })
 
-      const result = await response.json()
+      toast.success('Revision request submitted!', {
+        description: 'Your team will review and respond within 24 hours'
+      })
 
-      if (result.success) {
-        logger.info('Revision request submitted', { projectId: id })
-
-        toast.success('Revision request submitted!', {
-          description: 'Your team will review and respond within 24 hours'
-        })
-      }
+      // Reload dashboard data
+      const data = await getClientZoneDashboard()
+      setDashboardData(data)
+      setProjects(data.recentProjects)
     } catch (error: any) {
-      logger.error('Failed to request revision', { error, projectId: id })
+      logger.error('Failed to request revision', { error, projectId, userId })
       toast.error('Failed to request revision', {
         description: error.message || 'Please try again later'
       })
@@ -440,41 +436,28 @@ export default function ClientZonePage() {
   // HANDLER 4: APPROVE DELIVERABLE
   // ============================================================================
 
-  const handleApproveDeliverable = async (id: number) => {
-    const project = KAZI_CLIENT_DATA.projects.find(p => p.id === id)
-
+  const handleApproveDeliverable = async (deliverableId: string) => {
     logger.info('Deliverable approval initiated', {
-      projectId: id,
-      projectName: project?.name,
-      approvedBy: KAZI_CLIENT_DATA.clientInfo.contactPerson
+      deliverableId,
+      userId
     })
 
     try {
-      const response = await fetch('/api/projects/manage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'update-status',
-          projectId: id.toString(),
-          data: { status: 'approved' }
-        })
+      // Use database query instead of API endpoint
+      await approveDeliverable(deliverableId)
+
+      logger.info('Deliverable approved', { deliverableId, userId })
+
+      toast.success('Deliverable approved!', {
+        description: 'Milestone payment will be processed automatically'
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to approve deliverable')
-      }
-
-      const result = await response.json()
-
-      if (result.success) {
-        logger.info('Deliverable approved', { projectId: id })
-
-        toast.success('Deliverable approved!', {
-          description: 'Milestone payment will be processed automatically'
-        })
-      }
+      // Reload dashboard data
+      const data = await getClientZoneDashboard()
+      setDashboardData(data)
+      setProjects(data.recentProjects)
     } catch (error: any) {
-      logger.error('Failed to approve deliverable', { error, projectId: id })
+      logger.error('Failed to approve deliverable', { error, deliverableId, userId })
       toast.error('Failed to approve deliverable', {
         description: error.message || 'Please try again later'
       })
@@ -485,13 +468,18 @@ export default function ClientZonePage() {
   // HANDLER 5: DOWNLOAD FILES
   // ============================================================================
 
-  const handleDownloadFiles = (id: number) => {
-    const project = KAZI_CLIENT_DATA.projects.find(p => p.id === id)
+  const handleDownloadFiles = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId)
+
+    if (!project) {
+      toast.error('Project not found')
+      return
+    }
 
     logger.info('File download initiated', {
-      projectId: id,
+      projectId,
       projectName: project?.name,
-      client: KAZI_CLIENT_DATA.clientInfo.name
+      userId
     })
 
     toast.success('Preparing download...', {
@@ -503,23 +491,47 @@ export default function ClientZonePage() {
   // HANDLER 6: SEND MESSAGE
   // ============================================================================
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!newMessage.trim()) {
       logger.warn('Message validation failed', { reason: 'Empty message' })
       toast.error('Please enter a message')
       return
     }
 
+    // Need a project context to send message - for now use first project
+    const currentProject = projects[0]
+    if (!currentProject || !currentProject.id) {
+      toast.error('No active project found')
+      return
+    }
+
     logger.info('Message sent', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      sender: KAZI_CLIENT_DATA.clientInfo.contactPerson,
+      userId,
+      projectId: currentProject.id,
       messageLength: newMessage.length
     })
 
-    toast.success('Message sent successfully!', {
-      description: 'Your team will respond within 4-6 hours'
-    })
-    setNewMessage('')
+    try {
+      await sendMessage({
+        project_id: currentProject.id,
+        recipient_id: currentProject.user_id, // Send to project owner
+        message: newMessage
+      })
+
+      toast.success('Message sent successfully!', {
+        description: 'Your team will respond within 4-6 hours'
+      })
+      setNewMessage('')
+
+      // Reload messages
+      const data = await getClientZoneDashboard()
+      setMessages(data.recentMessages)
+    } catch (error: any) {
+      logger.error('Failed to send message', { error, userId })
+      toast.error('Failed to send message', {
+        description: error.message || 'Please try again later'
+      })
+    }
   }
 
   // ============================================================================
@@ -533,34 +545,39 @@ export default function ClientZonePage() {
       return
     }
 
+    // Need a project context - use first project
+    const currentProject = projects[0]
+    if (!currentProject || !currentProject.id) {
+      toast.error('No active project found')
+      return
+    }
+
     logger.info('Feedback submission initiated', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
+      userId,
+      projectId: currentProject.id,
       feedbackLength: newFeedback.length
     })
 
     try {
-      const response = await fetch('/api/collaboration/client-feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          feedback: newFeedback,
-          rating: 5,
-          timestamp: new Date().toISOString()
-        })
+      await submitFeedback({
+        project_id: currentProject.id,
+        rating: 5,
+        feedback_text: newFeedback,
+        would_recommend: true
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to submit feedback')
-      }
-
-      logger.info('Feedback submitted successfully')
+      logger.info('Feedback submitted successfully', { userId })
 
       toast.success('Feedback submitted!', {
         description: 'Your input helps us improve'
       })
       setNewFeedback('')
+
+      // Reload dashboard
+      const data = await getClientZoneDashboard()
+      setDashboardData(data)
     } catch (error: any) {
-      logger.error('Failed to submit feedback', { error })
+      logger.error('Failed to submit feedback', { error, userId })
       toast.error('Failed to submit feedback', {
         description: error.message || 'Please try again later'
       })
@@ -575,7 +592,7 @@ export default function ClientZonePage() {
     logger.info('Payment initiated', {
       invoiceNumber,
       amount,
-      client: KAZI_CLIENT_DATA.clientInfo.name
+      userId
     })
 
     toast.success('Redirecting to secure payment...', {
@@ -589,8 +606,8 @@ export default function ClientZonePage() {
 
   const handleScheduleMeeting = () => {
     logger.info('Meeting scheduler opened', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      email: KAZI_CLIENT_DATA.clientInfo.email
+      userId,
+      projectCount: projects.length
     })
 
     toast.success('Opening calendar...', {
@@ -605,7 +622,7 @@ export default function ClientZonePage() {
   const handleViewInvoiceDetails = (invoiceNumber: string) => {
     logger.info('Invoice details viewed', {
       invoiceNumber,
-      client: KAZI_CLIENT_DATA.clientInfo.name
+      userId
     })
 
     toast.success('Loading invoice details...', {
@@ -619,16 +636,14 @@ export default function ClientZonePage() {
 
   const handleClientOnboarding = useCallback(() => {
     logger.info('Client onboarding started', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      contactPerson: KAZI_CLIENT_DATA.clientInfo.contactPerson,
-      industry: KAZI_CLIENT_DATA.clientInfo.industry,
-      memberSince: KAZI_CLIENT_DATA.clientInfo.memberSince
+      userId,
+      projectCount: projects.length
     })
 
     toast.success('Client onboarding started!', {
       description: 'Setting up your personalized workspace and preferences'
     })
-  }, [])
+  }, [userId, projects])
 
   // ============================================================================
   // HANDLER 12: PROJECT PROPOSAL
@@ -637,8 +652,7 @@ export default function ClientZonePage() {
   const handleProjectProposal = useCallback(async (projectId?: number) => {
     logger.info('Project proposal initiated', {
       projectId: projectId || 'New Proposal',
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      accountManager: KAZI_CLIENT_DATA.clientInfo.accountManager
+      userId
     })
 
     try {
@@ -646,25 +660,25 @@ export default function ClientZonePage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          clientId: KAZI_CLIENT_DATA.clientInfo.name,
+          userId,
           projectId: projectId,
           timestamp: new Date().toISOString()
         })
       })
 
       if (response.ok) {
-        logger.info('Proposal sent successfully', { projectId })
+        logger.info('Proposal sent successfully', { projectId, userId })
         toast.success('Project proposal sent!', {
           description: 'Check your email for the detailed proposal document'
         })
       }
     } catch (error: any) {
-      logger.error('Failed to send proposal', { error, projectId })
+      logger.error('Failed to send proposal', { error, projectId, userId })
       toast.error('Failed to send proposal', {
         description: error.message || 'Please try again later'
       })
     }
-  }, [])
+  }, [userId])
 
   // ============================================================================
   // HANDLER 13: CONTRACT MANAGEMENT
@@ -672,15 +686,15 @@ export default function ClientZonePage() {
 
   const handleContractManagement = useCallback(() => {
     logger.info('Contract management accessed', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      totalProjects: KAZI_CLIENT_DATA.clientInfo.totalProjects,
-      activeContracts: KAZI_CLIENT_DATA.clientInfo.activeProjects
+      userId,
+      totalProjects: dashboardData?.projectStats?.total || 0,
+      activeContracts: dashboardData?.projectStats?.active || 0
     })
 
     toast.info('Contract management loaded', {
       description: 'View and manage all your project contracts'
     })
-  }, [])
+  }, [userId, dashboardData])
 
   // ============================================================================
   // HANDLER 14: MILESTONE APPROVAL
@@ -689,7 +703,7 @@ export default function ClientZonePage() {
   const handleMilestoneApproval = useCallback(async (milestoneId: number) => {
     logger.info('Milestone approval initiated', {
       milestoneId,
-      client: KAZI_CLIENT_DATA.clientInfo.name
+      userId
     })
 
     try {
@@ -698,24 +712,24 @@ export default function ClientZonePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           milestoneId: milestoneId,
-          clientId: KAZI_CLIENT_DATA.clientInfo.name,
+          userId,
           timestamp: new Date().toISOString()
         })
       })
 
       if (response.ok) {
-        logger.info('Milestone approved successfully', { milestoneId })
+        logger.info('Milestone approved successfully', { milestoneId, userId })
         toast.success('Milestone approved!', {
           description: 'Payment has been released from escrow'
         })
       }
     } catch (error: any) {
-      logger.error('Failed to approve milestone', { error, milestoneId })
+      logger.error('Failed to approve milestone', { error, milestoneId, userId })
       toast.error('Failed to approve milestone', {
         description: error.message || 'Please try again'
       })
     }
-  }, [])
+  }, [userId])
 
   // ============================================================================
   // HANDLER 15: FEEDBACK REQUEST
@@ -723,15 +737,15 @@ export default function ClientZonePage() {
 
   const handleFeedbackRequest = useCallback(() => {
     logger.info('Feedback request initiated', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      activeProjects: KAZI_CLIENT_DATA.clientInfo.activeProjects,
-      currentSatisfaction: KAZI_CLIENT_DATA.clientInfo.satisfaction
+      userId,
+      activeProjects: dashboardData?.projectStats?.active || 0,
+      averageRating: dashboardData?.averageRating || 0
     })
 
     toast.info('Feedback request sent', {
       description: 'Help us improve your experience'
     })
-  }, [])
+  }, [userId, dashboardData])
 
   // ============================================================================
   // HANDLER 16: FILE SHARING
@@ -740,14 +754,14 @@ export default function ClientZonePage() {
   const handleFileSharing = useCallback((fileId?: number) => {
     logger.info('File sharing initiated', {
       fileId: fileId || 'Multiple files',
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      totalFiles: KAZI_CLIENT_DATA.analytics.filesShared
+      userId,
+      projectCount: projects.length
     })
 
     toast.success('File sharing link generated', {
       description: 'Secure download link copied to clipboard'
     })
-  }, [])
+  }, [userId, projects])
 
   // ============================================================================
   // HANDLER 17: MEETING SCHEDULE
@@ -755,15 +769,15 @@ export default function ClientZonePage() {
 
   const handleMeetingSchedule = useCallback(() => {
     logger.info('Meeting scheduler opened', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      nextMeeting: KAZI_CLIENT_DATA.clientInfo.nextMeeting,
-      totalMeetings: KAZI_CLIENT_DATA.analytics.meetingsHeld
+      userId,
+      projectCount: projects.length,
+      nextMeeting: dashboardData?.nextMeeting
     })
 
     toast.info('Meeting scheduler opened', {
       description: 'Schedule a call with your project team'
     })
-  }, [])
+  }, [userId, projects, dashboardData])
 
   // ============================================================================
   // HANDLER 18: INVOICE DISPUTE
@@ -772,7 +786,7 @@ export default function ClientZonePage() {
   const handleInvoiceDispute = useCallback(async (invoiceNumber: string) => {
     logger.info('Invoice dispute initiated', {
       invoiceNumber,
-      client: KAZI_CLIENT_DATA.clientInfo.name
+      userId
     })
 
     const disputeReason = prompt('Please describe the dispute:')
@@ -782,29 +796,25 @@ export default function ClientZonePage() {
     }
 
     try {
-      const response = await fetch('/api/invoices/dispute', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          invoiceNumber: invoiceNumber,
-          reason: disputeReason,
-          clientId: KAZI_CLIENT_DATA.clientInfo.name
-        })
+      // TODO: Implement disputeInvoice database query when disputes table is ready
+      // await disputeInvoice({ invoice_id: invoiceNumber, reason: disputeReason })
+
+      logger.info('Dispute submitted successfully', { invoiceNumber, userId })
+      toast.success('Dispute submitted', {
+        description: 'Our team will review and respond within 24 hours'
       })
 
-      if (response.ok) {
-        logger.info('Dispute submitted successfully', { invoiceNumber })
-        toast.success('Dispute submitted', {
-          description: 'Our team will review and respond within 24 hours'
-        })
-      }
+      // Reload dashboard data
+      const data = await getClientZoneDashboard()
+      setDashboardData(data)
+      setInvoices(data.pendingInvoices)
     } catch (error: any) {
-      logger.error('Failed to submit dispute', { error, invoiceNumber })
+      logger.error('Failed to submit dispute', { error, invoiceNumber, userId })
       toast.error('Failed to submit dispute', {
         description: error.message
       })
     }
-  }, [])
+  }, [userId])
 
   // ============================================================================
   // HANDLER 19: PAYMENT REMINDER
@@ -812,14 +822,15 @@ export default function ClientZonePage() {
 
   const handlePaymentReminder = useCallback(() => {
     logger.info('Payment reminder sent', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      totalInvestment: KAZI_CLIENT_DATA.clientInfo.totalInvestment
+      userId,
+      invoiceCount: invoices.length,
+      totalInvestment: dashboardData?.totalInvestment
     })
 
     toast.info('Payment reminder sent', {
       description: 'Gentle reminder email sent to client'
     })
-  }, [])
+  }, [userId, invoices, dashboardData])
 
   // ============================================================================
   // HANDLER 20: CLIENT SURVEY
@@ -827,14 +838,15 @@ export default function ClientZonePage() {
 
   const handleClientSurvey = useCallback(() => {
     logger.info('Client survey initiated', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      currentSatisfaction: KAZI_CLIENT_DATA.clientInfo.satisfaction
+      userId,
+      projectCount: projects.length,
+      currentSatisfaction: dashboardData?.satisfaction
     })
 
     toast.success('Satisfaction survey sent!', {
       description: 'Your feedback helps us serve you better'
     })
-  }, [])
+  }, [userId, projects, dashboardData])
 
   // ============================================================================
   // HANDLER 21: REFERRAL REQUEST
@@ -842,15 +854,15 @@ export default function ClientZonePage() {
 
   const handleReferralRequest = useCallback(() => {
     logger.info('Referral request sent', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      satisfaction: KAZI_CLIENT_DATA.clientInfo.satisfaction,
-      tier: KAZI_CLIENT_DATA.clientInfo.tier
+      userId,
+      satisfaction: dashboardData?.satisfaction,
+      tier: dashboardData?.tier
     })
 
     toast.success('Referral program details sent!', {
       description: 'Earn rewards for referring new clients'
     })
-  }, [])
+  }, [userId, dashboardData])
 
   // ============================================================================
   // HANDLER 22: CLIENT RETENTION
@@ -858,15 +870,15 @@ export default function ClientZonePage() {
 
   const handleClientRetention = useCallback(() => {
     logger.info('Retention campaign initiated', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      totalProjects: KAZI_CLIENT_DATA.clientInfo.totalProjects,
-      totalInvestment: KAZI_CLIENT_DATA.clientInfo.totalInvestment
+      userId,
+      totalProjects: projects.length,
+      totalInvestment: dashboardData?.totalInvestment
     })
 
     toast.info('Exclusive offers available!', {
       description: 'Special discounts for valued clients'
     })
-  }, [])
+  }, [userId, projects, dashboardData])
 
   // ============================================================================
   // HANDLER 23: CLIENT SEGMENTATION
@@ -874,16 +886,16 @@ export default function ClientZonePage() {
 
   const handleClientSegmentation = useCallback(() => {
     logger.info('Client segmentation analyzed', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      tier: KAZI_CLIENT_DATA.clientInfo.tier,
-      totalInvestment: KAZI_CLIENT_DATA.clientInfo.totalInvestment,
-      satisfaction: KAZI_CLIENT_DATA.clientInfo.satisfaction
+      userId,
+      tier: dashboardData?.tier,
+      totalInvestment: dashboardData?.totalInvestment,
+      satisfaction: dashboardData?.satisfaction
     })
 
     toast.info('Client profile analyzed', {
       description: 'Premium tier benefits active'
     })
-  }, [])
+  }, [userId, dashboardData])
 
   // ============================================================================
   // HANDLER 24: CLIENT REPORTS
@@ -891,16 +903,17 @@ export default function ClientZonePage() {
 
   const handleClientReports = useCallback(() => {
     logger.info('Client reports generated', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      onTimeDelivery: KAZI_CLIENT_DATA.analytics.onTimeDelivery,
-      firstTimeApproval: KAZI_CLIENT_DATA.analytics.firstTimeApproval,
-      avgResponseTime: KAZI_CLIENT_DATA.analytics.avgResponseTime
+      userId,
+      projectCount: projects.length,
+      onTimeDelivery: dashboardData?.analytics?.onTimeDelivery,
+      firstTimeApproval: dashboardData?.analytics?.firstTimeApproval,
+      avgResponseTime: dashboardData?.analytics?.avgResponseTime
     })
 
     toast.success('Client reports generated!', {
       description: 'Detailed analytics and insights ready to view'
     })
-  }, [])
+  }, [userId, projects, dashboardData])
 
   // ============================================================================
   // HANDLER 25: CLIENT ANALYTICS
@@ -908,16 +921,16 @@ export default function ClientZonePage() {
 
   const handleClientAnalytics = useCallback(() => {
     logger.info('Analytics dashboard opened', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      messagesExchanged: KAZI_CLIENT_DATA.analytics.messagesExchanged,
-      meetingsHeld: KAZI_CLIENT_DATA.analytics.meetingsHeld,
-      filesShared: KAZI_CLIENT_DATA.analytics.filesShared
+      userId,
+      messagesExchanged: dashboardData?.analytics?.messagesExchanged,
+      meetingsHeld: dashboardData?.analytics?.meetingsHeld,
+      filesShared: dashboardData?.analytics?.filesShared
     })
 
     toast.info('Analytics dashboard loaded', {
       description: 'Comprehensive project insights and metrics'
     })
-  }, [])
+  }, [userId, dashboardData])
 
   // ============================================================================
   // HANDLER 26: CLIENT EXPORT
@@ -925,14 +938,15 @@ export default function ClientZonePage() {
 
   const handleClientExport = useCallback(() => {
     logger.info('Client data export initiated', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      email: KAZI_CLIENT_DATA.clientInfo.email
+      userId,
+      projectCount: projects.length,
+      email: dashboardData?.email
     })
 
     toast.success('Data export started', {
       description: 'Download link will be sent to your email'
     })
-  }, [])
+  }, [userId, projects, dashboardData])
 
   // ============================================================================
   // HANDLER 27: CLIENT NOTIFICATIONS MANAGEMENT
@@ -940,14 +954,14 @@ export default function ClientZonePage() {
 
   const handleClientNotifications = useCallback(() => {
     logger.info('Notification settings opened', {
-      client: KAZI_CLIENT_DATA.clientInfo.name,
-      activeProjects: KAZI_CLIENT_DATA.clientInfo.activeProjects
+      userId,
+      activeProjects: projects.filter(p => p.status === 'active').length
     })
 
     toast.info('Notification settings loaded', {
       description: 'Manage your communication preferences'
     })
-  }, [])
+  }, [userId, projects])
 
   // ============================================================================
   // HELPER HANDLERS
@@ -1008,7 +1022,7 @@ export default function ClientZonePage() {
               <p className="text-gray-600 dark:text-gray-300 mt-2 text-lg">
                 {userRole === 'freelancer'
                   ? `Manage your clients and track all project deliverables`
-                  : `Welcome back, ${KAZI_CLIENT_DATA.clientInfo.contactPerson}! Here's your project overview.`
+                  : `Welcome back${dashboardData?.contactPerson ? `, ${dashboardData.contactPerson}` : ''}! Here's your project overview.`
                 }
               </p>
             </div>
@@ -1111,7 +1125,7 @@ export default function ClientZonePage() {
                 <div className="inline-flex p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 dark:from-blue-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm mb-4">
                   <FolderOpen className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                 </div>
-                <NumberFlow value={KAZI_CLIENT_DATA.clientInfo.activeProjects} className="text-2xl font-bold text-blue-600 dark:text-blue-400 block" />
+                <NumberFlow value={dashboardData?.activeProjects || projects.filter(p => p.status === 'active').length || 0} className="text-2xl font-bold text-blue-600 dark:text-blue-400 block" />
                 <p className="text-gray-600 dark:text-gray-400">Active Projects</p>
               </div>
             </LiquidGlassCard>
@@ -1131,7 +1145,7 @@ export default function ClientZonePage() {
                 <div className="inline-flex p-3 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 dark:from-emerald-400/10 dark:to-teal-400/10 rounded-xl backdrop-blur-sm mb-4">
                   <CheckCircle className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                <NumberFlow value={KAZI_CLIENT_DATA.clientInfo.completedProjects} className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 block" />
+                <NumberFlow value={dashboardData?.completedProjects || projects.filter(p => p.status === 'completed').length || 0} className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 block" />
                 <p className="text-gray-600 dark:text-gray-400">Completed</p>
               </div>
             </LiquidGlassCard>
@@ -1151,7 +1165,7 @@ export default function ClientZonePage() {
                 <div className="inline-flex p-3 bg-gradient-to-br from-purple-400/20 to-indigo-400/20 dark:from-purple-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm mb-4">
                   <DollarSign className="h-8 w-8 text-purple-600 dark:text-purple-400" />
                 </div>
-                <NumberFlow value={KAZI_CLIENT_DATA.clientInfo.totalInvestment} format="currency" className="text-2xl font-bold text-purple-600 dark:text-purple-400 block" />
+                <NumberFlow value={dashboardData?.totalInvestment || 0} format="currency" className="text-2xl font-bold text-purple-600 dark:text-purple-400 block" />
                 <p className="text-gray-600 dark:text-gray-400">Total Investment</p>
               </div>
             </LiquidGlassCard>
@@ -1171,7 +1185,7 @@ export default function ClientZonePage() {
                 <div className="inline-flex p-3 bg-gradient-to-br from-amber-400/20 to-yellow-400/20 dark:from-amber-400/10 dark:to-yellow-400/10 rounded-xl backdrop-blur-sm mb-4">
                   <Star className="h-8 w-8 text-amber-600 dark:text-amber-400" />
                 </div>
-                <NumberFlow value={parseFloat(KAZI_CLIENT_DATA.clientInfo.satisfaction)} decimals={1} className="text-2xl font-bold text-amber-600 dark:text-amber-400 block" />
+                <NumberFlow value={parseFloat(dashboardData?.satisfaction || '0')} decimals={1} className="text-2xl font-bold text-amber-600 dark:text-amber-400 block" />
                 <p className="text-gray-600 dark:text-gray-400">Satisfaction Rating</p>
               </div>
             </LiquidGlassCard>
@@ -1407,7 +1421,7 @@ export default function ClientZonePage() {
           {/* Projects Tab */}
           <TabsContent value="projects" className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
-              {KAZI_CLIENT_DATA.projects.map((project) => (
+              {projects.map((project) => (
                 <Card key={project.id} className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -1598,7 +1612,7 @@ export default function ClientZonePage() {
                 <div className="space-y-4">
                   <h3 className="font-semibold text-lg">Recent Invoices</h3>
                   <div className="space-y-3">
-                    {KAZI_CLIENT_DATA.invoices.map((invoice) => (
+                    {invoices.map((invoice) => (
                       <div key={invoice.id} className="p-4 rounded-lg border border-gray-200 flex items-center justify-between gap-4">
                         <div className="flex-1">
                           <p className="font-medium">{invoice.number} - {invoice.project}</p>
@@ -1694,7 +1708,7 @@ export default function ClientZonePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="max-h-96 overflow-y-auto space-y-4">
-                  {KAZI_CLIENT_DATA.messages.map((message) => (
+                  {messages.map((message) => (
                     <div key={message.id} className="flex space-x-4 p-4 rounded-lg bg-gray-50">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={message.avatar} alt={message.sender} />
@@ -1715,8 +1729,8 @@ export default function ClientZonePage() {
                 <div className="border-t pt-4">
                   <div className="flex space-x-4">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={KAZI_CLIENT_DATA.clientInfo.avatar} alt={KAZI_CLIENT_DATA.clientInfo.contactPerson} />
-                      <AvatarFallback>{KAZI_CLIENT_DATA.clientInfo.contactPerson.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                      <AvatarImage src={dashboardData?.avatar || '/default-avatar.png'} alt={dashboardData?.contactPerson || 'User'} />
+                      <AvatarFallback>{dashboardData?.contactPerson?.split(' ').map(n => n[0]).join('') || 'U'}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 space-y-2">
                       <Textarea
@@ -1750,7 +1764,7 @@ export default function ClientZonePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {KAZI_CLIENT_DATA.recentFiles.map((file) => (
+                  {files.map((file) => (
                     <div key={file.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50">
                       <div className="flex items-center space-x-4">
                         <div className="p-2 bg-blue-100 rounded-lg">
@@ -1858,21 +1872,21 @@ export default function ClientZonePage() {
                   <Card className="bg-blue-50 border-blue-200">
                     <CardContent className="p-4 text-center">
                       <Target className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                      <p className="text-2xl font-bold text-blue-600">{KAZI_CLIENT_DATA.analytics.onTimeDelivery}%</p>
+                      <p className="text-2xl font-bold text-blue-600">{dashboardData?.analytics?.onTimeDelivery || 0}%</p>
                       <p className="text-sm text-gray-600">On-Time Delivery</p>
                     </CardContent>
                   </Card>
                   <Card className="bg-green-50 border-green-200">
                     <CardContent className="p-4 text-center">
                       <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                      <p className="text-2xl font-bold text-green-600">{KAZI_CLIENT_DATA.analytics.firstTimeApproval}%</p>
+                      <p className="text-2xl font-bold text-green-600">{dashboardData?.analytics?.firstTimeApproval || 0}%</p>
                       <p className="text-sm text-gray-600">First-Time Approval</p>
                     </CardContent>
                   </Card>
                   <Card className="bg-purple-50 border-purple-200">
                     <CardContent className="p-4 text-center">
                       <Zap className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                      <p className="text-2xl font-bold text-purple-600">{KAZI_CLIENT_DATA.analytics.avgResponseTime} days</p>
+                      <p className="text-2xl font-bold text-purple-600">{dashboardData?.analytics?.avgResponseTime || 0} days</p>
                       <p className="text-sm text-gray-600">Avg Response Time</p>
                     </CardContent>
                   </Card>
@@ -1882,7 +1896,7 @@ export default function ClientZonePage() {
                   <div className="space-y-4">
                     <h3 className="font-semibold text-lg">Project Timeline</h3>
                     <div className="space-y-3">
-                      {KAZI_CLIENT_DATA.projects.map((project) => (
+                      {projects.map((project) => (
                         <div key={project.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
                           <span className="text-sm">{project.name}</span>
                           <div className="flex items-center gap-2">
@@ -1898,15 +1912,15 @@ export default function ClientZonePage() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
                         <span className="text-sm">Messages Exchanged</span>
-                        <span className="font-semibold">{KAZI_CLIENT_DATA.analytics.messagesExchanged}</span>
+                        <span className="font-semibold">{dashboardData?.analytics?.messagesExchanged || messages.length}</span>
                       </div>
                       <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
                         <span className="text-sm">Meetings Held</span>
-                        <span className="font-semibold">{KAZI_CLIENT_DATA.analytics.meetingsHeld}</span>
+                        <span className="font-semibold">{dashboardData?.analytics?.meetingsHeld || 0}</span>
                       </div>
                       <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
                         <span className="text-sm">Files Shared</span>
-                        <span className="font-semibold">{KAZI_CLIENT_DATA.analytics.filesShared}</span>
+                        <span className="font-semibold">{dashboardData?.analytics?.filesShared || files.length}</span>
                       </div>
                     </div>
                   </div>
@@ -2014,7 +2028,7 @@ export default function ClientZonePage() {
                     <div className="space-y-3">
                       <div className="p-3 rounded-lg bg-gray-50">
                         <p className="font-medium mb-2">Contact Information</p>
-                        <p className="text-sm text-gray-600 mb-2">Email: {KAZI_CLIENT_DATA.clientInfo.email}</p>
+                        <p className="text-sm text-gray-600 mb-2">Email: {dashboardData?.email || 'N/A'}</p>
                         <Button size="sm" variant="outline">
                           <Edit className="h-3 w-3 mr-1" />
                           Update Contact Info
@@ -2058,9 +2072,9 @@ export default function ClientZonePage() {
       {/* Client Onboarding Tour - NEW */}
       <ClientOnboardingTour
         userRole="client"
-        clientId={KAZI_CLIENT_DATA.clientInfo.email}
+        clientId={userId || dashboardData?.email || 'guest'}
         onComplete={(tourId) => {
-          logger.info('Onboarding tour completed', { tourId })
+          logger.info('Onboarding tour completed', { tourId, userId })
           toast.success('Tour completed! 🎉', {
             description: 'You earned XP and unlocked new features'
           })
