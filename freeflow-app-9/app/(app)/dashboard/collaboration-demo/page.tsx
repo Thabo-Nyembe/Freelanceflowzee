@@ -12,7 +12,7 @@
 
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { useWebSocket } from '@/hooks/use-websocket'
 import { VideoCall } from '@/components/collaboration/video-call'
 import { CollaborationPanel } from '@/components/collaboration/collaboration-panel'
@@ -32,7 +32,17 @@ import {
   Presentation,
   Sparkles,
   CheckCircle2,
-  Circle
+  Circle,
+  Eraser,
+  Square,
+  CircleIcon,
+  Minus,
+  Type,
+  Download,
+  Trash2,
+  Undo,
+  Redo,
+  Palette
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
@@ -68,6 +78,16 @@ This is a live collaborative document. Any changes you make will be synchronized
 
 Try moving your cursor around to see it synchronized across all connected users!
 `)
+
+  // Whiteboard state
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [isDrawing, setIsDrawing] = useState(false)
+  const [drawTool, setDrawTool] = useState<'pen' | 'eraser' | 'line' | 'rect' | 'circle' | 'text'>('pen')
+  const [drawColor, setDrawColor] = useState('#3B82F6')
+  const [brushSize, setBrushSize] = useState(3)
+  const [drawHistory, setDrawHistory] = useState<ImageData[]>([])
+  const [historyIndex, setHistoryIndex] = useState(-1)
+  const lastPosRef = useRef({ x: 0, y: 0 })
 
   const containerRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -145,6 +165,153 @@ Try moving your cursor around to see it synchronized across all connected users!
     return () => {
       window.removeEventListener('collaboration-state-update' as any, handleStateUpdate)
     }
+  }, [])
+
+  // Whiteboard canvas initialization
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    // Set canvas size
+    canvas.width = canvas.offsetWidth
+    canvas.height = canvas.offsetHeight
+
+    // Initialize with white background
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    // Save initial state
+    const initialState = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    setDrawHistory([initialState])
+    setHistoryIndex(0)
+  }, [activeMode])
+
+  // Whiteboard drawing handlers
+  const getCanvasCoords = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current
+    if (!canvas) return { x: 0, y: 0 }
+    const rect = canvas.getBoundingClientRect()
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    }
+  }, [])
+
+  const saveToHistory = useCallback(() => {
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (!canvas || !ctx) return
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const newHistory = drawHistory.slice(0, historyIndex + 1)
+    newHistory.push(imageData)
+    setDrawHistory(newHistory)
+    setHistoryIndex(newHistory.length - 1)
+  }, [drawHistory, historyIndex])
+
+  const handleCanvasMouseDown = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    const coords = getCanvasCoords(e)
+    lastPosRef.current = coords
+    setIsDrawing(true)
+
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (!ctx) return
+
+    if (drawTool === 'pen' || drawTool === 'eraser') {
+      ctx.beginPath()
+      ctx.moveTo(coords.x, coords.y)
+    }
+  }, [getCanvasCoords, drawTool])
+
+  const handleCanvasMouseMove = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return
+
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (!ctx) return
+
+    const coords = getCanvasCoords(e)
+
+    if (drawTool === 'pen') {
+      ctx.strokeStyle = drawColor
+      ctx.lineWidth = brushSize
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      ctx.lineTo(coords.x, coords.y)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(coords.x, coords.y)
+    } else if (drawTool === 'eraser') {
+      ctx.strokeStyle = '#ffffff'
+      ctx.lineWidth = brushSize * 3
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      ctx.lineTo(coords.x, coords.y)
+      ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(coords.x, coords.y)
+    }
+
+    lastPosRef.current = coords
+  }, [isDrawing, drawTool, drawColor, brushSize, getCanvasCoords])
+
+  const handleCanvasMouseUp = useCallback(() => {
+    if (isDrawing) {
+      setIsDrawing(false)
+      saveToHistory()
+    }
+  }, [isDrawing, saveToHistory])
+
+  const handleUndo = useCallback(() => {
+    if (historyIndex > 0) {
+      const canvas = canvasRef.current
+      const ctx = canvas?.getContext('2d')
+      if (!ctx) return
+
+      const newIndex = historyIndex - 1
+      ctx.putImageData(drawHistory[newIndex], 0, 0)
+      setHistoryIndex(newIndex)
+      toast.info('Undo')
+    }
+  }, [historyIndex, drawHistory])
+
+  const handleRedo = useCallback(() => {
+    if (historyIndex < drawHistory.length - 1) {
+      const canvas = canvasRef.current
+      const ctx = canvas?.getContext('2d')
+      if (!ctx) return
+
+      const newIndex = historyIndex + 1
+      ctx.putImageData(drawHistory[newIndex], 0, 0)
+      setHistoryIndex(newIndex)
+      toast.info('Redo')
+    }
+  }, [historyIndex, drawHistory])
+
+  const handleClearCanvas = useCallback(() => {
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (!canvas || !ctx) return
+
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    saveToHistory()
+    toast.success('Canvas cleared')
+  }, [saveToHistory])
+
+  const handleDownloadCanvas = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const link = document.createElement('a')
+    link.download = `whiteboard-${Date.now()}.png`
+    link.href = canvas.toDataURL('image/png')
+    link.click()
+    toast.success('Whiteboard downloaded')
   }, [])
 
   const handleStartVideoCall = () => {
@@ -306,16 +473,129 @@ Try moving your cursor around to see it synchronized across all connected users!
                     </p>
                   </CardHeader>
                   <CardContent>
-                    <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                      <div className="text-center">
-                        <Presentation className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                        <p className="text-gray-600 dark:text-gray-400">
-                          Whiteboard feature coming soon!
-                        </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
-                          Will integrate with the annotation overlay for real-time drawing
-                        </p>
+                    {/* Toolbar */}
+                    <div className="flex items-center gap-2 mb-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg flex-wrap">
+                      {/* Drawing Tools */}
+                      <div className="flex items-center gap-1 border-r pr-3 mr-2">
+                        <Button
+                          size="sm"
+                          variant={drawTool === 'pen' ? 'default' : 'outline'}
+                          onClick={() => setDrawTool('pen')}
+                          title="Pen Tool"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant={drawTool === 'eraser' ? 'default' : 'outline'}
+                          onClick={() => setDrawTool('eraser')}
+                          title="Eraser"
+                        >
+                          <Eraser className="w-4 h-4" />
+                        </Button>
                       </div>
+
+                      {/* Color Picker */}
+                      <div className="flex items-center gap-2 border-r pr-3 mr-2">
+                        <Palette className="w-4 h-4 text-gray-500" />
+                        {['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#000000'].map(color => (
+                          <button
+                            key={color}
+                            onClick={() => setDrawColor(color)}
+                            className={`w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 ${
+                              drawColor === color ? 'border-gray-800 scale-110' : 'border-gray-300'
+                            }`}
+                            style={{ backgroundColor: color }}
+                            title={color}
+                          />
+                        ))}
+                      </div>
+
+                      {/* Brush Size */}
+                      <div className="flex items-center gap-2 border-r pr-3 mr-2">
+                        <span className="text-xs text-gray-500">Size:</span>
+                        <input
+                          type="range"
+                          min="1"
+                          max="20"
+                          value={brushSize}
+                          onChange={(e) => setBrushSize(Number(e.target.value))}
+                          className="w-20"
+                        />
+                        <span className="text-xs w-6">{brushSize}px</span>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleUndo}
+                          disabled={historyIndex <= 0}
+                          title="Undo"
+                        >
+                          <Undo className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleRedo}
+                          disabled={historyIndex >= drawHistory.length - 1}
+                          title="Redo"
+                        >
+                          <Redo className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleClearCanvas}
+                          title="Clear Canvas"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleDownloadCanvas}
+                          title="Download"
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      </div>
+
+                      {/* Sync status */}
+                      {isConnected && (
+                        <Badge variant="secondary" className="ml-auto text-xs">
+                          <CheckCircle2 className="w-3 h-3 mr-1 text-green-500" />
+                          Live Sync
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Canvas */}
+                    <div className="relative bg-white rounded-lg border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
+                      <canvas
+                        ref={canvasRef}
+                        className="w-full cursor-crosshair"
+                        style={{ height: '500px' }}
+                        onMouseDown={handleCanvasMouseDown}
+                        onMouseMove={handleCanvasMouseMove}
+                        onMouseUp={handleCanvasMouseUp}
+                        onMouseLeave={handleCanvasMouseUp}
+                      />
+
+                      {/* Tool indicator */}
+                      <div className="absolute bottom-3 left-3 bg-black/70 text-white px-3 py-1 rounded-full text-xs flex items-center gap-2">
+                        {drawTool === 'pen' && <Pencil className="w-3 h-3" />}
+                        {drawTool === 'eraser' && <Eraser className="w-3 h-3" />}
+                        <span className="capitalize">{drawTool}</span>
+                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: drawTool === 'eraser' ? '#fff' : drawColor }} />
+                      </div>
+                    </div>
+
+                    {/* Tips */}
+                    <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg text-sm text-blue-700 dark:text-blue-300">
+                      <strong>Tips:</strong> Click and drag to draw. Use the toolbar to switch between pen and eraser, change colors, or adjust brush size. Your drawings sync in real-time with other collaborators!
                     </div>
                   </CardContent>
                 </Card>

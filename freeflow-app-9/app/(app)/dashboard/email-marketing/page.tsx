@@ -58,6 +58,20 @@ export default function EmailMarketingPage() {
     source: 'manual' as string
   })
 
+  // Automation modal state
+  const [isAutomationOpen, setIsAutomationOpen] = useState(false)
+  const [automationForm, setAutomationForm] = useState({
+    name: '',
+    trigger: 'signup' as string,
+    delay: '1' as string,
+    action: 'welcome' as string
+  })
+  const [automations, setAutomations] = useState([
+    { id: 1, name: 'Welcome Series', trigger: 'New Subscriber', status: 'active', emails: 3, sent: 1245, opened: 876 },
+    { id: 2, name: 'Cart Abandonment', trigger: 'Abandoned Cart', status: 'active', emails: 2, sent: 432, opened: 298 },
+    { id: 3, name: 'Re-engagement', trigger: 'Inactive 30 days', status: 'paused', emails: 4, sent: 156, opened: 78 }
+  ])
+
   // A+++ LOAD EMAIL MARKETING DATA
   useEffect(() => {
     const loadEmailMarketingData = async () => {
@@ -324,11 +338,63 @@ export default function EmailMarketingPage() {
   }, [userId, subscriberForm, announce])
 
   const handleCreateAutomation = () => {
-    announce('Opening automation builder', 'polite')
-    toast.info('Automation builder', {
-      description: 'Advanced email automation workflows coming soon'
+    setAutomationForm({
+      name: '',
+      trigger: 'signup',
+      delay: '1',
+      action: 'welcome'
     })
+    setIsAutomationOpen(true)
+    announce('Opening automation builder', 'polite')
   }
+
+  const handleSaveAutomation = useCallback(() => {
+    if (!automationForm.name.trim()) {
+      toast.error('Please enter an automation name')
+      return
+    }
+
+    const triggerLabels: Record<string, string> = {
+      signup: 'New Subscriber',
+      purchase: 'Purchase Complete',
+      cart_abandon: 'Abandoned Cart',
+      inactive: 'Inactive 30 days',
+      birthday: 'Birthday',
+      tag_added: 'Tag Added'
+    }
+
+    const newAutomation = {
+      id: Date.now(),
+      name: automationForm.name,
+      trigger: triggerLabels[automationForm.trigger] || automationForm.trigger,
+      status: 'active' as const,
+      emails: 1,
+      sent: 0,
+      opened: 0
+    }
+
+    setAutomations(prev => [...prev, newAutomation])
+    setIsAutomationOpen(false)
+    toast.success('Automation created', {
+      description: `${automationForm.name} is now active`
+    })
+    announce('Automation created successfully', 'polite')
+  }, [automationForm, announce])
+
+  const handleToggleAutomation = useCallback((id: number) => {
+    setAutomations(prev => prev.map(a =>
+      a.id === id
+        ? { ...a, status: a.status === 'active' ? 'paused' : 'active' }
+        : a
+    ))
+    announce('Automation status updated', 'polite')
+  }, [announce])
+
+  const handleDeleteAutomation = useCallback((id: number) => {
+    setAutomations(prev => prev.filter(a => a.id !== id))
+    toast.success('Automation deleted')
+    announce('Automation deleted', 'polite')
+  }, [announce])
 
   const handleCreateTemplate = async () => {
     if (!userId) {
@@ -750,20 +816,116 @@ export default function EmailMarketingPage() {
         </button>
       </div>
 
-      <LiquidGlassCard className="p-12">
-        <NoDataEmptyState
-          title="Advanced Email Automation"
-          message="Automated email workflows and drip campaigns are coming soon. Create powerful sequences triggered by subscriber actions."
-          action={{
-            label: "Learn More",
-            onClick: () => {
-              toast.info('Email Automation', {
-                description: 'Advanced workflow automation features in development'
-              })
-            }
-          }}
-        />
-      </LiquidGlassCard>
+      {/* Automation Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <LiquidGlassCard>
+          <div className="p-4">
+            <div className="text-sm text-muted-foreground">Active Automations</div>
+            <div className="text-2xl font-bold text-green-500">
+              {automations.filter(a => a.status === 'active').length}
+            </div>
+          </div>
+        </LiquidGlassCard>
+        <LiquidGlassCard>
+          <div className="p-4">
+            <div className="text-sm text-muted-foreground">Total Emails Sent</div>
+            <div className="text-2xl font-bold text-blue-500">
+              {automations.reduce((sum, a) => sum + a.sent, 0).toLocaleString()}
+            </div>
+          </div>
+        </LiquidGlassCard>
+        <LiquidGlassCard>
+          <div className="p-4">
+            <div className="text-sm text-muted-foreground">Total Opened</div>
+            <div className="text-2xl font-bold text-purple-500">
+              {automations.reduce((sum, a) => sum + a.opened, 0).toLocaleString()}
+            </div>
+          </div>
+        </LiquidGlassCard>
+        <LiquidGlassCard>
+          <div className="p-4">
+            <div className="text-sm text-muted-foreground">Avg Open Rate</div>
+            <div className="text-2xl font-bold text-orange-500">
+              {automations.length > 0
+                ? Math.round(automations.reduce((sum, a) => sum + (a.sent > 0 ? (a.opened / a.sent) * 100 : 0), 0) / automations.length)
+                : 0}%
+            </div>
+          </div>
+        </LiquidGlassCard>
+      </div>
+
+      {/* Automations List */}
+      <div className="space-y-4">
+        {automations.map((automation) => (
+          <LiquidGlassCard key={automation.id}>
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                    automation.status === 'active' ? 'bg-green-100 dark:bg-green-900' : 'bg-gray-100 dark:bg-gray-800'
+                  }`}>
+                    <span className="text-2xl">⚡</span>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold">{automation.name}</h3>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>Trigger: {automation.trigger}</span>
+                      <span>•</span>
+                      <span>{automation.emails} email{automation.emails !== 1 ? 's' : ''} in sequence</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="text-right mr-4">
+                    <div className="text-sm text-muted-foreground">Sent / Opened</div>
+                    <div className="font-semibold">{automation.sent.toLocaleString()} / {automation.opened.toLocaleString()}</div>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    automation.status === 'active'
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                      : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                  }`}>
+                    {automation.status === 'active' ? '● Active' : '○ Paused'}
+                  </span>
+                  <button
+                    onClick={() => handleToggleAutomation(automation.id)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      automation.status === 'active'
+                        ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-300'
+                        : 'bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300'
+                    }`}
+                  >
+                    {automation.status === 'active' ? 'Pause' : 'Activate'}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteAutomation(automation.id)}
+                    className="px-3 py-1.5 bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          </LiquidGlassCard>
+        ))}
+      </div>
+
+      {automations.length === 0 && (
+        <LiquidGlassCard className="p-12">
+          <div className="text-center">
+            <div className="text-4xl mb-4">⚡</div>
+            <h3 className="text-lg font-semibold mb-2">No Automations Yet</h3>
+            <p className="text-muted-foreground mb-4">Create your first automation to start sending targeted emails automatically</p>
+            <button
+              onClick={handleCreateAutomation}
+              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors"
+            >
+              Create First Automation
+            </button>
+          </div>
+        </LiquidGlassCard>
+      )}
     </div>
   )
 
@@ -1065,6 +1227,103 @@ export default function EmailMarketingPage() {
             </button>
             <button
               onClick={() => setIsSubscriberFormOpen(false)}
+              className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Automation Creation Dialog */}
+      <Dialog open={isAutomationOpen} onOpenChange={setIsAutomationOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              ⚡ Create Automation
+            </DialogTitle>
+            <DialogDescription>
+              Set up automated email sequences triggered by subscriber actions
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Automation Name */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Automation Name *</label>
+              <input
+                type="text"
+                placeholder="e.g., Welcome Series, Cart Recovery"
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={automationForm.name}
+                onChange={(e) => setAutomationForm(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+
+            {/* Trigger */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Trigger Event</label>
+              <select
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={automationForm.trigger}
+                onChange={(e) => setAutomationForm(prev => ({ ...prev, trigger: e.target.value }))}
+              >
+                <option value="signup">New Subscriber Signs Up</option>
+                <option value="purchase">Purchase Completed</option>
+                <option value="cart_abandon">Cart Abandoned</option>
+                <option value="inactive">Inactive for 30 Days</option>
+                <option value="birthday">Subscriber Birthday</option>
+                <option value="tag_added">Tag Added to Subscriber</option>
+              </select>
+            </div>
+
+            {/* Delay */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Initial Delay</label>
+              <select
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={automationForm.delay}
+                onChange={(e) => setAutomationForm(prev => ({ ...prev, delay: e.target.value }))}
+              >
+                <option value="0">Immediately</option>
+                <option value="1">1 hour</option>
+                <option value="24">1 day</option>
+                <option value="72">3 days</option>
+                <option value="168">1 week</option>
+              </select>
+            </div>
+
+            {/* First Action */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">First Email Type</label>
+              <select
+                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={automationForm.action}
+                onChange={(e) => setAutomationForm(prev => ({ ...prev, action: e.target.value }))}
+              >
+                <option value="welcome">Welcome Email</option>
+                <option value="onboarding">Onboarding Guide</option>
+                <option value="promotion">Promotional Offer</option>
+                <option value="reminder">Friendly Reminder</option>
+                <option value="reengagement">Re-engagement Campaign</option>
+              </select>
+            </div>
+
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg text-sm text-blue-700 dark:text-blue-300">
+              💡 After creating, you can add more emails to the sequence and customize content
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 pt-4 border-t">
+            <button
+              onClick={handleSaveAutomation}
+              disabled={!automationForm.name.trim()}
+              className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-colors disabled:opacity-50"
+            >
+              Create Automation
+            </button>
+            <button
+              onClick={() => setIsAutomationOpen(false)}
               className="px-4 py-2 bg-muted hover:bg-muted/80 rounded-lg text-sm font-medium transition-colors"
             >
               Cancel

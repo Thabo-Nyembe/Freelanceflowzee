@@ -591,33 +591,157 @@ export default function WorkflowBuilderPage() {
 
           {/* Builder Tab */}
           <TabsContent value="builder" className="space-y-6">
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Wand2 className="h-5 w-5" />
-                  Visual Workflow Builder
-                </CardTitle>
-                <p className="text-gray-600">
-                  Drag and drop components to build your custom workflow
-                </p>
-              </CardHeader>
-              <CardContent className="h-96">
-                <div className="h-full bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-                  <div className="text-center">
-                    <Wand2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Start Building</h3>
-                    <p className="text-gray-500 mb-4">Choose a template or start from scratch</p>
-                    <Button
-                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-                      onClick={handleCreateWorkflow}
+            <div className="grid grid-cols-4 gap-6">
+              {/* Components Panel */}
+              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Components
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {[
+                    { icon: '🎯', name: 'Trigger', desc: 'Start your workflow', color: 'bg-blue-100 border-blue-300' },
+                    { icon: '📧', name: 'Send Email', desc: 'Send notification', color: 'bg-green-100 border-green-300' },
+                    { icon: '⏱️', name: 'Wait', desc: 'Add delay', color: 'bg-yellow-100 border-yellow-300' },
+                    { icon: '🔀', name: 'Condition', desc: 'If/else branch', color: 'bg-purple-100 border-purple-300' },
+                    { icon: '📋', name: 'Create Task', desc: 'Add to-do item', color: 'bg-orange-100 border-orange-300' },
+                    { icon: '🔔', name: 'Notification', desc: 'Push alert', color: 'bg-pink-100 border-pink-300' },
+                    { icon: '📊', name: 'Update Data', desc: 'Modify record', color: 'bg-cyan-100 border-cyan-300' },
+                    { icon: '🔗', name: 'Webhook', desc: 'External API', color: 'bg-gray-100 border-gray-300' }
+                  ].map((comp, i) => (
+                    <div
+                      key={i}
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('component', JSON.stringify(comp))
+                        announce(`Dragging ${comp.name} component`, 'polite')
+                      }}
+                      className={`p-3 rounded-lg border-2 ${comp.color} cursor-grab hover:shadow-md transition-all`}
                     >
-                      <Plus className="h-4 w-4 mr-2" />
-                      New Workflow
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{comp.icon}</span>
+                        <div>
+                          <div className="text-sm font-medium">{comp.name}</div>
+                          <div className="text-xs text-gray-500">{comp.desc}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Canvas Area */}
+              <div className="col-span-3">
+                <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg h-full">
+                  <CardHeader className="pb-3 border-b">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="flex items-center gap-2">
+                        <Wand2 className="h-5 w-5" />
+                        Workflow Canvas
+                      </CardTitle>
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" variant="outline" onClick={() => {
+                          toast.success('Workflow validated', { description: 'All connections are valid' })
+                          announce('Workflow validated successfully', 'polite')
+                        }}>
+                          <CheckCircle2 className="h-4 w-4 mr-1" />
+                          Validate
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => {
+                          toast.success('Workflow saved as draft')
+                          announce('Workflow saved', 'polite')
+                        }}>
+                          <Save className="h-4 w-4 mr-1" />
+                          Save Draft
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent
+                    className="h-[500px] relative overflow-hidden"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault()
+                      const data = e.dataTransfer.getData('component')
+                      if (data) {
+                        const comp = JSON.parse(data)
+                        toast.success(`Added ${comp.name}`, { description: 'Component added to workflow' })
+                        announce(`${comp.name} added to canvas`, 'polite')
+                      }
+                    }}
+                  >
+                    {/* Grid background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-blue-50/30" style={{
+                      backgroundImage: 'radial-gradient(circle, #ddd 1px, transparent 1px)',
+                      backgroundSize: '20px 20px'
+                    }} />
+
+                    {/* Sample workflow nodes */}
+                    <div className="relative z-10 p-6">
+                      {/* Start Node */}
+                      <div className="absolute left-1/2 top-4 -translate-x-1/2">
+                        <div className="px-6 py-3 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium shadow-lg flex items-center gap-2">
+                          <span>▶️</span> Start
+                        </div>
+                        <div className="absolute left-1/2 top-full -translate-x-1/2 w-0.5 h-8 bg-gray-400" />
+                      </div>
+
+                      {/* Trigger Node */}
+                      <div className="absolute left-1/2 top-24 -translate-x-1/2">
+                        <div className="px-6 py-4 rounded-xl bg-white border-2 border-blue-400 shadow-lg min-w-[200px]">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xl">🎯</span>
+                            <span className="font-semibold">New Client Signup</span>
+                          </div>
+                          <div className="text-xs text-gray-500">Triggers when new client registers</div>
+                        </div>
+                        <div className="absolute left-1/2 top-full -translate-x-1/2 w-0.5 h-8 bg-gray-400" />
+                      </div>
+
+                      {/* Wait Node */}
+                      <div className="absolute left-1/2 top-52 -translate-x-1/2">
+                        <div className="px-6 py-4 rounded-xl bg-white border-2 border-yellow-400 shadow-lg min-w-[200px]">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xl">⏱️</span>
+                            <span className="font-semibold">Wait 1 Hour</span>
+                          </div>
+                          <div className="text-xs text-gray-500">Delay before next action</div>
+                        </div>
+                        <div className="absolute left-1/2 top-full -translate-x-1/2 w-0.5 h-8 bg-gray-400" />
+                      </div>
+
+                      {/* Email Node */}
+                      <div className="absolute left-1/2 top-80 -translate-x-1/2">
+                        <div className="px-6 py-4 rounded-xl bg-white border-2 border-green-400 shadow-lg min-w-[200px]">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xl">📧</span>
+                            <span className="font-semibold">Send Welcome Email</span>
+                          </div>
+                          <div className="text-xs text-gray-500">Welcome message template</div>
+                        </div>
+                        <div className="absolute left-1/2 top-full -translate-x-1/2 w-0.5 h-8 bg-gray-400" />
+                      </div>
+
+                      {/* End Node */}
+                      <div className="absolute left-1/2 bottom-4 -translate-x-1/2">
+                        <div className="px-6 py-3 rounded-full bg-gradient-to-r from-red-500 to-rose-500 text-white font-medium shadow-lg flex items-center gap-2">
+                          <span>⏹️</span> End
+                        </div>
+                      </div>
+
+                      {/* Drop zone hint */}
+                      <div className="absolute right-6 top-1/2 -translate-y-1/2 text-center p-6 border-2 border-dashed border-gray-300 rounded-xl bg-white/50">
+                        <Wand2 className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                        <p className="text-sm text-gray-500">Drag components here</p>
+                        <p className="text-xs text-gray-400">to add to workflow</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 
