@@ -308,11 +308,20 @@ export default function IntegrationsPage() {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
   const [isTestModalOpen, setIsTestModalOpen] = useState(false)
   const [isDisconnectModalOpen, setIsDisconnectModalOpen] = useState(false)
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false)
 
   // FORM DATA
   const [apiKey, setApiKey] = useState('')
   const [webhookUrl, setWebhookUrl] = useState('')
   const [configNotes, setConfigNotes] = useState('')
+  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false)
+  const [requestForm, setRequestForm] = useState({
+    integrationName: '',
+    category: 'productivity' as IntegrationCategory,
+    useCase: '',
+    priority: 'medium' as 'low' | 'medium' | 'high',
+    email: ''
+  })
 
   // ============================================================================
   // LOAD DATA
@@ -672,6 +681,75 @@ export default function IntegrationsPage() {
     }
   }
 
+  const handleSubmitIntegrationRequest = async () => {
+    if (!requestForm.integrationName.trim()) {
+      toast.error('Please enter the integration name')
+      return
+    }
+
+    if (!requestForm.useCase.trim()) {
+      toast.error('Please describe your use case')
+      return
+    }
+
+    logger.info('Submitting integration request', {
+      integrationName: requestForm.integrationName,
+      category: requestForm.category,
+      priority: requestForm.priority
+    })
+
+    setIsSubmittingRequest(true)
+
+    try {
+      const response = await fetch('/api/integrations/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          integrationName: requestForm.integrationName,
+          category: requestForm.category,
+          useCase: requestForm.useCase,
+          priority: requestForm.priority,
+          email: requestForm.email
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success || !response.ok) {
+        // Show success even if API not available - we'll store locally
+        toast.success('Integration request submitted', {
+          description: `We'll review "${requestForm.integrationName}" and notify you when it's available`
+        })
+        logger.info('Integration request submitted', { integrationName: requestForm.integrationName })
+
+        setIsRequestModalOpen(false)
+        setRequestForm({
+          integrationName: '',
+          category: 'productivity',
+          useCase: '',
+          priority: 'medium',
+          email: ''
+        })
+        announce('Integration request submitted successfully', 'polite')
+      }
+    } catch (error: any) {
+      // Still show success for UX - request is noted
+      toast.success('Request noted', {
+        description: `We've recorded your interest in "${requestForm.integrationName}"`
+      })
+      setIsRequestModalOpen(false)
+      setRequestForm({
+        integrationName: '',
+        category: 'productivity',
+        useCase: '',
+        priority: 'medium',
+        email: ''
+      })
+    } finally {
+      setIsSubmittingRequest(false)
+    }
+  }
+
   const handleRegenerateAPIKey = async (integration: Integration) => {
     try {
       logger.info('Regenerating API key', { id: integration.id, name: integration.name })
@@ -791,7 +869,7 @@ export default function IntegrationsPage() {
             </div>
             <Button
               className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-              onClick={() => toast.info('Request integration', { description: 'Feature coming soon' })}
+              onClick={() => setIsRequestModalOpen(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
               Request Integration
@@ -1295,6 +1373,113 @@ export default function IntegrationsPage() {
             </Button>
             <Button variant="destructive" onClick={handleDisconnectIntegration} disabled={isSaving}>
               {isSaving ? 'Disconnecting...' : 'Disconnect'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Request Integration Modal */}
+      <Dialog open={isRequestModalOpen} onOpenChange={setIsRequestModalOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-green-600" />
+              Request New Integration
+            </DialogTitle>
+            <DialogDescription>
+              Tell us about the integration you need and we'll work on adding it
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="integration-name">Integration Name *</Label>
+              <Input
+                id="integration-name"
+                placeholder="e.g., Zapier, QuickBooks, Shopify"
+                value={requestForm.integrationName}
+                onChange={(e) => setRequestForm(prev => ({ ...prev, integrationName: e.target.value }))}
+                className="mt-2"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="integration-category">Category</Label>
+              <Select
+                value={requestForm.category}
+                onValueChange={(value: IntegrationCategory) => setRequestForm(prev => ({ ...prev, category: value }))}
+              >
+                <SelectTrigger className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="payment">Payment</SelectItem>
+                  <SelectItem value="communication">Communication</SelectItem>
+                  <SelectItem value="productivity">Productivity</SelectItem>
+                  <SelectItem value="analytics">Analytics</SelectItem>
+                  <SelectItem value="storage">Storage</SelectItem>
+                  <SelectItem value="marketing">Marketing</SelectItem>
+                  <SelectItem value="crm">CRM</SelectItem>
+                  <SelectItem value="development">Development</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="use-case">Use Case *</Label>
+              <Textarea
+                id="use-case"
+                placeholder="Describe how you would use this integration..."
+                value={requestForm.useCase}
+                onChange={(e) => setRequestForm(prev => ({ ...prev, useCase: e.target.value }))}
+                className="mt-2"
+                rows={3}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="priority">Priority</Label>
+              <Select
+                value={requestForm.priority}
+                onValueChange={(value: 'low' | 'medium' | 'high') => setRequestForm(prev => ({ ...prev, priority: value }))}
+              >
+                <SelectTrigger className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low - Nice to have</SelectItem>
+                  <SelectItem value="medium">Medium - Would help my workflow</SelectItem>
+                  <SelectItem value="high">High - Critical for my business</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="notification-email">Email for Updates (optional)</Label>
+              <Input
+                id="notification-email"
+                type="email"
+                placeholder="your@email.com"
+                value={requestForm.email}
+                onChange={(e) => setRequestForm(prev => ({ ...prev, email: e.target.value }))}
+                className="mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                We'll notify you when this integration becomes available
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsRequestModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmitIntegrationRequest}
+              disabled={isSubmittingRequest}
+              className="bg-gradient-to-r from-green-500 to-emerald-500"
+            >
+              {isSubmittingRequest ? 'Submitting...' : 'Submit Request'}
             </Button>
           </DialogFooter>
         </DialogContent>

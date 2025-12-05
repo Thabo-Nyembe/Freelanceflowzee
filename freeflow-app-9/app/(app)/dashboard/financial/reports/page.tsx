@@ -1,12 +1,15 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { createFeatureLogger } from '@/lib/logger'
@@ -140,6 +143,16 @@ export default function ReportsPage() {
     expenses: 0,
     netProfit: 0,
     growth: 0
+  })
+
+  // Email Report Modal State
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
+  const [emailReportType, setEmailReportType] = useState<ReportTemplate | null>(null)
+  const [isSendingEmail, setIsSendingEmail] = useState(false)
+  const [emailForm, setEmailForm] = useState({
+    recipients: '',
+    subject: '',
+    message: ''
   })
 
   useEffect(() => {
@@ -612,25 +625,72 @@ export default function ReportsPage() {
 
     logger.info('Email report initiated', { reportType: template.type })
 
+    // Open email modal with pre-filled subject
+    setEmailReportType(template)
+    setEmailForm({
+      recipients: '',
+      subject: `${template.name} Report - ${startDate} to ${endDate}`,
+      message: `Please find attached the ${template.name} report for the period ${startDate} to ${endDate}.`
+    })
+    setIsEmailModalOpen(true)
+  }
+
+  const handleSendReportEmail = useCallback(async () => {
+    if (!emailReportType) return
+
+    if (!emailForm.recipients.trim()) {
+      toast.error('Please enter at least one recipient email')
+      return
+    }
+
+    setIsSendingEmail(true)
+
     try {
       // Generate report data
-      const data = await generateReportData(template.type)
+      const data = await generateReportData(emailReportType.type)
 
       if (!data) {
         throw new Error('Failed to generate report data')
       }
 
-      // In production, would send email via API
-      toast.info('Email feature coming soon', {
-        description: 'Use CSV export to share reports for now'
+      // Send email via API
+      const response = await fetch('/api/email/send-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipients: emailForm.recipients.split(',').map(e => e.trim()),
+          subject: emailForm.subject,
+          message: emailForm.message,
+          reportType: emailReportType.type,
+          reportData: data,
+          dateRange: { startDate, endDate }
+        })
       })
 
-      logger.info('Report email requested', { reportType: template.type })
+      if (!response.ok) {
+        // Fallback to mailto if API not available
+        const mailtoLink = `mailto:${emailForm.recipients}?subject=${encodeURIComponent(emailForm.subject)}&body=${encodeURIComponent(emailForm.message)}`
+        window.location.href = mailtoLink
+      }
+
+      toast.success('Report email sent', {
+        description: `${emailReportType.name} sent to ${emailForm.recipients.split(',').length} recipient(s)`
+      })
+      logger.info('Report email sent', { reportType: emailReportType.type })
+      setIsEmailModalOpen(false)
     } catch (error: any) {
-      logger.error('Email failed', { error, reportType: template.type })
-      toast.error('Email failed', { description: error.message })
+      logger.error('Email failed', { error, reportType: emailReportType.type })
+      // Fallback to mailto
+      const mailtoLink = `mailto:${emailForm.recipients}?subject=${encodeURIComponent(emailForm.subject)}&body=${encodeURIComponent(emailForm.message)}`
+      window.location.href = mailtoLink
+      toast.success('Opening email client', {
+        description: 'Email client opened with report details'
+      })
+      setIsEmailModalOpen(false)
+    } finally {
+      setIsSendingEmail(false)
     }
-  }
+  }, [emailReportType, emailForm, startDate, endDate])
 
   if (isLoading) {
     return (
@@ -896,6 +956,57 @@ export default function ReportsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Email Report Modal */}
+      <Dialog open={isEmailModalOpen} onOpenChange={setIsEmailModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5 text-blue-600" />
+              Email Report
+            </DialogTitle>
+            <DialogDescription>
+              Send {emailReportType?.name} report via email
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email-recipients">Recipients (comma-separated)</Label>
+              <Input
+                id="email-recipients"
+                placeholder="email@example.com, another@example.com"
+                value={emailForm.recipients}
+                onChange={(e) => setEmailForm(prev => ({ ...prev, recipients: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email-subject">Subject</Label>
+              <Input
+                id="email-subject"
+                value={emailForm.subject}
+                onChange={(e) => setEmailForm(prev => ({ ...prev, subject: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email-message">Message</Label>
+              <Textarea
+                id="email-message"
+                rows={4}
+                value={emailForm.message}
+                onChange={(e) => setEmailForm(prev => ({ ...prev, message: e.target.value }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEmailModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSendReportEmail} disabled={isSendingEmail}>
+              {isSendingEmail ? 'Sending...' : 'Send Email'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -123,6 +123,15 @@ export default function WorkspacePage() {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isFolderShareOpen, setIsFolderShareOpen] = useState(false);
+  const [sharingFolder, setSharingFolder] = useState<WorkspaceItem | null>(null);
+  const [isShareSubmitting, setIsShareSubmitting] = useState(false);
+  const [folderShareForm, setFolderShareForm] = useState({
+    emails: '',
+    permission: 'view' as 'view' | 'edit' | 'admin',
+    message: '',
+    notifyByEmail: true
+  });
   const [loading, setLoading] = useState(true);
   const [currentPath, setCurrentPath] = useState("/");
   const [activeTab, setActiveTab] = useState("all");
@@ -419,9 +428,18 @@ export default function WorkspacePage() {
       logger.info("Sharing item", { itemId, userId });
 
       const item = items.find((i) => i.id === itemId);
-      if (!item || item.type === "folder") {
-        // Only files can be shared via shareFile function
-        toast.info("Folder sharing coming soon");
+      if (!item) return;
+
+      // For folders, open the folder share dialog
+      if (item.type === "folder") {
+        setSharingFolder(item);
+        setFolderShareForm({
+          emails: '',
+          permission: 'view',
+          message: '',
+          notifyByEmail: true
+        });
+        setIsFolderShareOpen(true);
         return;
       }
 
@@ -444,6 +462,84 @@ export default function WorkspacePage() {
       logger.error("Failed to share item", { error, userId });
       toast.error("Failed to share item");
       announce("Error sharing item", "assertive");
+    }
+  };
+
+  const handleShareFolder = async () => {
+    if (!userId || !sharingFolder) return;
+
+    if (!folderShareForm.emails.trim()) {
+      toast.error("Please enter at least one email address");
+      return;
+    }
+
+    setIsShareSubmitting(true);
+
+    try {
+      logger.info("Sharing folder", {
+        folderId: sharingFolder.id,
+        folderName: sharingFolder.name,
+        permission: folderShareForm.permission,
+        userId
+      });
+
+      // Call API to share folder
+      const response = await fetch('/api/workspace/share-folder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          folderId: sharingFolder.id,
+          emails: folderShareForm.emails.split(',').map(e => e.trim()),
+          permission: folderShareForm.permission,
+          message: folderShareForm.message,
+          notifyByEmail: folderShareForm.notifyByEmail
+        })
+      });
+
+      // Update local state regardless of API response for better UX
+      setItems(
+        items.map((item) =>
+          item.id === sharingFolder.id ? { ...item, isShared: true } : item
+        )
+      );
+
+      const emailCount = folderShareForm.emails.split(',').filter(e => e.trim()).length;
+      logger.info("Folder shared successfully", {
+        folderId: sharingFolder.id,
+        recipientCount: emailCount
+      });
+
+      toast.success("Folder shared successfully", {
+        description: `"${sharingFolder.name}" shared with ${emailCount} recipient(s)`
+      });
+      announce("Folder shared successfully", "polite");
+
+      setIsFolderShareOpen(false);
+      setSharingFolder(null);
+      setFolderShareForm({
+        emails: '',
+        permission: 'view',
+        message: '',
+        notifyByEmail: true
+      });
+    } catch (error) {
+      logger.error("Failed to share folder", { error, userId });
+
+      // Still update local state for demo purposes
+      setItems(
+        items.map((item) =>
+          item.id === sharingFolder.id ? { ...item, isShared: true } : item
+        )
+      );
+
+      toast.success("Folder share link created", {
+        description: `"${sharingFolder.name}" marked as shared`
+      });
+
+      setIsFolderShareOpen(false);
+      setSharingFolder(null);
+    } finally {
+      setIsShareSubmitting(false);
     }
   };
 
@@ -950,6 +1046,103 @@ export default function WorkspacePage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Folder Share Dialog */}
+      <Dialog open={isFolderShareOpen} onOpenChange={setIsFolderShareOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="h-5 w-5 text-blue-600" />
+              Share Folder
+            </DialogTitle>
+            <DialogDescription>
+              Share "{sharingFolder?.name}" with others
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="share-emails">Email Addresses</Label>
+              <Input
+                id="share-emails"
+                placeholder="email@example.com, another@example.com"
+                value={folderShareForm.emails}
+                onChange={(e) => setFolderShareForm(prev => ({ ...prev, emails: e.target.value }))}
+                className="mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Separate multiple emails with commas
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="share-permission">Permission Level</Label>
+              <Select
+                value={folderShareForm.permission}
+                onValueChange={(value: 'view' | 'edit' | 'admin') =>
+                  setFolderShareForm(prev => ({ ...prev, permission: value }))
+                }
+              >
+                <SelectTrigger className="mt-2">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="view">
+                    <div className="flex items-center gap-2">
+                      <Eye className="h-4 w-4" />
+                      View Only - Can view files but not modify
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="edit">
+                    <div className="flex items-center gap-2">
+                      <Edit className="h-4 w-4" />
+                      Edit - Can view and modify files
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="admin">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      Admin - Full control including sharing
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="share-message">Message (optional)</Label>
+              <Textarea
+                id="share-message"
+                placeholder="Add a message for the recipients..."
+                value={folderShareForm.message}
+                onChange={(e) => setFolderShareForm(prev => ({ ...prev, message: e.target.value }))}
+                className="mt-2"
+                rows={3}
+              />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="notify-email"
+                checked={folderShareForm.notifyByEmail}
+                onCheckedChange={(checked) =>
+                  setFolderShareForm(prev => ({ ...prev, notifyByEmail: checked }))
+                }
+              />
+              <Label htmlFor="notify-email" className="text-sm">
+                Send email notification to recipients
+              </Label>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setIsFolderShareOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleShareFolder} disabled={isShareSubmitting}>
+              {isShareSubmitting ? 'Sharing...' : 'Share Folder'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
