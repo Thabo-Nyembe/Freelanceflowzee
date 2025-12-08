@@ -51,6 +51,7 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { createFeatureLogger } from '@/lib/logger'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('CommunityProfile')
 
@@ -110,6 +111,7 @@ export default function CommunityProfilePage() {
   const params = useParams()
   const router = useRouter()
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
   const [isLoading, setIsLoading] = useState(true)
   const [isFollowing, setIsFollowing] = useState(false)
   const [activeTab, setActiveTab] = useState('portfolio')
