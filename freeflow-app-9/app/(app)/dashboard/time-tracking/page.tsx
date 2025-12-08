@@ -9,7 +9,17 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Play, Pause, Clock, BarChart3, Calendar, FileText, Edit, Trash2, Plus, Copy, Download, Filter, RotateCcw, Square } from 'lucide-react'
+import { Play, Pause, Clock, BarChart3, Calendar, FileText, Edit, Trash2, Plus, Copy, Download, Filter, RotateCcw, Square, AlertTriangle } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 import { BorderTrail } from '@/components/ui/border-trail'
 import { GlowEffect } from '@/components/ui/glow-effect'
@@ -61,6 +71,18 @@ export default function TimeTrackingPage() {
   const [description, setDescription] = useState<any>('')
   const [elapsedTime, setElapsedTime] = useState<any>(0)
   const [timerDisplay, setTimerDisplay] = useState('00:00:00')
+
+  // AlertDialog states for confirmations
+  const [showDeleteEntryDialog, setShowDeleteEntryDialog] = useState(false)
+  const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false)
+  const [showDeleteProjectDialog, setShowDeleteProjectDialog] = useState(false)
+  const [showDeleteTaskDialog, setShowDeleteTaskDialog] = useState(false)
+  const [showArchiveEntryDialog, setShowArchiveEntryDialog] = useState(false)
+  const [entryToDelete, setEntryToDelete] = useState<string | null>(null)
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null)
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null)
+  const [entryToArchive, setEntryToArchive] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // Mock data - replace with real data from your API
   const projects: Project[] = [
@@ -484,31 +506,42 @@ export default function TimeTrackingPage() {
     }
 
     logger.info('Delete entry initiated', { entryId })
-    if (confirm('⚠️ Delete Time Entry?\n\nThis action cannot be undone.\n\nAre you sure?')) {
-      try {
-        // Dynamic import for code splitting
-        const { deleteTimeEntry } = await import('@/lib/time-tracking-queries')
+    setEntryToDelete(entryId)
+    setShowDeleteEntryDialog(true)
+  }
 
-        const { success, error } = await deleteTimeEntry(entryId, userId)
+  const confirmDeleteEntry = async () => {
+    if (!entryToDelete || !userId) return
 
-        if (error || !success) {
-          throw new Error(error?.message || 'Failed to delete entry')
-        }
+    setIsDeleting(true)
+    try {
+      // Dynamic import for code splitting
+      const { deleteTimeEntry } = await import('@/lib/time-tracking-queries')
 
-        setTimeEntries((prev) => prev.filter((e) => e.id !== entryId))
-        logger.info('Entry deleted successfully', {
-          entryId,
-          remainingEntries: timeEntries.length - 1
-        })
-        toast.success('Entry Deleted', {
-          description: 'Time entry has been permanently removed from your records'
-        })
-      } catch (error) {
-        logger.error('Failed to delete entry', { error, entryId })
-        toast.error('Failed to Delete Entry', {
-          description: error instanceof Error ? error.message : 'Please try again'
-        })
+      const { success, error } = await deleteTimeEntry(entryToDelete, userId)
+
+      if (error || !success) {
+        throw new Error(error?.message || 'Failed to delete entry')
       }
+
+      setTimeEntries((prev) => prev.filter((e) => e.id !== entryToDelete))
+      logger.info('Entry deleted successfully', {
+        entryId: entryToDelete,
+        remainingEntries: timeEntries.length - 1
+      })
+      toast.success('Entry Deleted', {
+        description: 'Time entry has been permanently removed from your records'
+      })
+      announce('Time entry deleted', 'polite')
+    } catch (error) {
+      logger.error('Failed to delete entry', { error, entryId: entryToDelete })
+      toast.error('Failed to Delete Entry', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteEntryDialog(false)
+      setEntryToDelete(null)
     }
   }
 
@@ -694,12 +727,22 @@ export default function TimeTrackingPage() {
       })
       return
     }
-    if (confirm(`⚠️ Delete All ${timeEntries.length} Entries?\n\nThis action cannot be undone.\n\nAre you sure?`)) {
+    setShowDeleteAllDialog(true)
+  }
+
+  const confirmDeleteAllEntries = async () => {
+    setIsDeleting(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300))
       setTimeEntries([])
       logger.info('All entries deleted successfully')
       toast.success('All Entries Deleted', {
         description: 'All time entries have been permanently removed'
       })
+      announce('All time entries deleted', 'polite')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteAllDialog(false)
     }
   }
 
@@ -746,16 +789,31 @@ export default function TimeTrackingPage() {
       })
       return
     }
-    const project = projects.find((p) => p.id === selectedProject)
-    if (confirm(`⚠️ Delete Project: ${project?.name}?\n\nAll time entries will be preserved.\n\nAre you sure?`)) {
+    setProjectToDelete(selectedProject)
+    setShowDeleteProjectDialog(true)
+  }
+
+  const confirmDeleteProject = async () => {
+    if (!projectToDelete) return
+
+    const project = projects.find((p) => p.id === projectToDelete)
+
+    setIsDeleting(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300))
       setSelectedProject('')
       logger.info('Project deleted successfully', {
-        projectId: selectedProject,
+        projectId: projectToDelete,
         projectName: project?.name
       })
       toast.success('Project Deleted', {
         description: 'Project removed - all time entries have been preserved'
       })
+      announce(`Project ${project?.name} deleted`, 'polite')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteProjectDialog(false)
+      setProjectToDelete(null)
     }
   }
 
@@ -814,18 +872,33 @@ export default function TimeTrackingPage() {
       })
       return
     }
+    setTaskToDelete(selectedTask)
+    setShowDeleteTaskDialog(true)
+  }
+
+  const confirmDeleteTask = async () => {
+    if (!taskToDelete) return
+
     const task = projects
       .find((p) => p.id === selectedProject)
-      ?.tasks.find((t) => t.id === selectedTask)
-    if (confirm(`⚠️ Delete Task: ${task?.name}?\n\nAll time entries will be preserved.\n\nAre you sure?`)) {
+      ?.tasks.find((t) => t.id === taskToDelete)
+
+    setIsDeleting(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300))
       setSelectedTask('')
       logger.info('Task deleted successfully', {
-        taskId: selectedTask,
+        taskId: taskToDelete,
         taskName: task?.name
       })
       toast.success('Task Deleted', {
         description: 'Task removed - all time entries have been preserved'
       })
+      announce(`Task ${task?.name} deleted`, 'polite')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteTaskDialog(false)
+      setTaskToDelete(null)
     }
   }
 
@@ -841,11 +914,25 @@ export default function TimeTrackingPage() {
 
   const handleArchiveEntry = (entryId: string) => {
     logger.info('Archive entry initiated', { entryId })
-    if (confirm('Archive this time entry?\n\nArchived entries can be restored later.')) {
-      logger.info('Entry archived successfully', { entryId })
+    setEntryToArchive(entryId)
+    setShowArchiveEntryDialog(true)
+  }
+
+  const confirmArchiveEntry = async () => {
+    if (!entryToArchive) return
+
+    setIsDeleting(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300))
+      logger.info('Entry archived successfully', { entryId: entryToArchive })
       toast.success('Entry Archived', {
         description: 'Time entry archived - can be restored later'
       })
+      announce('Time entry archived', 'polite')
+    } finally {
+      setIsDeleting(false)
+      setShowArchiveEntryDialog(false)
+      setEntryToArchive(null)
     }
   }
 
@@ -1246,6 +1333,135 @@ export default function TimeTrackingPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Entry AlertDialog */}
+      <AlertDialog open={showDeleteEntryDialog} onOpenChange={setShowDeleteEntryDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Delete Time Entry
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this time entry?
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteEntry}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Entry'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete All Entries AlertDialog */}
+      <AlertDialog open={showDeleteAllDialog} onOpenChange={setShowDeleteAllDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Delete All Time Entries
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete all {timeEntries.length} time entries?
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteAllEntries}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : `Delete All ${timeEntries.length} Entries`}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Project AlertDialog */}
+      <AlertDialog open={showDeleteProjectDialog} onOpenChange={setShowDeleteProjectDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Delete Project
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{projects.find(p => p.id === projectToDelete)?.name}&quot;?
+              All time entries will be preserved but unassigned.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteProject}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Project'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Task AlertDialog */}
+      <AlertDialog open={showDeleteTaskDialog} onOpenChange={setShowDeleteTaskDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Delete Task
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this task?
+              All time entries will be preserved but unassigned.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteTask}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Task'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Archive Entry AlertDialog */}
+      <AlertDialog open={showArchiveEntryDialog} onOpenChange={setShowArchiveEntryDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              Archive Time Entry
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Archive this time entry? Archived entries can be restored later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmArchiveEntry}
+              disabled={isDeleting}
+              className="bg-orange-600 hover:bg-orange-700"
+            >
+              {isDeleting ? 'Archiving...' : 'Archive Entry'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 } 

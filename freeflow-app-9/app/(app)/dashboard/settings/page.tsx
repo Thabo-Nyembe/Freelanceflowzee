@@ -10,7 +10,17 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Label } from '@/components/ui/label'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
-import { Camera, Mail, Phone, MapPin, Globe, Briefcase, Trash2 } from 'lucide-react'
+import { Camera, Mail, Phone, MapPin, Globe, Briefcase, Trash2, AlertTriangle } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { UserProfile, defaultProfile } from '@/lib/settings-utils'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -25,6 +35,9 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile>(defaultProfile)
   const [isLoading, setIsLoading] = useState(false)
   const [loading, setLoading] = useState(true)
+
+  // AlertDialog states
+  const [showRemovePhotoDialog, setShowRemovePhotoDialog] = useState(false)
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -178,18 +191,22 @@ export default function ProfilePage() {
       hasAvatar: !!profile.avatar
     })
 
-    if (confirm('⚠️ Remove profile photo?\n\nYour photo will be replaced with your initials.')) {
-      setProfile({ ...profile, avatar: '' })
+    setShowRemovePhotoDialog(true)
+  }
 
-      logger.info('Photo removed successfully', {
-        email: profile.email,
-        initials: `${profile.firstName[0]}${profile.lastName[0]}`
-      })
+  const confirmRemovePhoto = () => {
+    setProfile({ ...profile, avatar: '' })
 
-      toast.success('Photo Removed', {
-        description: `Replaced with initials: ${profile.firstName[0]}${profile.lastName[0]}`
-      })
-    }
+    logger.info('Photo removed successfully', {
+      email: profile.email,
+      initials: `${profile.firstName[0]}${profile.lastName[0]}`
+    })
+
+    toast.success('Photo Removed', {
+      description: `Replaced with initials: ${profile.firstName[0]}${profile.lastName[0]}`
+    })
+    announce('Profile photo removed', 'polite')
+    setShowRemovePhotoDialog(false)
   }
 
   return (
@@ -350,6 +367,31 @@ export default function ProfilePage() {
           </CardContent>
         </LiquidGlassCard>
       </div>
+
+      {/* Remove Photo AlertDialog */}
+      <AlertDialog open={showRemovePhotoDialog} onOpenChange={setShowRemovePhotoDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              Remove Profile Photo
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove your profile photo?
+              Your photo will be replaced with your initials: {profile.firstName.charAt(0)}{profile.lastName.charAt(0)}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmRemovePhoto}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Remove Photo
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -39,8 +39,19 @@ import {
   TrendingUp,
   CheckCircle,
   AlertCircle,
+  AlertTriangle,
   XCircle
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 export default function TeamPage() {
   // A+++ STATE MANAGEMENT
@@ -51,6 +62,12 @@ export default function TeamPage() {
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [selectedRole, setSelectedRole] = useState<string>('all')
   const [viewMode, setViewMode] = useState<string>('grid')
+
+  // AlertDialog states
+  const [showRemoveMemberDialog, setShowRemoveMemberDialog] = useState(false)
+  const [memberToRemove, setMemberToRemove] = useState<number | null>(null)
+  const [isRemoving, setIsRemoving] = useState(false)
+
   const [teamMembers, setTeamMembers] = useState<any[]>([
     {
       id: 1,
@@ -279,26 +296,37 @@ export default function TeamPage() {
     const member = teamMembers.find(m => m.id === id)
     if (!member) return
 
-    if (!confirm(`Remove ${member.name} from the team?`)) {
-      logger.info('Member removal cancelled', {
-        memberId: id,
-        memberName: member.name
+    setMemberToRemove(id)
+    setShowRemoveMemberDialog(true)
+  }
+
+  const confirmRemoveMember = async () => {
+    if (!memberToRemove) return
+
+    const member = teamMembers.find(m => m.id === memberToRemove)
+    if (!member) return
+
+    setIsRemoving(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300))
+      setTeamMembers(teamMembers.filter(m => m.id !== memberToRemove))
+
+      logger.info('Team member removed', {
+        memberId: memberToRemove,
+        memberName: member.name,
+        role: member.role,
+        remainingMembers: teamMembers.length - 1
       })
-      return
+
+      toast.success('Member Removed', {
+        description: `${member.name} removed from team - ${teamMembers.length - 1} members remaining`
+      })
+      announce(`${member.name} removed from team`, 'polite')
+    } finally {
+      setIsRemoving(false)
+      setShowRemoveMemberDialog(false)
+      setMemberToRemove(null)
     }
-
-    setTeamMembers(teamMembers.filter(m => m.id !== id))
-
-    logger.info('Team member removed', {
-      memberId: id,
-      memberName: member.name,
-      role: member.role,
-      remainingMembers: teamMembers.length - 1
-    })
-
-    toast.success('Member Removed', {
-      description: `${member.name} removed from team - ${teamMembers.length - 1} members remaining`
-    })
   }
 
   const handleChangeRole = (id: number) => {
@@ -913,6 +941,32 @@ export default function TeamPage() {
         </CardContent>
       </Card>
       </div>
+
+      {/* Remove Member AlertDialog */}
+      <AlertDialog open={showRemoveMemberDialog} onOpenChange={setShowRemoveMemberDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Remove Team Member
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove &quot;{teamMembers.find(m => m.id === memberToRemove)?.name}&quot; from the team?
+              This action will revoke their access to all team resources.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRemoving}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmRemoveMember}
+              disabled={isRemoving}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isRemoving ? 'Removing...' : 'Remove Member'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
