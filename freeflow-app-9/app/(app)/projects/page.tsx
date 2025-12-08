@@ -35,6 +35,7 @@ import { cn } from '@/lib/utils'
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // Mock data for projects
 const mockProjects = [
@@ -105,6 +106,7 @@ export default function ProjectsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   const router = useRouter()
   const [projects, setProjects] = useState(mockProjects)
