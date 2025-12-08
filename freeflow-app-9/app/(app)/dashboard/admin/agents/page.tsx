@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // Loading component
 function DashboardLoading() {
@@ -49,6 +50,7 @@ export default function AgentsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // A+++ LOAD AGENTS DATA
   useEffect(() => {

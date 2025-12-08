@@ -28,6 +28,7 @@ const logger = createFeatureLogger('Desktop-App')
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const DESKTOP_PRESETS = [
   { id: 'macbook-14', name: 'MacBook Pro 14"', width: 1512, height: 982, os: 'macOS', category: 'laptop' },
@@ -157,6 +158,7 @@ export default function DesktopAppPage() {
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   const [selectedApp, setSelectedApp] = React.useState('code-editor')
   const [selectedDevice, setSelectedDevice] = React.useState('macbook-14')

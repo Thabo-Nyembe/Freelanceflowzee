@@ -44,6 +44,7 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('Profile')
 
@@ -52,6 +53,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   const [activeTab, setActiveTab] = useState<any>('overview')
   const [isEditing, setIsEditing] = useState<any>(false)

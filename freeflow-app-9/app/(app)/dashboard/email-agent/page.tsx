@@ -40,6 +40,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
+// A+++ UTILITIES
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -90,6 +94,10 @@ interface Statistics {
 
 export default function BusinessAutomationAgentDashboard() {
   const { toast } = useToast();
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
   const [statistics, setStatistics] = useState<Statistics | null>(null);

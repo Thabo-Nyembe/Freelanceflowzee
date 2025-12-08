@@ -65,6 +65,7 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { EmptyState } from '@/components/ui/empty-states'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { createFeatureLogger } from '@/lib/logger'
@@ -415,6 +416,7 @@ export default function CryptoPaymentsPage() {
   logger.debug('Component mounting')
 
   const announce = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // State Management
   const [state, dispatch] = useReducer(cryptoPaymentReducer, {

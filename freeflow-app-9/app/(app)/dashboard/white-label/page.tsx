@@ -47,6 +47,7 @@ import {
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 type ViewMode = 'overview' | 'branding' | 'domain' | 'templates' | 'export'
 
@@ -55,6 +56,7 @@ export default function WhiteLabelPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   const [viewMode, setViewMode] = useState<ViewMode>('overview')
   const [config, setConfig] = useState<WhiteLabelConfig>(MOCK_WHITE_LABEL_CONFIG)

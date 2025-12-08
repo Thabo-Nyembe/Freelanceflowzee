@@ -53,6 +53,7 @@ const logger = createFeatureLogger('Notifications')
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 interface Notification {
   id: string
@@ -146,6 +147,7 @@ export default function NotificationsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   const [state, dispatch] = useReducer(notificationReducer, initialState)
   const [activeTab, setActiveTab] = useState<string>('inbox')

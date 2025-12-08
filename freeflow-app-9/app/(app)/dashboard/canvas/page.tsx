@@ -46,6 +46,7 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   Monitor,
   Palette,
@@ -502,6 +503,7 @@ export default function CanvasPage() {
   // ============================================================================
   // A++++ STATE MANAGEMENT
   // ============================================================================
+  const { userId, loading: userLoading } = useCurrentUser()
   const [state, dispatch] = useReducer(canvasReducer, {
     canvases: [],
     selectedCanvas: null,

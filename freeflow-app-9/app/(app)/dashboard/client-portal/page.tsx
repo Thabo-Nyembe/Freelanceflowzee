@@ -75,6 +75,7 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -342,6 +343,7 @@ export default function ClientPortalPage() {
 
   // A+++ UTILITIES
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // STATE
   const [state, dispatch] = useReducer(portalReducer, {
