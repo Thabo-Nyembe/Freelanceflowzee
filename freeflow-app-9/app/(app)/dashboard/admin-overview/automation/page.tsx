@@ -9,6 +9,16 @@ import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
@@ -64,6 +74,10 @@ export default function AutomationPage() {
   const [statusFilter, setStatusFilter] = useState<AutomationStatus | 'all'>('all')
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null)
   const [showWorkflowModal, setShowWorkflowModal] = useState(false)
+
+  // Confirmation Dialog State
+  const [deleteWorkflow, setDeleteWorkflow] = useState<{ id: string; name: string } | null>(null)
+  const [disconnectIntegration, setDisconnectIntegration] = useState<{ id: string; name: string } | null>(null)
 
   // Filtered workflows
   const filteredWorkflows = useMemo(() => {
@@ -201,27 +215,28 @@ export default function AutomationPage() {
     }
   }
 
-  // Button 3: Delete Workflow
-  const handleDeleteWorkflow = async (workflowId: string, workflowName: string) => {
-    if (!confirm(`Are you sure you want to delete "${workflowName}"? This action cannot be undone.`)) {
-      return
-    }
+  // Button 3: Delete Workflow (opens confirmation dialog)
+  const handleDeleteWorkflowClick = (workflowId: string, workflowName: string) => {
+    setDeleteWorkflow({ id: workflowId, name: workflowName })
+  }
 
-    if (!userId) {
-      toast.error('Authentication required')
+  // Button 3b: Confirm Delete Workflow
+  const handleConfirmDeleteWorkflow = async () => {
+    if (!deleteWorkflow || !userId) {
+      if (!userId) toast.error('Authentication required')
       return
     }
 
     try {
-      logger.info('Deleting workflow', { workflowId, userId })
+      logger.info('Deleting workflow', { workflowId: deleteWorkflow.id, userId })
 
-      const { deleteWorkflow } = await import('@/lib/automation-queries')
-      await deleteWorkflow(workflowId)
+      const { deleteWorkflow: deleteWorkflowQuery } = await import('@/lib/automation-queries')
+      await deleteWorkflowQuery(deleteWorkflow.id)
 
       toast.success('Workflow Deleted', {
-        description: `"${workflowName}" has been permanently removed`
+        description: `"${deleteWorkflow.name}" has been permanently removed`
       })
-      logger.info('Workflow deleted', { success: true, workflowId })
+      logger.info('Workflow deleted', { success: true, workflowId: deleteWorkflow.id })
       announce('Workflow deleted successfully', 'polite')
 
       // Reload workflows
@@ -233,6 +248,8 @@ export default function AutomationPage() {
       toast.error('Delete Failed', { description: message })
       logger.error('Delete workflow failed', { error: message })
       announce('Failed to delete workflow', 'assertive')
+    } finally {
+      setDeleteWorkflow(null)
     }
   }
 
@@ -377,24 +394,25 @@ export default function AutomationPage() {
     }
   }
 
-  // Button 8: Disconnect Integration
+  // Button 8: Disconnect Integration (opens confirmation dialog)
   // NOTE: Integration disconnection requires OAuth token revocation
   // Keeping as API call - this is correct implementation for OAuth revocation
-  const handleDisconnectIntegration = async (integrationId: string, integrationName: string) => {
-    if (!confirm(`Are you sure you want to disconnect ${integrationName}?`)) {
-      return
-    }
+  const handleDisconnectIntegrationClick = (integrationId: string, integrationName: string) => {
+    setDisconnectIntegration({ id: integrationId, name: integrationName })
+  }
 
-    if (!userId) {
-      toast.error('Authentication required')
+  // Button 8b: Confirm Disconnect Integration
+  const handleConfirmDisconnectIntegration = async () => {
+    if (!disconnectIntegration || !userId) {
+      if (!userId) toast.error('Authentication required')
       return
     }
 
     try {
-      logger.info('Disconnecting integration', { integrationId })
+      logger.info('Disconnecting integration', { integrationId: disconnectIntegration.id })
 
       // OAuth token revocation requires backend API for secure credential management
-      const response = await fetch(`/api/admin/automation/integrations/${integrationId}`, {
+      const response = await fetch(`/api/admin/automation/integrations/${disconnectIntegration.id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' }
       })
@@ -402,13 +420,13 @@ export default function AutomationPage() {
       if (!response.ok) throw new Error('Failed to disconnect integration')
 
       toast.success('Integration Disconnected', {
-        description: `${integrationName} has been disconnected`
+        description: `${disconnectIntegration.name} has been disconnected`
       })
-      logger.info('Integration disconnected', { success: true, integrationId })
+      logger.info('Integration disconnected', { success: true, integrationId: disconnectIntegration.id })
       announce('Integration disconnected successfully', 'polite')
 
       // Optimistic update - ideally reload from database
-      setIntegrations(prev => prev.map(i => i.id === integrationId ? {
+      setIntegrations(prev => prev.map(i => i.id === disconnectIntegration.id ? {
         ...i,
         status: 'disconnected',
         connectedDate: undefined,
@@ -419,6 +437,8 @@ export default function AutomationPage() {
       toast.error('Disconnect Failed', { description: message })
       logger.error('Disconnect integration failed', { error: message })
       announce('Failed to disconnect integration', 'assertive')
+    } finally {
+      setDisconnectIntegration(null)
     }
   }
 
@@ -728,7 +748,7 @@ export default function AutomationPage() {
                       </button>
 
                       <button
-                        onClick={() => handleDeleteWorkflow(workflow.id, workflow.name)}
+                        onClick={() => handleDeleteWorkflowClick(workflow.id, workflow.name)}
                         className="px-3 py-1.5 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors flex items-center gap-1"
                       >
                         <Trash2 className="w-3 h-3" />
@@ -797,7 +817,7 @@ export default function AutomationPage() {
                   <div className="flex items-center gap-2">
                     {integration.status === 'connected' ? (
                       <button
-                        onClick={() => handleDisconnectIntegration(integration.id, integration.name)}
+                        onClick={() => handleDisconnectIntegrationClick(integration.id, integration.name)}
                         className="flex-1 px-3 py-1.5 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors flex items-center justify-center gap-1"
                       >
                         <Unlink className="w-3 h-3" />
@@ -931,6 +951,48 @@ export default function AutomationPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Delete Workflow Confirmation Dialog */}
+      <AlertDialog open={!!deleteWorkflow} onOpenChange={() => setDeleteWorkflow(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Workflow?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete &quot;{deleteWorkflow?.name}&quot;. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteWorkflow}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Disconnect Integration Confirmation Dialog */}
+      <AlertDialog open={!!disconnectIntegration} onOpenChange={() => setDisconnectIntegration(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect Integration?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will disconnect {disconnectIntegration?.name}. You can reconnect it later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDisconnectIntegration}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Disconnect
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
