@@ -5,6 +5,13 @@ import { FileText, Download, Eye, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
+// A+++ UTILITIES
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('AI-Create-Templates')
+
 const TEMPLATE_CATEGORIES = [
   {
     name: 'Content Writing',
@@ -33,6 +40,10 @@ const TEMPLATE_CATEGORIES = [
 ]
 
 export default function TemplatesPage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

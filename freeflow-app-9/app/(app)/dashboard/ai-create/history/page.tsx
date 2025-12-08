@@ -5,6 +5,13 @@ import { Clock, Download, Copy, Trash2, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
+// A+++ UTILITIES
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('AI-Create-History')
+
 const HISTORY_ITEMS = [
   {
     id: 1,
@@ -54,6 +61,10 @@ const HISTORY_ITEMS = [
 ]
 
 export default function HistoryPage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

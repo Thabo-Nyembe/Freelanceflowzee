@@ -6,6 +6,11 @@ import { Badge } from '@/components/ui/badge'
 import { Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+// A+++ UTILITIES
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
 // MY DAY UTILITIES
 import {
   taskReducer,
@@ -13,7 +18,13 @@ import {
   mockTimeBlocks
 } from '@/lib/my-day-utils'
 
+const logger = createFeatureLogger('MyDay-Schedule')
+
 export default function SchedulePage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [state] = useReducer(taskReducer, initialTaskState)
 
   return (

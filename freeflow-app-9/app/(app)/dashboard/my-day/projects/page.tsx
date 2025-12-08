@@ -5,7 +5,17 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Briefcase, TrendingUp, Brain, CheckCircle, Activity } from 'lucide-react'
 
+// A+++ UTILITIES
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('MyDay-Projects')
+
 export default function ProjectsPage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
   return (
     <div className="space-y-6">
       <div>

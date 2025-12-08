@@ -7,6 +7,13 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Activity, Zap, Clock, DollarSign, CheckCircle, AlertCircle } from 'lucide-react'
 
+// A+++ UTILITIES
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('AI-Create-Compare')
+
 const MODELS_TO_COMPARE = [
   { id: 'mistral-free', name: 'Mistral 7B', tier: 'free', color: 'green' },
   { id: 'phi-3-free', name: 'Phi-3 Mini', tier: 'free', color: 'green' },
@@ -16,6 +23,10 @@ const MODELS_TO_COMPARE = [
 ]
 
 export default function ComparePage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [prompt, setPrompt] = useState('')
   const [selectedModels, setSelectedModels] = useState<string[]>(['mistral-free', 'claude-sonnet'])
   const [comparing, setComparing] = useState(false)

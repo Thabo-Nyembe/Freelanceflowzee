@@ -5,6 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Target, Calendar, BarChart3, CheckCircle, Timer, MessageSquare, Lightbulb } from 'lucide-react'
 
+// A+++ UTILITIES
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
 // MY DAY UTILITIES
 import {
   taskReducer,
@@ -12,7 +17,13 @@ import {
   calculateMetrics
 } from '@/lib/my-day-utils'
 
+const logger = createFeatureLogger('MyDay-Goals')
+
 export default function GoalsPage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [state] = useReducer(taskReducer, initialTaskState)
   const { focusHours, focusMinutes } = calculateMetrics(state)
 

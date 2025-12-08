@@ -10,6 +10,13 @@ import { Badge } from '@/components/ui/badge'
 import { Settings as SettingsIcon, Key, Shield, Download, Upload, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 
+// A+++ UTILITIES
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('AI-Create-Settings')
+
 const API_PROVIDERS = [
   { id: 'openrouter', name: 'OpenRouter', required: true, description: 'Access to 4 FREE models + affordable options' },
   { id: 'openai', name: 'OpenAI', required: false, description: 'GPT-4o and DALL-E 3 (optional)' },
@@ -19,6 +26,10 @@ const API_PROVIDERS = [
 ]
 
 export default function SettingsPage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({})
   const [preferences, setPreferences] = useState({
     defaultModel: 'mistral-7b-free',

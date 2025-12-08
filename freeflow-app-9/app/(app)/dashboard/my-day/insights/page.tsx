@@ -7,10 +7,20 @@ import { CheckCircle, TrendingUp, Calendar, Activity, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
+// A+++ UTILITIES
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+
 // MY DAY UTILITIES
 import { mockAIInsights } from '@/lib/my-day-utils'
 
+const logger = createFeatureLogger('MyDay-Insights')
+
 export default function InsightsPage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
   const handleApplyAISuggestion = (insightId: string) => {
     const insight = mockAIInsights.find(i => i.id === insightId)
     toast.success('AI Suggestion Applied', {
