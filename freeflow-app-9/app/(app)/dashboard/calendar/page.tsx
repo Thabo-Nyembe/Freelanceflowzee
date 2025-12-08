@@ -5,6 +5,16 @@ import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import { format, addMonths, subMonths } from 'date-fns'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -24,7 +34,9 @@ import {
   ChevronRight,
   Filter,
   Search,
-  Brain
+  Brain,
+  AlertTriangle,
+  Trash2
 } from 'lucide-react'
 
 // ============================================================================
@@ -122,6 +134,12 @@ export default function CalendarPage() {
   const [view, setView] = useState<'month' | 'week' | 'day'>('month')
   const [searchTerm, setSearchTerm] = useState('')
   const [aiMode, setAiMode] = useState(false)
+
+  // Delete Event Dialog State
+  const [showDeleteEventDialog, setShowDeleteEventDialog] = useState(false)
+  const [eventToDelete, setEventToDelete] = useState<{id: number; title: string} | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
   const [events, setEvents] = useState([
     {
       id: 1,
@@ -533,7 +551,7 @@ export default function CalendarPage() {
   // HANDLER 7: DELETE EVENT (with real state update)
   // ============================================================================
 
-  const handleDeleteEvent = async (eventId: number) => {
+  const handleDeleteEvent = (eventId: number) => {
     if (!userId) {
       toast.error('Please log in to delete events')
       return
@@ -542,39 +560,46 @@ export default function CalendarPage() {
     const event = events.find(e => e.id === eventId)
     if (!event) return
 
-    const confirmed = confirm(`Delete "${event.title}"?`)
-    if (!confirmed) {
-      logger.debug('Event deletion cancelled', { eventId, userId })
-      return
-    }
+    setEventToDelete({ id: eventId, title: event.title })
+    setShowDeleteEventDialog(true)
+  }
+
+  const confirmDeleteEvent = async () => {
+    if (!eventToDelete || !userId) return
 
     try {
+      setIsDeleting(true)
+
       const { deleteCalendarEvent } = await import('@/lib/calendar-queries')
 
-      const { success, error: deleteError } = await deleteCalendarEvent(userId, eventId.toString())
+      const { success, error: deleteError } = await deleteCalendarEvent(userId, eventToDelete.id.toString())
 
       if (!success || deleteError) throw new Error(deleteError?.message || 'Failed to delete event')
 
       // Remove from state
-      setEvents(events.filter(e => e.id !== eventId))
+      setEvents(events.filter(e => e.id !== eventToDelete.id))
 
       logger.info('Event deleted from database', {
-        eventId,
-        title: event.title,
+        eventId: eventToDelete.id,
+        title: eventToDelete.title,
         remainingEvents: events.length - 1,
         userId
       })
 
       toast.success('Event deleted successfully', {
-        description: `${event.title} has been removed`
+        description: `${eventToDelete.title} has been removed`
       })
-      announce(`Event ${event.title} deleted successfully`, 'polite')
+      announce(`Event ${eventToDelete.title} deleted successfully`, 'polite')
     } catch (error: any) {
-      logger.error('Failed to delete event', { error, eventId, userId })
+      logger.error('Failed to delete event', { error, eventId: eventToDelete.id, userId })
       toast.error('Failed to delete event', {
         description: error.message || 'Please try again later'
       })
       announce('Error deleting event', 'assertive')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteEventDialog(false)
+      setEventToDelete(null)
     }
   }
 
@@ -1751,6 +1776,37 @@ export default function CalendarPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Event Confirmation Dialog */}
+      <AlertDialog open={showDeleteEventDialog} onOpenChange={setShowDeleteEventDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Event?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to delete{' '}
+                <span className="font-semibold">"{eventToDelete?.title}"</span>?
+              </p>
+              <p className="text-sm text-gray-500">
+                This action cannot be undone.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteEvent}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Event'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

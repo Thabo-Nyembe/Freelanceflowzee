@@ -19,6 +19,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
 import { Label } from '@/components/ui/label'
 import {
   Plus,
@@ -31,7 +41,8 @@ import {
   Search,
   Printer,
   Mail,
-  Loader2
+  Loader2,
+  AlertTriangle
 } from 'lucide-react'
 import {
   formatCurrency,
@@ -93,6 +104,15 @@ export default function InvoicesPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null)
+
+  // AlertDialog states
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showMarkPaidDialog, setShowMarkPaidDialog] = useState(false)
+  const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null)
+  const [invoiceToMarkPaid, setInvoiceToMarkPaid] = useState<Invoice | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isMarkingPaid, setIsMarkingPaid] = useState(false)
+
   const [formData, setFormData] = useState<InvoiceFormData>({
     client_name: '',
     client_email: '',
@@ -380,7 +400,7 @@ Thank you for your business!
     }
   }
 
-  const handleMarkAsPaid = async (invoice: Invoice) => {
+  const handleMarkAsPaid = (invoice: Invoice) => {
     if (!userId) return
 
     logger.info('Mark as paid initiated', {
@@ -388,17 +408,24 @@ Thank you for your business!
       invoiceNumber: invoice.number
     })
 
-    if (!confirm(`Mark ${invoice.number} as paid?`)) return
+    setInvoiceToMarkPaid(invoice)
+    setShowMarkPaidDialog(true)
+  }
+
+  const confirmMarkAsPaid = async () => {
+    if (!invoiceToMarkPaid || !userId) return
 
     try {
+      setIsMarkingPaid(true)
+
       const { updateInvoice } = await import('@/lib/financial-queries')
       const { data, error } = await updateInvoice(
-        invoice.id,
+        invoiceToMarkPaid.id,
         userId,
         {
           status: 'paid',
           paid_date: new Date().toISOString().split('T')[0],
-          paid_amount: invoice.amount
+          paid_amount: invoiceToMarkPaid.amount
         }
       )
 
@@ -406,26 +433,30 @@ Thank you for your business!
 
       // Optimistically update UI
       setInvoices(prev =>
-        prev.map(inv => (inv.id === invoice.id ? mapDbInvoiceToUi(data!) : inv))
+        prev.map(inv => (inv.id === invoiceToMarkPaid.id ? mapDbInvoiceToUi(data!) : inv))
       )
 
       toast.success('Invoice marked as paid', {
-        description: `${invoice.number} • ${formatCurrency(invoice.amount)}`
+        description: `${invoiceToMarkPaid.number} • ${formatCurrency(invoiceToMarkPaid.amount)}`
       })
 
       logger.info('Invoice marked as paid', {
-        invoiceId: invoice.id,
-        amount: invoice.amount
+        invoiceId: invoiceToMarkPaid.id,
+        amount: invoiceToMarkPaid.amount
       })
     } catch (error: any) {
-      logger.error('Failed to mark as paid', { error, invoiceId: invoice.id })
+      logger.error('Failed to mark as paid', { error, invoiceId: invoiceToMarkPaid.id })
       toast.error('Failed to mark as paid', {
         description: error.message
       })
+    } finally {
+      setIsMarkingPaid(false)
+      setShowMarkPaidDialog(false)
+      setInvoiceToMarkPaid(null)
     }
   }
 
-  const handleDeleteInvoice = async (invoice: Invoice) => {
+  const handleDeleteInvoice = (invoice: Invoice) => {
     if (!userId) return
 
     logger.info('Delete invoice initiated', {
@@ -433,27 +464,38 @@ Thank you for your business!
       invoiceNumber: invoice.number
     })
 
-    if (!confirm(`Delete ${invoice.number}?\n\nThis action cannot be undone.`)) return
+    setInvoiceToDelete(invoice)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDeleteInvoice = async () => {
+    if (!invoiceToDelete || !userId) return
 
     try {
+      setIsDeleting(true)
+
       const { deleteInvoice } = await import('@/lib/financial-queries')
-      const { error } = await deleteInvoice(invoice.id, userId)
+      const { error } = await deleteInvoice(invoiceToDelete.id, userId)
 
       if (error) throw new Error(error.message)
 
       // Optimistically remove from UI
-      setInvoices(prev => prev.filter(inv => inv.id !== invoice.id))
+      setInvoices(prev => prev.filter(inv => inv.id !== invoiceToDelete.id))
 
       toast.success('Invoice deleted', {
-        description: invoice.number
+        description: invoiceToDelete.number
       })
 
-      logger.info('Invoice deleted', { invoiceId: invoice.id })
+      logger.info('Invoice deleted', { invoiceId: invoiceToDelete.id })
     } catch (error: any) {
-      logger.error('Failed to delete invoice', { error, invoiceId: invoice.id })
+      logger.error('Failed to delete invoice', { error, invoiceId: invoiceToDelete.id })
       toast.error('Failed to delete invoice', {
         description: error.message
       })
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteDialog(false)
+      setInvoiceToDelete(null)
     }
   }
 
@@ -999,6 +1041,75 @@ KAZI Team
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Mark as Paid Confirmation Dialog */}
+      <AlertDialog open={showMarkPaidDialog} onOpenChange={setShowMarkPaidDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-green-600">
+              <CheckCircle className="w-5 h-5" />
+              Mark Invoice as Paid?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to mark{' '}
+                <span className="font-semibold">{invoiceToMarkPaid?.number}</span> as paid?
+              </p>
+              {invoiceToMarkPaid && (
+                <p className="font-medium">
+                  Amount: {formatCurrency(invoiceToMarkPaid.amount)}
+                </p>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isMarkingPaid}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmMarkAsPaid}
+              disabled={isMarkingPaid}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {isMarkingPaid ? 'Processing...' : 'Mark as Paid'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Invoice Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Invoice?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p className="font-medium text-red-700">
+                This action cannot be undone.
+              </p>
+              <p>
+                Are you sure you want to delete invoice{' '}
+                <span className="font-semibold">{invoiceToDelete?.number}</span>?
+              </p>
+              {invoiceToDelete && (
+                <p className="text-sm text-gray-600">
+                  Client: {invoiceToDelete.client} • Amount: {formatCurrency(invoiceToDelete.amount)}
+                </p>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteInvoice}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Invoice'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

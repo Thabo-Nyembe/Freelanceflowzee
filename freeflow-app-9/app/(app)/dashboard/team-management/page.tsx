@@ -9,6 +9,16 @@ import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -43,7 +53,8 @@ import {
   XCircle,
   Trash2,
   Send,
-  Loader2
+  Loader2,
+  AlertTriangle
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -130,6 +141,12 @@ export default function TeamManagementPage() {
 
   // Add member form state
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false)
+
+  // Remove member dialog state
+  const [showRemoveMemberDialog, setShowRemoveMemberDialog] = useState(false)
+  const [memberToRemove, setMemberToRemove] = useState<TeamMember | null>(null)
+  const [isRemoving, setIsRemoving] = useState(false)
+
   const [newMember, setNewMember] = useState({
     name: '',
     email: '',
@@ -311,16 +328,20 @@ export default function TeamManagementPage() {
     }
   }
 
-  const handleDeleteMember = async (memberId: string) => {
+  const handleDeleteMember = (memberId: string) => {
     const member = teamMembers.find(m => m.id === memberId)
     if (!member) return
 
-    if (!confirm(`Remove ${member.name} from the team? This action cannot be undone.`)) {
-      return
-    }
+    setMemberToRemove(member)
+    setShowRemoveMemberDialog(true)
+  }
+
+  const confirmDeleteMember = async () => {
+    if (!memberToRemove) return
 
     try {
-      logger.info('Deleting team member', { action: 'delete_member', member_id: memberId })
+      setIsRemoving(true)
+      logger.info('Deleting team member', { action: 'delete_member', member_id: memberToRemove.id })
 
       const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
@@ -332,20 +353,24 @@ export default function TeamManagementPage() {
 
       const { deleteTeamMember } = await import('@/lib/team-hub-queries')
 
-      const { success, error } = await deleteTeamMember(memberId, user.id)
+      const { success, error } = await deleteTeamMember(memberToRemove.id, user.id)
 
       if (error || !success) {
         throw new Error('Failed to remove team member')
       }
 
-      setTeamMembers(prev => prev.filter(m => m.id !== memberId))
-      toast.success(`${member.name} removed from team`)
-      logger.info('Team member deleted successfully', { member_id: memberId })
-      announce(`${member.name} removed from team`, 'polite')
+      setTeamMembers(prev => prev.filter(m => m.id !== memberToRemove.id))
+      toast.success(`${memberToRemove.name} removed from team`)
+      logger.info('Team member deleted successfully', { member_id: memberToRemove.id })
+      announce(`${memberToRemove.name} removed from team`, 'polite')
     } catch (err) {
       logger.error('Failed to delete team member', { error: err })
       toast.error('Failed to remove team member')
       announce('Failed to remove team member', 'assertive')
+    } finally {
+      setIsRemoving(false)
+      setShowRemoveMemberDialog(false)
+      setMemberToRemove(null)
     }
   }
 
@@ -1220,6 +1245,45 @@ export default function TeamManagementPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Remove Team Member Confirmation Dialog */}
+      <AlertDialog open={showRemoveMemberDialog} onOpenChange={setShowRemoveMemberDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Remove Team Member?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p className="font-medium text-red-700">
+                This action cannot be undone.
+              </p>
+              <p>
+                Are you sure you want to remove{' '}
+                <span className="font-semibold">{memberToRemove?.name}</span> from the team?
+              </p>
+              {memberToRemove && (
+                <p className="text-sm text-gray-600">
+                  Role: {memberToRemove.role} • Department: {memberToRemove.department}
+                </p>
+              )}
+              <p className="text-sm text-gray-500">
+                They will lose access to all team resources and projects.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRemoving}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteMember}
+              disabled={isRemoving}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isRemoving ? 'Removing...' : 'Remove Member'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
