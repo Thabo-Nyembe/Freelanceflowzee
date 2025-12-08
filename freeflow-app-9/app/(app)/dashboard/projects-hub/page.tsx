@@ -34,8 +34,13 @@ import {
   TrendingUp,
   Briefcase,
   Brain,
-  Trash2
+  Trash2,
+  LayoutTemplate,
+  BarChart3,
+  Upload,
+  Activity
 } from 'lucide-react'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
@@ -676,6 +681,80 @@ export default function ProjectsOverviewPage() {
 
   return (
     <div className="space-y-8">
+      {/* Sub-Page Navigation */}
+      <LiquidGlassCard>
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                <Briefcase className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-800">Projects Hub</h1>
+                <p className="text-sm text-gray-600">Manage all your projects</p>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <Link href="/dashboard/projects-hub/create">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Plus className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Create</h3>
+                  <p className="text-xs text-gray-500">New project</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/dashboard/projects-hub/active">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Activity className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Active</h3>
+                  <p className="text-xs text-gray-500">In progress</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/dashboard/projects-hub/templates">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <LayoutTemplate className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Templates</h3>
+                  <p className="text-xs text-gray-500">Quick start</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/dashboard/projects-hub/import">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Upload className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Import</h3>
+                  <p className="text-xs text-gray-500">From file</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/dashboard/projects-hub/analytics">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <BarChart3 className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Analytics</h3>
+                  <p className="text-xs text-gray-500">Insights</p>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+      </LiquidGlassCard>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0 }}>

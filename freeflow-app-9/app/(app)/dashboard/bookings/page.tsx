@@ -21,8 +21,15 @@ import {
   AlertTriangle,
   RefreshCw,
   Download,
-  Settings
+  Settings,
+  Users,
+  History,
+  BarChart3,
+  Wrench,
+  CalendarDays
 } from 'lucide-react'
+import Link from 'next/link'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -636,6 +643,91 @@ export default function UpcomingBookingsPage() {
 
   return (
     <div className="container mx-auto px-4 space-y-6">
+      {/* Sub-Page Navigation */}
+      <LiquidGlassCard>
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-800">Bookings</h1>
+                <p className="text-sm text-gray-600">Manage appointments & scheduling</p>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+            <Link href="/dashboard/bookings/calendar">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-teal-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <CalendarDays className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Calendar</h3>
+                  <p className="text-xs text-gray-500">View all</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/dashboard/bookings/availability">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-teal-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Clock className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Availability</h3>
+                  <p className="text-xs text-gray-500">Set hours</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/dashboard/bookings/services">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-teal-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Wrench className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Services</h3>
+                  <p className="text-xs text-gray-500">Offerings</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/dashboard/bookings/clients">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-teal-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Users className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Clients</h3>
+                  <p className="text-xs text-gray-500">Manage</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/dashboard/bookings/history">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-teal-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-gray-500 to-slate-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <History className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">History</h3>
+                  <p className="text-xs text-gray-500">Past</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/dashboard/bookings/analytics">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-teal-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <BarChart3 className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Analytics</h3>
+                  <p className="text-xs text-gray-500">Stats</p>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+      </LiquidGlassCard>
+
       {/* Action Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex gap-3">

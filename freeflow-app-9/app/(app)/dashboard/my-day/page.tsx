@@ -46,8 +46,13 @@ import {
   MessageSquare,
   Briefcase,
   Lightbulb,
-  Clock
+  Clock,
+  BarChart3,
+  LineChart,
+  FolderKanban,
+  CalendarDays
 } from 'lucide-react'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { NumberFlow } from '@/components/ui/number-flow'
@@ -299,11 +304,85 @@ export default function MyDayTodayPage() {
 
   return (
     <div className="space-y-6">
+      {/* Sub-Page Navigation */}
+      <LiquidGlassCard>
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center">
+                <Target className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-800">My Day</h1>
+                <p className="text-sm text-gray-600">Plan and track your day</p>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <Link href="/dashboard/my-day/goals">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-orange-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Target className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Goals</h3>
+                  <p className="text-xs text-gray-500">Set targets</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/dashboard/my-day/schedule">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-orange-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <CalendarDays className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Schedule</h3>
+                  <p className="text-xs text-gray-500">Time blocks</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/dashboard/my-day/projects">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-orange-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <FolderKanban className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Projects</h3>
+                  <p className="text-xs text-gray-500">Today's work</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/dashboard/my-day/insights">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-orange-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Lightbulb className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Insights</h3>
+                  <p className="text-xs text-gray-500">Productivity</p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link href="/dashboard/my-day/analytics">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-orange-300">
+                <CardContent className="p-4 text-center">
+                  <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <BarChart3 className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold text-sm">Analytics</h3>
+                  <p className="text-xs text-gray-500">Trends</p>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+      </LiquidGlassCard>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <TextShimmerComponent className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-orange-900 to-amber-900 bg-clip-text text-transparent mb-2 block">
-            Today's Tasks
+            Today&apos;s Tasks
           </TextShimmerComponent>
           <p className="text-lg text-gray-600 font-light">
             Focus on what matters most today
