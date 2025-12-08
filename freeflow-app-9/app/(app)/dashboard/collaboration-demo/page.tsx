@@ -47,6 +47,10 @@ import {
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 
+// A+++ UTILITIES
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+
 const logger = createFeatureLogger('CollaborationDemo')
 
 // Mock current user
@@ -61,6 +65,10 @@ const CURRENT_USER = {
 const DEMO_ROOM_ID = 'demo-collaboration-room-2025'
 
 export default function CollaborationDemoPage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [activeMode, setActiveMode] = useState<'document' | 'video' | 'whiteboard'>('document')
   const [showVideoCall, setShowVideoCall] = useState(false)
   const [showCollabPanel, setShowCollabPanel] = useState(true)

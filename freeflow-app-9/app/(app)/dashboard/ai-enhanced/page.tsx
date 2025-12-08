@@ -52,6 +52,7 @@ import { toast } from 'sonner'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
 
 // SUPABASE & QUERIES
@@ -380,6 +381,7 @@ export default function AIEnhancedPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // REDUCER STATE
   const [state, dispatch] = useReducer(aiEnhancedReducer, {
