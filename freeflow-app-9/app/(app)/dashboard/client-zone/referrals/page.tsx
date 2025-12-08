@@ -28,6 +28,7 @@ import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { KAZI_CLIENT_DATA } from '@/lib/client-zone-utils'
 
 const logger = createFeatureLogger('ReferralLoyaltySystem')
@@ -63,13 +64,16 @@ interface Reward {
 // ============================================================================
 
 export default function ReferralsPage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [referralCode, setReferralCode] = useState('KAZI-ACME-45K')
   const [referralLink, setReferralLink] = useState('')
   const [copiedToClipboard, setCopiedToClipboard] = useState(false)
-  const { announce } = useAnnouncer()
 
   // REFERRAL DATA
   const [referrals, setReferrals] = useState<Referral[]>([])

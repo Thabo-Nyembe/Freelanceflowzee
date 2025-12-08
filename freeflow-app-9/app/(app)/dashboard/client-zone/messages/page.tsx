@@ -29,6 +29,7 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { KAZI_CLIENT_DATA, Message } from '@/lib/client-zone-utils'
 
 const logger = createFeatureLogger('ClientZoneMessages')
@@ -94,11 +95,14 @@ const EXTENDED_MESSAGES: ExtendedMessage[] = [
 // ============================================================================
 
 export default function MessagesPage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { announce } = useAnnouncer()
   const router = useRouter()
 
   // MESSAGE STATE

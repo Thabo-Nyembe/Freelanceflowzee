@@ -23,7 +23,9 @@ import {
 // A+++ UTILITIES
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // CLIENT ZONE UTILITIES
 import {
@@ -41,6 +43,10 @@ const logger = createFeatureLogger('ClientZoneProjects')
 
 export default function ClientZoneProjectsPage() {
   const router = useRouter()
+
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
 
   // STATE MANAGEMENT
   const [projects, setProjects] = useState<Project[]>([])

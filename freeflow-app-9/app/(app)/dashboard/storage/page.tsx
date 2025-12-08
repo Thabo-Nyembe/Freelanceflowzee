@@ -76,10 +76,11 @@ import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { GlowEffect } from '@/components/ui/glow-effect'
 
 // A+++ UTILITIES
-import { CardSkeleton } from '@/components/ui/loading-skeleton'
-import { NoDataEmptyState } from '@/components/ui/empty-state'
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('Storage')
 
@@ -279,6 +280,7 @@ export default function StoragePage() {
   logger.debug('Component mounting')
 
   // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
   // STATE

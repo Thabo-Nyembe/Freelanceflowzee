@@ -2,6 +2,8 @@
 
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
 import { Plus, RefreshCw, FileUp, FileDown, UserCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +12,10 @@ import { mockBookings, getClientBookingCount } from '@/lib/bookings-utils'
 const logger = createFeatureLogger('BookingsClients')
 
 export default function ClientsPage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const handleImportClients = () => {
     logger.info('Import clients initiated')
     toast.info('Import Clients', {

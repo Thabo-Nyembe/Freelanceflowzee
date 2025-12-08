@@ -26,6 +26,7 @@ import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { formatCurrency, KAZI_CLIENT_DATA } from '@/lib/client-zone-utils'
 
 const logger = createFeatureLogger('ClientValueDashboard')
@@ -56,11 +57,14 @@ interface ValueTrackingData {
 // ============================================================================
 
 export default function ValueDashboardPage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isExporting, setIsExporting] = useState(false)
-  const { announce } = useAnnouncer()
 
   // ROI & VALUE DATA
   const [roiMetrics, setRoiMetrics] = useState<ROIMetric[]>([])

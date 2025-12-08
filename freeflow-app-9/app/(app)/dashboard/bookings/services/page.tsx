@@ -2,6 +2,8 @@
 
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
 import { Plus, Download } from 'lucide-react'
 import {
   Card,
@@ -17,6 +19,10 @@ import { mockServices } from '@/lib/bookings-utils'
 const logger = createFeatureLogger('BookingsServices')
 
 export default function ServicesPage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const handleManageServices = () => {
     logger.info('Manage services opened')
     toast.info('Manage Services', {

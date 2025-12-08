@@ -23,6 +23,7 @@ import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { KAZI_CLIENT_DATA } from '@/lib/client-zone-utils'
 
 const logger = createFeatureLogger('ClientFeedback')
@@ -51,11 +52,14 @@ interface FeedbackSubmission {
 // ============================================================================
 
 export default function FeedbackPage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   // A+++ STATE MANAGEMENT
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { announce } = useAnnouncer()
 
   // FORM STATE
   const [overallRating, setOverallRating] = useState(5)

@@ -29,6 +29,7 @@ import { createFeatureLogger } from '@/lib/logger'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('Integrations')
 
@@ -282,7 +283,8 @@ const generateMockIntegrations = (): Integration[] => {
 export default function IntegrationsPage() {
   logger.debug('Component mounting')
 
-  // A+++ ANNOUNCER
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
   // REDUCER STATE

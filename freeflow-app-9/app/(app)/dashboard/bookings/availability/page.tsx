@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
 import { Globe, Plus, Settings } from 'lucide-react'
 import {
   Card,
@@ -36,6 +38,10 @@ const weekDays = [
 ]
 
 export default function AvailabilityPage() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [timeZone, setTimeZone] = useState('EST')
 
   const handleBlockTimeSlot = () => {

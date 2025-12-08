@@ -29,6 +29,7 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { formatCurrency, getStatusColor } from '@/lib/client-zone-utils'
 
 const logger = createFeatureLogger('ClientZonePayments')
@@ -176,7 +177,11 @@ const PAYMENT_HISTORY: PaymentHistory[] = [
 
 export default function PaymentsPage() {
   const router = useRouter()
+
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
+
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [milestones, setMilestones] = useState<Milestone[]>([])
