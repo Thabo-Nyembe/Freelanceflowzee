@@ -19,6 +19,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Label } from '@/components/ui/label'
 import {
   Plus,
@@ -114,6 +124,9 @@ export default function TransactionsPage() {
     status: 'completed',
     payment_method: 'bank_transfer',
   })
+
+  // Confirmation Dialog State
+  const [deleteTransaction, setDeleteTransaction] = useState<{ id: string; description: string } | null>(null)
 
   useEffect(() => {
     if (userId) {
@@ -307,32 +320,36 @@ export default function TransactionsPage() {
     }
   }
 
-  const handleDeleteTransaction = async (transactionId: string, description: string) => {
+  const handleDeleteTransaction = (transactionId: string, description: string) => {
     if (!userId) return
-
     logger.info('Delete transaction initiated', { transactionId })
+    setDeleteTransaction({ id: transactionId, description })
+  }
 
-    if (!confirm(`Delete transaction: ${description}?`)) return
+  const handleConfirmDeleteTransaction = async () => {
+    if (!userId || !deleteTransaction) return
 
     try {
-      const { deleteTransaction } = await import('@/lib/financial-queries')
-      const { success, error } = await deleteTransaction(transactionId, userId)
+      const { deleteTransaction: deleteTransactionQuery } = await import('@/lib/financial-queries')
+      const { success, error } = await deleteTransactionQuery(deleteTransaction.id, userId)
 
       if (error || !success) {
         throw new Error(error?.message || 'Failed to delete transaction')
       }
 
       // Optimistically remove from UI
-      setTransactions(prev => prev.filter(t => t.id !== transactionId))
+      setTransactions(prev => prev.filter(t => t.id !== deleteTransaction.id))
 
       toast.success('Transaction deleted', {
-        description: description
+        description: deleteTransaction.description
       })
 
-      logger.info('Transaction deleted successfully', { transactionId })
+      logger.info('Transaction deleted successfully', { transactionId: deleteTransaction.id })
     } catch (error: any) {
-      logger.error('Failed to delete transaction', { error, transactionId })
+      logger.error('Failed to delete transaction', { error, transactionId: deleteTransaction.id })
       toast.error('Delete failed', { description: error.message })
+    } finally {
+      setDeleteTransaction(null)
     }
   }
 
@@ -857,6 +874,27 @@ export default function TransactionsPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Transaction Confirmation Dialog */}
+      <AlertDialog open={!!deleteTransaction} onOpenChange={() => setDeleteTransaction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Transaction?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete &quot;{deleteTransaction?.description}&quot;. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteTransaction}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

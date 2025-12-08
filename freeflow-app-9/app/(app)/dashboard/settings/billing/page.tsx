@@ -9,6 +9,16 @@ import { CreditCard } from 'lucide-react'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 const logger = createFeatureLogger('Settings:Billing')
 
@@ -24,6 +34,7 @@ export default function BillingPage() {
 
   const [billing, setBilling] = useState<BillingData>({})
   const [loading, setLoading] = useState(true)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
 
   useEffect(() => {
     const loadBillingData = async () => {
@@ -80,40 +91,44 @@ export default function BillingPage() {
     announce('Update billing information dialog opened', 'polite')
   }
 
-  const handleCancelSubscription = async () => {
+  const handleCancelSubscription = () => {
     if (!userId) {
       toast.error('Please log in')
       announce('Authentication required', 'assertive')
       return
     }
+    logger.info('Cancel subscription initiated', { userId })
+    setShowCancelConfirm(true)
+  }
+
+  const handleConfirmCancelSubscription = async () => {
+    if (!userId) return
 
     const activeUntil = billing.subscription?.current_period_end || 'January 15, 2025'
 
-    logger.info('Cancel subscription initiated', { userId })
+    try {
+      const { cancelSubscription } = await import('@/lib/billing-settings-queries')
+      const { error } = await cancelSubscription(userId)
 
-    if (confirm('⚠️ Cancel Subscription?\n\nYou will:\n• Lose access to premium features\n• Keep your data until end of billing period\n• Can resubscribe anytime\n\nContinue with cancellation?')) {
-      try {
-        const { cancelSubscription } = await import('@/lib/billing-settings-queries')
-        const { error } = await cancelSubscription(userId)
+      if (error) throw new Error(error.message)
 
-        if (error) throw new Error(error.message)
+      logger.info('Subscription canceled', { activeUntil, userId })
 
-        logger.info('Subscription canceled', { activeUntil, userId })
+      toast.info('Subscription Canceled', {
+        description: `Active until ${activeUntil}. You will switch to the free plan after that`
+      })
+      announce('Subscription canceled successfully', 'polite')
 
-        toast.info('Subscription Canceled', {
-          description: `Active until ${activeUntil}. You will switch to the free plan after that`
-        })
-        announce('Subscription canceled successfully', 'polite')
-
-        // Reload billing data
-        const { getActiveSubscription } = await import('@/lib/billing-settings-queries')
-        const result = await getActiveSubscription(userId)
-        setBilling({ ...billing, subscription: result.data })
-      } catch (error) {
-        logger.error('Failed to cancel subscription', { error, userId })
-        toast.error('Failed to cancel subscription')
-        announce('Error canceling subscription', 'assertive')
-      }
+      // Reload billing data
+      const { getActiveSubscription } = await import('@/lib/billing-settings-queries')
+      const result = await getActiveSubscription(userId)
+      setBilling({ ...billing, subscription: result.data })
+    } catch (error) {
+      logger.error('Failed to cancel subscription', { error, userId })
+      toast.error('Failed to cancel subscription')
+      announce('Error canceling subscription', 'assertive')
+    } finally {
+      setShowCancelConfirm(false)
     }
   }
 
@@ -257,6 +272,27 @@ export default function BillingPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Cancel Subscription Confirmation Dialog */}
+      <AlertDialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Subscription?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You will lose access to premium features but keep your data until the end of your billing period. You can resubscribe anytime.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Subscription</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmCancelSubscription}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Cancel Subscription
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
