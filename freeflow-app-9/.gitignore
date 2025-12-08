@@ -7,6 +7,10 @@ node_modules/
 out/
 build/
 
+# PWA (auto-generated)
+public/sw.js
+public/workbox-*.js
+
 # Environment variables
 .env
 .env.local
