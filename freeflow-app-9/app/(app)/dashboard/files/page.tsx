@@ -56,6 +56,7 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
 import { useInfiniteScroll } from '@/lib/hooks/use-infinite-scroll'
 
@@ -267,6 +268,7 @@ export default function FilesPage() {
 
   // A+++ ANNOUNCER
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   // REDUCER STATE
   const [state, dispatch] = useReducer(filesReducer, {

@@ -38,6 +38,7 @@ import { cn } from '@/lib/utils'
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 interface FeatureTest {
   id: string
@@ -312,6 +313,7 @@ export default function ComprehensiveTestingPage() {
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   const router = useRouter()
   const [tests, setTests] = React.useState(COMPREHENSIVE_FEATURE_TESTS)

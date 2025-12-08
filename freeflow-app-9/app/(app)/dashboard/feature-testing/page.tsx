@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
+import { useCurrentUser } from '@/hooks/use-ai-data'
 
 interface FeatureTest {
   id: string
@@ -340,6 +341,7 @@ export default function FeatureTestingPage() {
   const [isLoading, setIsLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
   const { announce } = useAnnouncer()
+  const { userId, loading: userLoading } = useCurrentUser()
 
   const router = useRouter()
   const [tests, setTests] = React.useState<FeatureTest[]>(FEATURE_TESTS)
