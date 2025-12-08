@@ -41,6 +41,16 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
   Card,
   CardHeader,
   CardTitle,
@@ -96,6 +106,18 @@ export default function UpcomingBookingsPage() {
   const [showCancelBookingDialog, setShowCancelBookingDialog] = useState(false)
   const [bookingToCancel, setBookingToCancel] = useState<string | null>(null)
   const [isCancelling, setIsCancelling] = useState(false)
+
+  // Edit and View modal states
+  const [editBooking, setEditBooking] = useState<Booking | null>(null)
+  const [viewBooking, setViewBooking] = useState<Booking | null>(null)
+  const [editForm, setEditForm] = useState({
+    clientName: '',
+    service: '',
+    date: '',
+    time: '',
+    notes: ''
+  })
+  const [isSaving, setIsSaving] = useState(false)
 
   // Load bookings data from Supabase
   useEffect(() => {
@@ -288,9 +310,61 @@ export default function UpcomingBookingsPage() {
       service: booking.service
     })
 
-    toast.info('Edit Booking', {
-      description: `Editing ${booking.clientName} - ${booking.service}. In production, a modal would open here.`
+    // Set edit form values
+    setEditForm({
+      clientName: booking.clientName,
+      service: booking.service,
+      date: booking.date,
+      time: booking.time,
+      notes: booking.notes || ''
     })
+    setEditBooking(booking)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editBooking || !userId) return
+
+    setIsSaving(true)
+    try {
+      const { updateBooking } = await import('@/lib/bookings-queries')
+
+      const { error } = await updateBooking(editBooking.id, {
+        client_name: editForm.clientName,
+        service: editForm.service,
+        booking_date: editForm.date,
+        start_time: editForm.time,
+        notes: editForm.notes
+      })
+
+      if (error) throw new Error(error.message)
+
+      // Update local state
+      setBookings(prev =>
+        prev.map(b =>
+          b.id === editBooking.id
+            ? {
+                ...b,
+                clientName: editForm.clientName,
+                service: editForm.service,
+                date: editForm.date,
+                time: editForm.time,
+                notes: editForm.notes
+              }
+            : b
+        )
+      )
+
+      logger.info('Booking updated successfully', { bookingId: editBooking.id })
+      toast.success('Booking updated', {
+        description: `${editForm.clientName} - ${editForm.service}`
+      })
+      setEditBooking(null)
+    } catch (error) {
+      logger.error('Failed to update booking', { error })
+      toast.error('Failed to update booking')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleCancelBooking = async (id: string) => {
@@ -408,9 +482,7 @@ export default function UpcomingBookingsPage() {
       status: booking.status
     })
 
-    toast.info('Viewing Booking Details', {
-      description: `${booking.clientName} - ${booking.service} on ${booking.date} at ${booking.time}. Status: ${booking.status}, Payment: ${booking.payment}`
-    })
+    setViewBooking(booking)
   }
 
   const handleSendReminder = (id: string) => {
@@ -1064,6 +1136,149 @@ export default function UpcomingBookingsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Booking Dialog */}
+      <Dialog open={!!editBooking} onOpenChange={() => setEditBooking(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit Booking</DialogTitle>
+            <DialogDescription>
+              Update the booking details below
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-client">Client Name</Label>
+              <Input
+                id="edit-client"
+                value={editForm.clientName}
+                onChange={(e) => setEditForm({ ...editForm, clientName: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-service">Service</Label>
+              <Input
+                id="edit-service"
+                value={editForm.service}
+                onChange={(e) => setEditForm({ ...editForm, service: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-date">Date</Label>
+                <Input
+                  id="edit-date"
+                  type="date"
+                  value={editForm.date}
+                  onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-time">Time</Label>
+                <Input
+                  id="edit-time"
+                  type="time"
+                  value={editForm.time}
+                  onChange={(e) => setEditForm({ ...editForm, time: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-notes">Notes</Label>
+              <Textarea
+                id="edit-notes"
+                value={editForm.notes}
+                onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                placeholder="Any additional notes..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditBooking(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit} disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Booking Details Dialog */}
+      <Dialog open={!!viewBooking} onOpenChange={() => setViewBooking(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Booking Details</DialogTitle>
+          </DialogHeader>
+          {viewBooking && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Client</p>
+                  <p className="font-semibold">{viewBooking.clientName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Service</p>
+                  <p className="font-semibold">{viewBooking.service}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Date</p>
+                  <p className="font-semibold">{viewBooking.date}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Time</p>
+                  <p className="font-semibold">{viewBooking.time}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Duration</p>
+                  <p className="font-semibold">{viewBooking.duration}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Amount</p>
+                  <p className="font-semibold">${viewBooking.amount}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Status</p>
+                  <Badge variant={viewBooking.status === 'confirmed' ? 'default' : 'secondary'}>
+                    {viewBooking.status}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Payment</p>
+                  <Badge variant={viewBooking.payment === 'paid' ? 'default' : 'outline'}>
+                    {viewBooking.payment}
+                  </Badge>
+                </div>
+              </div>
+              {viewBooking.notes && (
+                <div>
+                  <p className="text-sm text-gray-500">Notes</p>
+                  <p className="text-sm">{viewBooking.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewBooking(null)}>
+              Close
+            </Button>
+            <Button onClick={() => {
+              if (viewBooking) {
+                setViewBooking(null)
+                handleEditBooking(viewBooking.id)
+              }
+            }}>
+              Edit Booking
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
