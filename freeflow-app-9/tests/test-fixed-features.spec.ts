@@ -46,7 +46,7 @@ test.describe('Fixed Features Test', () => {
     await page.goto('http://localhost:9323');
     
     // Check for error boundary components
-    const errorBoundary = await page.locator('[data-testid="error-boundary"], .error-boundary');
+    const _errorBoundary = await page.locator('[data-testid="error-boundary"], .error-boundary');
     
     // If no error boundary is visible, that's good (means no errors)
     console.log('✅ Error boundaries are in place');

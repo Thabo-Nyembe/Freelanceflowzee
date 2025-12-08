@@ -1,4 +1,4 @@
-import { Page, expect, Locator } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
 
 /**
  * Comprehensive Test Helpers for KAZI Application
@@ -295,7 +295,7 @@ export class TestHelpers {
    */
   async checkAccessibility() {
     // Basic accessibility checks
-    const headings = this.page.locator('h1, h2, h3, h4, h5, h6');
+    const _headings = this.page.locator('h1, h2, h3, h4, h5, h6');
     const images = this.page.locator('img');
     const buttons = this.page.locator('button, [role="button"]');
     

@@ -121,7 +121,7 @@ test.describe('Quick Visual Verification', () => {
     await page.waitForTimeout(3000);
 
     // Check for JavaScript errors
-    const jsErrors = await page.evaluate(() => {
+    const _jsErrors = await page.evaluate(() => {
       return (window as any).__errors || [];
     });
 

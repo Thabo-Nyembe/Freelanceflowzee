@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
 // Test available routes that are working
 test.describe('Working Functionality Testing', () => {
@@ -229,7 +229,7 @@ test.describe('Working Functionality Testing', () => {
     await page.evaluate(() => {
       // Create a test blob/file
       const testContent = 'Test file content for upload testing'
-      const blob = new Blob([testContent], { type: 'text/plain' })
+      const _blob = new Blob([testContent], { type: 'text/plain' })
 
       // Simulate file upload areas
       const fileInputs = document.querySelectorAll('input[type="file"]')
