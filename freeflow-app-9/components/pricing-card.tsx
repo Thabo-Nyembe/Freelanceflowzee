@@ -171,4 +171,4 @@ export const PricingCard = memo(function PricingCard({ plan }: PricingCardProps)
       </CardContent>
     </Card>
   )
-}
+})

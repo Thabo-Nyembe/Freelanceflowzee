@@ -207,7 +207,7 @@ export interface EmailStats {
   campaignsSent: number
   campaignsScheduled: number
   averageOpenRate: number
-  averageClic kRate: number
+  averageClickRate: number
   revenueThisMonth: number
   topPerformingCampaigns: { campaignId: string; campaignName: string; openRate: number }[]
   subscriberGrowth: { month: string; subscribers: number }[]

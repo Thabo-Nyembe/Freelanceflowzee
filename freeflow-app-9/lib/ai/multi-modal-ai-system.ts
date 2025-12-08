@@ -2213,3 +2213,6 @@ export class MultiModalAISystem {
       this.websocket.send(JSON.stringify(message));
     } catch (error) {
       this.log('error', 'Failed to send WebSocket message', { error });
+    }
+  }
+}
