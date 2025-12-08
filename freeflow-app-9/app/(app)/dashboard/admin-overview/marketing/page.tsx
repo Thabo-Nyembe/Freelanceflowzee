@@ -50,6 +50,16 @@ import {
   Clock,
   Zap
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 const logger = createFeatureLogger('admin-marketing')
 
@@ -68,6 +78,8 @@ export default function MarketingPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
   const [showCampaignModal, setShowCampaignModal] = useState(false)
+  const [deleteLead, setDeleteLead] = useState<{ id: string; name: string } | null>(null)
+  const [deleteCampaign, setDeleteCampaign] = useState<{ id: string; name: string } | null>(null)
 
   // Filtered data
   const filteredLeads = useMemo(() => {
@@ -234,27 +246,30 @@ export default function MarketingPage() {
   }
 
   // Button 3: Delete Lead
-  const handleDeleteLead = async (leadId: string, leadName: string) => {
-    if (!confirm(`Are you sure you want to delete ${leadName}? This action cannot be undone.`)) {
-      return
-    }
+  const handleDeleteLeadClick = (leadId: string, leadName: string) => {
+    setDeleteLead({ id: leadId, name: leadName })
+  }
+
+  const handleConfirmDeleteLead = async () => {
+    if (!deleteLead) return
 
     if (!userId) {
       toast.error('Authentication required', { description: 'Please sign in to delete leads' })
+      setDeleteLead(null)
       return
     }
 
     try {
-      logger.info('Deleting lead', { leadId })
+      logger.info('Deleting lead', { leadId: deleteLead.id })
 
-      const { deleteLead, getLeads } = await import('@/lib/admin-marketing-queries')
+      const { deleteLead: deleteLeadQuery, getLeads } = await import('@/lib/admin-marketing-queries')
 
-      await deleteLead(leadId)
+      await deleteLeadQuery(deleteLead.id)
 
       toast.success('Lead Deleted', {
-        description: `${leadName} has been removed from your leads`
+        description: `${deleteLead.name} has been removed from your leads`
       })
-      logger.info('Lead deleted', { success: true, leadId })
+      logger.info('Lead deleted', { success: true, leadId: deleteLead.id })
       announce('Lead deleted successfully', 'polite')
 
       // Reload leads
@@ -265,6 +280,8 @@ export default function MarketingPage() {
       toast.error('Delete Failed', { description: message })
       logger.error('Delete lead failed', { error: message })
       announce('Failed to delete lead', 'assertive')
+    } finally {
+      setDeleteLead(null)
     }
   }
 
@@ -435,27 +452,30 @@ export default function MarketingPage() {
   }
 
   // Button 9: Delete Campaign
-  const handleDeleteCampaign = async (campaignId: string, campaignName: string) => {
-    if (!confirm(`Are you sure you want to delete "${campaignName}"? This action cannot be undone.`)) {
-      return
-    }
+  const handleDeleteCampaignClick = (campaignId: string, campaignName: string) => {
+    setDeleteCampaign({ id: campaignId, name: campaignName })
+  }
+
+  const handleConfirmDeleteCampaign = async () => {
+    if (!deleteCampaign) return
 
     if (!userId) {
       toast.error('Authentication required', { description: 'Please sign in to delete campaigns' })
+      setDeleteCampaign(null)
       return
     }
 
     try {
-      logger.info('Deleting campaign', { campaignId })
+      logger.info('Deleting campaign', { campaignId: deleteCampaign.id })
 
-      const { deleteCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
+      const { deleteCampaign: deleteCampaignQuery, getCampaigns } = await import('@/lib/admin-marketing-queries')
 
-      await deleteCampaign(campaignId)
+      await deleteCampaignQuery(deleteCampaign.id)
 
       toast.success('Campaign Deleted', {
-        description: `"${campaignName}" has been permanently removed`
+        description: `"${deleteCampaign.name}" has been permanently removed`
       })
-      logger.info('Campaign deleted', { success: true, campaignId })
+      logger.info('Campaign deleted', { success: true, campaignId: deleteCampaign.id })
       announce('Campaign deleted successfully', 'polite')
 
       // Reload campaigns
@@ -466,6 +486,8 @@ export default function MarketingPage() {
       toast.error('Delete Failed', { description: message })
       logger.error('Delete campaign failed', { error: message })
       announce('Failed to delete campaign', 'assertive')
+    } finally {
+      setDeleteCampaign(null)
     }
   }
 
@@ -868,7 +890,7 @@ export default function MarketingPage() {
                         </button>
                       )}
                       <button
-                        onClick={() => handleDeleteLead(lead.id, lead.name)}
+                        onClick={() => handleDeleteLeadClick(lead.id, lead.name)}
                         className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors"
                       >
                         <Trash2 className="w-3 h-3" />
@@ -1008,7 +1030,7 @@ export default function MarketingPage() {
                         </button>
 
                         <button
-                          onClick={() => handleDeleteCampaign(campaign.id, campaign.name)}
+                          onClick={() => handleDeleteCampaignClick(campaign.id, campaign.name)}
                           className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors flex items-center gap-1"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -1123,6 +1145,48 @@ export default function MarketingPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Delete Lead Confirmation Dialog */}
+      <AlertDialog open={!!deleteLead} onOpenChange={() => setDeleteLead(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Lead?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {deleteLead?.name}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteLead}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete Lead
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Campaign Confirmation Dialog */}
+      <AlertDialog open={!!deleteCampaign} onOpenChange={() => setDeleteCampaign(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Campaign?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{deleteCampaign?.name}&quot;? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteCampaign}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete Campaign
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

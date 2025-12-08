@@ -45,6 +45,16 @@ import {
   Share2,
   RefreshCw
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('Notifications')
@@ -151,6 +161,11 @@ export default function NotificationsPage() {
 
   const [state, dispatch] = useReducer(notificationReducer, initialState)
   const [activeTab, setActiveTab] = useState<string>('inbox')
+
+  // AlertDialog confirmation states
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false)
+  const [showClearAllConfirm, setShowClearAllConfirm] = useState(false)
+  const [showResetPreferencesConfirm, setShowResetPreferencesConfirm] = useState(false)
 
   // A+++ LOAD NOTIFICATIONS DATA
   useEffect(() => {
@@ -425,17 +440,20 @@ export default function NotificationsPage() {
       })
     }
   }
-  const handleDeleteAll = () => { const count = state.notifications.length; logger.info('Deleting all notifications', { count }); confirm('Delete all?') && state.notifications.forEach(n => dispatch({ type: 'DELETE_NOTIFICATION', payload: n.id })) }
+  const handleDeleteAll = () => { const count = state.notifications.length; logger.info('Deleting all notifications initiated', { count }); setShowDeleteAllConfirm(true) }
+  const handleConfirmDeleteAll = () => { const count = state.notifications.length; logger.info('Deleting all notifications', { count }); state.notifications.forEach(n => dispatch({ type: 'DELETE_NOTIFICATION', payload: n.id })); setShowDeleteAllConfirm(false); toast.success('All notifications deleted') }
   const handleUnarchive = (id: string) => { logger.info('Unarchiving notification', { notificationId: id }); toast.success('Notification unarchived') }
   const handleFilterAll = () => { logger.debug('Filtering all notifications'); dispatch({ type: 'SET_FILTER', payload: 'all' }) }
   const handleFilterUnread = () => { logger.debug('Filtering unread notifications'); dispatch({ type: 'SET_FILTER', payload: 'unread' }) }
   const handleFilterRead = () => { logger.debug('Filtering read notifications'); dispatch({ type: 'SET_FILTER', payload: 'read' }) }
   const handleExportNotifications = () => { const count = state.notifications.length; logger.info('Exporting notifications', { count }); toast.success('Exporting notifications...') }
-  const handleClearAll = () => { const count = state.notifications.length; logger.info('Clearing all notifications', { count }); confirm('Clear all?') && dispatch({ type: 'SET_NOTIFICATIONS', payload: [] }) }
+  const handleClearAll = () => { const count = state.notifications.length; logger.info('Clearing all notifications initiated', { count }); setShowClearAllConfirm(true) }
+  const handleConfirmClearAll = () => { const count = state.notifications.length; logger.info('Clearing all notifications', { count }); dispatch({ type: 'SET_NOTIFICATIONS', payload: [] }); setShowClearAllConfirm(false); toast.success('All notifications cleared') }
   const handleToggleSound = () => { logger.info('Toggling notification sound', { currentState: state.soundEnabled }); dispatch({ type: 'TOGGLE_SOUND' }) }
   const handleTogglePreviews = () => { logger.info('Toggling notification previews', { currentState: state.previewsEnabled }); dispatch({ type: 'TOGGLE_PREVIEWS' }) }
   const handleSavePreferences = () => { logger.info('Saving notification preferences', { soundEnabled: state.soundEnabled, previewsEnabled: state.previewsEnabled }); toast.success('Preferences saved successfully') }
-  const handleResetPreferences = () => { logger.info('Resetting notification preferences to defaults'); confirm('Reset all preferences to defaults?') && toast.success('Preferences reset to defaults') }
+  const handleResetPreferences = () => { logger.info('Resetting notification preferences initiated'); setShowResetPreferencesConfirm(true) }
+  const handleConfirmResetPreferences = () => { logger.info('Resetting notification preferences to defaults'); setShowResetPreferencesConfirm(false); toast.success('Preferences reset to defaults') }
   const handleSnooze = (id: string) => { logger.info('Snoozing notification', { notificationId: id, duration: '1 hour' }); toast.success('Notification snoozed for 1 hour') }
 
   const filteredNotifications = state.notifications.filter(notification => {
@@ -837,6 +855,66 @@ export default function NotificationsPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Delete All Confirmation Dialog */}
+      <AlertDialog open={showDeleteAllConfirm} onOpenChange={setShowDeleteAllConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete All Notifications?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all {state.notifications.length} notifications. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteAll}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clear All Confirmation Dialog */}
+      <AlertDialog open={showClearAllConfirm} onOpenChange={setShowClearAllConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear All Notifications?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will clear all notifications from your inbox. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmClearAll}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Clear All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Reset Preferences Confirmation Dialog */}
+      <AlertDialog open={showResetPreferencesConfirm} onOpenChange={setShowResetPreferencesConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset Preferences?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will reset all notification preferences to their default settings. Your notification history will not be affected.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmResetPreferences}>
+              Reset to Defaults
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

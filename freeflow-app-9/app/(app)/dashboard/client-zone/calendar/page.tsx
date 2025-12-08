@@ -22,6 +22,16 @@ import {
   Edit,
   X
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -132,6 +142,7 @@ export default function CalendarPage() {
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null)
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
   const [filterStatus, setFilterStatus] = useState<'all' | 'upcoming' | 'completed' | 'cancelled'>('all')
+  const [cancelMeeting, setCancelMeeting] = useState<{ id: number; title: string } | null>(null)
 
   // Load Calendar Data
   useEffect(() => {
@@ -294,7 +305,7 @@ export default function CalendarPage() {
   }
 
   // Handle Cancel Meeting
-  const handleCancelMeeting = async (meetingId: number) => {
+  const handleCancelMeeting = (meetingId: number) => {
     const meeting = meetings.find((m) => m.id === meetingId)
     if (!meeting) return
 
@@ -303,16 +314,17 @@ export default function CalendarPage() {
       meetingTitle: meeting.title
     })
 
-    if (!confirm(`Cancel meeting: ${meeting.title}?`)) {
-      logger.debug('Meeting cancellation cancelled')
-      return
-    }
+    setCancelMeeting({ id: meetingId, title: meeting.title })
+  }
+
+  const handleConfirmCancelMeeting = async () => {
+    if (!cancelMeeting) return
 
     try {
       const response = await fetch('/api/meetings/cancel', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ meetingId })
+        body: JSON.stringify({ meetingId: cancelMeeting.id })
       })
 
       if (!response.ok) {
@@ -321,18 +333,20 @@ export default function CalendarPage() {
 
       setMeetings(
         meetings.map((m) =>
-          m.id === meetingId ? { ...m, status: 'cancelled' } : m
+          m.id === cancelMeeting.id ? { ...m, status: 'cancelled' } : m
         )
       )
-      logger.info('Meeting cancelled', { meetingId })
+      logger.info('Meeting cancelled', { meetingId: cancelMeeting.id })
       toast.success('Meeting cancelled', {
-        description: `${meeting.title} has been cancelled`
+        description: `${cancelMeeting.title} has been cancelled`
       })
     } catch (error: any) {
-      logger.error('Failed to cancel meeting', { error, meetingId })
+      logger.error('Failed to cancel meeting', { error, meetingId: cancelMeeting.id })
       toast.error('Failed to cancel meeting', {
         description: error.message || 'Please try again later'
       })
+    } finally {
+      setCancelMeeting(null)
     }
   }
 
@@ -772,6 +786,27 @@ export default function CalendarPage() {
           </Card>
         </motion.div>
       </div>
+
+      {/* Cancel Meeting Confirmation Dialog */}
+      <AlertDialog open={!!cancelMeeting} onOpenChange={() => setCancelMeeting(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Meeting?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel &quot;{cancelMeeting?.title}&quot;? All participants will be notified of the cancellation.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Meeting</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmCancelMeeting}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Cancel Meeting
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

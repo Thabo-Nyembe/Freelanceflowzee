@@ -49,6 +49,16 @@ import {
 } from 'lucide-react'
 import { BorderTrail } from '@/components/ui/border-trail'
 import { GlowEffect } from '@/components/ui/glow-effect'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 // A+++ UTILITIES
 import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
@@ -747,6 +757,7 @@ export default function CommunityHubPage() {
 
   const [state, dispatch] = useReducer(communityReducer, initialState)
   const [activeTab, setActiveTab] = useState<string>('feed')
+  const [blockUser, setBlockUser] = useState<{ id: string; name: string } | null>(null)
 
   // Handlers
   const handleLikePost = async (id: string) => {
@@ -1215,16 +1226,21 @@ export default function CommunityHubPage() {
       userName: member?.name
     })
 
-    if (confirm(`Block ${member?.name}? They won't be able to contact you or see your content.`)) {
-      logger.info('User blocked', {
-        userId: id,
-        userName: member?.name
-      })
+    setBlockUser({ id, name: member?.name || 'Unknown' })
+  }
 
-      toast.success('User blocked', {
-        description: `${member?.name} - Blocked successfully - You can unblock from Settings`
-      })
-    }
+  const handleConfirmBlockUser = () => {
+    if (!blockUser) return
+
+    logger.info('User blocked', {
+      userId: blockUser.id,
+      userName: blockUser.name
+    })
+
+    toast.success('User blocked', {
+      description: `${blockUser.name} - Blocked successfully - You can unblock from Settings`
+    })
+    setBlockUser(null)
   }
 
   const mockMembers: CommunityMember[] = [
@@ -2980,6 +2996,27 @@ export default function CommunityHubPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Block User Confirmation Dialog */}
+      <AlertDialog open={!!blockUser} onOpenChange={() => setBlockUser(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Block User?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to block {blockUser?.name}? They won&apos;t be able to contact you or see your content. You can unblock them later from Settings.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmBlockUser}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Block User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

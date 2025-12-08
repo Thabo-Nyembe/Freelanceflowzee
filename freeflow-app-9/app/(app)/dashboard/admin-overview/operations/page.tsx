@@ -43,6 +43,16 @@ import {
   Eye,
   Plus
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 const logger = createFeatureLogger('admin-operations')
 
@@ -61,6 +71,7 @@ export default function OperationsPage() {
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
   const [showActivityLog, setShowActivityLog] = useState(false)
   const [activityData, setActivityData] = useState<any[]>([])
+  const [deleteUser, setDeleteUser] = useState<{ id: string; name: string } | null>(null)
 
   // Filtered members
   const filteredMembers = useMemo(() => {
@@ -228,27 +239,30 @@ export default function OperationsPage() {
   }
 
   // Button 3: Delete User
-  const handleDeleteUser = async (targetUserId: string, userName: string) => {
+  const handleDeleteUserClick = (targetUserId: string, userName: string) => {
+    setDeleteUser({ id: targetUserId, name: userName })
+  }
+
+  const handleConfirmDeleteUser = async () => {
+    if (!deleteUser) return
+
     if (!userId) {
       toast.error('Authentication required', { description: 'Please sign in to delete users' })
       announce('Authentication required', 'assertive')
-      return
-    }
-
-    if (!confirm(`Are you sure you want to delete ${userName}? This action cannot be undone.`)) {
+      setDeleteUser(null)
       return
     }
 
     try {
-      logger.info('Deleting user', { targetUserId, userId })
+      logger.info('Deleting user', { targetUserId: deleteUser.id, userId })
 
-      const { deleteUser } = await import('@/lib/user-management-queries')
-      await deleteUser(targetUserId)
+      const { deleteUser: deleteUserQuery } = await import('@/lib/user-management-queries')
+      await deleteUserQuery(deleteUser.id)
 
       toast.success('User Deleted', {
-        description: `${userName} has been permanently removed from the team`
+        description: `${deleteUser.name} has been permanently removed from the team`
       })
-      logger.info('User deleted', { success: true, targetUserId })
+      logger.info('User deleted', { success: true, targetUserId: deleteUser.id })
       announce('User deleted successfully', 'polite')
 
       // Reload team members
@@ -260,6 +274,8 @@ export default function OperationsPage() {
       toast.error('Delete Failed', { description: message })
       logger.error('Delete user failed', { error })
       announce('Failed to delete user', 'assertive')
+    } finally {
+      setDeleteUser(null)
     }
   }
 
@@ -697,7 +713,7 @@ export default function OperationsPage() {
                       )}
 
                       <button
-                        onClick={() => handleDeleteUser(member.id, member.name)}
+                        onClick={() => handleDeleteUserClick(member.id, member.name)}
                         className="px-2 py-1.5 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors flex items-center justify-center gap-1"
                       >
                         <Trash2 className="w-3 h-3" />
@@ -838,6 +854,27 @@ export default function OperationsPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Delete User Confirmation Dialog */}
+      <AlertDialog open={!!deleteUser} onOpenChange={() => setDeleteUser(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete User?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {deleteUser?.name}? This action cannot be undone and will permanently remove the user from the team.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteUser}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

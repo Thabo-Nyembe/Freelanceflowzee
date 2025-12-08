@@ -19,6 +19,16 @@ import {
   Trash2,
   Edit
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import ClientZoneGallery from '@/components/client-zone-gallery'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
@@ -123,6 +133,7 @@ export default function GalleryPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedItems, setSelectedItems] = useState<number[]>([])
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([])
+  const [deleteItem, setDeleteItem] = useState<{ id: number; name: string } | null>(null)
 
   // Filter State
   const [filters, setFilters] = useState<GalleryFilter>({
@@ -238,7 +249,7 @@ export default function GalleryPage() {
   }
 
   // Handle Delete
-  const handleDelete = async (itemId: number) => {
+  const handleDelete = (itemId: number) => {
     const item = galleryItems.find(i => i.id === itemId)
     if (!item) return
 
@@ -247,32 +258,35 @@ export default function GalleryPage() {
       itemName: item.name
     })
 
-    if (!confirm(`Delete "${item.name}"? This action cannot be undone.`)) {
-      logger.debug('Gallery item deletion cancelled')
-      return
-    }
+    setDeleteItem({ id: itemId, name: item.name })
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!deleteItem) return
 
     try {
       const response = await fetch('/api/gallery/items', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ itemId })
+        body: JSON.stringify({ itemId: deleteItem.id })
       })
 
       if (!response.ok) {
         throw new Error('Failed to delete item')
       }
 
-      setGalleryItems(galleryItems.filter(i => i.id !== itemId))
-      logger.info('Gallery item deleted successfully', { itemId })
+      setGalleryItems(galleryItems.filter(i => i.id !== deleteItem.id))
+      logger.info('Gallery item deleted successfully', { itemId: deleteItem.id })
       toast.success('Item deleted', {
-        description: `${item.name} has been removed from gallery`
+        description: `${deleteItem.name} has been removed from gallery`
       })
     } catch (error: any) {
-      logger.error('Failed to delete gallery item', { error, itemId })
+      logger.error('Failed to delete gallery item', { error, itemId: deleteItem.id })
       toast.error('Failed to delete item', {
         description: error.message || 'Please try again later'
       })
+    } finally {
+      setDeleteItem(null)
     }
   }
 
@@ -747,6 +761,27 @@ export default function GalleryPage() {
           </Card>
         </motion.div>
       </div>
+
+      {/* Delete Item Confirmation Dialog */}
+      <AlertDialog open={!!deleteItem} onOpenChange={() => setDeleteItem(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Gallery Item?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{deleteItem?.name}&quot;? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

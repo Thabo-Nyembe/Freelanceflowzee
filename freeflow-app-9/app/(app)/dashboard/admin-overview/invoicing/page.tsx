@@ -42,6 +42,16 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 const logger = createFeatureLogger('admin-invoicing')
 
@@ -92,6 +102,8 @@ export default function InvoicingPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
   const [showInvoiceModal, setShowInvoiceModal] = useState(false)
+  const [deleteInvoice, setDeleteInvoice] = useState<{ id: string; number: string } | null>(null)
+  const [voidInvoice, setVoidInvoice] = useState<{ id: string; number: string } | null>(null)
 
   // Filtered invoices
   const filteredInvoices = useMemo(() => {
@@ -248,28 +260,31 @@ export default function InvoicingPage() {
   }
 
   // Button 3: Delete Invoice
-  const handleDeleteInvoice = async (invoiceId: string, invoiceNumber: string) => {
-    if (!confirm(`Are you sure you want to delete ${invoiceNumber}? This action cannot be undone.`)) {
-      return
-    }
+  const handleDeleteInvoiceClick = (invoiceId: string, invoiceNumber: string) => {
+    setDeleteInvoice({ id: invoiceId, number: invoiceNumber })
+  }
+
+  const handleConfirmDeleteInvoice = async () => {
+    if (!deleteInvoice) return
 
     if (!userId) {
       toast.error('Authentication required')
       announce('Authentication required', 'assertive')
+      setDeleteInvoice(null)
       return
     }
 
     try {
-      logger.info('Deleting invoice', { userId, invoiceId })
+      logger.info('Deleting invoice', { userId, invoiceId: deleteInvoice.id })
 
-      const { deleteInvoice } = await import('@/lib/admin-overview-queries')
-      await deleteInvoice(invoiceId)
+      const { deleteInvoice: deleteInvoiceQuery } = await import('@/lib/admin-overview-queries')
+      await deleteInvoiceQuery(deleteInvoice.id)
 
       toast.success('Invoice Deleted', {
-        description: `${invoiceNumber} has been permanently removed`
+        description: `${deleteInvoice.number} has been permanently removed`
       })
       announce('Invoice deleted successfully', 'polite')
-      logger.info('Invoice deleted', { success: true, invoiceId })
+      logger.info('Invoice deleted', { success: true, invoiceId: deleteInvoice.id })
 
       // Reload invoices
       const { getInvoices } = await import('@/lib/admin-overview-queries')
@@ -280,6 +295,8 @@ export default function InvoicingPage() {
       toast.error('Delete Failed', { description: message })
       logger.error('Delete invoice failed', { error })
       announce('Failed to delete invoice', 'assertive')
+    } finally {
+      setDeleteInvoice(null)
     }
   }
 
@@ -406,28 +423,31 @@ export default function InvoicingPage() {
   }
 
   // Button 8: Void Invoice
-  const handleVoidInvoice = async (invoiceId: string, invoiceNumber: string) => {
-    if (!confirm(`Are you sure you want to void ${invoiceNumber}? This action cannot be undone.`)) {
-      return
-    }
+  const handleVoidInvoiceClick = (invoiceId: string, invoiceNumber: string) => {
+    setVoidInvoice({ id: invoiceId, number: invoiceNumber })
+  }
+
+  const handleConfirmVoidInvoice = async () => {
+    if (!voidInvoice) return
 
     if (!userId) {
       toast.error('Authentication required')
       announce('Authentication required', 'assertive')
+      setVoidInvoice(null)
       return
     }
 
     try {
-      logger.info('Voiding invoice', { userId, invoiceId })
+      logger.info('Voiding invoice', { userId, invoiceId: voidInvoice.id })
 
       const { updateInvoiceStatus } = await import('@/lib/admin-overview-queries')
-      await updateInvoiceStatus(invoiceId, 'cancelled')
+      await updateInvoiceStatus(voidInvoice.id, 'cancelled')
 
       toast.success('Invoice Voided', {
-        description: `${invoiceNumber} has been voided and cancelled`
+        description: `${voidInvoice.number} has been voided and cancelled`
       })
       announce('Invoice voided successfully', 'polite')
-      logger.info('Invoice voided', { success: true, invoiceId })
+      logger.info('Invoice voided', { success: true, invoiceId: voidInvoice.id })
 
       // Reload invoices
       const { getInvoices } = await import('@/lib/admin-overview-queries')
@@ -438,6 +458,8 @@ export default function InvoicingPage() {
       toast.error('Void Failed', { description: message })
       logger.error('Void invoice failed', { error })
       announce('Failed to void invoice', 'assertive')
+    } finally {
+      setVoidInvoice(null)
     }
   }
 
@@ -757,7 +779,7 @@ export default function InvoicingPage() {
 
                             {invoice.status !== 'paid' && invoice.status !== 'cancelled' && (
                               <button
-                                onClick={() => handleVoidInvoice(invoice.id, invoice.number)}
+                                onClick={() => handleVoidInvoiceClick(invoice.id, invoice.number)}
                                 className="px-3 py-1.5 bg-gray-400 text-white rounded text-xs hover:bg-gray-500 transition-colors flex items-center gap-1"
                               >
                                 <XCircle className="w-3 h-3" />
@@ -766,7 +788,7 @@ export default function InvoicingPage() {
                             )}
 
                             <button
-                              onClick={() => handleDeleteInvoice(invoice.id, invoice.number)}
+                              onClick={() => handleDeleteInvoiceClick(invoice.id, invoice.number)}
                               className="px-3 py-1.5 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors flex items-center gap-1"
                             >
                               <Trash2 className="w-3 h-3" />
@@ -884,6 +906,48 @@ export default function InvoicingPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Delete Invoice Confirmation Dialog */}
+      <AlertDialog open={!!deleteInvoice} onOpenChange={() => setDeleteInvoice(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Invoice?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {deleteInvoice?.number}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteInvoice}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete Invoice
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Void Invoice Confirmation Dialog */}
+      <AlertDialog open={!!voidInvoice} onOpenChange={() => setVoidInvoice(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Void Invoice?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to void {voidInvoice?.number}? This action cannot be undone and will cancel the invoice.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmVoidInvoice}
+              className="bg-gray-500 hover:bg-gray-600"
+            >
+              Void Invoice
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
