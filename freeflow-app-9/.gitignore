@@ -62,6 +62,15 @@ archive/
 *.png
 *.jpg
 *.jpeg
+
+# Backup and disabled files
+*.bak
+*.backup
+*.old
+*.orig
+*.disabled
+*-backup*
+*-broken*
 *.gif
 *.svg
 *.ico
