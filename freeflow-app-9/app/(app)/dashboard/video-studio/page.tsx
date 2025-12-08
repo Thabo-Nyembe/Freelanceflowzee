@@ -15,6 +15,16 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -95,7 +105,8 @@ import {
   Music,
   History,
   Wand2,
-  GitBranch
+  GitBranch,
+  AlertTriangle
 } from 'lucide-react'
 
 interface VideoProject {
@@ -236,6 +247,11 @@ export default function VideoStudioPage() {
   const [isTrimMode, setIsTrimMode] = useState<boolean>(false)
   const [editHistory, setEditHistory] = useState<{ past: any[]; future: any[] }>({ past: [], future: [] })
   const [selectedColorPreset, setSelectedColorPreset] = useState<string>('natural')
+
+  // Delete Project Dialog State
+  const [showDeleteProjectDialog, setShowDeleteProjectDialog] = useState(false)
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [newTextOverlay, setNewTextOverlay] = useState({ text: '', style: 'title', position: 'center' })
   const [selectedTransition, setSelectedTransition] = useState<string>('')
   const [selectedEffect, setSelectedEffect] = useState<string>('')
@@ -441,29 +457,43 @@ export default function VideoStudioPage() {
       views: project?.views
     })
 
-    if (confirm(`Delete "${project?.title}"?\n\nThis action cannot be undone.`)) {
-      try {
-        if (userId) {
-          const { deleteVideoProject } = await import('@/lib/video-studio-queries')
-          const result = await deleteVideoProject(userId, projectId)
+    setProjectToDelete(projectId)
+    setShowDeleteProjectDialog(true)
+  }
 
-          if (result.error) {
-            throw new Error(result.error)
-          }
+  const confirmDeleteProject = async () => {
+    if (!projectToDelete) return
+
+    const project = projects.find(p => p.id === projectToDelete)
+    logger.info('Project deletion confirmed', { projectId: projectToDelete })
+
+    try {
+      setIsDeleting(true)
+
+      if (userId) {
+        const { deleteVideoProject } = await import('@/lib/video-studio-queries')
+        const result = await deleteVideoProject(userId, projectToDelete)
+
+        if (result.error) {
+          throw new Error(result.error)
         }
-
-        // Update local state
-        setProjects(prev => prev.filter(p => p.id !== projectId))
-        logger.info('Project deleted', { projectId, title: project?.title })
-        toast.success(`Project "${project?.title}" deleted`)
-      } catch (error: any) {
-        logger.error('Failed to delete project', { error, projectId })
-        toast.error('Failed to delete project', {
-          description: error.message || 'Please try again'
-        })
       }
-    } else {
-      logger.debug('Project deletion cancelled')
+
+      // Update local state
+      setProjects(prev => prev.filter(p => p.id !== projectToDelete))
+      logger.info('Project deleted', { projectId: projectToDelete, title: project?.title })
+      toast.success(`Project "${project?.title}" deleted`)
+      announce(`Video project ${project?.title} deleted`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete project', { error, projectId: projectToDelete })
+      toast.error('Failed to delete project', {
+        description: error.message || 'Please try again'
+      })
+      announce('Error deleting project', 'assertive')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteProjectDialog(false)
+      setProjectToDelete(null)
     }
   }
 
@@ -2849,6 +2879,40 @@ onClick={() => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Project Confirmation Dialog */}
+      <AlertDialog open={showDeleteProjectDialog} onOpenChange={setShowDeleteProjectDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Video Project?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p className="font-medium text-red-700">
+                This action cannot be undone.
+              </p>
+              <p>
+                Are you sure you want to delete{' '}
+                <span className="font-semibold">
+                  "{projects.find(p => p.id === projectToDelete)?.title}"
+                </span>
+                ? All video files, edits, and associated data will be permanently removed.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteProject}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Project'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

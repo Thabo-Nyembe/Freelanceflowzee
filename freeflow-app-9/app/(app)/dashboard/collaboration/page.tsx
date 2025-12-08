@@ -3,6 +3,16 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -79,6 +89,12 @@ export default function CollaborationPage() {
   const [workspaceFiles, setWorkspaceFiles] = useState<any[]>([])
 
   const [activeTab, setActiveTab] = useState<any>("chat");
+
+  // Dialog States
+  const [showDeleteFeedbackDialog, setShowDeleteFeedbackDialog] = useState(false)
+  const [showRemoveParticipantDialog, setShowRemoveParticipantDialog] = useState(false)
+  const [feedbackToDelete, setFeedbackToDelete] = useState<number | null>(null)
+  const [participantToRemove, setParticipantToRemove] = useState<number | null>(null)
 
   // A+++ LOAD COLLABORATION DATA
   useEffect(() => {
@@ -189,10 +205,18 @@ export default function CollaborationPage() {
 
   const handleDeleteFeedback = (id: number) => {
     logger.info('Delete feedback requested', { feedbackId: id })
-    if (confirm('Delete feedback?')) {
-      logger.info('Feedback deleted', { feedbackId: id })
+    setFeedbackToDelete(id)
+    setShowDeleteFeedbackDialog(true)
+  }
+
+  const confirmDeleteFeedback = () => {
+    if (feedbackToDelete !== null) {
+      logger.info('Feedback deleted', { feedbackId: feedbackToDelete })
       toast.success('✅ Feedback deleted')
+      announce('Feedback deleted', 'polite')
     }
+    setShowDeleteFeedbackDialog(false)
+    setFeedbackToDelete(null)
   }
 
   const handleReplyToMessage = (id: number) => {
@@ -224,10 +248,18 @@ export default function CollaborationPage() {
 
   const handleRemoveParticipant = (id: number) => {
     logger.info('Remove participant requested', { participantId: id })
-    if (confirm('Remove participant?')) {
-      logger.info('Participant removed', { participantId: id })
+    setParticipantToRemove(id)
+    setShowRemoveParticipantDialog(true)
+  }
+
+  const confirmRemoveParticipant = () => {
+    if (participantToRemove !== null) {
+      logger.info('Participant removed', { participantId: participantToRemove })
       toast.success('✅ Participant removed')
+      announce('Participant removed from collaboration', 'polite')
     }
+    setShowRemoveParticipantDialog(false)
+    setParticipantToRemove(null)
   }
 
   const handleExportChat = () => {
@@ -2849,6 +2881,55 @@ export default function CollaborationPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Delete Feedback Confirmation Dialog */}
+      <AlertDialog open={showDeleteFeedbackDialog} onOpenChange={setShowDeleteFeedbackDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Feedback?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this feedback? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteFeedback}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete Feedback
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Remove Participant Confirmation Dialog */}
+      <AlertDialog open={showRemoveParticipantDialog} onOpenChange={setShowRemoveParticipantDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-yellow-600">
+              <AlertTriangle className="w-5 h-5" />
+              Remove Participant?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this participant from the collaboration?
+              They will lose access to shared resources and conversations.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmRemoveParticipant}
+              className="bg-yellow-600 hover:bg-yellow-700"
+            >
+              Remove Participant
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

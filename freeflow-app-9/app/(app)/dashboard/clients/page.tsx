@@ -12,7 +12,8 @@ import {
   Star, Briefcase, DollarSign, Edit2, Trash2, Eye, MessageSquare, Calendar,
   FileText, TrendingUp, Award, Building, Globe, Clock, CheckCircle, X,
   Download, Upload, Settings, Tag, Activity, BarChart3, PieChart, Target,
-  UserCheck, UserX, Zap, Heart, Share2, Send, Plus, AlertCircle, Info, Brain
+  UserCheck, UserX, Zap, Heart, Share2, Send, Plus, AlertCircle, Info, Brain,
+  AlertTriangle
 } from 'lucide-react'
 
 import {
@@ -28,6 +29,16 @@ import {
   Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
   DialogTrigger, DialogFooter
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select'
@@ -426,6 +437,12 @@ export default function ClientsPage() {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
 
+  // Delete Dialog States
+  const [showDeleteClientDialog, setShowDeleteClientDialog] = useState(false)
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
+  const [clientToDelete, setClientToDelete] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
   // Form States
   const [formData, setFormData] = useState<Partial<Client>>({})
   const [isSaving, setIsSaving] = useState(false)
@@ -781,44 +798,54 @@ export default function ClientsPage() {
     const client = state.clients.find(c => c.id === clientId)
     logger.info('Delete client requested', { clientId, name: client?.name, userId })
 
-    if (confirm(`⚠️ Delete client ${client?.name}? This action cannot be undone.`)) {
-      logger.info('Delete client confirmed', { clientId })
+    setClientToDelete(clientId)
+    setShowDeleteClientDialog(true)
+  }
 
-      try {
-        // Import clients queries utility
-        const { deleteClient } = await import('@/lib/clients-queries')
+  const confirmDeleteClient = async () => {
+    if (!clientToDelete || !userId) return
 
-        // Delete client from Supabase
-        const { success, error: deleteError } = await deleteClient(userId, clientId)
+    const client = state.clients.find(c => c.id === clientToDelete)
+    logger.info('Delete client confirmed', { clientId: clientToDelete })
 
-        if (deleteError || !success) {
-          throw new Error(deleteError?.message || 'Failed to delete client')
-        }
+    try {
+      setIsDeleting(true)
 
-        dispatch({ type: 'DELETE_CLIENT', clientId })
-        logger.info('Client deleted successfully from Supabase', {
-          clientId,
-          name: client?.name,
-          userId
-        })
+      // Import clients queries utility
+      const { deleteClient } = await import('@/lib/clients-queries')
 
-        toast.success('🗑️ Client deleted', {
-          description: `${client?.name} has been removed from your client list`
-        })
-        announce(`Client ${client?.name} deleted successfully`, 'polite')
-      } catch (error: any) {
-        logger.error('Failed to delete client', {
-          error,
-          clientId,
-          userId
-        })
-        toast.error('Failed to delete client', {
-          description: error.message || 'Please try again later'
-        })
-        announce('Error deleting client', 'assertive')
+      // Delete client from Supabase
+      const { success, error: deleteError } = await deleteClient(userId, clientToDelete)
+
+      if (deleteError || !success) {
+        throw new Error(deleteError?.message || 'Failed to delete client')
       }
-    } else {
-      logger.debug('Delete client canceled', { clientId })
+
+      dispatch({ type: 'DELETE_CLIENT', clientId: clientToDelete })
+      logger.info('Client deleted successfully from Supabase', {
+        clientId: clientToDelete,
+        name: client?.name,
+        userId
+      })
+
+      toast.success('🗑️ Client deleted', {
+        description: `${client?.name} has been removed from your client list`
+      })
+      announce(`Client ${client?.name} deleted successfully`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete client', {
+        error,
+        clientId: clientToDelete,
+        userId
+      })
+      toast.error('Failed to delete client', {
+        description: error.message || 'Please try again later'
+      })
+      announce('Error deleting client', 'assertive')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteClientDialog(false)
+      setClientToDelete(null)
     }
   }
 
@@ -927,50 +954,57 @@ export default function ClientsPage() {
     }
 
     logger.info('Bulk delete clients requested', { count: state.selectedClients.length })
+    setShowBulkDeleteDialog(true)
+  }
 
-    if (confirm(`⚠️ Delete ${state.selectedClients.length} clients? This action cannot be undone.`)) {
-      logger.info('Bulk delete confirmed', { count: state.selectedClients.length })
+  const confirmBulkDelete = async () => {
+    if (!userId) return
 
-      try {
-        const { deleteClient } = await import('@/lib/clients-queries')
+    logger.info('Bulk delete confirmed', { count: state.selectedClients.length })
 
-        let deletedCount = 0
-        const failedDeletes: string[] = []
+    try {
+      setIsDeleting(true)
+      const { deleteClient } = await import('@/lib/clients-queries')
 
-        for (const clientId of state.selectedClients) {
-          const { success, error } = await deleteClient(userId, clientId)
+      let deletedCount = 0
+      const failedDeletes: string[] = []
 
-          if (success) {
-            dispatch({ type: 'DELETE_CLIENT', clientId })
-            deletedCount++
-          } else {
-            failedDeletes.push(clientId)
-            logger.warn('Failed to delete client in bulk operation', { clientId, error })
-          }
+      for (const clientId of state.selectedClients) {
+        const { success, error } = await deleteClient(userId, clientId)
+
+        if (success) {
+          dispatch({ type: 'DELETE_CLIENT', clientId })
+          deletedCount++
+        } else {
+          failedDeletes.push(clientId)
+          logger.warn('Failed to delete client in bulk operation', { clientId, error })
         }
-
-        dispatch({ type: 'CLEAR_SELECTED_CLIENTS' })
-
-        logger.info('Bulk delete completed', { deletedCount, failedCount: failedDeletes.length })
-
-        if (deletedCount > 0) {
-          toast.success(`🗑️ ${deletedCount} client${deletedCount > 1 ? 's' : ''} deleted`)
-        }
-
-        if (failedDeletes.length > 0) {
-          toast.error(`Failed to delete ${failedDeletes.length} client${failedDeletes.length > 1 ? 's' : ''}`)
-        }
-      } catch (error: any) {
-        logger.error('Failed to bulk delete clients', {
-          error,
-          count: state.selectedClients.length
-        })
-        toast.error('Failed to delete clients', {
-          description: error.message || 'Please try again later'
-        })
       }
-    } else {
-      logger.debug('Bulk delete canceled')
+
+      dispatch({ type: 'CLEAR_SELECTED_CLIENTS' })
+
+      logger.info('Bulk delete completed', { deletedCount, failedCount: failedDeletes.length })
+
+      if (deletedCount > 0) {
+        toast.success(`🗑️ ${deletedCount} client${deletedCount > 1 ? 's' : ''} deleted`)
+        announce(`${deletedCount} clients deleted successfully`, 'polite')
+      }
+
+      if (failedDeletes.length > 0) {
+        toast.error(`Failed to delete ${failedDeletes.length} client${failedDeletes.length > 1 ? 's' : ''}`)
+      }
+    } catch (error: any) {
+      logger.error('Failed to bulk delete clients', {
+        error,
+        count: state.selectedClients.length
+      })
+      toast.error('Failed to delete clients', {
+        description: error.message || 'Please try again later'
+      })
+      announce('Error deleting clients', 'assertive')
+    } finally {
+      setIsDeleting(false)
+      setShowBulkDeleteDialog(false)
     }
   }
 
@@ -1953,6 +1987,77 @@ export default function ClientsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Single Client Confirmation Dialog */}
+      <AlertDialog open={showDeleteClientDialog} onOpenChange={setShowDeleteClientDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Client?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p className="font-medium text-red-700">
+                This action cannot be undone.
+              </p>
+              <p>
+                Are you sure you want to delete{' '}
+                <span className="font-semibold">
+                  {state.clients.find(c => c.id === clientToDelete)?.name}
+                </span>
+                ? All associated data will be permanently removed.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteClient}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Client'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete {state.selectedClients.length} Client{state.selectedClients.length > 1 ? 's' : ''}?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p className="font-medium text-red-700">
+                This action cannot be undone.
+              </p>
+              <p>
+                You are about to permanently delete{' '}
+                <span className="font-semibold">{state.selectedClients.length}</span>{' '}
+                selected client{state.selectedClients.length > 1 ? 's' : ''} and all their associated data.
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-sm">
+                <li>All client profiles will be removed</li>
+                <li>Project associations will be deleted</li>
+                <li>Contact history will be lost</li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmBulkDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : `Delete ${state.selectedClients.length} Client${state.selectedClients.length > 1 ? 's' : ''}`}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
