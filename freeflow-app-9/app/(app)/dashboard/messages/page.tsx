@@ -116,6 +116,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AIEnhancedInput } from '@/components/ai-create/ai-enhanced-input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -123,7 +133,7 @@ import {
   Send, Search, Filter, MessageSquare, Paperclip, Image as ImageIcon, Mic, Plus, Pin,
   Bell, BellOff, Archive, Trash2, CheckCheck, Reply, Forward, Smile, X, Users,
   Settings, Info, Download, Upload, Edit2, Check, MoreVertical, Phone, Video,
-  Camera, File, MapPin, Hash, AtSign, Clock, Star, Bookmark, Eye, EyeOff
+  Camera, File, MapPin, Hash, AtSign, Clock, Star, Bookmark, Eye, EyeOff, AlertTriangle
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
@@ -535,6 +545,13 @@ export default function MessagesPage() {
   const [isChatInfoModalOpen, setIsChatInfoModalOpen] = useState(false)
   const [isMediaGalleryModalOpen, setIsMediaGalleryModalOpen] = useState(false)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+
+  // AlertDialog States
+  const [showDeleteChatDialog, setShowDeleteChatDialog] = useState(false)
+  const [showDeleteMessageDialog, setShowDeleteMessageDialog] = useState(false)
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
+  const [chatToDelete, setChatToDelete] = useState<string | null>(null)
+  const [messageToDelete, setMessageToDelete] = useState<string | null>(null)
 
   // Form States for New Chat
   const [newChatName, setNewChatName] = useState('')
@@ -991,27 +1008,35 @@ export default function MessagesPage() {
       chatName: chat?.name
     })
 
-    if (confirm(`Delete conversation with ${chat?.name}? This action cannot be undone.`)) {
-      logger.warn('Chat deletion confirmed', {
-        chatId,
-        chatName: chat?.name
-      })
+    setChatToDelete(chatId)
+    setShowDeleteChatDialog(true)
+  }
 
-      dispatch({ type: 'DELETE_CHAT', chatId })
+  const confirmDeleteChat = () => {
+    if (!chatToDelete) return
 
-      // REAL: Clear draft for deleted chat
-      setMessageDrafts(prev => {
-        const updated = { ...prev }
-        delete updated[chatId]
-        return updated
-      })
+    const chat = state.chats.find(c => c.id === chatToDelete)
 
-      toast.success('Chat deleted', {
-        description: `Conversation with ${chat?.name} permanently removed`
-      })
-    } else {
-      logger.debug('Chat deletion cancelled by user', { chatId })
-    }
+    logger.warn('Chat deletion confirmed', {
+      chatId: chatToDelete,
+      chatName: chat?.name
+    })
+
+    dispatch({ type: 'DELETE_CHAT', chatId: chatToDelete })
+
+    // REAL: Clear draft for deleted chat
+    setMessageDrafts(prev => {
+      const updated = { ...prev }
+      delete updated[chatToDelete]
+      return updated
+    })
+
+    toast.success('Chat deleted', {
+      description: `Conversation with ${chat?.name} permanently removed`
+    })
+
+    setShowDeleteChatDialog(false)
+    setChatToDelete(null)
   }
 
   const handleMarkAsRead = async (chatId: string) => {
@@ -1258,27 +1283,33 @@ export default function MessagesPage() {
       sender: message?.sender
     })
 
-    if (confirm('Delete this message? This action cannot be undone.')) {
-      logger.warn('Message deletion confirmed', { messageId })
+    setMessageToDelete(messageId)
+    setShowDeleteMessageDialog(true)
+  }
 
-      try {
-        // REAL: Delete message immediately (optimistic)
-        dispatch({ type: 'DELETE_MESSAGE', messageId })
+  const confirmDeleteMessage = async () => {
+    if (!messageToDelete) return
 
-        logger.info('Message deleted successfully', { messageId })
-        toast.success('Message deleted')
-        announce('Message deleted', 'polite')
-      } catch (error: any) {
-        const errorMessage = error?.message || 'Failed to delete message'
-        logger.error('Failed to delete message', {
-          messageId,
-          error: errorMessage
-        })
-        toast.error('Failed to delete message')
-      }
-    } else {
-      logger.debug('Message deletion cancelled by user', { messageId })
+    logger.warn('Message deletion confirmed', { messageId: messageToDelete })
+
+    try {
+      // REAL: Delete message immediately (optimistic)
+      dispatch({ type: 'DELETE_MESSAGE', messageId: messageToDelete })
+
+      logger.info('Message deleted successfully', { messageId: messageToDelete })
+      toast.success('Message deleted')
+      announce('Message deleted', 'polite')
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to delete message'
+      logger.error('Failed to delete message', {
+        messageId: messageToDelete,
+        error: errorMessage
+      })
+      toast.error('Failed to delete message')
     }
+
+    setShowDeleteMessageDialog(false)
+    setMessageToDelete(null)
   }
 
   const handleExportChat = async () => {
@@ -1351,22 +1382,26 @@ export default function MessagesPage() {
       messageIds: state.selectedMessages
     })
 
-    if (confirm(`Delete ${selectedCount} messages? This action cannot be undone.`)) {
-      logger.warn('Bulk deletion confirmed', { messageCount: selectedCount })
+    setShowBulkDeleteDialog(true)
+  }
 
-      // REAL: Delete all selected messages
-      state.selectedMessages.forEach(id => {
-        dispatch({ type: 'DELETE_MESSAGE', messageId: id })
-      })
+  const confirmBulkDelete = () => {
+    const selectedCount = state.selectedMessages.length
 
-      dispatch({ type: 'CLEAR_SELECTED_MESSAGES' })
+    logger.warn('Bulk deletion confirmed', { messageCount: selectedCount })
 
-      logger.info('Bulk deletion complete', { deletedCount: selectedCount })
-      toast.success(`${selectedCount} messages deleted`)
-      announce(`${selectedCount} messages deleted`, 'polite')
-    } else {
-      logger.debug('Bulk deletion cancelled by user')
-    }
+    // REAL: Delete all selected messages
+    state.selectedMessages.forEach(id => {
+      dispatch({ type: 'DELETE_MESSAGE', messageId: id })
+    })
+
+    dispatch({ type: 'CLEAR_SELECTED_MESSAGES' })
+
+    logger.info('Bulk deletion complete', { deletedCount: selectedCount })
+    toast.success(`${selectedCount} messages deleted`)
+    announce(`${selectedCount} messages deleted`, 'polite')
+
+    setShowBulkDeleteDialog(false)
   }
 
   // ============================================================================
@@ -2102,6 +2137,93 @@ export default function MessagesPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Chat Dialog */}
+      <AlertDialog open={showDeleteChatDialog} onOpenChange={setShowDeleteChatDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Conversation?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to delete your conversation with <strong>{state.chats.find(c => c.id === chatToDelete)?.name}</strong>?
+              </p>
+              <p className="text-sm text-red-600">
+                This action cannot be undone. All messages will be permanently deleted.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setChatToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteChat}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete Chat
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Message Dialog */}
+      <AlertDialog open={showDeleteMessageDialog} onOpenChange={setShowDeleteMessageDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Message?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to delete this message?
+              </p>
+              <p className="text-sm text-red-600">
+                This action cannot be undone.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setMessageToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteMessage}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete Message
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Dialog */}
+      <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete {state.selectedMessages.length} Messages?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to delete <strong>{state.selectedMessages.length}</strong> selected messages?
+              </p>
+              <p className="text-sm text-red-600">
+                This action cannot be undone. All selected messages will be permanently deleted.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmBulkDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete All Selected
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

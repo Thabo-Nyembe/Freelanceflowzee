@@ -3,6 +3,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/card'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
 import { ErrorBoundary } from '@/components/ui/error-boundary-system'
 import {
   Key, Shield, Zap, Eye, EyeOff, CheckCircle, AlertTriangle,
@@ -165,6 +175,14 @@ export default function AISettingsPage() {
   const [defaultProviders, setDefaultProviders] = useState<Record<string, string>>({})
   const [rateLimits, setRateLimits] = useState<{ perMinute: number; perHour: number }>({ perMinute: 60, perHour: 1000 })
 
+  // AlertDialog States
+  const [showDeleteProviderDialog, setShowDeleteProviderDialog] = useState(false)
+  const [showRotateKeyDialog, setShowRotateKeyDialog] = useState(false)
+  const [showEnableLoggingDialog, setShowEnableLoggingDialog] = useState(false)
+  const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
+  const [providerToDelete, setProviderToDelete] = useState<string | null>(null)
+  const [providerToRotate, setProviderToRotate] = useState<string | null>(null)
+
   // ============================================
   // AI SETTINGS HANDLERS
   // ============================================
@@ -265,29 +283,36 @@ export default function AISettingsPage() {
     const provider = providers.find(p => p.id === providerId)
     if (!provider) return
 
-    if (!confirm(`Remove ${provider.name} from your AI providers?`)) {
-      logger.info('Provider deletion cancelled', { providerId, providerName: provider.name })
-      return
-    }
+    setProviderToDelete(providerId)
+    setShowDeleteProviderDialog(true)
+  }
+
+  const confirmDeleteProvider = () => {
+    if (!providerToDelete) return
+
+    const provider = providers.find(p => p.id === providerToDelete)
 
     // Remove provider's API key
     const newKeys = { ...apiKeys }
-    delete newKeys[providerId]
+    delete newKeys[providerToDelete]
     setApiKeys(newKeys)
     localStorage.setItem('kazi-ai-keys', JSON.stringify(newKeys))
 
     // Remove from providers list
-    setProviders(prev => prev.filter(p => p.id !== providerId))
+    setProviders(prev => prev.filter(p => p.id !== providerToDelete))
 
     logger.info('Provider deleted successfully', {
-      providerId,
-      providerName: provider.name,
+      providerId: providerToDelete,
+      providerName: provider?.name,
       remainingProviders: providers.length - 1
     })
 
     toast.success('Provider Removed', {
-      description: `${provider.name} removed - ${providers.length - 1} providers remaining`
+      description: `${provider?.name} removed - ${providers.length - 1} providers remaining`
     })
+
+    setShowDeleteProviderDialog(false)
+    setProviderToDelete(null)
   }
 
   const handleRefreshProviders = async () => {
@@ -412,25 +437,32 @@ export default function AISettingsPage() {
     const provider = providers.find(p => p.id === providerId)
     if (!provider) return
 
-    if (!confirm(`Rotate API key for ${provider.name}?`)) {
-      logger.info('API key rotation cancelled', { providerId, providerName: provider.name })
-      return
-    }
+    setProviderToRotate(providerId)
+    setShowRotateKeyDialog(true)
+  }
+
+  const confirmRotateApiKey = () => {
+    if (!providerToRotate) return
+
+    const provider = providers.find(p => p.id === providerToRotate)
 
     // Clear current key
     const newKeys = { ...apiKeys }
-    delete newKeys[providerId]
+    delete newKeys[providerToRotate]
     setApiKeys(newKeys)
     localStorage.setItem('kazi-ai-keys', JSON.stringify(newKeys))
 
     logger.info('API key rotation initiated', {
-      providerId,
-      providerName: provider.name
+      providerId: providerToRotate,
+      providerName: provider?.name
     })
 
     toast.success('Key Rotation Scheduled', {
-      description: `${provider.name} API key cleared - Please enter new key and test connection`
+      description: `${provider?.name} API key cleared - Please enter new key and test connection`
     })
+
+    setShowRotateKeyDialog(false)
+    setProviderToRotate(null)
   }
 
   const handleSetDefaultProvider = (providerId: string, feature: string) => {
@@ -494,22 +526,22 @@ export default function AISettingsPage() {
   }
 
   const handleEnableLogging = () => {
-    const loggingEnabled = confirm('Enable detailed request logging? (May impact performance)')
+    setShowEnableLoggingDialog(true)
+  }
 
-    if (loggingEnabled) {
-      localStorage.setItem('kazi-ai-logging', 'true')
+  const confirmEnableLogging = () => {
+    localStorage.setItem('kazi-ai-logging', 'true')
 
-      logger.info('Request logging enabled', {
-        logLevel: 'detailed',
-        includePayloads: true
-      })
+    logger.info('Request logging enabled', {
+      logLevel: 'detailed',
+      includePayloads: true
+    })
 
-      toast.success('Request Logging Enabled', {
-        description: 'All AI API requests will be logged for debugging'
-      })
-    } else {
-      logger.info('Request logging cancelled', {})
-    }
+    toast.success('Request Logging Enabled', {
+      description: 'All AI API requests will be logged for debugging'
+    })
+
+    setShowEnableLoggingDialog(false)
   }
 
   const handleBackupSettings = () => {
@@ -551,11 +583,10 @@ export default function AISettingsPage() {
   }
 
   const handleClearCache = () => {
-    if (!confirm('Clear all cached AI responses? This cannot be undone.')) {
-      logger.info('Cache clearing cancelled', {})
-      return
-    }
+    setShowClearCacheDialog(true)
+  }
 
+  const confirmClearCache = () => {
     // Clear cached responses from localStorage
     const cacheKeys = Object.keys(localStorage).filter(k => k.startsWith('kazi-ai-cache-'))
     cacheKeys.forEach(key => localStorage.removeItem(key))
@@ -567,6 +598,8 @@ export default function AISettingsPage() {
     toast.success('Cache Cleared', {
       description: `${cacheKeys.length} cached responses removed`
     })
+
+    setShowClearCacheDialog(false)
   }
 
   const handleConfigureRetry = () => {
@@ -1249,6 +1282,122 @@ export default function AISettingsPage() {
           </Tabs>
         </div>
       </div>
+
+      {/* Delete Provider Dialog */}
+      <AlertDialog open={showDeleteProviderDialog} onOpenChange={setShowDeleteProviderDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Remove AI Provider?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to remove <strong>{providers.find(p => p.id === providerToDelete)?.name}</strong> from your AI providers?
+              </p>
+              <p className="text-sm text-yellow-600">
+                This will also delete the associated API key.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setProviderToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteProvider}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Remove Provider
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Rotate API Key Dialog */}
+      <AlertDialog open={showRotateKeyDialog} onOpenChange={setShowRotateKeyDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-yellow-600">
+              <AlertTriangle className="w-5 h-5" />
+              Rotate API Key?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to rotate the API key for <strong>{providers.find(p => p.id === providerToRotate)?.name}</strong>?
+              </p>
+              <p className="text-sm text-yellow-600">
+                The current key will be cleared. You&apos;ll need to enter a new key and test the connection.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setProviderToRotate(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmRotateApiKey}
+              className="bg-yellow-600 hover:bg-yellow-700"
+            >
+              Rotate Key
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Enable Logging Dialog */}
+      <AlertDialog open={showEnableLoggingDialog} onOpenChange={setShowEnableLoggingDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-blue-600">
+              <AlertTriangle className="w-5 h-5" />
+              Enable Request Logging?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Enable detailed request logging for all AI API requests?
+              </p>
+              <p className="text-sm text-yellow-600">
+                This may impact performance and should be used for debugging only.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmEnableLogging}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Enable Logging
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clear Cache Dialog */}
+      <AlertDialog open={showClearCacheDialog} onOpenChange={setShowClearCacheDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Clear AI Cache?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Clear all cached AI responses?
+              </p>
+              <p className="text-sm text-red-600">
+                This action cannot be undone. All cached responses will be permanently deleted.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmClearCache}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Clear Cache
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </ErrorBoundary>
   )
 }

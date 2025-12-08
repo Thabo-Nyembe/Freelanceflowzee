@@ -7,6 +7,16 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { toast } from 'sonner'
@@ -37,7 +47,8 @@ import {
   Bookmark,
   Copy,
   Zap,
-  Star
+  Star,
+  AlertTriangle
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -252,6 +263,13 @@ export default function AIAssistantPage() {
   const [isVoiceMode, setIsVoiceMode] = useState<boolean>(false)
   const [isListening, setIsListening] = useState<boolean>(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // AlertDialog States
+  const [showDeleteConversationDialog, setShowDeleteConversationDialog] = useState(false)
+  const [showClearChatDialog, setShowClearChatDialog] = useState(false)
+  const [showDismissInsightDialog, setShowDismissInsightDialog] = useState(false)
+  const [conversationToDelete, setConversationToDelete] = useState<string | null>(null)
+  const [insightToDismiss, setInsightToDismiss] = useState<string | null>(null)
 
   const [conversations, setConversations] = useState<Conversation[]>([
     {
@@ -571,20 +589,28 @@ export default function AIAssistantPage() {
       messageCount: conversation?.messageCount
     })
 
-    if (confirm(`Delete "${conversation?.title}"? This action cannot be undone.`)) {
-      logger.info('Conversation deleted', {
-        conversationId,
-        title: conversation?.title,
-        messageCount: conversation?.messageCount
-      })
+    setConversationToDelete(conversationId)
+    setShowDeleteConversationDialog(true)
+  }
 
-      // Note: Using local state - in production, this would DELETE to /api/conversations/:id
-      toast.success('Conversation deleted', {
-        description: `${conversation?.title} - ${conversation?.messageCount} messages removed`
-      })
-    } else {
-      logger.debug('Conversation deletion cancelled', { conversationId })
-    }
+  const confirmDeleteConversation = () => {
+    if (!conversationToDelete) return
+
+    const conversation = conversations.find(c => c.id === conversationToDelete)
+
+    logger.info('Conversation deleted', {
+      conversationId: conversationToDelete,
+      title: conversation?.title,
+      messageCount: conversation?.messageCount
+    })
+
+    // Note: Using local state - in production, this would DELETE to /api/conversations/:id
+    toast.success('Conversation deleted', {
+      description: `${conversation?.title} - ${conversation?.messageCount} messages removed`
+    })
+
+    setShowDeleteConversationDialog(false)
+    setConversationToDelete(null)
   }
 
   const handleCopyMessage = (messageId: string, content: string) => {
@@ -846,17 +872,21 @@ export default function AIAssistantPage() {
 
     logger.info('Clear chat requested', { messageCount })
 
-    if (confirm(`Clear all ${messageCount} messages? This action cannot be undone.`)) {
-      logger.info('Chat cleared', { clearedMessageCount: messageCount })
+    setShowClearChatDialog(true)
+  }
 
-      setMessages([])
+  const confirmClearChat = () => {
+    const messageCount = messages.length
 
-      toast.success('Chat cleared', {
-        description: `${messageCount} messages removed`
-      })
-    } else {
-      logger.debug('Chat clear cancelled')
-    }
+    logger.info('Chat cleared', { clearedMessageCount: messageCount })
+
+    setMessages([])
+
+    toast.success('Chat cleared', {
+      description: `${messageCount} messages removed`
+    })
+
+    setShowClearChatDialog(false)
   }
 
   const handleAttachFile = () => {
@@ -896,19 +926,27 @@ export default function AIAssistantPage() {
       priority: insight?.priority
     })
 
-    if (confirm(`Dismiss "${insight?.title}"?`)) {
-      logger.info('Insight dismissed', {
-        insightId,
-        title: insight?.title
-      })
+    setInsightToDismiss(insightId)
+    setShowDismissInsightDialog(true)
+  }
 
-      // Note: Using local state - in production, this would DELETE to /api/ai/insights/:id
-      toast.success('Insight dismissed', {
-        description: `${insight?.title} - ${insight?.priority} priority removed`
-      })
-    } else {
-      logger.debug('Insight dismiss cancelled', { insightId })
-    }
+  const confirmDismissInsight = () => {
+    if (!insightToDismiss) return
+
+    const insight = aiInsights.find(i => i.id === insightToDismiss)
+
+    logger.info('Insight dismissed', {
+      insightId: insightToDismiss,
+      title: insight?.title
+    })
+
+    // Note: Using local state - in production, this would DELETE to /api/ai/insights/:id
+    toast.success('Insight dismissed', {
+      description: `${insight?.title} - ${insight?.priority} priority removed`
+    })
+
+    setShowDismissInsightDialog(false)
+    setInsightToDismiss(null)
   }
 
   const handlePinConversation = (conversationId: string) => {
@@ -1421,6 +1459,93 @@ export default function AIAssistantPage() {
           </Tabs>
         </div>
       </div>
+
+      {/* Delete Conversation Dialog */}
+      <AlertDialog open={showDeleteConversationDialog} onOpenChange={setShowDeleteConversationDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Conversation?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to delete <strong>&quot;{conversations.find(c => c.id === conversationToDelete)?.title}&quot;</strong>?
+              </p>
+              <p className="text-sm text-red-600">
+                This action cannot be undone. All {conversations.find(c => c.id === conversationToDelete)?.messageCount || 0} messages will be permanently deleted.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setConversationToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteConversation}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete Conversation
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clear Chat Dialog */}
+      <AlertDialog open={showClearChatDialog} onOpenChange={setShowClearChatDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Clear All Messages?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to clear all <strong>{messages.length}</strong> messages from this chat?
+              </p>
+              <p className="text-sm text-red-600">
+                This action cannot be undone. All messages will be permanently deleted.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmClearChat}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Clear All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Dismiss Insight Dialog */}
+      <AlertDialog open={showDismissInsightDialog} onOpenChange={setShowDismissInsightDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-yellow-600">
+              <AlertTriangle className="w-5 h-5" />
+              Dismiss Insight?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Are you sure you want to dismiss <strong>&quot;{aiInsights.find(i => i.id === insightToDismiss)?.title}&quot;</strong>?
+              </p>
+              <p className="text-sm text-gray-600">
+                This insight will be removed from your dashboard.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setInsightToDismiss(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDismissInsight}
+              className="bg-yellow-600 hover:bg-yellow-700"
+            >
+              Dismiss
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
