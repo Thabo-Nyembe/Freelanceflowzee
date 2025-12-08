@@ -35,8 +35,19 @@ import {
   Move,
   CheckSquare,
   Archive,
-  Tag
+  Tag,
+  AlertTriangle
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 // PRODUCTION LOGGER
 import { createFeatureLogger } from '@/lib/logger'
@@ -108,6 +119,14 @@ export default function GalleryPage() {
   const [aiPrompt, setAiPrompt] = useState<string>('')
   const [isGenerating, setIsGenerating] = useState<boolean>(false)
   const [generatedImage, setGeneratedImage] = useState<string>('')
+
+  // AlertDialog states for confirmations
+  const [showDeleteImageDialog, setShowDeleteImageDialog] = useState(false)
+  const [showDeleteAlbumDialog, setShowDeleteAlbumDialog] = useState(false)
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
+  const [imageToDelete, setImageToDelete] = useState<string | null>(null)
+  const [albumToDelete, setAlbumToDelete] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // A+++ LOAD GALLERY DATA FROM SUPABASE
   useEffect(() => {
@@ -407,54 +426,66 @@ export default function GalleryPage() {
 
     logger.info('Delete image initiated', { imageId, fileName: image.fileName })
 
-    if (confirm(`Delete "${image.title}"?`)) {
-      try {
-        // Delete from storage if storage_path exists
-        if (image.storagePath) {
-          const { createClient } = await import('@/lib/supabase/client')
-          const supabase = createClient()
+    setImageToDelete(imageId)
+    setShowDeleteImageDialog(true)
+  }
 
-          await supabase.storage
-            .from('user-files')
-            .remove([image.storagePath])
+  const confirmDeleteImage = async () => {
+    if (!imageToDelete) return
 
-          logger.info('Image deleted from storage', { storagePath: image.storagePath })
-        }
+    const image = images.find(img => img.id === imageToDelete)
+    if (!image) return
 
-        // Delete from database
-        const { deleteGalleryImage } = await import('@/lib/gallery-queries')
+    setIsDeleting(true)
+    try {
+      // Delete from storage if storage_path exists
+      if (image.storagePath) {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
 
-        const { error } = await deleteGalleryImage(imageId)
+        await supabase.storage
+          .from('user-files')
+          .remove([image.storagePath])
 
-        if (error) {
-          throw new Error(error.message || 'Failed to delete image')
-        }
-
-        // Optimistic UI update
-        setImages(prev => prev.filter(img => img.id !== imageId))
-        setSelectedImages(prev => {
-          const newSet = new Set(prev)
-          newSet.delete(imageId)
-          return newSet
-        })
-
-        logger.info('Image deleted from Supabase successfully', {
-          imageId,
-          fileName: image.fileName,
-          fileSize: image.fileSize
-        })
-
-        toast.success('Image deleted', {
-          description: `${image.fileName} has been removed`
-        })
-      } catch (err) {
-        logger.error('Failed to delete image', { error: err, imageId })
-        toast.error('Failed to delete image', {
-          description: err instanceof Error ? err.message : 'Unknown error'
-        })
+        logger.info('Image deleted from storage', { storagePath: image.storagePath })
       }
-    } else {
-      logger.debug('Delete cancelled by user', { imageId })
+
+      // Delete from database
+      const { deleteGalleryImage } = await import('@/lib/gallery-queries')
+
+      const { error } = await deleteGalleryImage(imageToDelete)
+
+      if (error) {
+        throw new Error(error.message || 'Failed to delete image')
+      }
+
+      // Optimistic UI update
+      setImages(prev => prev.filter(img => img.id !== imageToDelete))
+      setSelectedImages(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(imageToDelete)
+        return newSet
+      })
+
+      logger.info('Image deleted from Supabase successfully', {
+        imageId: imageToDelete,
+        fileName: image.fileName,
+        fileSize: image.fileSize
+      })
+
+      toast.success('Image deleted', {
+        description: `${image.fileName} has been removed`
+      })
+      announce(`Image ${image.title} deleted`, 'polite')
+    } catch (err) {
+      logger.error('Failed to delete image', { error: err, imageId: imageToDelete })
+      toast.error('Failed to delete image', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteImageDialog(false)
+      setImageToDelete(null)
     }
   }
 
@@ -677,40 +708,52 @@ export default function GalleryPage() {
       imageCount: album.imageCount
     })
 
-    if (confirm(`Delete album "${album.name}"? Images will be moved to unorganized.`)) {
-      try {
-        const { deleteGalleryAlbum } = await import('@/lib/gallery-queries')
+    setAlbumToDelete(albumId)
+    setShowDeleteAlbumDialog(true)
+  }
 
-        const { error } = await deleteGalleryAlbum(albumId)
+  const confirmDeleteAlbum = async () => {
+    if (!albumToDelete) return
 
-        if (error) {
-          throw new Error(error.message || 'Failed to delete album')
-        }
+    const album = albums.find(a => a.id === albumToDelete)
+    if (!album) return
 
-        // Optimistic UI update - remove album reference from images
-        setImages(prev => prev.map(img =>
-          img.albumId === albumId ? { ...img, albumId: null } : img
-        ))
+    setIsDeleting(true)
+    try {
+      const { deleteGalleryAlbum } = await import('@/lib/gallery-queries')
 
-        setAlbums(prev => prev.filter(a => a.id !== albumId))
+      const { error } = await deleteGalleryAlbum(albumToDelete)
 
-        logger.info('Album deleted from Supabase successfully', {
-          albumId,
-          albumName: album.name,
-          imagesAffected: album.imageCount
-        })
-
-        toast.success('Album deleted', {
-          description: `${album.name} - ${album.imageCount} images moved to unorganized`
-        })
-      } catch (err) {
-        logger.error('Failed to delete album', { error: err, albumId })
-        toast.error('Failed to delete album', {
-          description: err instanceof Error ? err.message : 'Unknown error'
-        })
+      if (error) {
+        throw new Error(error.message || 'Failed to delete album')
       }
-    } else {
-      logger.debug('Album deletion cancelled', { albumId })
+
+      // Optimistic UI update - remove album reference from images
+      setImages(prev => prev.map(img =>
+        img.albumId === albumToDelete ? { ...img, albumId: null } : img
+      ))
+
+      setAlbums(prev => prev.filter(a => a.id !== albumToDelete))
+
+      logger.info('Album deleted from Supabase successfully', {
+        albumId: albumToDelete,
+        albumName: album.name,
+        imagesAffected: album.imageCount
+      })
+
+      toast.success('Album deleted', {
+        description: `${album.name} - ${album.imageCount} images moved to unorganized`
+      })
+      announce(`Album ${album.name} deleted`, 'polite')
+    } catch (err) {
+      logger.error('Failed to delete album', { error: err, albumId: albumToDelete })
+      toast.error('Failed to delete album', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteAlbumDialog(false)
+      setAlbumToDelete(null)
     }
   }
 
@@ -760,42 +803,47 @@ export default function GalleryPage() {
     }
 
     logger.info('Bulk delete initiated', { selectedCount: count })
+    setShowBulkDeleteDialog(true)
+  }
 
+  const confirmBulkDelete = async () => {
+    const count = selectedImages.size
     const imagesToDelete = images.filter(img => selectedImages.has(img.id))
     const totalSize = imagesToDelete.reduce((sum, img) => sum + img.fileSize, 0)
     const imageIds = Array.from(selectedImages)
 
-    if (confirm(`Delete ${count} images?`)) {
-      try {
-        const { bulkDeleteGalleryImages } = await import('@/lib/gallery-queries')
+    setIsDeleting(true)
+    try {
+      const { bulkDeleteGalleryImages } = await import('@/lib/gallery-queries')
 
-        const { error } = await bulkDeleteGalleryImages(imageIds)
+      const { error } = await bulkDeleteGalleryImages(imageIds)
 
-        if (error) {
-          throw new Error(error.message || 'Failed to bulk delete images')
-        }
-
-        // Optimistic UI update
-        setImages(prev => prev.filter(img => !selectedImages.has(img.id)))
-        setSelectedImages(new Set())
-
-        logger.info('Bulk delete from Supabase successful', {
-          deletedCount: count,
-          totalSize,
-          imageIds
-        })
-
-        toast.success('Images deleted', {
-          description: `${count} images removed (${formatFileSize(totalSize)})`
-        })
-      } catch (err) {
-        logger.error('Failed to bulk delete images', { error: err, count })
-        toast.error('Failed to delete images', {
-          description: err instanceof Error ? err.message : 'Unknown error'
-        })
+      if (error) {
+        throw new Error(error.message || 'Failed to bulk delete images')
       }
-    } else {
-      logger.debug('Bulk delete cancelled')
+
+      // Optimistic UI update
+      setImages(prev => prev.filter(img => !selectedImages.has(img.id)))
+      setSelectedImages(new Set())
+
+      logger.info('Bulk delete from Supabase successful', {
+        deletedCount: count,
+        totalSize,
+        imageIds
+      })
+
+      toast.success('Images deleted', {
+        description: `${count} images removed (${formatFileSize(totalSize)})`
+      })
+      announce(`${count} images deleted`, 'polite')
+    } catch (err) {
+      logger.error('Failed to bulk delete images', { error: err, count })
+      toast.error('Failed to delete images', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
+    } finally {
+      setIsDeleting(false)
+      setShowBulkDeleteDialog(false)
     }
   }
 
@@ -1583,6 +1631,84 @@ export default function GalleryPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete Image AlertDialog */}
+      <AlertDialog open={showDeleteImageDialog} onOpenChange={setShowDeleteImageDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Delete Image
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{images.find(img => img.id === imageToDelete)?.title}&quot;?
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteImage}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Image'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Album AlertDialog */}
+      <AlertDialog open={showDeleteAlbumDialog} onOpenChange={setShowDeleteAlbumDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Delete Album
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{albums.find(a => a.id === albumToDelete)?.name}&quot;?
+              Images in this album will be moved to unorganized.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteAlbum}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Album'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete AlertDialog */}
+      <AlertDialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Delete Multiple Images
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedImages.size} images?
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmBulkDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : `Delete ${selectedImages.size} Images`}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

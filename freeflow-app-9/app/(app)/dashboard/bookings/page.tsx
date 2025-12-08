@@ -18,10 +18,21 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  AlertTriangle,
   RefreshCw,
   Download,
   Settings
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import {
   Card,
   CardHeader,
@@ -73,6 +84,11 @@ export default function UpcomingBookingsPage() {
   const [serviceFilter, setServiceFilter] = useState<string>('all')
   const [isCreating, setIsCreating] = useState(false)
   const [bookings, setBookings] = useState<Booking[]>(mockBookings)
+
+  // AlertDialog states
+  const [showCancelBookingDialog, setShowCancelBookingDialog] = useState(false)
+  const [bookingToCancel, setBookingToCancel] = useState<string | null>(null)
+  const [isCancelling, setIsCancelling] = useState(false)
 
   // Load bookings data from Supabase
   useEffect(() => {
@@ -293,64 +309,77 @@ export default function UpcomingBookingsPage() {
       amount: booking.amount
     })
 
-    if (confirm(`Cancel booking for ${booking.clientName}?`)) {
-      try {
-        // Dynamic import
-        const { updateBookingStatus, updatePaymentStatus } = await import('@/lib/bookings-queries')
+    setBookingToCancel(id)
+    setShowCancelBookingDialog(true)
+  }
 
-        // Update booking status to cancelled
-        const { error: statusError } = await updateBookingStatus(id, 'cancelled')
-        if (statusError) {
-          throw new Error(statusError.message || 'Failed to cancel booking')
-        }
+  const confirmCancelBooking = async () => {
+    if (!bookingToCancel) return
 
-        // Update payment status if needed
-        if (booking.payment === 'paid') {
-          const { error: paymentError } = await updatePaymentStatus(id, 'refunded')
-          if (paymentError) {
-            throw new Error(paymentError.message || 'Failed to process refund')
-          }
-        }
+    const booking = bookings.find(b => b.id === bookingToCancel)
+    if (!booking) return
 
-        // Optimistic UI update
-        setBookings(prev =>
-          prev.map(b =>
-            b.id === id
-              ? {
-                  ...b,
-                  status: 'cancelled',
-                  payment: b.payment === 'paid' ? 'refunded' : 'awaiting'
-                }
-              : b
-          )
-        )
+    setIsCancelling(true)
+    try {
+      // Dynamic import
+      const { updateBookingStatus, updatePaymentStatus } = await import('@/lib/bookings-queries')
 
-        const refundAmount = booking.payment === 'paid' ? booking.amount : 0
-        logger.info('Booking cancelled in Supabase successfully', {
-          bookingId: id,
-          clientName: booking.clientName,
-          refundAmount,
-          previousStatus: booking.status
-        })
-
-        const cancelled = countByStatus(bookings, 'cancelled') + 1
-        toast.success('Booking cancelled', {
-          description:
-            refundAmount > 0
-              ? `$${refundAmount} refund processed for ${booking.clientName}. Total cancelled: ${cancelled}`
-              : `Booking cancelled for ${booking.clientName}. Total cancelled: ${cancelled}`
-        })
-
-        announce(`Booking cancelled for ${booking.clientName}`, 'polite')
-      } catch (error: any) {
-        logger.error('Failed to cancel booking', {
-          error: error.message,
-          bookingId: id
-        })
-        toast.error('Failed to cancel booking', {
-          description: error.message || 'Please try again later'
-        })
+      // Update booking status to cancelled
+      const { error: statusError } = await updateBookingStatus(bookingToCancel, 'cancelled')
+      if (statusError) {
+        throw new Error(statusError.message || 'Failed to cancel booking')
       }
+
+      // Update payment status if needed
+      if (booking.payment === 'paid') {
+        const { error: paymentError } = await updatePaymentStatus(bookingToCancel, 'refunded')
+        if (paymentError) {
+          throw new Error(paymentError.message || 'Failed to process refund')
+        }
+      }
+
+      // Optimistic UI update
+      setBookings(prev =>
+        prev.map(b =>
+          b.id === bookingToCancel
+            ? {
+                ...b,
+                status: 'cancelled',
+                payment: b.payment === 'paid' ? 'refunded' : 'awaiting'
+              }
+            : b
+        )
+      )
+
+      const refundAmount = booking.payment === 'paid' ? booking.amount : 0
+      logger.info('Booking cancelled in Supabase successfully', {
+        bookingId: bookingToCancel,
+        clientName: booking.clientName,
+        refundAmount,
+        previousStatus: booking.status
+      })
+
+      const cancelled = countByStatus(bookings, 'cancelled') + 1
+      toast.success('Booking cancelled', {
+        description:
+          refundAmount > 0
+            ? `$${refundAmount} refund processed for ${booking.clientName}. Total cancelled: ${cancelled}`
+            : `Booking cancelled for ${booking.clientName}. Total cancelled: ${cancelled}`
+      })
+
+      announce(`Booking cancelled for ${booking.clientName}`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to cancel booking', {
+        error: error.message,
+        bookingId: bookingToCancel
+      })
+      toast.error('Failed to cancel booking', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsCancelling(false)
+      setShowCancelBookingDialog(false)
+      setBookingToCancel(null)
     }
   }
 
@@ -913,6 +942,36 @@ export default function UpcomingBookingsPage() {
           </div>
         </CardFooter>
       </Card>
+
+      {/* Cancel Booking AlertDialog */}
+      <AlertDialog open={showCancelBookingDialog} onOpenChange={setShowCancelBookingDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Cancel Booking
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel the booking for &quot;{bookings.find(b => b.id === bookingToCancel)?.clientName}&quot;?
+              {bookings.find(b => b.id === bookingToCancel)?.payment === 'paid' && (
+                <span className="block mt-2 text-orange-600">
+                  A refund of ${bookings.find(b => b.id === bookingToCancel)?.amount} will be processed.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isCancelling}>Keep Booking</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmCancelBooking}
+              disabled={isCancelling}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isCancelling ? 'Cancelling...' : 'Cancel Booking'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

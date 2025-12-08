@@ -33,10 +33,21 @@ import {
   ArrowDown,
   Check,
   AlertCircle,
+  AlertTriangle,
   Code,
   Languages,
   Lightbulb
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
@@ -180,6 +191,21 @@ export default function CVPortfolioPage() {
   const [isExporting, setIsExporting] = useState<boolean>(false)
   const [isSharing, setIsSharing] = useState<boolean>(false)
   const [previewMode, setPreviewMode] = useState<boolean>(false)
+
+  // AlertDialog states for confirmations
+  const [showDeleteProjectDialog, setShowDeleteProjectDialog] = useState(false)
+  const [showRemoveSkillDialog, setShowRemoveSkillDialog] = useState(false)
+  const [showDeleteExperienceDialog, setShowDeleteExperienceDialog] = useState(false)
+  const [showDeleteEducationDialog, setShowDeleteEducationDialog] = useState(false)
+  const [showDeleteAchievementDialog, setShowDeleteAchievementDialog] = useState(false)
+  const [showBulkDeleteProjectsDialog, setShowBulkDeleteProjectsDialog] = useState(false)
+  const [projectToDelete, setProjectToDelete] = useState<number | null>(null)
+  const [skillToRemove, setSkillToRemove] = useState<number | null>(null)
+  const [experienceToDelete, setExperienceToDelete] = useState<number | null>(null)
+  const [educationToDelete, setEducationToDelete] = useState<number | null>(null)
+  const [achievementToDelete, setAchievementToDelete] = useState<number | null>(null)
+  const [projectsToDelete, setProjectsToDelete] = useState<number[]>([])
+  const [isDeleting, setIsDeleting] = useState(false)
 
   // REAL STATE - Projects
   const [projects, setProjects] = useState<Project[]>([
@@ -533,21 +559,38 @@ export default function CVPortfolioPage() {
     const project = projects.find(p => p.id === projectId)
     if (!project) return
 
-    if (!confirm(`Delete "${project.title}"? This will remove it from your portfolio.`)) return
+    setProjectToDelete(projectId)
+    setShowDeleteProjectDialog(true)
+  }
 
-    setProjects(prev => prev.filter(p => p.id !== projectId))
+  const confirmDeleteProject = async () => {
+    if (!projectToDelete) return
 
-    const newCompleteness = calculateCompleteness()
-    logger.info('Project deleted', {
-      projectId,
-      projectTitle: project.title,
-      remainingProjects: projects.length - 1,
-      completenessScore: newCompleteness
-    })
+    const project = projects.find(p => p.id === projectToDelete)
+    if (!project) return
 
-    toast.success('Project Deleted', {
-      description: `"${project.title}" removed from portfolio`
-    })
+    setIsDeleting(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300))
+      setProjects(prev => prev.filter(p => p.id !== projectToDelete))
+
+      const newCompleteness = calculateCompleteness()
+      logger.info('Project deleted', {
+        projectId: projectToDelete,
+        projectTitle: project.title,
+        remainingProjects: projects.length - 1,
+        completenessScore: newCompleteness
+      })
+
+      toast.success('Project Deleted', {
+        description: `"${project.title}" removed from portfolio`
+      })
+      announce(`Project ${project.title} deleted`, 'polite')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteProjectDialog(false)
+      setProjectToDelete(null)
+    }
   }
 
   const handleViewProject = (project: Project) => {
@@ -630,22 +673,39 @@ export default function CVPortfolioPage() {
     const skill = skills.find(s => s.id === skillId)
     if (!skill) return
 
-    if (!confirm(`Remove "${skill.name}" skill?`)) return
+    setSkillToRemove(skillId)
+    setShowRemoveSkillDialog(true)
+  }
 
-    setSkills(prev => prev.filter(s => s.id !== skillId))
+  const confirmRemoveSkill = async () => {
+    if (!skillToRemove) return
 
-    const newCompleteness = calculateCompleteness()
-    logger.info('Skill removed', {
-      skillId,
-      skillName: skill.name,
-      category: skill.category,
-      remainingSkills: skills.length - 1,
-      completenessScore: newCompleteness
-    })
+    const skill = skills.find(s => s.id === skillToRemove)
+    if (!skill) return
 
-    toast.success('Skill Removed', {
-      description: `${skill.name} deleted (${skills.length - 1} skills remaining)`
-    })
+    setIsDeleting(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300))
+      setSkills(prev => prev.filter(s => s.id !== skillToRemove))
+
+      const newCompleteness = calculateCompleteness()
+      logger.info('Skill removed', {
+        skillId: skillToRemove,
+        skillName: skill.name,
+        category: skill.category,
+        remainingSkills: skills.length - 1,
+        completenessScore: newCompleteness
+      })
+
+      toast.success('Skill Removed', {
+        description: `${skill.name} deleted (${skills.length - 1} skills remaining)`
+      })
+      announce(`Skill ${skill.name} removed`, 'polite')
+    } finally {
+      setIsDeleting(false)
+      setShowRemoveSkillDialog(false)
+      setSkillToRemove(null)
+    }
   }
 
   // ==================== EXPERIENCE HANDLERS ====================
@@ -736,25 +796,42 @@ export default function CVPortfolioPage() {
     const exp = experience.find(e => e.id === experienceId)
     if (!exp) return
 
-    if (!confirm(`Delete experience at ${exp.company}?`)) return
+    setExperienceToDelete(experienceId)
+    setShowDeleteExperienceDialog(true)
+  }
 
-    setExperience(prev => prev.filter(e => e.id !== experienceId))
+  const confirmDeleteExperience = async () => {
+    if (!experienceToDelete) return
 
-    const newCompleteness = calculateCompleteness()
-    const newYears = calculateYearsOfExperience()
+    const exp = experience.find(e => e.id === experienceToDelete)
+    if (!exp) return
 
-    logger.info('Experience deleted', {
-      experienceId,
-      company: exp.company,
-      position: exp.position,
-      remainingExperiences: experience.length - 1,
-      yearsOfExperience: newYears,
-      completenessScore: newCompleteness
-    })
+    setIsDeleting(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300))
+      setExperience(prev => prev.filter(e => e.id !== experienceToDelete))
 
-    toast.success('Experience Deleted', {
-      description: `${exp.position} at ${exp.company} removed`
-    })
+      const newCompleteness = calculateCompleteness()
+      const newYears = calculateYearsOfExperience()
+
+      logger.info('Experience deleted', {
+        experienceId: experienceToDelete,
+        company: exp.company,
+        position: exp.position,
+        remainingExperiences: experience.length - 1,
+        yearsOfExperience: newYears,
+        completenessScore: newCompleteness
+      })
+
+      toast.success('Experience Deleted', {
+        description: `${exp.position} at ${exp.company} removed`
+      })
+      announce(`Experience at ${exp.company} deleted`, 'polite')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteExperienceDialog(false)
+      setExperienceToDelete(null)
+    }
   }
 
   // ==================== EDUCATION HANDLERS ====================
@@ -831,22 +908,39 @@ export default function CVPortfolioPage() {
     const edu = education.find(e => e.id === educationId)
     if (!edu) return
 
-    if (!confirm(`Delete ${edu.degree} from ${edu.institution}?`)) return
+    setEducationToDelete(educationId)
+    setShowDeleteEducationDialog(true)
+  }
 
-    setEducation(prev => prev.filter(e => e.id !== educationId))
+  const confirmDeleteEducation = async () => {
+    if (!educationToDelete) return
 
-    const newCompleteness = calculateCompleteness()
-    logger.info('Education deleted', {
-      educationId,
-      institution: edu.institution,
-      degree: edu.degree,
-      remainingEducation: education.length - 1,
-      completenessScore: newCompleteness
-    })
+    const edu = education.find(e => e.id === educationToDelete)
+    if (!edu) return
 
-    toast.success('Education Deleted', {
-      description: `${edu.degree} removed from CV`
-    })
+    setIsDeleting(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300))
+      setEducation(prev => prev.filter(e => e.id !== educationToDelete))
+
+      const newCompleteness = calculateCompleteness()
+      logger.info('Education deleted', {
+        educationId: educationToDelete,
+        institution: edu.institution,
+        degree: edu.degree,
+        remainingEducation: education.length - 1,
+        completenessScore: newCompleteness
+      })
+
+      toast.success('Education Deleted', {
+        description: `${edu.degree} removed from CV`
+      })
+      announce(`Education ${edu.degree} deleted`, 'polite')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteEducationDialog(false)
+      setEducationToDelete(null)
+    }
   }
 
   // ==================== ACHIEVEMENT HANDLERS ====================
@@ -917,22 +1011,39 @@ export default function CVPortfolioPage() {
     const achievement = achievements.find(a => a.id === achievementId)
     if (!achievement) return
 
-    if (!confirm(`Delete "${achievement.title}"?`)) return
+    setAchievementToDelete(achievementId)
+    setShowDeleteAchievementDialog(true)
+  }
 
-    setAchievements(prev => prev.filter(a => a.id !== achievementId))
+  const confirmDeleteAchievement = async () => {
+    if (!achievementToDelete) return
 
-    const newCompleteness = calculateCompleteness()
-    logger.info('Achievement deleted', {
-      achievementId,
-      title: achievement.title,
-      issuer: achievement.issuer,
-      remainingAchievements: achievements.length - 1,
-      completenessScore: newCompleteness
-    })
+    const achievement = achievements.find(a => a.id === achievementToDelete)
+    if (!achievement) return
 
-    toast.success('Achievement Deleted', {
-      description: `${achievement.title} removed`
-    })
+    setIsDeleting(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300))
+      setAchievements(prev => prev.filter(a => a.id !== achievementToDelete))
+
+      const newCompleteness = calculateCompleteness()
+      logger.info('Achievement deleted', {
+        achievementId: achievementToDelete,
+        title: achievement.title,
+        issuer: achievement.issuer,
+        remainingAchievements: achievements.length - 1,
+        completenessScore: newCompleteness
+      })
+
+      toast.success('Achievement Deleted', {
+        description: `${achievement.title} removed`
+      })
+      announce(`Achievement ${achievement.title} deleted`, 'polite')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteAchievementDialog(false)
+      setAchievementToDelete(null)
+    }
   }
 
   // ==================== CV CUSTOMIZATION HANDLERS ====================
@@ -1341,18 +1452,34 @@ export default function CVPortfolioPage() {
 
   // Bulk Actions
   const handleBulkDeleteProjects = (projectIds: number[]) => {
-    if (!confirm(`Delete ${projectIds.length} projects?`)) return
+    if (projectIds.length === 0) return
 
-    setProjects(prev => prev.filter(p => !projectIds.includes(p.id)))
+    setProjectsToDelete(projectIds)
+    setShowBulkDeleteProjectsDialog(true)
+  }
 
-    logger.info('Bulk project delete', {
-      count: projectIds.length,
-      projectIds
-    })
+  const confirmBulkDeleteProjects = async () => {
+    if (projectsToDelete.length === 0) return
 
-    toast.success('Projects Deleted', {
-      description: `${projectIds.length} projects removed`
-    })
+    setIsDeleting(true)
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300))
+      setProjects(prev => prev.filter(p => !projectsToDelete.includes(p.id)))
+
+      logger.info('Bulk project delete', {
+        count: projectsToDelete.length,
+        projectIds: projectsToDelete
+      })
+
+      toast.success('Projects Deleted', {
+        description: `${projectsToDelete.length} projects removed`
+      })
+      announce(`${projectsToDelete.length} projects deleted`, 'polite')
+    } finally {
+      setIsDeleting(false)
+      setShowBulkDeleteProjectsDialog(false)
+      setProjectsToDelete([])
+    }
   }
 
   const handleBulkFeatureProjects = (projectIds: number[]) => {
@@ -2187,6 +2314,161 @@ export default function CVPortfolioPage() {
           </div>
         </div>
       </div>
+
+      {/* Delete Project AlertDialog */}
+      <AlertDialog open={showDeleteProjectDialog} onOpenChange={setShowDeleteProjectDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Delete Project
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{projects.find(p => p.id === projectToDelete)?.title}&quot;?
+              This will permanently remove it from your portfolio.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteProject}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Project'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Remove Skill AlertDialog */}
+      <AlertDialog open={showRemoveSkillDialog} onOpenChange={setShowRemoveSkillDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Remove Skill
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove &quot;{skills.find(s => s.id === skillToRemove)?.name}&quot; from your skills?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmRemoveSkill}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Removing...' : 'Remove Skill'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Experience AlertDialog */}
+      <AlertDialog open={showDeleteExperienceDialog} onOpenChange={setShowDeleteExperienceDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Delete Experience
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete your experience at &quot;{experience.find(e => e.id === experienceToDelete)?.company}&quot;?
+              This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteExperience}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Experience'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Education AlertDialog */}
+      <AlertDialog open={showDeleteEducationDialog} onOpenChange={setShowDeleteEducationDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Delete Education
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{education.find(e => e.id === educationToDelete)?.degree}&quot;
+              from &quot;{education.find(e => e.id === educationToDelete)?.institution}&quot;?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteEducation}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Education'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Achievement AlertDialog */}
+      <AlertDialog open={showDeleteAchievementDialog} onOpenChange={setShowDeleteAchievementDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Delete Achievement
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete &quot;{achievements.find(a => a.id === achievementToDelete)?.title}&quot;?
+              This award/achievement will be removed from your CV.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteAchievement}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete Achievement'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Projects AlertDialog */}
+      <AlertDialog open={showBulkDeleteProjectsDialog} onOpenChange={setShowBulkDeleteProjectsDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Delete Multiple Projects
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {projectsToDelete.length} projects?
+              This action cannot be undone and will remove them from your portfolio.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmBulkDeleteProjects}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? 'Deleting...' : `Delete ${projectsToDelete.length} Projects`}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
