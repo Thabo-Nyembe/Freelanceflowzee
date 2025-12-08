@@ -36,6 +36,10 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
+// A+++ UTILITIES
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -87,6 +91,10 @@ interface SetupConfig {
 
 export default function BusinessAutomationAgentSetup() {
   const { toast } = useToast();
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const [currentStep, setCurrentStep] = useState<SetupStep>('welcome');
   const [loading, setLoading] = useState(false);
   const [showPasswords, setShowPasswords] = useState<{ [key: string]: boolean }>({});

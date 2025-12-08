@@ -42,6 +42,10 @@ import {
 
 const logger = createFeatureLogger('CanvasCollaboration')
 
+// A+++ UTILITIES
+import { useCurrentUser } from '@/hooks/use-ai-data'
+import { useAnnouncer } from '@/lib/accessibility'
+
 interface CanvasLayer {
   id: string
   name: string
@@ -71,6 +75,10 @@ interface CanvasProject {
 }
 
 export default function CanvasCollaboration() {
+  // A+++ UTILITIES
+  const { userId, loading: userLoading } = useCurrentUser()
+  const { announce } = useAnnouncer()
+
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [selectedTool, setSelectedTool] = useState<any>('select')
   const [brushSize, setBrushSize] = useState<any>(5)
