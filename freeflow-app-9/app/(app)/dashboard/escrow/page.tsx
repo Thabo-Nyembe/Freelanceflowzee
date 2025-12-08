@@ -9,7 +9,17 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { toast } from 'sonner'
@@ -21,6 +31,7 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
+  AlertTriangle,
   User,
   Calendar,
   Lock,
@@ -34,7 +45,8 @@ import {
   Receipt,
   Mail,
   Target,
-  Trash2
+  Trash2,
+  RefreshCw
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -210,6 +222,15 @@ export default function EscrowPage() {
     paymentMethod: 'stripe',
     notes: ''
   })
+
+  // AlertDialog states for confirmations
+  const [showDeleteDepositDialog, setShowDeleteDepositDialog] = useState(false)
+  const [showRefundDialog, setShowRefundDialog] = useState(false)
+  const [showDeleteMilestoneDialog, setShowDeleteMilestoneDialog] = useState(false)
+  const [showDisputeDialog, setShowDisputeDialog] = useState(false)
+  const [selectedDepositId, setSelectedDepositId] = useState<string | null>(null)
+  const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(null)
+  const [disputeReason, setDisputeReason] = useState('')
 
   // Mock data
   const mockDeposits: EscrowDeposit[] = [
@@ -758,13 +779,21 @@ export default function EscrowPage() {
 
   const handleDeleteDeposit = (depositId: string) => {
     logger.info('Delete deposit initiated', { depositId })
-    if (confirm('⚠️ Delete Escrow Deposit?\n\nThis action cannot be undone.\n\nAre you sure?')) {
-      logger.info('Deposit deleted', { depositId })
-      dispatch({ type: 'DELETE_DEPOSIT', depositId })
+    setSelectedDepositId(depositId)
+    setShowDeleteDepositDialog(true)
+  }
+
+  const confirmDeleteDeposit = () => {
+    if (selectedDepositId) {
+      logger.info('Deposit deleted', { depositId: selectedDepositId })
+      dispatch({ type: 'DELETE_DEPOSIT', depositId: selectedDepositId })
       toast.success('Deposit Deleted', {
         description: 'Escrow deposit has been removed successfully'
       })
+      announce('Escrow deposit deleted', 'polite')
     }
+    setShowDeleteDepositDialog(false)
+    setSelectedDepositId(null)
   }
 
   const handleViewContract = (depositId: string) => {
@@ -804,14 +833,23 @@ export default function EscrowPage() {
 
   const handleDisputeResolution = (depositId: string) => {
     logger.info('Dispute resolution initiated', { depositId })
-    const reason = prompt('Enter dispute reason:')
-    if (reason) {
-      logger.info('Dispute filed', { depositId, reason })
-      dispatch({ type: 'DISPUTE_DEPOSIT', depositId, reason })
+    setSelectedDepositId(depositId)
+    setDisputeReason('')
+    setShowDisputeDialog(true)
+  }
+
+  const confirmDispute = () => {
+    if (selectedDepositId && disputeReason.trim()) {
+      logger.info('Dispute filed', { depositId: selectedDepositId, reason: disputeReason })
+      dispatch({ type: 'DISPUTE_DEPOSIT', depositId: selectedDepositId, reason: disputeReason })
       toast.info('Dispute Filed', {
         description: 'Dispute has been submitted for review'
       })
+      announce('Dispute filed successfully', 'polite')
     }
+    setShowDisputeDialog(false)
+    setSelectedDepositId(null)
+    setDisputeReason('')
   }
 
   const handleDownloadReceipt = (depositId: string) => {
@@ -849,12 +887,20 @@ export default function EscrowPage() {
 
   const handleRefundDeposit = (depositId: string) => {
     logger.info('Refund deposit initiated', { depositId })
-    if (confirm('Refund this deposit to client?\n\nThis will return funds to client account.')) {
-      logger.info('Refund processed', { depositId })
+    setSelectedDepositId(depositId)
+    setShowRefundDialog(true)
+  }
+
+  const confirmRefund = () => {
+    if (selectedDepositId) {
+      logger.info('Refund processed', { depositId: selectedDepositId })
       toast.success('Refund Processed', {
         description: 'Funds will be returned to client within 5-7 business days'
       })
+      announce('Refund processed successfully', 'polite')
     }
+    setShowRefundDialog(false)
+    setSelectedDepositId(null)
   }
 
   const handleUpdatePaymentMethod = (depositId: string) => {
@@ -897,12 +943,22 @@ export default function EscrowPage() {
 
   const handleDeleteMilestone = (depositId: string, milestoneId: string) => {
     logger.info('Delete milestone initiated', { depositId, milestoneId })
-    if (confirm('Delete this milestone?')) {
-      logger.info('Milestone deleted', { depositId, milestoneId })
+    setSelectedDepositId(depositId)
+    setSelectedMilestoneId(milestoneId)
+    setShowDeleteMilestoneDialog(true)
+  }
+
+  const confirmDeleteMilestone = () => {
+    if (selectedDepositId && selectedMilestoneId) {
+      logger.info('Milestone deleted', { depositId: selectedDepositId, milestoneId: selectedMilestoneId })
       toast.success('Milestone Deleted', {
         description: 'Milestone has been removed successfully'
       })
+      announce('Milestone deleted', 'polite')
     }
+    setShowDeleteMilestoneDialog(false)
+    setSelectedDepositId(null)
+    setSelectedMilestoneId(null)
   }
 
   const handleAddMilestone = (depositId: string) => {
@@ -1829,6 +1885,114 @@ export default function EscrowPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Delete Deposit Dialog */}
+      <AlertDialog open={showDeleteDepositDialog} onOpenChange={setShowDeleteDepositDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Delete Escrow Deposit?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p className="font-medium text-red-600">This action cannot be undone.</p>
+              <p>Are you sure you want to delete this escrow deposit? All associated data will be permanently removed.</p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteDeposit} className="bg-red-600 hover:bg-red-700">
+              Delete Deposit
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Refund Dialog */}
+      <AlertDialog open={showRefundDialog} onOpenChange={setShowRefundDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-blue-600">
+              <RefreshCw className="w-5 h-5" />
+              Refund Deposit?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>This will return the funds to the client&apos;s account.</p>
+              <ul className="list-disc pl-5 text-sm space-y-1">
+                <li>Funds will be processed within 5-7 business days</li>
+                <li>Client will receive email notification</li>
+                <li>Transaction will be recorded in history</li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRefund} className="bg-blue-600 hover:bg-blue-700">
+              Process Refund
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Milestone Dialog */}
+      <AlertDialog open={showDeleteMilestoneDialog} onOpenChange={setShowDeleteMilestoneDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Delete Milestone?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this milestone? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteMilestone} className="bg-red-600 hover:bg-red-700">
+              Delete Milestone
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Dispute Dialog */}
+      <Dialog open={showDisputeDialog} onOpenChange={setShowDisputeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-orange-600">
+              <AlertCircle className="w-5 h-5" />
+              File a Dispute
+            </DialogTitle>
+            <DialogDescription>
+              Please provide the reason for this dispute. Our team will review it within 24-48 hours.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="dispute-reason">Dispute Reason</Label>
+              <Textarea
+                id="dispute-reason"
+                placeholder="Describe the issue in detail..."
+                value={disputeReason}
+                onChange={(e) => setDisputeReason(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDisputeDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmDispute}
+              disabled={!disputeReason.trim()}
+              className="bg-orange-600 hover:bg-orange-700"
+            >
+              Submit Dispute
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
