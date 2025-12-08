@@ -45,6 +45,16 @@ const logger = createFeatureLogger('CanvasCollaboration')
 // A+++ UTILITIES
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface CanvasLayer {
   id: string
@@ -129,6 +139,9 @@ export default function CanvasCollaboration() {
       tool: 'text'
     }
   ])
+
+  // Confirmation Dialog State
+  const [removeCollaborator, setRemoveCollaborator] = useState<{ name: string; id: string } | null>(null)
 
   const [recentProjects, setRecentProjects] = useState<CanvasProject[]>([
     {
@@ -594,20 +607,27 @@ export default function CanvasCollaboration() {
   }
 
   const handleRemoveCollaborator = (name: string) => {
-    if (!confirm(`Remove ${name} from this canvas?`)) return
-
     const collaborator = collaborators.find(c => c.name === name)
-    setCollaborators(collaborators.filter(c => c.name !== name))
+    if (collaborator) {
+      setRemoveCollaborator({ name, id: collaborator.id })
+    }
+  }
+
+  const handleConfirmRemoveCollaborator = () => {
+    if (!removeCollaborator) return
+
+    setCollaborators(collaborators.filter(c => c.name !== removeCollaborator.name))
 
     logger.info('Collaborator removed successfully', {
-      collaboratorName: name,
-      collaboratorId: collaborator?.id,
+      collaboratorName: removeCollaborator.name,
+      collaboratorId: removeCollaborator.id,
       remainingCollaborators: collaborators.length - 1
     })
 
     toast.success('Collaborator Removed', {
-      description: `${name} has been removed - ${collaborators.length - 1} collaborators remaining`
+      description: `${removeCollaborator.name} has been removed - ${collaborators.length - 1} collaborators remaining`
     })
+    setRemoveCollaborator(null)
   }
 
   const handleAddComment = () => {
@@ -1321,6 +1341,27 @@ export default function CanvasCollaboration() {
           </Tabs>
         </div>
       </div>
+
+      {/* Remove Collaborator Confirmation Dialog */}
+      <AlertDialog open={!!removeCollaborator} onOpenChange={() => setRemoveCollaborator(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Collaborator?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove {removeCollaborator?.name} from this canvas. They can be re-invited later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmRemoveCollaborator}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

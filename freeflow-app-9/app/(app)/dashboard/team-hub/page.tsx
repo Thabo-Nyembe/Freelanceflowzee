@@ -42,6 +42,16 @@ import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 // TYPES
 interface TeamMemberUI {
@@ -105,6 +115,9 @@ export default function TeamHubPage() {
   const [teamMembers, setTeamMembers] = useState<TeamMemberUI[]>([])
   const [departments, setDepartments] = useState<DepartmentUI[]>([])
   const [teamOverview, setTeamOverview] = useState<TeamOverview | null>(null)
+
+  // CONFIRMATION DIALOG STATE
+  const [removeMember, setRemoveMember] = useState<{ id: string; name: string } | null>(null)
 
   // COMPUTED TEAM STATS - Updated dynamically from Supabase data
   const teamStats = {
@@ -324,46 +337,49 @@ export default function TeamHubPage() {
     }
   }, [userId, teamMembers, departments, announce])
 
-  // REAL FEATURE: Remove Team Member
-  const handleRemoveMember = useCallback(async (memberId: string, memberName: string) => {
+  // REAL FEATURE: Remove Team Member (opens confirmation dialog)
+  const handleRemoveMember = useCallback((memberId: string, memberName: string) => {
     if (!userId) {
       toast.error('Authentication required', { description: 'Please sign in to remove team members' })
       return
     }
+    setRemoveMember({ id: memberId, name: memberName })
+  }, [userId])
 
-    if (!confirm(`Remove ${memberName} from the team?`)) {
-      logger.debug('Remove member cancelled', { memberId, memberName })
-      return
-    }
+  // REAL FEATURE: Confirm Remove Team Member
+  const handleConfirmRemoveMember = useCallback(async () => {
+    if (!removeMember) return
 
     try {
       const { deleteTeamMember } = await import('@/lib/team-hub-queries')
 
-      const { success, error } = await deleteTeamMember(memberId, userId)
+      const { success, error } = await deleteTeamMember(removeMember.id, userId!)
 
       if (error || !success) {
         throw new Error(error?.message || 'Failed to delete team member')
       }
 
-      setTeamMembers(prev => prev.filter(m => m.id !== memberId))
+      setTeamMembers(prev => prev.filter(m => m.id !== removeMember.id))
 
       logger.info('Team member removed', {
-        memberId,
-        memberName,
+        memberId: removeMember.id,
+        memberName: removeMember.name,
         newTeamSize: teamMembers.length - 1
       })
 
       toast.success('Team Member Removed', {
-        description: `${memberName} has been removed from the team`
+        description: `${removeMember.name} has been removed from the team`
       })
-      announce(`${memberName} removed from team`, 'polite')
+      announce(`${removeMember.name} removed from team`, 'polite')
     } catch (error) {
-      logger.error('Failed to remove team member', { error, memberId })
+      logger.error('Failed to remove team member', { error, memberId: removeMember.id })
       toast.error('Failed to remove team member', {
         description: error instanceof Error ? error.message : 'Unknown error occurred'
       })
+    } finally {
+      setRemoveMember(null)
     }
-  }, [userId, teamMembers, announce])
+  }, [userId, removeMember, teamMembers, announce])
 
   // REAL FEATURE: Update Member Role
   const handleUpdateRole = useCallback(async (memberId: string, currentRole: string) => {
@@ -1367,6 +1383,27 @@ export default function TeamHubPage() {
         </TabsContent>
       </Tabs>
       </div>
+
+      {/* Remove Team Member Confirmation Dialog */}
+      <AlertDialog open={!!removeMember} onOpenChange={() => setRemoveMember(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Team Member?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove {removeMember?.name} from your team. You can re-add them later if needed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmRemoveMember}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

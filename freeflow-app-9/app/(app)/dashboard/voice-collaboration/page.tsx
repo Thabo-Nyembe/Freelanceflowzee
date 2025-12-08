@@ -56,6 +56,16 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -241,6 +251,9 @@ export default function VoiceCollaborationPage() {
     echoCancellation: true,
     autoGainControl: true
   })
+
+  // Confirmation Dialog State
+  const [deleteRoom, setDeleteRoom] = useState<{ id: string; name: string; type: RoomType } | null>(null)
 
   // Load voice collaboration data from database
   useEffect(() => {
@@ -610,28 +623,27 @@ export default function VoiceCollaborationPage() {
       return
     }
 
-    if (confirm(`Delete "${room.name}"? This action cannot be undone.`)) {
-      logger.info('User confirmed room deletion', {
-        roomId: room.id,
-        roomName: room.name,
-        roomType: room.type,
-        participants: room.currentParticipants
-      })
+    setDeleteRoom({ id: roomId, name: room.name, type: room.type })
+  }
 
-      // Note: Using local state - in production, this would DELETE to /api/voice-collaboration/rooms/:id
-      dispatch({ type: 'DELETE_ROOM', roomId })
-      setShowViewRoomModal(false)
+  const handleConfirmDeleteRoom = () => {
+    if (!deleteRoom) return
 
-      toast.success('Room deleted', {
-        description: `${room.name} - ${room.type} room removed`
-      })
-      announce('Room deleted', 'polite')
-    } else {
-      logger.debug('User cancelled room deletion', {
-        roomId: room.id,
-        roomName: room.name
-      })
-    }
+    logger.info('User confirmed room deletion', {
+      roomId: deleteRoom.id,
+      roomName: deleteRoom.name,
+      roomType: deleteRoom.type
+    })
+
+    // Note: Using local state - in production, this would DELETE to /api/voice-collaboration/rooms/:id
+    dispatch({ type: 'DELETE_ROOM', roomId: deleteRoom.id })
+    setShowViewRoomModal(false)
+
+    toast.success('Room deleted', {
+      description: `${deleteRoom.name} - ${deleteRoom.type} room removed`
+    })
+    announce('Room deleted', 'polite')
+    setDeleteRoom(null)
   }
 
   const handleDownloadRecording = (recording: VoiceRecording) => {
@@ -1614,6 +1626,27 @@ export default function VoiceCollaborationPage() {
           </Dialog>
         )}
       </AnimatePresence>
+
+      {/* Delete Room Confirmation Dialog */}
+      <AlertDialog open={!!deleteRoom} onOpenChange={() => setDeleteRoom(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Voice Room?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete &quot;{deleteRoom?.name}&quot;. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteRoom}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

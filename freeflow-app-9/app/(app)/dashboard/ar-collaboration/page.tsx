@@ -61,6 +61,16 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -488,6 +498,9 @@ export default function ARCollaborationPage() {
     handTracking: true
   })
 
+  // Confirmation Dialog State
+  const [deleteSession, setDeleteSession] = useState<{ id: string; name: string; environment: AREnvironment } | null>(null)
+
   // Load mock data
   useEffect(() => {
     if (!userId) {
@@ -746,23 +759,25 @@ export default function ARCollaborationPage() {
       return
     }
 
-    if (confirm(`Delete "${session.name}"? This action cannot be undone.`)) {
-      dispatch({ type: 'DELETE_SESSION', sessionId })
+    setDeleteSession({ id: sessionId, name: session.name, environment: session.environment })
+  }
 
-      logger.info('Session deleted', {
-        sessionId: session.id,
-        sessionName: session.name,
-        environment: session.environment,
-        participants: session.currentParticipants
-      })
+  const handleConfirmDeleteSession = () => {
+    if (!deleteSession) return
 
-      toast.success('Session deleted', {
-        description: `${session.name} - ${getEnvironmentName(session.environment)}`
-      })
-      announce('Session deleted', 'polite')
-    } else {
-      logger.debug('Session deletion cancelled', { sessionId })
-    }
+    dispatch({ type: 'DELETE_SESSION', sessionId: deleteSession.id })
+
+    logger.info('Session deleted', {
+      sessionId: deleteSession.id,
+      sessionName: deleteSession.name,
+      environment: deleteSession.environment
+    })
+
+    toast.success('Session deleted', {
+      description: `${deleteSession.name} - ${getEnvironmentName(deleteSession.environment)}`
+    })
+    announce('Session deleted', 'polite')
+    setDeleteSession(null)
   }
 
   const handleToggleRecording = (sessionId: string) => {
@@ -1610,6 +1625,27 @@ export default function ARCollaborationPage() {
           </Dialog>
         )}
       </AnimatePresence>
+
+      {/* Delete Session Confirmation Dialog */}
+      <AlertDialog open={!!deleteSession} onOpenChange={() => setDeleteSession(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete AR Session?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete &quot;{deleteSession?.name}&quot;. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteSession}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

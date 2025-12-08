@@ -21,6 +21,16 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 const logger = createFeatureLogger('AutomationPage')
 
@@ -45,6 +55,9 @@ export default function AutomationPage() {
   const [metrics, setMetrics] = useState<any>(null)
   const [templates, setTemplates] = useState<any[]>([])
   const [statusFilter, setStatusFilter] = useState<WorkflowStatus | 'all'>('all')
+
+  // CONFIRMATION DIALOG STATE
+  const [deleteWorkflow, setDeleteWorkflow] = useState<{ id: string; name: string } | null>(null)
 
   // A+++ LOAD AUTOMATION DATA
   useEffect(() => {
@@ -161,35 +174,39 @@ export default function AutomationPage() {
     }
   }
 
-  // HANDLER: Delete workflow
-  const handleDeleteWorkflow = async (workflowId: string, workflowName: string) => {
+  // HANDLER: Delete workflow (opens confirmation dialog)
+  const handleDeleteWorkflow = (workflowId: string, workflowName: string) => {
     if (!userId) {
       toast.error('Please log in to delete workflows')
       return
     }
+    setDeleteWorkflow({ id: workflowId, name: workflowName })
+  }
 
-    if (!confirm(`Are you sure you want to delete "${workflowName}"? This action cannot be undone.`)) {
-      return
-    }
+  // HANDLER: Confirm delete workflow
+  const handleConfirmDeleteWorkflow = async () => {
+    if (!deleteWorkflow) return
 
     try {
-      logger.info('Deleting workflow', { workflowId, workflowName })
+      logger.info('Deleting workflow', { workflowId: deleteWorkflow.id, workflowName: deleteWorkflow.name })
 
-      const { deleteWorkflow } = await import('@/lib/automation-queries')
-      await deleteWorkflow(workflowId)
+      const { deleteWorkflow: deleteWorkflowQuery } = await import('@/lib/automation-queries')
+      await deleteWorkflowQuery(deleteWorkflow.id)
 
-      setWorkflows(prev => prev.filter(w => w.id !== workflowId))
-      if (selectedWorkflow === workflowId) {
+      setWorkflows(prev => prev.filter(w => w.id !== deleteWorkflow.id))
+      if (selectedWorkflow === deleteWorkflow.id) {
         setSelectedWorkflow(null)
       }
 
-      toast.success(`Workflow "${workflowName}" deleted`)
-      logger.info('Workflow deleted successfully', { workflowId })
+      toast.success(`Workflow "${deleteWorkflow.name}" deleted`)
+      logger.info('Workflow deleted successfully', { workflowId: deleteWorkflow.id })
       announce(`Workflow deleted`, 'polite')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete workflow'
-      logger.error('Failed to delete workflow', { error: err, workflowId })
+      logger.error('Failed to delete workflow', { error: err, workflowId: deleteWorkflow.id })
       toast.error(errorMessage)
+    } finally {
+      setDeleteWorkflow(null)
     }
   }
 
@@ -819,6 +836,27 @@ export default function AutomationPage() {
           </ScrollReveal>
         )}
       </div>
+
+      {/* Delete Workflow Confirmation Dialog */}
+      <AlertDialog open={!!deleteWorkflow} onOpenChange={() => setDeleteWorkflow(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Workflow?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete &quot;{deleteWorkflow?.name}&quot;. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteWorkflow}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

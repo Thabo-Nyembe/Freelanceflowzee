@@ -61,6 +61,16 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
@@ -529,6 +539,9 @@ export default function BrowserExtensionPage() {
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false)
   const [viewCaptureTab, setViewCaptureTab] = useState<'details' | 'metadata' | 'actions'>('details')
 
+  // Confirmation Dialog State
+  const [deleteCapture, setDeleteCapture] = useState<{ id: string; title: string; fileSize: number; type: CaptureType } | null>(null)
+
   // Load mock data
   useEffect(() => {
     logger.info('Loading mock data')
@@ -666,20 +679,22 @@ export default function BrowserExtensionPage() {
     }
 
     logger.info('Deleting capture', { captureId, title: capture.title, fileSize: capture.fileSize })
+    setDeleteCapture({ id: captureId, title: capture.title, fileSize: capture.fileSize, type: capture.type })
+  }
 
-    if (confirm(`Delete "${capture.title}"?`)) {
-      logger.info('User confirmed deletion', { captureId })
-      dispatch({ type: 'DELETE_CAPTURE', captureId })
+  const handleConfirmDeleteCapture = () => {
+    if (!deleteCapture) return
 
-      const fileSizeMB = (capture.fileSize / (1024 * 1024)).toFixed(1)
+    logger.info('User confirmed deletion', { captureId: deleteCapture.id })
+    dispatch({ type: 'DELETE_CAPTURE', captureId: deleteCapture.id })
 
-      toast.success('Capture deleted', {
-        description: `${capture.title} - ${capture.type} - ${fileSizeMB} MB freed`
-      })
-      announce('Capture deleted', 'polite')
-    } else {
-      logger.debug('User cancelled deletion', { captureId })
-    }
+    const fileSizeMB = (deleteCapture.fileSize / (1024 * 1024)).toFixed(1)
+
+    toast.success('Capture deleted', {
+      description: `${deleteCapture.title} - ${deleteCapture.type} - ${fileSizeMB} MB freed`
+    })
+    announce('Capture deleted', 'polite')
+    setDeleteCapture(null)
   }
 
   const handleToggleFeature = (featureId: string) => {
@@ -1453,6 +1468,27 @@ export default function BrowserExtensionPage() {
           </Dialog>
         )}
       </AnimatePresence>
+
+      {/* Delete Capture Confirmation Dialog */}
+      <AlertDialog open={!!deleteCapture} onOpenChange={() => setDeleteCapture(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Capture?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete &quot;{deleteCapture?.title}&quot;. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteCapture}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

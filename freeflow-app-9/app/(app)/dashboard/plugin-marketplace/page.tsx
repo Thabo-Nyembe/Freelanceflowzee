@@ -17,6 +17,16 @@ import {
   DialogFooter
 } from '@/components/ui/dialog'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -459,6 +469,9 @@ export default function PluginMarketplacePage() {
   const [showViewModal, setShowViewModal] = useState(false)
   const [showInstallModal, setShowInstallModal] = useState(false)
 
+  // Confirmation Dialog State
+  const [uninstallPlugin, setUninstallPlugin] = useState<{ id: string; name: string; category: string; version: string; fileSize: number; installedAt?: string } | null>(null)
+
   // ============================================================================
   // A++++ LOAD DATA
   // ============================================================================
@@ -680,22 +693,30 @@ export default function PluginMarketplacePage() {
       return
     }
 
-    const fileSizeMB = (plugin.fileSize / (1024 * 1024)).toFixed(1)
-    const installedDate = installedPlugin ? new Date(installedPlugin.installedAt).toLocaleDateString() : 'Unknown'
+    setUninstallPlugin({
+      id: pluginId,
+      name: plugin.name,
+      category: plugin.category,
+      version: plugin.version,
+      fileSize: plugin.fileSize,
+      installedAt: installedPlugin?.installedAt
+    })
+  }
 
-    logger.info('Prompting user for uninstallation confirmation', { pluginId, name: plugin.name })
+  const handleConfirmUninstallPlugin = () => {
+    if (!uninstallPlugin) return
 
-    if (confirm(`Uninstall "${plugin.name}"? This will remove all plugin data and settings.`)) {
-      logger.info('User confirmed uninstallation', { pluginId, name: plugin.name })
-      dispatch({ type: 'UNINSTALL_PLUGIN', pluginId })
+    logger.info('User confirmed uninstallation', { pluginId: uninstallPlugin.id, name: uninstallPlugin.name })
+    dispatch({ type: 'UNINSTALL_PLUGIN', pluginId: uninstallPlugin.id })
 
-      toast.success(`${plugin.name} uninstalled`, {
-        description: `${plugin.category} plugin - ${plugin.version} - ${fileSizeMB} MB freed - Installed since ${installedDate}`
-      })
-      announce('Plugin uninstalled', 'polite')
-    } else {
-      logger.debug('User cancelled uninstallation', { pluginId })
-    }
+    const fileSizeMB = (uninstallPlugin.fileSize / (1024 * 1024)).toFixed(1)
+    const installedDate = uninstallPlugin.installedAt ? new Date(uninstallPlugin.installedAt).toLocaleDateString() : 'Unknown'
+
+    toast.success(`${uninstallPlugin.name} uninstalled`, {
+      description: `${uninstallPlugin.category} plugin - ${uninstallPlugin.version} - ${fileSizeMB} MB freed - Installed since ${installedDate}`
+    })
+    announce('Plugin uninstalled', 'polite')
+    setUninstallPlugin(null)
   }
 
   const handleTogglePluginActive = (pluginId: string) => {
@@ -1412,6 +1433,27 @@ export default function PluginMarketplacePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Uninstall Plugin Confirmation Dialog */}
+      <AlertDialog open={!!uninstallPlugin} onOpenChange={() => setUninstallPlugin(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Uninstall Plugin?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove &quot;{uninstallPlugin?.name}&quot; and all its data and settings. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmUninstallPlugin}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Uninstall
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -27,6 +27,16 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
@@ -76,6 +86,9 @@ export default function IntegrationsManagement() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [testingId, setTestingId] = useState<string | null>(null);
   const [usageStats, setUsageStats] = useState<UsageStats[]>([]);
+
+  // Confirmation Dialog State
+  const [disconnectIntegration, setDisconnectIntegration] = useState<Integration | null>(null);
 
   useEffect(() => {
     loadIntegrations();
@@ -158,13 +171,15 @@ export default function IntegrationsManagement() {
     }
   };
 
-  const deleteIntegration = async (integration: Integration) => {
-    if (!confirm(`Are you sure you want to disconnect ${integration.provider}?`)) {
-      return;
-    }
+  const deleteIntegration = (integration: Integration) => {
+    setDisconnectIntegration(integration);
+  };
+
+  const handleConfirmDisconnect = async () => {
+    if (!disconnectIntegration) return;
 
     try {
-      const response = await fetch(`/api/integrations/save?type=${integration.type}`, {
+      const response = await fetch(`/api/integrations/save?type=${disconnectIntegration.type}`, {
         method: 'DELETE',
       });
 
@@ -173,10 +188,10 @@ export default function IntegrationsManagement() {
       if (result.success) {
         toast({
           title: 'Integration Removed',
-          description: `${integration.provider} has been disconnected.`,
+          description: `${disconnectIntegration.provider} has been disconnected.`,
         });
 
-        setIntegrations(prev => prev.filter(int => int.id !== integration.id));
+        setIntegrations(prev => prev.filter(int => int.id !== disconnectIntegration.id));
       }
     } catch (error: any) {
       toast({
@@ -184,6 +199,8 @@ export default function IntegrationsManagement() {
         description: error.message,
         variant: 'destructive',
       });
+    } finally {
+      setDisconnectIntegration(null);
     }
   };
 
@@ -515,6 +532,27 @@ export default function IntegrationsManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Disconnect Integration Confirmation Dialog */}
+      <AlertDialog open={!!disconnectIntegration} onOpenChange={() => setDisconnectIntegration(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disconnect Integration?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will disconnect {disconnectIntegration?.provider}. You can reconnect it later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDisconnect}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Disconnect
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

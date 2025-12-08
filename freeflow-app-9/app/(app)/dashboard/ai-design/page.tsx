@@ -41,6 +41,16 @@ import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
   Sparkles,
   Palette,
   Image as ImageIcon,
@@ -86,6 +96,9 @@ export default function AIDesignStudioPage() {
   const [activeTab, setActiveTab] = useState('tools')
   const [activeAITool, setActiveAITool] = useState<string | null>(null)
   const [generationInProgress, setGenerationInProgress] = useState(false)
+
+  // Confirmation Dialog State
+  const [deleteProject, setDeleteProject] = useState<{ id: string; name: string } | null>(null)
 
   // ============================================================================
   // A+++ LOAD AI DESIGN DATA FROM SUPABASE
@@ -365,21 +378,26 @@ export default function AIDesignStudioPage() {
     }
   }
 
-  // Handler 15: Delete Project
+  // Handler 15: Delete Project (opens confirmation dialog)
   const handleDeleteProject = (projectId: string) => {
     const project = recentProjects.find(p => p.id === projectId)
-    const confirmed = confirm('Delete Project?\n\nProject: ' + (project?.name || 'Unknown') + '\n\nThis action cannot be undone.\nAll versions will be deleted.\n\nContinue?')
-    if (confirmed) {
-      logger.info('Project deleted', {
-        projectId,
-        name: project?.name
-      })
-      toast.success('Project Deleted', {
-        description: (project?.name || 'Project') + ' has been permanently deleted'
-      })
-    } else {
-      logger.debug('Project deletion cancelled')
+    if (project) {
+      setDeleteProject({ id: projectId, name: project.name })
     }
+  }
+
+  // Handler 15b: Confirm Delete Project
+  const handleConfirmDeleteProject = () => {
+    if (!deleteProject) return
+
+    logger.info('Project deleted', {
+      projectId: deleteProject.id,
+      name: deleteProject.name
+    })
+    toast.success('Project Deleted', {
+      description: deleteProject.name + ' has been permanently deleted'
+    })
+    setDeleteProject(null)
   }
 
   // Handler 16: Batch Generate
@@ -1297,6 +1315,27 @@ export default function AIDesignStudioPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Delete Project Confirmation Dialog */}
+      <AlertDialog open={!!deleteProject} onOpenChange={() => setDeleteProject(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Project?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete &quot;{deleteProject?.name}&quot;. All versions will be deleted. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDeleteProject}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
