@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -114,6 +115,7 @@ export default function TeamHubPage() {
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
+  const router = useRouter()
 
   const [selectedMember, setSelectedMember] = useState<TeamMemberUI | null>(null)
   const [activeTab, setActiveTab] = useState<string>('overview')
@@ -1128,9 +1130,10 @@ export default function TeamHubPage() {
                         onlineMembers: teamStats.onlineMembers,
                         totalMembers: teamStats.totalMembers
                       })
-                      toast.success('Team Chat', {
-                        description: `${teamStats.onlineMembers} members online and ready to chat`
+                      toast.success('Opening Team Chat', {
+                        description: `${teamStats.onlineMembers} members online`
                       })
+                      router.push('/dashboard/messages?channel=team-general')
                     }}
                   >
                     <MessageSquare className="h-5 w-5" />
@@ -1145,9 +1148,10 @@ export default function TeamHubPage() {
                         activeProjects: teamStats.activeProjects,
                         membersScheduled: teamStats.totalMembers
                       })
-                      toast.info('Team Schedule', {
+                      toast.info('Opening Team Calendar', {
                         description: `View availability for ${teamStats.totalMembers} team members`
                       })
+                      router.push('/dashboard/calendar?view=team')
                     }}
                   >
                     <Calendar className="h-5 w-5" />
@@ -1162,9 +1166,10 @@ export default function TeamHubPage() {
                         availableParticipants: teamStats.onlineMembers,
                         totalMembers: teamStats.totalMembers
                       })
-                      toast.success('Video Call Starting', {
-                        description: `Connecting with ${teamStats.onlineMembers} online team members`
+                      toast.success('Starting Video Meeting', {
+                        description: `Connecting with ${teamStats.onlineMembers} online members`
                       })
+                      router.push('/dashboard/collaboration/meetings?action=new')
                     }}
                   >
                     <Video className="h-5 w-5" />
@@ -1179,9 +1184,10 @@ export default function TeamHubPage() {
                         membersAnalyzed: teamStats.totalMembers,
                         activeProjects: teamStats.activeProjects
                       })
-                      toast.success('Generating Reports', {
+                      toast.success('Opening Team Reports', {
                         description: 'Team analytics and performance metrics'
                       })
+                      router.push('/dashboard/analytics?filter=team')
                     }}
                   >
                     <FileText className="h-5 w-5" />
@@ -1286,9 +1292,10 @@ export default function TeamHubPage() {
                           department: member.department,
                           status: member.status
                         })
-                        toast.success('Chat Opened', {
+                        toast.success('Opening Chat', {
                           description: `Starting conversation with ${member.name}`
                         })
+                        router.push(`/dashboard/messages?dm=${member.id}&name=${encodeURIComponent(member.name)}`)
                       }}
                     >
                       <MessageSquare className="h-4 w-4 mr-2" />

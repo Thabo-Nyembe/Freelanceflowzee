@@ -11,7 +11,7 @@ import {
   Users, UserPlus, Search, MoreHorizontal, Mail, Phone, MapPin,
   Star, Briefcase, DollarSign, Edit2, Trash2, Eye, MessageSquare, Calendar, Award, Clock, CheckCircle, X,
   Download, Upload, Tag, BarChart3, Target, Zap, Brain,
-  AlertTriangle
+  AlertTriangle, FileCheck, Loader2
 } from 'lucide-react'
 
 import {
@@ -444,6 +444,11 @@ export default function ClientsPage() {
   // Form States
   const [formData, setFormData] = useState<Partial<Client>>({})
   const [isSaving, setIsSaving] = useState(false)
+
+  // Import States
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [isImporting, setIsImporting] = useState(false)
+  const [importProgress, setImportProgress] = useState(0)
 
   // AI Panel State
   const [showAIPanel, setShowAIPanel] = useState(true)
@@ -937,6 +942,138 @@ export default function ClientsPage() {
     } catch (error) {
       logger.error('Failed to export clients', { error, count: state.clients.length })
       toast.error('Export failed')
+    }
+  }
+
+  // Import Handlers
+  const handleFileSelect = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json,.csv'
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) {
+        setImportFile(file)
+        logger.info('Import file selected', { name: file.name, size: file.size, type: file.type })
+      }
+    }
+    input.click()
+  }
+
+  const handleImport = async () => {
+    if (!importFile || !userId) {
+      toast.error('Please select a file to import')
+      return
+    }
+
+    setIsImporting(true)
+    setImportProgress(0)
+    logger.info('Import started', { fileName: importFile.name, size: importFile.size })
+
+    try {
+      const text = await importFile.text()
+      let clientsData: any[] = []
+
+      // Parse based on file type
+      if (importFile.name.endsWith('.json')) {
+        const parsed = JSON.parse(text)
+        clientsData = Array.isArray(parsed) ? parsed : parsed.clients || [parsed]
+      } else if (importFile.name.endsWith('.csv')) {
+        // Simple CSV parsing
+        const lines = text.trim().split('\n')
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/\s+/g, '_'))
+
+        for (let i = 1; i < lines.length; i++) {
+          const values = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''))
+          const clientObj: Record<string, string> = {}
+          headers.forEach((header, idx) => {
+            clientObj[header] = values[idx] || ''
+          })
+          clientsData.push(clientObj)
+        }
+      }
+
+      if (clientsData.length === 0) {
+        toast.error('No valid client data found in file')
+        setIsImporting(false)
+        return
+      }
+
+      // Import clients
+      let importedCount = 0
+      let errorCount = 0
+
+      for (let i = 0; i < clientsData.length; i++) {
+        const clientData = clientsData[i]
+        setImportProgress(Math.round((i / clientsData.length) * 100))
+
+        try {
+          const { data: created, error } = await addClient(userId, {
+            name: clientData.name || clientData.client_name || 'Unnamed Client',
+            email: clientData.email || clientData.client_email || '',
+            phone: clientData.phone || clientData.client_phone,
+            company: clientData.company || clientData.company_name || '',
+            status: clientData.status || 'active',
+            type: clientData.type || 'individual',
+            priority: clientData.priority || 'medium',
+            tags: clientData.tags ? (Array.isArray(clientData.tags) ? clientData.tags : clientData.tags.split(',')) : [],
+            notes: clientData.notes || ''
+          })
+
+          if (error) {
+            errorCount++
+            logger.warn('Failed to import client', { clientName: clientData.name, error })
+          } else if (created) {
+            importedCount++
+            // Map database client to UI client format
+            const uiClient = {
+              id: created.id,
+              name: created.name,
+              email: created.email,
+              phone: created.phone || '',
+              company: created.company || '',
+              status: created.status,
+              priority: created.priority,
+              projectCount: 0,
+              totalRevenue: 0,
+              healthScore: 100,
+              tags: created.tags || [],
+              lastContact: created.last_contact || new Date().toISOString(),
+              avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(created.name)}&background=random`,
+              notes: created.notes || '',
+              type: created.type
+            }
+            dispatch({ type: 'ADD_CLIENT', client: uiClient })
+          }
+        } catch (err) {
+          errorCount++
+          logger.error('Exception importing client', { clientName: clientData.name, error: err })
+        }
+      }
+
+      setImportProgress(100)
+      logger.info('Import completed', { importedCount, errorCount, total: clientsData.length })
+
+      if (errorCount > 0) {
+        toast.warning(`Import completed with issues`, {
+          description: `${importedCount} imported, ${errorCount} failed`
+        })
+      } else {
+        toast.success('Import successful!', {
+          description: `${importedCount} clients imported`
+        })
+      }
+
+      setIsImportModalOpen(false)
+      setImportFile(null)
+      setImportProgress(0)
+    } catch (error) {
+      logger.error('Import failed', { error, fileName: importFile.name })
+      toast.error('Import failed', {
+        description: 'Invalid file format or corrupted data'
+      })
+    } finally {
+      setIsImporting(false)
     }
   }
 
@@ -1949,7 +2086,13 @@ export default function ClientsPage() {
       </Dialog>
 
       {/* Import Modal */}
-      <Dialog open={isImportModalOpen} onOpenChange={setIsImportModalOpen}>
+      <Dialog open={isImportModalOpen} onOpenChange={(open) => {
+        setIsImportModalOpen(open)
+        if (!open) {
+          setImportFile(null)
+          setImportProgress(0)
+        }
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Import Clients</DialogTitle>
@@ -1958,15 +2101,47 @@ export default function ClientsPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <div className="border-2 border-dashed rounded-lg p-8 text-center">
-              <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground mb-2">
-                Drag and drop your file here, or click to browse
-              </p>
-              <Button variant="outline" size="sm">
-                Choose File
+            <div
+              className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={handleFileSelect}
+            >
+              {importFile ? (
+                <>
+                  <FileCheck className="h-12 w-12 mx-auto mb-4 text-green-500" />
+                  <p className="text-sm font-medium mb-1">{importFile.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {(importFile.size / 1024).toFixed(1)} KB
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Drag and drop your file here, or click to browse
+                  </p>
+                </>
+              )}
+              <Button variant="outline" size="sm" className="mt-2" onClick={(e) => {
+                e.stopPropagation()
+                handleFileSelect()
+              }}>
+                {importFile ? 'Choose Different File' : 'Choose File'}
               </Button>
             </div>
+            {isImporting && (
+              <div className="mt-4">
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Importing...</span>
+                  <span>{importProgress}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-primary h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${importProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button
@@ -1974,13 +2149,27 @@ export default function ClientsPage() {
               onClick={() => {
                 logger.debug('Import canceled')
                 setIsImportModalOpen(false)
+                setImportFile(null)
               }}
+              disabled={isImporting}
             >
               Cancel
             </Button>
-            <Button>
-              <Upload className="h-4 w-4 mr-2" />
-              Import
+            <Button
+              onClick={handleImport}
+              disabled={!importFile || isImporting}
+            >
+              {isImporting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Importing...
+                </>
+              ) : (
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Import {importFile ? `(${importFile.name.endsWith('.csv') ? 'CSV' : 'JSON'})` : ''}
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

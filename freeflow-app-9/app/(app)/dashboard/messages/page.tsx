@@ -130,7 +130,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Search, MessageSquare, Paperclip, Image as ImageIcon, Mic, Plus, Pin,
-  Bell, BellOff, Archive, Trash2, CheckCheck, Reply, Forward, Smile, X, Users, Info, Download, Edit2, Check, Phone, Video, Hash, AlertTriangle
+  Bell, BellOff, Archive, Trash2, CheckCheck, Reply, Forward, Smile, X, Users, Info, Download, Edit2, Check, Phone, Video, Hash, AlertTriangle, CheckCircle
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
@@ -496,6 +496,12 @@ export default function MessagesPage() {
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
   const [chatToDelete, setChatToDelete] = useState<string | null>(null)
   const [messageToDelete, setMessageToDelete] = useState<string | null>(null)
+
+  // Forward Message States
+  const [showForwardDialog, setShowForwardDialog] = useState(false)
+  const [messageToForward, setMessageToForward] = useState<Message | null>(null)
+  const [forwardTargetChat, setForwardTargetChat] = useState<string | null>(null)
+  const [isForwarding, setIsForwarding] = useState(false)
 
   // Form States for New Chat
   const [newChatName, setNewChatName] = useState('')
@@ -1199,9 +1205,51 @@ export default function MessagesPage() {
       sender: message?.sender
     })
 
-    toast.info('Forward message', {
-      description: 'Select conversation to forward to'
-    })
+    if (message) {
+      setMessageToForward(message)
+      setForwardTargetChat(null)
+      setShowForwardDialog(true)
+    }
+  }
+
+  const confirmForwardMessage = async () => {
+    if (!messageToForward || !forwardTargetChat || !userId) return
+
+    setIsForwarding(true)
+
+    try {
+      const targetChat = state.chats.find(c => c.id === forwardTargetChat)
+      const { sendMessage } = await import('@/lib/messages-queries')
+
+      const forwardedContent = `📨 Forwarded from ${messageToForward.sender}:\n"${messageToForward.text}"`
+
+      const { data, error } = await sendMessage(
+        userId,
+        forwardTargetChat,
+        forwardedContent
+      )
+
+      if (error) throw new Error(error.message)
+
+      logger.info('Message forwarded successfully', {
+        originalMessageId: messageToForward.id,
+        targetChatId: forwardTargetChat,
+        targetChatName: targetChat?.name
+      })
+
+      toast.success('Message forwarded!', {
+        description: `Sent to ${targetChat?.name || 'selected chat'}`
+      })
+
+      setShowForwardDialog(false)
+      setMessageToForward(null)
+      setForwardTargetChat(null)
+    } catch (error) {
+      logger.error('Failed to forward message', { error })
+      toast.error('Failed to forward message')
+    } finally {
+      setIsForwarding(false)
+    }
   }
 
   const handleEditMessage = (messageId: string, currentText: string) => {
@@ -2168,6 +2216,74 @@ export default function MessagesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Forward Message Dialog */}
+      <Dialog open={showForwardDialog} onOpenChange={(open) => {
+        setShowForwardDialog(open)
+        if (!open) {
+          setMessageToForward(null)
+          setForwardTargetChat(null)
+        }
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Forward className="w-5 h-5" />
+              Forward Message
+            </DialogTitle>
+            <DialogDescription>
+              Select a conversation to forward this message to
+            </DialogDescription>
+          </DialogHeader>
+          {messageToForward && (
+            <div className="my-4 p-3 bg-slate-100 rounded-lg border">
+              <p className="text-xs text-slate-500 mb-1">Message from {messageToForward.sender}</p>
+              <p className="text-sm text-slate-700 line-clamp-3">{messageToForward.text}</p>
+            </div>
+          )}
+          <div className="max-h-64 overflow-y-auto space-y-2">
+            {state.chats
+              .filter(chat => chat.id !== state.activeChat?.id && !chat.isArchived)
+              .map(chat => (
+                <button
+                  key={chat.id}
+                  onClick={() => setForwardTargetChat(chat.id)}
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                    forwardTargetChat === chat.id
+                      ? 'bg-blue-100 border-2 border-blue-500'
+                      : 'bg-slate-50 hover:bg-slate-100 border-2 border-transparent'
+                  }`}
+                >
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold">
+                    {chat.avatar?.substring(0, 2) || chat.name.substring(0, 2).toUpperCase()}
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="font-medium">{chat.name}</p>
+                    <p className="text-xs text-slate-500 capitalize">{chat.type} chat</p>
+                  </div>
+                  {forwardTargetChat === chat.id && (
+                    <CheckCircle className="w-5 h-5 text-blue-600" />
+                  )}
+                </button>
+              ))}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowForwardDialog(false)}
+              disabled={isForwarding}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmForwardMessage}
+              disabled={!forwardTargetChat || isForwarding}
+            >
+              {isForwarding ? 'Forwarding...' : 'Forward'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

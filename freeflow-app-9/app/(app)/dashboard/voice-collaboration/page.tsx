@@ -1174,7 +1174,22 @@ export default function VoiceCollaborationPage() {
                               <Download className="w-4 h-4 mr-1" />
                               Download
                             </Button>
-                            <Button size="sm" variant="outline" className="border-gray-700 hover:bg-slate-800">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-gray-700 hover:bg-slate-800"
+                              onClick={async () => {
+                                try {
+                                  const shareLink = `${window.location.origin}/recordings/${recording.id}/share`
+                                  await navigator.clipboard.writeText(shareLink)
+                                  toast.success('Share link copied!', {
+                                    description: 'Paste in messages or email to share'
+                                  })
+                                } catch (error) {
+                                  toast.error('Failed to copy link')
+                                }
+                              }}
+                            >
                               <Share2 className="w-4 h-4 mr-1" />
                               Share
                             </Button>
