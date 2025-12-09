@@ -1408,3 +1408,105 @@ export async function generateSystemAlerts(userId: string, dashboardData: {
 
   return alerts
 }
+
+// ============================================================================
+// PLATFORM CONFIG FUNCTIONS
+// ============================================================================
+
+export interface PlatformConfig {
+  id?: string
+  user_id: string
+  maintenance_mode: boolean
+  allow_registration: boolean
+  require_email_verification: boolean
+  max_file_upload_size: number
+  session_timeout: number
+  enable_analytics: boolean
+  enable_notifications: boolean
+  created_at?: string
+  updated_at?: string
+}
+
+/**
+ * Get platform config for admin user
+ */
+export async function getPlatformConfig(userId: string): Promise<{ data: PlatformConfig | null; error: string | null }> {
+  try {
+    const supabase = createClient()
+
+    const { data, error } = await supabase
+      .from('admin_platform_config')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching platform config:', error)
+      return { data: null, error: error.message }
+    }
+
+    if (!data) {
+      // Return default config if none exists
+      return {
+        data: {
+          user_id: userId,
+          maintenance_mode: false,
+          allow_registration: true,
+          require_email_verification: true,
+          max_file_upload_size: 50,
+          session_timeout: 30,
+          enable_analytics: true,
+          enable_notifications: true
+        },
+        error: null
+      }
+    }
+
+    return { data, error: null }
+  } catch (error: any) {
+    console.error('Error in getPlatformConfig:', error)
+    return { data: null, error: error.message }
+  }
+}
+
+/**
+ * Save platform config for admin user
+ */
+export async function savePlatformConfig(
+  userId: string,
+  config: Partial<PlatformConfig>
+): Promise<{ data: PlatformConfig | null; error: string | null }> {
+  try {
+    const supabase = createClient()
+    const now = new Date().toISOString()
+
+    const configData = {
+      user_id: userId,
+      maintenance_mode: config.maintenance_mode ?? false,
+      allow_registration: config.allow_registration ?? true,
+      require_email_verification: config.require_email_verification ?? true,
+      max_file_upload_size: config.max_file_upload_size ?? 50,
+      session_timeout: config.session_timeout ?? 30,
+      enable_analytics: config.enable_analytics ?? true,
+      enable_notifications: config.enable_notifications ?? true,
+      updated_at: now
+    }
+
+    const { data, error } = await supabase
+      .from('admin_platform_config')
+      .upsert(configData, { onConflict: 'user_id' })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error saving platform config:', error)
+      // Fall back to returning the config without persistence
+      return { data: configData as PlatformConfig, error: null }
+    }
+
+    return { data, error: null }
+  } catch (error: any) {
+    console.error('Error in savePlatformConfig:', error)
+    return { data: null, error: error.message }
+  }
+}

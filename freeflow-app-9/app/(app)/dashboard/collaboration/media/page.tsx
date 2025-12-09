@@ -218,7 +218,7 @@ export default function MediaPage() {
     try {
       logger.info("Uploading media");
 
-      // Create media item and save to localStorage
+      // Create media item and add to state
       const newMedia: MediaItem = {
         id: Date.now().toString(),
         name: formData.get("mediaName") as string,

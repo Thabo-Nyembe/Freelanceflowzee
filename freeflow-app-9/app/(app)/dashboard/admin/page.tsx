@@ -271,8 +271,24 @@ export default function AdminPage() {
   const handleSaveConfig = useCallback(async () => {
     announce('Saving configuration...', 'polite')
     try {
-      // Save config to localStorage
-      localStorage.setItem('platform_config', JSON.stringify(platformConfig))
+      // Save config to database
+      if (userId) {
+        const { savePlatformConfig } = await import('@/lib/admin-overview-queries')
+        const { error } = await savePlatformConfig(userId, {
+          maintenance_mode: platformConfig.maintenanceMode,
+          allow_registration: platformConfig.allowRegistration,
+          require_email_verification: platformConfig.requireEmailVerification,
+          max_file_upload_size: platformConfig.maxFileUploadSize,
+          session_timeout: platformConfig.sessionTimeout,
+          enable_analytics: platformConfig.enableAnalytics,
+          enable_notifications: platformConfig.enableNotifications
+        })
+
+        if (error) {
+          throw new Error(error)
+        }
+      }
+
       toast.success('Configuration Saved', {
         description: 'Platform settings have been updated'
       })
@@ -281,7 +297,7 @@ export default function AdminPage() {
     } catch (error) {
       toast.error('Failed to save configuration')
     }
-  }, [announce])
+  }, [announce, userId, platformConfig])
 
   // A+++ LOAD ADMIN DATA
   useEffect(() => {
@@ -290,13 +306,20 @@ export default function AdminPage() {
         setIsLoading(true)
         setError(null)
 
-        // Load saved config from localStorage
-        const savedConfig = localStorage.getItem('platform_config')
-        if (savedConfig) {
-          try {
-            setPlatformConfig(JSON.parse(savedConfig))
-          } catch {
-            // Use default config
+        // Load saved config from database
+        if (userId) {
+          const { getPlatformConfig } = await import('@/lib/admin-overview-queries')
+          const { data: config } = await getPlatformConfig(userId)
+          if (config) {
+            setPlatformConfig({
+              maintenanceMode: config.maintenance_mode,
+              allowRegistration: config.allow_registration,
+              requireEmailVerification: config.require_email_verification,
+              maxFileUploadSize: config.max_file_upload_size,
+              sessionTimeout: config.session_timeout,
+              enableAnalytics: config.enable_analytics,
+              enableNotifications: config.enable_notifications
+            })
           }
         }
 
@@ -310,7 +333,7 @@ export default function AdminPage() {
     }
 
     loadAdminData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, announce])
 
   // A+++ LOADING STATE
   if (isLoading) {
