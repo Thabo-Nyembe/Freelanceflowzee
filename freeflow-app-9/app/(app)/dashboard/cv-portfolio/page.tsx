@@ -48,6 +48,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
@@ -206,6 +211,75 @@ export default function CVPortfolioPage() {
   const [achievementToDelete, setAchievementToDelete] = useState<number | null>(null)
   const [projectsToDelete, setProjectsToDelete] = useState<number[]>([])
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Dialog states for prompt() replacements
+  // Add Project Dialog
+  const [showAddProjectDialog, setShowAddProjectDialog] = useState(false)
+  const [newProjectTitle, setNewProjectTitle] = useState('')
+  const [newProjectDescription, setNewProjectDescription] = useState('')
+  const [newProjectTechnologies, setNewProjectTechnologies] = useState('')
+  const [newProjectLink, setNewProjectLink] = useState('')
+
+  // Edit Project Dialog
+  const [showEditProjectDialog, setShowEditProjectDialog] = useState(false)
+  const [editingProject, setEditingProject] = useState<Project | null>(null)
+  const [editProjectTitle, setEditProjectTitle] = useState('')
+  const [editProjectDescription, setEditProjectDescription] = useState('')
+  const [editProjectTechnologies, setEditProjectTechnologies] = useState('')
+  const [editProjectLink, setEditProjectLink] = useState('')
+
+  // Add Skill Dialog
+  const [showAddSkillDialog, setShowAddSkillDialog] = useState(false)
+  const [newSkillName, setNewSkillName] = useState('')
+  const [newSkillCategory, setNewSkillCategory] = useState<'Technical' | 'Soft' | 'Languages'>('Technical')
+  const [newSkillProficiency, setNewSkillProficiency] = useState('3')
+
+  // Add Experience Dialog
+  const [showAddExperienceDialog, setShowAddExperienceDialog] = useState(false)
+  const [newExpCompany, setNewExpCompany] = useState('')
+  const [newExpPosition, setNewExpPosition] = useState('')
+  const [newExpLocation, setNewExpLocation] = useState('')
+  const [newExpDescription, setNewExpDescription] = useState('')
+  const [newExpPeriod, setNewExpPeriod] = useState('')
+  const [newExpTechnologies, setNewExpTechnologies] = useState('')
+
+  // Edit Experience Dialog
+  const [showEditExperienceDialog, setShowEditExperienceDialog] = useState(false)
+  const [editingExperience, setEditingExperience] = useState<Experience | null>(null)
+  const [editExpCompany, setEditExpCompany] = useState('')
+  const [editExpPosition, setEditExpPosition] = useState('')
+  const [editExpDescription, setEditExpDescription] = useState('')
+
+  // Add Education Dialog
+  const [showAddEducationDialog, setShowAddEducationDialog] = useState(false)
+  const [newEduInstitution, setNewEduInstitution] = useState('')
+  const [newEduDegree, setNewEduDegree] = useState('')
+  const [newEduPeriod, setNewEduPeriod] = useState('')
+  const [newEduLocation, setNewEduLocation] = useState('')
+  const [newEduGpa, setNewEduGpa] = useState('')
+
+  // Edit Education Dialog
+  const [showEditEducationDialog, setShowEditEducationDialog] = useState(false)
+  const [editingEducation, setEditingEducation] = useState<Education | null>(null)
+  const [editEduInstitution, setEditEduInstitution] = useState('')
+  const [editEduDegree, setEditEduDegree] = useState('')
+
+  // Add Achievement Dialog
+  const [showAddAchievementDialog, setShowAddAchievementDialog] = useState(false)
+  const [newAchTitle, setNewAchTitle] = useState('')
+  const [newAchIssuer, setNewAchIssuer] = useState('')
+  const [newAchDate, setNewAchDate] = useState('')
+  const [newAchDescription, setNewAchDescription] = useState('')
+
+  // Edit Achievement Dialog
+  const [showEditAchievementDialog, setShowEditAchievementDialog] = useState(false)
+  const [editingAchievement, setEditingAchievement] = useState<Achievement | null>(null)
+  const [editAchTitle, setEditAchTitle] = useState('')
+  const [editAchIssuer, setEditAchIssuer] = useState('')
+
+  // Update Bio Dialog
+  const [showUpdateBioDialog, setShowUpdateBioDialog] = useState(false)
+  const [editBio, setEditBio] = useState('')
 
   // REAL STATE - Projects
   const [projects, setProjects] = useState<Project[]>([
@@ -495,24 +569,35 @@ export default function CVPortfolioPage() {
   // ==================== PROJECT HANDLERS ====================
 
   const handleAddProject = () => {
-    const title = prompt('Enter project title:')
-    if (!title?.trim()) return
+    setNewProjectTitle('')
+    setNewProjectDescription('')
+    setNewProjectTechnologies('')
+    setNewProjectLink('')
+    setShowAddProjectDialog(true)
+  }
 
-    const description = prompt('Enter project description:')
-    if (!description?.trim()) return
+  const confirmAddProject = () => {
+    if (!newProjectTitle.trim()) {
+      toast.error('Please enter a project title')
+      return
+    }
+    if (!newProjectDescription.trim()) {
+      toast.error('Please enter a project description')
+      return
+    }
 
-    const techInput = prompt('Enter technologies (comma-separated):')
-    const technologies = techInput ? techInput.split(',').map(t => t.trim()) : []
-
-    const link = prompt('Enter project URL:') || ''
+    const title = newProjectTitle.trim()
+    const description = newProjectDescription.trim()
+    const technologies = newProjectTechnologies ? newProjectTechnologies.split(',').map(t => t.trim()).filter(t => t) : []
+    const link = newProjectLink.trim()
 
     const newProject: Project = {
       id: Date.now(),
-      title: title.trim(),
-      description: description.trim(),
+      title,
+      description,
       image: '/portfolio-default.jpg',
       technologies,
-      link: link.trim(),
+      link,
       status: 'In Development',
       dateAdded: new Date().toISOString()
     }
@@ -527,42 +612,59 @@ export default function CVPortfolioPage() {
       completenessScore: newCompleteness
     })
 
+    setShowAddProjectDialog(false)
     toast.success('Project Added!', {
       description: `"${title}" added to portfolio (CV ${newCompleteness}% complete)`
     })
   }
 
   const handleEditProject = (project: Project) => {
-    const title = prompt('Edit project title:', project.title)
-    if (!title?.trim()) return
+    setEditingProject(project)
+    setEditProjectTitle(project.title)
+    setEditProjectDescription(project.description)
+    setEditProjectTechnologies(project.technologies.join(', '))
+    setEditProjectLink(project.link)
+    setShowEditProjectDialog(true)
+  }
 
-    const description = prompt('Edit project description:', project.description)
-    if (!description?.trim()) return
+  const confirmEditProject = () => {
+    if (!editingProject) return
 
-    const techInput = prompt('Edit technologies (comma-separated):', project.technologies.join(', '))
-    const technologies = techInput ? techInput.split(',').map(t => t.trim()) : project.technologies
+    if (!editProjectTitle.trim()) {
+      toast.error('Please enter a project title')
+      return
+    }
+    if (!editProjectDescription.trim()) {
+      toast.error('Please enter a project description')
+      return
+    }
 
-    const link = prompt('Edit project URL:', project.link)
+    const title = editProjectTitle.trim()
+    const description = editProjectDescription.trim()
+    const technologies = editProjectTechnologies ? editProjectTechnologies.split(',').map(t => t.trim()).filter(t => t) : editingProject.technologies
+    const link = editProjectLink.trim()
 
     setProjects(prev => prev.map(p =>
-      p.id === project.id
+      p.id === editingProject.id
         ? {
             ...p,
-            title: title.trim(),
-            description: description.trim(),
+            title,
+            description,
             technologies,
-            link: link?.trim() || p.link
+            link: link || p.link
           }
         : p
     ))
 
     logger.info('Project updated', {
-      projectId: project.id,
-      oldTitle: project.title,
+      projectId: editingProject.id,
+      oldTitle: editingProject.title,
       newTitle: title,
       technologiesCount: technologies.length
     })
 
+    setShowEditProjectDialog(false)
+    setEditingProject(null)
     toast.success('Project Updated!', {
       description: `"${title}" has been updated`
     })
@@ -621,17 +723,21 @@ export default function CVPortfolioPage() {
   // ==================== SKILL HANDLERS ====================
 
   const handleAddSkill = () => {
-    const name = prompt('Enter skill name:')
-    if (!name?.trim()) return
+    setNewSkillName('')
+    setNewSkillCategory('Technical')
+    setNewSkillProficiency('3')
+    setShowAddSkillDialog(true)
+  }
 
-    const category = prompt('Enter category (Technical/Soft/Languages):') as 'Technical' | 'Soft' | 'Languages'
-    if (!category || !['Technical', 'Soft', 'Languages'].includes(category)) {
-      toast.error('Invalid category', { description: 'Please use: Technical, Soft, or Languages' })
+  const confirmAddSkill = () => {
+    if (!newSkillName.trim()) {
+      toast.error('Please enter a skill name')
       return
     }
 
-    const proficiencyInput = prompt('Enter proficiency level (1-5):')
-    const proficiency = parseInt(proficiencyInput || '3')
+    const name = newSkillName.trim()
+    const category = newSkillCategory
+    const proficiency = parseInt(newSkillProficiency || '3')
 
     if (proficiency < 1 || proficiency > 5) {
       toast.error('Invalid proficiency', { description: 'Level must be between 1-5' })
@@ -640,7 +746,7 @@ export default function CVPortfolioPage() {
 
     const newSkill: Skill = {
       id: Date.now(),
-      name: name.trim(),
+      name,
       category,
       proficiency
     }
@@ -657,6 +763,7 @@ export default function CVPortfolioPage() {
       completenessScore: newCompleteness
     })
 
+    setShowAddSkillDialog(false)
     toast.success('Skill Added!', {
       description: `${name} (${proficiency}/5 stars) - ${skills.length + 1} skills total`
     })
@@ -724,31 +831,51 @@ export default function CVPortfolioPage() {
   // ==================== EXPERIENCE HANDLERS ====================
 
   const handleAddExperience = () => {
-    const company = prompt('Enter company name:')
-    if (!company?.trim()) return
+    setNewExpCompany('')
+    setNewExpPosition('')
+    setNewExpLocation('')
+    setNewExpDescription('')
+    setNewExpPeriod('')
+    setNewExpTechnologies('')
+    setShowAddExperienceDialog(true)
+  }
 
-    const position = prompt('Enter position/role:')
-    if (!position?.trim()) return
+  const confirmAddExperience = () => {
+    if (!newExpCompany.trim()) {
+      toast.error('Please enter a company name')
+      return
+    }
+    if (!newExpPosition.trim()) {
+      toast.error('Please enter a position/role')
+      return
+    }
+    if (!newExpLocation.trim()) {
+      toast.error('Please enter a location')
+      return
+    }
+    if (!newExpDescription.trim()) {
+      toast.error('Please enter a job description')
+      return
+    }
+    if (!newExpPeriod.trim()) {
+      toast.error('Please enter a period')
+      return
+    }
 
-    const location = prompt('Enter location:')
-    if (!location?.trim()) return
-
-    const description = prompt('Enter job description:')
-    if (!description?.trim()) return
-
-    const period = prompt('Enter period (e.g., "2020 - 2023"):')
-    if (!period?.trim()) return
-
-    const techInput = prompt('Enter technologies used (comma-separated):')
-    const technologies = techInput ? techInput.split(',').map(t => t.trim()) : []
+    const company = newExpCompany.trim()
+    const position = newExpPosition.trim()
+    const location = newExpLocation.trim()
+    const description = newExpDescription.trim()
+    const period = newExpPeriod.trim()
+    const technologies = newExpTechnologies ? newExpTechnologies.split(',').map(t => t.trim()).filter(t => t) : []
 
     const newExperience: Experience = {
       id: Date.now(),
-      company: company.trim(),
-      position: position.trim(),
-      location: location.trim(),
-      description: description.trim(),
-      period: period.trim(),
+      company,
+      position,
+      location,
+      description,
+      period,
       technologies,
       startDate: new Date().toISOString()
     }
@@ -765,41 +892,62 @@ export default function CVPortfolioPage() {
       completenessScore: newCompleteness
     })
 
+    setShowAddExperienceDialog(false)
     toast.success('Experience Added!', {
       description: `${position} at ${company} (CV ${newCompleteness}% complete)`
     })
   }
 
   const handleEditExperience = (exp: Experience) => {
-    const company = prompt('Edit company name:', exp.company)
-    if (!company?.trim()) return
+    setEditingExperience(exp)
+    setEditExpCompany(exp.company)
+    setEditExpPosition(exp.position)
+    setEditExpDescription(exp.description)
+    setShowEditExperienceDialog(true)
+  }
 
-    const position = prompt('Edit position:', exp.position)
-    if (!position?.trim()) return
+  const confirmEditExperience = () => {
+    if (!editingExperience) return
 
-    const description = prompt('Edit description:', exp.description)
-    if (!description?.trim()) return
+    if (!editExpCompany.trim()) {
+      toast.error('Please enter a company name')
+      return
+    }
+    if (!editExpPosition.trim()) {
+      toast.error('Please enter a position')
+      return
+    }
+    if (!editExpDescription.trim()) {
+      toast.error('Please enter a description')
+      return
+    }
+
+    const company = editExpCompany.trim()
+    const position = editExpPosition.trim()
+    const description = editExpDescription.trim()
 
     setExperience(prev => prev.map(e =>
-      e.id === exp.id
+      e.id === editingExperience.id
         ? {
             ...e,
-            company: company.trim(),
-            position: position.trim(),
-            description: description.trim()
+            company,
+            position,
+            description
           }
         : e
     ))
 
     logger.info('Experience updated', {
-      experienceId: exp.id,
-      oldCompany: exp.company,
+      experienceId: editingExperience.id,
+      oldCompany: editingExperience.company,
       newCompany: company,
-      oldPosition: exp.position,
+      oldPosition: editingExperience.position,
       newPosition: position,
       descriptionLength: description.length
     })
 
+    setShowEditExperienceDialog(false)
+    setEditingExperience(null)
     toast.success('Experience Updated!', {
       description: `${position} at ${company}`
     })
@@ -850,28 +998,46 @@ export default function CVPortfolioPage() {
   // ==================== EDUCATION HANDLERS ====================
 
   const handleAddEducation = () => {
-    const institution = prompt('Enter institution name:')
-    if (!institution?.trim()) return
+    setNewEduInstitution('')
+    setNewEduDegree('')
+    setNewEduPeriod('')
+    setNewEduLocation('')
+    setNewEduGpa('')
+    setShowAddEducationDialog(true)
+  }
 
-    const degree = prompt('Enter degree/certification:')
-    if (!degree?.trim()) return
+  const confirmAddEducation = () => {
+    if (!newEduInstitution.trim()) {
+      toast.error('Please enter an institution name')
+      return
+    }
+    if (!newEduDegree.trim()) {
+      toast.error('Please enter a degree/certification')
+      return
+    }
+    if (!newEduPeriod.trim()) {
+      toast.error('Please enter a period')
+      return
+    }
+    if (!newEduLocation.trim()) {
+      toast.error('Please enter a location')
+      return
+    }
 
-    const period = prompt('Enter period (e.g., "2020 - 2023"):')
-    if (!period?.trim()) return
-
-    const location = prompt('Enter location:')
-    if (!location?.trim()) return
-
-    const gpa = prompt('Enter GPA (optional):')
+    const institution = newEduInstitution.trim()
+    const degree = newEduDegree.trim()
+    const period = newEduPeriod.trim()
+    const location = newEduLocation.trim()
+    const gpa = newEduGpa.trim()
 
     const newEducation: Education = {
       id: Date.now(),
-      institution: institution.trim(),
-      degree: degree.trim(),
-      period: period.trim(),
-      location: location.trim(),
+      institution,
+      degree,
+      period,
+      location,
       achievements: [],
-      gpa: gpa?.trim(),
+      gpa: gpa || undefined,
       startDate: new Date().toISOString()
     }
 
@@ -886,32 +1052,50 @@ export default function CVPortfolioPage() {
       completenessScore: newCompleteness
     })
 
+    setShowAddEducationDialog(false)
     toast.success('Education Added!', {
       description: `${degree} from ${institution}`
     })
   }
 
   const handleEditEducation = (edu: Education) => {
-    const institution = prompt('Edit institution:', edu.institution)
-    if (!institution?.trim()) return
+    setEditingEducation(edu)
+    setEditEduInstitution(edu.institution)
+    setEditEduDegree(edu.degree)
+    setShowEditEducationDialog(true)
+  }
 
-    const degree = prompt('Edit degree:', edu.degree)
-    if (!degree?.trim()) return
+  const confirmEditEducation = () => {
+    if (!editingEducation) return
+
+    if (!editEduInstitution.trim()) {
+      toast.error('Please enter an institution name')
+      return
+    }
+    if (!editEduDegree.trim()) {
+      toast.error('Please enter a degree')
+      return
+    }
+
+    const institution = editEduInstitution.trim()
+    const degree = editEduDegree.trim()
 
     setEducation(prev => prev.map(e =>
-      e.id === edu.id
-        ? { ...e, institution: institution.trim(), degree: degree.trim() }
+      e.id === editingEducation.id
+        ? { ...e, institution, degree }
         : e
     ))
 
     logger.info('Education updated', {
-      educationId: edu.id,
-      oldInstitution: edu.institution,
+      educationId: editingEducation.id,
+      oldInstitution: editingEducation.institution,
       newInstitution: institution,
-      oldDegree: edu.degree,
+      oldDegree: editingEducation.degree,
       newDegree: degree
     })
 
+    setShowEditEducationDialog(false)
+    setEditingEducation(null)
     toast.success('Education Updated!', {
       description: `${degree} from ${institution}`
     })
@@ -959,23 +1143,38 @@ export default function CVPortfolioPage() {
   // ==================== ACHIEVEMENT HANDLERS ====================
 
   const handleAddAchievement = () => {
-    const title = prompt('Enter achievement title:')
-    if (!title?.trim()) return
+    setNewAchTitle('')
+    setNewAchIssuer('')
+    setNewAchDate('')
+    setNewAchDescription('')
+    setShowAddAchievementDialog(true)
+  }
 
-    const issuer = prompt('Enter issuing organization:')
-    if (!issuer?.trim()) return
+  const confirmAddAchievement = () => {
+    if (!newAchTitle.trim()) {
+      toast.error('Please enter an achievement title')
+      return
+    }
+    if (!newAchIssuer.trim()) {
+      toast.error('Please enter an issuing organization')
+      return
+    }
+    if (!newAchDate.trim()) {
+      toast.error('Please enter a date')
+      return
+    }
 
-    const date = prompt('Enter date (e.g., "2023"):')
-    if (!date?.trim()) return
-
-    const description = prompt('Enter description (optional):')
+    const title = newAchTitle.trim()
+    const issuer = newAchIssuer.trim()
+    const date = newAchDate.trim()
+    const description = newAchDescription.trim()
 
     const newAchievement: Achievement = {
       id: Date.now(),
-      title: title.trim(),
-      issuer: issuer.trim(),
-      date: date.trim(),
-      description: description?.trim()
+      title,
+      issuer,
+      date,
+      description: description || undefined
     }
 
     setAchievements(prev => [...prev, newAchievement])
@@ -989,32 +1188,50 @@ export default function CVPortfolioPage() {
       completenessScore: newCompleteness
     })
 
+    setShowAddAchievementDialog(false)
     toast.success('Achievement Added!', {
       description: `${title} - ${issuer}`
     })
   }
 
   const handleEditAchievement = (achievement: Achievement) => {
-    const title = prompt('Edit achievement title:', achievement.title)
-    if (!title?.trim()) return
+    setEditingAchievement(achievement)
+    setEditAchTitle(achievement.title)
+    setEditAchIssuer(achievement.issuer)
+    setShowEditAchievementDialog(true)
+  }
 
-    const issuer = prompt('Edit issuer:', achievement.issuer)
-    if (!issuer?.trim()) return
+  const confirmEditAchievement = () => {
+    if (!editingAchievement) return
+
+    if (!editAchTitle.trim()) {
+      toast.error('Please enter an achievement title')
+      return
+    }
+    if (!editAchIssuer.trim()) {
+      toast.error('Please enter an issuer')
+      return
+    }
+
+    const title = editAchTitle.trim()
+    const issuer = editAchIssuer.trim()
 
     setAchievements(prev => prev.map(a =>
-      a.id === achievement.id
-        ? { ...a, title: title.trim(), issuer: issuer.trim() }
+      a.id === editingAchievement.id
+        ? { ...a, title, issuer }
         : a
     ))
 
     logger.info('Achievement updated', {
-      achievementId: achievement.id,
-      oldTitle: achievement.title,
+      achievementId: editingAchievement.id,
+      oldTitle: editingAchievement.title,
       newTitle: title,
-      oldIssuer: achievement.issuer,
+      oldIssuer: editingAchievement.issuer,
       newIssuer: issuer
     })
 
+    setShowEditAchievementDialog(false)
+    setEditingAchievement(null)
     toast.success('Achievement Updated!', {
       description: `${title} - ${issuer}`
     })
@@ -1670,13 +1887,21 @@ export default function CVPortfolioPage() {
   }
 
   const handleUpdateBio = () => {
-    const newBio = prompt('Update your professional summary:', profileData.bio)
-    if (!newBio?.trim()) return
+    setEditBio(profileData.bio)
+    setShowUpdateBioDialog(true)
+  }
 
-    const wordCount = newBio.trim().split(' ').length
-    const charCount = newBio.trim().length
+  const confirmUpdateBio = () => {
+    if (!editBio.trim()) {
+      toast.error('Please enter a professional summary')
+      return
+    }
 
-    setProfileData(prev => ({ ...prev, bio: newBio.trim() }))
+    const newBio = editBio.trim()
+    const wordCount = newBio.split(' ').length
+    const charCount = newBio.length
+
+    setProfileData(prev => ({ ...prev, bio: newBio }))
 
     logger.info('Bio updated', {
       wordCount,
@@ -1684,6 +1909,7 @@ export default function CVPortfolioPage() {
       previousLength: profileData.bio.length
     })
 
+    setShowUpdateBioDialog(false)
     toast.success('Bio Updated!', {
       description: `${wordCount} words, ${charCount} characters`
     })
@@ -2492,6 +2718,551 @@ export default function CVPortfolioPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Add Project Dialog */}
+      <Dialog open={showAddProjectDialog} onOpenChange={setShowAddProjectDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Project</DialogTitle>
+            <DialogDescription>
+              Add a new project to your portfolio.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="project-title">Project Title *</Label>
+              <Input
+                id="project-title"
+                placeholder="Enter project title"
+                value={newProjectTitle}
+                onChange={(e) => setNewProjectTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="project-description">Description *</Label>
+              <Textarea
+                id="project-description"
+                placeholder="Enter project description"
+                value={newProjectDescription}
+                onChange={(e) => setNewProjectDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="project-tech">Technologies (comma-separated)</Label>
+              <Input
+                id="project-tech"
+                placeholder="React, Node.js, PostgreSQL"
+                value={newProjectTechnologies}
+                onChange={(e) => setNewProjectTechnologies(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="project-link">Project URL</Label>
+              <Input
+                id="project-link"
+                placeholder="https://example.com"
+                value={newProjectLink}
+                onChange={(e) => setNewProjectLink(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddProjectDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAddProject}>
+              Add Project
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Project Dialog */}
+      <Dialog open={showEditProjectDialog} onOpenChange={setShowEditProjectDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Project</DialogTitle>
+            <DialogDescription>
+              Update project details.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-project-title">Project Title *</Label>
+              <Input
+                id="edit-project-title"
+                placeholder="Enter project title"
+                value={editProjectTitle}
+                onChange={(e) => setEditProjectTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-project-description">Description *</Label>
+              <Textarea
+                id="edit-project-description"
+                placeholder="Enter project description"
+                value={editProjectDescription}
+                onChange={(e) => setEditProjectDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-project-tech">Technologies (comma-separated)</Label>
+              <Input
+                id="edit-project-tech"
+                placeholder="React, Node.js, PostgreSQL"
+                value={editProjectTechnologies}
+                onChange={(e) => setEditProjectTechnologies(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-project-link">Project URL</Label>
+              <Input
+                id="edit-project-link"
+                placeholder="https://example.com"
+                value={editProjectLink}
+                onChange={(e) => setEditProjectLink(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditProjectDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmEditProject}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Skill Dialog */}
+      <Dialog open={showAddSkillDialog} onOpenChange={setShowAddSkillDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Skill</DialogTitle>
+            <DialogDescription>
+              Add a skill to your profile.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="skill-name">Skill Name *</Label>
+              <Input
+                id="skill-name"
+                placeholder="Enter skill name"
+                value={newSkillName}
+                onChange={(e) => setNewSkillName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="skill-category">Category *</Label>
+              <Select value={newSkillCategory} onValueChange={(value: 'Technical' | 'Soft' | 'Languages') => setNewSkillCategory(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Technical">Technical</SelectItem>
+                  <SelectItem value="Soft">Soft Skills</SelectItem>
+                  <SelectItem value="Languages">Languages</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="skill-proficiency">Proficiency Level (1-5) *</Label>
+              <Select value={newSkillProficiency} onValueChange={setNewSkillProficiency}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 - Beginner</SelectItem>
+                  <SelectItem value="2">2 - Elementary</SelectItem>
+                  <SelectItem value="3">3 - Intermediate</SelectItem>
+                  <SelectItem value="4">4 - Advanced</SelectItem>
+                  <SelectItem value="5">5 - Expert</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddSkillDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAddSkill}>
+              Add Skill
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Experience Dialog */}
+      <Dialog open={showAddExperienceDialog} onOpenChange={setShowAddExperienceDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add Work Experience</DialogTitle>
+            <DialogDescription>
+              Add your professional experience.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+            <div className="space-y-2">
+              <Label htmlFor="exp-company">Company Name *</Label>
+              <Input
+                id="exp-company"
+                placeholder="Enter company name"
+                value={newExpCompany}
+                onChange={(e) => setNewExpCompany(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="exp-position">Position/Role *</Label>
+              <Input
+                id="exp-position"
+                placeholder="Enter your position"
+                value={newExpPosition}
+                onChange={(e) => setNewExpPosition(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="exp-location">Location *</Label>
+              <Input
+                id="exp-location"
+                placeholder="City, Country"
+                value={newExpLocation}
+                onChange={(e) => setNewExpLocation(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="exp-period">Period *</Label>
+              <Input
+                id="exp-period"
+                placeholder="e.g., 2020 - 2023"
+                value={newExpPeriod}
+                onChange={(e) => setNewExpPeriod(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="exp-description">Job Description *</Label>
+              <Textarea
+                id="exp-description"
+                placeholder="Describe your responsibilities and achievements"
+                value={newExpDescription}
+                onChange={(e) => setNewExpDescription(e.target.value)}
+                rows={4}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="exp-tech">Technologies (comma-separated)</Label>
+              <Input
+                id="exp-tech"
+                placeholder="React, Python, AWS"
+                value={newExpTechnologies}
+                onChange={(e) => setNewExpTechnologies(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddExperienceDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAddExperience}>
+              Add Experience
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Experience Dialog */}
+      <Dialog open={showEditExperienceDialog} onOpenChange={setShowEditExperienceDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Experience</DialogTitle>
+            <DialogDescription>
+              Update your work experience details.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-exp-company">Company Name *</Label>
+              <Input
+                id="edit-exp-company"
+                placeholder="Enter company name"
+                value={editExpCompany}
+                onChange={(e) => setEditExpCompany(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-exp-position">Position *</Label>
+              <Input
+                id="edit-exp-position"
+                placeholder="Enter your position"
+                value={editExpPosition}
+                onChange={(e) => setEditExpPosition(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-exp-description">Description *</Label>
+              <Textarea
+                id="edit-exp-description"
+                placeholder="Describe your responsibilities"
+                value={editExpDescription}
+                onChange={(e) => setEditExpDescription(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditExperienceDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmEditExperience}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Education Dialog */}
+      <Dialog open={showAddEducationDialog} onOpenChange={setShowAddEducationDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Education</DialogTitle>
+            <DialogDescription>
+              Add your educational background.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+            <div className="space-y-2">
+              <Label htmlFor="edu-institution">Institution Name *</Label>
+              <Input
+                id="edu-institution"
+                placeholder="Enter institution name"
+                value={newEduInstitution}
+                onChange={(e) => setNewEduInstitution(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edu-degree">Degree/Certification *</Label>
+              <Input
+                id="edu-degree"
+                placeholder="e.g., Bachelor of Science"
+                value={newEduDegree}
+                onChange={(e) => setNewEduDegree(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edu-period">Period *</Label>
+              <Input
+                id="edu-period"
+                placeholder="e.g., 2015 - 2019"
+                value={newEduPeriod}
+                onChange={(e) => setNewEduPeriod(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edu-location">Location *</Label>
+              <Input
+                id="edu-location"
+                placeholder="City, Country"
+                value={newEduLocation}
+                onChange={(e) => setNewEduLocation(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edu-gpa">GPA (optional)</Label>
+              <Input
+                id="edu-gpa"
+                placeholder="e.g., 3.8"
+                value={newEduGpa}
+                onChange={(e) => setNewEduGpa(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddEducationDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAddEducation}>
+              Add Education
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Education Dialog */}
+      <Dialog open={showEditEducationDialog} onOpenChange={setShowEditEducationDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Education</DialogTitle>
+            <DialogDescription>
+              Update your education details.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-edu-institution">Institution *</Label>
+              <Input
+                id="edit-edu-institution"
+                placeholder="Enter institution name"
+                value={editEduInstitution}
+                onChange={(e) => setEditEduInstitution(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-edu-degree">Degree *</Label>
+              <Input
+                id="edit-edu-degree"
+                placeholder="Enter degree"
+                value={editEduDegree}
+                onChange={(e) => setEditEduDegree(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditEducationDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmEditEducation}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Achievement Dialog */}
+      <Dialog open={showAddAchievementDialog} onOpenChange={setShowAddAchievementDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Achievement</DialogTitle>
+            <DialogDescription>
+              Add an award or achievement to your profile.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="ach-title">Achievement Title *</Label>
+              <Input
+                id="ach-title"
+                placeholder="Enter achievement title"
+                value={newAchTitle}
+                onChange={(e) => setNewAchTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ach-issuer">Issuing Organization *</Label>
+              <Input
+                id="ach-issuer"
+                placeholder="Enter issuer name"
+                value={newAchIssuer}
+                onChange={(e) => setNewAchIssuer(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ach-date">Date *</Label>
+              <Input
+                id="ach-date"
+                placeholder="e.g., 2023"
+                value={newAchDate}
+                onChange={(e) => setNewAchDate(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ach-description">Description (optional)</Label>
+              <Textarea
+                id="ach-description"
+                placeholder="Describe the achievement"
+                value={newAchDescription}
+                onChange={(e) => setNewAchDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddAchievementDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAddAchievement}>
+              Add Achievement
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Achievement Dialog */}
+      <Dialog open={showEditAchievementDialog} onOpenChange={setShowEditAchievementDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Achievement</DialogTitle>
+            <DialogDescription>
+              Update your achievement details.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-ach-title">Achievement Title *</Label>
+              <Input
+                id="edit-ach-title"
+                placeholder="Enter title"
+                value={editAchTitle}
+                onChange={(e) => setEditAchTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-ach-issuer">Issuer *</Label>
+              <Input
+                id="edit-ach-issuer"
+                placeholder="Enter issuer"
+                value={editAchIssuer}
+                onChange={(e) => setEditAchIssuer(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditAchievementDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmEditAchievement}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Bio Dialog */}
+      <Dialog open={showUpdateBioDialog} onOpenChange={setShowUpdateBioDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Update Professional Summary</DialogTitle>
+            <DialogDescription>
+              Write a compelling summary of your professional background.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="update-bio">Professional Summary *</Label>
+              <Textarea
+                id="update-bio"
+                placeholder="Enter your professional summary..."
+                value={editBio}
+                onChange={(e) => setEditBio(e.target.value)}
+                rows={6}
+              />
+              <p className="text-xs text-gray-500">
+                {editBio.split(' ').filter(w => w).length} words, {editBio.length} characters
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUpdateBioDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmUpdateBio}>
+              Update Bio
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
