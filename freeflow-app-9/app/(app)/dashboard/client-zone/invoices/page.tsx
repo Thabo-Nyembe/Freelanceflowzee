@@ -26,6 +26,9 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { formatCurrency, getStatusColor } from '@/lib/client-zone-utils'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 const logger = createFeatureLogger('ClientZoneInvoices')
 
@@ -228,6 +231,11 @@ export default function InvoicesPage() {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
   const [filterStatus, setFilterStatus] = useState<'all' | 'paid' | 'pending' | 'overdue' | 'disputed'>('all')
 
+  // Dispute dialog state
+  const [showDisputeDialog, setShowDisputeDialog] = useState(false)
+  const [disputeInvoice, setDisputeInvoice] = useState<Invoice | null>(null)
+  const [disputeReason, setDisputeReason] = useState('')
+
   // Load Invoices Data
   useEffect(() => {
     const loadInvoicesData = async () => {
@@ -375,19 +383,22 @@ export default function InvoicesPage() {
   }
 
   // Handle Dispute Invoice
-  const handleDisputeInvoice = async (invoice: Invoice) => {
+  const handleDisputeInvoice = (invoice: Invoice) => {
     logger.info('Invoice dispute initiated', {
       invoiceId: invoice.id,
       invoiceNumber: invoice.number
     })
+    setDisputeInvoice(invoice)
+    setDisputeReason('')
+    setShowDisputeDialog(true)
+  }
 
-    const reason = prompt(
-      'Please describe the reason for the dispute:',
-      'Please provide detailed explanation...'
-    )
+  // Confirm Dispute Invoice
+  const confirmDisputeInvoice = async () => {
+    if (!disputeInvoice) return
 
-    if (!reason) {
-      logger.debug('Invoice dispute cancelled')
+    if (!disputeReason.trim()) {
+      toast.error('Please provide a reason for the dispute')
       return
     }
 
@@ -396,10 +407,10 @@ export default function InvoicesPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          invoiceId: invoice.id,
-          invoiceNumber: invoice.number,
-          reason: reason,
-          amount: invoice.amount
+          invoiceId: disputeInvoice.id,
+          invoiceNumber: disputeInvoice.number,
+          reason: disputeReason.trim(),
+          amount: disputeInvoice.amount
         })
       })
 
@@ -409,16 +420,20 @@ export default function InvoicesPage() {
 
       setInvoices(
         invoices.map((i) =>
-          i.id === invoice.id ? { ...i, status: 'disputed' } : i
+          i.id === disputeInvoice.id ? { ...i, status: 'disputed' } : i
         )
       )
 
-      logger.info('Invoice dispute submitted', { invoiceId: invoice.id })
+      logger.info('Invoice dispute submitted', { invoiceId: disputeInvoice.id })
       toast.success('Dispute submitted', {
         description: 'Our team will review and contact you within 24 hours'
       })
+      announce('Dispute submitted successfully', 'polite')
+      setShowDisputeDialog(false)
+      setDisputeInvoice(null)
+      setDisputeReason('')
     } catch (error: any) {
-      logger.error('Failed to submit dispute', { error, invoiceId: invoice.id })
+      logger.error('Failed to submit dispute', { error, invoiceId: disputeInvoice.id })
       toast.error('Failed to submit dispute', {
         description: error.message || 'Please try again later'
       })
@@ -668,6 +683,47 @@ export default function InvoicesPage() {
             ))}
           </motion.div>
         )}
+
+        {/* Dispute Invoice Dialog */}
+        <Dialog open={showDisputeDialog} onOpenChange={setShowDisputeDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5 text-amber-500" />
+                Dispute Invoice
+              </DialogTitle>
+              <DialogDescription>
+                {disputeInvoice && (
+                  <>Dispute invoice {disputeInvoice.number} ({formatCurrency(disputeInvoice.amount)})</>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="disputeReason">Reason for Dispute</Label>
+                <Textarea
+                  id="disputeReason"
+                  value={disputeReason}
+                  onChange={(e) => setDisputeReason(e.target.value)}
+                  placeholder="Please provide a detailed explanation of why you are disputing this invoice..."
+                  rows={4}
+                  className="resize-none"
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setShowDisputeDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmDisputeInvoice}
+                className="bg-amber-600 hover:bg-amber-700 text-white"
+              >
+                Submit Dispute
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Invoice Details Modal */}
         {selectedInvoice && (

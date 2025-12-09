@@ -13,6 +13,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -154,6 +157,10 @@ export default function AICodeCompletionPage() {
   const [versionHistory, setVersionHistory] = useState<CodeVersion[]>([])
   const [originalCode, setOriginalCode] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+
+  // Save snippet dialog state
+  const [showSaveSnippetDialog, setShowSaveSnippetDialog] = useState(false)
+  const [snippetName, setSnippetName] = useState('')
 
   // Load data from Supabase
   useEffect(() => {
@@ -298,13 +305,25 @@ export default function AICodeCompletionPage() {
   }
 
   const handleSaveSnippet = () => {
-    const name = prompt('Snippet name:')
-    if (!name) return
+    const code = completion || codeInput
+    if (!code) {
+      toast.error('No code to save')
+      return
+    }
+    setSnippetName('')
+    setShowSaveSnippetDialog(true)
+  }
+
+  const confirmSaveSnippet = () => {
+    if (!snippetName.trim()) {
+      toast.error('Please enter a snippet name')
+      return
+    }
 
     const code = completion || codeInput
     const newSnippet: CodeSnippet = {
       id: Date.now().toString(),
-      name,
+      name: snippetName.trim(),
       code,
       language: selectedLanguage,
       createdAt: new Date().toISOString()
@@ -315,15 +334,18 @@ export default function AICodeCompletionPage() {
 
     logger.info('Snippet saved successfully', {
       snippetId: newSnippet.id,
-      name,
+      name: snippetName.trim(),
       language: selectedLanguage,
       codeLength: code.length,
       totalSnippets: snippets.length + 1
     })
 
     toast.success('Snippet Saved', {
-      description: `"${name}" saved - ${snippets.length + 1} total snippets`
+      description: `"${snippetName.trim()}" saved - ${snippets.length + 1} total snippets`
     })
+    announce('Snippet saved successfully', 'polite')
+    setShowSaveSnippetDialog(false)
+    setSnippetName('')
   }
 
   const handleLoadSnippet = (snippetId: string) => {
@@ -940,6 +962,51 @@ export default function AICodeCompletionPage() {
             </div>
           </div>
         </div>
+
+        {/* Save Snippet Dialog */}
+        <Dialog open={showSaveSnippetDialog} onOpenChange={setShowSaveSnippetDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                Save Code Snippet
+              </DialogTitle>
+              <DialogDescription>
+                Save this code snippet for quick access later
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="snippetName">Snippet Name</Label>
+                <Input
+                  id="snippetName"
+                  value={snippetName}
+                  onChange={(e) => setSnippetName(e.target.value)}
+                  placeholder="e.g., React Modal Component"
+                  onKeyDown={(e) => e.key === 'Enter' && confirmSaveSnippet()}
+                />
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Badge variant="outline">{selectedLanguage}</Badge>
+                <span>{(completion || codeInput).split('\n').length} lines</span>
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <button
+                className="px-4 py-2 border border-input bg-background hover:bg-accent rounded-md"
+                onClick={() => setShowSaveSnippetDialog(false)}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmSaveSnippet}
+                className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md"
+              >
+                Save Snippet
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
       </ErrorBoundary>
     )

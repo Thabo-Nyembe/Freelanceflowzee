@@ -25,6 +25,9 @@ import {
 import { toast } from 'sonner'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 
 const logger = createFeatureLogger('FinancialLayout')
 
@@ -51,6 +54,10 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
   const [financialData, setFinancialData] = useState<any>(null)
   const [invoices, setInvoices] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+
+  // Schedule review dialog state
+  const [showScheduleReviewDialog, setShowScheduleReviewDialog] = useState(false)
+  const [reviewDate, setReviewDate] = useState('')
 
   useEffect(() => {
     const loadFinancialLayoutData = async () => {
@@ -236,16 +243,25 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
     }
 
     logger.info('Schedule review initiated')
-    const reviewDate = prompt('Enter review date (YYYY-MM-DD):')
-    if (reviewDate) {
-      // TODO: Could enhance to store schedule in database via financial-queries.ts
-      // For now, keeping simple client-side reminder
-      logger.info('Review scheduled', { reviewDate })
-      toast.success('Financial Review Scheduled', {
-        description: `Date: ${reviewDate} - Reminder set`
-      })
-      announce('Review scheduled successfully', 'polite')
+    setReviewDate('')
+    setShowScheduleReviewDialog(true)
+  }
+
+  const confirmScheduleReview = () => {
+    if (!reviewDate) {
+      toast.error('Please select a date')
+      return
     }
+
+    // TODO: Could enhance to store schedule in database via financial-queries.ts
+    // For now, keeping simple client-side reminder
+    logger.info('Review scheduled', { reviewDate })
+    toast.success('Financial Review Scheduled', {
+      description: `Date: ${reviewDate} - Reminder set`
+    })
+    announce('Review scheduled successfully', 'polite')
+    setShowScheduleReviewDialog(false)
+    setReviewDate('')
   }
 
   const handleRefreshData = async () => {
@@ -452,6 +468,40 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
 
       {/* Page Content */}
       {children}
+
+      {/* Schedule Review Dialog */}
+      <Dialog open={showScheduleReviewDialog} onOpenChange={setShowScheduleReviewDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Schedule Financial Review
+            </DialogTitle>
+            <DialogDescription>
+              Set a date for your financial review reminder.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="review-date">Review Date</Label>
+              <Input
+                id="review-date"
+                type="date"
+                value={reviewDate}
+                onChange={(e) => setReviewDate(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowScheduleReviewDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmScheduleReview}>
+              Schedule Review
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

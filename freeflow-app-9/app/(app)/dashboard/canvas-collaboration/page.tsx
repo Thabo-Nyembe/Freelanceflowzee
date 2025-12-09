@@ -55,6 +55,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 interface CanvasLayer {
   id: string
@@ -142,6 +145,19 @@ export default function CanvasCollaboration() {
 
   // Confirmation Dialog State
   const [removeCollaborator, setRemoveCollaborator] = useState<{ name: string; id: string } | null>(null)
+
+  // Create Canvas Dialog State
+  const [showCreateCanvasDialog, setShowCreateCanvasDialog] = useState(false)
+  const [newCanvasSize, setNewCanvasSize] = useState('1920x1080')
+  const [newCanvasName, setNewCanvasName] = useState('')
+
+  // Invite Collaborator Dialog State
+  const [showInviteDialog, setShowInviteDialog] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState('')
+
+  // Add Comment Dialog State
+  const [showCommentDialog, setShowCommentDialog] = useState(false)
+  const [newComment, setNewComment] = useState('')
 
   const [recentProjects, setRecentProjects] = useState<CanvasProject[]>([
     {
@@ -428,8 +444,14 @@ export default function CanvasCollaboration() {
 
   // Additional Handlers
   const handleCreateCanvas = () => {
-    const size = prompt('Canvas size (e.g., 1920x1080):') || '1920x1080'
-    const name = prompt('Canvas name:') || 'Untitled Canvas'
+    setNewCanvasSize('1920x1080')
+    setNewCanvasName('')
+    setShowCreateCanvasDialog(true)
+  }
+
+  const confirmCreateCanvas = () => {
+    const size = newCanvasSize || '1920x1080'
+    const name = newCanvasName.trim() || 'Untitled Canvas'
 
     const newProject: CanvasProject = {
       id: (recentProjects.length + 1).toString(),
@@ -453,6 +475,10 @@ export default function CanvasCollaboration() {
     toast.success('Canvas Created!', {
       description: `${name} (${size}) - Ready to start designing`
     })
+    announce('Canvas created successfully', 'polite')
+    setShowCreateCanvasDialog(false)
+    setNewCanvasSize('1920x1080')
+    setNewCanvasName('')
   }
 
   const handleOpenCanvas = (canvasId: string) => {
@@ -575,9 +601,17 @@ export default function CanvasCollaboration() {
   }
 
   const handleInviteCollaborator = () => {
-    const email = prompt('Collaborator email:')
-    if (!email) return
+    setInviteEmail('')
+    setShowInviteDialog(true)
+  }
 
+  const confirmInviteCollaborator = () => {
+    if (!inviteEmail.trim()) {
+      toast.error('Please enter an email address')
+      return
+    }
+
+    const email = inviteEmail.trim()
     const name = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
     const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3']
     const randomColor = colors[Math.floor(Math.random() * colors.length)]
@@ -604,6 +638,9 @@ export default function CanvasCollaboration() {
     toast.success('Invitation Sent!', {
       description: `Collaboration invite sent to ${email} - Total collaborators: ${collaborators.length + 1}`
     })
+    announce('Collaborator invited successfully', 'polite')
+    setShowInviteDialog(false)
+    setInviteEmail('')
   }
 
   const handleRemoveCollaborator = (name: string) => {
@@ -631,8 +668,17 @@ export default function CanvasCollaboration() {
   }
 
   const handleAddComment = () => {
-    const comment = prompt('Add your comment:')
-    if (!comment) return
+    setNewComment('')
+    setShowCommentDialog(true)
+  }
+
+  const confirmAddComment = () => {
+    if (!newComment.trim()) {
+      toast.error('Please enter a comment')
+      return
+    }
+
+    const comment = newComment.trim()
 
     logger.info('Comment mode activated', {
       canvasName,
@@ -643,6 +689,9 @@ export default function CanvasCollaboration() {
     toast.success('Comment Added!', {
       description: `"${comment.slice(0, 50)}${comment.length > 50 ? '...' : ''}" - Click canvas to place annotation`
     })
+    announce('Comment added successfully', 'polite')
+    setShowCommentDialog(false)
+    setNewComment('')
   }
 
   const handleResolveComment = (id: string) => {
@@ -1362,6 +1411,122 @@ export default function CanvasCollaboration() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Create Canvas Dialog */}
+      <Dialog open={showCreateCanvasDialog} onOpenChange={setShowCreateCanvasDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Palette className="h-5 w-5 text-purple-600" />
+              Create New Canvas
+            </DialogTitle>
+            <DialogDescription>
+              Set up your new canvas with custom dimensions
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="canvasName">Canvas Name</Label>
+              <Input
+                id="canvasName"
+                value={newCanvasName}
+                onChange={(e) => setNewCanvasName(e.target.value)}
+                placeholder="e.g., Brand Identity Design"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="canvasSize">Canvas Size</Label>
+              <Input
+                id="canvasSize"
+                value={newCanvasSize}
+                onChange={(e) => setNewCanvasSize(e.target.value)}
+                placeholder="e.g., 1920x1080"
+              />
+              <p className="text-xs text-muted-foreground">Format: widthxheight (e.g., 1920x1080)</p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowCreateCanvasDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmCreateCanvas} className="bg-purple-600 hover:bg-purple-700">
+              Create Canvas
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invite Collaborator Dialog */}
+      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-purple-600" />
+              Invite Collaborator
+            </DialogTitle>
+            <DialogDescription>
+              Send an invitation to collaborate on this canvas
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="inviteEmail">Email Address</Label>
+              <Input
+                id="inviteEmail"
+                type="email"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                placeholder="collaborator@email.com"
+                onKeyDown={(e) => e.key === 'Enter' && confirmInviteCollaborator()}
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowInviteDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmInviteCollaborator} className="bg-purple-600 hover:bg-purple-700">
+              Send Invitation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Comment Dialog */}
+      <Dialog open={showCommentDialog} onOpenChange={setShowCommentDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Type className="h-5 w-5 text-purple-600" />
+              Add Comment
+            </DialogTitle>
+            <DialogDescription>
+              Add a comment annotation to the canvas
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="commentText">Your Comment</Label>
+              <Textarea
+                id="commentText"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Enter your feedback or annotation..."
+                rows={3}
+                className="resize-none"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowCommentDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAddComment} className="bg-purple-600 hover:bg-purple-700">
+              Add Comment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

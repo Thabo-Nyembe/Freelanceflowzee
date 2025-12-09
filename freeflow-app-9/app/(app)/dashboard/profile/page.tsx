@@ -93,6 +93,10 @@ export default function ProfilePage() {
   const [phoneForm, setPhoneForm] = useState({ phone: '', code: '' })
   const [isSavingPhone, setIsSavingPhone] = useState(false)
 
+  // Add skill dialog state
+  const [showAddSkillDialog, setShowAddSkillDialog] = useState(false)
+  const [newSkillName, setNewSkillName] = useState('')
+
   // A+++ LOAD PROFILE DATA
   useEffect(() => {
     const loadProfileData = async () => {
@@ -211,22 +215,29 @@ export default function ProfilePage() {
 
   const handleAddSkill = () => {
     logger.info('Add skill initiated', {
-      action: 'promptSkillName'
+      action: 'openSkillDialog'
     })
 
-    const skill = prompt('Add skill:')
-    if (skill && skill.trim()) {
+    setNewSkillName('')
+    setShowAddSkillDialog(true)
+  }
+
+  const confirmAddSkill = () => {
+    if (newSkillName && newSkillName.trim()) {
       logger.info('Skill added', {
-        skill: skill.trim(),
+        skill: newSkillName.trim(),
         action: 'updateSkillsList'
       })
 
       // Note: Using local state - in production, this would POST to /api/profile/skills
       toast.success('Skill added', {
-        description: `${skill.trim()} - Successfully added to your profile`
+        description: `${newSkillName.trim()} - Successfully added to your profile`
       })
-    } else if (skill !== null) {
-      logger.warn('Skill add cancelled', { reason: 'Empty skill name' })
+
+      setShowAddSkillDialog(false)
+      setNewSkillName('')
+    } else {
+      toast.error('Please enter a skill name')
     }
   }
 
@@ -1172,6 +1183,40 @@ export default function ProfilePage() {
             </Button>
             <Button onClick={handleSavePhone} disabled={isSavingPhone}>
               {isSavingPhone ? 'Updating...' : 'Update Phone'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Skill Dialog */}
+      <Dialog open={showAddSkillDialog} onOpenChange={setShowAddSkillDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Award className="h-5 w-5" />
+              Add Skill
+            </DialogTitle>
+            <DialogDescription>
+              Add a new skill to your profile.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="skill-name">Skill Name</Label>
+              <Input
+                id="skill-name"
+                value={newSkillName}
+                onChange={(e) => setNewSkillName(e.target.value)}
+                placeholder="e.g., React, Project Management, UI/UX Design"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddSkillDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAddSkill}>
+              Add Skill
             </Button>
           </DialogFooter>
         </DialogContent>

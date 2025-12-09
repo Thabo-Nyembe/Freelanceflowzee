@@ -27,6 +27,10 @@ import {
 } from 'lucide-react'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -188,6 +192,16 @@ export default function PaymentsPage() {
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([])
   const [expandedMilestone, setExpandedMilestone] = useState<number | null>(null)
 
+  // Release payment dialog state
+  const [showReleaseDialog, setShowReleaseDialog] = useState(false)
+  const [releaseMilestone, setReleaseMilestone] = useState<Milestone | null>(null)
+  const [releaseConfirmation, setReleaseConfirmation] = useState('')
+
+  // Dispute payment dialog state
+  const [showDisputeDialog, setShowDisputeDialog] = useState(false)
+  const [disputeMilestone, setDisputeMilestone] = useState<Milestone | null>(null)
+  const [disputeReason, setDisputeReason] = useState('')
+
   // Load Payments Data
   useEffect(() => {
     const loadPaymentsData = async () => {
@@ -234,19 +248,23 @@ export default function PaymentsPage() {
   }
 
   // Handle Release Payment
-  const handleReleasePayment = async (milestone: Milestone) => {
+  const handleReleasePayment = (milestone: Milestone) => {
     logger.info('Payment release initiated', {
       milestoneId: milestone.id,
       milestoneName: milestone.name,
       amount: milestone.amount
     })
+    setReleaseMilestone(milestone)
+    setReleaseConfirmation('')
+    setShowReleaseDialog(true)
+  }
 
-    const confirmation = prompt(
-      `Release payment of ${formatCurrency(milestone.amount)} for "${milestone.name}"?\n\nType "CONFIRM" to proceed:`
-    )
+  // Confirm Release Payment
+  const confirmReleasePayment = async () => {
+    if (!releaseMilestone) return
 
-    if (confirmation !== 'CONFIRM') {
-      logger.debug('Payment release cancelled')
+    if (releaseConfirmation !== 'CONFIRM') {
+      toast.error('Please type CONFIRM to proceed')
       return
     }
 
@@ -255,9 +273,9 @@ export default function PaymentsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          milestoneId: milestone.id,
-          milestoneName: milestone.name,
-          amount: milestone.amount,
+          milestoneId: releaseMilestone.id,
+          milestoneName: releaseMilestone.name,
+          amount: releaseMilestone.amount,
           timestamp: new Date().toISOString()
         })
       })
@@ -270,7 +288,7 @@ export default function PaymentsPage() {
 
       setMilestones(
         milestones.map((m) =>
-          m.id === milestone.id
+          m.id === releaseMilestone.id
             ? {
               ...m,
               status: 'released',
@@ -281,15 +299,19 @@ export default function PaymentsPage() {
       )
 
       logger.info('Payment released successfully', {
-        milestoneId: milestone.id,
+        milestoneId: releaseMilestone.id,
         transactionId: data.transactionId
       })
 
       toast.success('Payment released!', {
-        description: `${formatCurrency(milestone.amount)} has been transferred to the freelancer`
+        description: `${formatCurrency(releaseMilestone.amount)} has been transferred to the freelancer`
       })
+      announce('Payment released successfully', 'polite')
+      setShowReleaseDialog(false)
+      setReleaseMilestone(null)
+      setReleaseConfirmation('')
     } catch (error: any) {
-      logger.error('Failed to release payment', { error, milestoneId: milestone.id })
+      logger.error('Failed to release payment', { error, milestoneId: releaseMilestone.id })
       toast.error('Failed to release payment', {
         description: error.message || 'Please try again later'
       })
@@ -297,19 +319,22 @@ export default function PaymentsPage() {
   }
 
   // Handle Dispute Payment
-  const handleDisputePayment = async (milestone: Milestone) => {
+  const handleDisputePayment = (milestone: Milestone) => {
     logger.info('Payment dispute initiated', {
       milestoneId: milestone.id,
       milestoneName: milestone.name
     })
+    setDisputeMilestone(milestone)
+    setDisputeReason('')
+    setShowDisputeDialog(true)
+  }
 
-    const reason = prompt(
-      'Please describe the reason for the dispute:',
-      'Deliverables do not meet requirements...'
-    )
+  // Confirm Dispute Payment
+  const confirmDisputePayment = async () => {
+    if (!disputeMilestone) return
 
-    if (!reason) {
-      logger.debug('Payment dispute cancelled')
+    if (!disputeReason.trim()) {
+      toast.error('Please provide a reason for the dispute')
       return
     }
 
@@ -318,10 +343,10 @@ export default function PaymentsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          milestoneId: milestone.id,
-          milestoneName: milestone.name,
-          amount: milestone.amount,
-          reason: reason,
+          milestoneId: disputeMilestone.id,
+          milestoneName: disputeMilestone.name,
+          amount: disputeMilestone.amount,
+          reason: disputeReason.trim(),
           timestamp: new Date().toISOString()
         })
       })
@@ -332,17 +357,21 @@ export default function PaymentsPage() {
 
       setMilestones(
         milestones.map((m) =>
-          m.id === milestone.id ? { ...m, status: 'disputed' } : m
+          m.id === disputeMilestone.id ? { ...m, status: 'disputed' } : m
         )
       )
 
-      logger.info('Payment dispute submitted', { milestoneId: milestone.id })
+      logger.info('Payment dispute submitted', { milestoneId: disputeMilestone.id })
 
       toast.success('Dispute submitted', {
         description: 'Our mediation team will review and contact you within 24 hours'
       })
+      announce('Dispute submitted successfully', 'polite')
+      setShowDisputeDialog(false)
+      setDisputeMilestone(null)
+      setDisputeReason('')
     } catch (error: any) {
-      logger.error('Failed to submit dispute', { error, milestoneId: milestone.id })
+      logger.error('Failed to submit dispute', { error, milestoneId: disputeMilestone.id })
       toast.error('Failed to submit dispute', {
         description: error.message || 'Please try again later'
       })
@@ -827,6 +856,91 @@ export default function PaymentsPage() {
             </Card>
           )}
         </motion.div>
+
+        {/* Release Payment Dialog */}
+        <Dialog open={showReleaseDialog} onOpenChange={setShowReleaseDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                Release Payment
+              </DialogTitle>
+              <DialogDescription>
+                {releaseMilestone && (
+                  <>Release {formatCurrency(releaseMilestone.amount)} for "{releaseMilestone.name}"</>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                <strong>Warning:</strong> This action cannot be undone. Once released, the payment will be transferred to the freelancer immediately.
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="releaseConfirmation">Type CONFIRM to proceed</Label>
+                <Input
+                  id="releaseConfirmation"
+                  value={releaseConfirmation}
+                  onChange={(e) => setReleaseConfirmation(e.target.value.toUpperCase())}
+                  placeholder="Type CONFIRM"
+                  className="font-mono"
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setShowReleaseDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmReleasePayment}
+                disabled={releaseConfirmation !== 'CONFIRM'}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                Release Payment
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dispute Payment Dialog */}
+        <Dialog open={showDisputeDialog} onOpenChange={setShowDisputeDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Flag className="h-5 w-5 text-red-500" />
+                Dispute Payment
+              </DialogTitle>
+              <DialogDescription>
+                {disputeMilestone && (
+                  <>Dispute payment for "{disputeMilestone.name}" ({formatCurrency(disputeMilestone.amount)})</>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="disputeReason">Reason for Dispute</Label>
+                <Textarea
+                  id="disputeReason"
+                  value={disputeReason}
+                  onChange={(e) => setDisputeReason(e.target.value)}
+                  placeholder="Please explain why the deliverables do not meet requirements..."
+                  rows={4}
+                  className="resize-none"
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => setShowDisputeDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmDisputePayment}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Submit Dispute
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
