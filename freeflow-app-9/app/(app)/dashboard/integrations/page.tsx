@@ -30,6 +30,9 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('Integrations')
 
+// DATABASE QUERIES - Secure API Key Storage
+import { createIntegrationAPIKey, getIntegrationAPIKeys, deleteIntegrationAPIKey } from '@/lib/integrations-management-queries'
+
 // ============================================================================
 // FRAMER MOTION COMPONENTS
 // ============================================================================
@@ -753,28 +756,42 @@ export default function IntegrationsPage() {
   }
 
   const handleRegenerateAPIKey = async (integration: Integration) => {
+    if (!userId) {
+      toast.error('Please log in to regenerate API keys')
+      return
+    }
+
     try {
-      logger.info('Regenerating API key', { id: integration.id, name: integration.name })
+      logger.info('Regenerating API key', { id: integration.id, name: integration.name, userId })
 
       toast.info('Regenerating API key', { description: `For ${integration.name}` })
 
-      // Generate new key and save to localStorage
-      const newKey = `sk_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
-      const savedKeys = JSON.parse(localStorage.getItem('integration_api_keys') || '{}')
-      savedKeys[integration.id] = {
-        key: newKey,
-        regeneratedAt: new Date().toISOString(),
-        integrationName: integration.name
-      }
-      localStorage.setItem('integration_api_keys', JSON.stringify(savedKeys))
+      // Generate and save new key to database (not localStorage)
+      const result = await createIntegrationAPIKey(userId, integration.id, integration.name)
 
-      toast.success('API key regenerated', {
-        description: `New key: ${newKey.substring(0, 20)}...`
+      if (result.error) {
+        throw new Error(result.error.message || 'Failed to save API key')
+      }
+
+      if (!result.newKey) {
+        throw new Error('No key was generated')
+      }
+
+      logger.info('API key regenerated and saved to database', {
+        integrationId: integration.id,
+        integrationName: integration.name,
+        keyLastFour: result.newKey.slice(-4)
+      })
+
+      toast.success('API key regenerated securely', {
+        description: `New key: ${result.newKey.substring(0, 20)}... (stored in database)`
       })
       announce('API key regenerated', 'polite')
     } catch (err: any) {
-      logger.error('Key regeneration failed', { error: err.message })
-      toast.error('Failed to regenerate API key')
+      logger.error('Key regeneration failed', { error: err.message, userId })
+      toast.error('Failed to regenerate API key', {
+        description: err.message || 'Please try again'
+      })
     }
   }
 

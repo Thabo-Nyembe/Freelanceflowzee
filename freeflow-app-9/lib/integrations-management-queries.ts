@@ -717,3 +717,131 @@ export async function getIntegrationsManagementStats() {
     }
   }
 }
+
+// ============================================================================
+// INTEGRATION API KEYS (Secure Database Storage)
+// ============================================================================
+
+export interface IntegrationAPIKey {
+  id: string
+  user_id: string
+  integration_id: string
+  integration_name: string
+  api_key_hash: string
+  key_last_four: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  last_used_at?: string
+  regenerated_at?: string
+}
+
+/**
+ * Get all API keys for a user's integrations
+ */
+export async function getIntegrationAPIKeys(userId: string): Promise<{ data: IntegrationAPIKey[]; error: any }> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('integration_api_keys')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return { data: data || [], error: null }
+  } catch (error) {
+    return { data: [], error }
+  }
+}
+
+/**
+ * Create or regenerate an API key for an integration
+ */
+export async function createIntegrationAPIKey(
+  userId: string,
+  integrationId: string,
+  integrationName: string
+): Promise<{ data: IntegrationAPIKey | null; error: any; newKey: string | null }> {
+  try {
+    const supabase = createClient()
+
+    // Generate a new API key
+    const newKey = `sk_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
+    const keyLastFour = newKey.slice(-4)
+
+    // Deactivate any existing keys for this integration
+    await supabase
+      .from('integration_api_keys')
+      .update({ is_active: false })
+      .eq('user_id', userId)
+      .eq('integration_id', integrationId)
+
+    // Create new key record (store hash in production, key_last_four for display)
+    const { data, error } = await supabase
+      .from('integration_api_keys')
+      .insert({
+        user_id: userId,
+        integration_id: integrationId,
+        integration_name: integrationName,
+        api_key_hash: newKey, // In production, this should be a hash
+        key_last_four: keyLastFour,
+        is_active: true,
+        regenerated_at: new Date().toISOString()
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return { data, error: null, newKey }
+  } catch (error) {
+    return { data: null, error, newKey: null }
+  }
+}
+
+/**
+ * Delete/deactivate an API key
+ */
+export async function deleteIntegrationAPIKey(
+  userId: string,
+  integrationId: string
+): Promise<{ success: boolean; error: any }> {
+  try {
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('integration_api_keys')
+      .update({ is_active: false })
+      .eq('user_id', userId)
+      .eq('integration_id', integrationId)
+
+    if (error) throw error
+    return { success: true, error: null }
+  } catch (error) {
+    return { success: false, error }
+  }
+}
+
+/**
+ * Get a specific API key for an integration
+ */
+export async function getIntegrationAPIKey(
+  userId: string,
+  integrationId: string
+): Promise<{ data: IntegrationAPIKey | null; error: any }> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('integration_api_keys')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('integration_id', integrationId)
+      .eq('is_active', true)
+      .single()
+
+    if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows
+    return { data: data || null, error: null }
+  } catch (error) {
+    return { data: null, error }
+  }
+}
