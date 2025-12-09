@@ -727,7 +727,7 @@ export default function PluginMarketplacePage() {
     }
   }
 
-  const handleTogglePluginActive = (pluginId: string) => {
+  const handleTogglePluginActive = async (pluginId: string) => {
     const installed = state.installedPlugins.find(p => p.pluginId === pluginId)
     const plugin = state.plugins.find(p => p.id === pluginId)
 
@@ -740,6 +740,17 @@ export default function PluginMarketplacePage() {
         currentState: installed.isActive,
         newState
       })
+
+      // Persist active state to database
+      if (userId && installed.id) {
+        try {
+          const { updateInstallation } = await import('@/lib/plugin-marketplace-queries')
+          await updateInstallation(installed.id, { is_active: newState })
+          logger.info('Plugin active state persisted to database', { pluginId, isActive: newState })
+        } catch (error: any) {
+          logger.error('Failed to persist plugin active state', { error: error.message })
+        }
+      }
 
       dispatch({ type: 'TOGGLE_PLUGIN_ACTIVE', pluginId })
 

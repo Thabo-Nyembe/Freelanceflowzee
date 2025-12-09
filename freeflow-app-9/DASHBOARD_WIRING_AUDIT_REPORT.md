@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **80 critical features** across 24 sessions.
+Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **81 critical features** across 25 sessions.
 
 ---
 
@@ -479,6 +479,13 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 - `handleJoinEvent` → `rsvpEvent()` - Records event RSVP in database
 - `handleJoinGroup` → `joinGroup()` - Records group membership in database
 
+### 77. Plugin Marketplace Handler (plugin-marketplace) - Session 25
+**File:** `app/(app)/dashboard/plugin-marketplace/page.tsx`
+**Query File:** `lib/plugin-marketplace-queries.ts`
+**Status:** WIRED
+
+- `handleTogglePluginActive` → `updateInstallation()` - Persists plugin active state to database
+
 ---
 
 ## Available Query Functions (92 Query Files)
@@ -560,13 +567,14 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | ede42e54 | feat: Wire notification handlers to database (Session 21) |
 | b30fe8c3 | feat: Wire crypto cancel/refund, AR session handlers (Session 22) |
 | 4cb9b119 | feat: Wire AI code snippet, AI assistant handlers (Session 23) |
-| (pending) | feat: Wire community-hub event/group handlers (Session 24) |
+| ed2437e7 | feat: Wire community-hub event/group handlers (Session 24) |
+| (pending) | feat: Wire plugin marketplace toggle handler (Session 25) |
 
 ---
 
 ## Conclusion
 
-The KAZI dashboard has **92 query files** and **149 API routes**. Critical features (invoice disputes, admin alerts, team invitations, AI assistant conversations, plugin installations, AI video generation, browser extension, community hub) are now wired. Remaining items are acceptable as-is or lower priority.
+The KAZI dashboard has **92 query files** and **149 API routes**. Critical features (invoice disputes, admin alerts, team invitations, AI assistant conversations, plugin installations, AI video generation, browser extension, community hub, plugin marketplace) are now wired. Remaining items are acceptable as-is or lower priority.
 
-**Total:** 80 features wired across 24 sessions
+**Total:** 81 features wired across 25 sessions
 **Overall Status:** Production Ready
