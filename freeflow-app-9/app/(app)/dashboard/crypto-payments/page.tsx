@@ -697,29 +697,42 @@ export default function CryptoPaymentsPage() {
     setCancelTransaction(transaction)
   }
 
-  const handleConfirmCancelTransaction = () => {
+  const handleConfirmCancelTransaction = async () => {
     if (!cancelTransaction) return
 
-    const updatedTransaction: CryptoTransaction = {
-      ...cancelTransaction,
-      status: 'cancelled',
-      updatedAt: new Date().toISOString()
+    try {
+      // Cancel transaction in database
+      if (userId) {
+        const { cancelTransaction: cancelTransactionDB } = await import('@/lib/crypto-payment-queries')
+        await cancelTransactionDB(cancelTransaction.id)
+        logger.info('Transaction cancelled in database', { transactionId: cancelTransaction.id })
+      }
+
+      const updatedTransaction: CryptoTransaction = {
+        ...cancelTransaction,
+        status: 'cancelled',
+        updatedAt: new Date().toISOString()
+      }
+
+      dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
+
+      logger.info('Transaction cancelled', {
+        transactionId: cancelTransaction.id,
+        amount: cancelTransaction.amount,
+        currency: cancelTransaction.currency,
+        previousStatus: 'pending'
+      })
+
+      toast.success('Transaction cancelled', {
+        description: `${cancelTransaction.id} - ${formatCryptoAmount(cancelTransaction.amount, cancelTransaction.currency)} - ${cancelTransaction.description}`
+      })
+      announce('Transaction cancelled', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to cancel transaction', { error: error.message })
+      toast.error('Failed to cancel transaction', { description: error.message })
+    } finally {
+      setCancelTransaction(null)
     }
-
-    dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
-
-    logger.info('Transaction cancelled', {
-      transactionId: cancelTransaction.id,
-      amount: cancelTransaction.amount,
-      currency: cancelTransaction.currency,
-      previousStatus: 'pending'
-    })
-
-    toast.success('Transaction cancelled', {
-      description: `${cancelTransaction.id} - ${formatCryptoAmount(cancelTransaction.amount, cancelTransaction.currency)} - ${cancelTransaction.description}`
-    })
-    announce('Transaction cancelled', 'polite')
-    setCancelTransaction(null)
   }
 
   const handleRefundTransaction = (transactionId: string) => {
@@ -743,30 +756,43 @@ export default function CryptoPaymentsPage() {
     setRefundTransaction(transaction)
   }
 
-  const handleConfirmRefundTransaction = () => {
+  const handleConfirmRefundTransaction = async () => {
     if (!refundTransaction) return
 
-    const updatedTransaction: CryptoTransaction = {
-      ...refundTransaction,
-      status: 'refunded',
-      updatedAt: new Date().toISOString()
+    try {
+      // Refund transaction in database
+      if (userId) {
+        const { refundTransaction: refundTransactionDB } = await import('@/lib/crypto-payment-queries')
+        await refundTransactionDB(refundTransaction.id)
+        logger.info('Transaction refunded in database', { transactionId: refundTransaction.id })
+      }
+
+      const updatedTransaction: CryptoTransaction = {
+        ...refundTransaction,
+        status: 'refunded',
+        updatedAt: new Date().toISOString()
+      }
+
+      dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
+
+      logger.info('Transaction refunded', {
+        transactionId: refundTransaction.id,
+        amount: refundTransaction.amount,
+        currency: refundTransaction.currency,
+        usdAmount: refundTransaction.usdAmount,
+        customerEmail: refundTransaction.metadata.customerEmail
+      })
+
+      toast.success('Transaction refunded', {
+        description: `${formatCryptoAmount(refundTransaction.amount, refundTransaction.currency)} - ${formatUSD(refundTransaction.usdAmount)} - Refunded to ${refundTransaction.metadata.customerEmail || 'customer'}`
+      })
+      announce('Transaction refunded', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to refund transaction', { error: error.message })
+      toast.error('Failed to refund transaction', { description: error.message })
+    } finally {
+      setRefundTransaction(null)
     }
-
-    dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
-
-    logger.info('Transaction refunded', {
-      transactionId: refundTransaction.id,
-      amount: refundTransaction.amount,
-      currency: refundTransaction.currency,
-      usdAmount: refundTransaction.usdAmount,
-      customerEmail: refundTransaction.metadata.customerEmail
-    })
-
-    toast.success('Transaction refunded', {
-      description: `${formatCryptoAmount(refundTransaction.amount, refundTransaction.currency)} - ${formatUSD(refundTransaction.usdAmount)} - Refunded to ${refundTransaction.metadata.customerEmail || 'customer'}`
-    })
-    announce('Transaction refunded', 'polite')
-    setRefundTransaction(null)
   }
 
   const handleCopyAddress = (address: string) => {

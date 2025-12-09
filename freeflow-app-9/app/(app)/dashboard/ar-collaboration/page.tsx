@@ -828,15 +828,26 @@ export default function ARCollaborationPage() {
     }
   }
 
-  const handleToggleRecording = (sessionId: string) => {
+  const handleToggleRecording = async (sessionId: string) => {
     logger.info('Toggling recording', { sessionId })
 
     const session = state.sessions.find(s => s.id === sessionId)
     if (!session) return
 
-    dispatch({ type: 'TOGGLE_RECORDING', sessionId })
-
     const newStatus = !session.isRecording
+
+    // Persist to database
+    if (userId) {
+      try {
+        const { updateSession } = await import('@/lib/ar-collaboration-queries')
+        await updateSession(sessionId, { is_recording: newStatus })
+        logger.info('Recording status persisted to database', { sessionId, recording: newStatus })
+      } catch (error: any) {
+        logger.error('Failed to persist recording status', { error: error.message })
+      }
+    }
+
+    dispatch({ type: 'TOGGLE_RECORDING', sessionId })
 
     logger.info('Recording toggled', {
       sessionId: session.id,
@@ -850,15 +861,26 @@ export default function ARCollaborationPage() {
     announce(session.isRecording ? 'Recording stopped' : 'Recording started', 'polite')
   }
 
-  const handleToggleLock = (sessionId: string) => {
+  const handleToggleLock = async (sessionId: string) => {
     logger.info('Toggling session lock', { sessionId })
 
     const session = state.sessions.find(s => s.id === sessionId)
     if (!session) return
 
-    dispatch({ type: 'TOGGLE_LOCK', sessionId })
-
     const newStatus = !session.isLocked
+
+    // Persist to database
+    if (userId) {
+      try {
+        const { updateSession } = await import('@/lib/ar-collaboration-queries')
+        await updateSession(sessionId, { is_locked: newStatus })
+        logger.info('Lock status persisted to database', { sessionId, locked: newStatus })
+      } catch (error: any) {
+        logger.error('Failed to persist lock status', { error: error.message })
+      }
+    }
+
+    dispatch({ type: 'TOGGLE_LOCK', sessionId })
 
     logger.info('Session lock toggled', {
       sessionId: session.id,

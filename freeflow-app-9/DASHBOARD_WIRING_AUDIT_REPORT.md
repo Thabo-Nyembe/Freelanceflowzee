@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **69 critical features** across 21 sessions.
+Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **75 critical features** across 22 sessions.
 
 ---
 
@@ -440,6 +440,22 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 - `handleConfirmDeleteAll` → `createBulkAction()` - Records bulk delete action
 - `handleConfirmClearAll` → `createBulkAction()` - Records bulk clear action
 
+### 68-69. Crypto Payment Handlers (crypto-payments) - Session 22
+**File:** `app/(app)/dashboard/crypto-payments/page.tsx`
+**Query File:** `lib/crypto-payment-queries.ts`
+**Status:** WIRED
+
+- `handleConfirmCancelTransaction` → `cancelTransaction()` - Cancels transaction in database
+- `handleConfirmRefundTransaction` → `refundTransaction()` - Refunds transaction in database
+
+### 70-71. AR Collaboration Handlers (ar-collaboration) - Session 22
+**File:** `app/(app)/dashboard/ar-collaboration/page.tsx`
+**Query File:** `lib/ar-collaboration-queries.ts`
+**Status:** WIRED
+
+- `handleToggleRecording` → `updateSession()` - Persists recording status to database
+- `handleToggleLock` → `updateSession()` - Persists lock status to database
+
 ---
 
 ## Available Query Functions (92 Query Files)
@@ -518,7 +534,8 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | f9f68307 | feat: Wire crypto-payments create handler (Session 18) |
 | 809e6097 | feat: Wire email automations, voice recording tracking (Session 19) |
 | eb9f0dac | feat: Wire AI video generation, browser extension handlers (Session 20) |
-| (pending) | feat: Wire notification handlers to database (Session 21) |
+| ede42e54 | feat: Wire notification handlers to database (Session 21) |
+| (pending) | feat: Wire crypto cancel/refund, AR session handlers (Session 22) |
 
 ---
 
@@ -526,5 +543,5 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 
 The KAZI dashboard has **92 query files** and **149 API routes**. Critical features (invoice disputes, admin alerts, team invitations, AI assistant conversations, plugin installations, AI video generation, browser extension) are now wired. Remaining items are acceptable as-is or lower priority.
 
-**Total:** 69 features wired across 21 sessions
+**Total:** 75 features wired across 22 sessions
 **Overall Status:** Production Ready
