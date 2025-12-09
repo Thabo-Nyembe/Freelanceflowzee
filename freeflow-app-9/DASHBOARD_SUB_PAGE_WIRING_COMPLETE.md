@@ -21,6 +21,7 @@ This session completed comprehensive database wiring for critical dashboard sub-
 | `1b044031` | feat: Wire Team page to database with full CRUD |
 | `74ddbda5` | fix: Secure Integration API keys with database storage |
 | `e1c753d6` | feat: Wire Time-tracking delete operations to database |
+| `2e6e9744` | feat: Wire CV-Portfolio to database |
 
 ---
 
@@ -163,6 +164,19 @@ await createPaymentMethod(userId, {
 - `lib/time-tracking-queries.ts` (+36 lines)
 - `app/(app)/dashboard/time-tracking/page.tsx` (+15/-5 lines)
 
+### 6. CV-Portfolio Page (`/dashboard/cv-portfolio`)
+
+**Problem:** Portfolio data loaded from/saved to localStorage
+
+**Solution:**
+- Replace localStorage loading with database queries
+- Load projects, skills, experience, education from Supabase
+- Map database fields to component state format
+- Remove localStorage save from export and AI summary functions
+
+**Files Modified:**
+- `app/(app)/dashboard/cv-portfolio/page.tsx` (+79/-25 lines)
+
 ---
 
 ## Additional Verified Pages
@@ -176,11 +190,15 @@ These pages were audited and found to already be properly wired:
 
 ## Remaining Items (Lower Priority)
 
-These pages still have localStorage usage but for NON-SENSITIVE data:
+These pages still have localStorage usage but for NON-SENSITIVE data only:
 
 | Page | localStorage Usage | Priority |
 |------|-------------------|----------|
 | AI-Settings | Budget, rate limits, default providers | LOW (non-sensitive preferences) |
+| CV-Portfolio | Share link history tracking | LOW (non-sensitive tracking) |
+| Analytics | Refresh timestamp | LOW (just a timestamp) |
+| Profile | Password change timestamp | LOW (just a timestamp) |
+| Admin | Cache clearing operations | LOW (appropriate use) |
 
 ---
 
