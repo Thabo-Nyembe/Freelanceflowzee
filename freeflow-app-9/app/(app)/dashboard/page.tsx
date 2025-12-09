@@ -234,13 +234,26 @@ export default function DashboardPage() {
 
         // Import dashboard stats utility
         const { getDashboardStats, getRecentActivity, getRecentProjects } = await import('@/lib/dashboard-stats')
+        const { getTimeEntries } = await import('@/lib/time-tracking-queries')
+
+        // Calculate start and end of current month for time tracking
+        const now = new Date()
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
 
         // Fetch real dashboard data from Supabase
-        const [stats, activities, recentProjects] = await Promise.all([
+        const [stats, activities, recentProjects, timeEntriesResult] = await Promise.all([
           getDashboardStats(userId),
           getRecentActivity(userId, 10),
-          getRecentProjects(userId, 3)
+          getRecentProjects(userId, 3),
+          getTimeEntries(userId, { startDate: startOfMonth, endDate: endOfMonth })
         ])
+
+        // Calculate hours this month from time entries (duration is in seconds)
+        const hoursThisMonth = (timeEntriesResult.data || []).reduce(
+          (total, entry) => total + (entry.duration || 0) / 3600,
+          0
+        )
 
         // Update state with real data
         setLiveActivities(activities.map((act: any) => ({
@@ -261,7 +274,7 @@ export default function DashboardPage() {
           activeProjects: stats.projects.active,
           completedProjects: stats.projects.completed,
           totalClients: stats.clients.total,
-          hoursThisMonth: 0, // TODO: Add time tracking when implemented
+          hoursThisMonth: Math.round(hoursThisMonth * 10) / 10, // Rounded to 1 decimal
           revenue: {
             total: stats.revenue.total,
             growth: stats.revenue.growth
