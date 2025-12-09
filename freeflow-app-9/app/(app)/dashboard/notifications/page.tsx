@@ -373,7 +373,24 @@ export default function NotificationsPage() {
       })
     }
   }
-  const handleArchiveAll = () => { const count = state.notifications.length; logger.info('Archiving all notifications', { count }); state.notifications.forEach(n => dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: n.id })); toast.success('All notifications archived') }
+  const handleArchiveAll = async () => {
+    const count = state.notifications.length
+    logger.info('Archiving all notifications', { count })
+
+    // Create bulk action in database
+    if (userId) {
+      try {
+        const { createBulkAction } = await import('@/lib/notifications-center-queries')
+        await createBulkAction(userId, 'archive', state.notifications.map(n => n.id), `Archived ${count} notifications`)
+        logger.info('Bulk archive action recorded in database', { count })
+      } catch (error: any) {
+        logger.error('Failed to record bulk action', { error: error.message })
+      }
+    }
+
+    state.notifications.forEach(n => dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: n.id }))
+    toast.success('All notifications archived')
+  }
   const handleDelete = async (id: string) => {
     const notification = state.notifications.find(n => n.id === id)
 
@@ -424,20 +441,101 @@ export default function NotificationsPage() {
     }
   }
   const handleDeleteAll = () => { const count = state.notifications.length; logger.info('Deleting all notifications initiated', { count }); setShowDeleteAllConfirm(true) }
-  const handleConfirmDeleteAll = () => { const count = state.notifications.length; logger.info('Deleting all notifications', { count }); state.notifications.forEach(n => dispatch({ type: 'DELETE_NOTIFICATION', payload: n.id })); setShowDeleteAllConfirm(false); toast.success('All notifications deleted') }
+  const handleConfirmDeleteAll = async () => {
+    const count = state.notifications.length
+    logger.info('Deleting all notifications', { count })
+
+    // Create bulk delete action in database
+    if (userId) {
+      try {
+        const { createBulkAction } = await import('@/lib/notifications-center-queries')
+        await createBulkAction(userId, 'delete', state.notifications.map(n => n.id), `Deleted ${count} notifications`)
+        logger.info('Bulk delete action recorded in database', { count })
+      } catch (error: any) {
+        logger.error('Failed to record bulk action', { error: error.message })
+      }
+    }
+
+    state.notifications.forEach(n => dispatch({ type: 'DELETE_NOTIFICATION', payload: n.id }))
+    setShowDeleteAllConfirm(false)
+    toast.success('All notifications deleted')
+  }
   const handleUnarchive = (id: string) => { logger.info('Unarchiving notification', { notificationId: id }); toast.success('Notification unarchived') }
   const handleFilterAll = () => { logger.debug('Filtering all notifications'); dispatch({ type: 'SET_FILTER', payload: 'all' }) }
   const handleFilterUnread = () => { logger.debug('Filtering unread notifications'); dispatch({ type: 'SET_FILTER', payload: 'unread' }) }
   const handleFilterRead = () => { logger.debug('Filtering read notifications'); dispatch({ type: 'SET_FILTER', payload: 'read' }) }
   const handleExportNotifications = () => { const count = state.notifications.length; logger.info('Exporting notifications', { count }); toast.success('Exporting notifications...') }
   const handleClearAll = () => { const count = state.notifications.length; logger.info('Clearing all notifications initiated', { count }); setShowClearAllConfirm(true) }
-  const handleConfirmClearAll = () => { const count = state.notifications.length; logger.info('Clearing all notifications', { count }); dispatch({ type: 'SET_NOTIFICATIONS', payload: [] }); setShowClearAllConfirm(false); toast.success('All notifications cleared') }
+  const handleConfirmClearAll = async () => {
+    const count = state.notifications.length
+    logger.info('Clearing all notifications', { count })
+
+    // Create bulk clear action in database
+    if (userId) {
+      try {
+        const { createBulkAction } = await import('@/lib/notifications-center-queries')
+        await createBulkAction(userId, 'delete', state.notifications.map(n => n.id), `Cleared ${count} notifications`)
+        logger.info('Bulk clear action recorded in database', { count })
+      } catch (error: any) {
+        logger.error('Failed to record bulk action', { error: error.message })
+      }
+    }
+
+    dispatch({ type: 'SET_NOTIFICATIONS', payload: [] })
+    setShowClearAllConfirm(false)
+    toast.success('All notifications cleared')
+  }
   const handleToggleSound = () => { logger.info('Toggling notification sound', { currentState: state.soundEnabled }); dispatch({ type: 'TOGGLE_SOUND' }) }
   const handleTogglePreviews = () => { logger.info('Toggling notification previews', { currentState: state.previewsEnabled }); dispatch({ type: 'TOGGLE_PREVIEWS' }) }
-  const handleSavePreferences = () => { logger.info('Saving notification preferences', { soundEnabled: state.soundEnabled, previewsEnabled: state.previewsEnabled }); toast.success('Preferences saved successfully') }
+  const handleSavePreferences = async () => {
+    logger.info('Saving notification preferences', { soundEnabled: state.soundEnabled, previewsEnabled: state.previewsEnabled })
+
+    // Persist preferences to database
+    if (userId) {
+      try {
+        const { createNotificationPreference, getNotificationPreference, updateNotificationPreference } = await import('@/lib/notification-settings-queries')
+
+        // Check if preferences exist, create or update
+        const { data: existing } = await getNotificationPreference(userId, 'general', 'in_app')
+        if (existing) {
+          await updateNotificationPreference(existing.id, {
+            custom_settings: { soundEnabled: state.soundEnabled, previewsEnabled: state.previewsEnabled }
+          })
+        } else {
+          await createNotificationPreference(userId, {
+            category: 'general',
+            channel: 'in_app',
+            is_enabled: true,
+            custom_settings: { soundEnabled: state.soundEnabled, previewsEnabled: state.previewsEnabled }
+          })
+        }
+        logger.info('Notification preferences saved to database')
+      } catch (error: any) {
+        logger.error('Failed to save preferences', { error: error.message })
+      }
+    }
+
+    toast.success('Preferences saved successfully')
+  }
   const handleResetPreferences = () => { logger.info('Resetting notification preferences initiated'); setShowResetPreferencesConfirm(true) }
   const handleConfirmResetPreferences = () => { logger.info('Resetting notification preferences to defaults'); setShowResetPreferencesConfirm(false); toast.success('Preferences reset to defaults') }
-  const handleSnooze = (id: string) => { logger.info('Snoozing notification', { notificationId: id, duration: '1 hour' }); toast.success('Notification snoozed for 1 hour') }
+  const handleSnooze = async (id: string) => {
+    logger.info('Snoozing notification', { notificationId: id, duration: '1 hour' })
+
+    // Persist snooze to database
+    if (userId) {
+      try {
+        const { snoozeNotification } = await import('@/lib/notifications-center-queries')
+        const { error } = await snoozeNotification(userId, id, '1_hour')
+        if (error) throw error
+        logger.info('Notification snoozed in database', { notificationId: id })
+      } catch (error: any) {
+        logger.error('Failed to snooze notification', { error: error.message })
+      }
+    }
+
+    toast.success('Notification snoozed for 1 hour')
+  }
 
   const filteredNotifications = state.notifications.filter(notification => {
     const matchesSearch = notification.title.toLowerCase().includes(state.search.toLowerCase()) ||

@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **63 critical features** across 20 sessions.
+Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **69 critical features** across 21 sessions.
 
 ---
 
@@ -429,6 +429,17 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 - `handleInstallExtension` → `createInstallation()` - Records installation in database
 - `handleToggleFeature` → `updateInstallation()` - Persists feature toggles in DB
 
+### 62-67. Notification Handlers (notifications) - Session 21
+**File:** `app/(app)/dashboard/notifications/page.tsx`
+**Query Files:** `lib/notifications-center-queries.ts`, `lib/notification-settings-queries.ts`
+**Status:** WIRED
+
+- `handleSnooze` → `snoozeNotification()` - Persists snooze to database
+- `handleSavePreferences` → `createNotificationPreference()/updateNotificationPreference()` - Persists preferences
+- `handleArchiveAll` → `createBulkAction()` - Records bulk archive action
+- `handleConfirmDeleteAll` → `createBulkAction()` - Records bulk delete action
+- `handleConfirmClearAll` → `createBulkAction()` - Records bulk clear action
+
 ---
 
 ## Available Query Functions (92 Query Files)
@@ -506,7 +517,8 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | 53c44a35 | feat: Wire ai-assistant save chat handler (Session 17) |
 | f9f68307 | feat: Wire crypto-payments create handler (Session 18) |
 | 809e6097 | feat: Wire email automations, voice recording tracking (Session 19) |
-| (pending) | feat: Wire AI video generation, browser extension handlers (Session 20) |
+| eb9f0dac | feat: Wire AI video generation, browser extension handlers (Session 20) |
+| (pending) | feat: Wire notification handlers to database (Session 21) |
 
 ---
 
@@ -514,5 +526,5 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 
 The KAZI dashboard has **92 query files** and **149 API routes**. Critical features (invoice disputes, admin alerts, team invitations, AI assistant conversations, plugin installations, AI video generation, browser extension) are now wired. Remaining items are acceptable as-is or lower priority.
 
-**Total:** 63 features wired across 20 sessions
+**Total:** 69 features wired across 21 sessions
 **Overall Status:** Production Ready
