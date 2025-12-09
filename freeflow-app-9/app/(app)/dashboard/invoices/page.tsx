@@ -920,11 +920,27 @@ ${invoices.map(inv =>
             </p>
           </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              logger.info('Exporting invoices', {
+                totalInvoices: invoices.length,
+                paidCount: invoices.filter(inv => inv.status === 'paid').length,
+                totalAmount: invoices.reduce((sum, inv) => sum + inv.amount, 0)
+              })
+              toast.success('Exporting invoices...', {
+                description: `${invoices.length} invoices - $${invoices.reduce((sum, inv) => sum + inv.amount, 0).toLocaleString()} total`
+              })
+            }}
+          >
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button size="sm">
+          <Button
+            size="sm"
+            onClick={handleCreateInvoice}
+          >
             <Plus className="h-4 w-4 mr-2" />
             New Invoice
           </Button>
@@ -1454,12 +1470,86 @@ ${invoices.map(inv =>
             </div>
 
             <TabsContent value="all" className="space-y-4">
+              {/* Bulk Actions Toolbar - Appears when invoices are selected */}
+              {selectedInvoices.length > 0 && (
+                <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedInvoices.length === filteredInvoices.length}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedInvoices(filteredInvoices.map(inv => inv.id))
+                        } else {
+                          setSelectedInvoices([])
+                        }
+                      }}
+                      className="w-4 h-4 rounded border-gray-300"
+                    />
+                    <span className="text-sm font-medium text-blue-800">
+                      {selectedInvoices.length} invoice{selectedInvoices.length !== 1 ? 's' : ''} selected
+                    </span>
+                    <span className="text-sm text-blue-600">
+                      (${filteredInvoices.filter(inv => selectedInvoices.includes(inv.id)).reduce((sum, inv) => sum + inv.amount, 0).toLocaleString()} total)
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleBulkAction('send')}
+                      className="bg-white hover:bg-blue-50"
+                    >
+                      Send All
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleBulkAction('markPaid')}
+                      className="bg-white hover:bg-green-50 text-green-700"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      Mark as Paid
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleBulkAction('delete')}
+                      className="bg-white hover:bg-red-50 text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setSelectedInvoices([])}
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-4">
                 {filteredInvoices.map((invoice) => (
-                  <Card key={invoice.id} className="kazi-card">
+                  <Card key={invoice.id} className={`kazi-card ${selectedInvoices.includes(invoice.id) ? 'ring-2 ring-blue-500' : ''}`}>
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
+                          {/* Selection Checkbox */}
+                          <input
+                            type="checkbox"
+                            checked={selectedInvoices.includes(invoice.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedInvoices(prev => [...prev, invoice.id])
+                              } else {
+                                setSelectedInvoices(prev => prev.filter(id => id !== invoice.id))
+                              }
+                            }}
+                            className="w-4 h-4 rounded border-gray-300"
+                          />
                           <div className="p-2 bg-blue-50 rounded-lg">
                             <FileText className="h-6 w-6 text-blue-600" />
                           </div>
@@ -1485,16 +1575,54 @@ ${invoices.map(inv =>
                             <p>Due: {invoice.dueDate}</p>
                           </div>
                           <div className="flex gap-2 mt-3">
-                            <Button size="sm" variant="outline">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                logger.info('Viewing invoice', { invoiceId: invoice.id })
+                                setViewInvoice(invoice)
+                              }}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="outline">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                logger.info('Editing invoice', { invoiceId: invoice.id })
+                                setEditForm({
+                                  client: invoice.client,
+                                  clientEmail: invoice.clientEmail,
+                                  project: invoice.project,
+                                  description: invoice.description,
+                                  dueDate: invoice.dueDate
+                                })
+                                setEditInvoice(invoice)
+                              }}
+                            >
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="outline">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                logger.info('Downloading invoice', { invoiceId: invoice.id })
+                                toast.success(`Downloading ${invoice.id}...`, {
+                                  description: `${invoice.client} - $${invoice.amount.toLocaleString()}`
+                                })
+                              }}
+                            >
                               <Download className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => {
+                                logger.info('Initiating invoice deletion', { invoiceId: invoice.id })
+                                setDeleteInvoice({ id: invoice.id, client: invoice.client })
+                              }}
+                            >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>

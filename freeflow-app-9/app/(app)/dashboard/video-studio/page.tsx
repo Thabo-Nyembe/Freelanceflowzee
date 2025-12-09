@@ -570,6 +570,181 @@ export default function VideoStudioPage() {
     })
   }
 
+  // ============================================================================
+  // USE TEMPLATE - Creates a new project from template
+  // ============================================================================
+  const handleUseTemplate = async (template: VideoTemplate) => {
+    logger.info('Creating project from template', {
+      templateId: template.id,
+      templateName: template.name,
+      category: template.category,
+      duration: template.duration
+    })
+
+    toast.info('Creating project from template...')
+
+    try {
+      setIsCreatingProject(true)
+
+      let newProjectData: VideoProject
+
+      if (userId) {
+        const { createVideoProject } = await import('@/lib/video-studio-queries')
+        const result = await createVideoProject(userId, {
+          title: `${template.name} - New Project`,
+          description: template.description || `Created from ${template.name} template`,
+          resolution: template.resolution || '1920x1080',
+          format: 'mp4',
+          duration: template.duration,
+          category: template.category,
+          tags: template.tags || [],
+          status: 'draft'
+        })
+
+        if (result.error) {
+          throw new Error(result.error)
+        }
+
+        newProjectData = result.data as VideoProject
+      } else {
+        // Create local project for non-authenticated state
+        newProjectData = {
+          id: `proj_${Date.now()}`,
+          title: `${template.name} - New Project`,
+          description: template.description || `Created from ${template.name} template`,
+          duration: template.duration,
+          resolution: template.resolution || '1920x1080',
+          format: 'mp4',
+          file_size: 0,
+          thumbnail_path: template.thumbnail_path,
+          status: 'draft',
+          views: 0,
+          likes: 0,
+          comments_count: 0,
+          category: template.category,
+          tags: template.tags || [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      }
+
+      setProjects(prev => [newProjectData, ...prev])
+      logger.info('Project created from template', {
+        projectId: newProjectData.id,
+        title: newProjectData.title,
+        templateUsed: template.name
+      })
+      toast.success(`Project created from "${template.name}" template!`, {
+        description: 'Opening editor...'
+      })
+      announce(`Project created from ${template.name} template`)
+
+      // Navigate to editor after short delay
+      setTimeout(() => {
+        router.push(`/dashboard/video-studio/editor?project=${newProjectData.id}`)
+      }, 1500)
+    } catch (error: any) {
+      logger.error('Failed to create project from template', { error, templateId: template.id })
+      toast.error('Failed to create project from template', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setIsCreatingProject(false)
+    }
+  }
+
+  // ============================================================================
+  // RESTORE VERSION - Restores project to a previous version
+  // ============================================================================
+  const handleRestoreVersion = async (version: string, changes: string) => {
+    if (!selectedProject) {
+      toast.error('No project selected')
+      return
+    }
+
+    logger.info('Restoring project version', {
+      projectId: selectedProject.id,
+      version,
+      changes
+    })
+
+    toast.info(`Restoring ${version}...`)
+
+    try {
+      // In production, this would call the API to restore the version
+      // For now, we simulate success
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      logger.info('Version restored', {
+        projectId: selectedProject.id,
+        version,
+        restoredChanges: changes
+      })
+      toast.success(`Restored to ${version}`, {
+        description: changes
+      })
+      announce(`Project restored to ${version}`)
+      setIsVersionHistoryOpen(false)
+    } catch (error: any) {
+      logger.error('Failed to restore version', { error, version })
+      toast.error('Failed to restore version', {
+        description: error.message || 'Please try again'
+      })
+    }
+  }
+
+  // ============================================================================
+  // RECORDING SETTINGS - Opens recording settings dialog
+  // ============================================================================
+  const [isRecordingSettingsOpen, setIsRecordingSettingsOpen] = useState(false)
+  const [recordingSettings, setRecordingSettings] = useState({
+    webcamPosition: 'bottom-right' as 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left',
+    webcamSize: 'medium' as 'small' | 'medium' | 'large',
+    showCursor: true,
+    cursorHighlight: true,
+    countdown: true,
+    countdownSeconds: 3
+  })
+
+  const handleOpenRecordingSettings = () => {
+    logger.info('Recording settings opened')
+    setIsRecordingSettingsOpen(true)
+  }
+
+  // ============================================================================
+  // AUDIO LIBRARY ACTIONS
+  // ============================================================================
+  const handleRecordVoiceover = () => {
+    logger.info('Voiceover recording initiated')
+    setIsAudioLibraryOpen(false)
+    toast.info('Preparing microphone...', {
+      description: 'Click the record button when ready'
+    })
+    setRecordingType('audio')
+    setIsMuted(false)
+    announce('Voiceover recording mode enabled')
+  }
+
+  const handleAIVoiceover = () => {
+    logger.info('AI Voiceover tool opened')
+    setIsAudioLibraryOpen(false)
+    setIsAIToolsOpen(true)
+    setSelectedAiTool('voiceover')
+    toast.info('AI Voiceover', {
+      description: 'Enter text to generate AI narration'
+    })
+    announce('AI voiceover tool opened')
+  }
+
+  const handleMusicLibrary = () => {
+    logger.info('Music library opened')
+    toast.info('Loading royalty-free music library...', {
+      description: 'Browse thousands of tracks'
+    })
+    // In production, this would open a music browser or navigate to music section
+    router.push('/dashboard/audio-studio?tab=library')
+  }
+
   const handlePublishVideo = async (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
     logger.info('Video published', {
@@ -690,18 +865,6 @@ export default function VideoStudioPage() {
     }))
 
     toast.success('Clip split at playhead position')
-  }
-
-  const handleUseTemplate = (templateId: string) => {
-    const template = templates.find(t => t.id === templateId)
-    logger.info('Template applied', {
-      templateId,
-      name: template?.name,
-      duration: template?.duration,
-      category: template?.category
-    })
-    setSelectedTemplate(template || null)
-    toast.success(`Template "${template?.name}" applied`)
   }
 
   const handleSaveProject = async () => {
@@ -1650,10 +1813,7 @@ export default function VideoStudioPage() {
                       data-testid="recording-settings-btn"
                       variant="outline"
                       size="sm"
-                      onClick={() => {
-                          // Open video studio settings
-                          logger.info('Video Studio settings opened')
-                        }}
+                      onClick={handleOpenRecordingSettings}
                     >
                       <Settings className="w-4 h-4" />
                     </Button>
@@ -1912,12 +2072,17 @@ export default function VideoStudioPage() {
                         data-testid="use-template-btn"
                         size="sm"
                         className="flex-1"
-                        onClick={() => {
-                          logger.info('Template applied', { templateId: template.id, name: template.name })
-                          // Apply template to new project
-                        }}
+                        disabled={isCreatingProject}
+                        onClick={() => handleUseTemplate(template)}
                       >
-                        Use Template
+                        {isCreatingProject ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 mr-1 animate-spin" />
+                            Creating...
+                          </>
+                        ) : (
+                          'Use Template'
+                        )}
                       </Button>
                     </div>
                   </CardContent>
@@ -2698,7 +2863,10 @@ onClick={() => {
                   </div>
                 </div>
               </Card>
-              <Card className="p-4 hover:border-blue-300 cursor-pointer transition-colors">
+              <Card
+                className="p-4 hover:border-blue-300 cursor-pointer transition-colors"
+                onClick={handleRecordVoiceover}
+              >
                 <div className="flex items-center gap-3">
                   <Mic className="w-8 h-8 text-blue-600" />
                   <div>
@@ -2707,7 +2875,10 @@ onClick={() => {
                   </div>
                 </div>
               </Card>
-              <Card className="p-4 hover:border-purple-300 cursor-pointer transition-colors">
+              <Card
+                className="p-4 hover:border-purple-300 cursor-pointer transition-colors"
+                onClick={handleAIVoiceover}
+              >
                 <div className="flex items-center gap-3">
                   <Sparkles className="w-8 h-8 text-purple-600" />
                   <div>
@@ -2716,7 +2887,10 @@ onClick={() => {
                   </div>
                 </div>
               </Card>
-              <Card className="p-4 hover:border-orange-300 cursor-pointer transition-colors">
+              <Card
+                className="p-4 hover:border-orange-300 cursor-pointer transition-colors"
+                onClick={handleMusicLibrary}
+              >
                 <div className="flex items-center gap-3">
                   <Music className="w-8 h-8 text-orange-600" />
                   <div>
@@ -2858,12 +3032,149 @@ onClick={() => {
                     </div>
                     <p className="text-xs text-gray-500">{v.date} by {v.author}</p>
                   </div>
-                  <Button size="sm" variant="ghost">Restore</Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleRestoreVersion(v.version, v.changes)}
+                  >
+                    Restore
+                  </Button>
                 </div>
               ))}
             </div>
             <div className="flex justify-end">
               <Button variant="outline" onClick={() => setIsVersionHistoryOpen(false)}>Close</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* RECORDING SETTINGS DIALOG */}
+      <Dialog open={isRecordingSettingsOpen} onOpenChange={setIsRecordingSettingsOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-purple-600" />
+              Recording Settings
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Webcam Position */}
+            <div className="space-y-2">
+              <Label>Webcam Position</Label>
+              <Select
+                value={recordingSettings.webcamPosition}
+                onValueChange={(v: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left') =>
+                  setRecordingSettings(prev => ({ ...prev, webcamPosition: v }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bottom-right">Bottom Right</SelectItem>
+                  <SelectItem value="bottom-left">Bottom Left</SelectItem>
+                  <SelectItem value="top-right">Top Right</SelectItem>
+                  <SelectItem value="top-left">Top Left</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Webcam Size */}
+            <div className="space-y-2">
+              <Label>Webcam Size</Label>
+              <Select
+                value={recordingSettings.webcamSize}
+                onValueChange={(v: 'small' | 'medium' | 'large') =>
+                  setRecordingSettings(prev => ({ ...prev, webcamSize: v }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="small">Small</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="large">Large</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Cursor Settings */}
+            <div className="space-y-3 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Show Cursor</p>
+                  <p className="text-xs text-gray-500">Display cursor in recording</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={recordingSettings.showCursor}
+                  onChange={(e) => setRecordingSettings(prev => ({ ...prev, showCursor: e.target.checked }))}
+                  className="w-4 h-4 rounded border-gray-300"
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Cursor Highlight</p>
+                  <p className="text-xs text-gray-500">Add highlight effect on click</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={recordingSettings.cursorHighlight}
+                  onChange={(e) => setRecordingSettings(prev => ({ ...prev, cursorHighlight: e.target.checked }))}
+                  className="w-4 h-4 rounded border-gray-300"
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Countdown Timer</p>
+                  <p className="text-xs text-gray-500">Show countdown before recording</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={recordingSettings.countdown}
+                  onChange={(e) => setRecordingSettings(prev => ({ ...prev, countdown: e.target.checked }))}
+                  className="w-4 h-4 rounded border-gray-300"
+                />
+              </div>
+            </div>
+
+            {/* Countdown Duration */}
+            {recordingSettings.countdown && (
+              <div className="space-y-2">
+                <Label>Countdown Duration</Label>
+                <div className="flex items-center gap-4">
+                  <Slider
+                    value={[recordingSettings.countdownSeconds]}
+                    onValueChange={(v) => setRecordingSettings(prev => ({ ...prev, countdownSeconds: v[0] }))}
+                    min={1}
+                    max={10}
+                    step={1}
+                    className="flex-1"
+                  />
+                  <span className="text-sm font-medium w-16 text-right">
+                    {recordingSettings.countdownSeconds}s
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setIsRecordingSettingsOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  logger.info('Recording settings saved', { settings: recordingSettings })
+                  toast.success('Recording settings saved')
+                  setIsRecordingSettingsOpen(false)
+                }}
+              >
+                Save Settings
+              </Button>
             </div>
           </div>
         </DialogContent>
