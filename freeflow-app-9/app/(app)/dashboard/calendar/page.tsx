@@ -15,6 +15,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -139,6 +142,33 @@ export default function CalendarPage() {
   const [showDeleteEventDialog, setShowDeleteEventDialog] = useState(false)
   const [eventToDelete, setEventToDelete] = useState<{id: number; title: string} | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Dialog states for prompt() replacements
+  const [showCreateEventDialog, setShowCreateEventDialog] = useState(false)
+  const [newEventTitle, setNewEventTitle] = useState('')
+  const [newEventTime, setNewEventTime] = useState('')
+
+  const [showEditEventDialog, setShowEditEventDialog] = useState(false)
+  const [editingEvent, setEditingEvent] = useState<{id: number; title: string} | null>(null)
+  const [editEventTitle, setEditEventTitle] = useState('')
+
+  const [showRecurringDialog, setShowRecurringDialog] = useState(false)
+  const [recurringTitle, setRecurringTitle] = useState('')
+  const [recurringFrequency, setRecurringFrequency] = useState('weekly')
+  const [recurringOccurrences, setRecurringOccurrences] = useState('4')
+
+  const [showReminderDialog, setShowReminderDialog] = useState(false)
+  const [reminderMinutes, setReminderMinutes] = useState('15')
+
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [exportFormat, setExportFormat] = useState('csv')
+
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [shareEmail, setShareEmail] = useState('')
+  const [sharePermission, setSharePermission] = useState('view')
+
+  const [showTimezoneDialog, setShowTimezoneDialog] = useState(false)
+  const [selectedTimezone, setSelectedTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone)
 
   const [events, setEvents] = useState([
     {
@@ -391,7 +421,7 @@ export default function CalendarPage() {
   // HANDLER 4: CREATE EVENT
   // ============================================================================
 
-  const handleCreateEvent = async () => {
+  const handleCreateEvent = () => {
     if (!userId) {
       toast.error('Please log in to create events')
       announce('Authentication required', 'assertive')
@@ -405,22 +435,28 @@ export default function CalendarPage() {
       userId
     })
 
-    const title = prompt('Enter event title:')
-    if (!title) {
-      logger.debug('Event creation cancelled')
+    setNewEventTitle('')
+    setNewEventTime('')
+    setShowCreateEventDialog(true)
+  }
+
+  const confirmCreateEvent = async () => {
+    if (!newEventTitle.trim()) {
+      toast.error('Please enter an event title')
+      return
+    }
+    if (!newEventTime.trim()) {
+      toast.error('Please enter a start time')
       return
     }
 
-    const time = prompt('Enter start time (e.g., 2:00 PM):')
-    if (!time) {
-      logger.debug('Event creation cancelled')
-      return
-    }
+    const title = newEventTitle.trim()
+    const time = newEventTime.trim()
 
     try {
       const { createCalendarEvent } = await import('@/lib/calendar-queries')
 
-      const { data: newEvent, error: createError } = await createCalendarEvent(userId, {
+      const { data: newEvent, error: createError } = await createCalendarEvent(userId!, {
         title,
         date: format(currentDate, 'yyyy-MM-dd'),
         time,
@@ -458,6 +494,7 @@ export default function CalendarPage() {
         userId
       })
 
+      setShowCreateEventDialog(false)
       toast.success('Event created successfully!', {
         description: `${title} added to ${format(currentDate, 'MMMM d, yyyy')}`
       })
@@ -495,7 +532,7 @@ export default function CalendarPage() {
   // HANDLER 6: EDIT EVENT (with real state update)
   // ============================================================================
 
-  const handleEditEvent = async (eventId: number) => {
+  const handleEditEvent = (eventId: number) => {
     if (!userId) {
       toast.error('Please log in to edit events')
       return
@@ -504,18 +541,27 @@ export default function CalendarPage() {
     const event = events.find(e => e.id === eventId)
     if (!event) return
 
-    const newTitle = prompt('Edit event title:', event.title)
-    if (!newTitle) {
-      logger.debug('Event edit cancelled', { eventId, userId })
+    setEditingEvent({ id: eventId, title: event.title })
+    setEditEventTitle(event.title)
+    setShowEditEventDialog(true)
+  }
+
+  const confirmEditEvent = async () => {
+    if (!editingEvent) return
+
+    if (!editEventTitle.trim()) {
+      toast.error('Please enter an event title')
       return
     }
+
+    const newTitle = editEventTitle.trim()
 
     try {
       const { updateCalendarEvent } = await import('@/lib/calendar-queries')
 
       const { data: updatedEvent, error: updateError } = await updateCalendarEvent(
-        userId,
-        eventId.toString(),
+        userId!,
+        editingEvent.id.toString(),
         { title: newTitle }
       )
 
@@ -523,23 +569,25 @@ export default function CalendarPage() {
 
       // Update event in state
       setEvents(events.map(e =>
-        e.id === eventId ? { ...e, title: newTitle } : e
+        e.id === editingEvent.id ? { ...e, title: newTitle } : e
       ))
 
       logger.info('Event updated in database', {
-        eventId,
-        oldTitle: event.title,
+        eventId: editingEvent.id,
+        oldTitle: editingEvent.title,
         newTitle,
         totalEvents: events.length,
         userId
       })
 
+      setShowEditEventDialog(false)
+      setEditingEvent(null)
       toast.success('Event updated successfully!', {
         description: `${newTitle} has been updated`
       })
       announce(`Event updated to ${newTitle}`, 'polite')
     } catch (error: any) {
-      logger.error('Failed to update event', { error, eventId, userId })
+      logger.error('Failed to update event', { error, eventId: editingEvent.id, userId })
       toast.error('Failed to update event', {
         description: error.message || 'Please try again later'
       })
@@ -708,7 +756,7 @@ export default function CalendarPage() {
   // HANDLER 10: CREATE RECURRING EVENT
   // ============================================================================
 
-  const handleCreateRecurring = async () => {
+  const handleCreateRecurring = () => {
     if (!userId) {
       toast.error('Please log in to create recurring events')
       return
@@ -722,20 +770,21 @@ export default function CalendarPage() {
       userId
     })
 
-    const title = prompt('Enter recurring event title:')
-    if (!title) {
-      logger.debug('Recurring event creation cancelled - no title provided')
+    setRecurringTitle('')
+    setRecurringFrequency('weekly')
+    setRecurringOccurrences('4')
+    setShowRecurringDialog(true)
+  }
+
+  const confirmCreateRecurring = async () => {
+    if (!recurringTitle.trim()) {
+      toast.error('Please enter an event title')
       return
     }
 
-    const frequency = prompt('Enter frequency (daily/weekly/monthly):')
-    if (!frequency) {
-      logger.debug('Recurring event creation cancelled - no frequency provided')
-      return
-    }
-
-    const occurrencesStr = prompt('How many occurrences? (1-30):', '4')
-    const occurrences = Math.min(Math.max(parseInt(occurrencesStr || '4'), 1), 30)
+    const title = recurringTitle.trim()
+    const frequency = recurringFrequency
+    const occurrences = Math.min(Math.max(parseInt(recurringOccurrences || '4'), 1), 30)
 
     logger.info('Creating recurring events in database', {
       title,
@@ -748,7 +797,7 @@ export default function CalendarPage() {
     try {
       const { createRecurringEvents } = await import('@/lib/calendar-queries')
 
-      const { data: newEvents, error: createError } = await createRecurringEvents(userId, {
+      const { data: newEvents, error: createError } = await createRecurringEvents(userId!, {
         title,
         frequency,
         occurrences,
@@ -787,6 +836,7 @@ export default function CalendarPage() {
         userId
       })
 
+      setShowRecurringDialog(false)
       toast.success('Recurring event created!', {
         description: `Created ${newEvents.length} ${frequency} events starting ${format(new Date(newEvents[0].date), 'MMM d')}`
       })
@@ -809,7 +859,7 @@ export default function CalendarPage() {
   // HANDLER 11: SET EVENT REMINDERS
   // ============================================================================
 
-  const handleEventReminders = async () => {
+  const handleEventReminders = () => {
     logger.info('Event reminder configuration initiated', {
       currentMonth: format(currentDate, 'MMMM yyyy'),
       view,
@@ -817,15 +867,13 @@ export default function CalendarPage() {
       totalEvents: events.length
     })
 
-    const reminderTime = prompt('Set reminder time (minutes before event):', '15')
-    if (!reminderTime) {
-      logger.debug('Reminder configuration cancelled')
-      return
-    }
+    setReminderMinutes('15')
+    setShowReminderDialog(true)
+  }
 
-    const minutesBefore = parseInt(reminderTime)
+  const confirmEventReminders = async () => {
+    const minutesBefore = parseInt(reminderMinutes)
     if (isNaN(minutesBefore) || minutesBefore < 0) {
-      logger.error('Invalid reminder time provided', { input: reminderTime })
       toast.error('Invalid reminder time', {
         description: 'Please enter a valid number of minutes'
       })
@@ -866,6 +914,7 @@ export default function CalendarPage() {
         })
       }).catch(err => logger.error('Failed to sync reminders to server', { error: err }))
 
+      setShowReminderDialog(false)
       toast.success('Event reminders configured!', {
         description: `Updated ${updatedEvents.length} events with ${minutesBefore}min reminders via ${notificationTypes.join(', ')}`
       })
@@ -917,7 +966,7 @@ export default function CalendarPage() {
   // HANDLER 13: EXPORT CALENDAR
   // ============================================================================
 
-  const handleExportCalendar = async () => {
+  const handleExportCalendar = () => {
     logger.info('Calendar export initiated', {
       currentMonth: format(currentDate, 'MMMM yyyy'),
       view,
@@ -925,31 +974,24 @@ export default function CalendarPage() {
       totalEvents: events.length
     })
 
-    const exportFormat = prompt('Export format (csv/ical/json):', 'csv')?.toLowerCase()
-    if (!exportFormat) {
-      logger.debug('Calendar export cancelled')
-      return
-    }
+    setExportFormat('csv')
+    setShowExportDialog(true)
+  }
 
-    if (!['csv', 'ical', 'json'].includes(exportFormat)) {
-      logger.error('Invalid export format', { format: exportFormat })
-      toast.error('Invalid format', {
-        description: 'Please choose csv, ical, or json'
-      })
-      return
-    }
+  const confirmExportCalendar = async () => {
+    const selectedFormat = exportFormat
 
     logger.info('Generating export file', {
-      format: exportFormat,
+      format: selectedFormat,
       eventCount: events.length
     })
 
     try {
       let fileContent = ''
       let mimeType = ''
-      const filename = `calendar-export-${format(currentDate, 'yyyy-MM')}.${exportFormat}`
+      const filename = `calendar-export-${format(currentDate, 'yyyy-MM')}.${selectedFormat}`
 
-      if (exportFormat === 'csv') {
+      if (selectedFormat === 'csv') {
         // Generate CSV
         const headers = ['Title', 'Date', 'Time', 'Duration', 'Location', 'Attendees', 'Type', 'Reminder (min)']
         const rows = events.map(e => [
@@ -964,7 +1006,7 @@ export default function CalendarPage() {
         ])
         fileContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
         mimeType = 'text/csv'
-      } else if (exportFormat === 'ical') {
+      } else if (selectedFormat === 'ical') {
         // Generate iCalendar format
         const icalEvents = events.map(e => {
           const eventDate = format(new Date(e.date), 'yyyyMMdd')
@@ -1011,7 +1053,7 @@ export default function CalendarPage() {
       URL.revokeObjectURL(url)
 
       logger.info('Calendar export completed', {
-        format: exportFormat,
+        format: selectedFormat,
         filename,
         eventsExported: events.length,
         fileSize: blob.size
@@ -1023,7 +1065,7 @@ export default function CalendarPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'export',
-          format: exportFormat,
+          format: selectedFormat,
           dateRange: {
             start: format(currentDate, 'yyyy-MM-01'),
             end: format(currentDate, 'yyyy-MM-31')
@@ -1031,13 +1073,14 @@ export default function CalendarPage() {
         })
       }).catch(err => logger.error('Failed to log export to server', { error: err }))
 
+      setShowExportDialog(false)
       toast.success('Calendar exported successfully!', {
         description: `Downloaded ${events.length} events as ${filename}`
       })
     } catch (error: any) {
       logger.error('Calendar export failed', {
         error: error.message,
-        format: exportFormat
+        format: selectedFormat
       })
       toast.error('Failed to export calendar', {
         description: error.message || 'Please try again later'
@@ -1049,7 +1092,7 @@ export default function CalendarPage() {
   // HANDLER 14: SHARE CALENDAR
   // ============================================================================
 
-  const handleShareCalendar = async () => {
+  const handleShareCalendar = () => {
     logger.info('Calendar share initiated', {
       currentMonth: format(currentDate, 'MMMM yyyy'),
       view,
@@ -1057,35 +1100,29 @@ export default function CalendarPage() {
       totalEvents: events.length
     })
 
-    const email = prompt('Enter email address to share with:')
+    setShareEmail('')
+    setSharePermission('view')
+    setShowShareDialog(true)
+  }
+
+  const confirmShareCalendar = async () => {
+    const email = shareEmail.trim()
+
     if (!email) {
-      logger.debug('Calendar share cancelled - no email provided')
+      toast.error('Please enter an email address')
       return
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
-      logger.error('Invalid email address', { email })
       toast.error('Invalid email', {
         description: 'Please enter a valid email address'
       })
       return
     }
 
-    const permission = prompt('Permission level (view/edit/admin):', 'view')?.toLowerCase()
-    if (!permission) {
-      logger.debug('Calendar share cancelled - no permission provided')
-      return
-    }
-
-    if (!['view', 'edit', 'admin'].includes(permission)) {
-      logger.error('Invalid permission level', { permission })
-      toast.error('Invalid permission', {
-        description: 'Please choose view, edit, or admin'
-      })
-      return
-    }
+    const permission = sharePermission
 
     logger.info('Sharing calendar', {
       recipientEmail: email,
@@ -1119,6 +1156,7 @@ export default function CalendarPage() {
         statusCode: response.status
       })
 
+      setShowShareDialog(false)
       toast.success('Calendar shared successfully!', {
         description: `Shared ${events.length} events with ${email} (${permission} access)`
       })
@@ -1149,13 +1187,16 @@ export default function CalendarPage() {
       eventCount: events.length
     })
 
-    const timezone = prompt(
-      'Enter time zone (e.g., America/New_York, Europe/London, Asia/Tokyo):',
-      currentTimezone
-    )
+    setSelectedTimezone(currentTimezone)
+    setShowTimezoneDialog(true)
+  }
+
+  const confirmTimeZoneSettings = () => {
+    const currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    const timezone = selectedTimezone.trim()
 
     if (!timezone) {
-      logger.debug('Time zone change cancelled')
+      toast.error('Please select a timezone')
       return
     }
 
@@ -1169,6 +1210,7 @@ export default function CalendarPage() {
         eventsAffected: events.length
       })
 
+      setShowTimezoneDialog(false)
       // In a real app, we'd update event times here
       // For now, just show confirmation
       toast.success('Time zone updated!', {
@@ -1807,6 +1849,297 @@ export default function CalendarPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Create Event Dialog */}
+      <Dialog open={showCreateEventDialog} onOpenChange={setShowCreateEventDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Event</DialogTitle>
+            <DialogDescription>
+              Add a new event to your calendar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="event-title">Event Title</Label>
+              <Input
+                id="event-title"
+                placeholder="Enter event title"
+                value={newEventTitle}
+                onChange={(e) => setNewEventTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="event-time">Start Time</Label>
+              <Input
+                id="event-time"
+                placeholder="e.g., 2:00 PM"
+                value={newEventTime}
+                onChange={(e) => setNewEventTime(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateEventDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmCreateEvent}>
+              Create Event
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Event Dialog */}
+      <Dialog open={showEditEventDialog} onOpenChange={setShowEditEventDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Event</DialogTitle>
+            <DialogDescription>
+              Update the event title.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-event-title">Event Title</Label>
+              <Input
+                id="edit-event-title"
+                placeholder="Enter event title"
+                value={editEventTitle}
+                onChange={(e) => setEditEventTitle(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditEventDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmEditEvent}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Recurring Event Dialog */}
+      <Dialog open={showRecurringDialog} onOpenChange={setShowRecurringDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Recurring Event</DialogTitle>
+            <DialogDescription>
+              Set up a recurring event series.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="recurring-title">Event Title</Label>
+              <Input
+                id="recurring-title"
+                placeholder="Enter event title"
+                value={recurringTitle}
+                onChange={(e) => setRecurringTitle(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="recurring-frequency">Frequency</Label>
+              <Select value={recurringFrequency} onValueChange={setRecurringFrequency}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select frequency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="recurring-occurrences">Number of Occurrences (1-30)</Label>
+              <Input
+                id="recurring-occurrences"
+                type="number"
+                min="1"
+                max="30"
+                placeholder="4"
+                value={recurringOccurrences}
+                onChange={(e) => setRecurringOccurrences(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRecurringDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmCreateRecurring}>
+              Create Series
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Set Reminders Dialog */}
+      <Dialog open={showReminderDialog} onOpenChange={setShowReminderDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Configure Event Reminders</DialogTitle>
+            <DialogDescription>
+              Set reminder time for all events.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="reminder-minutes">Minutes Before Event</Label>
+              <Input
+                id="reminder-minutes"
+                type="number"
+                min="0"
+                placeholder="15"
+                value={reminderMinutes}
+                onChange={(e) => setReminderMinutes(e.target.value)}
+              />
+              <p className="text-sm text-gray-500">
+                Reminders will be sent via email, push notifications, and SMS.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReminderDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmEventReminders}>
+              Set Reminders
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Calendar Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Calendar</DialogTitle>
+            <DialogDescription>
+              Choose a format to export your calendar events.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="export-format">Export Format</Label>
+              <Select value={exportFormat} onValueChange={setExportFormat}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                  <SelectItem value="ical">iCalendar (.ics)</SelectItem>
+                  <SelectItem value="json">JSON</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-gray-500">
+                {events.length} events will be exported for {format(currentDate, 'MMMM yyyy')}.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmExportCalendar}>
+              Export
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Calendar Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Calendar</DialogTitle>
+            <DialogDescription>
+              Share your calendar with another user.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="share-email">Email Address</Label>
+              <Input
+                id="share-email"
+                type="email"
+                placeholder="colleague@example.com"
+                value={shareEmail}
+                onChange={(e) => setShareEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="share-permission">Permission Level</Label>
+              <Select value={sharePermission} onValueChange={setSharePermission}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select permission" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="view">View Only</SelectItem>
+                  <SelectItem value="edit">Can Edit</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowShareDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmShareCalendar}>
+              Share
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Timezone Settings Dialog */}
+      <Dialog open={showTimezoneDialog} onOpenChange={setShowTimezoneDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Time Zone Settings</DialogTitle>
+            <DialogDescription>
+              Set your calendar time zone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="timezone">Time Zone</Label>
+              <Select value={selectedTimezone} onValueChange={setSelectedTimezone}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select timezone" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="America/New_York">Eastern Time (America/New_York)</SelectItem>
+                  <SelectItem value="America/Chicago">Central Time (America/Chicago)</SelectItem>
+                  <SelectItem value="America/Denver">Mountain Time (America/Denver)</SelectItem>
+                  <SelectItem value="America/Los_Angeles">Pacific Time (America/Los_Angeles)</SelectItem>
+                  <SelectItem value="Europe/London">London (Europe/London)</SelectItem>
+                  <SelectItem value="Europe/Paris">Paris (Europe/Paris)</SelectItem>
+                  <SelectItem value="Asia/Tokyo">Tokyo (Asia/Tokyo)</SelectItem>
+                  <SelectItem value="Asia/Shanghai">Shanghai (Asia/Shanghai)</SelectItem>
+                  <SelectItem value="Australia/Sydney">Sydney (Australia/Sydney)</SelectItem>
+                  <SelectItem value="Africa/Johannesburg">Johannesburg (Africa/Johannesburg)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-gray-500">
+                {events.length} events will be updated to display in this timezone.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTimezoneDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmTimeZoneSettings}>
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
