@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useCallback, useReducer } from 'react'
+import { useState, useCallback, useReducer, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Target, Calendar, BarChart3, CheckCircle, Lightbulb, Plus, Edit2, Trash2, Download, RotateCcw } from 'lucide-react'
+import { Target, Calendar, BarChart3, CheckCircle, Lightbulb, Plus, Edit2, Trash2, Download, RotateCcw, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -44,6 +44,15 @@ import {
   initialTaskState,
   calculateMetrics
 } from '@/lib/my-day-utils'
+
+// DATABASE QUERIES
+import {
+  Goal as DBGoal,
+  getGoals,
+  createGoal as createGoalDB,
+  updateGoal as updateGoalDB,
+  deleteGoal as deleteGoalDB
+} from '@/lib/my-day-queries'
 
 const logger = createFeatureLogger('MyDay-Goals')
 
@@ -97,14 +106,83 @@ export default function GoalsPage() {
   const { announce } = useAnnouncer()
 
   const [state] = useReducer(taskReducer, initialTaskState)
-  const { focusHours, focusMinutes } = calculateMetrics(state)
+  const { focusHours } = calculateMetrics(state)
 
-  const [dailyGoals, setDailyGoals] = useState<Goal[]>(INITIAL_DAILY_GOALS)
-  const [weeklyGoals, setWeeklyGoals] = useState<Goal[]>(INITIAL_WEEKLY_GOALS)
+  // State
+  const [dailyGoals, setDailyGoals] = useState<Goal[]>([])
+  const [weeklyGoals, setWeeklyGoals] = useState<Goal[]>([])
   const [showGoalDialog, setShowGoalDialog] = useState(false)
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null)
-  const [deleteGoal, setDeleteGoal] = useState<Goal | null>(null)
+  const [deleteGoalState, setDeleteGoalState] = useState<Goal | null>(null)
   const [formData, setFormData] = useState(DEFAULT_GOAL)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Fetch goals from database
+  useEffect(() => {
+    async function fetchGoals() {
+      if (!userId) {
+        // Use demo data when not logged in
+        setDailyGoals(INITIAL_DAILY_GOALS)
+        setWeeklyGoals(INITIAL_WEEKLY_GOALS)
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        setIsLoading(true)
+        const [dailyResult, weeklyResult] = await Promise.all([
+          getGoals(userId, 'daily'),
+          getGoals(userId, 'weekly')
+        ])
+
+        if (dailyResult.data) {
+          // Convert DB goals to UI format
+          setDailyGoals(dailyResult.data.map(dbGoalToUIGoal))
+        }
+        if (weeklyResult.data) {
+          setWeeklyGoals(weeklyResult.data.map(dbGoalToUIGoal))
+        }
+
+        // If no goals exist, show demo data
+        if ((!dailyResult.data || dailyResult.data.length === 0) &&
+            (!weeklyResult.data || weeklyResult.data.length === 0)) {
+          setDailyGoals(INITIAL_DAILY_GOALS)
+          setWeeklyGoals(INITIAL_WEEKLY_GOALS)
+        }
+      } catch (error) {
+        logger.error('Failed to fetch goals', { error })
+        toast.error('Failed to load goals')
+        // Fallback to demo data
+        setDailyGoals(INITIAL_DAILY_GOALS)
+        setWeeklyGoals(INITIAL_WEEKLY_GOALS)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (!userLoading) {
+      fetchGoals()
+    }
+  }, [userId, userLoading])
+
+  // Convert DB goal to UI goal format
+  function dbGoalToUIGoal(dbGoal: DBGoal): Goal {
+    return {
+      id: dbGoal.id,
+      title: dbGoal.title,
+      description: dbGoal.description || '',
+      type: dbGoal.type === 'monthly' ? 'weekly' : dbGoal.type,
+      category: 'productivity', // Default category
+      target: 100,
+      current: dbGoal.progress,
+      unit: 'percent',
+      status: dbGoal.status === 'completed' ? 'completed' :
+              dbGoal.status === 'in_progress' ? 'in-progress' :
+              dbGoal.status === 'not_started' ? 'pending' : 'pending',
+      dueDate: dbGoal.target_date
+    }
+  }
 
   // Calculate progress percentage
   const calculateProgress = useCallback((goal: Goal) => {
@@ -138,35 +216,69 @@ export default function GoalsPage() {
   }, [])
 
   // Save goal (create or update)
-  const handleSaveGoal = useCallback(() => {
+  const handleSaveGoal = useCallback(async () => {
     if (!formData.title.trim()) {
       toast.error('Please enter a goal title')
       return
     }
 
+    setIsSaving(true)
     const setGoals = formData.type === 'daily' ? setDailyGoals : setWeeklyGoals
 
-    if (editingGoal) {
-      setGoals(prev => prev.map(g =>
-        g.id === editingGoal.id ? { ...g, ...formData } : g
-      ))
-      toast.success('Goal Updated', { description: formData.title })
-      logger.info('Goal updated', { goalId: editingGoal.id })
-      announce('Goal updated', 'polite')
-    } else {
-      const newGoal: Goal = {
-        id: `goal_${Date.now()}`,
-        ...formData
+    try {
+      if (userId) {
+        // Database operation
+        if (editingGoal) {
+          const result = await updateGoalDB(userId, editingGoal.id, {
+            title: formData.title,
+            description: formData.description,
+            type: formData.type,
+            progress: formData.current,
+            status: formData.status === 'completed' ? 'completed' :
+                    formData.status === 'in-progress' ? 'in_progress' : 'not_started'
+          })
+          if (result.error) throw result.error
+        } else {
+          const result = await createGoalDB(userId, {
+            title: formData.title,
+            description: formData.description,
+            type: formData.type,
+            priority: 'medium',
+            progress: 0,
+            status: 'not_started'
+          })
+          if (result.error) throw result.error
+        }
       }
-      setGoals(prev => [...prev, newGoal])
-      toast.success('Goal Created', { description: formData.title })
-      logger.info('Goal created', { goalId: newGoal.id })
-      announce('Goal created', 'polite')
-    }
 
-    setShowGoalDialog(false)
-    setFormData(DEFAULT_GOAL)
-  }, [formData, editingGoal, announce])
+      // Update local state
+      if (editingGoal) {
+        setGoals(prev => prev.map(g =>
+          g.id === editingGoal.id ? { ...g, ...formData } : g
+        ))
+        toast.success('Goal Updated', { description: formData.title })
+        logger.info('Goal updated', { goalId: editingGoal.id })
+        announce('Goal updated', 'polite')
+      } else {
+        const newGoal: Goal = {
+          id: `goal_${Date.now()}`,
+          ...formData
+        }
+        setGoals(prev => [...prev, newGoal])
+        toast.success('Goal Created', { description: formData.title })
+        logger.info('Goal created', { goalId: newGoal.id })
+        announce('Goal created', 'polite')
+      }
+
+      setShowGoalDialog(false)
+      setFormData(DEFAULT_GOAL)
+    } catch (error) {
+      logger.error('Failed to save goal', { error })
+      toast.error('Failed to save goal')
+    } finally {
+      setIsSaving(false)
+    }
+  }, [formData, editingGoal, announce, userId])
 
   // Update progress
   const handleUpdateProgress = useCallback((goal: Goal, increment: number) => {
@@ -195,16 +307,26 @@ export default function GoalsPage() {
   }, [announce])
 
   // Confirm delete
-  const handleConfirmDelete = useCallback(() => {
-    if (!deleteGoal) return
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deleteGoalState) return
 
-    const setGoals = deleteGoal.type === 'daily' ? setDailyGoals : setWeeklyGoals
-    setGoals(prev => prev.filter(g => g.id !== deleteGoal.id))
-    toast.success('Goal Deleted', { description: deleteGoal.title })
-    logger.info('Goal deleted', { goalId: deleteGoal.id })
-    announce('Goal deleted', 'polite')
-    setDeleteGoal(null)
-  }, [deleteGoal, announce])
+    try {
+      if (userId) {
+        const result = await deleteGoalDB(userId, deleteGoalState.id)
+        if (result.error) throw result.error
+      }
+
+      const setGoals = deleteGoalState.type === 'daily' ? setDailyGoals : setWeeklyGoals
+      setGoals(prev => prev.filter(g => g.id !== deleteGoalState.id))
+      toast.success('Goal Deleted', { description: deleteGoalState.title })
+      logger.info('Goal deleted', { goalId: deleteGoalState.id })
+      announce('Goal deleted', 'polite')
+    } catch (error) {
+      logger.error('Failed to delete goal', { error })
+      toast.error('Failed to delete goal')
+    }
+    setDeleteGoalState(null)
+  }, [deleteGoalState, announce, userId])
 
   // Reset daily goals
   const handleResetDaily = useCallback(() => {
@@ -278,7 +400,7 @@ export default function GoalsPage() {
               <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => handleEditGoal(goal)} title="Edit">
                 <Edit2 className="h-3 w-3" />
               </Button>
-              <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-red-500" onClick={() => setDeleteGoal(goal)} title="Delete">
+              <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-red-500" onClick={() => setDeleteGoalState(goal)} title="Delete">
                 <Trash2 className="h-3 w-3" />
               </Button>
             </div>
@@ -299,6 +421,15 @@ export default function GoalsPage() {
             )}
           </div>
         </div>
+      </div>
+    )
+  }
+
+  if (isLoading || userLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2 text-gray-600 dark:text-gray-400">Loading goals...</span>
       </div>
     )
   }
@@ -540,11 +671,18 @@ export default function GoalsPage() {
               </Select>
             </div>
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setShowGoalDialog(false)}>
+              <Button variant="outline" onClick={() => setShowGoalDialog(false)} disabled={isSaving}>
                 Cancel
               </Button>
-              <Button onClick={handleSaveGoal}>
-                {editingGoal ? 'Save Changes' : 'Create Goal'}
+              <Button onClick={handleSaveGoal} disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  editingGoal ? 'Save Changes' : 'Create Goal'
+                )}
               </Button>
             </div>
           </div>
@@ -552,12 +690,12 @@ export default function GoalsPage() {
       </Dialog>
 
       {/* Delete Confirmation */}
-      <AlertDialog open={!!deleteGoal} onOpenChange={() => setDeleteGoal(null)}>
+      <AlertDialog open={!!deleteGoalState} onOpenChange={() => setDeleteGoalState(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Goal?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete "{deleteGoal?.title}". This action cannot be undone.
+              This will permanently delete "{deleteGoalState?.title}". This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

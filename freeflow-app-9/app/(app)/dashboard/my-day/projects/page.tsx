@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Briefcase, TrendingUp, Brain, CheckCircle, Activity, Plus, Edit2, Trash2, Download, MoreVertical } from 'lucide-react'
+import { Briefcase, TrendingUp, Brain, CheckCircle, Activity, Plus, Edit2, Trash2, Download, MoreVertical, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -44,6 +44,15 @@ import {
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+
+// DATABASE QUERIES
+import {
+  MyDayProject,
+  getMyDayProjects,
+  addProjectToMyDay,
+  updateMyDayProject,
+  removeProjectFromMyDay
+} from '@/lib/my-day-queries'
 
 const logger = createFeatureLogger('MyDay-Projects')
 
@@ -98,11 +107,66 @@ export default function ProjectsPage() {
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
-  const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS)
+  const [projects, setProjects] = useState<Project[]>([])
   const [showProjectDialog, setShowProjectDialog] = useState(false)
   const [editingProject, setEditingProject] = useState<Project | null>(null)
-  const [deleteProject, setDeleteProject] = useState<Project | null>(null)
+  const [deleteProjectState, setDeleteProjectState] = useState<Project | null>(null)
   const [formData, setFormData] = useState(DEFAULT_PROJECT)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Convert DB project to UI format
+  function dbProjectToUIProject(dbProject: MyDayProject): Project {
+    return {
+      id: dbProject.id,
+      name: dbProject.project_name,
+      description: '',
+      progress: dbProject.progress,
+      status: dbProject.status === 'completed' ? 'completed' :
+              dbProject.progress >= 80 ? 'ahead' :
+              dbProject.progress < 50 ? 'at-risk' : 'on-track',
+      priority: dbProject.priority,
+      velocity: 80,
+      tasksToday: dbProject.tasks_count - dbProject.completed_tasks,
+      dueIn: dbProject.deadline || '1 week',
+      color: 'purple'
+    }
+  }
+
+  // Fetch projects from database
+  useEffect(() => {
+    async function fetchProjects() {
+      if (!userId) {
+        // Use demo data when not logged in
+        setProjects(INITIAL_PROJECTS)
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        setIsLoading(true)
+        const result = await getMyDayProjects(userId)
+
+        if (result.data && result.data.length > 0) {
+          setProjects(result.data.map(dbProjectToUIProject))
+        } else {
+          // No data - show demo data
+          setProjects(INITIAL_PROJECTS)
+        }
+      } catch (error) {
+        logger.error('Failed to fetch projects', { error })
+        toast.error('Failed to load projects')
+        // Fallback to demo data
+        setProjects(INITIAL_PROJECTS)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (!userLoading) {
+      fetchProjects()
+    }
+  }, [userId, userLoading])
 
   // Open create dialog
   const handleCreateProject = useCallback(() => {
@@ -131,33 +195,66 @@ export default function ProjectsPage() {
   }, [])
 
   // Save project
-  const handleSaveProject = useCallback(() => {
+  const handleSaveProject = useCallback(async () => {
     if (!formData.name.trim()) {
       toast.error('Please enter a project name')
       return
     }
 
-    if (editingProject) {
-      setProjects(prev => prev.map(p =>
-        p.id === editingProject.id ? { ...p, ...formData } : p
-      ))
-      toast.success('Project Updated', { description: formData.name })
-      logger.info('Project updated', { projectId: editingProject.id })
-      announce('Project updated', 'polite')
-    } else {
-      const newProject: Project = {
-        id: `proj_${Date.now()}`,
-        ...formData
+    setIsSaving(true)
+    try {
+      if (userId) {
+        // Database operation
+        if (editingProject) {
+          const result = await updateMyDayProject(userId, editingProject.id, {
+            project_name: formData.name,
+            progress: formData.progress,
+            priority: formData.priority,
+            status: formData.progress >= 100 ? 'completed' : 'active'
+          })
+          if (result.error) throw result.error
+        } else {
+          const result = await addProjectToMyDay(userId, {
+            project_id: `proj_${Date.now()}`,
+            project_name: formData.name,
+            status: 'active',
+            priority: formData.priority,
+            progress: formData.progress,
+            tasks_count: 0,
+            completed_tasks: 0
+          })
+          if (result.error) throw result.error
+        }
       }
-      setProjects(prev => [...prev, newProject])
-      toast.success('Project Created', { description: formData.name })
-      logger.info('Project created', { projectId: newProject.id })
-      announce('Project created', 'polite')
-    }
 
-    setShowProjectDialog(false)
-    setFormData(DEFAULT_PROJECT)
-  }, [formData, editingProject, announce])
+      // Update local state
+      if (editingProject) {
+        setProjects(prev => prev.map(p =>
+          p.id === editingProject.id ? { ...p, ...formData } : p
+        ))
+        toast.success('Project Updated', { description: formData.name })
+        logger.info('Project updated', { projectId: editingProject.id })
+        announce('Project updated', 'polite')
+      } else {
+        const newProject: Project = {
+          id: `proj_${Date.now()}`,
+          ...formData
+        }
+        setProjects(prev => [...prev, newProject])
+        toast.success('Project Created', { description: formData.name })
+        logger.info('Project created', { projectId: newProject.id })
+        announce('Project created', 'polite')
+      }
+
+      setShowProjectDialog(false)
+      setFormData(DEFAULT_PROJECT)
+    } catch (error) {
+      logger.error('Failed to save project', { error })
+      toast.error('Failed to save project')
+    } finally {
+      setIsSaving(false)
+    }
+  }, [formData, editingProject, announce, userId])
 
   // Update progress
   const handleUpdateProgress = useCallback((project: Project, newProgress: number) => {
@@ -172,15 +269,25 @@ export default function ProjectsPage() {
   }, [])
 
   // Confirm delete
-  const handleConfirmDelete = useCallback(() => {
-    if (!deleteProject) return
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deleteProjectState) return
 
-    setProjects(prev => prev.filter(p => p.id !== deleteProject.id))
-    toast.success('Project Deleted', { description: deleteProject.name })
-    logger.info('Project deleted', { projectId: deleteProject.id })
-    announce('Project deleted', 'polite')
-    setDeleteProject(null)
-  }, [deleteProject, announce])
+    try {
+      if (userId) {
+        const result = await removeProjectFromMyDay(userId, deleteProjectState.id)
+        if (result.error) throw result.error
+      }
+
+      setProjects(prev => prev.filter(p => p.id !== deleteProjectState.id))
+      toast.success('Project Deleted', { description: deleteProjectState.name })
+      logger.info('Project deleted', { projectId: deleteProjectState.id })
+      announce('Project deleted', 'polite')
+    } catch (error) {
+      logger.error('Failed to delete project', { error })
+      toast.error('Failed to delete project')
+    }
+    setDeleteProjectState(null)
+  }, [deleteProjectState, announce, userId])
 
   // Export projects
   const handleExportProjects = useCallback(() => {
@@ -253,7 +360,7 @@ export default function ProjectsPage() {
                 <DropdownMenuItem onClick={() => handleUpdateProgress(project, project.progress + 10)}>
                   <TrendingUp className="h-4 w-4 mr-2" /> Add 10%
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setDeleteProject(project)} className="text-red-600">
+                <DropdownMenuItem onClick={() => setDeleteProjectState(project)} className="text-red-600">
                   <Trash2 className="h-4 w-4 mr-2" /> Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -282,6 +389,15 @@ export default function ProjectsPage() {
             </Badge>
           </div>
         </div>
+      </div>
+    )
+  }
+
+  if (isLoading || userLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2 text-gray-600 dark:text-gray-400">Loading projects...</span>
       </div>
     )
   }
@@ -508,11 +624,18 @@ export default function ProjectsPage() {
               </div>
             </div>
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setShowProjectDialog(false)}>
+              <Button variant="outline" onClick={() => setShowProjectDialog(false)} disabled={isSaving}>
                 Cancel
               </Button>
-              <Button onClick={handleSaveProject}>
-                {editingProject ? 'Save Changes' : 'Create Project'}
+              <Button onClick={handleSaveProject} disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  editingProject ? 'Save Changes' : 'Create Project'
+                )}
               </Button>
             </div>
           </div>
@@ -520,12 +643,12 @@ export default function ProjectsPage() {
       </Dialog>
 
       {/* Delete Confirmation */}
-      <AlertDialog open={!!deleteProject} onOpenChange={() => setDeleteProject(null)}>
+      <AlertDialog open={!!deleteProjectState} onOpenChange={() => setDeleteProjectState(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Project?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete "{deleteProject?.name}" and all its data. This action cannot be undone.
+              This will permanently delete "{deleteProjectState?.name}" and all its data. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useCallback, useReducer } from 'react'
+import { useState, useCallback, useReducer, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Clock, Plus, Edit2, Trash2, Copy, Download, GripVertical } from 'lucide-react'
+import { Clock, Plus, Edit2, Trash2, Copy, Download, GripVertical, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
@@ -47,6 +47,16 @@ import {
   type TimeBlock
 } from '@/lib/my-day-utils'
 
+// DATABASE QUERIES
+import {
+  ScheduleBlock,
+  getSchedule,
+  createScheduleBlock,
+  updateScheduleBlock,
+  deleteScheduleBlock,
+  dbBlockToUIBlock
+} from '@/lib/my-day-queries'
+
 const logger = createFeatureLogger('MyDay-Schedule')
 
 const BLOCK_TYPE_COLORS: Record<string, string> = {
@@ -71,11 +81,52 @@ export default function SchedulePage() {
   const { announce } = useAnnouncer()
 
   const [state] = useReducer(taskReducer, initialTaskState)
-  const [timeBlocks, setTimeBlocks] = useState<TimeBlock[]>(mockTimeBlocks)
+  const [timeBlocks, setTimeBlocks] = useState<TimeBlock[]>([])
   const [showBlockDialog, setShowBlockDialog] = useState(false)
   const [editingBlock, setEditingBlock] = useState<TimeBlock | null>(null)
-  const [deleteBlock, setDeleteBlock] = useState<TimeBlock | null>(null)
+  const [deleteBlockState, setDeleteBlockState] = useState<TimeBlock | null>(null)
   const [formData, setFormData] = useState(DEFAULT_BLOCK)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0]
+
+  // Fetch schedule from database
+  useEffect(() => {
+    async function fetchSchedule() {
+      if (!userId) {
+        // Use demo data when not logged in
+        setTimeBlocks(mockTimeBlocks)
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        setIsLoading(true)
+        const result = await getSchedule(userId, today)
+
+        if (result.data && result.data.length > 0) {
+          // Convert DB blocks to UI format
+          setTimeBlocks(result.data.map(dbBlockToUIBlock))
+        } else {
+          // No data - show demo data
+          setTimeBlocks(mockTimeBlocks)
+        }
+      } catch (error) {
+        logger.error('Failed to fetch schedule', { error })
+        toast.error('Failed to load schedule')
+        // Fallback to demo data
+        setTimeBlocks(mockTimeBlocks)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    if (!userLoading) {
+      fetchSchedule()
+    }
+  }, [userId, userLoading, today])
 
   // Open create dialog
   const handleCreateBlock = useCallback(() => {
@@ -101,7 +152,7 @@ export default function SchedulePage() {
   }, [])
 
   // Save block (create or update)
-  const handleSaveBlock = useCallback(() => {
+  const handleSaveBlock = useCallback(async () => {
     if (!formData.title.trim()) {
       toast.error('Please enter a title')
       return
@@ -112,45 +163,88 @@ export default function SchedulePage() {
       return
     }
 
+    setIsSaving(true)
     const blockColor = BLOCK_TYPE_COLORS[formData.type] || BLOCK_TYPE_COLORS.focus
 
-    if (editingBlock) {
-      // Update existing block
-      setTimeBlocks(prev => prev.map(b =>
-        b.id === editingBlock.id
-          ? { ...b, ...formData, color: blockColor }
-          : b
-      ))
-      toast.success('Time Block Updated', { description: formData.title })
-      logger.info('Time block updated', { blockId: editingBlock.id })
-      announce('Time block updated', 'polite')
-    } else {
-      // Create new block
-      const newBlock: TimeBlock = {
-        id: `block_${Date.now()}`,
-        ...formData,
-        color: blockColor
+    try {
+      if (userId) {
+        // Database operation
+        if (editingBlock) {
+          const result = await updateScheduleBlock(userId, editingBlock.id, {
+            title: formData.title,
+            start_time: formData.start,
+            end_time: formData.end,
+            type: formData.type as 'focus' | 'meeting' | 'break' | 'admin' | 'personal',
+            color: blockColor
+          })
+          if (result.error) throw result.error
+        } else {
+          const result = await createScheduleBlock(userId, {
+            title: formData.title,
+            start_time: formData.start,
+            end_time: formData.end,
+            type: formData.type as 'focus' | 'meeting' | 'break' | 'admin' | 'personal',
+            color: blockColor,
+            recurring: false,
+            task_ids: [],
+            date: today
+          })
+          if (result.error) throw result.error
+        }
       }
-      setTimeBlocks(prev => [...prev, newBlock].sort((a, b) => a.start.localeCompare(b.start)))
-      toast.success('Time Block Created', { description: formData.title })
-      logger.info('Time block created', { blockId: newBlock.id })
-      announce('Time block created', 'polite')
-    }
 
-    setShowBlockDialog(false)
-    setFormData(DEFAULT_BLOCK)
-  }, [formData, editingBlock, announce])
+      // Update local state
+      if (editingBlock) {
+        setTimeBlocks(prev => prev.map(b =>
+          b.id === editingBlock.id
+            ? { ...b, ...formData, color: blockColor }
+            : b
+        ))
+        toast.success('Time Block Updated', { description: formData.title })
+        logger.info('Time block updated', { blockId: editingBlock.id })
+        announce('Time block updated', 'polite')
+      } else {
+        const newBlock: TimeBlock = {
+          id: `block_${Date.now()}`,
+          ...formData,
+          color: blockColor
+        }
+        setTimeBlocks(prev => [...prev, newBlock].sort((a, b) => a.start.localeCompare(b.start)))
+        toast.success('Time Block Created', { description: formData.title })
+        logger.info('Time block created', { blockId: newBlock.id })
+        announce('Time block created', 'polite')
+      }
+
+      setShowBlockDialog(false)
+      setFormData(DEFAULT_BLOCK)
+    } catch (error) {
+      logger.error('Failed to save time block', { error })
+      toast.error('Failed to save time block')
+    } finally {
+      setIsSaving(false)
+    }
+  }, [formData, editingBlock, announce, userId, today])
 
   // Confirm delete
-  const handleConfirmDelete = useCallback(() => {
-    if (!deleteBlock) return
+  const handleConfirmDelete = useCallback(async () => {
+    if (!deleteBlockState) return
 
-    setTimeBlocks(prev => prev.filter(b => b.id !== deleteBlock.id))
-    toast.success('Time Block Deleted', { description: deleteBlock.title })
-    logger.info('Time block deleted', { blockId: deleteBlock.id })
-    announce('Time block deleted', 'polite')
-    setDeleteBlock(null)
-  }, [deleteBlock, announce])
+    try {
+      if (userId) {
+        const result = await deleteScheduleBlock(userId, deleteBlockState.id)
+        if (result.error) throw result.error
+      }
+
+      setTimeBlocks(prev => prev.filter(b => b.id !== deleteBlockState.id))
+      toast.success('Time Block Deleted', { description: deleteBlockState.title })
+      logger.info('Time block deleted', { blockId: deleteBlockState.id })
+      announce('Time block deleted', 'polite')
+    } catch (error) {
+      logger.error('Failed to delete time block', { error })
+      toast.error('Failed to delete time block')
+    }
+    setDeleteBlockState(null)
+  }, [deleteBlockState, announce, userId])
 
   // Duplicate block
   const handleDuplicateBlock = useCallback((block: TimeBlock) => {
@@ -194,6 +288,15 @@ export default function SchedulePage() {
     const mins = totalMinutes % 60
     return `${hours}h ${mins}m`
   }, [timeBlocks])
+
+  if (isLoading || userLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2 text-gray-600 dark:text-gray-400">Loading schedule...</span>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -297,7 +400,7 @@ export default function SchedulePage() {
                           size="sm"
                           variant="ghost"
                           className="h-8 w-8 p-0 text-red-500 hover:text-red-600"
-                          onClick={() => setDeleteBlock(block)}
+                          onClick={() => setDeleteBlockState(block)}
                           title="Delete"
                         >
                           <Trash2 className="h-3 w-3" />
@@ -384,11 +487,18 @@ export default function SchedulePage() {
               </Select>
             </div>
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setShowBlockDialog(false)}>
+              <Button variant="outline" onClick={() => setShowBlockDialog(false)} disabled={isSaving}>
                 Cancel
               </Button>
-              <Button onClick={handleSaveBlock}>
-                {editingBlock ? 'Save Changes' : 'Create Block'}
+              <Button onClick={handleSaveBlock} disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  editingBlock ? 'Save Changes' : 'Create Block'
+                )}
               </Button>
             </div>
           </div>
@@ -396,12 +506,12 @@ export default function SchedulePage() {
       </Dialog>
 
       {/* Delete Confirmation */}
-      <AlertDialog open={!!deleteBlock} onOpenChange={() => setDeleteBlock(null)}>
+      <AlertDialog open={!!deleteBlockState} onOpenChange={() => setDeleteBlockState(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Time Block?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete "{deleteBlock?.title}". This action cannot be undone.
+              This will permanently delete "{deleteBlockState?.title}". This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
