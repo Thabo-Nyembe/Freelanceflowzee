@@ -820,23 +820,32 @@ export default function ClientZonePage() {
     }
 
     try {
-      // TODO: Implement disputeInvoice database query when disputes table is ready
-      // await disputeInvoice({ invoice_id: disputeInvoiceNumber, reason: disputeReason })
+      // Import and call the disputeInvoice database query
+      const { disputeInvoice } = await import('@/lib/client-zone-queries')
+      const { data, error } = await disputeInvoice(disputeInvoiceNumber, disputeReason)
 
-      logger.info('Dispute submitted successfully', { invoiceNumber: disputeInvoiceNumber, userId })
+      if (error) throw error
+
+      logger.info('Dispute submitted successfully', {
+        invoiceNumber: disputeInvoiceNumber,
+        invoiceId: data?.id,
+        userId
+      })
       toast.success('Dispute submitted', {
         description: 'Our team will review and respond within 24 hours'
       })
+      announce('Invoice dispute submitted successfully', 'polite')
 
       // Reload dashboard data
-      const data = await getClientZoneDashboard()
-      setDashboardData(data)
-      setInvoices(data.pendingInvoices)
+      const dashboardData = await getClientZoneDashboard()
+      setDashboardData(dashboardData)
+      setInvoices(dashboardData.pendingInvoices)
     } catch (error: any) {
       logger.error('Failed to submit dispute', { error, invoiceNumber: disputeInvoiceNumber, userId })
       toast.error('Failed to submit dispute', {
-        description: error.message
+        description: error.message || 'Please try again'
       })
+      announce('Error submitting invoice dispute', 'assertive')
     } finally {
       setShowDisputeDialog(false)
       setDisputeInvoiceNumber(null)

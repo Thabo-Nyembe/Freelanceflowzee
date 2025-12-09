@@ -929,7 +929,7 @@ export default function TeamHubPage() {
               label: searchTerm ? 'Clear Search' : 'Invite Member',
               onClick: searchTerm
                 ? () => setSearchTerm('')
-                : () => toast.info('Invite Member', { description: 'Team invitation feature' })
+                : handleAddMember
             }}
           />
         </div>

@@ -225,20 +225,46 @@ export default function AdminOverviewPage() {
 
   // Handle mark alert as read
   const handleMarkAlertRead = async (alertId: string) => {
-    logger.info('Alert marked as read', { alertId, userId })
-    toast.success('Alert Marked as Read', {
-      description: 'The alert has been acknowledged'
-    })
-    // TODO: Implement admin_alerts table for persistence
+    try {
+      const { acknowledgeAlert } = await import('@/lib/admin-overview-queries')
+      await acknowledgeAlert(alertId)
+
+      logger.info('Alert marked as read', { alertId, userId })
+      toast.success('Alert Marked as Read', {
+        description: 'The alert has been acknowledged'
+      })
+      announce('Alert acknowledged', 'polite')
+
+      // Refresh dashboard data to update alerts list
+      await handleRefresh()
+    } catch (error: any) {
+      logger.error('Failed to acknowledge alert', { error, alertId, userId })
+      toast.error('Failed to mark alert as read', {
+        description: error.message || 'Please try again'
+      })
+    }
   }
 
   // Handle dismiss alert
   const handleDismissAlert = async (alertId: string) => {
-    logger.info('Alert dismissed', { alertId, userId })
-    toast.success('Alert Dismissed', {
-      description: 'The alert has been removed from view'
-    })
-    // TODO: Implement admin_alerts table for persistence
+    try {
+      const { dismissAlert } = await import('@/lib/admin-overview-queries')
+      await dismissAlert(alertId)
+
+      logger.info('Alert dismissed', { alertId, userId })
+      toast.success('Alert Dismissed', {
+        description: 'The alert has been removed from view'
+      })
+      announce('Alert dismissed', 'polite')
+
+      // Refresh dashboard data to update alerts list
+      await handleRefresh()
+    } catch (error: any) {
+      logger.error('Failed to dismiss alert', { error, alertId, userId })
+      toast.error('Failed to dismiss alert', {
+        description: error.message || 'Please try again'
+      })
+    }
   }
 
   // Handle view module
