@@ -1007,3 +1007,95 @@ export async function disconnectImportSource(
     return { success: false, error }
   }
 }
+
+// ============================================================================
+// IMPORT SETTINGS
+// ============================================================================
+
+export interface ImportSettings {
+  id: string
+  user_id: string
+  auto_sync: boolean
+  file_naming: 'original' | 'prefix' | 'rename'
+  duplicate_handling: 'skip' | 'replace' | 'rename'
+  compression_level: 'none' | 'low' | 'medium' | 'high'
+  max_file_size_mb: number
+  allowed_types: string[]
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Get user's import settings
+ */
+export async function getImportSettings(
+  userId: string
+): Promise<{ data: ImportSettings | null; error: any }> {
+  logger.info('Fetching import settings', { userId })
+
+  try {
+    const { data, error } = await supabase
+      .from('import_settings')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
+
+    if (error && error.code !== 'PGRST116') {
+      logger.error('Failed to fetch import settings', { error, userId })
+      return { data: null, error }
+    }
+
+    return { data, error: null }
+  } catch (error) {
+    logger.error('Exception fetching import settings', { error, userId })
+    return { data: null, error }
+  }
+}
+
+/**
+ * Save or update user's import settings
+ */
+export async function saveImportSettings(
+  userId: string,
+  settings: {
+    autoSync?: boolean
+    fileNaming?: string
+    duplicateHandling?: string
+    compressionLevel?: string
+    maxFileSize?: string
+    allowedTypes?: string[]
+  }
+): Promise<{ data: ImportSettings | null; error: any }> {
+  logger.info('Saving import settings', { userId, fields: Object.keys(settings) })
+
+  try {
+    const { data, error } = await supabase
+      .from('import_settings')
+      .upsert(
+        {
+          user_id: userId,
+          auto_sync: settings.autoSync,
+          file_naming: settings.fileNaming,
+          duplicate_handling: settings.duplicateHandling,
+          compression_level: settings.compressionLevel,
+          max_file_size_mb: settings.maxFileSize ? parseInt(settings.maxFileSize) : 100,
+          allowed_types: settings.allowedTypes || ['all'],
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' }
+      )
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to save import settings', { error, userId })
+      return { data: null, error }
+    }
+
+    logger.info('Import settings saved successfully', { userId })
+    return { data, error: null }
+  } catch (error) {
+    logger.error('Exception saving import settings', { error, userId })
+    return { data: null, error }
+  }
+}

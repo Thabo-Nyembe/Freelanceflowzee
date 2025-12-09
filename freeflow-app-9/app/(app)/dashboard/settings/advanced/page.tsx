@@ -262,9 +262,6 @@ export default function AdvancedPage() {
 
       if (createError) throw new Error(createError.message)
 
-      // Save sync state to localStorage as backup
-      localStorage.setItem('settings_last_sync', new Date().toISOString())
-
       // Complete sync
       const syncDuration = Date.now() - syncStartTime
       if (syncRecord) {

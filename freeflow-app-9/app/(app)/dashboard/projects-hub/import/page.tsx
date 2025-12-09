@@ -44,6 +44,8 @@ import {
   deleteImport,
   getImportSources,
   connectImportSource,
+  getImportSettings,
+  saveImportSettings,
   ProjectImport
 } from '@/lib/projects-hub-queries'
 
@@ -122,7 +124,12 @@ export default function ProjectImportPage() {
 
         // Load import history from database
         if (userId) {
-          const historyResult = await getImportHistory(userId, 20)
+          const [historyResult, sourcesResult, settingsResult] = await Promise.all([
+            getImportHistory(userId, 20),
+            getImportSources(userId),
+            getImportSettings(userId)
+          ])
+
           if (historyResult.data && historyResult.data.length > 0) {
             const dbHistory: ImportItem[] = historyResult.data.map((item: ProjectImport) => ({
               id: parseInt(item.id) || Date.now(),
@@ -138,7 +145,6 @@ export default function ProjectImportPage() {
           }
 
           // Load connected sources from database
-          const sourcesResult = await getImportSources(userId)
           if (sourcesResult.data && sourcesResult.data.length > 0) {
             const connectedIds = sourcesResult.data.map((s: any) => s.source_type)
             const mergedSources = defaultImportSources.map(source => ({
@@ -148,6 +154,18 @@ export default function ProjectImportPage() {
             setImportSources(mergedSources)
           } else {
             setImportSources(defaultImportSources)
+          }
+
+          // Load import settings from database
+          if (settingsResult.data) {
+            setImportSettings({
+              autoSync: settingsResult.data.auto_sync,
+              fileNaming: settingsResult.data.file_naming || 'original',
+              duplicateHandling: settingsResult.data.duplicate_handling || 'skip',
+              compressionLevel: settingsResult.data.compression_level || 'medium',
+              maxFileSize: String(settingsResult.data.max_file_size_mb || 100),
+              allowedTypes: settingsResult.data.allowed_types || ['all']
+            })
           }
         } else {
           setImportSources(defaultImportSources)
@@ -265,19 +283,11 @@ export default function ProjectImportPage() {
   const handleSaveSettings = useCallback(async () => {
     setIsProcessing(true)
     try {
-      // Save settings to localStorage for persistence
-      localStorage.setItem('importSettings', JSON.stringify(importSettings))
-
-      // Also attempt to save to user preferences via API
+      // Save settings to database
       if (userId) {
-        try {
-          await fetch('/api/user/preferences', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ import_settings: importSettings })
-          })
-        } catch {
-          // Fallback: settings saved locally
+        const result = await saveImportSettings(userId, importSettings)
+        if (result.error) {
+          throw new Error(result.error.message || 'Failed to save settings')
         }
       }
 

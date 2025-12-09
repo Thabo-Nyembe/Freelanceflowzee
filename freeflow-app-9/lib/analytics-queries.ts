@@ -592,6 +592,120 @@ export async function getMonthlyMetrics(
 }
 
 // ============================================================================
+// USER ANALYTICS PREFERENCES
+// ============================================================================
+
+export interface AnalyticsUserPreferences {
+  id: string
+  user_id: string
+  last_refresh_at: string
+  auto_refresh_interval: number
+  default_date_range: string
+  ai_mode_enabled: boolean
+  predictive_mode_enabled: boolean
+  bookmarked_views: string[]
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Get user's analytics preferences
+ */
+export async function getAnalyticsPreferences(
+  userId: string
+): Promise<{ data: AnalyticsUserPreferences | null; error: any }> {
+  try {
+    const supabase = createClient()
+
+    const { data, error } = await supabase
+      .from('analytics_user_preferences')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
+
+    if (error && error.code !== 'PGRST116') {
+      logger.error('Failed to fetch analytics preferences', { error: error.message, userId })
+      return { data: null, error }
+    }
+
+    return { data, error: null }
+  } catch (error: any) {
+    logger.error('Exception in getAnalyticsPreferences', { error: error.message, userId })
+    return { data: null, error }
+  }
+}
+
+/**
+ * Update analytics last refresh timestamp
+ */
+export async function updateAnalyticsLastRefresh(
+  userId: string
+): Promise<{ data: AnalyticsUserPreferences | null; error: any }> {
+  try {
+    const supabase = createClient()
+    const now = new Date().toISOString()
+
+    const { data, error } = await supabase
+      .from('analytics_user_preferences')
+      .upsert({
+        user_id: userId,
+        last_refresh_at: now,
+        updated_at: now
+      }, {
+        onConflict: 'user_id'
+      })
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to update analytics last refresh', { error: error.message, userId })
+      return { data: null, error }
+    }
+
+    logger.info('Analytics last refresh updated', { userId, timestamp: now })
+    return { data, error: null }
+  } catch (error: any) {
+    logger.error('Exception in updateAnalyticsLastRefresh', { error: error.message, userId })
+    return { data: null, error }
+  }
+}
+
+/**
+ * Update analytics user preferences
+ */
+export async function updateAnalyticsPreferences(
+  userId: string,
+  preferences: Partial<AnalyticsUserPreferences>
+): Promise<{ data: AnalyticsUserPreferences | null; error: any }> {
+  try {
+    const supabase = createClient()
+
+    const { data, error } = await supabase
+      .from('analytics_user_preferences')
+      .upsert({
+        user_id: userId,
+        ...preferences,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id'
+      })
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to update analytics preferences', { error: error.message, userId })
+      return { data: null, error }
+    }
+
+    logger.info('Analytics preferences updated', { userId, fields: Object.keys(preferences) })
+    return { data, error: null }
+  } catch (error: any) {
+    logger.error('Exception in updateAnalyticsPreferences', { error: error.message, userId })
+    return { data: null, error }
+  }
+}
+
+// ============================================================================
 // ANALYTICS COMPUTATION HELPERS
 // ============================================================================
 

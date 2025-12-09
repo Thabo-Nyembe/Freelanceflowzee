@@ -196,8 +196,17 @@ export default function AnalyticsOverviewPage() {
   const handleRefreshAnalytics = async () => {
     logger.info('Analytics data refresh started')
     setIsRefreshing(true)
-    // Save refresh timestamp
-    localStorage.setItem('analytics_last_refresh', new Date().toISOString())
+
+    // Save refresh timestamp to database
+    if (userId) {
+      try {
+        const { updateAnalyticsLastRefresh } = await import('@/lib/analytics-queries')
+        await updateAnalyticsLastRefresh(userId)
+      } catch (err) {
+        logger.warn('Failed to save refresh timestamp to database', { error: err })
+      }
+    }
+
     setIsRefreshing(false)
     logger.info('Analytics data refreshed successfully')
     toast.success('Analytics data refreshed!', {
