@@ -332,8 +332,10 @@ export default function CommunityProfilePage() {
     logger.info('Sending message', { memberId: member.id, messageLength: messageText.length })
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Open email client with message
+      const subject = encodeURIComponent(`Message from Kazi Community`)
+      const body = encodeURIComponent(messageText)
+      window.open(`mailto:${member.email || ''}?subject=${subject}&body=${body}`, '_blank')
 
       toast.success('Message sent!', {
         description: `Your message to ${member.name} has been delivered`

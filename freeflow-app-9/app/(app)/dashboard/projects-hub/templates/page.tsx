@@ -332,8 +332,16 @@ export default function ProjectTemplatesPage() {
     announce(`Duplicating template: ${template.title}`, 'polite')
 
     try {
-      // Simulate duplicate operation
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Save duplicated template to localStorage
+      const duplicatedTemplate = {
+        ...template,
+        id: `template_${Date.now()}`,
+        title: `${template.title} (Copy)`,
+        createdAt: new Date().toISOString()
+      }
+      const savedTemplates = JSON.parse(localStorage.getItem('project_templates') || '[]')
+      savedTemplates.push(duplicatedTemplate)
+      localStorage.setItem('project_templates', JSON.stringify(savedTemplates))
 
       toast.success('Template duplicated!', {
         description: `"${template.title} (Copy)" added to your templates`

@@ -505,9 +505,6 @@ Thank you for your business!
     toast.loading('Sending reminder...', { id: 'reminder' })
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1200))
-
       // Calculate days overdue
       const dueDate = new Date(invoice.dueDate)
       const today = new Date()

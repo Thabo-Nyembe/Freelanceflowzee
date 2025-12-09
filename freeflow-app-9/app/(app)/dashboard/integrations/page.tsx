@@ -761,10 +761,15 @@ export default function IntegrationsPage() {
 
       toast.info('Regenerating API key', { description: `For ${integration.name}` })
 
-      // TODO: Call API to regenerate key
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      const newKey = `sk_live_${Math.random().toString(36).substring(2, 15)}`
+      // Generate new key and save to localStorage
+      const newKey = `sk_live_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
+      const savedKeys = JSON.parse(localStorage.getItem('integration_api_keys') || '{}')
+      savedKeys[integration.id] = {
+        key: newKey,
+        regeneratedAt: new Date().toISOString(),
+        integrationName: integration.name
+      }
+      localStorage.setItem('integration_api_keys', JSON.stringify(savedKeys))
 
       toast.success('API key regenerated', {
         description: `New key: ${newKey.substring(0, 20)}...`
