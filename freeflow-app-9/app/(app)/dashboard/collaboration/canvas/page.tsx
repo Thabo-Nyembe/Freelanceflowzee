@@ -44,6 +44,8 @@ import {
   createCanvasProject as createCanvasProjectDB,
   updateCanvasProject,
   deleteCanvasProject,
+  getCanvasDrawingCount,
+  getCanvasTemplates,
 } from "@/lib/canvas-collaboration-queries";
 
 
@@ -210,17 +212,28 @@ export default function CanvasPage() {
 
       setProjects(canvasProjects);
 
+      // Calculate total drawings across all projects
+      let totalDrawings = 0;
+      for (const project of projectsData || []) {
+        const { count } = await getCanvasDrawingCount(project.id);
+        totalDrawings += count;
+      }
+
+      // Get saved templates count
+      const { data: templates } = await getCanvasTemplates({ limit: 1000 });
+      const savedTemplates = templates?.length || 0;
+
       setStats({
         totalProjects: canvasProjects.length,
         activeCollaborators: canvasProjects.reduce(
           (sum, p) => sum + p.collaborators,
           0
         ),
-        totalDrawings: 156, // TODO: Calculate from layers/elements
-        savedTemplates: 12, // TODO: Count templates
+        totalDrawings,
+        savedTemplates,
       });
 
-      logger.info("Canvas data fetched successfully", { count: canvasProjects.length, userId });
+      logger.info("Canvas data fetched successfully", { count: canvasProjects.length, userId, totalDrawings, savedTemplates });
       toast.success("Canvas loaded");
       announce(`${canvasProjects.length} canvas projects loaded successfully`, "polite");
     } catch (error) {

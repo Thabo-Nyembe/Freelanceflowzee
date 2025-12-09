@@ -958,3 +958,58 @@ export async function getCanvasTemplates(
     return { data: null, error }
   }
 }
+
+// ============================================================
+// CANVAS STATISTICS
+// ============================================================
+
+/**
+ * Get total drawing count for a canvas project
+ * Counts all elements across all layers
+ */
+export async function getCanvasDrawingCount(
+  canvasId: string
+): Promise<{ count: number; error: any }> {
+  try {
+    logger.info('Counting canvas drawings', { canvasId })
+
+    const supabase = createClient()
+
+    // Get all layers for this canvas
+    const { data: layers, error: layersError } = await supabase
+      .from('canvas_layers')
+      .select('id')
+      .eq('canvas_id', canvasId)
+
+    if (layersError) {
+      logger.error('Failed to fetch layers for counting', { error: layersError, canvasId })
+      return { count: 0, error: layersError }
+    }
+
+    if (!layers || layers.length === 0) {
+      return { count: 0, error: null }
+    }
+
+    // Count elements across all layers
+    const layerIds = layers.map(l => l.id)
+    const { count, error: countError } = await supabase
+      .from('canvas_elements')
+      .select('*', { count: 'exact', head: true })
+      .in('layer_id', layerIds)
+
+    if (countError) {
+      logger.error('Failed to count canvas elements', { error: countError, canvasId })
+      return { count: 0, error: countError }
+    }
+
+    logger.info('Canvas drawing count retrieved', {
+      canvasId,
+      totalDrawings: count || 0
+    })
+
+    return { count: count || 0, error: null }
+  } catch (error) {
+    logger.error('Exception counting canvas drawings', { error, canvasId })
+    return { count: 0, error }
+  }
+}

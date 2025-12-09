@@ -248,6 +248,8 @@ export function useUserMetrics(userId?: string) {
  */
 export function useCurrentUser() {
   const [userId, setUserId] = useState<string | null>(null)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [userName, setUserName] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
@@ -261,6 +263,13 @@ export function useCurrentUser() {
         if (authError) throw authError
 
         setUserId(user?.id || null)
+        setUserEmail(user?.email || null)
+        // Get name from user_metadata or derive from email
+        const name = user?.user_metadata?.full_name ||
+                     user?.user_metadata?.name ||
+                     user?.email?.split('@')[0] ||
+                     null
+        setUserName(name)
       } catch (err) {
         setError(err as Error)
         console.error('Error fetching current user:', err)
@@ -274,6 +283,12 @@ export function useCurrentUser() {
     // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUserId(session?.user?.id || null)
+      setUserEmail(session?.user?.email || null)
+      const name = session?.user?.user_metadata?.full_name ||
+                   session?.user?.user_metadata?.name ||
+                   session?.user?.email?.split('@')[0] ||
+                   null
+      setUserName(name)
     })
 
     return () => {
@@ -281,7 +296,7 @@ export function useCurrentUser() {
     }
   }, [])
 
-  return { userId, loading, error }
+  return { userId, userEmail, userName, loading, error }
 }
 
 // ============================================================================

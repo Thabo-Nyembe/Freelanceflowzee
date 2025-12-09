@@ -367,7 +367,7 @@ export default function ReportsPage() {
 
   // A+++ UTILITIES
   const { announce } = useAnnouncer()
-  const { userId, loading: userLoading } = useCurrentUser()
+  const { userId, userName, loading: userLoading } = useCurrentUser()
 
   // STATE
   const [state, dispatch] = useReducer(reportsReducer, {
@@ -599,7 +599,7 @@ export default function ReportsPage() {
         description: reportForm.description,
         frequency: reportForm.frequency,
         status: 'draft',
-        created_by: 'Demo User', // TODO: Replace with real user name
+        created_by: userName || 'Unknown User',
       })
 
       if (error) {
