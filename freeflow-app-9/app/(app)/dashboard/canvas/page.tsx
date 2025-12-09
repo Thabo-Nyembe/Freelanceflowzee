@@ -655,8 +655,6 @@ export default function CanvasPage() {
 
   const handleCreateCanvas = async () => {
     logger.info('Creating canvas', { name: canvasName, template: selectedTemplate })
-    
-    
 
     if (!canvasName.trim()) {
       logger.warn('Canvas validation failed', { reason: 'Name required' })
@@ -668,8 +666,24 @@ export default function CanvasPage() {
       const template = canvasTemplates.find(t => t.id === selectedTemplate)
       const size = template?.defaultSize || { width: parseInt(customWidth), height: parseInt(customHeight) }
 
+      let canvasId = `CVS-${Date.now()}`
+
+      if (userId) {
+        const { createCanvasProject } = await import('@/lib/canvas-collaboration-queries')
+        const { data: createdCanvas, error: createError } = await createCanvasProject(userId, {
+          name: canvasName,
+          description: canvasDescription,
+          width: size.width,
+          height: size.height,
+          background_color: '#FFFFFF',
+          is_public: false
+        })
+        if (createError) throw new Error(createError.message || 'Failed to create canvas')
+        if (createdCanvas?.id) canvasId = createdCanvas.id
+      }
+
       const newCanvas: CanvasProject = {
-        id: `CVS-${Date.now()}`,
+        id: canvasId,
         name: canvasName,
         description: canvasDescription,
         thumbnail: `https://picsum.photos/seed/${Date.now()}/800/600`,
@@ -707,9 +721,11 @@ export default function CanvasPage() {
         description: `${newCanvas.name} - ${template?.name || newCanvas.template} - ${size.width}×${size.height}px - v${newCanvas.version}`
       })
       announce('New canvas created', 'polite')
-    } catch (err) {
-      logger.error('Canvas creation failed', { error: err })
-      toast.error('Failed to create canvas')
+    } catch (err: any) {
+      logger.error('Canvas creation failed', { error: err.message || err })
+      toast.error('Failed to create canvas', {
+        description: err.message || 'Please try again'
+      })
     }
   }
 

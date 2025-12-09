@@ -481,7 +481,6 @@ export default function WidgetsPage() {
     try {
       setIsSaving(true)
 
-      // Note: Using local state - in production, this would POST to /api/widgets
       const icons = {
         metric: '📊',
         chart: '📈',
@@ -491,8 +490,40 @@ export default function WidgetsPage() {
         calendar: '📅'
       }
 
+      let widgetId = `W-${String(state.widgets.length + 1).padStart(3, '0')}`
+
+      // Create widget in database if user is authenticated
+      if (userId) {
+        const { createWidget } = await import('@/lib/widgets-queries')
+        const createdWidget = await createWidget(userId, {
+          name: widgetName,
+          type: widgetType,
+          category: widgetCategory,
+          size: widgetSize,
+          icon: icons[widgetType],
+          description: widgetDescription || `Custom ${widgetType} widget`,
+          is_visible: true,
+          is_locked: false,
+          position_x: 0,
+          position_y: 0,
+          width: widgetSize === 'small' ? 1 : widgetSize === 'medium' ? 2 : widgetSize === 'large' ? 3 : 4,
+          height: widgetSize === 'small' ? 1 : widgetSize === 'medium' ? 2 : 2,
+          config: {
+            refreshInterval: 60,
+            color: 'blue',
+            showLegend: true,
+            dataSource: 'api'
+          },
+          usage_count: 0
+        })
+        if (createdWidget?.id) {
+          widgetId = createdWidget.id
+        }
+        logger.info('Widget created in database', { widgetId, userId })
+      }
+
       const newWidget: Widget = {
-        id: `W-${String(state.widgets.length + 1).padStart(3, '0')}`,
+        id: widgetId,
         name: widgetName,
         type: widgetType,
         category: widgetCategory,
