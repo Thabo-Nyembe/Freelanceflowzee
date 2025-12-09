@@ -787,16 +787,31 @@ export default function TimeTrackingPage() {
   }
 
   const confirmDeleteAllEntries = async () => {
+    if (!userId) return
+
     setIsDeleting(true)
     try {
+      // Delete from database
+      const { deleteAllTimeEntries } = await import('@/lib/time-tracking-queries')
+      const result = await deleteAllTimeEntries(userId)
+
+      if (result.error) {
+        throw new Error(result.error.message || 'Failed to delete entries')
+      }
+
+      // Update local state
       setTimeEntries([])
-      // Persist to localStorage
-      localStorage.setItem(`time_entries_${userId}`, JSON.stringify([]))
-      logger.info('All entries deleted successfully')
+
+      logger.info('All entries deleted from database', { deletedCount: result.deletedCount })
       toast.success('All Entries Deleted', {
-        description: 'All time entries have been permanently removed'
+        description: `${result.deletedCount} time entries permanently removed`
       })
       announce('All time entries deleted', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete all entries', { error: error.message })
+      toast.error('Delete Failed', {
+        description: error.message || 'Please try again'
+      })
     } finally {
       setIsDeleting(false)
       setShowDeleteAllDialog(false)
@@ -879,9 +894,9 @@ export default function TimeTrackingPage() {
     setIsDeleting(true)
     try {
       setSelectedProject('')
-      // Persist updated projects list to localStorage
-      const updatedProjects = projects.filter(p => p.id !== projectToDelete)
-      localStorage.setItem(`time_projects_${userId}`, JSON.stringify(updatedProjects))
+      // Note: Projects are mock data in this component
+      // In production, would delete from a projects database table
+
       logger.info('Project deleted successfully', {
         projectId: projectToDelete,
         projectName: project?.name

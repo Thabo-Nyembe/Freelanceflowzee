@@ -458,6 +458,42 @@ export async function deleteTimeEntry(
   }
 }
 
+/**
+ * Delete all time entries for a user
+ */
+export async function deleteAllTimeEntries(
+  userId: string
+): Promise<{ success: boolean; deletedCount: number; error: any }> {
+  try {
+    logger.info('Deleting all time entries from Supabase', { userId })
+
+    const supabase = createClient()
+
+    // First count entries to be deleted
+    const { count } = await supabase
+      .from('time_entries')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+
+    // Delete all entries
+    const { error } = await supabase
+      .from('time_entries')
+      .delete()
+      .eq('user_id', userId)
+
+    if (error) {
+      logger.error('Failed to delete all time entries', { error, userId })
+      return { success: false, deletedCount: 0, error }
+    }
+
+    logger.info('All time entries deleted successfully', { userId, deletedCount: count || 0 })
+    return { success: true, deletedCount: count || 0, error: null }
+  } catch (error) {
+    logger.error('Exception deleting all time entries', { error, userId })
+    return { success: false, deletedCount: 0, error }
+  }
+}
+
 // ============================================
 // REPORTING & ANALYTICS
 // ============================================
