@@ -16,6 +16,7 @@ import {
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
+import { saveModelComparison, type ComparisonResult as DBComparisonResult } from '@/lib/ai-create-queries'
 
 const logger = createFeatureLogger('AI-Create-Compare')
 
@@ -190,22 +191,44 @@ export default function ComparePage() {
     logger.info('Output rated', { model: model.name, rating })
   }, [])
 
-  const handleSaveComparison = useCallback(() => {
-    const comparisonData = {
-      timestamp: new Date().toISOString(),
-      prompt,
-      results,
-      ratings
+  const handleSaveComparison = useCallback(async () => {
+    if (!userId) {
+      toast.error('Please log in to save comparisons')
+      return
     }
 
-    // Save to localStorage for history
-    const history = JSON.parse(localStorage.getItem('ai-comparison-history') || '[]')
-    history.unshift(comparisonData)
-    localStorage.setItem('ai-comparison-history', JSON.stringify(history.slice(0, 20)))
+    // Transform results to database format
+    const dbResults: DBComparisonResult[] = results.map(r => ({
+      model_id: r.modelId,
+      output: r.output,
+      response_time: r.responseTime,
+      token_count: r.tokenCount,
+      estimated_cost: r.estimatedCost,
+      quality_score: r.quality
+    }))
 
-    toast.success('Comparison Saved', { description: 'Added to your comparison history' })
-    logger.info('Comparison saved to history')
-  }, [prompt, results, ratings])
+    try {
+      // Save to database
+      const { error } = await saveModelComparison(userId, {
+        prompt,
+        results: dbResults,
+        ratings
+      })
+
+      if (error) {
+        logger.error('Failed to save comparison to database', { error })
+        toast.error('Failed to save comparison')
+        return
+      }
+
+      toast.success('Comparison Saved', { description: 'Added to your comparison history' })
+      logger.info('Comparison saved to database')
+      announce('Comparison saved', 'polite')
+    } catch (error) {
+      logger.error('Exception saving comparison', { error })
+      toast.error('Failed to save comparison')
+    }
+  }, [prompt, results, ratings, userId, announce])
 
   const handleExportComparison = useCallback(() => {
     const exportData = {

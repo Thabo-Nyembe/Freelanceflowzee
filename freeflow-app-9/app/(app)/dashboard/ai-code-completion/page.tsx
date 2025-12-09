@@ -24,8 +24,11 @@ import { useAnnouncer } from '@/lib/accessibility'
 import {
   getCodeCompletions,
   getCodeSnippets,
+  createCodeSnippet,
+  deleteCodeSnippet,
   getAICodeStats,
-  type ProgrammingLanguage
+  type ProgrammingLanguage,
+  type CodeSnippet as DBCodeSnippet
 } from '@/lib/ai-code-queries'
 
 const logger = createFeatureLogger('AICodeCompletion')
@@ -307,38 +310,65 @@ export default function AICodeCompletionPage() {
     setShowSaveSnippetDialog(true)
   }
 
-  const confirmSaveSnippet = () => {
+  const confirmSaveSnippet = async () => {
     if (!snippetName.trim()) {
       toast.error('Please enter a snippet name')
       return
     }
 
-    const code = completion || codeInput
-    const newSnippet: CodeSnippet = {
-      id: Date.now().toString(),
-      name: snippetName.trim(),
-      code,
-      language: selectedLanguage,
-      createdAt: new Date().toISOString()
+    if (!userId) {
+      toast.error('Please log in to save snippets')
+      return
     }
 
-    setSnippets([...snippets, newSnippet])
-    localStorage.setItem('kazi-code-snippets', JSON.stringify([...snippets, newSnippet]))
+    const code = completion || codeInput
 
-    logger.info('Snippet saved successfully', {
-      snippetId: newSnippet.id,
-      name: snippetName.trim(),
-      language: selectedLanguage,
-      codeLength: code.length,
-      totalSnippets: snippets.length + 1
-    })
+    try {
+      // Save to database
+      const { data, error } = await createCodeSnippet(userId, {
+        name: snippetName.trim(),
+        code,
+        language: selectedLanguage as ProgrammingLanguage,
+        category: 'utility',
+        description: `Saved from AI Code Completion - ${selectedLanguage}`
+      })
 
-    toast.success('Snippet Saved', {
-      description: `"${snippetName.trim()}" saved - ${snippets.length + 1} total snippets`
-    })
-    announce('Snippet saved successfully', 'polite')
-    setShowSaveSnippetDialog(false)
-    setSnippetName('')
+      if (error) {
+        logger.error('Failed to save snippet to database', { error })
+        toast.error('Failed to save snippet')
+        return
+      }
+
+      // Update local state with database response
+      const newSnippet: CodeSnippet = {
+        id: data?.id || Date.now().toString(),
+        name: snippetName.trim(),
+        code,
+        language: selectedLanguage,
+        createdAt: data?.created_at || new Date().toISOString()
+      }
+
+      setSnippets([...snippets, newSnippet])
+
+      logger.info('Snippet saved successfully', {
+        snippetId: newSnippet.id,
+        name: snippetName.trim(),
+        language: selectedLanguage,
+        codeLength: code.length,
+        totalSnippets: snippets.length + 1
+      })
+
+      toast.success('Snippet Saved', {
+        description: `"${snippetName.trim()}" saved - ${snippets.length + 1} total snippets`
+      })
+      announce('Snippet saved successfully', 'polite')
+    } catch (error) {
+      logger.error('Exception saving snippet', { error })
+      toast.error('Failed to save snippet')
+    } finally {
+      setShowSaveSnippetDialog(false)
+      setSnippetName('')
+    }
   }
 
   const handleLoadSnippet = (snippetId: string) => {

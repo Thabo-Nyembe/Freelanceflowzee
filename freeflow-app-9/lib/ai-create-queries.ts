@@ -792,3 +792,84 @@ export async function getGenerationStats(
 
   return { data: stats, error: null }
 }
+
+// ============================================================================
+// MODEL COMPARISON HISTORY
+// ============================================================================
+
+export interface ComparisonResult {
+  model_id: string
+  output: string
+  response_time: number
+  token_count: number
+  estimated_cost: number
+  quality_score: number
+}
+
+export interface ModelComparison {
+  id: string
+  user_id: string
+  prompt: string
+  results: ComparisonResult[]
+  ratings: Record<string, 'up' | 'down' | null>
+  created_at: string
+}
+
+/**
+ * Save a model comparison to history
+ */
+export async function saveModelComparison(
+  userId: string,
+  comparison: {
+    prompt: string
+    results: ComparisonResult[]
+    ratings: Record<string, 'up' | 'down' | null>
+  }
+): Promise<{ data: ModelComparison | null; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('ai_model_comparisons')
+    .insert({
+      user_id: userId,
+      prompt: comparison.prompt,
+      results: comparison.results,
+      ratings: comparison.ratings
+    })
+    .select()
+    .single()
+
+  return { data, error }
+}
+
+/**
+ * Get model comparison history
+ */
+export async function getModelComparisons(
+  userId: string,
+  limit: number = 20
+): Promise<{ data: ModelComparison[]; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('ai_model_comparisons')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  return { data: data || [], error }
+}
+
+/**
+ * Delete a model comparison
+ */
+export async function deleteModelComparison(
+  comparisonId: string
+): Promise<{ error: any }> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('ai_model_comparisons')
+    .delete()
+    .eq('id', comparisonId)
+
+  return { error }
+}

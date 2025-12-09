@@ -58,6 +58,7 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
+import { createActivityLog, getProfileAnalytics } from '@/lib/profile-settings-queries'
 
 const logger = createFeatureLogger('Profile')
 
@@ -97,15 +98,14 @@ export default function ProfilePage() {
         setIsLoading(true)
         setError(null)
 
-        // Load profile data from localStorage
-        const savedProfile = localStorage.getItem('user_profile')
-        if (savedProfile) {
-          try {
-            const profileData = JSON.parse(savedProfile)
-            // Profile data could be used to populate form fields
-            logger.info('Profile loaded from localStorage', { hasData: true })
-          } catch {
-            logger.warn('Failed to parse saved profile')
+        // Load profile analytics from database
+        if (userId) {
+          const { data: analytics } = await getProfileAnalytics(userId)
+          if (analytics) {
+            logger.info('Profile analytics loaded from database', {
+              views: analytics.total_views,
+              completeness: analytics.profile_completeness
+            })
           }
         }
 
@@ -119,7 +119,7 @@ export default function ProfilePage() {
     }
 
     loadProfileData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handlers
   const handleEditProfile = () => {
@@ -295,8 +295,15 @@ export default function ProfilePage() {
 
     setIsSavingPassword(true)
     try {
-      // Save password change timestamp to localStorage (password itself stays with auth provider)
-      localStorage.setItem('password_last_updated', new Date().toISOString())
+      // Log password change activity to database
+      if (userId) {
+        await createActivityLog(userId, {
+          activity_type: 'password_change',
+          action: 'Password updated',
+          description: 'User changed their password',
+          metadata: { updated_at: new Date().toISOString() }
+        })
+      }
 
       logger.info('Password updated successfully')
       toast.success('Password updated', {
@@ -334,12 +341,19 @@ export default function ProfilePage() {
 
     setIsSavingEmail(true)
     try {
-      // Save pending email change to localStorage
-      localStorage.setItem('pending_email_change', JSON.stringify({
-        newEmail: emailForm.email,
-        requestedAt: new Date().toISOString(),
-        verified: false
-      }))
+      // Log email change request to database
+      if (userId) {
+        await createActivityLog(userId, {
+          activity_type: 'email_change',
+          action: 'Email change requested',
+          description: `Verification email sent to ${emailForm.email}`,
+          metadata: {
+            new_email: emailForm.email,
+            requested_at: new Date().toISOString(),
+            verified: false
+          }
+        })
+      }
 
       logger.info('Email update initiated', { newEmail: emailForm.email })
       toast.success('Verification email sent', {
@@ -371,11 +385,18 @@ export default function ProfilePage() {
 
     setIsSavingPhone(true)
     try {
-      // Save phone number to user profile in localStorage
-      const savedProfile = JSON.parse(localStorage.getItem('user_profile') || '{}')
-      savedProfile.phone = phoneForm.phone
-      savedProfile.phoneUpdatedAt = new Date().toISOString()
-      localStorage.setItem('user_profile', JSON.stringify(savedProfile))
+      // Log phone update to database activity
+      if (userId) {
+        await createActivityLog(userId, {
+          activity_type: 'profile_update',
+          action: 'Phone number updated',
+          description: 'User updated their phone number',
+          metadata: {
+            phone: phoneForm.phone,
+            updated_at: new Date().toISOString()
+          }
+        })
+      }
 
       logger.info('Phone updated successfully', { phone: phoneForm.phone })
       toast.success('Phone number updated', {
