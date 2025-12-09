@@ -54,6 +54,9 @@ export default function WorkflowBuilderPage() {
   const [isEditMode, setIsEditMode] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
 
+  // A+++ Loading states for individual actions
+  const [runningWorkflows, setRunningWorkflows] = useState<Set<string>>(new Set())
+
   // A+++ LOAD WORKFLOW DATA
   const loadWorkflowData = async () => {
     if (!userId) {
@@ -225,14 +228,22 @@ export default function WorkflowBuilderPage() {
     }
   }
 
-  // n8n-style "Run Now" - Execute workflow manually with full execution tracking
+  // n8n-style "Run Now" - A+++ with loading states and full execution tracking
   const handleRunWorkflow = async (workflow: any) => {
     if (!userId) {
       toast.error('Please log in to run workflows')
       return
     }
 
-    announce(`Running workflow: ${workflow.name}`, 'polite')
+    // Prevent double-click
+    if (runningWorkflows.has(workflow.id)) {
+      toast.info('Workflow is already running')
+      return
+    }
+
+    // A+++ Set loading state
+    setRunningWorkflows(prev => new Set(prev).add(workflow.id))
+    announce(`Starting workflow: ${workflow.name}`, 'polite')
 
     try {
       const {
@@ -242,7 +253,7 @@ export default function WorkflowBuilderPage() {
         updateWorkflow
       } = await import('@/lib/automation-queries')
 
-      toast.info(`Running "${workflow.name}"...`, {
+      const toastId = toast.loading(`Running "${workflow.name}"...`, {
         description: 'Executing workflow steps'
       })
 
@@ -273,19 +284,34 @@ export default function WorkflowBuilderPage() {
         last_run: new Date().toISOString()
       })
 
+      // Dismiss loading toast and show success
+      toast.dismiss(toastId)
       toast.success('Workflow executed successfully!', {
         description: `"${workflow.name}" completed ${stepsCompleted} action${stepsCompleted !== 1 ? 's' : ''}`
       })
       logger.info('Workflow executed', { workflowId: workflow.id, executionId: execution.id, stepsCompleted })
-      announce(`Workflow ${workflow.name} executed`, 'polite')
+      announce(`Workflow ${workflow.name} executed with ${stepsCompleted} steps`, 'polite')
 
       // Reload workflows to show updated run count
       await loadWorkflowData()
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Execution failed'
       logger.error('Failed to run workflow', { error, workflowId: workflow.id })
-      toast.error('Execution failed', { description: errorMessage })
+      toast.error('Execution failed', {
+        description: errorMessage,
+        action: {
+          label: 'Retry',
+          onClick: () => handleRunWorkflow(workflow)
+        }
+      })
       announce('Workflow execution failed', 'assertive')
+    } finally {
+      // A+++ Clear loading state
+      setRunningWorkflows(prev => {
+        const next = new Set(prev)
+        next.delete(workflow.id)
+        return next
+      })
     }
   }
 
@@ -619,8 +645,24 @@ export default function WorkflowBuilderPage() {
                       Last run: {workflow.lastRun.toLocaleDateString()}
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Button size="sm" className="bg-green-500 hover:bg-green-600 text-white" onClick={() => handleRunWorkflow(workflow)}>
-                        ▶ Run
+                      <Button
+                        size="sm"
+                        className={`transition-all ${
+                          runningWorkflows.has(workflow.id)
+                            ? 'bg-green-400 text-white cursor-wait opacity-75'
+                            : 'bg-green-500 hover:bg-green-600 text-white'
+                        }`}
+                        onClick={() => handleRunWorkflow(workflow)}
+                        disabled={runningWorkflows.has(workflow.id)}
+                        aria-busy={runningWorkflows.has(workflow.id)}
+                      >
+                        {runningWorkflows.has(workflow.id) ? (
+                          <span className="flex items-center gap-1">
+                            <span className="animate-spin">⟳</span> Running...
+                          </span>
+                        ) : (
+                          '▶ Run'
+                        )}
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => handleViewWorkflow(workflow)}>
                         <Eye className="h-3 w-3 mr-1" />

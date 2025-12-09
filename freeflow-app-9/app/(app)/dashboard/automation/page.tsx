@@ -57,6 +57,10 @@ export default function AutomationPage() {
   // CONFIRMATION DIALOG STATE
   const [deleteWorkflow, setDeleteWorkflow] = useState<{ id: string; name: string } | null>(null)
 
+  // A+++ LOADING STATES FOR ACTIONS
+  const [runningWorkflows, setRunningWorkflows] = useState<Set<string>>(new Set())
+  const [isLoadingExecutions, setIsLoadingExecutions] = useState(false)
+
   // A+++ LOAD AUTOMATION DATA
   useEffect(() => {
     const loadAutomationData = async () => {
@@ -254,16 +258,28 @@ export default function AutomationPage() {
     }
   }
 
-  // HANDLER: Run workflow manually (n8n-style "Run Now" feature)
+  // HANDLER: Run workflow manually (n8n-style "Run Now" feature) - A+++ with loading states
   const handleRunWorkflow = async (workflowId: string, workflowName: string) => {
     if (!userId) {
       toast.error('Please log in to run workflows')
       return
     }
 
+    // Prevent double-click
+    if (runningWorkflows.has(workflowId)) {
+      toast.info('Workflow is already running')
+      return
+    }
+
+    // A+++ Set loading state
+    setRunningWorkflows(prev => new Set(prev).add(workflowId))
+    announce(`Starting workflow: ${workflowName}`, 'polite')
+
     try {
       logger.info('Running workflow manually', { workflowId, workflowName, userId })
-      toast.info(`Running "${workflowName}"...`, { description: 'Executing workflow steps' })
+      const toastId = toast.loading(`Running "${workflowName}"...`, {
+        description: 'Executing workflow steps'
+      })
 
       const { createWorkflowExecution, updateExecutionStatus, getWorkflowActions, updateWorkflow } = await import('@/lib/automation-queries')
 
@@ -296,7 +312,7 @@ export default function AutomationPage() {
           last_run: new Date().toISOString()
         })
 
-        // Update local state
+        // A+++ Optimistic UI update
         setWorkflows(prev => prev.map(w =>
           w.id === workflowId
             ? { ...w, run_count: (w.run_count || 0) + 1, last_run: new Date().toISOString() }
@@ -304,44 +320,79 @@ export default function AutomationPage() {
         ))
       }
 
+      // Dismiss loading toast and show success
+      toast.dismiss(toastId)
       toast.success(`Workflow executed successfully!`, {
-        description: `"${workflowName}" completed ${stepsCompleted} action${stepsCompleted !== 1 ? 's' : ''}`
+        description: `"${workflowName}" completed ${stepsCompleted} action${stepsCompleted !== 1 ? 's' : ''}`,
+        action: {
+          label: 'View History',
+          onClick: () => handleViewModeChange('executions')
+        }
       })
       logger.info('Workflow executed successfully', { workflowId, executionId: execution.id, stepsCompleted })
-      announce(`Workflow ${workflowName} executed successfully`, 'polite')
+      announce(`Workflow ${workflowName} executed successfully with ${stepsCompleted} steps`, 'polite')
 
-      // Load updated executions
-      await handleLoadExecutions(workflowId)
+      // Load updated executions if on history view
+      if (viewMode === 'executions') {
+        await handleLoadAllExecutions()
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to run workflow'
       logger.error('Failed to run workflow', { error: err, workflowId })
-      toast.error('Workflow execution failed', { description: errorMessage })
+      toast.error('Workflow execution failed', {
+        description: errorMessage,
+        action: {
+          label: 'Retry',
+          onClick: () => handleRunWorkflow(workflowId, workflowName)
+        }
+      })
       announce('Workflow execution failed', 'assertive')
+    } finally {
+      // A+++ Clear loading state
+      setRunningWorkflows(prev => {
+        const next = new Set(prev)
+        next.delete(workflowId)
+        return next
+      })
     }
   }
 
-  // HANDLER: Load all executions for history view
+  // HANDLER: Load all executions for history view - A+++ with loading state
   const handleLoadAllExecutions = async () => {
     if (!userId) return
+
+    setIsLoadingExecutions(true)
+    announce('Loading execution history', 'polite')
 
     try {
       logger.info('Loading all executions for history view')
       const { getWorkflowExecutions } = await import('@/lib/automation-queries')
 
-      // Load executions for all workflows
-      const allExecutions: any[] = []
-      for (const workflow of workflows) {
+      // Load executions for all workflows in parallel for better performance
+      const executionPromises = workflows.map(async (workflow) => {
         const workflowExecutions = await getWorkflowExecutions(workflow.id, { limit: 20 })
-        allExecutions.push(...workflowExecutions.map(e => ({ ...e, workflowId: workflow.id })))
-      }
+        return workflowExecutions.map(e => ({ ...e, workflowId: workflow.id }))
+      })
+
+      const executionResults = await Promise.all(executionPromises)
+      const allExecutions = executionResults.flat()
 
       // Sort by start time descending
       allExecutions.sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime())
       setExecutions(allExecutions.slice(0, 50)) // Limit to 50 most recent
       logger.info('All executions loaded', { count: allExecutions.length })
+      announce(`Loaded ${allExecutions.length} executions`, 'polite')
     } catch (err) {
       logger.error('Failed to load executions', { error: err })
-      toast.error('Failed to load execution history')
+      toast.error('Failed to load execution history', {
+        action: {
+          label: 'Retry',
+          onClick: () => handleLoadAllExecutions()
+        }
+      })
+      announce('Failed to load execution history', 'assertive')
+    } finally {
+      setIsLoadingExecutions(false)
     }
   }
 
@@ -672,10 +723,22 @@ export default function AutomationPage() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleRunWorkflow(workflow.id, workflow.name)}
-                            className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-sm font-medium transition-colors"
-                            title="Run workflow now"
+                            disabled={runningWorkflows.has(workflow.id)}
+                            className={`px-3 py-1 rounded text-sm font-medium transition-all ${
+                              runningWorkflows.has(workflow.id)
+                                ? 'bg-green-400 text-white cursor-wait opacity-75'
+                                : 'bg-green-500 hover:bg-green-600 text-white'
+                            }`}
+                            title={runningWorkflows.has(workflow.id) ? 'Running...' : 'Run workflow now'}
+                            aria-busy={runningWorkflows.has(workflow.id)}
                           >
-                            ▶ Run
+                            {runningWorkflows.has(workflow.id) ? (
+                              <span className="flex items-center gap-1">
+                                <span className="animate-spin">⟳</span> Running...
+                              </span>
+                            ) : (
+                              '▶ Run'
+                            )}
                           </button>
                           <button
                             onClick={() => handleToggleWorkflow(workflow.id, workflow.status)}
@@ -879,62 +942,154 @@ export default function AutomationPage() {
           </div>
         )}
 
-        {/* Executions */}
+        {/* Executions - A+++ with loading, empty states, and refresh */}
         {viewMode === 'executions' && (
           <ScrollReveal delay={0.2}>
             <LiquidGlassCard>
               <div className="p-6">
-                <h3 className="text-lg font-semibold mb-6">Execution History</h3>
-                <div className="space-y-4">
-                  {executions.map((execution) => {
-                    const workflow = workflows.find(w => w.id === execution.workflowId)
-                    return (
-                      <div
-                        key={execution.id}
-                        className="p-4 rounded-lg bg-muted/30 border border-muted"
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold">{workflow?.name}</span>
-                              <span className={`text-xs px-2 py-1 rounded ${getStatusColor(execution.status)}`}>
-                                {execution.status}
-                              </span>
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              Triggered by: {execution.triggeredBy}
-                            </div>
-                            <div className="text-xs text-muted-foreground mt-1">
-                              {execution.startTime.toLocaleString()}
-                            </div>
-                          </div>
-                          <div className="text-sm font-medium">
-                            {execution.endTime && formatDuration(execution.endTime.getTime() - execution.startTime.getTime())}
-                          </div>
-                        </div>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold">Execution History</h3>
+                  <button
+                    onClick={() => handleLoadAllExecutions()}
+                    disabled={isLoadingExecutions}
+                    className={`px-3 py-1 rounded text-sm font-medium transition-all ${
+                      isLoadingExecutions
+                        ? 'bg-muted text-muted-foreground cursor-wait'
+                        : 'bg-purple-500 hover:bg-purple-600 text-white'
+                    }`}
+                    aria-busy={isLoadingExecutions}
+                  >
+                    {isLoadingExecutions ? (
+                      <span className="flex items-center gap-1">
+                        <span className="animate-spin">⟳</span> Loading...
+                      </span>
+                    ) : (
+                      '🔄 Refresh'
+                    )}
+                  </button>
+                </div>
 
-                        {/* Execution Steps */}
+                {/* A+++ Loading State */}
+                {isLoadingExecutions && executions.length === 0 && (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="p-4 rounded-lg bg-muted/30 border border-muted animate-pulse">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1 space-y-2">
+                            <div className="h-4 bg-muted rounded w-1/3"></div>
+                            <div className="h-3 bg-muted rounded w-1/4"></div>
+                          </div>
+                          <div className="h-4 bg-muted rounded w-16"></div>
+                        </div>
                         <div className="ml-4 space-y-2">
-                          {execution.steps.map((step, idx) => (
-                            <div key={idx} className="flex items-center gap-3 text-sm">
-                              <span className="text-lg">{getActionIcon(step.actionType)}</span>
-                              <span className="text-muted-foreground capitalize">{step.actionType}</span>
-                              <span className={`text-xs px-2 py-0.5 rounded ${getStatusColor(step.status)}`}>
-                                {step.status}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {formatDuration(step.duration)}
-                              </span>
-                              {step.error && (
-                                <span className="text-xs text-red-500">{step.error}</span>
-                              )}
-                            </div>
-                          ))}
+                          <div className="h-3 bg-muted rounded w-1/2"></div>
+                          <div className="h-3 bg-muted rounded w-2/5"></div>
                         </div>
                       </div>
-                    )
-                  })}
-                </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* A+++ Empty State */}
+                {!isLoadingExecutions && executions.length === 0 && (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">📜</div>
+                    <h4 className="text-lg font-semibold mb-2">No Executions Yet</h4>
+                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                      Your workflow execution history will appear here. Run a workflow to see its execution details.
+                    </p>
+                    <button
+                      onClick={() => handleViewModeChange('workflows')}
+                      className="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium transition-colors"
+                    >
+                      View Workflows →
+                    </button>
+                  </div>
+                )}
+
+                {/* Execution List */}
+                {executions.length > 0 && (
+                  <div className="space-y-4">
+                    {executions.map((execution) => {
+                      const workflow = workflows.find(w => w.id === execution.workflowId)
+                      const startTime = execution.started_at ? new Date(execution.started_at) : execution.startTime
+                      const endTime = execution.completed_at ? new Date(execution.completed_at) : execution.endTime
+                      const triggeredBy = execution.triggered_by || execution.triggeredBy || 'unknown'
+
+                      return (
+                        <div
+                          key={execution.id}
+                          className="p-4 rounded-lg bg-muted/30 border border-muted hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-semibold">{workflow?.name || 'Unknown Workflow'}</span>
+                                <span className={`text-xs px-2 py-1 rounded ${getStatusColor(execution.status)}`}>
+                                  {execution.status}
+                                </span>
+                                {triggeredBy === 'webhook' && (
+                                  <span className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                                    🔗 Webhook
+                                  </span>
+                                )}
+                                {triggeredBy === 'manual' && (
+                                  <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                                    👆 Manual
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                Triggered: {triggeredBy}
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {startTime instanceof Date ? startTime.toLocaleString() : 'Unknown time'}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-medium">
+                                {endTime && startTime && (
+                                  formatDuration(new Date(endTime).getTime() - new Date(startTime).getTime())
+                                )}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {execution.steps_completed || 0}/{execution.steps_total || 0} steps
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Execution Steps */}
+                          {execution.steps && execution.steps.length > 0 && (
+                            <div className="ml-4 space-y-2 border-l-2 border-muted pl-4">
+                              {execution.steps.map((step: any, idx: number) => (
+                                <div key={idx} className="flex items-center gap-3 text-sm">
+                                  <span className="text-lg">{getActionIcon(step.actionType || step.action_type)}</span>
+                                  <span className="text-muted-foreground capitalize">{step.actionType || step.action_type}</span>
+                                  <span className={`text-xs px-2 py-0.5 rounded ${getStatusColor(step.status)}`}>
+                                    {step.status}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {formatDuration(step.duration || step.duration_ms || 0)}
+                                  </span>
+                                  {(step.error || step.error_message) && (
+                                    <span className="text-xs text-red-500">{step.error || step.error_message}</span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Error Message */}
+                          {execution.error_message && (
+                            <div className="mt-3 p-2 bg-red-50 dark:bg-red-950 rounded text-sm text-red-600 dark:text-red-400">
+                              ❌ {execution.error_message}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </LiquidGlassCard>
           </ScrollReveal>
