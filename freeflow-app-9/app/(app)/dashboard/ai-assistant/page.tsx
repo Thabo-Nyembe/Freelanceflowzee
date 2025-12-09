@@ -583,24 +583,40 @@ export default function AIAssistantPage() {
     setShowDeleteConversationDialog(true)
   }
 
-  const confirmDeleteConversation = () => {
+  const confirmDeleteConversation = async () => {
     if (!conversationToDelete) return
 
     const conversation = conversations.find(c => c.id === conversationToDelete)
 
-    logger.info('Conversation deleted', {
-      conversationId: conversationToDelete,
-      title: conversation?.title,
-      messageCount: conversation?.messageCount
-    })
+    try {
+      if (userId) {
+        const { deleteConversation } = await import('@/lib/ai-assistant-queries')
+        const { error: deleteError } = await deleteConversation(conversationToDelete)
+        if (deleteError) throw new Error(deleteError.message || 'Failed to delete conversation')
+      }
 
-    // Note: Using local state - in production, this would DELETE to /api/conversations/:id
-    toast.success('Conversation deleted', {
-      description: `${conversation?.title} - ${conversation?.messageCount} messages removed`
-    })
+      // Update local state
+      setConversations(prev => prev.filter(c => c.id !== conversationToDelete))
 
-    setShowDeleteConversationDialog(false)
-    setConversationToDelete(null)
+      logger.info('Conversation deleted', {
+        conversationId: conversationToDelete,
+        title: conversation?.title,
+        messageCount: conversation?.messageCount
+      })
+
+      toast.success('Conversation deleted', {
+        description: `${conversation?.title} - ${conversation?.messageCount} messages removed`
+      })
+      announce('Conversation deleted successfully', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete conversation', { error: error.message })
+      toast.error('Failed to delete conversation', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setShowDeleteConversationDialog(false)
+      setConversationToDelete(null)
+    }
   }
 
   const handleCopyMessage = (messageId: string, content: string) => {
@@ -920,53 +936,98 @@ export default function AIAssistantPage() {
     setShowDismissInsightDialog(true)
   }
 
-  const confirmDismissInsight = () => {
+  const confirmDismissInsight = async () => {
     if (!insightToDismiss) return
 
     const insight = aiInsights.find(i => i.id === insightToDismiss)
 
-    logger.info('Insight dismissed', {
-      insightId: insightToDismiss,
-      title: insight?.title
-    })
+    try {
+      if (userId) {
+        const { dismissInsight } = await import('@/lib/ai-assistant-queries')
+        const { error: dismissError } = await dismissInsight(insightToDismiss)
+        if (dismissError) throw new Error(dismissError.message || 'Failed to dismiss insight')
+      }
 
-    // Note: Using local state - in production, this would DELETE to /api/ai/insights/:id
-    toast.success('Insight dismissed', {
-      description: `${insight?.title} - ${insight?.priority} priority removed`
-    })
+      // Update local state
+      setAiInsights(prev => prev.filter(i => i.id !== insightToDismiss))
 
-    setShowDismissInsightDialog(false)
-    setInsightToDismiss(null)
+      logger.info('Insight dismissed', {
+        insightId: insightToDismiss,
+        title: insight?.title
+      })
+
+      toast.success('Insight dismissed', {
+        description: `${insight?.title} - ${insight?.priority} priority removed`
+      })
+      announce('Insight dismissed successfully', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to dismiss insight', { error: error.message })
+      toast.error('Failed to dismiss insight', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setShowDismissInsightDialog(false)
+      setInsightToDismiss(null)
+    }
   }
 
-  const handlePinConversation = (conversationId: string) => {
+  const handlePinConversation = async (conversationId: string) => {
     const conversation = conversations.find(c => c.id === conversationId)
 
-    logger.info('Pinning conversation', {
-      conversationId,
-      title: conversation?.title,
-      messageCount: conversation?.messageCount
-    })
+    try {
+      if (userId) {
+        const { togglePinConversation } = await import('@/lib/ai-assistant-queries')
+        const { error: pinError } = await togglePinConversation(conversationId)
+        if (pinError) throw new Error(pinError.message || 'Failed to pin conversation')
+      }
 
-    // Note: Using local state - in production, this would PATCH to /api/conversations/:id
-    toast.success('Conversation pinned', {
-      description: `${conversation?.title} - Pinned to top of list`
-    })
+      logger.info('Pinning conversation', {
+        conversationId,
+        title: conversation?.title,
+        messageCount: conversation?.messageCount
+      })
+
+      toast.success('Conversation pinned', {
+        description: `${conversation?.title} - Pinned to top of list`
+      })
+      announce('Conversation pinned successfully', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to pin conversation', { error: error.message })
+      toast.error('Failed to pin conversation', {
+        description: error.message || 'Please try again'
+      })
+    }
   }
 
-  const handleArchiveConversation = (conversationId: string) => {
+  const handleArchiveConversation = async (conversationId: string) => {
     const conversation = conversations.find(c => c.id === conversationId)
 
-    logger.info('Archiving conversation', {
-      conversationId,
-      title: conversation?.title,
-      messageCount: conversation?.messageCount
-    })
+    try {
+      if (userId) {
+        const { archiveConversation } = await import('@/lib/ai-assistant-queries')
+        const { error: archiveError } = await archiveConversation(conversationId)
+        if (archiveError) throw new Error(archiveError.message || 'Failed to archive conversation')
+      }
 
-    // Note: Using local state - in production, this would PATCH to /api/conversations/:id
-    toast.success('Conversation archived', {
-      description: `${conversation?.title} - ${conversation?.messageCount} messages moved to archive`
-    })
+      // Remove from active conversations list
+      setConversations(prev => prev.filter(c => c.id !== conversationId))
+
+      logger.info('Archiving conversation', {
+        conversationId,
+        title: conversation?.title,
+        messageCount: conversation?.messageCount
+      })
+
+      toast.success('Conversation archived', {
+        description: `${conversation?.title} - ${conversation?.messageCount} messages moved to archive`
+      })
+      announce('Conversation archived successfully', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to archive conversation', { error: error.message })
+      toast.error('Failed to archive conversation', {
+        description: error.message || 'Please try again'
+      })
+    }
   }
 
   // A+++ LOADING STATE

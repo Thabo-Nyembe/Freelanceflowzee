@@ -639,22 +639,41 @@ export default function PluginMarketplacePage() {
       description: `${plugin.category} plugin - ${plugin.version} - ${fileSizeMB} MB - Setting up dependencies`
     })
 
-    // Note: Using local state - in production, this would POST to /api/plugins/install
-    dispatch({ type: 'INSTALL_PLUGIN', plugin })
+    try {
+      if (userId) {
+        const { createInstallation, incrementPluginInstalls } = await import('@/lib/plugin-marketplace-queries')
+        const { error: installError } = await createInstallation(userId, {
+          plugin_id: plugin.id,
+          status: 'active',
+          settings: {}
+        })
+        if (installError) throw new Error(installError.message || 'Failed to install plugin')
 
-    const installsK = (plugin.installCount / 1000).toFixed(1)
+        // Increment plugin install count
+        await incrementPluginInstalls(plugin.id)
+      }
 
-    logger.info('Plugin installed successfully', {
-      pluginId: plugin.id,
-      name: plugin.name,
-      version: plugin.version,
-      installedAt: new Date().toISOString()
-    })
+      dispatch({ type: 'INSTALL_PLUGIN', plugin })
 
-    toast.success(`${plugin.name} installed`, {
-      description: `${plugin.category} - ${plugin.version} - ${price} - ${plugin.rating}⭐ (${installsK}k installs) - Active and ready to use`
-    })
-    announce(`${plugin.name} installed`, 'polite')
+      const installsK = (plugin.installCount / 1000).toFixed(1)
+
+      logger.info('Plugin installed successfully', {
+        pluginId: plugin.id,
+        name: plugin.name,
+        version: plugin.version,
+        installedAt: new Date().toISOString()
+      })
+
+      toast.success(`${plugin.name} installed`, {
+        description: `${plugin.category} - ${plugin.version} - ${price} - ${plugin.rating}⭐ (${installsK}k installs) - Active and ready to use`
+      })
+      announce(`${plugin.name} installed`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to install plugin', { error: error.message, pluginId: plugin.id })
+      toast.error('Failed to install plugin', {
+        description: error.message || 'Please try again'
+      })
+    }
   }
 
   const handleUninstallPlugin = (pluginId: string) => {
@@ -677,20 +696,35 @@ export default function PluginMarketplacePage() {
     })
   }
 
-  const handleConfirmUninstallPlugin = () => {
+  const handleConfirmUninstallPlugin = async () => {
     if (!uninstallPlugin) return
 
     logger.info('User confirmed uninstallation', { pluginId: uninstallPlugin.id, name: uninstallPlugin.name })
-    dispatch({ type: 'UNINSTALL_PLUGIN', pluginId: uninstallPlugin.id })
 
-    const fileSizeMB = (uninstallPlugin.fileSize / (1024 * 1024)).toFixed(1)
-    const installedDate = uninstallPlugin.installedAt ? new Date(uninstallPlugin.installedAt).toLocaleDateString() : 'Unknown'
+    try {
+      if (userId) {
+        const { deleteInstallationByPluginId } = await import('@/lib/plugin-marketplace-queries')
+        const { error: deleteError } = await deleteInstallationByPluginId(userId, uninstallPlugin.id)
+        if (deleteError) throw new Error(deleteError.message || 'Failed to uninstall plugin')
+      }
 
-    toast.success(`${uninstallPlugin.name} uninstalled`, {
-      description: `${uninstallPlugin.category} plugin - ${uninstallPlugin.version} - ${fileSizeMB} MB freed - Installed since ${installedDate}`
-    })
-    announce('Plugin uninstalled', 'polite')
-    setUninstallPlugin(null)
+      dispatch({ type: 'UNINSTALL_PLUGIN', pluginId: uninstallPlugin.id })
+
+      const fileSizeMB = (uninstallPlugin.fileSize / (1024 * 1024)).toFixed(1)
+      const installedDate = uninstallPlugin.installedAt ? new Date(uninstallPlugin.installedAt).toLocaleDateString() : 'Unknown'
+
+      toast.success(`${uninstallPlugin.name} uninstalled`, {
+        description: `${uninstallPlugin.category} plugin - ${uninstallPlugin.version} - ${fileSizeMB} MB freed - Installed since ${installedDate}`
+      })
+      announce('Plugin uninstalled', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to uninstall plugin', { error: error.message, pluginId: uninstallPlugin.id })
+      toast.error('Failed to uninstall plugin', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setUninstallPlugin(null)
+    }
   }
 
   const handleTogglePluginActive = (pluginId: string) => {

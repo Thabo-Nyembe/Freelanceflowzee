@@ -569,6 +569,18 @@ export async function deleteInstallation(installationId: string) {
   return true
 }
 
+export async function deleteInstallationByPluginId(userId: string, pluginId: string) {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('plugin_installations')
+    .delete()
+    .eq('user_id', userId)
+    .eq('plugin_id', pluginId)
+
+  if (error) throw error
+  return { error: null }
+}
+
 export async function activatePlugin(installationId: string) {
   return updateInstallation(installationId, {
     is_active: true,

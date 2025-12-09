@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **24 critical features** across 9 sessions.
+Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **30 critical features** across 10 sessions.
 
 ---
 
@@ -198,6 +198,53 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 - `handleCreatePost` now calls `createPost()` from community-hub-queries
 - Community posts persist to database
 
+### 25. AI Assistant Conversation Delete (ai-assistant) - Session 10
+**File:** `app/(app)/dashboard/ai-assistant/page.tsx`
+**Status:** WIRED
+
+- `confirmDeleteConversation` now calls `deleteConversation()` from ai-assistant-queries
+- Conversation deletions persist to database
+- Updates local state after successful database deletion
+
+### 26. AI Assistant Insight Dismiss (ai-assistant) - Session 10
+**File:** `app/(app)/dashboard/ai-assistant/page.tsx`
+**Status:** WIRED
+
+- `confirmDismissInsight` now calls `dismissInsight()` from ai-assistant-queries
+- Insight dismissals persist to database
+- Removes dismissed insights from local state
+
+### 27. AI Assistant Pin Conversation (ai-assistant) - Session 10
+**File:** `app/(app)/dashboard/ai-assistant/page.tsx`
+**Status:** WIRED
+
+- `handlePinConversation` now calls `togglePinConversation()` from ai-assistant-queries
+- Pin state persists to database
+
+### 28. AI Assistant Archive Conversation (ai-assistant) - Session 10
+**File:** `app/(app)/dashboard/ai-assistant/page.tsx`
+**Status:** WIRED
+
+- `handleArchiveConversation` now calls `archiveConversation()` from ai-assistant-queries
+- Archive state persists to database
+- Removes archived conversations from active list
+
+### 29. Plugin Marketplace Install (plugin-marketplace) - Session 10
+**File:** `app/(app)/dashboard/plugin-marketplace/page.tsx`
+**Status:** WIRED
+
+- `handleInstallPlugin` now calls `createInstallation()` and `incrementPluginInstalls()` from plugin-marketplace-queries
+- Plugin installations persist to `plugin_installations` table
+- Install counts are incremented in database
+
+### 30. Plugin Marketplace Uninstall (plugin-marketplace) - Session 10
+**File:** `app/(app)/dashboard/plugin-marketplace/page.tsx`
+**Status:** WIRED
+
+- `handleConfirmUninstallPlugin` now calls `deleteInstallationByPluginId()` from plugin-marketplace-queries
+- Added new `deleteInstallationByPluginId(userId, pluginId)` function to queries
+- Plugin uninstallations persist to database
+
 ---
 
 ## Available Query Functions (92 Query Files)
@@ -264,12 +311,13 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | 22b811b1 | feat: Wire invoices, widgets, files-hub handlers (Session 6) |
 | ea4c057b | feat: Wire voice, ar, client-portal handlers (Session 7) |
 | 486465fe | feat: Wire ai-video, browser-ext, ar-create handlers (Session 8) |
-| (pending) | feat: Wire voice-create, community-post handlers (Session 9) |
+| 743b2cc8 | feat: Wire voice-create, community-post handlers (Session 9) |
+| (pending) | feat: Wire ai-assistant, plugin-marketplace handlers (Session 10) |
 
 ---
 
 ## Conclusion
 
-The KAZI dashboard has **92 query files** and **149 API routes**. Critical features (invoice disputes, admin alerts, team invitations) are now wired. Remaining items are acceptable as-is or lower priority.
+The KAZI dashboard has **92 query files** and **149 API routes**. Critical features (invoice disputes, admin alerts, team invitations, AI assistant conversations, plugin installations) are now wired. Remaining items are acceptable as-is or lower priority.
 
 **Overall Status:** Production Ready
