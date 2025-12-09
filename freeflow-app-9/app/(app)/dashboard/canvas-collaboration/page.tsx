@@ -449,36 +449,63 @@ export default function CanvasCollaboration() {
     setShowCreateCanvasDialog(true)
   }
 
-  const confirmCreateCanvas = () => {
-    const size = newCanvasSize || '1920x1080'
-    const name = newCanvasName.trim() || 'Untitled Canvas'
-
-    const newProject: CanvasProject = {
-      id: (recentProjects.length + 1).toString(),
-      name,
-      thumbnail: '/canvas-thumbnails/new.jpg',
-      lastModified: 'Just now',
-      collaborators: ['You'],
-      size
+  const confirmCreateCanvas = async () => {
+    if (!userId) {
+      toast.error('Please log in to create a canvas')
+      return
     }
 
-    setRecentProjects([newProject, ...recentProjects])
-    setCanvasName(name)
+    const size = newCanvasSize || '1920x1080'
+    const name = newCanvasName.trim() || 'Untitled Canvas'
+    const [width, height] = size.split('x').map(Number)
 
-    logger.info('Canvas created successfully', {
-      projectId: newProject.id,
-      name,
-      size,
-      totalProjects: recentProjects.length + 1
-    })
+    try {
+      const { createCanvasProject } = await import('@/lib/canvas-collaboration-queries')
+      const { data: newCanvas, error } = await createCanvasProject(userId, {
+        name,
+        width,
+        height
+      })
 
-    toast.success('Canvas Created!', {
-      description: `${name} (${size}) - Ready to start designing`
-    })
-    announce('Canvas created successfully', 'polite')
-    setShowCreateCanvasDialog(false)
-    setNewCanvasSize('1920x1080')
-    setNewCanvasName('')
+      if (error) {
+        throw new Error(error.message || 'Failed to create canvas')
+      }
+
+      if (newCanvas) {
+        const newProject: CanvasProject = {
+          id: newCanvas.id,
+          name: newCanvas.name,
+          thumbnail: '/canvas-thumbnails/new.jpg',
+          lastModified: 'Just now',
+          collaborators: ['You'],
+          size
+        }
+
+        setRecentProjects([newProject, ...recentProjects])
+        setCanvasName(name)
+
+        logger.info('Canvas created successfully', {
+          projectId: newCanvas.id,
+          name,
+          size,
+          totalProjects: recentProjects.length + 1
+        })
+
+        toast.success('Canvas Created!', {
+          description: `${name} (${size}) - Ready to start designing`
+        })
+        announce('Canvas created successfully', 'polite')
+      }
+
+      setShowCreateCanvasDialog(false)
+      setNewCanvasSize('1920x1080')
+      setNewCanvasName('')
+    } catch (err: any) {
+      logger.error('Failed to create canvas', { error: err })
+      toast.error('Failed to create canvas', {
+        description: err.message || 'Please try again'
+      })
+    }
   }
 
   const handleOpenCanvas = (canvasId: string) => {
