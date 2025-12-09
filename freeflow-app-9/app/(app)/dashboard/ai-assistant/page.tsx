@@ -861,16 +861,39 @@ export default function AIAssistantPage() {
     })
   }
 
-  const handleSaveChat = () => {
+  const handleSaveChat = async () => {
     logger.info('Saving chat', {
       messageCount: messages.length,
       hasUserMessages: messages.some(m => m.type === 'user')
     })
 
-    // Note: Using local state - in production, this would POST to /api/conversations
-    toast.success('Chat saved', {
-      description: `${messages.length} messages preserved - ${messages.filter(m => m.type === 'user').length} user messages, ${messages.filter(m => m.type === 'assistant').length} AI responses`
-    })
+    try {
+      // Create conversation in database
+      if (userId && messages.length > 0) {
+        const { createConversation } = await import('@/lib/ai-assistant-queries')
+        const firstUserMessage = messages.find(m => m.type === 'user')
+        const title = firstUserMessage?.content?.slice(0, 50) || 'New Conversation'
+
+        const { data: conversation, error } = await createConversation(userId, {
+          title,
+          model: selectedModel,
+          messages: messages.map(m => ({
+            role: m.type === 'user' ? 'user' : 'assistant',
+            content: m.content
+          }))
+        })
+
+        if (error) throw new Error(error.message || 'Failed to save conversation')
+        logger.info('Chat saved to database', { conversationId: conversation?.id })
+      }
+
+      toast.success('Chat saved', {
+        description: `${messages.length} messages preserved - ${messages.filter(m => m.type === 'user').length} user messages, ${messages.filter(m => m.type === 'assistant').length} AI responses`
+      })
+    } catch (error: any) {
+      logger.error('Failed to save chat', { error: error.message })
+      toast.error('Failed to save chat', { description: error.message || 'Please try again' })
+    }
   }
 
   const handleClearChat = () => {
