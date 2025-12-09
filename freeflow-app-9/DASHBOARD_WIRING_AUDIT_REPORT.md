@@ -46,6 +46,22 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 - collaboration/teams, meetings
 - bookings/clients, history, services
 
+### 5. User Name in Reports (reports)
+**File:** `app/(app)/dashboard/reports/page.tsx`
+**Status:** WIRED
+
+- Extended `useCurrentUser` hook to return `userName` and `userEmail`
+- Reports now show real user name instead of hardcoded "Demo User"
+- User name derived from user_metadata or email prefix
+
+### 6. Canvas Statistics (collaboration/canvas)
+**File:** `app/(app)/dashboard/collaboration/canvas/page.tsx`
+**Status:** WIRED
+
+- Added `getCanvasDrawingCount()` function to calculate total drawings from layers/elements
+- Canvas page now fetches real `totalDrawings` count from database
+- Templates count now fetched via `getCanvasTemplates()`
+
 ---
 
 ## Available Query Functions (92 Query Files)
@@ -74,11 +90,11 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | Desktop Simulator | desktop-app | Demo feature |
 
 ### Hardcoded Values (Future Enhancement)
-| Page | Issue | Priority |
-|------|-------|----------|
-| collaboration/canvas | totalDrawings hardcoded | Low |
-| collaboration/workspace | isShared always false | Medium |
-| projects-hub | team_members, comments empty | Medium |
+| Page | Issue | Priority | Status |
+|------|-------|----------|--------|
+| collaboration/canvas | totalDrawings hardcoded | Low | ✅ FIXED |
+| collaboration/workspace | isShared always false | Medium | Acceptable (default) |
+| projects-hub | team_members, comments empty | Medium | Needs new DB tables |
 
 ---
 
@@ -89,7 +105,8 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | e5714ca5 | feat: Add A+++ loading/error states to bookings pages |
 | 78a72bca | feat: Add A+++ loading/error states to settings pages |
 | 81986ac9 | feat: Add A+++ loading/error states to collaboration pages |
-| pending | feat: Wire invoice dispute, admin alerts, team invitations |
+| 1917d818 | feat: Wire critical dashboard features to database |
+| 784eff89 | feat: Wire remaining hardcoded values to database |
 
 ---
 
