@@ -134,15 +134,22 @@ await createPaymentMethod(userId, {
 
 ---
 
+## Additional Verified Pages
+
+These pages were audited and found to already be properly wired:
+
+| Page | Status | Notes |
+|------|--------|-------|
+| Calendar | ✅ Already Wired | Full CRUD via calendar-queries.ts |
+| Collaboration | ✅ Already Wired | Loads from collaboration-queries.ts |
+
 ## Remaining Items (Lower Priority)
 
 These pages still have localStorage usage but for NON-SENSITIVE data:
 
 | Page | localStorage Usage | Priority |
 |------|-------------------|----------|
-| AI-Settings | Budget, rate limits, default providers | LOW (non-sensitive) |
-| Calendar | Mock calendar events | MEDIUM |
-| Collaboration | Handler states | LOW |
+| AI-Settings | Budget, rate limits, default providers | LOW (non-sensitive preferences) |
 
 ---
 
