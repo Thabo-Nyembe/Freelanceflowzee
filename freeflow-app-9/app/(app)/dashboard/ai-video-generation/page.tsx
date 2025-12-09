@@ -869,12 +869,26 @@ export default function AIVideoGenerationPage() {
 
   const handleDeleteVideo = async (videoId: string) => {
     const video = state.videos.find(v => v.id === videoId)
-    logger.info('Deleting video', { videoId, title: video?.title })
+    logger.info('Deleting video', { videoId, title: video?.title, userId })
+
+    if (!userId) {
+      toast.error('Please log in to delete videos')
+      return
+    }
 
     try {
+      // Dynamic import for code splitting
+      const { deleteGeneratedVideo } = await import('@/lib/ai-video-queries')
+
+      const { error: deleteError } = await deleteGeneratedVideo(videoId)
+
+      if (deleteError) {
+        throw new Error(deleteError.message || 'Failed to delete video')
+      }
+
       dispatch({ type: 'DELETE_VIDEO', videoId })
 
-      logger.info('Video deleted successfully', { videoId })
+      logger.info('Video deleted from database', { videoId, title: video?.title, userId })
 
       toast.success('Video deleted successfully!', {
         description: `${video?.title} - ${formatFileSize(video?.fileSize || 0)} removed from library`
@@ -883,10 +897,11 @@ export default function AIVideoGenerationPage() {
       setShowViewModal(false)
 
     } catch (error: any) {
-      logger.error('Video delete failed', { error: error.message, videoId })
+      logger.error('Video delete failed', { error: error.message, videoId, userId })
       toast.error('Failed to delete video', {
         description: error.message || 'Please try again later'
       })
+      announce('Error deleting video', 'assertive')
     }
   }
 

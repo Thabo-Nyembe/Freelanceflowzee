@@ -674,19 +674,48 @@ export default function BrowserExtensionPage() {
     setDeleteCapture({ id: captureId, title: capture.title, fileSize: capture.fileSize, type: capture.type })
   }
 
-  const handleConfirmDeleteCapture = () => {
-    if (!deleteCapture) return
+  const handleConfirmDeleteCapture = async () => {
+    if (!deleteCapture || !userId) return
 
-    logger.info('User confirmed deletion', { captureId: deleteCapture.id })
-    dispatch({ type: 'DELETE_CAPTURE', captureId: deleteCapture.id })
+    logger.info('User confirmed deletion', { captureId: deleteCapture.id, userId })
 
-    const fileSizeMB = (deleteCapture.fileSize / (1024 * 1024)).toFixed(1)
+    try {
+      // Dynamic import for code splitting
+      const { deleteCapture: deleteCaptureFromDB } = await import('@/lib/browser-extension-queries')
 
-    toast.success('Capture deleted', {
-      description: `${deleteCapture.title} - ${deleteCapture.type} - ${fileSizeMB} MB freed`
-    })
-    announce('Capture deleted', 'polite')
-    setDeleteCapture(null)
+      const { error: deleteError } = await deleteCaptureFromDB(deleteCapture.id)
+
+      if (deleteError) {
+        throw new Error(deleteError.message || 'Failed to delete capture')
+      }
+
+      dispatch({ type: 'DELETE_CAPTURE', captureId: deleteCapture.id })
+
+      const fileSizeMB = (deleteCapture.fileSize / (1024 * 1024)).toFixed(1)
+
+      logger.info('Capture deleted from database', {
+        captureId: deleteCapture.id,
+        title: deleteCapture.title,
+        userId
+      })
+
+      toast.success('Capture deleted', {
+        description: `${deleteCapture.title} - ${deleteCapture.type} - ${fileSizeMB} MB freed`
+      })
+      announce('Capture deleted', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete capture', {
+        error: error.message,
+        captureId: deleteCapture.id,
+        userId
+      })
+      toast.error('Failed to delete capture', {
+        description: error.message || 'Please try again later'
+      })
+      announce('Error deleting capture', 'assertive')
+    } finally {
+      setDeleteCapture(null)
+    }
   }
 
   const handleToggleFeature = (featureId: string) => {

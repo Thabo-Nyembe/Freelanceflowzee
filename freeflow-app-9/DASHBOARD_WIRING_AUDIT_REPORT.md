@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **19 critical features** across 7 sessions.
+Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **22 critical features** across 8 sessions.
 
 ---
 
@@ -163,6 +163,27 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 - Projects persist to `portal_projects` table in database
 - Also fixed naming conflict in client-portal-queries.ts (renamed createClient → createPortalClient)
 
+### 20. AI Video Delete (ai-video-generation) - Session 8
+**File:** `app/(app)/dashboard/ai-video-generation/page.tsx`
+**Status:** WIRED
+
+- `handleDeleteVideo` now calls `deleteGeneratedVideo()` from ai-video-queries
+- Generated video deletions persist to database
+
+### 21. Browser Extension Capture Delete (browser-extension) - Session 8
+**File:** `app/(app)/dashboard/browser-extension/page.tsx`
+**Status:** WIRED
+
+- `handleConfirmDeleteCapture` now calls `deleteCapture()` from browser-extension-queries
+- Page capture deletions persist to database
+
+### 22. AR Session Create (ar-collaboration) - Session 8
+**File:** `app/(app)/dashboard/ar-collaboration/page.tsx`
+**Status:** WIRED
+
+- `handleCreateSession` now calls `createSession()` from ar-collaboration-queries
+- AR sessions persist to `ar_sessions` table in database
+
 ---
 
 ## Available Query Functions (92 Query Files)
@@ -227,7 +248,8 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | df45a994 | feat: Wire messages delete handlers to database |
 | fd001a38 | feat: Wire settings photo removal to database |
 | 22b811b1 | feat: Wire invoices, widgets, files-hub handlers (Session 6) |
-| (pending) | feat: Wire voice, ar, client-portal handlers (Session 7) |
+| ea4c057b | feat: Wire voice, ar, client-portal handlers (Session 7) |
+| (pending) | feat: Wire ai-video, browser-ext, ar-create handlers (Session 8) |
 
 ---
 

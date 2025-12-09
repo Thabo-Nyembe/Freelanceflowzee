@@ -595,7 +595,8 @@ export default function ARCollaborationPage() {
       name: sessionName,
       environment: sessionEnvironment,
       maxParticipants,
-      isLocked: sessionIsLocked
+      isLocked: sessionIsLocked,
+      userId
     })
 
     if (!sessionName.trim()) {
@@ -612,18 +613,39 @@ export default function ARCollaborationPage() {
       return
     }
 
+    if (!userId) {
+      toast.error('Please log in to create sessions')
+      return
+    }
+
     try {
       dispatch({ type: 'SET_LOADING', isLoading: true })
+
+      // Dynamic import for code splitting
+      const { createSession } = await import('@/lib/ar-collaboration-queries')
 
       const enabledFeatures = Object.entries(sessionFeatures)
         .filter(([_, enabled]) => enabled)
         .map(([feature]) => feature)
 
-      const newSession: ARSession = {
-        id: `AR-${Date.now()}`,
+      const { data: createdSession, error: createError } = await createSession(userId, {
         name: sessionName,
         description: sessionDescription,
-        hostId: 'USER-CURRENT',
+        host_name: 'Current User',
+        environment: sessionEnvironment,
+        max_participants: maxParticipants,
+        is_locked: sessionIsLocked
+      })
+
+      if (createError || !createdSession) {
+        throw new Error(createError?.message || 'Failed to create session')
+      }
+
+      const newSession: ARSession = {
+        id: createdSession.id,
+        name: sessionName,
+        description: sessionDescription,
+        hostId: userId,
         hostName: 'Current User',
         environment: sessionEnvironment,
         status: 'active',
@@ -641,11 +663,12 @@ export default function ARCollaborationPage() {
 
       dispatch({ type: 'ADD_SESSION', session: newSession })
 
-      logger.info('AR session created', {
+      logger.info('AR session created in database', {
         sessionId: newSession.id,
         environment: sessionEnvironment,
         maxParticipants,
-        featuresEnabled: enabledFeatures.length
+        featuresEnabled: enabledFeatures.length,
+        userId
       })
 
       // Reset form
@@ -660,9 +683,11 @@ export default function ARCollaborationPage() {
         description: `${newSession.name} - ${getEnvironmentName(sessionEnvironment)} - ${maxParticipants} max participants - ${enabledFeatures.length} features enabled - ${sessionIsLocked ? 'Locked' : 'Open'}`
       })
       announce('AR session created', 'polite')
-    } catch (error) {
-      logger.error('Session creation failed', { error, name: sessionName })
-      toast.error('Failed to create session')
+    } catch (error: any) {
+      logger.error('Session creation failed', { error: error.message, name: sessionName, userId })
+      toast.error('Failed to create session', {
+        description: error.message || 'Please try again later'
+      })
       announce('Failed to create session', 'assertive')
       dispatch({ type: 'SET_ERROR', error: 'Failed to create session' })
     }
