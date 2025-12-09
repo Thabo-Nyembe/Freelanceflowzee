@@ -18,8 +18,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { Shield, AlertCircle, Download, Key, Eye, EyeOff, AlertTriangle } from 'lucide-react'
+import { Shield, AlertCircle, Download, Key, Eye, EyeOff, AlertTriangle, Loader2 } from 'lucide-react'
 import { SecuritySettings, defaultSecurity } from '@/lib/settings-utils'
+import { CardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -33,6 +35,7 @@ export default function SecurityPage() {
   const [security, setSecurity] = useState<SecuritySettings>(defaultSecurity)
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showDisable2FADialog, setShowDisable2FADialog] = useState(false)
 
   useEffect(() => {
@@ -45,6 +48,7 @@ export default function SecurityPage() {
 
       try {
         setLoading(true)
+        setError(null)
         logger.info('Loading security settings', { userId })
 
         // Dynamic import for code splitting
@@ -65,8 +69,10 @@ export default function SecurityPage() {
 
         logger.info('Security settings loaded', { userId })
         announce('Security settings loaded successfully', 'polite')
-      } catch (error) {
-        logger.error('Failed to load security settings', { error, userId })
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load security settings'
+        setError(errorMessage)
+        logger.error('Failed to load security settings', { error: err, userId })
         toast.error('Failed to load security settings')
         announce('Error loading security settings', 'assertive')
       } finally {
@@ -166,6 +172,33 @@ If you lose access to your authenticator app, you can use these codes to sign in
     toast.info('Change Password', {
       description: 'Requirements: At least 8 characters, 1 uppercase, 1 number, 1 special character'
     })
+  }
+
+  // A+++ LOADING STATE
+  if (loading || userLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <ErrorEmptyState
+          error={error}
+          action={{
+            label: 'Retry',
+            onClick: () => window.location.reload()
+          }}
+        />
+      </div>
+    )
   }
 
   return (

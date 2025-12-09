@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Sun, Moon, Monitor } from 'lucide-react'
+import { Sun, Moon, Monitor, Loader2 } from 'lucide-react'
 import { AppearanceSettings, defaultAppearance } from '@/lib/settings-utils'
+import { CardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -21,6 +23,7 @@ export default function AppearancePage() {
 
   const [appearance, setAppearance] = useState<AppearanceSettings>(defaultAppearance)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const loadAppearanceSettings = async () => {
@@ -32,6 +35,7 @@ export default function AppearancePage() {
 
       try {
         setLoading(true)
+        setError(null)
         logger.info('Loading appearance settings', { userId })
 
         // Dynamic import for code splitting
@@ -55,8 +59,10 @@ export default function AppearancePage() {
 
         logger.info('Appearance settings loaded', { userId })
         announce('Appearance settings loaded successfully', 'polite')
-      } catch (error) {
-        logger.error('Failed to load appearance settings', { error, userId })
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load appearance settings'
+        setError(errorMessage)
+        logger.error('Failed to load appearance settings', { error: err, userId })
         toast.error('Failed to load appearance settings')
         announce('Error loading appearance settings', 'assertive')
       } finally {
@@ -92,6 +98,33 @@ export default function AppearancePage() {
       toast.error('Failed to update theme')
       announce('Error updating theme', 'assertive')
     }
+  }
+
+  // A+++ LOADING STATE
+  if (loading || userLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <ErrorEmptyState
+          error={error}
+          action={{
+            label: 'Retry',
+            onClick: () => window.location.reload()
+          }}
+        />
+      </div>
+    )
   }
 
   return (

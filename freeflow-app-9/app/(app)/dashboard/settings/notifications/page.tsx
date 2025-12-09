@@ -5,8 +5,10 @@ import { toast } from 'sonner'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
-import { Mail, Bell, Smartphone } from 'lucide-react'
+import { Mail, Bell, Smartphone, Loader2 } from 'lucide-react'
 import { NotificationSettings, defaultNotifications } from '@/lib/settings-utils'
+import { CardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
@@ -19,6 +21,7 @@ export default function NotificationsPage() {
 
   const [notifications, setNotifications] = useState<NotificationSettings>(defaultNotifications)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const loadNotificationSettings = async () => {
@@ -30,6 +33,7 @@ export default function NotificationsPage() {
 
       try {
         setLoading(true)
+        setError(null)
         logger.info('Loading notification settings', { userId })
 
         // Dynamic import for code splitting
@@ -54,8 +58,10 @@ export default function NotificationsPage() {
         setNotifications(mappedSettings)
         logger.info('Notification settings loaded', { count: preferences.length, userId })
         announce('Notification settings loaded successfully', 'polite')
-      } catch (error) {
-        logger.error('Failed to load notification settings', { error, userId })
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load notification settings'
+        setError(errorMessage)
+        logger.error('Failed to load notification settings', { error: err, userId })
         toast.error('Failed to load notification settings')
         announce('Error loading notification settings', 'assertive')
       } finally {
@@ -91,6 +97,33 @@ export default function NotificationsPage() {
       toast.error('Failed to update notification setting')
       announce('Error updating notification setting', 'assertive')
     }
+  }
+
+  // A+++ LOADING STATE
+  if (loading || userLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <ErrorEmptyState
+          error={error}
+          action={{
+            label: 'Retry',
+            onClick: () => window.location.reload()
+          }}
+        />
+      </div>
+    )
   }
 
   return (
