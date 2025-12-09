@@ -793,64 +793,202 @@ export default function TeamHubPage() {
     setShowTasksDialog(true)
   }, [teamStats])
 
-  // Save handlers for dialogs
-  const handleSaveGoal = useCallback(() => {
+  // Save handlers for dialogs - WIRED TO DATABASE
+  const handleSaveGoal = useCallback(async () => {
     if (!newGoal.title) {
       toast.error('Please enter a goal title')
       return
     }
-    logger.info('Goal saved', { goal: newGoal })
-    toast.success('Goal Created', { description: `"${newGoal.title}" has been added to team goals` })
-    setNewGoal({ title: '', target: '', deadline: '' })
-    setShowGoalsDialog(false)
-  }, [newGoal])
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
 
-  const handleSaveMilestone = useCallback(() => {
+    try {
+      const { createTeamGoal } = await import('@/lib/team-hub-queries')
+      const { data, error } = await createTeamGoal(userId, {
+        title: newGoal.title,
+        target: newGoal.target,
+        deadline: newGoal.deadline
+      })
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to create goal')
+      }
+
+      logger.info('Goal saved to database', { goalId: data.id, goal: newGoal })
+      toast.success('Goal Created', { description: `"${newGoal.title}" has been added to team goals` })
+      announce(`Goal "${newGoal.title}" created`, 'polite')
+      setNewGoal({ title: '', target: '', deadline: '' })
+      setShowGoalsDialog(false)
+    } catch (err) {
+      logger.error('Failed to save goal', { error: err })
+      toast.error('Failed to create goal', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
+    }
+  }, [newGoal, userId, announce])
+
+  const handleSaveMilestone = useCallback(async () => {
     if (!newMilestone.title) {
       toast.error('Please enter a milestone title')
       return
     }
-    logger.info('Milestone saved', { milestone: newMilestone })
-    toast.success('Milestone Created', { description: `"${newMilestone.title}" has been added` })
-    setNewMilestone({ title: '', project: '', date: '' })
-    setShowMilestonesDialog(false)
-  }, [newMilestone])
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
 
-  const handleSubmitFeedback = useCallback(() => {
+    try {
+      const { createTeamMilestone } = await import('@/lib/team-hub-queries')
+      const { data, error } = await createTeamMilestone(userId, {
+        title: newMilestone.title,
+        project: newMilestone.project,
+        date: newMilestone.date
+      })
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to create milestone')
+      }
+
+      logger.info('Milestone saved to database', { milestoneId: data.id, milestone: newMilestone })
+      toast.success('Milestone Created', { description: `"${newMilestone.title}" has been added` })
+      announce(`Milestone "${newMilestone.title}" created`, 'polite')
+      setNewMilestone({ title: '', project: '', date: '' })
+      setShowMilestonesDialog(false)
+    } catch (err) {
+      logger.error('Failed to save milestone', { error: err })
+      toast.error('Failed to create milestone', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
+    }
+  }, [newMilestone, userId, announce])
+
+  const handleSubmitFeedback = useCallback(async () => {
     if (!feedbackForm.memberId) {
       toast.error('Please select a team member')
       return
     }
-    const member = teamMembers.find(m => m.id === feedbackForm.memberId)
-    logger.info('Feedback submitted', { feedback: feedbackForm, memberName: member?.name })
-    toast.success('Feedback Submitted', { description: `Feedback sent for ${member?.name}` })
-    setFeedbackForm({ memberId: '', rating: 5, comments: '' })
-    setShowFeedbackDialog(false)
-  }, [feedbackForm, teamMembers])
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
 
-  const handleSubmitRecognition = useCallback(() => {
+    const member = teamMembers.find(m => m.id === feedbackForm.memberId)
+
+    try {
+      const { submitTeamFeedback } = await import('@/lib/team-hub-queries')
+      const { data, error } = await submitTeamFeedback(userId, {
+        memberId: feedbackForm.memberId,
+        rating: feedbackForm.rating,
+        comments: feedbackForm.comments
+      })
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to submit feedback')
+      }
+
+      // Update local state with new rating
+      setTeamMembers(prev => prev.map(m =>
+        m.id === feedbackForm.memberId
+          ? { ...m, rating: feedbackForm.rating }
+          : m
+      ))
+
+      logger.info('Feedback saved to database', { feedbackId: data.id, memberName: member?.name })
+      toast.success('Feedback Submitted', { description: `Feedback sent for ${member?.name}` })
+      announce(`Feedback submitted for ${member?.name}`, 'polite')
+      setFeedbackForm({ memberId: '', rating: 5, comments: '' })
+      setShowFeedbackDialog(false)
+    } catch (err) {
+      logger.error('Failed to submit feedback', { error: err })
+      toast.error('Failed to submit feedback', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
+    }
+  }, [feedbackForm, teamMembers, userId, announce])
+
+  const handleSubmitRecognition = useCallback(async () => {
     if (!recognitionForm.memberId || !recognitionForm.award) {
       toast.error('Please select a member and award type')
       return
     }
-    const member = teamMembers.find(m => m.id === recognitionForm.memberId)
-    logger.info('Recognition submitted', { recognition: recognitionForm, memberName: member?.name })
-    toast.success('Recognition Sent', { description: `${recognitionForm.award} award given to ${member?.name}` })
-    setRecognitionForm({ memberId: '', award: '', reason: '' })
-    setShowRecognitionDialog(false)
-  }, [recognitionForm, teamMembers])
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
 
-  const handleAssignNewTask = useCallback(() => {
+    const member = teamMembers.find(m => m.id === recognitionForm.memberId)
+
+    try {
+      const { giveTeamRecognition } = await import('@/lib/team-hub-queries')
+      const { data, error } = await giveTeamRecognition(userId, {
+        memberId: recognitionForm.memberId,
+        award: recognitionForm.award,
+        reason: recognitionForm.reason
+      })
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to give recognition')
+      }
+
+      logger.info('Recognition saved to database', { recognitionId: data.id, memberName: member?.name })
+      toast.success('Recognition Sent', { description: `${recognitionForm.award} award given to ${member?.name}` })
+      announce(`${recognitionForm.award} awarded to ${member?.name}`, 'polite')
+      setRecognitionForm({ memberId: '', award: '', reason: '' })
+      setShowRecognitionDialog(false)
+    } catch (err) {
+      logger.error('Failed to give recognition', { error: err })
+      toast.error('Failed to send recognition', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
+    }
+  }, [recognitionForm, teamMembers, userId, announce])
+
+  const handleAssignNewTask = useCallback(async () => {
     if (!taskForm.memberId || !taskForm.title) {
       toast.error('Please select a member and enter task title')
       return
     }
+    if (!userId) {
+      toast.error('Authentication required')
+      return
+    }
+
     const member = teamMembers.find(m => m.id === taskForm.memberId)
-    logger.info('Task assigned', { task: taskForm, memberName: member?.name })
-    toast.success('Task Assigned', { description: `"${taskForm.title}" assigned to ${member?.name}` })
-    setTaskForm({ memberId: '', title: '', priority: 'medium', dueDate: '' })
-    setShowTasksDialog(false)
-  }, [taskForm, teamMembers])
+
+    try {
+      const { assignTeamTask } = await import('@/lib/team-hub-queries')
+      const { data, error } = await assignTeamTask(userId, {
+        memberId: taskForm.memberId,
+        title: taskForm.title,
+        priority: taskForm.priority as 'low' | 'medium' | 'high',
+        dueDate: taskForm.dueDate
+      })
+
+      if (error || !data) {
+        throw new Error(error?.message || 'Failed to assign task')
+      }
+
+      // Update local state with incremented project count
+      setTeamMembers(prev => prev.map(m =>
+        m.id === taskForm.memberId
+          ? { ...m, projects: m.projects + 1 }
+          : m
+      ))
+
+      logger.info('Task saved to database', { taskId: data.id, memberName: member?.name })
+      toast.success('Task Assigned', { description: `"${taskForm.title}" assigned to ${member?.name}` })
+      announce(`Task "${taskForm.title}" assigned to ${member?.name}`, 'polite')
+      setTaskForm({ memberId: '', title: '', priority: 'medium', dueDate: '' })
+      setShowTasksDialog(false)
+    } catch (err) {
+      logger.error('Failed to assign task', { error: err })
+      toast.error('Failed to assign task', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
+    }
+  }, [taskForm, teamMembers, userId, announce])
 
   const getStatusColor = (status) => {
     switch (status) {

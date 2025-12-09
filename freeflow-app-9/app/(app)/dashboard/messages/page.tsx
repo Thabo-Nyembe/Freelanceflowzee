@@ -896,7 +896,8 @@ export default function MessagesPage() {
     }
   }
 
-  const handlePinChat = (chatId: string) => {
+  // A+++ Wired to database
+  const handlePinChat = async (chatId: string) => {
     const chat = state.chats.find(c => c.id === chatId)
     const isPinned = chat?.isPinned
 
@@ -907,14 +908,29 @@ export default function MessagesPage() {
       newState: !isPinned
     })
 
+    // Optimistic update
     dispatch({ type: 'TOGGLE_PIN_CHAT', chatId })
 
-    toast.success(isPinned ? 'Chat unpinned' : 'Chat pinned', {
-      description: isPinned ? `${chat?.name} removed from pinned list` : `${chat?.name} moved to top`
-    })
+    try {
+      const { toggleChatPin } = await import('@/lib/messages-queries')
+      const { error } = await toggleChatPin(chatId, !isPinned)
+
+      if (error) throw new Error(error.message || 'Failed to update pin status')
+
+      toast.success(isPinned ? 'Chat unpinned' : 'Chat pinned', {
+        description: isPinned ? `${chat?.name} removed from pinned list` : `${chat?.name} moved to top`
+      })
+      logger.info('Pin status persisted to database', { chatId, isPinned: !isPinned })
+    } catch (err: any) {
+      // Revert optimistic update
+      dispatch({ type: 'TOGGLE_PIN_CHAT', chatId })
+      logger.error('Failed to toggle pin', { error: err, chatId })
+      toast.error('Failed to update pin status', { description: err.message })
+    }
   }
 
-  const handleMuteChat = (chatId: string) => {
+  // A+++ Wired to database
+  const handleMuteChat = async (chatId: string) => {
     const chat = state.chats.find(c => c.id === chatId)
     const isMuted = chat?.isMuted
 
@@ -925,14 +941,29 @@ export default function MessagesPage() {
       newState: !isMuted
     })
 
+    // Optimistic update
     dispatch({ type: 'TOGGLE_MUTE_CHAT', chatId })
 
-    toast.success(isMuted ? 'Notifications enabled' : 'Chat muted', {
-      description: isMuted ? `Notifications on for ${chat?.name}` : `Notifications off for ${chat?.name}`
-    })
+    try {
+      const { toggleChatMute } = await import('@/lib/messages-queries')
+      const { error } = await toggleChatMute(chatId, !isMuted)
+
+      if (error) throw new Error(error.message || 'Failed to update mute status')
+
+      toast.success(isMuted ? 'Notifications enabled' : 'Chat muted', {
+        description: isMuted ? `Notifications on for ${chat?.name}` : `Notifications off for ${chat?.name}`
+      })
+      logger.info('Mute status persisted to database', { chatId, isMuted: !isMuted })
+    } catch (err: any) {
+      // Revert optimistic update
+      dispatch({ type: 'TOGGLE_MUTE_CHAT', chatId })
+      logger.error('Failed to toggle mute', { error: err, chatId })
+      toast.error('Failed to update mute status', { description: err.message })
+    }
   }
 
-  const handleArchiveChat = (chatId: string) => {
+  // A+++ Wired to database
+  const handleArchiveChat = async (chatId: string) => {
     const chat = state.chats.find(c => c.id === chatId)
     const isArchived = chat?.isArchived
 
@@ -943,11 +974,25 @@ export default function MessagesPage() {
       newState: !isArchived
     })
 
+    // Optimistic update
     dispatch({ type: 'ARCHIVE_CHAT', chatId })
 
-    toast.success(isArchived ? 'Chat unarchived' : 'Chat archived', {
-      description: isArchived ? `${chat?.name} returned to active chats` : `${chat?.name} moved to archive`
-    })
+    try {
+      const { toggleChatArchive } = await import('@/lib/messages-queries')
+      const { error } = await toggleChatArchive(chatId, !isArchived)
+
+      if (error) throw new Error(error.message || 'Failed to update archive status')
+
+      toast.success(isArchived ? 'Chat unarchived' : 'Chat archived', {
+        description: isArchived ? `${chat?.name} returned to active chats` : `${chat?.name} moved to archive`
+      })
+      logger.info('Archive status persisted to database', { chatId, isArchived: !isArchived })
+    } catch (err: any) {
+      // Revert optimistic update
+      dispatch({ type: 'ARCHIVE_CHAT', chatId })
+      logger.error('Failed to toggle archive', { error: err, chatId })
+      toast.error('Failed to update archive status', { description: err.message })
+    }
   }
 
   const handleDeleteChat = (chatId: string) => {
@@ -1005,40 +1050,48 @@ export default function MessagesPage() {
     }
   }
 
+  // A+++ Wired to database
   const handleMarkAsRead = async (chatId: string) => {
     const chat = state.chats.find(c => c.id === chatId)
-    const messageCount = state.messages.length
+    const previousUnread = chat?.unread || 0
 
     logger.info('Mark as read requested', {
       chatId,
       chatName: chat?.name,
-      messageCount
+      previousUnread
+    })
+
+    // Optimistic update
+    dispatch({
+      type: 'UPDATE_CHAT',
+      chatId,
+      updates: { unread: 0 }
     })
 
     try {
-      // REAL: Update unread count immediately (optimistic)
-      dispatch({
-        type: 'UPDATE_CHAT',
-        chatId,
-        updates: { unread: 0 }
-      })
+      const { updateUnreadCount } = await import('@/lib/messages-queries')
+      const { error } = await updateUnreadCount(chatId, 0)
 
-      logger.info('Messages marked as read', {
+      if (error) throw new Error(error.message || 'Failed to mark as read')
+
+      logger.info('Messages marked as read in database', {
         chatId,
         chatName: chat?.name,
-        markedCount: messageCount
+        markedCount: previousUnread
       })
 
       toast.success('Marked as read', {
-        description: `${messageCount} messages in ${chat?.name}`
+        description: `${previousUnread} messages in ${chat?.name}`
       })
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to mark as read'
-      logger.error('Failed to mark messages as read', {
+    } catch (err: any) {
+      // Revert optimistic update
+      dispatch({
+        type: 'UPDATE_CHAT',
         chatId,
-        error: errorMessage
+        updates: { unread: previousUnread }
       })
-      toast.error('Failed to mark as read')
+      logger.error('Failed to mark messages as read', { error: err, chatId })
+      toast.error('Failed to mark as read', { description: err.message })
     }
   }
 
@@ -1174,27 +1227,39 @@ export default function MessagesPage() {
     }
   }
 
+  // A+++ Wired to database
   const handleReactToMessage = async (messageId: string, emoji: string) => {
-    logger.info('Reacting to message', { messageId, emoji })
+    if (!userId) {
+      toast.error('Please log in to react')
+      return
+    }
+
+    logger.info('Reacting to message', { messageId, emoji, userId })
+
+    // Optimistic update
+    dispatch({
+      type: 'UPDATE_MESSAGE',
+      messageId,
+      updates: { reactions: [{ emoji, userId, userName: 'You' }] }
+    })
 
     try {
-      // REAL: Add reaction immediately (optimistic)
+      const { addReaction } = await import('@/lib/messages-queries')
+      const { error } = await addReaction(messageId, userId, emoji)
+
+      if (error) throw new Error(error.message || 'Failed to add reaction')
+
+      logger.info('Reaction persisted to database', { messageId, emoji, userId })
+      toast.success(`${emoji} Reaction added`)
+    } catch (err: any) {
+      // Revert optimistic update
       dispatch({
         type: 'UPDATE_MESSAGE',
         messageId,
-        updates: { reactions: [{ emoji, userId: 'user-1', userName: 'You' }] }
+        updates: { reactions: [] }
       })
-
-      logger.info('Reaction added to message', { messageId, emoji })
-      toast.success(`${emoji} Reaction added`)
-    } catch (error: any) {
-      const errorMessage = error?.message || 'Failed to add reaction'
-      logger.error('Failed to add reaction', {
-        messageId,
-        emoji,
-        error: errorMessage
-      })
-      toast.error('Failed to add reaction')
+      logger.error('Failed to add reaction', { error: err, messageId, emoji })
+      toast.error('Failed to add reaction', { description: err.message })
     }
   }
 
