@@ -1067,7 +1067,12 @@ export default function CVPortfolioPage() {
 
     setIsDeleting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
+      if (userId) {
+        const { deleteExperience } = await import('@/lib/cv-portfolio-queries')
+        const { error: deleteError } = await deleteExperience(String(experienceToDelete))
+        if (deleteError) throw new Error(deleteError.message || 'Failed to delete experience')
+      }
+
       setExperience(prev => prev.filter(e => e.id !== experienceToDelete))
 
       const newCompleteness = calculateCompleteness()
@@ -1086,6 +1091,11 @@ export default function CVPortfolioPage() {
         description: `${exp.position} at ${exp.company} removed`
       })
       announce(`Experience at ${exp.company} deleted`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete experience', { error: error.message, experienceId: experienceToDelete })
+      toast.error('Failed to delete experience', {
+        description: error.message || 'Please try again'
+      })
     } finally {
       setIsDeleting(false)
       setShowDeleteExperienceDialog(false)
@@ -1215,7 +1225,12 @@ export default function CVPortfolioPage() {
 
     setIsDeleting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
+      if (userId) {
+        const { deleteEducation } = await import('@/lib/cv-portfolio-queries')
+        const { error: deleteError } = await deleteEducation(String(educationToDelete))
+        if (deleteError) throw new Error(deleteError.message || 'Failed to delete education')
+      }
+
       setEducation(prev => prev.filter(e => e.id !== educationToDelete))
 
       const newCompleteness = calculateCompleteness()
@@ -1231,6 +1246,11 @@ export default function CVPortfolioPage() {
         description: `${edu.degree} removed from CV`
       })
       announce(`Education ${edu.degree} deleted`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete education', { error: error.message, educationId: educationToDelete })
+      toast.error('Failed to delete education', {
+        description: error.message || 'Please try again'
+      })
     } finally {
       setIsDeleting(false)
       setShowDeleteEducationDialog(false)
@@ -1351,7 +1371,12 @@ export default function CVPortfolioPage() {
 
     setIsDeleting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
+      if (userId) {
+        const { deleteCertification } = await import('@/lib/cv-portfolio-queries')
+        const { error: deleteError } = await deleteCertification(String(achievementToDelete))
+        if (deleteError) throw new Error(deleteError.message || 'Failed to delete achievement')
+      }
+
       setAchievements(prev => prev.filter(a => a.id !== achievementToDelete))
 
       const newCompleteness = calculateCompleteness()
@@ -1367,6 +1392,11 @@ export default function CVPortfolioPage() {
         description: `${achievement.title} removed`
       })
       announce(`Achievement ${achievement.title} deleted`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete achievement', { error: error.message, achievementId: achievementToDelete })
+      toast.error('Failed to delete achievement', {
+        description: error.message || 'Please try again'
+      })
     } finally {
       setIsDeleting(false)
       setShowDeleteAchievementDialog(false)
@@ -1796,7 +1826,16 @@ export default function CVPortfolioPage() {
 
     setIsDeleting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
+      if (userId) {
+        const { deleteProject } = await import('@/lib/cv-portfolio-queries')
+        const deletePromises = projectsToDelete.map(id => deleteProject(String(id)))
+        const results = await Promise.all(deletePromises)
+        const errors = results.filter(r => r.error)
+        if (errors.length > 0) {
+          throw new Error(`Failed to delete ${errors.length} project(s)`)
+        }
+      }
+
       setProjects(prev => prev.filter(p => !projectsToDelete.includes(p.id)))
 
       logger.info('Bulk project delete', {
@@ -1808,6 +1847,11 @@ export default function CVPortfolioPage() {
         description: `${projectsToDelete.length} projects removed`
       })
       announce(`${projectsToDelete.length} projects deleted`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to bulk delete projects', { error: error.message, projectIds: projectsToDelete })
+      toast.error('Failed to delete projects', {
+        description: error.message || 'Please try again'
+      })
     } finally {
       setIsDeleting(false)
       setShowBulkDeleteProjectsDialog(false)

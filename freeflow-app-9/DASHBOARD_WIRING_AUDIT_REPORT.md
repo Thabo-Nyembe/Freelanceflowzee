@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **34 critical features** across 11 sessions.
+Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **38 critical features** across 12 sessions.
 
 ---
 
@@ -276,6 +276,35 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 - Skill deletions persist to database
 - Replaced fake setTimeout delay with real database call
 
+### 35. CV Portfolio Experience Delete (cv-portfolio) - Session 12
+**File:** `app/(app)/dashboard/cv-portfolio/page.tsx`
+**Status:** WIRED
+
+- `confirmDeleteExperience` now calls `deleteExperience()` from cv-portfolio-queries
+- Experience deletions persist to database
+
+### 36. CV Portfolio Education Delete (cv-portfolio) - Session 12
+**File:** `app/(app)/dashboard/cv-portfolio/page.tsx`
+**Status:** WIRED
+
+- `confirmDeleteEducation` now calls `deleteEducation()` from cv-portfolio-queries
+- Education deletions persist to database
+
+### 37. CV Portfolio Achievement Delete (cv-portfolio) - Session 12
+**File:** `app/(app)/dashboard/cv-portfolio/page.tsx`
+**Status:** WIRED
+
+- `confirmDeleteAchievement` now calls `deleteCertification()` from cv-portfolio-queries
+- Achievement/certification deletions persist to database
+
+### 38. CV Portfolio Bulk Project Delete (cv-portfolio) - Session 12
+**File:** `app/(app)/dashboard/cv-portfolio/page.tsx`
+**Status:** WIRED
+
+- `confirmBulkDeleteProjects` now calls `deleteProject()` for each project via Promise.all
+- Bulk project deletions persist to database
+- Handles partial failures gracefully
+
 ---
 
 ## Available Query Functions (92 Query Files)
@@ -344,7 +373,8 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | 486465fe | feat: Wire ai-video, browser-ext, ar-create handlers (Session 8) |
 | 743b2cc8 | feat: Wire voice-create, community-post handlers (Session 9) |
 | 42fda9a4 | feat: Wire ai-assistant, plugin-marketplace handlers (Session 10) |
-| (pending) | feat: Wire cv-portfolio handlers (Session 11) |
+| fa4aa0cc | feat: Wire cv-portfolio handlers (Session 11) |
+| (pending) | feat: Wire cv-portfolio experience, education, achievement, bulk handlers (Session 12) |
 
 ---
 
