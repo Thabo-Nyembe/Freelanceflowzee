@@ -112,7 +112,8 @@ import {
   createExperience,
   deleteProject,
   deleteSkill,
-  deleteExperience
+  deleteExperience,
+  createShareLink
 } from '@/lib/cv-portfolio-queries'
 
 // TYPES
@@ -1548,14 +1549,15 @@ export default function CVPortfolioPage() {
         skillCount: skills.length
       })
 
-      // Generate unique share ID and save to localStorage
+      // Generate unique share ID
       const shareId = `${profileData.name.toLowerCase().replace(/\s/g, '-')}-${Date.now().toString(36)}`
       const shareUrl = `${window.location.origin}/public/portfolio/${shareId}`
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 
-      // Save share link history
-      const shareHistory = JSON.parse(localStorage.getItem(`portfolio_shares_${userId}`) || '[]')
-      shareHistory.push({ shareId, url: shareUrl, createdAt: new Date().toISOString(), expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() })
-      localStorage.setItem(`portfolio_shares_${userId}`, JSON.stringify(shareHistory))
+      // Save share link to database
+      if (userId) {
+        await createShareLink(userId, shareId, shareUrl, expiresAt)
+      }
 
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(shareUrl)

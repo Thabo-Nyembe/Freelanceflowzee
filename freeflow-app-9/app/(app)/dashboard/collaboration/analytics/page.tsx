@@ -38,6 +38,7 @@ import {
 
 
 import { useCurrentUser } from "@/hooks/use-ai-data";
+import { upsertReportSchedule } from "@/lib/collaboration-analytics-queries";
 import { useAnnouncer } from "@/lib/accessibility";
 import {
   getCollaborationAnalytics,
@@ -216,12 +217,13 @@ export default function AnalyticsPage() {
     try {
       logger.info("Scheduling analytics report");
 
-      // Save schedule to localStorage
-      localStorage.setItem('analytics_report_schedule', JSON.stringify({
-        frequency: 'weekly',
-        scheduledAt: new Date().toISOString(),
-        nextRun: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-      }));
+      // Save schedule to database
+      if (userId) {
+        const { error } = await upsertReportSchedule(userId, 'weekly');
+        if (error) {
+          logger.error("Failed to save schedule to database", { error });
+        }
+      }
 
       logger.info("Report scheduled successfully");
       toast.success("Weekly report scheduled");

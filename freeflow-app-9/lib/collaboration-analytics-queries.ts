@@ -505,3 +505,91 @@ export async function exportCollaborationReport(
     return { data: null, error }
   }
 }
+
+// ============================================================================
+// REPORT SCHEDULING
+// ============================================================================
+
+export type ReportFrequency = 'daily' | 'weekly' | 'monthly'
+
+export interface ReportSchedule {
+  id: string
+  user_id: string
+  frequency: ReportFrequency
+  scheduled_at: string
+  next_run: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Create or update a report schedule
+ */
+export async function upsertReportSchedule(
+  userId: string,
+  frequency: ReportFrequency
+): Promise<{ data: ReportSchedule | null; error: any }> {
+  const supabase = createClient()
+
+  // Calculate next run based on frequency
+  const now = new Date()
+  let nextRun: Date
+  switch (frequency) {
+    case 'daily':
+      nextRun = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+      break
+    case 'weekly':
+      nextRun = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      break
+    case 'monthly':
+      nextRun = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+      break
+  }
+
+  const { data, error } = await supabase
+    .from('collaboration_report_schedules')
+    .upsert({
+      user_id: userId,
+      frequency,
+      scheduled_at: now.toISOString(),
+      next_run: nextRun.toISOString(),
+      is_active: true,
+      updated_at: now.toISOString()
+    }, { onConflict: 'user_id' })
+    .select()
+    .single()
+
+  return { data, error }
+}
+
+/**
+ * Get report schedule for a user
+ */
+export async function getReportSchedule(
+  userId: string
+): Promise<{ data: ReportSchedule | null; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('collaboration_report_schedules')
+    .select('*')
+    .eq('user_id', userId)
+    .single()
+
+  return { data, error }
+}
+
+/**
+ * Cancel report schedule
+ */
+export async function cancelReportSchedule(
+  userId: string
+): Promise<{ error: any }> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('collaboration_report_schedules')
+    .update({ is_active: false })
+    .eq('user_id', userId)
+
+  return { error }
+}

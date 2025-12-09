@@ -790,3 +790,88 @@ export async function getCompletePortfolioData(userId: string) {
     return { data: null, error }
   }
 }
+
+// ============================================================================
+// PORTFOLIO SHARE LINKS
+// ============================================================================
+
+export interface PortfolioShareLink {
+  id: string
+  user_id: string
+  share_id: string
+  share_url: string
+  created_at: string
+  expires_at: string
+  is_active: boolean
+  view_count: number
+}
+
+/**
+ * Create a portfolio share link
+ */
+export async function createShareLink(
+  userId: string,
+  shareId: string,
+  shareUrl: string,
+  expiresAt: string
+): Promise<{ data: PortfolioShareLink | null; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('portfolio_share_links')
+    .insert({
+      user_id: userId,
+      share_id: shareId,
+      share_url: shareUrl,
+      expires_at: expiresAt,
+      is_active: true,
+      view_count: 0
+    })
+    .select()
+    .single()
+
+  return { data, error }
+}
+
+/**
+ * Get all share links for a user
+ */
+export async function getShareLinks(
+  userId: string
+): Promise<{ data: PortfolioShareLink[]; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('portfolio_share_links')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+
+  return { data: data || [], error }
+}
+
+/**
+ * Deactivate a share link
+ */
+export async function deactivateShareLink(
+  shareId: string
+): Promise<{ error: any }> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('portfolio_share_links')
+    .update({ is_active: false })
+    .eq('share_id', shareId)
+
+  return { error }
+}
+
+/**
+ * Increment view count for a share link
+ */
+export async function incrementShareViewCount(
+  shareId: string
+): Promise<{ error: any }> {
+  const supabase = createClient()
+  const { error } = await supabase
+    .rpc('increment_share_view_count', { p_share_id: shareId })
+
+  return { error }
+}

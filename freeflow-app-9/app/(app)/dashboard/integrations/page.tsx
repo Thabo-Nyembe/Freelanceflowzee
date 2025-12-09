@@ -635,11 +635,8 @@ export default function IntegrationsPage() {
       announce('Refreshing integrations', 'polite')
       setIsLoading(true)
 
-      // Load integrations from localStorage cache
-      const savedIntegrations = localStorage.getItem('user_integrations')
-      if (savedIntegrations) {
-        logger.info('Integrations loaded from cache')
-      }
+      // Note: Integrations are loaded from database via getIntegrationAPIKeys on mount
+      logger.info('Integrations refreshed')
 
       toast.success('Integrations refreshed')
       announce('Integrations refreshed successfully', 'polite')
