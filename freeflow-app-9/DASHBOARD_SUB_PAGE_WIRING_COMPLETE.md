@@ -19,6 +19,8 @@ This session completed comprehensive database wiring for critical dashboard sub-
 | `df911ca7` | fix: Secure AI-Settings API keys with database storage |
 | `6e1d726a` | fix: Secure Settings/Billing with database storage |
 | `1b044031` | feat: Wire Team page to database with full CRUD |
+| `74ddbda5` | fix: Secure Integration API keys with database storage |
+| `e1c753d6` | feat: Wire Time-tracking delete operations to database |
 
 ---
 
@@ -131,6 +133,35 @@ await createPaymentMethod(userId, {
   is_default: true
 })
 ```
+
+---
+
+### 4. Integrations Page (`/dashboard/integrations`)
+
+**Problem:** Integration API keys stored in localStorage (CRITICAL SECURITY RISK)
+
+**Solution:**
+- Added `IntegrationAPIKey` interface and CRUD functions
+- Replaced localStorage with `createIntegrationAPIKey()` database call
+- Added `getIntegrationAPIKeys()`, `deleteIntegrationAPIKey()` functions
+- Keys stored in Supabase `integration_api_keys` table
+
+**Files Modified:**
+- `lib/integrations-management-queries.ts` (+125 lines)
+- `app/(app)/dashboard/integrations/page.tsx` (+25/-13 lines)
+
+### 5. Time-Tracking Page (`/dashboard/time-tracking`)
+
+**Problem:** Time entries deleted via localStorage instead of database
+
+**Solution:**
+- Added `deleteAllTimeEntries()` bulk delete function
+- Replaced localStorage with database call in `confirmDeleteAllEntries`
+- Removed unused localStorage calls
+
+**Files Modified:**
+- `lib/time-tracking-queries.ts` (+36 lines)
+- `app/(app)/dashboard/time-tracking/page.tsx` (+15/-5 lines)
 
 ---
 
