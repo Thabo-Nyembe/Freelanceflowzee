@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **38 critical features** across 12 sessions.
+Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **40 critical features** across 13 sessions.
 
 ---
 
@@ -305,6 +305,21 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 - Bulk project deletions persist to database
 - Handles partial failures gracefully
 
+### 39. Canvas Delete (canvas) - Session 13
+**File:** `app/(app)/dashboard/canvas/page.tsx`
+**Status:** WIRED
+
+- `handleConfirmDeleteCanvas` now calls `deleteCanvasProject()` from canvas-collaboration-queries
+- Canvas deletions persist to database
+
+### 40. Canvas Bulk Delete (canvas) - Session 13
+**File:** `app/(app)/dashboard/canvas/page.tsx`
+**Status:** WIRED
+
+- `handleConfirmBulkDelete` now calls `deleteCanvasProject()` for each canvas via Promise.all
+- Bulk canvas deletions persist to database
+- Handles partial failures gracefully
+
 ---
 
 ## Available Query Functions (92 Query Files)
@@ -374,7 +389,8 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | 743b2cc8 | feat: Wire voice-create, community-post handlers (Session 9) |
 | 42fda9a4 | feat: Wire ai-assistant, plugin-marketplace handlers (Session 10) |
 | fa4aa0cc | feat: Wire cv-portfolio handlers (Session 11) |
-| (pending) | feat: Wire cv-portfolio experience, education, achievement, bulk handlers (Session 12) |
+| 445ca6db | feat: Wire cv-portfolio experience, education, achievement, bulk handlers (Session 12) |
+| (pending) | feat: Wire canvas delete handlers (Session 13) |
 
 ---
 

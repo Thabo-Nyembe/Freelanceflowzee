@@ -739,17 +739,32 @@ export default function CanvasPage() {
     setDeleteCanvas({ id: canvasId, name: canvas.name })
   }
 
-  const handleConfirmDeleteCanvas = () => {
+  const handleConfirmDeleteCanvas = async () => {
     if (!deleteCanvas) return
 
     const canvas = state.canvases.find(c => c.id === deleteCanvas.id)
     logger.info('Canvas deletion confirmed', { canvasId: deleteCanvas.id, canvasName: deleteCanvas.name })
-    dispatch({ type: 'DELETE_CANVAS', canvasId: deleteCanvas.id })
-    toast.success('Canvas deleted', {
-      description: `${deleteCanvas.name} - ${canvas?.artboards.length || 0} artboards - ${canvas?.totalLayers || 0} layers - ${canvas?.size.toFixed(2) || 0}MB`
-    })
-    announce('Canvas deleted', 'polite')
-    setDeleteCanvas(null)
+
+    try {
+      if (userId) {
+        const { deleteCanvasProject } = await import('@/lib/canvas-collaboration-queries')
+        const { error: deleteError } = await deleteCanvasProject(deleteCanvas.id)
+        if (deleteError) throw new Error(deleteError.message || 'Failed to delete canvas')
+      }
+
+      dispatch({ type: 'DELETE_CANVAS', canvasId: deleteCanvas.id })
+      toast.success('Canvas deleted', {
+        description: `${deleteCanvas.name} - ${canvas?.artboards.length || 0} artboards - ${canvas?.totalLayers || 0} layers - ${canvas?.size.toFixed(2) || 0}MB`
+      })
+      announce('Canvas deleted', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete canvas', { error: error.message, canvasId: deleteCanvas.id })
+      toast.error('Failed to delete canvas', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setDeleteCanvas(null)
+    }
   }
 
   const handleBulkDelete = () => {
@@ -764,16 +779,35 @@ export default function CanvasPage() {
     setShowBulkDeleteConfirm(true)
   }
 
-  const handleConfirmBulkDelete = () => {
+  const handleConfirmBulkDelete = async () => {
     logger.info('Bulk deletion confirmed', { count: state.selectedCanvases.length })
     const count = state.selectedCanvases.length
-    state.selectedCanvases.forEach(canvasId => {
-      dispatch({ type: 'DELETE_CANVAS', canvasId })
-    })
-    dispatch({ type: 'CLEAR_SELECTED_CANVASES' })
-    toast.success(`${count} canvas(es) deleted`)
-    announce('Selected canvases deleted', 'polite')
-    setShowBulkDeleteConfirm(false)
+
+    try {
+      if (userId) {
+        const { deleteCanvasProject } = await import('@/lib/canvas-collaboration-queries')
+        const deletePromises = state.selectedCanvases.map(canvasId => deleteCanvasProject(canvasId))
+        const results = await Promise.all(deletePromises)
+        const errors = results.filter(r => r.error)
+        if (errors.length > 0) {
+          throw new Error(`Failed to delete ${errors.length} canvas(es)`)
+        }
+      }
+
+      state.selectedCanvases.forEach(canvasId => {
+        dispatch({ type: 'DELETE_CANVAS', canvasId })
+      })
+      dispatch({ type: 'CLEAR_SELECTED_CANVASES' })
+      toast.success(`${count} canvas(es) deleted`)
+      announce('Selected canvases deleted', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to bulk delete canvases', { error: error.message, count })
+      toast.error('Failed to delete canvases', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setShowBulkDeleteConfirm(false)
+    }
   }
 
   const handleDuplicateCanvas = (canvasId: string) => {
