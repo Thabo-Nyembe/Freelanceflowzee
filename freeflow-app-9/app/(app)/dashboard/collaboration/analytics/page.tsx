@@ -242,8 +242,12 @@ export default function AnalyticsPage() {
     try {
       logger.info("Scheduling analytics report");
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      // Save schedule to localStorage
+      localStorage.setItem('analytics_report_schedule', JSON.stringify({
+        frequency: 'weekly',
+        scheduledAt: new Date().toISOString(),
+        nextRun: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      }));
 
       logger.info("Report scheduled successfully");
       toast.success("Weekly report scheduled");
@@ -257,10 +261,8 @@ export default function AnalyticsPage() {
     try {
       logger.info("Sharing analytics");
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      navigator.clipboard.writeText("https://app.example.com/analytics/report");
+      // Copy share link to clipboard
+      await navigator.clipboard.writeText(`${window.location.origin}/analytics/report`);
 
       logger.info("Analytics shared");
       toast.success("Analytics link copied to clipboard");

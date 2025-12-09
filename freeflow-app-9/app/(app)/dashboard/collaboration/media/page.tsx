@@ -244,9 +244,7 @@ export default function MediaPage() {
     try {
       logger.info("Uploading media");
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
+      // Create media item and save to localStorage
       const newMedia: MediaItem = {
         id: Date.now().toString(),
         name: formData.get("mediaName") as string,
@@ -357,9 +355,7 @@ export default function MediaPage() {
     try {
       logger.info("Sharing media", { mediaId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
+      // Update share status and copy link
       setMediaItems(
         mediaItems.map((m) =>
           m.id === mediaId ? { ...m, isShared: true } : m
@@ -434,9 +430,7 @@ export default function MediaPage() {
     try {
       logger.info("Duplicating media", { mediaId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
+      // Create duplicate media item
       const originalMedia = mediaItems.find((m) => m.id === mediaId);
       if (originalMedia) {
         const duplicatedMedia: MediaItem = {
@@ -466,9 +460,7 @@ export default function MediaPage() {
     try {
       logger.info("Bulk downloading media");
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
+      // In production, would trigger actual bulk download
       logger.info("Bulk download started");
       toast.success("Downloading selected files");
     } catch (error) {

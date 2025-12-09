@@ -189,11 +189,19 @@ export default function CreateProjectPage() {
       description: `${formData.name || 'New Project'} - ${selectedTemplate?.name || 'No template'} - ${formData.category || 'Uncategorized'}`
     })
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Save project to localStorage
+    const projectId = Date.now()
+    const savedProjects = JSON.parse(localStorage.getItem('created_projects') || '[]')
+    savedProjects.push({
+      id: projectId,
+      ...formData,
+      template: selectedTemplate?.name,
+      createdAt: new Date().toISOString()
+    })
+    localStorage.setItem('created_projects', JSON.stringify(savedProjects))
 
     logger.info('Project created successfully', {
-      projectId: Date.now(),
+      projectId,
       projectName: formData.name,
       template: selectedTemplate?.name
     })

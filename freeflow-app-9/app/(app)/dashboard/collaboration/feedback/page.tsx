@@ -636,10 +636,8 @@ export default function FeedbackPage() {
     try {
       logger.info("Sharing feedback", { feedbackId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      navigator.clipboard.writeText(
+      // Copy share link to clipboard
+      await navigator.clipboard.writeText(
         `https://app.example.com/feedback/${feedbackId}`
       );
 
@@ -655,8 +653,16 @@ export default function FeedbackPage() {
     try {
       logger.info("Exporting feedback");
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Export feedback data as JSON
+      const blob = new Blob([JSON.stringify(feedbacks, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `feedback-export-${Date.now()}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
 
       logger.info("Feedback exported successfully");
       toast.success("Feedback data exported");

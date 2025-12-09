@@ -65,9 +65,6 @@ export default function CollaborationLayout({ children }: CollaborationLayoutPro
         timestamp: new Date().toISOString()
       })
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500))
-
       toast.success('Message Composer Opened', {
         description: 'Start typing your message to the team'
       })
@@ -97,9 +94,6 @@ export default function CollaborationLayout({ children }: CollaborationLayoutPro
         timestamp: new Date().toISOString()
       })
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500))
-
       toast.success('Meeting Scheduler Opened', {
         description: 'Select date, time, and attendees for your meeting'
       })
@@ -127,9 +121,6 @@ export default function CollaborationLayout({ children }: CollaborationLayoutPro
         timestamp: new Date().toISOString()
       })
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500))
-
       toast.success('File Upload Ready', {
         description: 'Drag and drop files or click to browse'
       })
@@ -156,9 +147,6 @@ export default function CollaborationLayout({ children }: CollaborationLayoutPro
         user: 'current-user',
         unreadCount: 8
       })
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 300))
 
       toast.success('Notifications Center', {
         description: 'You have 8 unread notifications'
