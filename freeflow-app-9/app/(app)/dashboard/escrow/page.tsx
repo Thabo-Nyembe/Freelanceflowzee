@@ -954,7 +954,7 @@ export default function EscrowPage() {
     setAddingMilestone(depositId)
   }
 
-  const handleSaveNewMilestone = () => {
+  const handleSaveNewMilestone = async () => {
     if (!addingMilestone || !newMilestoneForm.title || !newMilestoneForm.amount) {
       toast.error('Please fill in milestone title and amount')
       return
@@ -963,29 +963,56 @@ export default function EscrowPage() {
     const deposit = state.deposits.find(d => d.id === addingMilestone)
     if (!deposit) return
 
-    const newMilestone: EscrowMilestone = {
-      id: `ms_${Date.now()}`,
-      title: newMilestoneForm.title,
-      description: newMilestoneForm.description,
-      amount: parseFloat(newMilestoneForm.amount),
-      status: 'pending',
-      dueDate: newMilestoneForm.dueDate || undefined
-    }
+    try {
+      let milestoneId = `ms_${Date.now()}`
 
-    dispatch({
-      type: 'UPDATE_DEPOSIT',
-      depositId: addingMilestone,
-      updates: {
-        milestones: [...deposit.milestones, newMilestone]
+      // Create milestone in database
+      if (userId) {
+        const { createMilestone } = await import('@/lib/escrow-queries')
+        const milestoneAmount = parseFloat(newMilestoneForm.amount)
+        const depositAmount = deposit.amount || 1
+        const percentage = Math.round((milestoneAmount / depositAmount) * 100)
+        const createdMilestone = await createMilestone({
+          deposit_id: addingMilestone,
+          title: newMilestoneForm.title,
+          description: newMilestoneForm.description,
+          amount: milestoneAmount,
+          percentage,
+          due_date: newMilestoneForm.dueDate || new Date().toISOString()
+        })
+        if (createdMilestone?.id) {
+          milestoneId = createdMilestone.id
+        }
+        logger.info('Milestone created in database', { milestoneId, depositId: addingMilestone })
       }
-    })
 
-    logger.info('Milestone added', { depositId: addingMilestone, milestoneId: newMilestone.id })
-    toast.success('Milestone Added', {
-      description: `${newMilestoneForm.title} has been added to the project`
-    })
-    setAddingMilestone(null)
-    announce('Milestone added successfully', 'polite')
+      const newMilestone: EscrowMilestone = {
+        id: milestoneId,
+        title: newMilestoneForm.title,
+        description: newMilestoneForm.description,
+        amount: parseFloat(newMilestoneForm.amount),
+        status: 'pending',
+        dueDate: newMilestoneForm.dueDate || new Date().toISOString()
+      }
+
+      dispatch({
+        type: 'UPDATE_DEPOSIT',
+        depositId: addingMilestone,
+        updates: {
+          milestones: [...deposit.milestones, newMilestone]
+        }
+      })
+
+      logger.info('Milestone added', { depositId: addingMilestone, milestoneId: newMilestone.id })
+      toast.success('Milestone Added', {
+        description: `${newMilestoneForm.title} has been added to the project`
+      })
+      setAddingMilestone(null)
+      announce('Milestone added successfully', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to create milestone', { error: error.message, depositId: addingMilestone })
+      toast.error('Failed to add milestone', { description: error.message || 'Please try again' })
+    }
   }
 
   const handleAddNotes = (depositId: string) => {

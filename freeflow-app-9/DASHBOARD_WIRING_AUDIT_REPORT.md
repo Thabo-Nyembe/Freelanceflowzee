@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **45 critical features** across 15 sessions.
+Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **47 critical features** across 16 sessions.
 
 ---
 
@@ -361,6 +361,22 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 - Video projects persist to `video_projects` table
 - Properly parses resolution string to width/height
 
+### 46. Escrow Milestone Create (escrow) - Session 16
+**File:** `app/(app)/dashboard/escrow/page.tsx`
+**Status:** WIRED
+
+- `handleSaveNewMilestone` now calls `createMilestone()` from escrow-queries
+- Milestones persist to `escrow_milestones` table
+- Calculates percentage from milestone amount vs deposit total
+
+### 47. AI Video Update (ai-video-generation) - Session 16
+**File:** `app/(app)/dashboard/ai-video-generation/page.tsx`
+**Status:** WIRED
+
+- `handleUpdateVideo` now calls `updateGeneratedVideo()` from ai-video-queries
+- Video title and tags updates persist to database
+- Uses database-generated timestamps
+
 ---
 
 ## Available Query Functions (92 Query Files)
@@ -433,7 +449,8 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | 445ca6db | feat: Wire cv-portfolio experience, education, achievement, bulk handlers (Session 12) |
 | c2f7fd38 | feat: Wire canvas delete handlers (Session 13) |
 | 1b98c99c | feat: Wire canvas and widget create handlers to database (Session 14) |
-| (pending) | feat: Wire client-portal, voice, video handlers (Session 15) |
+| adb2a65a | feat: Wire client-portal, voice, video handlers (Session 15) |
+| (pending) | feat: Wire escrow milestone, ai-video update handlers (Session 16) |
 
 ---
 

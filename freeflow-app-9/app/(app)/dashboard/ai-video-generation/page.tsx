@@ -842,6 +842,17 @@ export default function AIVideoGenerationPage() {
     })
 
     try {
+      // Update video in database
+      if (userId) {
+        const { updateGeneratedVideo } = await import('@/lib/ai-video-queries')
+        const { error } = await updateGeneratedVideo(state.selectedVideo.id, {
+          title: editTitle,
+          tags: editTags.split(',').map(t => t.trim()).filter(t => t)
+        })
+        if (error) throw new Error(error.message || 'Failed to update video')
+        logger.info('Video updated in database', { videoId: state.selectedVideo.id })
+      }
+
       const updatedVideo: GeneratedVideo = {
         ...state.selectedVideo,
         title: editTitle,
