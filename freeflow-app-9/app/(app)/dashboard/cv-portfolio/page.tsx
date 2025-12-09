@@ -100,6 +100,21 @@ import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('CVPortfolio')
 
+// DATABASE QUERIES - CV Portfolio
+import {
+  getPortfolioProjects,
+  getSkills,
+  getExperience,
+  getEducation,
+  getCertifications,
+  createProject,
+  createSkill,
+  createExperience,
+  deleteProject,
+  deleteSkill,
+  deleteExperience
+} from '@/lib/cv-portfolio-queries'
+
 // TYPES
 interface Project {
   id: number
@@ -506,22 +521,69 @@ export default function CVPortfolioPage() {
         setIsLoading(true)
         setError(null)
 
-        // Load from localStorage if available
-        const savedPortfolio = localStorage.getItem(`portfolio_${userId}`)
-        if (savedPortfolio) {
-          try {
-            const data = JSON.parse(savedPortfolio)
-            if (data.projects) setProjects(data.projects)
-            if (data.skills) setSkills(data.skills)
-            if (data.experience) setExperience(data.experience)
-            if (data.education) setEducation(data.education)
-            if (data.achievements) setAchievements(data.achievements)
-            if (data.profileData) setProfileData(data.profileData)
-            logger.info('Portfolio loaded from localStorage', { userId })
-          } catch {
-            logger.warn('Failed to parse saved portfolio', { userId })
-          }
+        // Load from database
+        const [projectsResult, skillsResult, experienceResult, educationResult] = await Promise.all([
+          getPortfolioProjects(userId),
+          getSkills(userId),
+          getExperience(userId),
+          getEducation(userId)
+        ])
+
+        // Map database results to component state format
+        if (projectsResult.data && projectsResult.data.length > 0) {
+          const mappedProjects = projectsResult.data.map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            description: p.description,
+            image: p.image_url || '/portfolio-default.jpg',
+            technologies: p.technologies || [],
+            link: p.project_url || '',
+            status: p.is_featured ? 'Featured' : 'Published',
+            dateAdded: p.created_at
+          }))
+          setProjects(mappedProjects)
         }
+
+        if (skillsResult.data && skillsResult.data.length > 0) {
+          const mappedSkills = skillsResult.data.map((s: any) => ({
+            id: s.id,
+            name: s.name,
+            category: s.category === 'technical' ? 'Technical' : s.category === 'soft' ? 'Soft' : 'Languages',
+            proficiency: Math.ceil(s.proficiency / 20) // Convert 1-100 to 1-5
+          }))
+          setSkills(mappedSkills)
+        }
+
+        if (experienceResult.data && experienceResult.data.length > 0) {
+          const mappedExperience = experienceResult.data.map((e: any) => ({
+            id: e.id,
+            title: e.position,
+            company: e.company,
+            period: `${new Date(e.start_date).getFullYear()} - ${e.is_current ? 'Present' : new Date(e.end_date).getFullYear()}`,
+            description: e.description,
+            achievements: e.achievements || []
+          }))
+          setExperience(mappedExperience)
+        }
+
+        if (educationResult.data && educationResult.data.length > 0) {
+          const mappedEducation = educationResult.data.map((ed: any) => ({
+            id: ed.id,
+            degree: ed.degree,
+            institution: ed.institution,
+            year: ed.end_date ? new Date(ed.end_date).getFullYear().toString() : 'Present',
+            description: ed.description || ''
+          }))
+          setEducation(mappedEducation)
+        }
+
+        logger.info('Portfolio loaded from database', {
+          userId,
+          projectCount: projectsResult.data?.length || 0,
+          skillCount: skillsResult.data?.length || 0,
+          experienceCount: experienceResult.data?.length || 0,
+          educationCount: educationResult.data?.length || 0
+        })
 
         const completeness = calculateCompleteness()
         logger.info('CV portfolio loaded successfully', {
@@ -1384,10 +1446,7 @@ export default function CVPortfolioPage() {
         template: selectedTemplate
       })
 
-      // Save to localStorage before export
-      localStorage.setItem(`portfolio_${userId}`, JSON.stringify({
-        projects, skills, experience, education, achievements, profileData
-      }))
+      // Note: Data is already persisted in database - no localStorage needed
 
       // Create download
       const blob = new Blob([JSON.stringify(cvData, null, 2)], { type: 'application/json' })
@@ -1540,12 +1599,7 @@ export default function CVPortfolioPage() {
     const skillsText = technicalSkills.length > 0 ? technicalSkills.join(', ') : 'various technologies'
     const summary = `${profileData.title || 'Professional'} with ${yearsOfExperience}+ years of experience specializing in ${skillsText}. Proven track record of ${projects.length} successful projects and ${experience.length} professional roles. Expert in delivering innovative solutions with focus on quality and user experience.`
 
-    // Save updated profile to localStorage
-    const updatedProfile = { ...profileData, bio: summary }
-    localStorage.setItem(`portfolio_${userId}`, JSON.stringify({
-      projects, skills, experience, education, achievements, profileData: updatedProfile
-    }))
-
+    // Update local state (profile bio is saved when portfolio settings are updated)
     setProfileData(prev => ({ ...prev, bio: summary }))
 
     logger.info('AI summary generated', {
