@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **81 critical features** across 25 sessions. Session 26 verified CRM handlers are already properly wired.
+Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **86 critical features** across 27 sessions. Session 26 verified CRM handlers. Session 27 added n8n-style automation features including webhook triggers.
 
 ---
 
@@ -495,6 +495,22 @@ Verified that CRM page handlers are already properly wired:
 - `handleSubmitContact` → `createContact()` - Creates contact in database
 - `handleUpdateDealStage` → `updateCRMDeal()` - Updates deal stage in database
 - `handleViewContact` / `handleEmailContact` / `handleViewDeal` - UI-only handlers (no persistence needed)
+
+### 78-82. n8n-Style Automation Enhancement - Session 27
+**Files:**
+- `app/(app)/dashboard/automation/page.tsx`
+- `app/(app)/dashboard/workflow-builder/page.tsx`
+- `app/api/workflows/webhook/[workflowId]/route.ts` (NEW)
+
+**Query Files:** `lib/automation-queries.ts`, `lib/workflow-builder-queries.ts`
+**Status:** ENHANCED ✓
+
+Added n8n-competitive automation features:
+- `handleRunWorkflow` → `createWorkflowExecution()`, `updateExecutionStatus()`, `updateWorkflow()` - Manual workflow execution with full tracking
+- `handleLoadAllExecutions` → `getWorkflowExecutions()` - Load execution history across all workflows
+- `handleViewModeChange` - Smart view switching that loads data on demand
+- **Webhook Trigger API** - External systems can trigger workflows via POST `/api/workflows/webhook/{workflowId}`
+- Added "▶ Run" button to workflow cards in both automation and workflow-builder pages
 
 ---
 
