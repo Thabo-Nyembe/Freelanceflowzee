@@ -730,7 +730,12 @@ export default function CVPortfolioPage() {
 
     setIsDeleting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
+      if (userId) {
+        const { deleteProject } = await import('@/lib/cv-portfolio-queries')
+        const { error: deleteError } = await deleteProject(projectToDelete)
+        if (deleteError) throw new Error(deleteError.message || 'Failed to delete project')
+      }
+
       setProjects(prev => prev.filter(p => p.id !== projectToDelete))
 
       const newCompleteness = calculateCompleteness()
@@ -745,6 +750,11 @@ export default function CVPortfolioPage() {
         description: `"${project.title}" removed from portfolio`
       })
       announce(`Project ${project.title} deleted`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete project', { error: error.message, projectId: projectToDelete })
+      toast.error('Failed to delete project', {
+        description: error.message || 'Please try again'
+      })
     } finally {
       setIsDeleting(false)
       setShowDeleteProjectDialog(false)
@@ -773,7 +783,7 @@ export default function CVPortfolioPage() {
     setShowAddSkillDialog(true)
   }
 
-  const confirmAddSkill = () => {
+  const confirmAddSkill = async () => {
     if (!newSkillName.trim()) {
       toast.error('Please enter a skill name')
       return
@@ -788,49 +798,83 @@ export default function CVPortfolioPage() {
       return
     }
 
-    const newSkill: Skill = {
-      id: Date.now(),
-      name,
-      category,
-      proficiency
+    try {
+      let newSkillId = Date.now()
+
+      if (userId) {
+        const { addSkill } = await import('@/lib/cv-portfolio-queries')
+        const { data: createdSkill, error: addError } = await addSkill(userId, {
+          name,
+          category,
+          proficiency
+        })
+        if (addError) throw new Error(addError.message || 'Failed to add skill')
+        if (createdSkill?.id) newSkillId = parseInt(createdSkill.id)
+      }
+
+      const newSkill: Skill = {
+        id: newSkillId,
+        name,
+        category,
+        proficiency
+      }
+
+      setSkills(prev => [...prev, newSkill])
+
+      const newCompleteness = calculateCompleteness()
+      logger.info('Skill added', {
+        skillId: newSkill.id,
+        skillName: name,
+        category,
+        proficiency,
+        totalSkills: skills.length + 1,
+        completenessScore: newCompleteness
+      })
+
+      setShowAddSkillDialog(false)
+      toast.success('Skill Added!', {
+        description: `${name} (${proficiency}/5 stars) - ${skills.length + 1} skills total`
+      })
+      announce(`Skill ${name} added`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to add skill', { error: error.message })
+      toast.error('Failed to add skill', {
+        description: error.message || 'Please try again'
+      })
     }
-
-    setSkills(prev => [...prev, newSkill])
-
-    const newCompleteness = calculateCompleteness()
-    logger.info('Skill added', {
-      skillId: newSkill.id,
-      skillName: name,
-      category,
-      proficiency,
-      totalSkills: skills.length + 1,
-      completenessScore: newCompleteness
-    })
-
-    setShowAddSkillDialog(false)
-    toast.success('Skill Added!', {
-      description: `${name} (${proficiency}/5 stars) - ${skills.length + 1} skills total`
-    })
   }
 
-  const handleUpdateSkillLevel = (skillId: number, newProficiency: number) => {
+  const handleUpdateSkillLevel = async (skillId: number, newProficiency: number) => {
     const skill = skills.find(s => s.id === skillId)
     if (!skill) return
 
-    setSkills(prev => prev.map(s =>
-      s.id === skillId ? { ...s, proficiency: newProficiency } : s
-    ))
+    try {
+      if (userId) {
+        const { updateSkill } = await import('@/lib/cv-portfolio-queries')
+        const { error: updateError } = await updateSkill(String(skillId), { proficiency: newProficiency })
+        if (updateError) throw new Error(updateError.message || 'Failed to update skill')
+      }
 
-    logger.info('Skill proficiency updated', {
-      skillId,
-      skillName: skill.name,
-      oldProficiency: skill.proficiency,
-      newProficiency
-    })
+      setSkills(prev => prev.map(s =>
+        s.id === skillId ? { ...s, proficiency: newProficiency } : s
+      ))
 
-    toast.success('Skill Updated!', {
-      description: `${skill.name}: ${newProficiency}/5 stars`
-    })
+      logger.info('Skill proficiency updated', {
+        skillId,
+        skillName: skill.name,
+        oldProficiency: skill.proficiency,
+        newProficiency
+      })
+
+      toast.success('Skill Updated!', {
+        description: `${skill.name}: ${newProficiency}/5 stars`
+      })
+    } catch (error: any) {
+      logger.error('Failed to update skill', { error: error.message, skillId })
+      toast.error('Failed to update skill', {
+        description: error.message || 'Please try again'
+      })
+    }
   }
 
   const handleRemoveSkill = (skillId: number) => {
@@ -849,7 +893,12 @@ export default function CVPortfolioPage() {
 
     setIsDeleting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
+      if (userId) {
+        const { deleteSkill } = await import('@/lib/cv-portfolio-queries')
+        const { error: deleteError } = await deleteSkill(String(skillToRemove))
+        if (deleteError) throw new Error(deleteError.message || 'Failed to remove skill')
+      }
+
       setSkills(prev => prev.filter(s => s.id !== skillToRemove))
 
       const newCompleteness = calculateCompleteness()
@@ -865,6 +914,11 @@ export default function CVPortfolioPage() {
         description: `${skill.name} deleted (${skills.length - 1} skills remaining)`
       })
       announce(`Skill ${skill.name} removed`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to remove skill', { error: error.message, skillId: skillToRemove })
+      toast.error('Failed to remove skill', {
+        description: error.message || 'Please try again'
+      })
     } finally {
       setIsDeleting(false)
       setShowRemoveSkillDialog(false)
