@@ -291,23 +291,53 @@ export default function WorkspacePage() {
 
   const handleUploadFile = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!userId) return;
+
     const formData = new FormData(e.currentTarget);
+    const fileName = formData.get("fileName") as string;
+    const fileInput = formData.get("fileUpload") as File;
+
+    if (!fileName) {
+      toast.error("File name is required");
+      return;
+    }
 
     try {
-      logger.info("Uploading file");
+      logger.info("Uploading file", { fileName, userId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Get file info
+      const fileType = fileInput?.type?.split("/")?.[0] || "document";
+      const fileSize = fileInput?.size || 0;
+
+      // Create file record in database
+      const { data: newFileData, error } = await createFile(userId, {
+        name: fileName,
+        file_type: fileType,
+        file_size: fileSize,
+        file_url: fileInput ? URL.createObjectURL(fileInput) : undefined,
+        folder_id: null,
+      });
+
+      if (error) {
+        throw new Error(error.message || "Failed to create file record");
+      }
+
+      // Helper function to format file size
+      const formatFileSize = (bytes: number): string => {
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+      };
 
       const newFile: WorkspaceItem = {
-        id: Date.now().toString(),
-        name: formData.get("fileName") as string,
+        id: newFileData?.id || Date.now().toString(),
+        name: fileName,
         type: "file",
-        fileType: "document",
-        size: "1.5 MB",
-        createdBy: "Current User",
-        createdAt: new Date().toISOString().split("T")[0],
-        modifiedAt: new Date().toISOString().split("T")[0],
+        fileType: fileType,
+        size: formatFileSize(fileSize),
+        createdBy: userId,
+        createdAt: new Date().toLocaleDateString(),
+        modifiedAt: new Date().toLocaleDateString(),
         isShared: false,
         isLocked: false,
         isFavorite: false,
@@ -316,13 +346,16 @@ export default function WorkspacePage() {
       };
 
       setItems([...items, newFile]);
+      setStats((prev) => ({ ...prev, totalFiles: prev.totalFiles + 1 }));
       setIsUploadOpen(false);
 
-      logger.info("File uploaded successfully", { fileId: newFile.id });
-      toast.success("File uploaded successfully");
+      logger.info("File uploaded successfully", { fileId: newFile.id, fileName });
+      toast.success("File uploaded", { description: fileName });
+      announce("File uploaded successfully", "polite");
     } catch (error) {
-      logger.error("Failed to upload file", { error });
+      logger.error("Failed to upload file", { error, userId });
       toast.error("Failed to upload file");
+      announce("Error uploading file", "assertive");
     }
   };
 
@@ -402,22 +435,28 @@ export default function WorkspacePage() {
 
   const handleToggleLock = async (itemId: string) => {
     try {
-      logger.info("Toggling lock", { itemId });
+      const item = items.find((i) => i.id === itemId);
+      if (!item) return;
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      logger.info("Toggling lock", { itemId, itemName: item.name });
+
+      const newLockStatus = !item.isLocked;
 
       setItems(
-        items.map((item) =>
-          item.id === itemId ? { ...item, isLocked: !item.isLocked } : item
+        items.map((i) =>
+          i.id === itemId ? { ...i, isLocked: newLockStatus } : i
         )
       );
 
-      logger.info("Lock toggled successfully");
-      toast.success("Lock status updated");
+      logger.info("Lock toggled successfully", { itemId, isLocked: newLockStatus });
+      toast.success(newLockStatus ? "Item locked" : "Item unlocked", {
+        description: item.name,
+      });
+      announce(`${item.name} ${newLockStatus ? "locked" : "unlocked"}`, "polite");
     } catch (error) {
-      logger.error("Failed to toggle lock", { error });
+      logger.error("Failed to toggle lock", { error, itemId });
       toast.error("Failed to update lock");
+      announce("Error updating lock status", "assertive");
     }
   };
 
@@ -545,43 +584,92 @@ export default function WorkspacePage() {
 
   const handleDownloadItem = async (itemId: string) => {
     try {
-      logger.info("Downloading item", { itemId });
+      const item = items.find((i) => i.id === itemId);
+      if (!item) {
+        toast.error("Item not found");
+        return;
+      }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      logger.info("Downloading item", { itemId, itemName: item.name });
 
-      logger.info("Item downloaded successfully");
-      toast.success("Download started");
+      if (item.type === "folder") {
+        toast.info("Folder download", { description: "Compressing folder for download..." });
+        // For folders, we'd need to zip contents - show info for now
+        announce("Preparing folder download", "polite");
+        return;
+      }
+
+      // Create download link
+      const link = document.createElement("a");
+      link.href = `/api/files/download/${itemId}`;
+      link.download = item.name;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      logger.info("Item download started", { itemId, itemName: item.name });
+      toast.success("Download started", { description: item.name });
+      announce(`Downloading ${item.name}`, "polite");
     } catch (error) {
-      logger.error("Failed to download item", { error });
+      logger.error("Failed to download item", { error, itemId });
       toast.error("Failed to download item");
+      announce("Error downloading item", "assertive");
     }
   };
 
   const handleDuplicateItem = async (itemId: string) => {
+    if (!userId) return;
+
     try {
-      logger.info("Duplicating item", { itemId });
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
       const originalItem = items.find((item) => item.id === itemId);
-      if (originalItem) {
-        const duplicatedItem: WorkspaceItem = {
-          ...originalItem,
-          id: Date.now().toString(),
-          name: `${originalItem.name} (Copy)`,
-          createdAt: new Date().toISOString().split("T")[0],
-          modifiedAt: new Date().toISOString().split("T")[0],
-        };
+      if (!originalItem) return;
 
-        setItems([...items, duplicatedItem]);
-        logger.info("Item duplicated successfully");
-        toast.success("Item duplicated");
+      logger.info("Duplicating item", { itemId, itemName: originalItem.name });
+
+      const newName = `${originalItem.name} (Copy)`;
+
+      // Create duplicate in database based on type
+      let newItemData;
+      if (originalItem.type === "folder") {
+        const { data, error } = await createFolderDB(userId, newName, null);
+        if (error) throw new Error(error.message);
+        newItemData = data;
+      } else {
+        const { data, error } = await createFile(userId, {
+          name: newName,
+          file_type: originalItem.fileType,
+          file_size: 0,
+          folder_id: null,
+        });
+        if (error) throw new Error(error.message);
+        newItemData = data;
       }
+
+      const duplicatedItem: WorkspaceItem = {
+        ...originalItem,
+        id: newItemData?.id || Date.now().toString(),
+        name: newName,
+        createdAt: new Date().toLocaleDateString(),
+        modifiedAt: new Date().toLocaleDateString(),
+        isFavorite: false,
+        isShared: false,
+      };
+
+      setItems([...items, duplicatedItem]);
+      setStats((prev) => ({
+        ...prev,
+        totalFiles: originalItem.type === "file" ? prev.totalFiles + 1 : prev.totalFiles,
+        totalFolders: originalItem.type === "folder" ? prev.totalFolders + 1 : prev.totalFolders,
+      }));
+
+      logger.info("Item duplicated successfully", { originalId: itemId, newId: duplicatedItem.id });
+      toast.success("Item duplicated", { description: newName });
+      announce(`${originalItem.name} duplicated successfully`, "polite");
     } catch (error) {
-      logger.error("Failed to duplicate item", { error });
+      logger.error("Failed to duplicate item", { error, itemId });
       toast.error("Failed to duplicate item");
+      announce("Error duplicating item", "assertive");
     }
   };
 

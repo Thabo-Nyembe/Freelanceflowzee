@@ -147,6 +147,9 @@ export default function MeetingsPage() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
   const [isJoinOpen, setIsJoinOpen] = useState(false);
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [inviteMeetingId, setInviteMeetingId] = useState<string | null>(null);
+  const [inviteEmail, setInviteEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("upcoming");
   const [activeMeeting, setActiveMeeting] = useState<Meeting | null>(null);
@@ -313,31 +316,64 @@ export default function MeetingsPage() {
 
   const handleJoinMeeting = async (meetingId: string) => {
     try {
-      logger.info("Joining meeting", { meetingId });
-
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      logger.info("Joining meeting", { meetingId, userId });
 
       const meeting = meetings.find((m) => m.id === meetingId);
-      if (meeting) {
-        setActiveMeeting(meeting);
-        setCallState({ ...callState, isInCall: true });
-
-        logger.info("Joined meeting successfully");
-        toast.success("Joined meeting");
+      if (!meeting) {
+        toast.error("Meeting not found");
+        return;
       }
+
+      // Update meeting status to ongoing in database
+      const { error } = await updateMeeting(meetingId, { status: "ongoing" });
+      if (error) {
+        logger.error("Failed to update meeting status", { error, meetingId });
+      }
+
+      // Update local state
+      setMeetings(meetings.map(m =>
+        m.id === meetingId ? { ...m, status: "ongoing" as const } : m
+      ));
+
+      setActiveMeeting({ ...meeting, status: "ongoing" });
+      setCallState({ ...callState, isInCall: true });
+
+      logger.info("Joined meeting successfully", { meetingId });
+      toast.success("Joined meeting", { description: meeting.title });
+      announce(`Joined meeting: ${meeting.title}`, "polite");
     } catch (error) {
-      logger.error("Failed to join meeting", { error });
+      logger.error("Failed to join meeting", { error, meetingId });
       toast.error("Failed to join meeting");
+      announce("Error joining meeting", "assertive");
     }
   };
 
   const handleLeaveMeeting = async () => {
     try {
-      logger.info("Leaving meeting");
+      if (!activeMeeting) return;
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      logger.info("Leaving meeting", { meetingId: activeMeeting.id });
+
+      // Update meeting status back to upcoming (or completed if it was the last participant)
+      const { error } = await updateMeeting(activeMeeting.id, { status: "upcoming" });
+      if (error) {
+        logger.error("Failed to update meeting status on leave", { error });
+      }
+
+      // Stop screen share if active
+      if (callState.isScreenSharing) {
+        try {
+          const tracks = (window as unknown as { currentScreenTrack?: MediaStreamTrack }).currentScreenTrack;
+          tracks?.stop();
+        } catch {
+          // Screen track already stopped
+        }
+      }
+
+      // Update local state
+      setMeetings(meetings.map(m =>
+        m.id === activeMeeting.id ? { ...m, status: "upcoming" as const } : m
+      ));
 
       setActiveMeeting(null);
       setCallState({
@@ -349,9 +385,11 @@ export default function MeetingsPage() {
 
       logger.info("Left meeting successfully");
       toast.success("Left meeting");
+      announce("Left meeting", "polite");
     } catch (error) {
       logger.error("Failed to leave meeting", { error });
       toast.error("Failed to leave meeting");
+      announce("Error leaving meeting", "assertive");
     }
   };
 
@@ -387,49 +425,94 @@ export default function MeetingsPage() {
     try {
       logger.info("Toggling screen share");
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (!callState.isScreenSharing) {
+        // Start screen sharing using native browser API
+        try {
+          const stream = await navigator.mediaDevices.getDisplayMedia({
+            video: true,
+            audio: true,
+          });
 
-      setCallState({
-        ...callState,
-        isScreenSharing: !callState.isScreenSharing,
-      });
+          // Store track reference for cleanup
+          const videoTrack = stream.getVideoTracks()[0];
+          (window as unknown as { currentScreenTrack?: MediaStreamTrack }).currentScreenTrack = videoTrack;
 
-      logger.info("Screen share toggled", {
-        isScreenSharing: !callState.isScreenSharing,
-      });
-      toast.success(
-        callState.isScreenSharing ? "Screen share stopped" : "Screen sharing"
-      );
+          // Listen for when user stops sharing via browser UI
+          videoTrack.onended = () => {
+            setCallState(prev => ({ ...prev, isScreenSharing: false }));
+            toast.info("Screen sharing ended");
+            announce("Screen sharing ended", "polite");
+          };
+
+          setCallState({ ...callState, isScreenSharing: true });
+          logger.info("Screen sharing started");
+          toast.success("Screen sharing started");
+          announce("Screen sharing started", "polite");
+        } catch (err) {
+          // User cancelled or permission denied
+          logger.info("Screen share cancelled or denied", { err });
+          toast.info("Screen share cancelled");
+          return;
+        }
+      } else {
+        // Stop screen sharing
+        try {
+          const track = (window as unknown as { currentScreenTrack?: MediaStreamTrack }).currentScreenTrack;
+          track?.stop();
+          (window as unknown as { currentScreenTrack?: MediaStreamTrack }).currentScreenTrack = undefined;
+        } catch {
+          // Track already stopped
+        }
+
+        setCallState({ ...callState, isScreenSharing: false });
+        logger.info("Screen sharing stopped");
+        toast.success("Screen share stopped");
+        announce("Screen sharing stopped", "polite");
+      }
     } catch (error) {
       logger.error("Failed to toggle screen share", { error });
       toast.error("Failed to toggle screen share");
+      announce("Error toggling screen share", "assertive");
     }
   };
 
   const handleToggleRecording = async () => {
     try {
-      logger.info("Toggling recording");
+      if (!activeMeeting) return;
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      logger.info("Toggling recording", { meetingId: activeMeeting.id });
 
-      setCallState({ ...callState, isRecording: !callState.isRecording });
+      const newRecordingState = !callState.isRecording;
 
-      if (activeMeeting) {
-        setActiveMeeting({
-          ...activeMeeting,
-          isRecording: !callState.isRecording,
-        });
+      // Update meeting recording status in database
+      const { error } = await updateMeeting(activeMeeting.id, {
+        recording_url: newRecordingState ? `pending_${Date.now()}` : activeMeeting.recordingUrl,
+      });
+
+      if (error) {
+        logger.error("Failed to update recording status", { error });
+        toast.error("Failed to update recording status");
+        return;
       }
 
-      logger.info("Recording toggled", { isRecording: !callState.isRecording });
-      toast.success(
-        callState.isRecording ? "Recording stopped" : "Recording started"
-      );
+      setCallState({ ...callState, isRecording: newRecordingState });
+      setActiveMeeting({
+        ...activeMeeting,
+        isRecording: newRecordingState,
+      });
+
+      // Update local meetings list
+      setMeetings(meetings.map(m =>
+        m.id === activeMeeting.id ? { ...m, isRecording: newRecordingState } : m
+      ));
+
+      logger.info("Recording toggled", { isRecording: newRecordingState });
+      toast.success(newRecordingState ? "Recording started" : "Recording stopped");
+      announce(newRecordingState ? "Recording started" : "Recording stopped", "polite");
     } catch (error) {
       logger.error("Failed to toggle recording", { error });
       toast.error("Failed to toggle recording");
+      announce("Error toggling recording", "assertive");
     }
   };
 
@@ -460,34 +543,90 @@ export default function MeetingsPage() {
   };
 
   const handleInviteParticipant = async (meetingId: string) => {
+    setInviteMeetingId(meetingId);
+    setInviteEmail("");
+    setIsInviteOpen(true);
+  };
+
+  const handleSendInvitation = async () => {
     try {
-      logger.info("Inviting participant", { meetingId });
+      if (!inviteMeetingId || !inviteEmail) return;
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      logger.info("Sending invitation", { meetingId: inviteMeetingId, email: inviteEmail });
 
-      logger.info("Invitation sent successfully");
-      toast.success("Invitation sent");
+      const meeting = meetings.find(m => m.id === inviteMeetingId);
+      if (!meeting) {
+        toast.error("Meeting not found");
+        return;
+      }
+
+      // Generate meeting link
+      const meetingUrl = `${window.location.origin}/dashboard/collaboration/meetings/join/${inviteMeetingId}`;
+
+      // Open email client with pre-filled invitation
+      const subject = encodeURIComponent(`Invitation: ${meeting.title}`);
+      const body = encodeURIComponent(
+        `You're invited to join a meeting!\n\n` +
+        `Meeting: ${meeting.title}\n` +
+        `Date: ${meeting.scheduledDate} at ${meeting.scheduledTime}\n` +
+        `Duration: ${meeting.duration} minutes\n` +
+        `Type: ${meeting.type === "video" ? "Video Call" : "Voice Call"}\n\n` +
+        `Join here: ${meetingUrl}\n\n` +
+        `Looking forward to seeing you there!`
+      );
+
+      window.open(`mailto:${inviteEmail}?subject=${subject}&body=${body}`, "_blank");
+
+      setIsInviteOpen(false);
+      setInviteEmail("");
+      setInviteMeetingId(null);
+
+      logger.info("Invitation sent successfully", { meetingId: inviteMeetingId, email: inviteEmail });
+      toast.success("Invitation email opened", { description: `Ready to send to ${inviteEmail}` });
+      announce("Invitation email opened", "polite");
     } catch (error) {
       logger.error("Failed to invite participant", { error });
       toast.error("Failed to send invitation");
+      announce("Error sending invitation", "assertive");
     }
   };
 
   const handleDeleteMeeting = async (meetingId: string) => {
     try {
-      logger.info("Deleting meeting", { meetingId });
+      logger.info("Deleting meeting", { meetingId, userId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Delete from database using real function
+      const { error } = await deleteMeeting(meetingId);
 
+      if (error) {
+        logger.error("Failed to delete meeting from database", { error, meetingId });
+        toast.error("Failed to delete meeting");
+        announce("Error deleting meeting", "assertive");
+        return;
+      }
+
+      // Update local state
       setMeetings(meetings.filter((m) => m.id !== meetingId));
 
-      logger.info("Meeting deleted successfully");
+      // Update stats
+      const deletedMeeting = meetings.find(m => m.id === meetingId);
+      if (deletedMeeting) {
+        setStats(prev => ({
+          ...prev,
+          totalMeetings: prev.totalMeetings - 1,
+          upcomingMeetings: deletedMeeting.status === "upcoming" ? prev.upcomingMeetings - 1 : prev.upcomingMeetings,
+          completedMeetings: deletedMeeting.status === "completed" ? prev.completedMeetings - 1 : prev.completedMeetings,
+          totalHours: prev.totalHours - (deletedMeeting.duration / 60),
+        }));
+      }
+
+      logger.info("Meeting deleted successfully", { meetingId });
       toast.success("Meeting deleted");
+      announce("Meeting deleted successfully", "polite");
     } catch (error) {
-      logger.error("Failed to delete meeting", { error });
+      logger.error("Failed to delete meeting", { error, meetingId });
       toast.error("Failed to delete meeting");
+      announce("Error deleting meeting", "assertive");
     }
   };
 
@@ -495,14 +634,36 @@ export default function MeetingsPage() {
     try {
       logger.info("Downloading recording", { meetingId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const meeting = meetings.find(m => m.id === meetingId);
+      if (!meeting?.recordingUrl) {
+        toast.error("No recording available for this meeting");
+        announce("No recording available", "assertive");
+        return;
+      }
 
-      logger.info("Recording downloaded successfully");
+      // Check if recording URL is a pending marker (recording in progress)
+      if (meeting.recordingUrl.startsWith("pending_")) {
+        toast.info("Recording is still being processed");
+        announce("Recording is still being processed", "polite");
+        return;
+      }
+
+      // Create download link and trigger download
+      const link = document.createElement("a");
+      link.href = meeting.recordingUrl;
+      link.download = `${meeting.title.replace(/\s+/g, "_")}_recording.mp4`;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      logger.info("Recording download started", { meetingId });
       toast.success("Download started");
+      announce("Recording download started", "polite");
     } catch (error) {
-      logger.error("Failed to download recording", { error });
+      logger.error("Failed to download recording", { error, meetingId });
       toast.error("Failed to download recording");
+      announce("Error downloading recording", "assertive");
     }
   };
 
@@ -510,18 +671,33 @@ export default function MeetingsPage() {
     try {
       logger.info("Sharing meeting link", { meetingId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      const meeting = meetings.find(m => m.id === meetingId);
+      const meetingUrl = `${window.location.origin}/dashboard/collaboration/meetings/join/${meetingId}`;
 
-      navigator.clipboard.writeText(
-        `https://app.example.com/meetings/${meetingId}`
-      );
+      // Use modern clipboard API with fallback
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(meetingUrl);
+      } else {
+        // Fallback for older browsers or non-secure contexts
+        const textArea = document.createElement("textarea");
+        textArea.value = meetingUrl;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
 
-      logger.info("Meeting link copied");
-      toast.success("Meeting link copied to clipboard");
+      logger.info("Meeting link copied", { meetingId, meetingUrl });
+      toast.success("Meeting link copied", {
+        description: meeting?.title || "Share this link to invite others",
+      });
+      announce("Meeting link copied to clipboard", "polite");
     } catch (error) {
-      logger.error("Failed to share meeting", { error });
-      toast.error("Failed to share meeting");
+      logger.error("Failed to share meeting", { error, meetingId });
+      toast.error("Failed to copy meeting link");
+      announce("Error copying meeting link", "assertive");
     }
   };
 
@@ -952,6 +1128,48 @@ export default function MeetingsPage() {
                       Schedule Meeting
                     </Button>
                   </form>
+                </DialogContent>
+              </Dialog>
+
+              {/* Invite Participant Dialog */}
+              <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Invite Participant</DialogTitle>
+                    <DialogDescription>
+                      Send an invitation email to join this meeting
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="inviteEmail">Email Address</Label>
+                      <Input
+                        id="inviteEmail"
+                        type="email"
+                        placeholder="colleague@example.com"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setIsInviteOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        className="flex-1"
+                        onClick={handleSendInvitation}
+                        disabled={!inviteEmail}
+                      >
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Send Invitation
+                      </Button>
+                    </div>
+                  </div>
                 </DialogContent>
               </Dialog>
             </div>

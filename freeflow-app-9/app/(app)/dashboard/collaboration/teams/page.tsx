@@ -61,6 +61,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useCurrentUser } from "@/hooks/use-ai-data";
+import { useAnnouncer } from "@/lib/accessibility";
 import type { Team as DBTeam, TeamType } from "@/lib/collaboration-queries";
 
 const logger = createFeatureLogger("CollaborationTeams");
@@ -91,6 +92,7 @@ interface Team {
 
 export default function TeamsPage() {
   const { userId, loading: userLoading } = useCurrentUser();
+  const { announce } = useAnnouncer();
   const [teams, setTeams] = useState<Team[]>([]);
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -245,19 +247,36 @@ export default function TeamsPage() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    try {
-      logger.info("Adding team member");
+    const name = formData.get("memberName") as string;
+    const email = formData.get("memberEmail") as string;
+    const role = formData.get("memberRole") as string;
+    const department = formData.get("memberDepartment") as string;
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
+    if (!name || !email) {
+      toast.error("Name and email are required");
+      return;
+    }
+
+    try {
+      logger.info("Adding team member", { name, email, role, userId });
+
+      // Try to add to database
+      const { createTeamMember } = await import("@/lib/admin-overview-queries");
+      const dbMember = await createTeamMember(userId || "", {
+        name,
+        email,
+        role,
+        department,
+        status: "active",
+      });
 
       const newMember: TeamMember = {
-        id: Date.now().toString(),
-        name: formData.get("memberName") as string,
-        email: formData.get("memberEmail") as string,
-        role: formData.get("memberRole") as string,
+        id: dbMember?.id || Date.now().toString(),
+        name,
+        email,
+        role,
         status: "offline",
-        department: formData.get("memberDepartment") as string,
+        department,
         joinedDate: new Date().toISOString().split("T")[0],
         tasksCompleted: 0,
         performance: 0,
@@ -265,30 +284,48 @@ export default function TeamsPage() {
       };
 
       setMembers([...members, newMember]);
+      setStats((prev) => ({ ...prev, totalMembers: prev.totalMembers + 1 }));
       setIsAddMemberOpen(false);
 
-      logger.info("Member added successfully", { memberId: newMember.id });
-      toast.success("Member added successfully");
+      // Send invitation email
+      const subject = encodeURIComponent(`You've been added to the team`);
+      const body = encodeURIComponent(
+        `Hi ${name},\n\n` +
+        `You've been added to the team as a ${role}.\n` +
+        `Department: ${department}\n\n` +
+        `Login to get started!`
+      );
+      window.open(`mailto:${email}?subject=${subject}&body=${body}`, "_blank");
+
+      logger.info("Member added successfully", { memberId: newMember.id, email });
+      toast.success("Member added", { description: `Invitation sent to ${email}` });
+      announce(`${name} added to team successfully`, "polite");
     } catch (error) {
       logger.error("Failed to add member", { error });
       toast.error("Failed to add member");
+      announce("Error adding team member", "assertive");
     }
   };
 
   const handleRemoveMember = async (memberId: string) => {
     try {
-      logger.info("Removing team member", { memberId });
+      const member = members.find((m) => m.id === memberId);
+      logger.info("Removing team member", { memberId, memberName: member?.name });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
+      // Remove from local state
       setMembers(members.filter((m) => m.id !== memberId));
+      setStats((prev) => ({
+        ...prev,
+        totalMembers: Math.max(0, prev.totalMembers - 1),
+      }));
 
-      logger.info("Member removed successfully");
-      toast.success("Member removed from team");
+      logger.info("Member removed successfully", { memberId });
+      toast.success("Member removed", { description: member?.name || "Team member" });
+      announce(`${member?.name || "Member"} removed from team`, "polite");
     } catch (error) {
-      logger.error("Failed to remove member", { error });
+      logger.error("Failed to remove member", { error, memberId });
       toast.error("Failed to remove member");
+      announce("Error removing team member", "assertive");
     }
   };
 
@@ -312,62 +349,99 @@ export default function TeamsPage() {
 
   const handleChangeRole = async (memberId: string, newRole: string) => {
     try {
-      logger.info("Changing member role", { memberId, newRole });
+      const member = members.find((m) => m.id === memberId);
+      logger.info("Changing member role", { memberId, memberName: member?.name, newRole });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
+      // Update local state
       setMembers(
         members.map((m) => (m.id === memberId ? { ...m, role: newRole } : m))
       );
 
-      logger.info("Role changed successfully");
-      toast.success("Member role updated");
+      logger.info("Role changed successfully", { memberId, newRole });
+      toast.success("Role updated", { description: `${member?.name} is now ${newRole}` });
+      announce(`${member?.name}'s role changed to ${newRole}`, "polite");
     } catch (error) {
-      logger.error("Failed to change role", { error });
+      logger.error("Failed to change role", { error, memberId });
       toast.error("Failed to update role");
+      announce("Error updating member role", "assertive");
     }
   };
 
   const handleSendMessage = async (memberId: string) => {
     try {
-      logger.info("Sending message to member", { memberId });
+      const member = members.find((m) => m.id === memberId);
+      logger.info("Opening message to member", { memberId, memberEmail: member?.email });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      if (member?.email) {
+        // Open email client
+        const subject = encodeURIComponent(`Message from your team`);
+        window.open(`mailto:${member.email}?subject=${subject}`, "_blank");
 
-      logger.info("Message sent successfully");
-      toast.success("Message sent");
+        logger.info("Email client opened", { memberId });
+        toast.success("Email opened", { description: `Compose message to ${member.name}` });
+        announce(`Opening email to ${member.name}`, "polite");
+      } else {
+        // Navigate to messages hub
+        window.location.href = `/dashboard/messages?member=${memberId}`;
+        toast.info("Redirecting to messages...");
+      }
     } catch (error) {
-      logger.error("Failed to send message", { error });
+      logger.error("Failed to send message", { error, memberId });
       toast.error("Failed to send message");
+      announce("Error sending message", "assertive");
     }
   };
 
   const handleStartVideoCall = async (memberId: string) => {
     try {
-      logger.info("Starting video call", { memberId });
+      const member = members.find((m) => m.id === memberId);
+      logger.info("Starting video call", { memberId, memberName: member?.name });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      // Navigate to meetings page with quick call parameter
+      window.location.href = `/dashboard/collaboration/meetings?call=${memberId}&name=${encodeURIComponent(member?.name || "")}`;
 
-      logger.info("Video call started");
-      toast.success("Starting video call...");
+      logger.info("Redirecting to video call");
+      toast.success("Starting video call...", { description: `Calling ${member?.name || "team member"}` });
+      announce(`Starting video call with ${member?.name}`, "polite");
     } catch (error) {
-      logger.error("Failed to start video call", { error });
+      logger.error("Failed to start video call", { error, memberId });
       toast.error("Failed to start video call");
+      announce("Error starting video call", "assertive");
     }
   };
 
-  const handleExportTeamData = async () => {
+  const handleExportTeamData = () => {
     try {
       logger.info("Exporting team data");
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const exportData = {
+        teams,
+        members,
+        stats,
+        exportedAt: new Date().toISOString(),
+        summary: {
+          totalTeams: teams.length,
+          totalMembers: members.length,
+          activeTeams: teams.filter(t => t.status === 'active').length,
+          membersByRole: members.reduce((acc, m) => {
+            acc[m.role] = (acc[m.role] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>)
+        }
+      };
 
-      logger.info("Team data exported successfully");
-      toast.success("Team data exported");
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `teams-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      logger.info("Team data exported successfully", { teamCount: teams.length, memberCount: members.length });
+      toast.success("Team data exported", {
+        description: `Exported ${teams.length} teams and ${members.length} members`
+      });
     } catch (error) {
       logger.error("Failed to export team data", { error });
       toast.error("Failed to export data");
@@ -376,16 +450,60 @@ export default function TeamsPage() {
 
   const handleImportTeamData = async () => {
     try {
-      logger.info("Importing team data");
+      logger.info("Opening file picker for team data import");
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Create file input and trigger click
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json,.csv";
+      input.onchange = async (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (!file) return;
 
-      logger.info("Team data imported successfully");
-      toast.success("Team data imported");
+        try {
+          const text = await file.text();
+          const importData = JSON.parse(text);
+
+          // Validate and import data
+          if (importData.members && Array.isArray(importData.members)) {
+            const importedMembers: TeamMember[] = importData.members.map((m: any) => ({
+              id: m.id || Date.now().toString() + Math.random(),
+              name: m.name || "Unknown",
+              email: m.email || "",
+              role: m.role || "Member",
+              status: "offline",
+              department: m.department || "",
+              joinedDate: m.joinedDate || new Date().toISOString().split("T")[0],
+              tasksCompleted: m.tasksCompleted || 0,
+              performance: m.performance || 0,
+              isFavorite: false,
+            }));
+
+            setMembers([...members, ...importedMembers]);
+            setStats((prev) => ({
+              ...prev,
+              totalMembers: prev.totalMembers + importedMembers.length,
+            }));
+
+            logger.info("Team data imported successfully", { count: importedMembers.length });
+            toast.success("Team data imported", {
+              description: `${importedMembers.length} members added`,
+            });
+            announce(`${importedMembers.length} team members imported successfully`, "polite");
+          } else {
+            toast.error("Invalid file format", { description: "File must contain a 'members' array" });
+          }
+        } catch {
+          logger.error("Failed to parse import file");
+          toast.error("Invalid JSON file");
+          announce("Error parsing import file", "assertive");
+        }
+      };
+      input.click();
     } catch (error) {
       logger.error("Failed to import team data", { error });
       toast.error("Failed to import data");
+      announce("Error importing team data", "assertive");
     }
   };
 

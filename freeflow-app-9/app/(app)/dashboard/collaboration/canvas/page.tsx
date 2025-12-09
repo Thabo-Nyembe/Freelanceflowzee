@@ -23,6 +23,7 @@ import {
   Palette,
   Settings,
   Users,
+  UserPlus,
   Share2,
   Copy,
   Grid3x3,
@@ -137,6 +138,8 @@ export default function CanvasPage() {
   );
   const [isNewProjectOpen, setIsNewProjectOpen] = useState(false);
   const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("canvas");
 
@@ -354,55 +357,104 @@ export default function CanvasPage() {
 
   const handleSaveCanvas = async () => {
     try {
-      logger.info("Saving canvas");
+      if (!activeProject) return;
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      logger.info("Saving canvas", { projectId: activeProject.id });
 
-      if (activeProject) {
-        setProjects(
-          projects.map((p) =>
-            p.id === activeProject.id
-              ? {
-                  ...p,
-                  modifiedAt: new Date().toISOString().split("T")[0],
-                }
-              : p
-          )
-        );
+      // Get canvas data as base64
+      const canvas = canvasRef.current;
+      let canvasData: string | undefined;
+      if (canvas) {
+        canvasData = canvas.toDataURL("image/png");
       }
 
-      logger.info("Canvas saved successfully");
+      // Update in database
+      const { error } = await updateCanvasProject(activeProject.id, {
+        canvas_data: canvasData,
+        updated_at: new Date().toISOString(),
+      });
+
+      if (error) {
+        logger.error("Failed to save canvas to database", { error });
+        toast.error("Failed to save canvas");
+        announce("Error saving canvas", "assertive");
+        return;
+      }
+
+      // Update local state
+      const now = new Date().toLocaleDateString();
+      setProjects(
+        projects.map((p) =>
+          p.id === activeProject.id ? { ...p, modifiedAt: now } : p
+        )
+      );
+
+      logger.info("Canvas saved successfully", { projectId: activeProject.id });
       toast.success("Canvas saved");
+      announce("Canvas saved successfully", "polite");
     } catch (error) {
       logger.error("Failed to save canvas", { error });
       toast.error("Failed to save canvas");
+      announce("Error saving canvas", "assertive");
     }
   };
 
   const handleExportCanvas = async (format: "png" | "pdf" | "svg") => {
     try {
-      logger.info("Exporting canvas", { format });
+      logger.info("Exporting canvas", { format, projectName: activeProject?.name });
 
       const canvas = canvasRef.current;
-      if (!canvas) return;
+      if (!canvas) {
+        toast.error("No canvas to export");
+        return;
+      }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const filename = `${activeProject?.name || "canvas"}_${new Date().toISOString().split("T")[0]}`;
 
       if (format === "png") {
         const dataUrl = canvas.toDataURL("image/png");
         const link = document.createElement("a");
-        link.download = `${activeProject?.name || "canvas"}.png`;
+        link.download = `${filename}.png`;
         link.href = dataUrl;
+        document.body.appendChild(link);
         link.click();
+        document.body.removeChild(link);
+      } else if (format === "pdf") {
+        // For PDF, we'll convert the canvas to an image and create a basic PDF
+        const dataUrl = canvas.toDataURL("image/png");
+        // Create a printable HTML page with the image
+        const printWindow = window.open("", "_blank");
+        if (printWindow) {
+          printWindow.document.write(`
+            <html>
+              <head><title>${filename}</title></head>
+              <body style="margin:0;display:flex;justify-content:center;align-items:center;">
+                <img src="${dataUrl}" style="max-width:100%;max-height:100vh;" />
+              </body>
+            </html>
+          `);
+          printWindow.document.close();
+          printWindow.print();
+        }
+      } else if (format === "svg") {
+        // Export canvas as PNG with SVG-like naming (actual SVG would need vector data)
+        const dataUrl = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.download = `${filename}.png`; // Note: Canvas exports raster, not vector
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.info("Note: Canvas exports as raster image, not vector SVG");
       }
 
-      logger.info("Canvas exported successfully");
+      logger.info("Canvas exported successfully", { format, filename });
       toast.success(`Exported as ${format.toUpperCase()}`);
+      announce(`Canvas exported as ${format.toUpperCase()}`, "polite");
     } catch (error) {
-      logger.error("Failed to export canvas", { error });
+      logger.error("Failed to export canvas", { error, format });
       toast.error("Failed to export canvas");
+      announce("Error exporting canvas", "assertive");
     }
   };
 
@@ -555,118 +607,283 @@ export default function CanvasPage() {
 
   const handleShareCanvas = async () => {
     try {
-      logger.info("Sharing canvas");
+      if (!activeProject) return;
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      logger.info("Sharing canvas", { projectId: activeProject.id });
 
-      if (activeProject) {
-        setProjects(
-          projects.map((p) =>
-            p.id === activeProject.id ? { ...p, isShared: true } : p
-          )
-        );
+      // Update share status in database
+      const { error } = await updateCanvasProject(activeProject.id, {
+        is_shared: true,
+      });
+
+      if (error) {
+        logger.error("Failed to update share status", { error });
+        toast.error("Failed to share canvas");
+        return;
       }
 
-      navigator.clipboard.writeText(
-        `https://app.example.com/canvas/${activeProject?.id}`
+      // Update local state
+      setProjects(
+        projects.map((p) =>
+          p.id === activeProject.id ? { ...p, isShared: true } : p
+        )
       );
+      setActiveProject({ ...activeProject, isShared: true });
 
-      logger.info("Canvas shared");
-      toast.success("Share link copied to clipboard");
+      // Generate and copy share link
+      const shareUrl = `${window.location.origin}/dashboard/collaboration/canvas/view/${activeProject.id}`;
+
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = shareUrl;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+
+      logger.info("Canvas shared successfully", { projectId: activeProject.id });
+      toast.success("Share link copied", { description: "Anyone with the link can view" });
+      announce("Canvas share link copied to clipboard", "polite");
     } catch (error) {
       logger.error("Failed to share canvas", { error });
       toast.error("Failed to share canvas");
+      announce("Error sharing canvas", "assertive");
     }
   };
 
   const handleDuplicateCanvas = async () => {
     try {
-      logger.info("Duplicating canvas");
+      if (!activeProject || !userId) return;
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      logger.info("Duplicating canvas", { projectId: activeProject.id });
 
-      if (activeProject) {
+      // Get current canvas data
+      const canvas = canvasRef.current;
+      let canvasData: string | undefined;
+      if (canvas) {
+        canvasData = canvas.toDataURL("image/png");
+      }
+
+      // Create duplicate in database
+      const { data, error } = await createCanvasProjectDB(userId, {
+        name: `${activeProject.name} (Copy)`,
+        canvas_data: canvasData,
+      });
+
+      if (error) {
+        logger.error("Failed to duplicate canvas in database", { error });
+        toast.error("Failed to duplicate canvas");
+        announce("Error duplicating canvas", "assertive");
+        return;
+      }
+
+      if (data) {
         const duplicatedProject: CanvasProject = {
-          ...activeProject,
-          id: Date.now().toString(),
-          name: `${activeProject.name} (Copy)`,
-          createdAt: new Date().toISOString().split("T")[0],
-          modifiedAt: new Date().toISOString().split("T")[0],
+          id: data.id,
+          name: data.name,
+          createdBy: userId,
+          createdAt: new Date().toLocaleDateString(),
+          modifiedAt: new Date().toLocaleDateString(),
+          collaborators: 1,
+          isShared: false,
         };
 
         setProjects([duplicatedProject, ...projects]);
-        logger.info("Canvas duplicated");
-        toast.success("Canvas duplicated");
+        setStats(prev => ({ ...prev, totalProjects: prev.totalProjects + 1 }));
+
+        logger.info("Canvas duplicated successfully", { newProjectId: data.id });
+        toast.success("Canvas duplicated", { description: duplicatedProject.name });
+        announce("Canvas duplicated successfully", "polite");
       }
     } catch (error) {
       logger.error("Failed to duplicate canvas", { error });
       toast.error("Failed to duplicate canvas");
+      announce("Error duplicating canvas", "assertive");
     }
   };
 
   const handleDeleteProject = async (projectId: string) => {
     try {
-      logger.info("Deleting project", { projectId });
+      logger.info("Deleting project", { projectId, userId });
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Delete from database
+      const { error } = await deleteCanvasProject(projectId);
 
+      if (error) {
+        logger.error("Failed to delete project from database", { error, projectId });
+        toast.error("Failed to delete project");
+        announce("Error deleting project", "assertive");
+        return;
+      }
+
+      // Update local state
       setProjects(projects.filter((p) => p.id !== projectId));
+      setStats(prev => ({ ...prev, totalProjects: prev.totalProjects - 1 }));
 
       if (activeProject?.id === projectId) {
         setActiveProject(null);
         setActiveTab("projects");
       }
 
-      logger.info("Project deleted");
+      logger.info("Project deleted successfully", { projectId });
       toast.success("Project deleted");
+      announce("Canvas project deleted successfully", "polite");
     } catch (error) {
-      logger.error("Failed to delete project", { error });
+      logger.error("Failed to delete project", { error, projectId });
       toast.error("Failed to delete project");
+      announce("Error deleting project", "assertive");
     }
   };
 
   const handleLoadTemplate = async (templateName: string) => {
     try {
-      logger.info("Loading template", { templateName });
+      if (!userId) return;
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      logger.info("Loading template", { templateName, userId });
 
-      setIsTemplatesOpen(false);
+      // Create a new project with the template
+      const { data, error } = await createCanvasProjectDB(userId, {
+        name: `${templateName} - ${new Date().toLocaleDateString()}`,
+        template_type: templateName.toLowerCase().replace(/\s+/g, "_"),
+      });
 
-      logger.info("Template loaded");
-      toast.success("Template loaded");
+      if (error) {
+        logger.error("Failed to create project from template", { error });
+        toast.error("Failed to load template");
+        announce("Error loading template", "assertive");
+        return;
+      }
+
+      if (data) {
+        const newProject: CanvasProject = {
+          id: data.id,
+          name: data.name,
+          createdBy: userId,
+          createdAt: new Date().toLocaleDateString(),
+          modifiedAt: new Date().toLocaleDateString(),
+          collaborators: 1,
+          isShared: false,
+        };
+
+        setProjects([newProject, ...projects]);
+        setActiveProject(newProject);
+        setActiveTab("canvas");
+        setIsTemplatesOpen(false);
+        setStats(prev => ({ ...prev, totalProjects: prev.totalProjects + 1 }));
+
+        // Initialize canvas with template-specific content
+        setTimeout(() => {
+          const canvas = canvasRef.current;
+          if (canvas) {
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              // Draw template-specific background/guides
+              ctx.fillStyle = "#ffffff";
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+              if (templateName === "Wireframe") {
+                // Draw grid for wireframe
+                ctx.strokeStyle = "#e0e0e0";
+                ctx.lineWidth = 1;
+                for (let x = 0; x <= canvas.width; x += 50) {
+                  ctx.beginPath();
+                  ctx.moveTo(x, 0);
+                  ctx.lineTo(x, canvas.height);
+                  ctx.stroke();
+                }
+                for (let y = 0; y <= canvas.height; y += 50) {
+                  ctx.beginPath();
+                  ctx.moveTo(0, y);
+                  ctx.lineTo(canvas.width, y);
+                  ctx.stroke();
+                }
+              } else if (templateName === "Mind Map") {
+                // Draw center circle for mind map
+                ctx.strokeStyle = "#3b82f6";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height / 2, 50, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.fillStyle = "#eff6ff";
+                ctx.fill();
+              } else if (templateName === "Flowchart") {
+                // Draw flowchart start symbol
+                ctx.strokeStyle = "#10b981";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.ellipse(canvas.width / 2, 60, 60, 30, 0, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.fillStyle = "#ecfdf5";
+                ctx.fill();
+              }
+
+              saveToHistory();
+            }
+          }
+        }, 100);
+
+        logger.info("Template loaded successfully", { templateName, projectId: data.id });
+        toast.success(`${templateName} template loaded`);
+        announce(`${templateName} template loaded successfully`, "polite");
+      }
     } catch (error) {
-      logger.error("Failed to load template", { error });
+      logger.error("Failed to load template", { error, templateName });
       toast.error("Failed to load template");
+      announce("Error loading template", "assertive");
     }
   };
 
   const handleInviteCollaborator = async () => {
+    setInviteEmail("");
+    setIsInviteOpen(true);
+  };
+
+  const handleSendCollaboratorInvite = async () => {
     try {
-      logger.info("Inviting collaborator");
+      if (!activeProject || !inviteEmail) return;
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      logger.info("Sending collaborator invitation", { projectId: activeProject.id, email: inviteEmail });
 
-      if (activeProject) {
-        setProjects(
-          projects.map((p) =>
-            p.id === activeProject.id
-              ? { ...p, collaborators: p.collaborators + 1 }
-              : p
-          )
-        );
-      }
+      // Generate share link
+      const shareUrl = `${window.location.origin}/dashboard/collaboration/canvas/join/${activeProject.id}`;
 
-      logger.info("Collaborator invited");
-      toast.success("Invitation sent");
+      // Open email client with invitation
+      const subject = encodeURIComponent(`Invitation to collaborate on "${activeProject.name}"`);
+      const body = encodeURIComponent(
+        `You've been invited to collaborate on a canvas!\n\n` +
+        `Project: ${activeProject.name}\n\n` +
+        `Click here to join: ${shareUrl}\n\n` +
+        `Start collaborating in real-time!`
+      );
+
+      window.open(`mailto:${inviteEmail}?subject=${subject}&body=${body}`, "_blank");
+
+      // Update collaborator count in local state
+      setProjects(
+        projects.map((p) =>
+          p.id === activeProject.id
+            ? { ...p, collaborators: p.collaborators + 1 }
+            : p
+        )
+      );
+      setActiveProject({ ...activeProject, collaborators: activeProject.collaborators + 1 });
+      setStats(prev => ({ ...prev, activeCollaborators: prev.activeCollaborators + 1 }));
+
+      setIsInviteOpen(false);
+      setInviteEmail("");
+
+      logger.info("Collaborator invitation sent", { projectId: activeProject.id, email: inviteEmail });
+      toast.success("Invitation email opened", { description: `Ready to send to ${inviteEmail}` });
+      announce("Collaborator invitation email opened", "polite");
     } catch (error) {
       logger.error("Failed to invite collaborator", { error });
       toast.error("Failed to send invitation");
+      announce("Error sending invitation", "assertive");
     }
   };
 
@@ -752,6 +969,48 @@ export default function CanvasPage() {
                 </Card>
               )
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invite Collaborator Dialog */}
+      <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite Collaborator</DialogTitle>
+            <DialogDescription>
+              Invite someone to collaborate on this canvas in real-time
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="collabEmail">Email Address</Label>
+              <Input
+                id="collabEmail"
+                type="email"
+                placeholder="colleague@example.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setIsInviteOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="flex-1"
+                onClick={handleSendCollaboratorInvite}
+                disabled={!inviteEmail}
+              >
+                <UserPlus className="mr-2 h-4 w-4" />
+                Send Invitation
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
