@@ -1038,7 +1038,7 @@ export default function CommunityHubPage() {
     })
   }
 
-  const handleJoinEvent = (id: string) => {
+  const handleJoinEvent = async (id: string) => {
     const event = state.events.find(e => e.id === id)
 
     logger.info('Joining event', {
@@ -1047,6 +1047,17 @@ export default function CommunityHubPage() {
       eventDate: event?.date,
       currentAttendees: event?.attendees?.length
     })
+
+    // RSVP to event in database
+    if (userId) {
+      try {
+        const { rsvpEvent } = await import('@/lib/community-hub-queries')
+        await rsvpEvent(id, userId, 'attending')
+        logger.info('Event RSVP recorded in database', { eventId: id })
+      } catch (error: any) {
+        logger.error('Failed to record event RSVP', { error: error.message })
+      }
+    }
 
     toast.success('Registered for event!', {
       description: `${event?.title} - ${event?.date} - ${event?.location} - ${(event?.attendees?.length || 0) + 1} attendees`
@@ -1061,7 +1072,7 @@ export default function CommunityHubPage() {
     })
   }
 
-  const handleJoinGroup = (id: string) => {
+  const handleJoinGroup = async (id: string) => {
     const group = state.groups.find(g => g.id === id)
 
     logger.info('Joining group', {
@@ -1069,6 +1080,17 @@ export default function CommunityHubPage() {
       groupName: group?.name,
       currentMembers: group?.members?.length
     })
+
+    // Join group in database
+    if (userId) {
+      try {
+        const { joinGroup } = await import('@/lib/community-hub-queries')
+        await joinGroup(id, userId)
+        logger.info('Group join recorded in database', { groupId: id })
+      } catch (error: any) {
+        logger.error('Failed to record group join', { error: error.message })
+      }
+    }
 
     toast.success('Joined group!', {
       description: `${group?.name} - ${group?.category} - ${(group?.members?.length || 0) + 1} members - ${group?.posts} posts`
