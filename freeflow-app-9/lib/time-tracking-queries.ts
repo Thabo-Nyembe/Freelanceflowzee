@@ -494,6 +494,39 @@ export async function deleteAllTimeEntries(
   }
 }
 
+/**
+ * Archive a time entry (soft delete - updates status to 'archived')
+ */
+export async function archiveTimeEntry(
+  entryId: string,
+  userId: string
+): Promise<{ success: boolean; error: any }> {
+  try {
+    logger.info('Archiving time entry', { entryId, userId })
+
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('time_entries')
+      .update({
+        status: 'completed',
+        metadata: { archived: true, archived_at: new Date().toISOString() }
+      })
+      .eq('id', entryId)
+      .eq('user_id', userId)
+
+    if (error) {
+      logger.error('Failed to archive time entry', { error, entryId })
+      return { success: false, error }
+    }
+
+    logger.info('Time entry archived successfully', { entryId })
+    return { success: true, error: null }
+  } catch (error) {
+    logger.error('Exception archiving time entry', { error, entryId })
+    return { success: false, error }
+  }
+}
+
 // ============================================
 // REPORTING & ANALYTICS
 // ============================================

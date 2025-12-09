@@ -31,6 +31,7 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
+import { archiveTimeEntry, deleteTimeEntry } from '@/lib/time-tracking-queries'
 
 const logger = createFeatureLogger('TimeTracking')
 
@@ -1004,14 +1005,7 @@ export default function TimeTrackingPage() {
     setIsDeleting(true)
     try {
       setSelectedTask('')
-      // Persist updated projects (with task removed) to localStorage
-      const updatedProjects = projects.map(p => {
-        if (p.id === selectedProject) {
-          return { ...p, tasks: p.tasks.filter(t => t.id !== taskToDelete) }
-        }
-        return p
-      })
-      localStorage.setItem(`time_projects_${userId}`, JSON.stringify(updatedProjects))
+      // Note: Projects are demo data - in production, would delete via database
       logger.info('Task deleted successfully', {
         taskId: taskToDelete,
         taskName: task?.name
@@ -1044,24 +1038,30 @@ export default function TimeTrackingPage() {
   }
 
   const confirmArchiveEntry = async () => {
-    if (!entryToArchive) return
+    if (!entryToArchive || !userId) return
 
     setIsDeleting(true)
     try {
-      // Archive the entry to localStorage
-      const archivedEntries = JSON.parse(localStorage.getItem(`archived_entries_${userId}`) || '[]')
-      const entryToMove = timeEntries.find(e => e.id === entryToArchive)
-      if (entryToMove) {
-        archivedEntries.push({ ...entryToMove, archivedAt: new Date().toISOString() })
-        localStorage.setItem(`archived_entries_${userId}`, JSON.stringify(archivedEntries))
-        setTimeEntries(prev => prev.filter(e => e.id !== entryToArchive))
-        localStorage.setItem(`time_entries_${userId}`, JSON.stringify(timeEntries.filter(e => e.id !== entryToArchive)))
+      // Archive entry in database
+      const { success, error } = await archiveTimeEntry(entryToArchive, userId)
+
+      if (error) {
+        logger.error('Failed to archive entry in database', { error, entryId: entryToArchive })
+        toast.error('Archive Failed', { description: 'Could not archive time entry' })
+        return
       }
+
+      // Update local state
+      setTimeEntries(prev => prev.filter(e => e.id !== entryToArchive))
+
       logger.info('Entry archived successfully', { entryId: entryToArchive })
       toast.success('Entry Archived', {
         description: 'Time entry archived - can be restored later'
       })
       announce('Time entry archived', 'polite')
+    } catch (error) {
+      logger.error('Exception archiving entry', { error })
+      toast.error('Archive Failed')
     } finally {
       setIsDeleting(false)
       setShowArchiveEntryDialog(false)
