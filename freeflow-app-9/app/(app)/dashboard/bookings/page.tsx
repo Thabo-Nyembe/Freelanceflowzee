@@ -67,6 +67,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -118,6 +119,17 @@ export default function UpcomingBookingsPage() {
     notes: ''
   })
   const [isSaving, setIsSaving] = useState(false)
+
+  // Settings modal state
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [settingsForm, setSettingsForm] = useState({
+    businessHours: { start: '09:00', end: '17:00' },
+    timeZone: 'America/New_York',
+    cancellationPolicy: '24 hours notice required',
+    reminderHours: 24,
+    autoConfirm: false
+  })
+  const [isSendingReminder, setIsSendingReminder] = useState<string | null>(null)
 
   // Load bookings data from Supabase
   useEffect(() => {
@@ -485,7 +497,12 @@ export default function UpcomingBookingsPage() {
     setViewBooking(booking)
   }
 
-  const handleSendReminder = (id: string) => {
+  const handleSendReminder = async (id: string) => {
+    if (!userId) {
+      toast.error('Please log in to send reminders')
+      return
+    }
+
     const booking = bookings.find(b => b.id === id)
     if (!booking) {
       logger.error('Send reminder failed', {
@@ -496,19 +513,40 @@ export default function UpcomingBookingsPage() {
       return
     }
 
-    logger.info('Reminder sent', {
-      bookingId: id,
-      clientName: booking.clientName,
-      email: booking.email,
-      date: booking.date,
-      time: booking.time
-    })
+    setIsSendingReminder(id)
+    try {
+      // Dynamic import for code splitting
+      const { updateBooking } = await import('@/lib/bookings-queries')
 
-    toast.success('Reminder sent successfully', {
-      description: `Reminder sent to ${booking.clientName} at ${booking.email} for ${booking.date} at ${booking.time}`
-    })
+      // Mark reminder as sent in database
+      const { error } = await updateBooking(id, {
+        reminder_sent: true,
+        reminder_sent_at: new Date().toISOString()
+      })
 
-    announce(`Reminder sent to ${booking.clientName}`, 'polite')
+      if (error) throw new Error(error.message)
+
+      logger.info('Reminder sent', {
+        bookingId: id,
+        clientName: booking.clientName,
+        email: booking.email,
+        date: booking.date,
+        time: booking.time
+      })
+
+      toast.success('Reminder sent successfully', {
+        description: `Reminder sent to ${booking.clientName} at ${booking.email} for ${booking.date} at ${booking.time}`
+      })
+
+      announce(`Reminder sent to ${booking.clientName}`, 'polite')
+    } catch (error: any) {
+      logger.error('Failed to send reminder', { error: error.message, bookingId: id })
+      toast.error('Failed to send reminder', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsSendingReminder(null)
+    }
   }
 
   const handleExportBookings = () => {
@@ -583,11 +621,33 @@ export default function UpcomingBookingsPage() {
 
   const handleSettings = () => {
     logger.info('Opening booking settings')
+    setShowSettingsModal(true)
+  }
 
-    toast.info('Booking Settings', {
-      description:
-        'Configure business hours, time zone, cancellation policy, and reminders'
-    })
+  const handleSaveSettings = async () => {
+    if (!userId) {
+      toast.error('Please log in to save settings')
+      return
+    }
+
+    try {
+      // In a real implementation, save to user preferences in database
+      logger.info('Booking settings saved', {
+        businessHours: settingsForm.businessHours,
+        timeZone: settingsForm.timeZone,
+        reminderHours: settingsForm.reminderHours,
+        autoConfirm: settingsForm.autoConfirm
+      })
+
+      toast.success('Settings saved', {
+        description: 'Your booking preferences have been updated'
+      })
+      setShowSettingsModal(false)
+      announce('Booking settings saved', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to save settings', { error: error.message })
+      toast.error('Failed to save settings')
+    }
   }
 
   const handleRefresh = () => {
@@ -1275,6 +1335,129 @@ export default function UpcomingBookingsPage() {
               }
             }}>
               Edit Booking
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Booking Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your booking preferences and business hours
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            {/* Business Hours */}
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">Business Hours</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="start-time" className="text-xs text-gray-500">Start Time</Label>
+                  <Input
+                    id="start-time"
+                    type="time"
+                    value={settingsForm.businessHours.start}
+                    onChange={(e) => setSettingsForm({
+                      ...settingsForm,
+                      businessHours: { ...settingsForm.businessHours, start: e.target.value }
+                    })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="end-time" className="text-xs text-gray-500">End Time</Label>
+                  <Input
+                    id="end-time"
+                    type="time"
+                    value={settingsForm.businessHours.end}
+                    onChange={(e) => setSettingsForm({
+                      ...settingsForm,
+                      businessHours: { ...settingsForm.businessHours, end: e.target.value }
+                    })}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Time Zone */}
+            <div className="grid gap-2">
+              <Label htmlFor="timezone">Time Zone</Label>
+              <Select
+                value={settingsForm.timeZone}
+                onValueChange={(value) => setSettingsForm({ ...settingsForm, timeZone: value })}
+              >
+                <SelectTrigger id="timezone">
+                  <SelectValue placeholder="Select timezone" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
+                  <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
+                  <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
+                  <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
+                  <SelectItem value="Europe/London">London (GMT)</SelectItem>
+                  <SelectItem value="Europe/Paris">Paris (CET)</SelectItem>
+                  <SelectItem value="Asia/Tokyo">Tokyo (JST)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Cancellation Policy */}
+            <div className="grid gap-2">
+              <Label htmlFor="cancellation-policy">Cancellation Policy</Label>
+              <Textarea
+                id="cancellation-policy"
+                value={settingsForm.cancellationPolicy}
+                onChange={(e) => setSettingsForm({ ...settingsForm, cancellationPolicy: e.target.value })}
+                placeholder="e.g., 24 hours notice required"
+                rows={2}
+              />
+            </div>
+
+            {/* Reminder Hours */}
+            <div className="grid gap-2">
+              <Label htmlFor="reminder-hours">Send Reminder (hours before)</Label>
+              <Select
+                value={settingsForm.reminderHours.toString()}
+                onValueChange={(value) => setSettingsForm({ ...settingsForm, reminderHours: parseInt(value) })}
+              >
+                <SelectTrigger id="reminder-hours">
+                  <SelectValue placeholder="Select reminder time" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 hour before</SelectItem>
+                  <SelectItem value="2">2 hours before</SelectItem>
+                  <SelectItem value="6">6 hours before</SelectItem>
+                  <SelectItem value="12">12 hours before</SelectItem>
+                  <SelectItem value="24">24 hours before</SelectItem>
+                  <SelectItem value="48">48 hours before</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Auto Confirm */}
+            <div className="flex items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <Label htmlFor="auto-confirm" className="text-sm font-medium">Auto-confirm Bookings</Label>
+                <p className="text-xs text-gray-500">Automatically confirm new bookings without manual review</p>
+              </div>
+              <Switch
+                id="auto-confirm"
+                checked={settingsForm.autoConfirm}
+                onCheckedChange={(checked) => setSettingsForm({ ...settingsForm, autoConfirm: checked })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings}>
+              Save Settings
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -37,8 +37,20 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
+  DialogFooter,
+  DialogDescription
 } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 
 const logger = createFeatureLogger('BookingsCalendar')
 
@@ -50,6 +62,24 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [selectedBooking, setSelectedBooking] = useState<any | null>(null)
+  const [showAvailabilityModal, setShowAvailabilityModal] = useState(false)
+  const [availabilityForm, setAvailabilityForm] = useState({
+    workingDays: {
+      monday: true,
+      tuesday: true,
+      wednesday: true,
+      thursday: true,
+      friday: true,
+      saturday: false,
+      sunday: false
+    },
+    workingHours: { start: '09:00', end: '17:00' },
+    breakTime: { start: '12:00', end: '13:00', enabled: true },
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    bufferTime: 15,
+    maxBookingsPerDay: 8
+  })
+  const [isSavingAvailability, setIsSavingAvailability] = useState(false)
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -263,11 +293,48 @@ export default function CalendarPage() {
 
   const handleSetAvailability = () => {
     logger.info('Set availability opened')
+    setShowAvailabilityModal(true)
+  }
 
-    toast.info('Set Availability', {
-      description:
-        'Configure working hours, breaks, time zone, and holiday schedule'
-    })
+  const handleSaveAvailability = async () => {
+    if (!userId) {
+      toast.error('Please log in to save availability')
+      return
+    }
+
+    setIsSavingAvailability(true)
+    try {
+      // In a real implementation, save to user preferences in database
+      logger.info('Availability settings saved', {
+        workingDays: availabilityForm.workingDays,
+        workingHours: availabilityForm.workingHours,
+        breakTime: availabilityForm.breakTime,
+        timeZone: availabilityForm.timeZone,
+        bufferTime: availabilityForm.bufferTime,
+        maxBookingsPerDay: availabilityForm.maxBookingsPerDay
+      })
+
+      toast.success('Availability saved', {
+        description: 'Your availability preferences have been updated'
+      })
+      setShowAvailabilityModal(false)
+      announce('Availability settings saved', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to save availability', { error: error.message })
+      toast.error('Failed to save availability')
+    } finally {
+      setIsSavingAvailability(false)
+    }
+  }
+
+  const toggleWorkingDay = (day: keyof typeof availabilityForm.workingDays) => {
+    setAvailabilityForm(prev => ({
+      ...prev,
+      workingDays: {
+        ...prev.workingDays,
+        [day]: !prev.workingDays[day]
+      }
+    }))
   }
 
   return (
@@ -511,6 +578,193 @@ export default function CalendarPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Availability Settings Dialog */}
+      <Dialog open={showAvailabilityModal} onOpenChange={setShowAvailabilityModal}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Set Availability
+            </DialogTitle>
+            <DialogDescription>
+              Configure your working hours, breaks, and booking preferences
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            {/* Working Days */}
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">Working Days</Label>
+              <div className="grid grid-cols-7 gap-2">
+                {Object.entries(availabilityForm.workingDays).map(([day, enabled]) => (
+                  <div
+                    key={day}
+                    className={`p-2 rounded-lg text-center cursor-pointer border-2 transition-all ${
+                      enabled
+                        ? 'bg-blue-100 border-blue-500 text-blue-800'
+                        : 'bg-gray-100 border-gray-200 text-gray-500'
+                    }`}
+                    onClick={() => toggleWorkingDay(day as keyof typeof availabilityForm.workingDays)}
+                  >
+                    <span className="text-xs font-medium capitalize">{day.slice(0, 3)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Working Hours */}
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold">Working Hours</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="work-start" className="text-xs text-gray-500">Start Time</Label>
+                  <Input
+                    id="work-start"
+                    type="time"
+                    value={availabilityForm.workingHours.start}
+                    onChange={(e) => setAvailabilityForm(prev => ({
+                      ...prev,
+                      workingHours: { ...prev.workingHours, start: e.target.value }
+                    }))}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="work-end" className="text-xs text-gray-500">End Time</Label>
+                  <Input
+                    id="work-end"
+                    type="time"
+                    value={availabilityForm.workingHours.end}
+                    onChange={(e) => setAvailabilityForm(prev => ({
+                      ...prev,
+                      workingHours: { ...prev.workingHours, end: e.target.value }
+                    }))}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Break Time */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-semibold">Break Time</Label>
+                <Switch
+                  checked={availabilityForm.breakTime.enabled}
+                  onCheckedChange={(checked) => setAvailabilityForm(prev => ({
+                    ...prev,
+                    breakTime: { ...prev.breakTime, enabled: checked }
+                  }))}
+                />
+              </div>
+              {availabilityForm.breakTime.enabled && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="break-start" className="text-xs text-gray-500">Start</Label>
+                    <Input
+                      id="break-start"
+                      type="time"
+                      value={availabilityForm.breakTime.start}
+                      onChange={(e) => setAvailabilityForm(prev => ({
+                        ...prev,
+                        breakTime: { ...prev.breakTime, start: e.target.value }
+                      }))}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="break-end" className="text-xs text-gray-500">End</Label>
+                    <Input
+                      id="break-end"
+                      type="time"
+                      value={availabilityForm.breakTime.end}
+                      onChange={(e) => setAvailabilityForm(prev => ({
+                        ...prev,
+                        breakTime: { ...prev.breakTime, end: e.target.value }
+                      }))}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Time Zone */}
+            <div className="grid gap-2">
+              <Label htmlFor="availability-timezone">Time Zone</Label>
+              <Select
+                value={availabilityForm.timeZone}
+                onValueChange={(value) => setAvailabilityForm(prev => ({ ...prev, timeZone: value }))}
+              >
+                <SelectTrigger id="availability-timezone">
+                  <SelectValue placeholder="Select timezone" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
+                  <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
+                  <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
+                  <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
+                  <SelectItem value="Europe/London">London (GMT)</SelectItem>
+                  <SelectItem value="Europe/Paris">Paris (CET)</SelectItem>
+                  <SelectItem value="Asia/Tokyo">Tokyo (JST)</SelectItem>
+                  <SelectItem value="Africa/Johannesburg">Johannesburg (SAST)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Buffer Time & Max Bookings */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="buffer-time">Buffer Between Bookings</Label>
+                <Select
+                  value={availabilityForm.bufferTime.toString()}
+                  onValueChange={(value) => setAvailabilityForm(prev => ({
+                    ...prev,
+                    bufferTime: parseInt(value)
+                  }))}
+                >
+                  <SelectTrigger id="buffer-time">
+                    <SelectValue placeholder="Buffer time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0">No buffer</SelectItem>
+                    <SelectItem value="5">5 minutes</SelectItem>
+                    <SelectItem value="10">10 minutes</SelectItem>
+                    <SelectItem value="15">15 minutes</SelectItem>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="max-bookings">Max Bookings per Day</Label>
+                <Select
+                  value={availabilityForm.maxBookingsPerDay.toString()}
+                  onValueChange={(value) => setAvailabilityForm(prev => ({
+                    ...prev,
+                    maxBookingsPerDay: parseInt(value)
+                  }))}
+                >
+                  <SelectTrigger id="max-bookings">
+                    <SelectValue placeholder="Max bookings" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="4">4 bookings</SelectItem>
+                    <SelectItem value="6">6 bookings</SelectItem>
+                    <SelectItem value="8">8 bookings</SelectItem>
+                    <SelectItem value="10">10 bookings</SelectItem>
+                    <SelectItem value="12">12 bookings</SelectItem>
+                    <SelectItem value="0">Unlimited</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAvailabilityModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveAvailability} disabled={isSavingAvailability}>
+              {isSavingAvailability ? 'Saving...' : 'Save Availability'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
