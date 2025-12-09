@@ -81,27 +81,43 @@ export default function HistoryPage() {
     }
   }, [userId, currentPage])
 
-  // Refresh history
+  // Refresh history from database
   const handleRefresh = useCallback(async () => {
-    setIsLoading(true)
-    // Load history from localStorage if available
-    const savedHistory = localStorage.getItem('ai_create_history')
-    if (savedHistory) {
-      try {
-        const parsed = JSON.parse(savedHistory)
-        setHistory(parsed)
-        setIsLoading(false)
-        return
-      } catch {
-        // Fall back to initial history
-      }
+    if (!userId) {
+      toast.error('Please log in to refresh history')
+      return
     }
-    setHistory([...INITIAL_HISTORY].sort(() => Math.random() - 0.5))
-    setIsLoading(false)
-    toast.success('History Refreshed')
-    logger.info('History refreshed')
-    announce('History refreshed', 'polite')
-  }, [announce])
+
+    setIsLoading(true)
+    try {
+      // Load from database
+      const { data, error } = await getGenerations(userId, { limit: itemsPerPage, offset: 0 })
+
+      if (error) throw error
+
+      if (data && data.length > 0) {
+        setHistory(data.map(g => ({
+          id: g.id,
+          type: g.asset_type || 'Generation',
+          title: g.custom_prompt?.substring(0, 50) || 'AI Generation',
+          model: g.model_used,
+          timestamp: new Date(g.created_at).toLocaleDateString(),
+          tokens: 0,
+          cost: 0,
+          content: g.custom_prompt
+        })))
+      }
+
+      toast.success('History Refreshed')
+      logger.info('History refreshed from database', { count: data?.length || 0 })
+      announce('History refreshed', 'polite')
+    } catch (error) {
+      logger.error('Failed to refresh history', { error })
+      toast.error('Failed to refresh history')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [userId, announce])
 
   // Export all history
   const handleExportAll = useCallback(() => {
