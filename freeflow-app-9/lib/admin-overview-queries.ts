@@ -1166,3 +1166,245 @@ export async function getPipelineMetrics(userId: string) {
     weightedValue
   }
 }
+
+// ============================================================================
+// ADMIN ALERTS SYSTEM
+// ============================================================================
+
+export type AlertLevel = 'info' | 'warning' | 'error' | 'success'
+export type AlertStatus = 'active' | 'acknowledged' | 'dismissed' | 'resolved'
+
+export interface AdminAlert {
+  id: string
+  user_id: string
+  level: AlertLevel
+  title: string
+  message: string
+  action?: string
+  path?: string
+  status: AlertStatus
+  acknowledged_at?: string
+  dismissed_at?: string
+  resolved_at?: string
+  metadata?: Record<string, any>
+  expires_at?: string
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Get all active alerts for a user
+ */
+export async function getAdminAlerts(userId: string, includeAll: boolean = false): Promise<AdminAlert[]> {
+  const supabase = createClient()
+
+  let query = supabase
+    .from('admin_alerts')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+
+  if (!includeAll) {
+    query = query.eq('status', 'active')
+  }
+
+  const { data, error } = await query
+  if (error) throw error
+  return data || []
+}
+
+/**
+ * Create a new admin alert
+ */
+export async function createAdminAlert(
+  userId: string,
+  alertData: {
+    level: AlertLevel
+    title: string
+    message: string
+    action?: string
+    path?: string
+    expires_at?: string
+    metadata?: Record<string, any>
+  }
+): Promise<AdminAlert> {
+  const supabase = createClient()
+
+  const { data, error } = await supabase
+    .from('admin_alerts')
+    .insert({
+      user_id: userId,
+      ...alertData,
+      status: 'active'
+    })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+/**
+ * Acknowledge an alert (mark as seen but not dismissed)
+ */
+export async function acknowledgeAlert(alertId: string): Promise<void> {
+  const supabase = createClient()
+
+  const { error } = await supabase
+    .from('admin_alerts')
+    .update({
+      status: 'acknowledged',
+      acknowledged_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', alertId)
+
+  if (error) throw error
+}
+
+/**
+ * Dismiss an alert (hide from view)
+ */
+export async function dismissAlert(alertId: string): Promise<void> {
+  const supabase = createClient()
+
+  const { error } = await supabase
+    .from('admin_alerts')
+    .update({
+      status: 'dismissed',
+      dismissed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', alertId)
+
+  if (error) throw error
+}
+
+/**
+ * Resolve an alert (mark as handled)
+ */
+export async function resolveAlert(alertId: string): Promise<void> {
+  const supabase = createClient()
+
+  const { error } = await supabase
+    .from('admin_alerts')
+    .update({
+      status: 'resolved',
+      resolved_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', alertId)
+
+  if (error) throw error
+}
+
+/**
+ * Delete an alert permanently
+ */
+export async function deleteAdminAlert(alertId: string): Promise<void> {
+  const supabase = createClient()
+
+  const { error } = await supabase
+    .from('admin_alerts')
+    .delete()
+    .eq('id', alertId)
+
+  if (error) throw error
+}
+
+/**
+ * Get unacknowledged alert count
+ */
+export async function getUnacknowledgedAlertCount(userId: string): Promise<number> {
+  const supabase = createClient()
+
+  const { count, error } = await supabase
+    .from('admin_alerts')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('status', 'active')
+
+  if (error) throw error
+  return count || 0
+}
+
+/**
+ * Generate system alerts based on dashboard data
+ */
+export async function generateSystemAlerts(userId: string, dashboardData: {
+  overdueInvoices: number
+  overdueAmount: number
+  highValueDeals: number
+  highValueAmount: number
+  hotLeads: number
+  activeCampaigns: number
+}): Promise<AdminAlert[]> {
+  const alerts: AdminAlert[] = []
+  const now = new Date().toISOString()
+
+  // Overdue invoices alert
+  if (dashboardData.overdueInvoices > 0) {
+    alerts.push({
+      id: `sys-overdue-${Date.now()}`,
+      user_id: userId,
+      level: 'warning',
+      title: 'Overdue Invoices Require Attention',
+      message: `${dashboardData.overdueInvoices} invoice${dashboardData.overdueInvoices !== 1 ? 's' : ''} totaling $${dashboardData.overdueAmount.toLocaleString()} are overdue`,
+      action: 'View Invoicing',
+      path: '/dashboard/admin-overview/invoicing',
+      status: 'active',
+      created_at: now,
+      updated_at: now
+    })
+  }
+
+  // High value deals alert
+  if (dashboardData.highValueDeals > 0) {
+    alerts.push({
+      id: `sys-deals-${Date.now()}`,
+      user_id: userId,
+      level: 'success',
+      title: 'High-Value Deals in Pipeline',
+      message: `${dashboardData.highValueDeals} deals worth $${dashboardData.highValueAmount.toLocaleString()} are in final stages`,
+      action: 'View CRM',
+      path: '/dashboard/admin-overview/crm',
+      status: 'active',
+      created_at: now,
+      updated_at: now
+    })
+  }
+
+  // Hot leads alert
+  if (dashboardData.hotLeads > 0) {
+    alerts.push({
+      id: `sys-leads-${Date.now()}`,
+      user_id: userId,
+      level: 'info',
+      title: 'Hot Leads Ready for Contact',
+      message: `${dashboardData.hotLeads} high-score leads are awaiting follow-up`,
+      action: 'View Marketing',
+      path: '/dashboard/admin-overview/marketing',
+      status: 'active',
+      created_at: now,
+      updated_at: now
+    })
+  }
+
+  // Active campaigns alert
+  if (dashboardData.activeCampaigns > 0) {
+    alerts.push({
+      id: `sys-campaigns-${Date.now()}`,
+      user_id: userId,
+      level: 'success',
+      title: 'Campaign Performance Update',
+      message: `${dashboardData.activeCampaigns} active campaigns are running`,
+      action: 'View Analytics',
+      path: '/dashboard/admin-overview/analytics',
+      status: 'active',
+      created_at: now,
+      updated_at: now
+    })
+  }
+
+  return alerts
+}
