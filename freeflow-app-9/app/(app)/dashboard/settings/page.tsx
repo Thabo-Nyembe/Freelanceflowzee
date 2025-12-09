@@ -194,19 +194,41 @@ export default function ProfilePage() {
     setShowRemovePhotoDialog(true)
   }
 
-  const confirmRemovePhoto = () => {
-    setProfile({ ...profile, avatar: '' })
+  const confirmRemovePhoto = async () => {
+    if (!userId) {
+      toast.error('Please log in to remove photo')
+      return
+    }
 
-    logger.info('Photo removed successfully', {
-      email: profile.email,
-      initials: `${profile.firstName[0]}${profile.lastName[0]}`
-    })
+    try {
+      logger.info('Removing photo from database', { userId })
 
-    toast.success('Photo Removed', {
-      description: `Replaced with initials: ${profile.firstName[0]}${profile.lastName[0]}`
-    })
-    announce('Profile photo removed', 'polite')
-    setShowRemovePhotoDialog(false)
+      const { updateAvatar } = await import('@/lib/user-settings-queries')
+      const { error } = await updateAvatar(userId, '')
+
+      if (error) {
+        throw new Error(error.message || 'Failed to remove photo')
+      }
+
+      setProfile({ ...profile, avatar: '' })
+
+      logger.info('Photo removed successfully', {
+        email: profile.email,
+        initials: `${profile.firstName[0]}${profile.lastName[0]}`
+      })
+
+      toast.success('Photo Removed', {
+        description: `Replaced with initials: ${profile.firstName[0]}${profile.lastName[0]}`
+      })
+      announce('Profile photo removed', 'polite')
+    } catch (err: any) {
+      logger.error('Failed to remove photo', { error: err })
+      toast.error('Failed to remove photo', {
+        description: err.message || 'Please try again'
+      })
+    } finally {
+      setShowRemovePhotoDialog(false)
+    }
   }
 
   return (
