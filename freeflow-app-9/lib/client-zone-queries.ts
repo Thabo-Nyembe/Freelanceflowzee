@@ -29,7 +29,7 @@ export type ProjectStatus = 'pending' | 'in-progress' | 'review' | 'completed' |
 export type DeliverableStatus = 'pending' | 'in-progress' | 'review' | 'completed' | 'revision-requested'
 export type RevisionStatus = 'open' | 'in-progress' | 'completed' | 'rejected'
 export type MessageType = 'text' | 'system' | 'notification'
-export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
+export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled' | 'disputed'
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
 export type NotificationType = 'project' | 'message' | 'invoice' | 'payment' | 'system'
 export type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent'
@@ -949,6 +949,114 @@ export async function markInvoiceAsPaid(
     .eq('id', invoiceId)
 
   if (error) throw error
+}
+
+/**
+ * Dispute an invoice
+ */
+export async function disputeInvoice(
+  invoiceId: string,
+  reason: string
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { data: null, error: new Error('Not authenticated') }
+
+  try {
+    // Update invoice status to disputed
+    const { data, error } = await supabase
+      .from('client_invoices')
+      .update({
+        status: 'disputed',
+        dispute_reason: reason,
+        disputed_at: new Date().toISOString(),
+        disputed_by: user.id,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', invoiceId)
+      .select()
+      .single()
+
+    if (error) return { data: null, error }
+
+    // Create a notification for the freelancer
+    await supabase.from('client_notifications').insert({
+      user_id: data.user_id, // The freelancer
+      title: 'Invoice Disputed',
+      message: `Invoice ${data.invoice_number} has been disputed. Reason: ${reason}`,
+      type: 'invoice',
+      priority: 'high',
+      link: `/dashboard/invoices/${invoiceId}`,
+      metadata: {
+        invoice_id: invoiceId,
+        invoice_number: data.invoice_number,
+        dispute_reason: reason
+      }
+    })
+
+    return { data, error: null }
+  } catch (err) {
+    return { data: null, error: err }
+  }
+}
+
+/**
+ * Resolve an invoice dispute
+ */
+export async function resolveInvoiceDispute(
+  invoiceId: string,
+  resolution: 'accepted' | 'rejected',
+  notes?: string
+): Promise<{ data: any; error: any }> {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { data: null, error: new Error('Not authenticated') }
+
+  try {
+    const newStatus = resolution === 'accepted' ? 'cancelled' : 'sent'
+
+    const { data, error } = await supabase
+      .from('client_invoices')
+      .update({
+        status: newStatus,
+        dispute_resolution: resolution,
+        dispute_resolved_at: new Date().toISOString(),
+        dispute_resolved_by: user.id,
+        dispute_resolution_notes: notes,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', invoiceId)
+      .select()
+      .single()
+
+    if (error) return { data: null, error }
+    return { data, error: null }
+  } catch (err) {
+    return { data: null, error: err }
+  }
+}
+
+/**
+ * Get disputed invoices
+ */
+export async function getDisputedInvoices(limit?: number): Promise<ClientInvoice[]> {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  let query = supabase
+    .from('client_invoices')
+    .select('*')
+    .eq('status', 'disputed')
+    .order('disputed_at', { ascending: false })
+
+  if (limit) {
+    query = query.limit(limit)
+  }
+
+  const { data, error } = await query
+  if (error) throw error
+  return data || []
 }
 
 // ============================================================================

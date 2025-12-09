@@ -27,6 +27,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 
+// DATABASE QUERIES
+import { getClientInvoices, disputeInvoice, ClientInvoice as DBInvoice } from '@/lib/client-zone-queries'
+
 const logger = createFeatureLogger('ClientZoneInvoices')
 
 // Type Definitions
@@ -230,7 +233,7 @@ export default function InvoicesPage() {
 
   // Dispute dialog state
   const [showDisputeDialog, setShowDisputeDialog] = useState(false)
-  const [disputeInvoice, setDisputeInvoice] = useState<Invoice | null>(null)
+  const [disputeInvoiceState, setDisputeInvoiceState] = useState<Invoice | null>(null)
   const [disputeReason, setDisputeReason] = useState('')
 
   // Load Invoices Data
@@ -385,14 +388,14 @@ export default function InvoicesPage() {
       invoiceId: invoice.id,
       invoiceNumber: invoice.number
     })
-    setDisputeInvoice(invoice)
+    setDisputeInvoiceState(invoice)
     setDisputeReason('')
     setShowDisputeDialog(true)
   }
 
   // Confirm Dispute Invoice
   const confirmDisputeInvoice = async () => {
-    if (!disputeInvoice) return
+    if (!disputeInvoiceState) return
 
     if (!disputeReason.trim()) {
       toast.error('Please provide a reason for the dispute')
@@ -400,37 +403,33 @@ export default function InvoicesPage() {
     }
 
     try {
-      const response = await fetch('/api/invoices/dispute', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          invoiceId: disputeInvoice.id,
-          invoiceNumber: disputeInvoice.number,
-          reason: disputeReason.trim(),
-          amount: disputeInvoice.amount
-        })
-      })
+      // Use database function to dispute invoice
+      const result = await disputeInvoice(
+        disputeInvoiceState.id.toString(),
+        disputeReason.trim()
+      )
 
-      if (!response.ok) {
-        throw new Error('Failed to submit dispute')
+      if (result.error) {
+        throw result.error
       }
 
+      // Update local state
       setInvoices(
         invoices.map((i) =>
-          i.id === disputeInvoice.id ? { ...i, status: 'disputed' } : i
+          i.id === disputeInvoiceState.id ? { ...i, status: 'disputed' } : i
         )
       )
 
-      logger.info('Invoice dispute submitted', { invoiceId: disputeInvoice.id })
+      logger.info('Invoice dispute submitted', { invoiceId: disputeInvoiceState.id })
       toast.success('Dispute submitted', {
         description: 'Our team will review and contact you within 24 hours'
       })
       announce('Dispute submitted successfully', 'polite')
       setShowDisputeDialog(false)
-      setDisputeInvoice(null)
+      setDisputeInvoiceState(null)
       setDisputeReason('')
     } catch (error: any) {
-      logger.error('Failed to submit dispute', { error, invoiceId: disputeInvoice.id })
+      logger.error('Failed to submit dispute', { error, invoiceId: disputeInvoiceState.id })
       toast.error('Failed to submit dispute', {
         description: error.message || 'Please try again later'
       })
@@ -690,8 +689,8 @@ export default function InvoicesPage() {
                 Dispute Invoice
               </DialogTitle>
               <DialogDescription>
-                {disputeInvoice && (
-                  <>Dispute invoice {disputeInvoice.number} ({formatCurrency(disputeInvoice.amount)})</>
+                {disputeInvoiceState && (
+                  <>Dispute invoice {disputeInvoiceState.number} ({formatCurrency(disputeInvoiceState.amount)})</>
                 )}
               </DialogDescription>
             </DialogHeader>
