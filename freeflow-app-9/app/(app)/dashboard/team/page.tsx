@@ -20,6 +20,17 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('Team')
+
+// DATABASE QUERIES
+import {
+  getTeamMembers,
+  createTeamMember,
+  deleteTeamMember,
+  updateTeamMember,
+  TeamMember as DBTeamMember,
+  DepartmentType
+} from '@/lib/team-hub-queries'
+
 import {
   Users,
   UserPlus,
@@ -207,23 +218,52 @@ export default function TeamPage() {
     }
   ])
 
-  // A+++ LOAD TEAM DATA
+  // A+++ LOAD TEAM DATA FROM DATABASE
   useEffect(() => {
     const loadTeamData = async () => {
+      if (!userId || userLoading) {
+        setIsLoading(false)
+        return
+      }
+
       try {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load team data'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load team members from database
+        const result = await getTeamMembers(userId)
+
+        if (result.error) {
+          throw new Error(result.error.message || 'Failed to load team data')
+        }
+
+        // If database returns members, use them; otherwise keep defaults for demo
+        if (result.data && result.data.length > 0) {
+          const mappedMembers = result.data.map((m: DBTeamMember) => ({
+            id: m.id,
+            name: m.name,
+            role: m.role,
+            department: m.department,
+            email: m.email,
+            phone: m.phone || '+1 (555) 000-0000',
+            location: m.location || 'Remote',
+            avatar: m.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${m.name}`,
+            status: m.status || 'offline',
+            joinDate: m.start_date || m.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+            projects: m.projects_count || 0,
+            completedTasks: m.tasks_completed || 0,
+            rating: m.rating || 5.0,
+            skills: m.skills || [],
+            availability: m.availability || 'Available',
+            workHours: '9:00 AM - 6:00 PM',
+            timezone: m.timezone || 'UTC'
+          }))
+          setTeamMembers(mappedMembers)
+          logger.info('Team members loaded from database', { count: mappedMembers.length })
+        } else {
+          // Keep demo data for users without team members
+          logger.info('Using demo team data - no members in database', { userId })
+        }
 
         setIsLoading(false)
         announce('Team dashboard loaded successfully', 'polite')
@@ -231,11 +271,12 @@ export default function TeamPage() {
         setError(err instanceof Error ? err.message : 'Failed to load team data')
         setIsLoading(false)
         announce('Error loading team dashboard', 'assertive')
+        logger.error('Failed to load team data', { error: err, userId })
       }
     }
 
     loadTeamData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, userLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handlers
   const handleInviteMember = () => {
@@ -245,47 +286,85 @@ export default function TeamPage() {
     setShowInviteDialog(true)
   }
 
-  const confirmInviteMember = () => {
+  const confirmInviteMember = async () => {
     if (!inviteEmail.trim() || !inviteName.trim()) {
       toast.error('Please fill in all required fields')
       return
     }
 
-    const newMember = {
-      id: teamMembers.length + 1,
-      name: inviteName,
-      role: inviteRole,
-      department: 'New',
-      email: inviteEmail,
-      phone: '+1 (555) 000-0000',
-      location: 'Remote',
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${inviteName}`,
-      status: 'offline',
-      joinDate: new Date().toISOString().split('T')[0],
-      projects: 0,
-      completedTasks: 0,
-      rating: 5.0,
-      skills: [],
-      availability: 'Pending',
-      workHours: '9:00 AM - 6:00 PM',
-      timezone: 'UTC'
+    if (!userId) {
+      toast.error('Please log in to invite team members')
+      return
     }
 
-    setTeamMembers([...teamMembers, newMember])
+    try {
+      // Map role to department
+      const roleToDepartment: Record<string, DepartmentType> = {
+        'Lead Designer': 'design',
+        'Frontend Developer': 'development',
+        'Backend Developer': 'development',
+        'Project Manager': 'management',
+        'QA Engineer': 'qa',
+        'Team Member': 'operations'
+      }
 
-    logger.info('Team member invited', {
-      memberId: newMember.id,
-      name: inviteName,
-      email: inviteEmail,
-      role: inviteRole,
-      totalMembers: teamMembers.length + 1
-    })
+      // Save to database
+      const result = await createTeamMember(userId, {
+        name: inviteName,
+        email: inviteEmail,
+        role: inviteRole,
+        department: roleToDepartment[inviteRole] || 'operations',
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${inviteName}`,
+        timezone: 'UTC',
+        skills: []
+      })
 
-    toast.success('Invitation Sent!', {
-      description: `Invited ${inviteName} as ${inviteRole} - Total team: ${teamMembers.length + 1} members`
-    })
+      if (result.error) {
+        throw new Error(result.error.message || 'Failed to invite member')
+      }
 
-    setShowInviteDialog(false)
+      // Add to local state with database ID
+      const newMember = {
+        id: result.data?.id || `temp_${Date.now()}`,
+        name: inviteName,
+        role: inviteRole,
+        department: roleToDepartment[inviteRole] || 'operations',
+        email: inviteEmail,
+        phone: '+1 (555) 000-0000',
+        location: 'Remote',
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${inviteName}`,
+        status: 'offline' as const,
+        joinDate: new Date().toISOString().split('T')[0],
+        projects: 0,
+        completedTasks: 0,
+        rating: 5.0,
+        skills: [],
+        availability: 'Pending',
+        workHours: '9:00 AM - 6:00 PM',
+        timezone: 'UTC'
+      }
+
+      setTeamMembers([...teamMembers, newMember])
+
+      logger.info('Team member invited and saved to database', {
+        memberId: newMember.id,
+        name: inviteName,
+        email: inviteEmail,
+        role: inviteRole,
+        totalMembers: teamMembers.length + 1
+      })
+
+      toast.success('Invitation Sent!', {
+        description: `Invited ${inviteName} as ${inviteRole} - Total team: ${teamMembers.length + 1} members`
+      })
+
+      setShowInviteDialog(false)
+    } catch (error) {
+      logger.error('Failed to invite team member', { error, email: inviteEmail })
+      toast.error('Failed to invite member', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }
 
   const handleViewMember = (id: number) => {
@@ -329,29 +408,40 @@ export default function TeamPage() {
   }
 
   const confirmRemoveMember = async () => {
-    if (!memberToRemove) return
+    if (!memberToRemove || !userId) return
 
     const member = teamMembers.find(m => m.id === memberToRemove)
     if (!member) return
 
     setIsRemoving(true)
     try {
-      // Remove member and persist to localStorage
+      // Remove member from database
+      const result = await deleteTeamMember(memberToRemove.toString(), userId)
+
+      if (result.error) {
+        throw new Error(result.error.message || 'Failed to remove member')
+      }
+
+      // Update local state
       const updatedMembers = teamMembers.filter(m => m.id !== memberToRemove)
       setTeamMembers(updatedMembers)
-      localStorage.setItem('team_members', JSON.stringify(updatedMembers))
 
-      logger.info('Team member removed', {
+      logger.info('Team member removed from database', {
         memberId: memberToRemove,
         memberName: member.name,
         role: member.role,
-        remainingMembers: teamMembers.length - 1
+        remainingMembers: updatedMembers.length
       })
 
       toast.success('Member Removed', {
-        description: `${member.name} removed from team - ${teamMembers.length - 1} members remaining`
+        description: `${member.name} removed from team - ${updatedMembers.length} members remaining`
       })
       announce(`${member.name} removed from team`, 'polite')
+    } catch (error) {
+      logger.error('Failed to remove team member', { error, memberId: memberToRemove })
+      toast.error('Failed to remove member', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
     } finally {
       setIsRemoving(false)
       setShowRemoveMemberDialog(false)
