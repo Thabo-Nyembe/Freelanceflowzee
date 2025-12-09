@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **16 critical features** across 6 sessions.
+Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **19 critical features** across 7 sessions.
 
 ---
 
@@ -141,6 +141,28 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 - `handleMove` now calls `moveFileToFolder()` to persist file folder changes
 - File sharing and moving operations persist to database
 
+### 17. Voice Room Delete (voice-collaboration) - Session 7
+**File:** `app/(app)/dashboard/voice-collaboration/page.tsx`
+**Status:** WIRED
+
+- `handleConfirmDeleteRoom` now calls `deleteVoiceRoom()` from voice-collaboration-queries
+- Room deletions persist to database
+
+### 18. AR Session Delete (ar-collaboration) - Session 7
+**File:** `app/(app)/dashboard/ar-collaboration/page.tsx`
+**Status:** WIRED
+
+- `handleConfirmDeleteSession` now calls `deleteSession()` from ar-collaboration-queries
+- AR session deletions persist to database
+
+### 19. Client Portal Project Create (client-portal) - Session 7
+**File:** `app/(app)/dashboard/client-portal/page.tsx`
+**Status:** WIRED
+
+- `handleAddProject` now calls `createProject()` from client-portal-queries
+- Projects persist to `portal_projects` table in database
+- Also fixed naming conflict in client-portal-queries.ts (renamed createClient → createPortalClient)
+
 ---
 
 ## Available Query Functions (92 Query Files)
@@ -204,9 +226,8 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | 2df1a4a2 | docs: Update audit report with session 4 fixes |
 | df45a994 | feat: Wire messages delete handlers to database |
 | fd001a38 | feat: Wire settings photo removal to database |
-| (pending) | feat: Wire invoices delete and send to database (Session 6) |
-| (pending) | feat: Wire widgets delete handlers to database (Session 6) |
-| (pending) | feat: Wire files-hub share and move to database (Session 6) |
+| 22b811b1 | feat: Wire invoices, widgets, files-hub handlers (Session 6) |
+| (pending) | feat: Wire voice, ar, client-portal handlers (Session 7) |
 
 ---
 

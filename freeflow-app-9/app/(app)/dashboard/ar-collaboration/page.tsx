@@ -756,22 +756,51 @@ export default function ARCollaborationPage() {
     setDeleteSession({ id: sessionId, name: session.name, environment: session.environment })
   }
 
-  const handleConfirmDeleteSession = () => {
-    if (!deleteSession) return
+  const handleConfirmDeleteSession = async () => {
+    if (!deleteSession || !userId) return
 
-    dispatch({ type: 'DELETE_SESSION', sessionId: deleteSession.id })
-
-    logger.info('Session deleted', {
+    logger.info('User confirmed session deletion', {
       sessionId: deleteSession.id,
       sessionName: deleteSession.name,
-      environment: deleteSession.environment
+      environment: deleteSession.environment,
+      userId
     })
 
-    toast.success('Session deleted', {
-      description: `${deleteSession.name} - ${getEnvironmentName(deleteSession.environment)}`
-    })
-    announce('Session deleted', 'polite')
-    setDeleteSession(null)
+    try {
+      // Dynamic import for code splitting
+      const { deleteSession: deleteSessionFromDB } = await import('@/lib/ar-collaboration-queries')
+
+      const { error: deleteError } = await deleteSessionFromDB(deleteSession.id)
+
+      if (deleteError) {
+        throw new Error(deleteError.message || 'Failed to delete session')
+      }
+
+      dispatch({ type: 'DELETE_SESSION', sessionId: deleteSession.id })
+
+      logger.info('Session deleted from database', {
+        sessionId: deleteSession.id,
+        sessionName: deleteSession.name,
+        userId
+      })
+
+      toast.success('Session deleted', {
+        description: `${deleteSession.name} - ${getEnvironmentName(deleteSession.environment)}`
+      })
+      announce('Session deleted', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete session', {
+        error: error.message,
+        sessionId: deleteSession.id,
+        userId
+      })
+      toast.error('Failed to delete session', {
+        description: error.message || 'Please try again later'
+      })
+      announce('Error deleting session', 'assertive')
+    } finally {
+      setDeleteSession(null)
+    }
   }
 
   const handleToggleRecording = (sessionId: string) => {

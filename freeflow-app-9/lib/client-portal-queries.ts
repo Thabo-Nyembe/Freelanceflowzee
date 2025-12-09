@@ -278,7 +278,7 @@ export async function getClient(clientId: string): Promise<PortalClient | null> 
 /**
  * Create new client
  */
-export async function createClient(clientData: {
+export async function createPortalClient(clientData: {
   company_name: string
   contact_person: string
   email: string

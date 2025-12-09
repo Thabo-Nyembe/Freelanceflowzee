@@ -623,24 +623,52 @@ export default function VoiceCollaborationPage() {
     setDeleteRoom({ id: roomId, name: room.name, type: room.type })
   }
 
-  const handleConfirmDeleteRoom = () => {
-    if (!deleteRoom) return
+  const handleConfirmDeleteRoom = async () => {
+    if (!deleteRoom || !userId) return
 
     logger.info('User confirmed room deletion', {
       roomId: deleteRoom.id,
       roomName: deleteRoom.name,
-      roomType: deleteRoom.type
+      roomType: deleteRoom.type,
+      userId
     })
 
-    // Note: Using local state - in production, this would DELETE to /api/voice-collaboration/rooms/:id
-    dispatch({ type: 'DELETE_ROOM', roomId: deleteRoom.id })
-    setShowViewRoomModal(false)
+    try {
+      // Dynamic import for code splitting
+      const { deleteVoiceRoom } = await import('@/lib/voice-collaboration-queries')
 
-    toast.success('Room deleted', {
-      description: `${deleteRoom.name} - ${deleteRoom.type} room removed`
-    })
-    announce('Room deleted', 'polite')
-    setDeleteRoom(null)
+      const { error: deleteError } = await deleteVoiceRoom(deleteRoom.id)
+
+      if (deleteError) {
+        throw new Error(deleteError.message || 'Failed to delete room')
+      }
+
+      dispatch({ type: 'DELETE_ROOM', roomId: deleteRoom.id })
+      setShowViewRoomModal(false)
+
+      logger.info('Room deleted from database', {
+        roomId: deleteRoom.id,
+        roomName: deleteRoom.name,
+        userId
+      })
+
+      toast.success('Room deleted', {
+        description: `${deleteRoom.name} - ${deleteRoom.type} room removed`
+      })
+      announce('Room deleted', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete room', {
+        error: error.message,
+        roomId: deleteRoom.id,
+        userId
+      })
+      toast.error('Failed to delete room', {
+        description: error.message || 'Please try again later'
+      })
+      announce('Error deleting room', 'assertive')
+    } finally {
+      setDeleteRoom(null)
+    }
   }
 
   const handleDownloadRecording = (recording: VoiceRecording) => {

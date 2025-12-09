@@ -650,22 +650,42 @@ export default function ClientPortalPage() {
       return
     }
 
+    if (!userId) {
+      toast.error('Please log in to add projects')
+      return
+    }
+
     const client = state.clients.find(c => c.id === projectForm.clientId)
 
     logger.info('Adding new project', {
       projectName: projectForm.name,
       clientId: projectForm.clientId,
-      companyName: client?.companyName
+      companyName: client?.companyName,
+      userId
     })
 
     try {
       setIsSaving(true)
 
-      // Note: Using local state - in production, this would POST to /api/projects
+      // Dynamic import for code splitting
+      const { createProject } = await import('@/lib/client-portal-queries')
+
       const budget = parseInt(projectForm.budget) || 50000
+      const startDate = new Date().toISOString()
+      const endDate = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+
+      const createdProject = await createProject({
+        client_id: projectForm.clientId,
+        name: projectForm.name,
+        description: projectForm.description,
+        budget,
+        start_date: startDate,
+        end_date: endDate,
+        deadline: endDate
+      })
 
       const newProject: Project = {
-        id: `PR-${String(state.projects.length + 1).padStart(3, '0')}`,
+        id: createdProject.id,
         clientId: projectForm.clientId,
         name: projectForm.name,
         description: projectForm.description,
@@ -673,31 +693,38 @@ export default function ClientPortalPage() {
         budget,
         spent: 0,
         progress: 0,
-        startDate: new Date().toISOString(),
-        endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+        startDate,
+        endDate,
         team: []
       }
 
       dispatch({ type: 'ADD_PROJECT', project: newProject })
 
-      logger.info('Project added successfully', { projectId: newProject.id, name: newProject.name })
+      logger.info('Project added to database', {
+        projectId: newProject.id,
+        name: newProject.name,
+        userId
+      })
 
-      const endDate = new Date(newProject.endDate).toLocaleDateString()
+      const endDateFormatted = new Date(newProject.endDate).toLocaleDateString()
 
       toast.success('Project added successfully', {
-        description: `${projectForm.name} - ${client?.companyName} - Planning stage - Budget: $${budget.toLocaleString()} - Due: ${endDate}`
+        description: `${projectForm.name} - ${client?.companyName} - Planning stage - Budget: $${budget.toLocaleString()} - Due: ${endDateFormatted}`
       })
+      announce('Project added successfully', 'polite')
       setIsAddProjectModalOpen(false)
       setProjectForm({ name: '', description: '', budget: '', clientId: '' })
     } catch (error: any) {
       logger.error('Project creation error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error,
-        projectName: projectForm.name
+        projectName: projectForm.name,
+        userId
       })
       toast.error('Failed to add project', {
         description: error.message || 'Please try again later'
       })
+      announce('Error adding project', 'assertive')
     } finally {
       setIsSaving(false)
     }
