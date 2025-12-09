@@ -19,6 +19,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Check, ArrowRight, Building, Receipt, Download, Star } from 'lucide-react'
 
 const logger = createFeatureLogger('Settings:Billing')
 
@@ -35,6 +46,40 @@ export default function BillingPage() {
   const [billing, setBilling] = useState<BillingData>({})
   const [loading, setLoading] = useState(true)
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
+
+  // Dialog states
+  const [showChangePlanDialog, setShowChangePlanDialog] = useState(false)
+  const [showPaymentMethodDialog, setShowPaymentMethodDialog] = useState(false)
+  const [showBillingAddressDialog, setShowBillingAddressDialog] = useState(false)
+  const [showInvoiceDialog, setShowInvoiceDialog] = useState<any>(null)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Form states
+  const [paymentForm, setPaymentForm] = useState({
+    cardNumber: '',
+    expiryMonth: '',
+    expiryYear: '',
+    cvv: '',
+    cardholderName: '',
+    setAsDefault: true
+  })
+
+  const [billingAddress, setBillingAddress] = useState({
+    company: '',
+    addressLine1: '',
+    addressLine2: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    country: 'US'
+  })
+
+  // Available plans
+  const plans = [
+    { id: 'free', name: 'Free', price: 0, features: ['5 projects', '1 team member', 'Basic storage'] },
+    { id: 'professional', name: 'Professional', price: 29, features: ['Unlimited projects', '10 team members', '100GB storage', 'Priority support'] },
+    { id: 'enterprise', name: 'Enterprise', price: 99, features: ['Unlimited everything', 'Unlimited team members', '1TB storage', '24/7 support', 'Custom integrations'] }
+  ]
 
   useEffect(() => {
     const loadBillingData = async () => {
@@ -84,11 +129,107 @@ export default function BillingPage() {
 
   const handleUpdateBilling = () => {
     logger.info('Update billing information opened', { userId })
-
-    toast.info('Update Billing Information', {
-      description: 'Manage payment method, billing address, tax info, and invoices - Securely encrypted'
-    })
+    setShowPaymentMethodDialog(true)
     announce('Update billing information dialog opened', 'polite')
+  }
+
+  const handleChangePlan = () => {
+    logger.info('Change plan dialog opened', { userId })
+    setShowChangePlanDialog(true)
+  }
+
+  const handleSelectPlan = async (planId: string) => {
+    if (!userId) return
+
+    setIsSaving(true)
+    try {
+      const selectedPlan = plans.find(p => p.id === planId)
+      logger.info('Plan change initiated', { planId, planName: selectedPlan?.name, userId })
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      toast.success('Plan Updated', {
+        description: `You are now on the ${selectedPlan?.name} plan`
+      })
+      announce(`Plan changed to ${selectedPlan?.name}`, 'polite')
+      setShowChangePlanDialog(false)
+    } catch (error) {
+      logger.error('Failed to change plan', { error, planId, userId })
+      toast.error('Failed to update plan')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleSavePaymentMethod = async () => {
+    if (!userId) return
+
+    if (!paymentForm.cardNumber || !paymentForm.expiryMonth || !paymentForm.expiryYear || !paymentForm.cvv) {
+      toast.error('Please fill in all card details')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      logger.info('Saving payment method', { userId, lastFour: paymentForm.cardNumber.slice(-4) })
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      toast.success('Payment Method Added', {
+        description: `Card ending in ${paymentForm.cardNumber.slice(-4)} has been added`
+      })
+      announce('Payment method added successfully', 'polite')
+      setPaymentForm({ cardNumber: '', expiryMonth: '', expiryYear: '', cvv: '', cardholderName: '', setAsDefault: true })
+      setShowPaymentMethodDialog(false)
+
+      // Refresh billing data
+      const { getPaymentMethods } = await import('@/lib/billing-settings-queries')
+      const result = await getPaymentMethods(userId)
+      setBilling(prev => ({ ...prev, paymentMethods: result.data || [] }))
+    } catch (error) {
+      logger.error('Failed to save payment method', { error, userId })
+      toast.error('Failed to add payment method')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleSaveBillingAddress = async () => {
+    if (!userId) return
+
+    if (!billingAddress.addressLine1 || !billingAddress.city || !billingAddress.postalCode) {
+      toast.error('Please fill in required address fields')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      logger.info('Saving billing address', { userId, city: billingAddress.city })
+
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      toast.success('Billing Address Updated', {
+        description: 'Your billing address has been saved'
+      })
+      announce('Billing address updated', 'polite')
+      setShowBillingAddressDialog(false)
+    } catch (error) {
+      logger.error('Failed to save billing address', { error, userId })
+      toast.error('Failed to update billing address')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleDownloadInvoice = (invoice: any) => {
+    logger.info('Downloading invoice', { invoiceId: invoice.id, userId })
+    toast.success('Downloading Invoice', {
+      description: `Invoice for ${new Date(invoice.invoice_date).toLocaleDateString()} is being prepared`
+    })
+    // In production, this would trigger an actual file download
   }
 
   const handleCancelSubscription = () => {
@@ -180,13 +321,17 @@ export default function BillingPage() {
               )}
 
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={handleUpdateBilling} disabled={loading}>
+                <Button variant="outline" className="flex-1" onClick={handleChangePlan} disabled={loading}>
                   Change Plan
                 </Button>
                 <Button variant="outline" className="flex-1" onClick={handleCancelSubscription} disabled={loading || !billing.subscription}>
                   Cancel Subscription
                 </Button>
               </div>
+              <Button variant="ghost" size="sm" className="w-full mt-2" onClick={() => setShowBillingAddressDialog(true)} disabled={loading}>
+                <Building className="w-4 h-4 mr-2" />
+                Update Billing Address
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -249,18 +394,26 @@ export default function BillingPage() {
               </div>
             ) : billing.invoices && billing.invoices.length > 0 ? (
               billing.invoices.map((invoice, index) => (
-                <div key={invoice.id || index} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <p className="font-medium">
-                      {invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
-                    </p>
-                    <p className="text-sm text-gray-500">{invoice.description || 'Professional Plan'}</p>
+                <div key={invoice.id || index} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <Receipt className="w-5 h-5 text-gray-400" />
+                    <div>
+                      <p className="font-medium">
+                        {invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
+                      </p>
+                      <p className="text-sm text-gray-500">{invoice.description || 'Professional Plan'}</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium">${invoice.amount?.toFixed(2) || '0.00'}</p>
-                    <Badge variant="outline" className={invoice.status === 'paid' ? 'text-green-600' : 'text-gray-600'}>
-                      {invoice.status ? invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1) : 'Pending'}
-                    </Badge>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="font-medium">${invoice.amount?.toFixed(2) || '0.00'}</p>
+                      <Badge variant="outline" className={invoice.status === 'paid' ? 'text-green-600' : 'text-gray-600'}>
+                        {invoice.status ? invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1) : 'Pending'}
+                      </Badge>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => handleDownloadInvoice(invoice)}>
+                      <Download className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               ))
@@ -293,6 +446,228 @@ export default function BillingPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Change Plan Dialog */}
+      <Dialog open={showChangePlanDialog} onOpenChange={setShowChangePlanDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-purple-500" />
+              Choose Your Plan
+            </DialogTitle>
+            <DialogDescription>
+              Select the plan that best fits your needs
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {plans.map((plan) => (
+              <div
+                key={plan.id}
+                className={`p-4 rounded-lg border-2 transition-all cursor-pointer hover:border-purple-400 ${
+                  billing.subscription?.plan_id === plan.id ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200'
+                }`}
+                onClick={() => handleSelectPlan(plan.id)}
+              >
+                <div className="text-center mb-3">
+                  <h3 className="font-semibold text-lg">{plan.name}</h3>
+                  <div className="text-2xl font-bold text-purple-600">
+                    ${plan.price}<span className="text-sm font-normal text-gray-500">/mo</span>
+                  </div>
+                </div>
+                <ul className="space-y-2">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <Check className="w-4 h-4 text-green-500" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  className="w-full mt-4"
+                  variant={billing.subscription?.plan_id === plan.id ? 'outline' : 'default'}
+                  disabled={isSaving || billing.subscription?.plan_id === plan.id}
+                  onClick={() => handleSelectPlan(plan.id)}
+                >
+                  {billing.subscription?.plan_id === plan.id ? 'Current Plan' : 'Select'}
+                  {billing.subscription?.plan_id !== plan.id && <ArrowRight className="w-4 h-4 ml-2" />}
+                </Button>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowChangePlanDialog(false)}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Payment Method Dialog */}
+      <Dialog open={showPaymentMethodDialog} onOpenChange={setShowPaymentMethodDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-blue-500" />
+              Add Payment Method
+            </DialogTitle>
+            <DialogDescription>
+              Enter your card details securely
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Cardholder Name</Label>
+              <Input
+                value={paymentForm.cardholderName}
+                onChange={(e) => setPaymentForm({ ...paymentForm, cardholderName: e.target.value })}
+                placeholder="John Doe"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Card Number</Label>
+              <Input
+                value={paymentForm.cardNumber}
+                onChange={(e) => setPaymentForm({ ...paymentForm, cardNumber: e.target.value.replace(/\D/g, '').slice(0, 16) })}
+                placeholder="4242 4242 4242 4242"
+                maxLength={16}
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-2">
+                <Label>Month</Label>
+                <Input
+                  value={paymentForm.expiryMonth}
+                  onChange={(e) => setPaymentForm({ ...paymentForm, expiryMonth: e.target.value.replace(/\D/g, '').slice(0, 2) })}
+                  placeholder="MM"
+                  maxLength={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Year</Label>
+                <Input
+                  value={paymentForm.expiryYear}
+                  onChange={(e) => setPaymentForm({ ...paymentForm, expiryYear: e.target.value.replace(/\D/g, '').slice(0, 2) })}
+                  placeholder="YY"
+                  maxLength={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>CVV</Label>
+                <Input
+                  type="password"
+                  value={paymentForm.cvv}
+                  onChange={(e) => setPaymentForm({ ...paymentForm, cvv: e.target.value.replace(/\D/g, '').slice(0, 4) })}
+                  placeholder="***"
+                  maxLength={4}
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <input
+                type="checkbox"
+                checked={paymentForm.setAsDefault}
+                onChange={(e) => setPaymentForm({ ...paymentForm, setAsDefault: e.target.checked })}
+                className="rounded"
+              />
+              <Label className="text-sm">Set as default payment method</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPaymentMethodDialog(false)}>Cancel</Button>
+            <Button onClick={handleSavePaymentMethod} disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Add Card'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Billing Address Dialog */}
+      <Dialog open={showBillingAddressDialog} onOpenChange={setShowBillingAddressDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building className="w-5 h-5 text-green-500" />
+              Billing Address
+            </DialogTitle>
+            <DialogDescription>
+              Update your billing address for invoices
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Company Name (Optional)</Label>
+              <Input
+                value={billingAddress.company}
+                onChange={(e) => setBillingAddress({ ...billingAddress, company: e.target.value })}
+                placeholder="Acme Inc."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Address Line 1 *</Label>
+              <Input
+                value={billingAddress.addressLine1}
+                onChange={(e) => setBillingAddress({ ...billingAddress, addressLine1: e.target.value })}
+                placeholder="123 Main Street"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Address Line 2</Label>
+              <Input
+                value={billingAddress.addressLine2}
+                onChange={(e) => setBillingAddress({ ...billingAddress, addressLine2: e.target.value })}
+                placeholder="Suite 100"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>City *</Label>
+                <Input
+                  value={billingAddress.city}
+                  onChange={(e) => setBillingAddress({ ...billingAddress, city: e.target.value })}
+                  placeholder="San Francisco"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>State</Label>
+                <Input
+                  value={billingAddress.state}
+                  onChange={(e) => setBillingAddress({ ...billingAddress, state: e.target.value })}
+                  placeholder="CA"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Postal Code *</Label>
+                <Input
+                  value={billingAddress.postalCode}
+                  onChange={(e) => setBillingAddress({ ...billingAddress, postalCode: e.target.value })}
+                  placeholder="94102"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Country</Label>
+                <select
+                  className="w-full p-2 rounded border bg-background"
+                  value={billingAddress.country}
+                  onChange={(e) => setBillingAddress({ ...billingAddress, country: e.target.value })}
+                >
+                  <option value="US">United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="GB">United Kingdom</option>
+                  <option value="AU">Australia</option>
+                  <option value="DE">Germany</option>
+                  <option value="FR">France</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBillingAddressDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveBillingAddress} disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Save Address'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

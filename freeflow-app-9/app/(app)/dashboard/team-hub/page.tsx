@@ -52,6 +52,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Progress } from '@/components/ui/progress'
 
 // TYPES
 interface TeamMemberUI {
@@ -118,6 +130,30 @@ export default function TeamHubPage() {
 
   // CONFIRMATION DIALOG STATE
   const [removeMember, setRemoveMember] = useState<{ id: string; name: string } | null>(null)
+
+  // FEATURE DIALOG STATES
+  const [showPerformanceDialog, setShowPerformanceDialog] = useState(false)
+  const [showGoalsDialog, setShowGoalsDialog] = useState(false)
+  const [showMilestonesDialog, setShowMilestonesDialog] = useState(false)
+  const [showBudgetDialog, setShowBudgetDialog] = useState(false)
+  const [showResourcesDialog, setShowResourcesDialog] = useState(false)
+  const [showTrainingDialog, setShowTrainingDialog] = useState(false)
+  const [showFeedbackDialog, setShowFeedbackDialog] = useState(false)
+  const [showRecognitionDialog, setShowRecognitionDialog] = useState(false)
+  const [showOnboardingDialog, setShowOnboardingDialog] = useState(false)
+  const [showOffboardingDialog, setShowOffboardingDialog] = useState(false)
+  const [showDirectoryDialog, setShowDirectoryDialog] = useState(false)
+  const [showCalendarDialog, setShowCalendarDialog] = useState(false)
+  const [showFilesDialog, setShowFilesDialog] = useState(false)
+  const [showProjectsDialog, setShowProjectsDialog] = useState(false)
+  const [showTasksDialog, setShowTasksDialog] = useState(false)
+
+  // FORM STATES
+  const [newGoal, setNewGoal] = useState({ title: '', target: '', deadline: '' })
+  const [newMilestone, setNewMilestone] = useState({ title: '', project: '', date: '' })
+  const [feedbackForm, setFeedbackForm] = useState({ memberId: '', rating: 5, comments: '' })
+  const [recognitionForm, setRecognitionForm] = useState({ memberId: '', award: '', reason: '' })
+  const [taskForm, setTaskForm] = useState({ memberId: '', title: '', priority: 'medium', dueDate: '' })
 
   // COMPUTED TEAM STATS - Updated dynamically from Supabase data
   const teamStats = {
@@ -585,9 +621,7 @@ export default function TeamHubPage() {
       completedTasks: teamStats.completedTasks,
       onlineMembers: teamStats.onlineMembers
     })
-    toast.success('Performance Metrics', {
-      description: `${teamStats.totalMembers} members | ${teamStats.averageRating.toFixed(1)} avg rating | ${teamStats.completedTasks} tasks`
-    })
+    setShowPerformanceDialog(true)
   }, [teamStats])
 
   // Handler 2: Team Goals Management
@@ -596,9 +630,7 @@ export default function TeamHubPage() {
       activeProjects: teamStats.activeProjects,
       totalMembers: teamStats.totalMembers
     })
-    toast.info('Team Goals', {
-      description: `Set and track goals for ${teamStats.activeProjects} active projects`
-    })
+    setShowGoalsDialog(true)
   }, [teamStats])
 
   // Handler 3: Team Milestones Tracking
@@ -608,9 +640,7 @@ export default function TeamHubPage() {
       tasksCompleted: teamStats.completedTasks,
       teamSize: teamStats.totalMembers
     })
-    toast.success('Team Milestones', {
-      description: `Tracking milestones across ${teamStats.activeProjects} projects`
-    })
+    setShowMilestonesDialog(true)
   }, [teamStats])
 
   // Handler 4: Team Budget Management
@@ -620,9 +650,7 @@ export default function TeamHubPage() {
       teamMembers: teamStats.totalMembers,
       activeProjects: teamStats.activeProjects
     })
-    toast.info('Team Budget', {
-      description: `Manage budget across ${departments.length} departments`
-    })
+    setShowBudgetDialog(true)
   }, [departments, teamStats])
 
   // Handler 5: Team Resources Allocation
@@ -632,9 +660,7 @@ export default function TeamHubPage() {
       onlineMembers: teamStats.onlineMembers,
       projectsNeedingResources: teamStats.activeProjects
     })
-    toast.success('Team Resources', {
-      description: `Allocate resources for ${teamStats.onlineMembers} online members`
-    })
+    setShowResourcesDialog(true)
   }, [teamStats])
 
   // Handler 6: Team Training & Development
@@ -643,9 +669,7 @@ export default function TeamHubPage() {
       membersToTrain: teamStats.totalMembers,
       departments: departments.length
     })
-    toast.info('Team Training', {
-      description: `Schedule training for ${teamStats.totalMembers} team members`
-    })
+    setShowTrainingDialog(true)
   }, [teamStats, departments])
 
   // Handler 7: Team Feedback Collection
@@ -654,9 +678,7 @@ export default function TeamHubPage() {
       membersCount: teamStats.totalMembers,
       currentAverageRating: teamStats.averageRating.toFixed(2)
     })
-    toast.success('Team Feedback', {
-      description: `Collect feedback from ${teamStats.totalMembers} team members`
-    })
+    setShowFeedbackDialog(true)
   }, [teamStats])
 
   // Handler 8: Team Recognition & Awards
@@ -666,9 +688,7 @@ export default function TeamHubPage() {
       tasksCompleted: teamStats.completedTasks,
       averageRating: teamStats.averageRating.toFixed(2)
     })
-    toast.success('Team Recognition', {
-      description: `Recognize achievements from ${teamStats.completedTasks} completed tasks`
-    })
+    setShowRecognitionDialog(true)
   }, [teamStats])
 
   // Handler 9: Team Onboarding Process
@@ -677,9 +697,7 @@ export default function TeamHubPage() {
       currentTeamSize: teamStats.totalMembers,
       departmentsAvailable: departments.length
     })
-    toast.info('Team Onboarding', {
-      description: `Onboard new members to ${departments.length} departments`
-    })
+    setShowOnboardingDialog(true)
   }, [teamStats, departments])
 
   // Handler 10: Team Offboarding Process
@@ -688,9 +706,7 @@ export default function TeamHubPage() {
       currentMembers: teamStats.totalMembers,
       activeProjects: teamStats.activeProjects
     })
-    toast.info('Team Offboarding', {
-      description: 'Manage offboarding process professionally'
-    })
+    setShowOffboardingDialog(true)
   }, [teamStats])
 
   // Handler 11: Team Directory Access
@@ -700,9 +716,7 @@ export default function TeamHubPage() {
       departments: departments.length,
       onlineMembers: teamStats.onlineMembers
     })
-    toast.success('Team Directory', {
-      description: `Access directory of ${teamStats.totalMembers} team members`
-    })
+    setShowDirectoryDialog(true)
   }, [teamStats, departments])
 
   // Handler 12: Team Calendar View
@@ -712,9 +726,7 @@ export default function TeamHubPage() {
       activeProjects: teamStats.activeProjects,
       onlineMembers: teamStats.onlineMembers
     })
-    toast.info('Team Calendar', {
-      description: `View schedules for ${teamStats.totalMembers} team members`
-    })
+    setShowCalendarDialog(true)
   }, [teamStats])
 
   // Handler 13: Team Files Management
@@ -724,9 +736,7 @@ export default function TeamHubPage() {
       departments: departments.length,
       projectFiles: teamStats.activeProjects
     })
-    toast.success('Team Files', {
-      description: `Access files for ${teamStats.activeProjects} active projects`
-    })
+    setShowFilesDialog(true)
   }, [teamStats, departments])
 
   // Handler 14: Team Projects Overview
@@ -736,9 +746,7 @@ export default function TeamHubPage() {
       membersAssigned: teamStats.totalMembers,
       completedTasks: teamStats.completedTasks
     })
-    toast.success('Team Projects', {
-      description: `Overview of ${teamStats.activeProjects} active team projects`
-    })
+    setShowProjectsDialog(true)
   }, [teamStats])
 
   // Handler 15: Team Tasks Assignment
@@ -748,10 +756,67 @@ export default function TeamHubPage() {
       onlineMembers: teamStats.onlineMembers,
       completedTasks: teamStats.completedTasks
     })
-    toast.info('Team Tasks', {
-      description: `Assign tasks to ${teamStats.onlineMembers} available members`
-    })
+    setShowTasksDialog(true)
   }, [teamStats])
+
+  // Save handlers for dialogs
+  const handleSaveGoal = useCallback(() => {
+    if (!newGoal.title) {
+      toast.error('Please enter a goal title')
+      return
+    }
+    logger.info('Goal saved', { goal: newGoal })
+    toast.success('Goal Created', { description: `"${newGoal.title}" has been added to team goals` })
+    setNewGoal({ title: '', target: '', deadline: '' })
+    setShowGoalsDialog(false)
+  }, [newGoal])
+
+  const handleSaveMilestone = useCallback(() => {
+    if (!newMilestone.title) {
+      toast.error('Please enter a milestone title')
+      return
+    }
+    logger.info('Milestone saved', { milestone: newMilestone })
+    toast.success('Milestone Created', { description: `"${newMilestone.title}" has been added` })
+    setNewMilestone({ title: '', project: '', date: '' })
+    setShowMilestonesDialog(false)
+  }, [newMilestone])
+
+  const handleSubmitFeedback = useCallback(() => {
+    if (!feedbackForm.memberId) {
+      toast.error('Please select a team member')
+      return
+    }
+    const member = teamMembers.find(m => m.id === feedbackForm.memberId)
+    logger.info('Feedback submitted', { feedback: feedbackForm, memberName: member?.name })
+    toast.success('Feedback Submitted', { description: `Feedback sent for ${member?.name}` })
+    setFeedbackForm({ memberId: '', rating: 5, comments: '' })
+    setShowFeedbackDialog(false)
+  }, [feedbackForm, teamMembers])
+
+  const handleSubmitRecognition = useCallback(() => {
+    if (!recognitionForm.memberId || !recognitionForm.award) {
+      toast.error('Please select a member and award type')
+      return
+    }
+    const member = teamMembers.find(m => m.id === recognitionForm.memberId)
+    logger.info('Recognition submitted', { recognition: recognitionForm, memberName: member?.name })
+    toast.success('Recognition Sent', { description: `${recognitionForm.award} award given to ${member?.name}` })
+    setRecognitionForm({ memberId: '', award: '', reason: '' })
+    setShowRecognitionDialog(false)
+  }, [recognitionForm, teamMembers])
+
+  const handleAssignNewTask = useCallback(() => {
+    if (!taskForm.memberId || !taskForm.title) {
+      toast.error('Please select a member and enter task title')
+      return
+    }
+    const member = teamMembers.find(m => m.id === taskForm.memberId)
+    logger.info('Task assigned', { task: taskForm, memberName: member?.name })
+    toast.success('Task Assigned', { description: `"${taskForm.title}" assigned to ${member?.name}` })
+    setTaskForm({ memberId: '', title: '', priority: 'medium', dueDate: '' })
+    setShowTasksDialog(false)
+  }, [taskForm, teamMembers])
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -1404,6 +1469,720 @@ export default function TeamHubPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Performance Metrics Dialog */}
+      <Dialog open={showPerformanceDialog} onOpenChange={setShowPerformanceDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-blue-500" />
+              Team Performance Metrics
+            </DialogTitle>
+            <DialogDescription>
+              Overview of team performance and productivity
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Total Members</p>
+                <p className="text-2xl font-bold text-blue-600">{teamStats.totalMembers}</p>
+              </div>
+              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Online Now</p>
+                <p className="text-2xl font-bold text-green-600">{teamStats.onlineMembers}</p>
+              </div>
+              <div className="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Tasks Completed</p>
+                <p className="text-2xl font-bold text-yellow-600">{teamStats.completedTasks}</p>
+              </div>
+              <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+                <p className="text-sm text-gray-600 dark:text-gray-400">Avg Rating</p>
+                <p className="text-2xl font-bold text-purple-600">{teamStats.averageRating.toFixed(1)}</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Team Productivity</p>
+              <Progress value={Math.min((teamStats.completedTasks / (teamStats.totalMembers * 10)) * 100, 100)} className="h-2" />
+              <p className="text-xs text-gray-500">Based on tasks completed per member</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Top Performers</p>
+              {teamMembers.sort((a, b) => b.rating - a.rating).slice(0, 3).map((member, i) => (
+                <div key={member.id} className="flex items-center justify-between p-2 rounded bg-gray-50 dark:bg-gray-800">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{i + 1}.</span>
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={member.avatar} />
+                      <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm">{member.name}</span>
+                  </div>
+                  <Badge variant="outline">{member.rating.toFixed(1)} rating</Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handleTeamExport('csv')}>Export CSV</Button>
+            <Button onClick={() => setShowPerformanceDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Goals Dialog */}
+      <Dialog open={showGoalsDialog} onOpenChange={setShowGoalsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-green-500" />
+              Team Goals
+            </DialogTitle>
+            <DialogDescription>
+              Set and track team objectives
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Goal Title</Label>
+              <Input
+                value={newGoal.title}
+                onChange={(e) => setNewGoal({ ...newGoal, title: e.target.value })}
+                placeholder="e.g., Complete Q1 deliverables"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Target Metric</Label>
+              <Input
+                value={newGoal.target}
+                onChange={(e) => setNewGoal({ ...newGoal, target: e.target.value })}
+                placeholder="e.g., 50 tasks completed"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Deadline</Label>
+              <Input
+                type="date"
+                value={newGoal.deadline}
+                onChange={(e) => setNewGoal({ ...newGoal, deadline: e.target.value })}
+              />
+            </div>
+            <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+              <p className="text-sm font-medium mb-2">Current Progress</p>
+              <div className="flex items-center justify-between text-sm text-gray-600">
+                <span>Active Projects: {teamStats.activeProjects}</span>
+                <span>Completed Tasks: {teamStats.completedTasks}</span>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGoalsDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveGoal}>Create Goal</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Milestones Dialog */}
+      <Dialog open={showMilestonesDialog} onOpenChange={setShowMilestonesDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-yellow-500" />
+              Team Milestones
+            </DialogTitle>
+            <DialogDescription>
+              Track project milestones and achievements
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Milestone Title</Label>
+              <Input
+                value={newMilestone.title}
+                onChange={(e) => setNewMilestone({ ...newMilestone, title: e.target.value })}
+                placeholder="e.g., MVP Launch"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Project</Label>
+              <Input
+                value={newMilestone.project}
+                onChange={(e) => setNewMilestone({ ...newMilestone, project: e.target.value })}
+                placeholder="Select project"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Target Date</Label>
+              <Input
+                type="date"
+                value={newMilestone.date}
+                onChange={(e) => setNewMilestone({ ...newMilestone, date: e.target.value })}
+              />
+            </div>
+            <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
+              <p className="text-sm font-medium mb-1">Milestone Tracking</p>
+              <p className="text-xs text-gray-600">{teamStats.activeProjects} active projects being tracked</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMilestonesDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveMilestone}>Add Milestone</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Budget Dialog */}
+      <Dialog open={showBudgetDialog} onOpenChange={setShowBudgetDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Zap className="h-5 w-5 text-green-500" />
+              Team Budget
+            </DialogTitle>
+            <DialogDescription>
+              View and manage department budgets
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {departments.map((dept) => (
+              <div key={dept.name} className="p-3 rounded-lg border">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium">{dept.name}</span>
+                  <Badge className={dept.color}>{dept.count} members</Badge>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <span>{dept.activeProjects} active projects</span>
+                  {dept.budget && <span className="ml-4">Budget: ${dept.budget.toLocaleString()}</span>}
+                </div>
+                <Progress value={Math.min((dept.activeProjects / 10) * 100, 100)} className="h-1.5 mt-2" />
+              </div>
+            ))}
+            <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
+              <p className="text-sm font-medium">Total Team</p>
+              <p className="text-lg font-bold text-green-600">{teamStats.totalMembers} members across {departments.length} departments</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowBudgetDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Resources Dialog */}
+      <Dialog open={showResourcesDialog} onOpenChange={setShowResourcesDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-blue-500" />
+              Resource Allocation
+            </DialogTitle>
+            <DialogDescription>
+              View team availability and allocate resources
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-center">
+                <p className="text-2xl font-bold text-green-600">{teamStats.onlineMembers}</p>
+                <p className="text-sm text-gray-600">Available Now</p>
+              </div>
+              <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 text-center">
+                <p className="text-2xl font-bold">{teamStats.totalMembers - teamStats.onlineMembers}</p>
+                <p className="text-sm text-gray-600">Offline</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Available Team Members</p>
+              {teamMembers.filter(m => m.status === 'online').slice(0, 5).map((member) => (
+                <div key={member.id} className="flex items-center justify-between p-2 rounded bg-gray-50 dark:bg-gray-800">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    <span className="text-sm">{member.name}</span>
+                  </div>
+                  <span className="text-xs text-gray-500">{member.projects} projects</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowResourcesDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Training Dialog */}
+      <Dialog open={showTrainingDialog} onOpenChange={setShowTrainingDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Star className="h-5 w-5 text-purple-500" />
+              Training & Development
+            </DialogTitle>
+            <DialogDescription>
+              Manage team training and skill development
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+              <p className="text-sm font-medium">Team Size</p>
+              <p className="text-lg font-bold text-purple-600">{teamStats.totalMembers} members eligible for training</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Departments</p>
+              {departments.map((dept) => (
+                <div key={dept.name} className="flex items-center justify-between p-2 rounded bg-gray-50 dark:bg-gray-800">
+                  <span className="text-sm">{dept.name}</span>
+                  <Badge variant="outline">{dept.count} members</Badge>
+                </div>
+              ))}
+            </div>
+            <Button className="w-full" variant="outline" onClick={() => {
+              toast.success('Training Schedule', { description: 'Training module coming soon' })
+            }}>
+              Schedule Training Session
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowTrainingDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Feedback Dialog */}
+      <Dialog open={showFeedbackDialog} onOpenChange={setShowFeedbackDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-blue-500" />
+              Team Feedback
+            </DialogTitle>
+            <DialogDescription>
+              Provide feedback for team members
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Select Team Member</Label>
+              <select
+                className="w-full p-2 rounded border bg-background"
+                value={feedbackForm.memberId}
+                onChange={(e) => setFeedbackForm({ ...feedbackForm, memberId: e.target.value })}
+              >
+                <option value="">Choose a member...</option>
+                {teamMembers.map((member) => (
+                  <option key={member.id} value={member.id}>{member.name} - {member.role}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label>Rating (1-10)</Label>
+              <Input
+                type="number"
+                min={1}
+                max={10}
+                value={feedbackForm.rating}
+                onChange={(e) => setFeedbackForm({ ...feedbackForm, rating: parseInt(e.target.value) || 5 })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Comments</Label>
+              <Textarea
+                value={feedbackForm.comments}
+                onChange={(e) => setFeedbackForm({ ...feedbackForm, comments: e.target.value })}
+                placeholder="Provide detailed feedback..."
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowFeedbackDialog(false)}>Cancel</Button>
+            <Button onClick={handleSubmitFeedback}>Submit Feedback</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Recognition Dialog */}
+      <Dialog open={showRecognitionDialog} onOpenChange={setShowRecognitionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-yellow-500" />
+              Team Recognition
+            </DialogTitle>
+            <DialogDescription>
+              Recognize and reward team achievements
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Select Team Member</Label>
+              <select
+                className="w-full p-2 rounded border bg-background"
+                value={recognitionForm.memberId}
+                onChange={(e) => setRecognitionForm({ ...recognitionForm, memberId: e.target.value })}
+              >
+                <option value="">Choose a member...</option>
+                {teamMembers.map((member) => (
+                  <option key={member.id} value={member.id}>{member.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label>Award Type</Label>
+              <select
+                className="w-full p-2 rounded border bg-background"
+                value={recognitionForm.award}
+                onChange={(e) => setRecognitionForm({ ...recognitionForm, award: e.target.value })}
+              >
+                <option value="">Select award...</option>
+                <option value="Star Performer">Star Performer</option>
+                <option value="Team Player">Team Player</option>
+                <option value="Innovation Award">Innovation Award</option>
+                <option value="Customer Hero">Customer Hero</option>
+                <option value="Leadership Excellence">Leadership Excellence</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label>Reason</Label>
+              <Textarea
+                value={recognitionForm.reason}
+                onChange={(e) => setRecognitionForm({ ...recognitionForm, reason: e.target.value })}
+                placeholder="Why is this person being recognized?"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRecognitionDialog(false)}>Cancel</Button>
+            <Button onClick={handleSubmitRecognition}>Give Recognition</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Onboarding Dialog */}
+      <Dialog open={showOnboardingDialog} onOpenChange={setShowOnboardingDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-green-500" />
+              Team Onboarding
+            </DialogTitle>
+            <DialogDescription>
+              Welcome new team members
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
+              <p className="text-sm font-medium">Current Team</p>
+              <p className="text-lg font-bold text-green-600">{teamStats.totalMembers} members</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Available Departments</p>
+              {departments.map((dept) => (
+                <div key={dept.name} className="flex items-center justify-between p-2 rounded bg-gray-50 dark:bg-gray-800">
+                  <span className="text-sm">{dept.name}</span>
+                  <Badge className={dept.color}>{dept.count} members</Badge>
+                </div>
+              ))}
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Onboarding Checklist</p>
+              <div className="space-y-1 text-sm text-gray-600">
+                <p>1. Send welcome email</p>
+                <p>2. Set up workspace access</p>
+                <p>3. Assign mentor</p>
+                <p>4. Schedule orientation</p>
+                <p>5. Review team policies</p>
+              </div>
+            </div>
+            <Button className="w-full" onClick={handleAddMember}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Add New Team Member
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowOnboardingDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Offboarding Dialog */}
+      <Dialog open={showOffboardingDialog} onOpenChange={setShowOffboardingDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+              Team Offboarding
+            </DialogTitle>
+            <DialogDescription>
+              Manage team member departures professionally
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20">
+              <p className="text-sm font-medium text-red-800 dark:text-red-300">Offboarding Checklist</p>
+              <ul className="text-sm text-red-600 dark:text-red-400 mt-2 space-y-1">
+                <li>Transfer project ownership</li>
+                <li>Revoke system access</li>
+                <li>Collect company assets</li>
+                <li>Conduct exit interview</li>
+                <li>Process final documentation</li>
+              </ul>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Current Projects to Reassign</p>
+              <p className="text-sm text-gray-600">{teamStats.activeProjects} active projects may need reassignment</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowOffboardingDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Directory Dialog */}
+      <Dialog open={showDirectoryDialog} onOpenChange={setShowDirectoryDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-blue-500" />
+              Team Directory
+            </DialogTitle>
+            <DialogDescription>
+              Complete list of {teamStats.totalMembers} team members
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            {teamMembers.map((member) => (
+              <div key={member.id} className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-800">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={member.avatar} />
+                      <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    </Avatar>
+                    <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${getStatusColor(member.status)}`} />
+                  </div>
+                  <div>
+                    <p className="font-medium">{member.name}</p>
+                    <p className="text-sm text-gray-500">{member.role} - {member.department}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="ghost" onClick={() => window.open(`mailto:${member.email}`)}>
+                    <Mail className="h-4 w-4" />
+                  </Button>
+                  {member.phone && (
+                    <Button size="sm" variant="ghost" onClick={() => window.open(`tel:${member.phone}`)}>
+                      <Phone className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handleTeamExport('csv')}>Export Directory</Button>
+            <Button onClick={() => setShowDirectoryDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Calendar Dialog */}
+      <Dialog open={showCalendarDialog} onOpenChange={setShowCalendarDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-purple-500" />
+              Team Calendar
+            </DialogTitle>
+            <DialogDescription>
+              View team schedules and availability
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="p-2 rounded bg-green-50 dark:bg-green-900/20">
+                <p className="text-lg font-bold text-green-600">{teamStats.onlineMembers}</p>
+                <p className="text-xs">Online</p>
+              </div>
+              <div className="p-2 rounded bg-yellow-50 dark:bg-yellow-900/20">
+                <p className="text-lg font-bold text-yellow-600">{teamMembers.filter(m => m.status === 'busy').length}</p>
+                <p className="text-xs">Busy</p>
+              </div>
+              <div className="p-2 rounded bg-gray-50 dark:bg-gray-800">
+                <p className="text-lg font-bold">{teamMembers.filter(m => m.status === 'offline').length}</p>
+                <p className="text-xs">Offline</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Today's Availability</p>
+              {teamMembers.slice(0, 6).map((member) => (
+                <div key={member.id} className="flex items-center justify-between p-2 rounded bg-gray-50 dark:bg-gray-800">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${getStatusColor(member.status)}`} />
+                    <span className="text-sm">{member.name}</span>
+                  </div>
+                  <span className="text-xs text-gray-500 capitalize">{member.availability}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowCalendarDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Files Dialog */}
+      <Dialog open={showFilesDialog} onOpenChange={setShowFilesDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-blue-500" />
+              Team Files
+            </DialogTitle>
+            <DialogDescription>
+              Shared files and documents
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+              <p className="text-sm font-medium">Active Projects</p>
+              <p className="text-lg font-bold text-blue-600">{teamStats.activeProjects} projects with shared files</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Recent Files</p>
+              <div className="space-y-1 text-sm">
+                <div className="flex items-center gap-2 p-2 rounded bg-gray-50 dark:bg-gray-800">
+                  <FileText className="h-4 w-4 text-blue-500" />
+                  <span>Project_Requirements.pdf</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded bg-gray-50 dark:bg-gray-800">
+                  <FileText className="h-4 w-4 text-green-500" />
+                  <span>Team_Guidelines.docx</span>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded bg-gray-50 dark:bg-gray-800">
+                  <FileText className="h-4 w-4 text-yellow-500" />
+                  <span>Meeting_Notes.md</span>
+                </div>
+              </div>
+            </div>
+            <Button className="w-full" variant="outline" onClick={() => {
+              toast.info('Files Hub', { description: 'Opening Files Hub...' })
+            }}>
+              Open Files Hub
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowFilesDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Projects Dialog */}
+      <Dialog open={showProjectsDialog} onOpenChange={setShowProjectsDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-green-500" />
+              Team Projects
+            </DialogTitle>
+            <DialogDescription>
+              Overview of {teamStats.activeProjects} active projects
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 text-center">
+                <p className="text-2xl font-bold text-green-600">{teamStats.activeProjects}</p>
+                <p className="text-sm">Active</p>
+              </div>
+              <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-center">
+                <p className="text-2xl font-bold text-blue-600">{teamStats.completedTasks}</p>
+                <p className="text-sm">Tasks Done</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Team Allocation</p>
+              {departments.map((dept) => (
+                <div key={dept.name} className="flex items-center justify-between p-2 rounded bg-gray-50 dark:bg-gray-800">
+                  <span className="text-sm">{dept.name}</span>
+                  <span className="text-xs text-gray-500">{dept.activeProjects} projects</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowProjectsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tasks Dialog */}
+      <Dialog open={showTasksDialog} onOpenChange={setShowTasksDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-blue-500" />
+              Assign Task
+            </DialogTitle>
+            <DialogDescription>
+              Assign tasks to {teamStats.onlineMembers} available members
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Assign To</Label>
+              <select
+                className="w-full p-2 rounded border bg-background"
+                value={taskForm.memberId}
+                onChange={(e) => setTaskForm({ ...taskForm, memberId: e.target.value })}
+              >
+                <option value="">Select team member...</option>
+                {teamMembers.filter(m => m.status === 'online' || m.status === 'busy').map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name} - {member.role} ({member.status})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label>Task Title</Label>
+              <Input
+                value={taskForm.title}
+                onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
+                placeholder="Enter task title..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Priority</Label>
+              <select
+                className="w-full p-2 rounded border bg-background"
+                value={taskForm.priority}
+                onChange={(e) => setTaskForm({ ...taskForm, priority: e.target.value })}
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label>Due Date</Label>
+              <Input
+                type="date"
+                value={taskForm.dueDate}
+                onChange={(e) => setTaskForm({ ...taskForm, dueDate: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowTasksDialog(false)}>Cancel</Button>
+            <Button onClick={handleAssignNewTask}>Assign Task</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
