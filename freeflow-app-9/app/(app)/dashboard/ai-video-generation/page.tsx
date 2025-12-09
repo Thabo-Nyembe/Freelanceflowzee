@@ -745,8 +745,27 @@ export default function AIVideoGenerationPage() {
       const duration = 15 + Math.floor(Math.random() * 60)
       const fileSize = duration * 1024 * 1024 * (genQuality === '4k' ? 8 : genQuality === 'full-hd' ? 4 : genQuality === 'hd' ? 2 : 1)
 
+      let videoId = `vid_${Math.random().toString(36).substr(2, 9)}`
+
+      // Create video in database
+      if (userId) {
+        const { createGeneratedVideo } = await import('@/lib/ai-video-queries')
+        const { data, error } = await createGeneratedVideo(userId, {
+          title: genPrompt.substring(0, 50),
+          prompt: genPrompt,
+          style: genStyle as any,
+          format: genFormat as any,
+          quality: genQuality as any,
+          ai_model: genModel as any,
+          tags: ['ai-generated', genStyle]
+        })
+        if (error) throw error
+        if (data?.id) videoId = data.id
+        logger.info('Video created in database', { videoId })
+      }
+
       const newVideo: GeneratedVideo = {
-        id: `vid_${Math.random().toString(36).substr(2, 9)}`,
+        id: videoId,
         title: genPrompt.substring(0, 50),
         prompt: genPrompt,
         style: genStyle,
@@ -813,11 +832,18 @@ export default function AIVideoGenerationPage() {
     }
   }
 
-  const handleViewVideo = (video: GeneratedVideo) => {
+  const handleViewVideo = async (video: GeneratedVideo) => {
     logger.info('Opening video view', { videoId: video.id, title: video.title })
     dispatch({ type: 'SELECT_VIDEO', video })
     dispatch({ type: 'INCREMENT_VIEW', videoId: video.id })
     setShowViewModal(true)
+
+    // Track view count in database
+    if (userId) {
+      const { incrementVideoViews } = await import('@/lib/ai-video-queries')
+      await incrementVideoViews(video.id)
+      logger.info('View count incremented in database', { videoId: video.id })
+    }
   }
 
   const handleEditVideo = (video: GeneratedVideo) => {
@@ -916,9 +942,16 @@ export default function AIVideoGenerationPage() {
     }
   }
 
-  const handleDownload = (video: GeneratedVideo) => {
+  const handleDownload = async (video: GeneratedVideo) => {
     logger.info('Downloading video', { videoId: video.id, title: video.title, fileSize: video.fileSize })
     dispatch({ type: 'INCREMENT_DOWNLOAD', videoId: video.id })
+
+    // Track download count in database
+    if (userId) {
+      const { updateGeneratedVideo } = await import('@/lib/ai-video-queries')
+      await updateGeneratedVideo(video.id, { downloads: video.downloads + 1 })
+      logger.info('Download count incremented in database', { videoId: video.id })
+    }
 
     toast.success('Download started!', {
       description: `${video.title} - ${formatDuration(video.duration)} - ${formatFileSize(video.fileSize)} - ${video.quality.toUpperCase()}`
@@ -926,23 +959,38 @@ export default function AIVideoGenerationPage() {
     announce(`Downloading ${video.title}`)
   }
 
-  const handleToggleLike = (videoId: string) => {
+  const handleToggleLike = async (videoId: string) => {
     const video = state.videos.find(v => v.id === videoId)
     const isLiked = video?.likes && video.likes > 0
 
     logger.info(isLiked ? 'Unliking video' : 'Liking video', { videoId, currentLikes: video?.likes })
     dispatch({ type: 'TOGGLE_LIKE', videoId })
 
+    // Persist like status in database
+    if (userId && video) {
+      const { updateGeneratedVideo } = await import('@/lib/ai-video-queries')
+      const newLikes = isLiked ? Math.max(0, video.likes - 1) : video.likes + 1
+      await updateGeneratedVideo(videoId, { likes: newLikes })
+      logger.info('Like status persisted in database', { videoId, likes: newLikes })
+    }
+
     toast.success(isLiked ? 'Removed from liked videos' : 'Added to liked videos', {
       description: `${video?.title} - ${video?.likes || 0} likes`
     })
   }
 
-  const handleTogglePublic = (videoId: string) => {
+  const handleTogglePublic = async (videoId: string) => {
     const video = state.videos.find(v => v.id === videoId)
 
     logger.info('Toggling public status', { videoId, currentStatus: video?.isPublic })
     dispatch({ type: 'TOGGLE_PUBLIC', videoId })
+
+    // Persist public status in database
+    if (userId && video) {
+      const { updateGeneratedVideo } = await import('@/lib/ai-video-queries')
+      await updateGeneratedVideo(videoId, { is_public: !video.isPublic })
+      logger.info('Public status persisted in database', { videoId, isPublic: !video.isPublic })
+    }
 
     toast.success('Visibility updated!', {
       description: `${video?.title} - ${video?.isPublic ? 'Now private - Only you can view' : 'Now public - Anyone with link can view'}`

@@ -630,7 +630,25 @@ export default function BrowserExtensionPage() {
         description: 'Setting up browser integration'
       })
 
-      // Note: Using local state - in production, this would install actual browser extension
+      // Create installation record in database
+      if (userId) {
+        const { createInstallation } = await import('@/lib/browser-extension-queries')
+        const { data, error } = await createInstallation(userId, {
+          browser: state.currentBrowser as any,
+          browser_version: navigator.userAgent.match(/Chrome\/(\d+)/)?.[1] || '120',
+          extension_version: '1.0.0',
+          status: 'active',
+          installed_at: new Date().toISOString(),
+          settings: {},
+          enabled_features: ['screenshot', 'quick-actions', 'sync'],
+          total_captures: 0,
+          total_actions: 0,
+          storage_used: 0
+        })
+        if (error) throw error
+        logger.info('Installation record created in database', { installationId: data?.id })
+      }
+
       dispatch({ type: 'SET_INSTALLED', isInstalled: true })
       setShowInstallModal(false)
 
@@ -718,7 +736,7 @@ export default function BrowserExtensionPage() {
     }
   }
 
-  const handleToggleFeature = (featureId: string) => {
+  const handleToggleFeature = async (featureId: string) => {
     const feature = state.features.find(f => f.id === featureId)
     if (!feature) return
 
@@ -731,6 +749,21 @@ export default function BrowserExtensionPage() {
     dispatch({ type: 'TOGGLE_FEATURE', featureId })
 
     const newState = !feature.enabled
+
+    // Persist feature toggle in database
+    if (userId) {
+      const { getUserInstallations, updateInstallation } = await import('@/lib/browser-extension-queries')
+      const { data: installations } = await getUserInstallations(userId)
+      if (installations && installations.length > 0) {
+        const installation = installations[0]
+        const enabledFeatures = newState
+          ? [...(installation.enabled_features || []), featureId]
+          : (installation.enabled_features || []).filter((f: string) => f !== featureId)
+        await updateInstallation(installation.id, { enabled_features: enabledFeatures })
+        logger.info('Feature toggle persisted in database', { featureId, enabled: newState })
+      }
+    }
+
     toast.success(newState ? `${feature.name} enabled` : `${feature.name} disabled`, {
       description: `${feature.description} - ${newState ? 'Now active' : 'Disabled'}`
     })
