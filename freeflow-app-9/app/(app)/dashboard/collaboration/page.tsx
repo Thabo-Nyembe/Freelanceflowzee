@@ -13,6 +13,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -95,6 +103,27 @@ export default function CollaborationPage() {
   const [showRemoveParticipantDialog, setShowRemoveParticipantDialog] = useState(false)
   const [feedbackToDelete, setFeedbackToDelete] = useState<number | null>(null)
   const [participantToRemove, setParticipantToRemove] = useState<number | null>(null)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [showMediaGallery, setShowMediaGallery] = useState(false)
+  const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null)
+
+  // Emoji categories
+  const emojiCategories = {
+    'Smileys': ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂', '😉', '😍', '🥰', '😘', '😋', '😜'],
+    'Gestures': ['👍', '👎', '👏', '🙌', '🤝', '💪', '✌️', '🤞', '🤟', '🤘', '👋', '🙏', '✋', '🤚', '👐', '🖐️'],
+    'Objects': ['🎉', '🎊', '🎁', '🏆', '⭐', '🌟', '💡', '📌', '📎', '✅', '❌', '❓', '❗', '💬', '💭', '🔔'],
+    'Hearts': ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '💔', '💕', '💖', '💗', '💘', '💝', '💞', '💟']
+  }
+
+  // Sample media for gallery
+  const mediaItems = [
+    { id: 1, type: 'image', name: 'project-design.png', size: '2.4 MB', date: '2 hours ago', url: '/placeholder-image.jpg' },
+    { id: 2, type: 'video', name: 'demo-recording.mp4', size: '45 MB', date: '1 day ago', url: '/placeholder-video.mp4' },
+    { id: 3, type: 'image', name: 'wireframes.jpg', size: '1.8 MB', date: '2 days ago', url: '/placeholder-image.jpg' },
+    { id: 4, type: 'image', name: 'screenshot.png', size: '890 KB', date: '3 days ago', url: '/placeholder-image.jpg' },
+    { id: 5, type: 'video', name: 'meeting-recap.mp4', size: '120 MB', date: '4 days ago', url: '/placeholder-video.mp4' },
+    { id: 6, type: 'image', name: 'mockup-v2.png', size: '3.1 MB', date: '5 days ago', url: '/placeholder-image.jpg' }
+  ]
 
   // A+++ LOAD COLLABORATION DATA
   useEffect(() => {
@@ -759,7 +788,7 @@ export default function CollaborationPage() {
                       data-testid="add-emoji-btn"
                       size="sm"
                       variant="outline"
-                      onClick={() => toast.info('😀 Emoji picker', { description: 'Select an emoji to react' })}
+                      onClick={() => setShowEmojiPicker(true)}
                     >
                       <Smile className="h-4 w-4 mr-2" />
                       Emoji
@@ -2237,7 +2266,7 @@ export default function CollaborationPage() {
                   <Button
                     data-testid="view-all-media-btn"
                     variant="outline"
-                    onClick={() => toast.info('📁 View all media', { description: 'Loading media gallery...' })}
+                    onClick={() => setShowMediaGallery(true)}
                   >
                     View All
                   </Button>
@@ -2930,6 +2959,128 @@ export default function CollaborationPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Emoji Picker Dialog */}
+      <Dialog open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Smile className="w-5 h-5 text-yellow-500" />
+              Emoji Picker
+            </DialogTitle>
+            <DialogDescription>
+              Select an emoji to add to your message
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {Object.entries(emojiCategories).map(([category, emojis]) => (
+              <div key={category}>
+                <h4 className="text-sm font-medium text-gray-500 mb-2">{category}</h4>
+                <div className="grid grid-cols-8 gap-1">
+                  {emojis.map((emoji, index) => (
+                    <button
+                      key={index}
+                      className={`p-2 text-xl rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${selectedEmoji === emoji ? 'bg-blue-100 dark:bg-blue-900' : ''}`}
+                      onClick={() => {
+                        setSelectedEmoji(emoji)
+                        toast.success(`Emoji selected: ${emoji}`)
+                        logger.info('Emoji selected', { emoji })
+                        announce(`Emoji ${emoji} selected`, 'polite')
+                      }}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEmojiPicker(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                if (selectedEmoji) {
+                  toast.success(`Added reaction: ${selectedEmoji}`)
+                  setShowEmojiPicker(false)
+                  setSelectedEmoji(null)
+                } else {
+                  toast.error('Please select an emoji first')
+                }
+              }}
+              disabled={!selectedEmoji}
+            >
+              Add Reaction
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Media Gallery Dialog */}
+      <Dialog open={showMediaGallery} onOpenChange={setShowMediaGallery}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Image className="w-5 h-5 text-blue-500" />
+              Media Gallery
+            </DialogTitle>
+            <DialogDescription>
+              Browse and manage shared media files
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" className="text-blue-600">All</Button>
+              <Button variant="ghost" size="sm">Images</Button>
+              <Button variant="ghost" size="sm">Videos</Button>
+              <Button variant="ghost" size="sm">Documents</Button>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              {mediaItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer group"
+                  onClick={() => {
+                    toast.info(`Opening ${item.name}`, { description: `${item.size} • ${item.date}` })
+                    logger.info('Media item opened', { item: item.name, type: item.type })
+                  }}
+                >
+                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center relative">
+                    {item.type === 'image' ? (
+                      <Image className="w-8 h-8 text-gray-400" />
+                    ) : (
+                      <Play className="w-8 h-8 text-gray-400" />
+                    )}
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <Button size="sm" variant="secondary">
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="secondary">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="p-3">
+                    <p className="text-sm font-medium truncate">{item.name}</p>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-xs text-gray-500">{item.size}</span>
+                      <span className="text-xs text-gray-500">{item.date}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMediaGallery(false)}>Close</Button>
+            <Button onClick={() => {
+              toast.success('Upload Dialog', { description: 'Opening file upload...' })
+            }}>
+              <Upload className="w-4 h-4 mr-2" />
+              Upload Media
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
