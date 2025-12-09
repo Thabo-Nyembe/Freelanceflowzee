@@ -310,8 +310,10 @@ export default function TeamPage() {
 
     setIsRemoving(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
-      setTeamMembers(teamMembers.filter(m => m.id !== memberToRemove))
+      // Remove member and persist to localStorage
+      const updatedMembers = teamMembers.filter(m => m.id !== memberToRemove)
+      setTeamMembers(updatedMembers)
+      localStorage.setItem('team_members', JSON.stringify(updatedMembers))
 
       logger.info('Team member removed', {
         memberId: memberToRemove,

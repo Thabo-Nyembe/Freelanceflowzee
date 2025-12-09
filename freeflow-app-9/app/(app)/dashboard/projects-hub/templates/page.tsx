@@ -257,8 +257,14 @@ export default function ProjectTemplatesPage() {
     announce('Creating new template', 'polite')
 
     try {
-      // Simulate API call to create template
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Save template to localStorage
+      const savedTemplates = JSON.parse(localStorage.getItem('project_templates') || '[]')
+      savedTemplates.push({
+        id: `template_${Date.now()}`,
+        ...newTemplate,
+        createdAt: new Date().toISOString()
+      })
+      localStorage.setItem('project_templates', JSON.stringify(savedTemplates))
 
       toast.success('Template created successfully!', {
         description: `"${newTemplate.title}" is now available in your templates`

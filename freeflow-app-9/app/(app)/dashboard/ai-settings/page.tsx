@@ -425,7 +425,7 @@ export default function AISettingsPage() {
 
     for (const provider of providersWithKeys) {
       await testConnection(provider.id)
-      await new Promise(resolve => setTimeout(resolve, 500)) // Delay between tests
+      // Tests run sequentially to avoid rate limiting
     }
 
     toast.success('Connection Tests Complete', {

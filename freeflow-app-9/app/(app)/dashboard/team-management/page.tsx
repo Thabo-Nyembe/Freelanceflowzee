@@ -457,8 +457,10 @@ export default function TeamManagementPage() {
         message_length: messageText.length
       })
 
-      // Simulate sending message
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Open email client with message
+      const subject = encodeURIComponent(`Message from Team`)
+      const body = encodeURIComponent(messageText)
+      window.open(`mailto:${selectedMember.email}?subject=${subject}&body=${body}`, '_blank')
 
       toast.success(`Message sent to ${selectedMember.name}!`)
       setIsMessageOpen(false)

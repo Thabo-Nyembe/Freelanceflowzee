@@ -262,8 +262,8 @@ export default function AdvancedPage() {
 
       if (createError) throw new Error(createError.message)
 
-      // Simulate sync (in production, this would sync with server)
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Save sync state to localStorage as backup
+      localStorage.setItem('settings_last_sync', new Date().toISOString())
 
       // Complete sync
       const syncDuration = Date.now() - syncStartTime

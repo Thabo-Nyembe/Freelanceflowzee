@@ -1014,11 +1014,14 @@ export default function ReportsPage() {
         recipients: shareRecipients.split(',').map(e => e.trim())
       })
 
-      // Simulate sharing - in production this would send via API
-      await new Promise(resolve => setTimeout(resolve, 500))
+      // Open email client to share report
+      const recipients = shareRecipients.split(',').map(e => e.trim())
+      const subject = encodeURIComponent(`Report: ${shareReport.name}`)
+      const body = encodeURIComponent(`Please find the attached report "${shareReport.name}".\n\nReport URL: ${window.location.origin}/reports/${shareReport.id}`)
+      window.open(`mailto:${recipients.join(',')}?subject=${subject}&body=${body}`, '_blank')
 
       toast.success('Report shared', {
-        description: `"${shareReport.name}" shared with ${shareRecipients.split(',').length} recipient(s)`
+        description: `"${shareReport.name}" shared with ${recipients.length} recipient(s)`
       })
       announce('Report shared successfully', 'polite')
       setIsShareModalOpen(false)

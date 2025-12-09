@@ -354,9 +354,6 @@ export default function InvoicesPage() {
     toast.loading('Generating PDF...', { id: 'pdf-gen' })
 
     try {
-      // Simulate PDF generation time
-      await new Promise(resolve => setTimeout(resolve, 1500))
-
       // Create a simple invoice PDF content
       const pdfContent = `
 INVOICE ${invoice.number}

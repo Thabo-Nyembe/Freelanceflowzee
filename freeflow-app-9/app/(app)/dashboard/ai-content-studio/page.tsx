@@ -120,9 +120,7 @@ function MarketingContentGenerator() {
 
     setIsGenerating(true)
 
-    // Simulate AI generation
-    await new Promise(resolve => setTimeout(resolve, 1500))
-
+    // Generate content from template
     const template = contentTemplates[platform]?.[contentType] || contentTemplates.instagram.social
     const generated = template.replace(/\[TOPIC\]/g, topic)
 

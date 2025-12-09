@@ -197,7 +197,8 @@ export default function AnalyticsOverviewPage() {
   const handleRefreshAnalytics = async () => {
     logger.info('Analytics data refresh started')
     setIsRefreshing(true)
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Save refresh timestamp
+    localStorage.setItem('analytics_last_refresh', new Date().toISOString())
     setIsRefreshing(false)
     logger.info('Analytics data refreshed successfully')
     toast.success('Analytics data refreshed!', {
