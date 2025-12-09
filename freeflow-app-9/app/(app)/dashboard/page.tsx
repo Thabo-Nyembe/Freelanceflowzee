@@ -442,11 +442,11 @@ export default function DashboardPage() {
       // Create comprehensive export data from API
       const exportData = {
         dashboard: result.data.executive?.overview || {
-          earnings: mockData.earnings,
-          activeProjects: mockData.activeProjects,
-          completedProjects: mockData.completedProjects,
-          totalClients: mockData.totalClients,
-          hoursThisMonth: mockData.hoursThisMonth
+          earnings: dashboardStats.earnings,
+          activeProjects: dashboardStats.activeProjects,
+          completedProjects: dashboardStats.completedProjects,
+          totalClients: dashboardStats.totalClients,
+          hoursThisMonth: dashboardStats.hoursThisMonth
         },
         projects: projects.map(p => ({
           name: p.name,

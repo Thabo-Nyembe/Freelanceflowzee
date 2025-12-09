@@ -67,7 +67,7 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
-  const { userId, loading: userLoading } = useCurrentUser()
+  const { userId, userName, userEmail, loading: userLoading } = useCurrentUser()
 
   const [activeTab, setActiveTab] = useState<any>('overview')
   const [isEditing, setIsEditing] = useState<any>(false)
@@ -477,14 +477,18 @@ export default function ProfilePage() {
       format: 'JSON'
     })
 
-    // Note: Using mock export - in production, this would fetch from /api/profile/export
-    const mockData = {
-      profile: { name: 'User Profile', email: 'user@example.com' },
+    // Export profile data with real user information
+    const exportData = {
+      profile: {
+        name: userName || 'Unknown User',
+        email: userEmail || 'No email',
+        userId: userId
+      },
       exportDate: new Date().toISOString(),
       categories: dataCategories
     }
 
-    const blob = new Blob([JSON.stringify(mockData, null, 2)], { type: 'application/json' })
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
