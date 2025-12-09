@@ -1983,11 +1983,37 @@ export default function CommunityHubPage() {
     }
   }
 
-  const handleCreatePost = () => {
-    if (state.newPost.content) {
+  const handleCreatePost = async () => {
+    if (!state.newPost.content) {
+      toast.error('Please enter some content')
+      return
+    }
+
+    if (!userId) {
+      toast.error('Please log in to create posts')
+      return
+    }
+
+    try {
+      // Dynamic import for code splitting
+      const { createPost } = await import('@/lib/community-hub-queries')
+
+      const { data: createdPost, error: createError } = await createPost(userId, {
+        content: state.newPost.content,
+        type: state.postType,
+        visibility: 'public',
+        tags: [],
+        hashtags: [],
+        mentions: []
+      })
+
+      if (createError || !createdPost) {
+        throw new Error(createError?.message || 'Failed to create post')
+      }
+
       const newPost: CommunityPost = {
-        id: Date.now().toString(),
-        authorId: state.currentUser?.id || '',
+        id: createdPost.id,
+        authorId: userId,
         content: state.newPost.content,
         type: state.postType,
         createdAt: new Date().toISOString(),
@@ -2021,11 +2047,17 @@ export default function CommunityHubPage() {
           likes: 0
         }
       }
-      
+
       dispatch({ type: 'ADD_POST', payload: newPost })
       dispatch({ type: 'SET_NEW_POST', payload: {} })
       dispatch({ type: 'SET_SHOW_CREATE_POST', payload: false })
       toast.success('Post created successfully!')
+      announce('Post created successfully', 'polite')
+    } catch (error: any) {
+      toast.error('Failed to create post', {
+        description: error.message || 'Please try again later'
+      })
+      announce('Error creating post', 'assertive')
     }
   }
 

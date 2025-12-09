@@ -435,7 +435,8 @@ export default function VoiceCollaborationPage() {
       type: roomType,
       capacity: roomCapacity,
       quality: roomQuality,
-      isLocked: roomIsLocked
+      isLocked: roomIsLocked,
+      userId
     })
 
     if (!roomName.trim()) {
@@ -452,17 +453,43 @@ export default function VoiceCollaborationPage() {
       return
     }
 
+    if (!userId) {
+      toast.error('Please log in to create rooms')
+      return
+    }
+
     try {
       dispatch({ type: 'SET_LOADING', isLoading: true })
 
-      // Note: Using local state - in production, this would POST to /api/voice-collaboration/rooms
-      const newRoom: VoiceRoom = {
-        id: `ROOM-${Date.now()}`,
+      // Dynamic import for code splitting
+      const { createVoiceRoom } = await import('@/lib/voice-collaboration-queries')
+
+      const { data: createdRoom, error: createError } = await createVoiceRoom(userId, {
         name: roomName,
         description: roomDescription,
         type: roomType,
         status: 'active',
-        hostId: 'USER-CURRENT',
+        host_name: 'Current User',
+        capacity: roomCapacity,
+        quality: roomQuality,
+        is_locked: roomIsLocked,
+        password: roomIsLocked ? roomPassword : undefined,
+        is_recording: false,
+        category: 'Custom',
+        tags: [roomType, roomQuality]
+      })
+
+      if (createError || !createdRoom) {
+        throw new Error(createError?.message || 'Failed to create room')
+      }
+
+      const newRoom: VoiceRoom = {
+        id: createdRoom.id,
+        name: roomName,
+        description: roomDescription,
+        type: roomType,
+        status: 'active',
+        hostId: userId,
         hostName: 'Current User',
         participants: [],
         currentParticipants: 0,
@@ -480,11 +507,12 @@ export default function VoiceCollaborationPage() {
 
       dispatch({ type: 'ADD_ROOM', room: newRoom })
 
-      logger.info('Voice room created successfully', {
+      logger.info('Voice room created in database', {
         roomId: newRoom.id,
         name: newRoom.name,
         type: newRoom.type,
-        capacity: newRoom.capacity
+        capacity: newRoom.capacity,
+        userId
       })
 
       // Reset form
@@ -502,8 +530,10 @@ export default function VoiceCollaborationPage() {
       })
       announce('Voice room created', 'polite')
     } catch (error: any) {
-      logger.error('Room creation failed', { error: error.message })
-      toast.error('Failed to create room')
+      logger.error('Room creation failed', { error: error.message, userId })
+      toast.error('Failed to create room', {
+        description: error.message || 'Please try again later'
+      })
       announce('Failed to create room', 'assertive')
       dispatch({ type: 'SET_ERROR', error: 'Failed to create room' })
     }
