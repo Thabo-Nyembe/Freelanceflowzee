@@ -22,6 +22,7 @@ This session completed comprehensive database wiring for critical dashboard sub-
 | `74ddbda5` | fix: Secure Integration API keys with database storage |
 | `e1c753d6` | feat: Wire Time-tracking delete operations to database |
 | `2e6e9744` | feat: Wire CV-Portfolio to database |
+| `f8cb04b5` | feat: Wire AI-Create History refresh to database |
 
 ---
 
@@ -176,6 +177,18 @@ await createPaymentMethod(userId, {
 
 **Files Modified:**
 - `app/(app)/dashboard/cv-portfolio/page.tsx` (+79/-25 lines)
+
+### 7. AI-Create History Page (`/dashboard/ai-create/history`)
+
+**Problem:** Refresh function used localStorage instead of database
+
+**Solution:**
+- Replace localStorage with getGenerations() database call
+- Refresh now loads fresh data from Supabase
+- Added error handling and user feedback
+
+**Files Modified:**
+- `app/(app)/dashboard/ai-create/history/page.tsx` (+33/-17 lines)
 
 ---
 
