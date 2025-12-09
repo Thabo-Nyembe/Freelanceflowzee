@@ -48,6 +48,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCurrentUser } from "@/hooks/use-ai-data";
 import { useAnnouncer } from "@/lib/accessibility";
 import type { Team as DBTeam, TeamType } from "@/lib/collaboration-queries";
+import { CardSkeleton } from "@/components/ui/loading-skeleton";
+import { ErrorEmptyState } from "@/components/ui/empty-state";
 
 const logger = createFeatureLogger("CollaborationTeams");
 
@@ -87,6 +89,7 @@ export default function TeamsPage() {
   const [isCreateTeamOpen, setIsCreateTeamOpen] = useState(false);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
 
   // Stats
@@ -111,6 +114,7 @@ export default function TeamsPage() {
 
     try {
       setLoading(true);
+      setError(null);
       logger.info("Fetching teams from Supabase", { userId });
 
       const { getTeams } = await import("@/lib/collaboration-queries");
@@ -154,10 +158,12 @@ export default function TeamsPage() {
           description: `${teamsData.length} team${teamsData.length !== 1 ? "s" : ""} found`,
         });
       }
-    } catch (error: any) {
-      logger.error("Failed to load teams", { error });
+    } catch (err: any) {
+      const errorMessage = err.message || "Failed to load teams";
+      setError(errorMessage);
+      logger.error("Failed to load teams", { error: err });
       toast.error("Failed to load teams", {
-        description: error.message || "Please try again",
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
@@ -507,6 +513,46 @@ export default function TeamsPage() {
 
     return matchesSearch && matchesRole && matchesStatus;
   });
+
+  // A+++ LOADING STATE
+  if (loading || userLoading) {
+    return (
+      <div className="flex-1 space-y-6 p-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Teams</h2>
+            <p className="text-muted-foreground">Loading teams...</p>
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-4">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="flex-1 space-y-6 p-8">
+        <ErrorEmptyState
+          error={error}
+          action={{
+            label: "Retry",
+            onClick: () => fetchTeamsData(),
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 space-y-6 p-8">

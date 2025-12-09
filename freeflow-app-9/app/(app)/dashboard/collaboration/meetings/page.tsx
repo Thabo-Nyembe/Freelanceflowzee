@@ -70,6 +70,8 @@ import {
   updateMeeting,
   deleteMeeting,
 } from "@/lib/collaboration-queries";
+import { CardSkeleton } from "@/components/ui/loading-skeleton";
+import { ErrorEmptyState } from "@/components/ui/empty-state";
 
 const logger = createFeatureLogger("CollaborationMeetings");
 
@@ -125,6 +127,7 @@ export default function MeetingsPage() {
   const [inviteMeetingId, setInviteMeetingId] = useState<string | null>(null);
   const [inviteEmail, setInviteEmail] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("upcoming");
   const [activeMeeting, setActiveMeeting] = useState<Meeting | null>(null);
 
@@ -162,6 +165,7 @@ export default function MeetingsPage() {
 
     try {
       setLoading(true);
+      setError(null);
       logger.info("Fetching meetings data", { userId });
 
       // Fetch real meetings from database
@@ -214,8 +218,10 @@ export default function MeetingsPage() {
       });
       toast.success(`${transformedMeetings.length} meetings loaded`);
       announce(`${transformedMeetings.length} meetings loaded successfully`, "polite");
-    } catch (error) {
-      logger.error("Failed to fetch meetings data", { error, userId });
+    } catch (err: any) {
+      const errorMessage = err.message || "Failed to fetch meetings";
+      setError(errorMessage);
+      logger.error("Failed to fetch meetings data", { error: err, userId });
       toast.error("Failed to load meetings");
       announce("Error loading meetings", "assertive");
     } finally {
@@ -739,6 +745,46 @@ export default function MeetingsPage() {
 
     return matchesSearch && matchesType && matchesStatus && matchesTab;
   });
+
+  // A+++ LOADING STATE
+  if (loading || userLoading) {
+    return (
+      <div className="flex-1 space-y-6 p-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Meetings</h2>
+            <p className="text-muted-foreground">Loading meetings...</p>
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-4">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+  // A+++ ERROR STATE
+  if (error && !callState.isInCall) {
+    return (
+      <div className="flex-1 space-y-6 p-8">
+        <ErrorEmptyState
+          error={error}
+          action={{
+            label: "Retry",
+            onClick: () => fetchMeetingsData(),
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 space-y-6 p-8">
