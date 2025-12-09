@@ -152,6 +152,16 @@ export default function TeamHubPage() {
   const [newGoal, setNewGoal] = useState({ title: '', target: '', deadline: '' })
   const [newMilestone, setNewMilestone] = useState({ title: '', project: '', date: '' })
   const [feedbackForm, setFeedbackForm] = useState({ memberId: '', rating: 5, comments: '' })
+
+  // PROMPT REPLACEMENT DIALOG STATES
+  const [showAddMemberDialog, setShowAddMemberDialog] = useState(false)
+  const [addMemberForm, setAddMemberForm] = useState({ name: '', email: '', role: 'Team Member', department: 'development' })
+  const [showUpdateRoleDialog, setShowUpdateRoleDialog] = useState(false)
+  const [updateRoleMember, setUpdateRoleMember] = useState<{ id: string; name: string; currentRole: string } | null>(null)
+  const [newRoleValue, setNewRoleValue] = useState('')
+  const [showAssignTaskDialog, setShowAssignTaskDialog] = useState(false)
+  const [assignTaskMember, setAssignTaskMember] = useState<{ id: string; name: string } | null>(null)
+  const [taskNameValue, setTaskNameValue] = useState('')
   const [recognitionForm, setRecognitionForm] = useState({ memberId: '', award: '', reason: '' })
   const [taskForm, setTaskForm] = useState({ memberId: '', title: '', priority: 'medium', dueDate: '' })
 
@@ -285,7 +295,7 @@ export default function TeamHubPage() {
   // ============================================================
 
   // REAL FEATURE: Add Team Member
-  const handleAddMember = useCallback(async () => {
+  const handleAddMember = useCallback(() => {
     if (!userId) {
       toast.error('Authentication required', { description: 'Please sign in to add team members' })
       return
@@ -296,20 +306,20 @@ export default function TeamHubPage() {
       departments: departments.length
     })
 
-    const memberName = prompt('Enter new member name:')
-    if (!memberName) {
-      logger.debug('Add member cancelled by user')
+    setAddMemberForm({ name: '', email: '', role: 'Team Member', department: 'development' })
+    setShowAddMemberDialog(true)
+  }, [userId, teamMembers, departments])
+
+  // Confirm Add Member from dialog
+  const confirmAddMember = useCallback(async () => {
+    if (!userId) return
+
+    const { name: memberName, email: memberEmail, role: memberRole, department: memberDept } = addMemberForm
+
+    if (!memberName.trim() || !memberEmail.trim()) {
+      toast.error('Please fill in all required fields')
       return
     }
-
-    const memberEmail = prompt('Enter email:')
-    if (!memberEmail) {
-      logger.debug('Add member cancelled - no email provided')
-      return
-    }
-
-    const memberRole = prompt('Enter role:') || 'Team Member'
-    const memberDept = prompt('Enter department (design/development/management/marketing/qa/content/operations/analytics/sales/support):') || 'development'
 
     try {
       const { createTeamMember } = await import('@/lib/team-hub-queries')
@@ -365,13 +375,14 @@ export default function TeamHubPage() {
         description: `${memberName} added as ${memberRole} in ${memberDept}`
       })
       announce(`${memberName} added to team`, 'polite')
+      setShowAddMemberDialog(false)
     } catch (error) {
       logger.error('Failed to add team member', { error })
       toast.error('Failed to add team member', {
         description: error instanceof Error ? error.message : 'Unknown error occurred'
       })
     }
-  }, [userId, teamMembers, departments, announce])
+  }, [userId, addMemberForm, teamMembers, announce])
 
   // REAL FEATURE: Remove Team Member (opens confirmation dialog)
   const handleRemoveMember = useCallback((memberId: string, memberName: string) => {
@@ -418,7 +429,7 @@ export default function TeamHubPage() {
   }, [userId, removeMember, teamMembers, announce])
 
   // REAL FEATURE: Update Member Role
-  const handleUpdateRole = useCallback(async (memberId: string, currentRole: string) => {
+  const handleUpdateRole = useCallback((memberId: string, currentRole: string) => {
     if (!userId) {
       toast.error('Authentication required', { description: 'Please sign in to update roles' })
       return
@@ -427,17 +438,25 @@ export default function TeamHubPage() {
     const member = teamMembers.find(m => m.id === memberId)
     if (!member) return
 
-    const newRole = prompt(`Update role for ${member.name}:`, currentRole)
-    if (!newRole || newRole === currentRole) {
-      logger.debug('Role update cancelled', { memberId, memberName: member.name })
+    setUpdateRoleMember({ id: memberId, name: member.name, currentRole })
+    setNewRoleValue(currentRole)
+    setShowUpdateRoleDialog(true)
+  }, [userId, teamMembers])
+
+  // Confirm Update Role from dialog
+  const confirmUpdateRole = useCallback(async () => {
+    if (!userId || !updateRoleMember) return
+
+    if (!newRoleValue.trim() || newRoleValue === updateRoleMember.currentRole) {
+      setShowUpdateRoleDialog(false)
       return
     }
 
     try {
       const { updateTeamMember } = await import('@/lib/team-hub-queries')
 
-      const { data: updatedMember, error } = await updateTeamMember(memberId, userId, {
-        role: newRole
+      const { data: updatedMember, error } = await updateTeamMember(updateRoleMember.id, userId, {
+        role: newRoleValue
       })
 
       if (error || !updatedMember) {
@@ -445,30 +464,33 @@ export default function TeamHubPage() {
       }
 
       setTeamMembers(prev => prev.map(m =>
-        m.id === memberId ? { ...m, role: newRole } : m
+        m.id === updateRoleMember.id ? { ...m, role: newRoleValue } : m
       ))
 
       logger.info('Member role updated', {
-        memberId,
-        memberName: member.name,
-        oldRole: currentRole,
-        newRole
+        memberId: updateRoleMember.id,
+        memberName: updateRoleMember.name,
+        oldRole: updateRoleMember.currentRole,
+        newRole: newRoleValue
       })
 
       toast.success('Role Updated', {
-        description: `${member.name}'s role changed to ${newRole}`
+        description: `${updateRoleMember.name}'s role changed to ${newRoleValue}`
       })
-      announce(`${member.name} role updated to ${newRole}`, 'polite')
+      announce(`${updateRoleMember.name} role updated to ${newRoleValue}`, 'polite')
+      setShowUpdateRoleDialog(false)
+      setUpdateRoleMember(null)
+      setNewRoleValue('')
     } catch (error) {
-      logger.error('Failed to update member role', { error, memberId })
+      logger.error('Failed to update member role', { error, memberId: updateRoleMember.id })
       toast.error('Failed to update role', {
         description: error instanceof Error ? error.message : 'Unknown error occurred'
       })
     }
-  }, [userId, teamMembers, announce])
+  }, [userId, updateRoleMember, newRoleValue, announce])
 
   // REAL FEATURE: Assign Task to Member
-  const handleAssignTask = useCallback(async (memberId: string) => {
+  const handleAssignTask = useCallback((memberId: string) => {
     if (!userId) {
       toast.error('Authentication required', { description: 'Please sign in to assign tasks' })
       return
@@ -477,9 +499,17 @@ export default function TeamHubPage() {
     const member = teamMembers.find(m => m.id === memberId)
     if (!member) return
 
-    const taskName = prompt(`Assign task to ${member.name}:`)
-    if (!taskName) {
-      logger.debug('Task assignment cancelled', { memberId, memberName: member.name })
+    setAssignTaskMember({ id: memberId, name: member.name })
+    setTaskNameValue('')
+    setShowAssignTaskDialog(true)
+  }, [userId, teamMembers])
+
+  // Confirm Assign Task from dialog
+  const confirmAssignTask = useCallback(async () => {
+    if (!userId || !assignTaskMember) return
+
+    if (!taskNameValue.trim()) {
+      toast.error('Please enter a task name')
       return
     }
 
@@ -487,38 +517,42 @@ export default function TeamHubPage() {
       const { updateMemberStats } = await import('@/lib/team-hub-queries')
 
       // Increment project count
-      const { success, error } = await updateMemberStats(memberId, true, false)
+      const { success, error } = await updateMemberStats(assignTaskMember.id, true, false)
 
       if (error || !success) {
         throw new Error(error?.message || 'Failed to update member stats')
       }
 
+      const member = teamMembers.find(m => m.id === assignTaskMember.id)
       setTeamMembers(prev => prev.map(m =>
-        m.id === memberId ? {
+        m.id === assignTaskMember.id ? {
           ...m,
           projects: m.projects + 1,
-          currentProjects: [...m.currentProjects, taskName]
+          currentProjects: [...m.currentProjects, taskNameValue]
         } : m
       ))
 
       logger.info('Task assigned to team member', {
-        memberId,
-        memberName: member.name,
-        taskName,
-        newProjectCount: member.projects + 1
+        memberId: assignTaskMember.id,
+        memberName: assignTaskMember.name,
+        taskName: taskNameValue,
+        newProjectCount: member ? member.projects + 1 : 1
       })
 
       toast.success('Task Assigned', {
-        description: `"${taskName}" assigned to ${member.name}`
+        description: `"${taskNameValue}" assigned to ${assignTaskMember.name}`
       })
-      announce(`Task assigned to ${member.name}`, 'polite')
+      announce(`Task assigned to ${assignTaskMember.name}`, 'polite')
+      setShowAssignTaskDialog(false)
+      setAssignTaskMember(null)
+      setTaskNameValue('')
     } catch (error) {
-      logger.error('Failed to assign task', { error, memberId })
+      logger.error('Failed to assign task', { error, memberId: assignTaskMember.id })
       toast.error('Failed to assign task', {
         description: error instanceof Error ? error.message : 'Unknown error occurred'
       })
     }
-  }, [userId, teamMembers, announce])
+  }, [userId, assignTaskMember, taskNameValue, teamMembers, announce])
 
   // REAL FEATURE: Export Team Data
   const handleTeamExport = useCallback((format: 'csv' | 'json' = 'csv') => {
@@ -2180,6 +2214,147 @@ export default function TeamHubPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowTasksDialog(false)}>Cancel</Button>
             <Button onClick={handleAssignNewTask}>Assign Task</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Member Dialog */}
+      <Dialog open={showAddMemberDialog} onOpenChange={setShowAddMemberDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5" />
+              Add Team Member
+            </DialogTitle>
+            <DialogDescription>
+              Add a new member to your team.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="member-name">Name</Label>
+              <Input
+                id="member-name"
+                placeholder="Enter member name"
+                value={addMemberForm.name}
+                onChange={(e) => setAddMemberForm({ ...addMemberForm, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="member-email">Email</Label>
+              <Input
+                id="member-email"
+                type="email"
+                placeholder="member@company.com"
+                value={addMemberForm.email}
+                onChange={(e) => setAddMemberForm({ ...addMemberForm, email: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="member-role">Role</Label>
+              <Input
+                id="member-role"
+                placeholder="Team Member"
+                value={addMemberForm.role}
+                onChange={(e) => setAddMemberForm({ ...addMemberForm, role: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="member-dept">Department</Label>
+              <select
+                id="member-dept"
+                className="w-full rounded-md border bg-background px-3 py-2"
+                value={addMemberForm.department}
+                onChange={(e) => setAddMemberForm({ ...addMemberForm, department: e.target.value })}
+              >
+                <option value="design">Design</option>
+                <option value="development">Development</option>
+                <option value="management">Management</option>
+                <option value="marketing">Marketing</option>
+                <option value="qa">QA</option>
+                <option value="content">Content</option>
+                <option value="operations">Operations</option>
+                <option value="analytics">Analytics</option>
+                <option value="sales">Sales</option>
+                <option value="support">Support</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddMemberDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAddMember}>
+              Add Member
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Role Dialog */}
+      <Dialog open={showUpdateRoleDialog} onOpenChange={setShowUpdateRoleDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Update Role
+            </DialogTitle>
+            <DialogDescription>
+              Update role for {updateRoleMember?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-role">New Role</Label>
+              <Input
+                id="new-role"
+                placeholder="Enter new role"
+                value={newRoleValue}
+                onChange={(e) => setNewRoleValue(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUpdateRoleDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmUpdateRole}>
+              Update Role
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Task Dialog */}
+      <Dialog open={showAssignTaskDialog} onOpenChange={setShowAssignTaskDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Assign Task
+            </DialogTitle>
+            <DialogDescription>
+              Assign a task to {assignTaskMember?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="task-name">Task Name</Label>
+              <Input
+                id="task-name"
+                placeholder="Enter task name"
+                value={taskNameValue}
+                onChange={(e) => setTaskNameValue(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAssignTaskDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAssignTask}>
+              Assign Task
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

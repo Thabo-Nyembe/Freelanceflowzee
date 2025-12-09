@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { NumberFlow } from '@/components/ui/number-flow'
@@ -305,6 +307,14 @@ export default function ClientZonePage() {
   const [files, setFiles] = useState<ClientFile[]>([])
   const [invoices, setInvoices] = useState<ClientInvoice[]>([])
 
+  // Dialog states for replacing prompt()
+  const [showRevisionDialog, setShowRevisionDialog] = useState(false)
+  const [revisionProjectId, setRevisionProjectId] = useState<string | null>(null)
+  const [revisionFeedback, setRevisionFeedback] = useState('')
+  const [showDisputeDialog, setShowDisputeDialog] = useState(false)
+  const [disputeInvoiceNumber, setDisputeInvoiceNumber] = useState<string | null>(null)
+  const [disputeReason, setDisputeReason] = useState('')
+
   // A+++ LOAD CLIENT ZONE DATA FROM DATABASE
   useEffect(() => {
     const loadClientZoneData = async () => {
@@ -400,21 +410,28 @@ export default function ClientZonePage() {
       userId
     })
 
-    const feedback = prompt('Please describe the changes needed:')
-    if (!feedback) {
-      logger.debug('Revision request canceled')
+    // Open dialog instead of using prompt()
+    setRevisionProjectId(projectId)
+    setRevisionFeedback('')
+    setShowRevisionDialog(true)
+  }
+
+  // Confirm revision request from dialog
+  const confirmRevisionRequest = async () => {
+    if (!revisionProjectId || !revisionFeedback.trim()) {
+      toast.error('Please describe the changes needed')
       return
     }
 
     try {
       // Use database query instead of API endpoint
       await createRevisionRequest({
-        deliverable_id: projectId, // Note: In real use, this would be a deliverable ID
-        project_id: projectId,
-        notes: feedback
+        deliverable_id: revisionProjectId,
+        project_id: revisionProjectId,
+        notes: revisionFeedback
       })
 
-      logger.info('Revision request submitted', { projectId, userId })
+      logger.info('Revision request submitted', { projectId: revisionProjectId, userId })
 
       toast.success('Revision request submitted!', {
         description: 'Your team will review and respond within 24 hours'
@@ -425,10 +442,14 @@ export default function ClientZonePage() {
       setDashboardData(data)
       setProjects(data.recentProjects)
     } catch (error: any) {
-      logger.error('Failed to request revision', { error, projectId, userId })
+      logger.error('Failed to request revision', { error, projectId: revisionProjectId, userId })
       toast.error('Failed to request revision', {
         description: error.message || 'Please try again later'
       })
+    } finally {
+      setShowRevisionDialog(false)
+      setRevisionProjectId(null)
+      setRevisionFeedback('')
     }
   }
 
@@ -783,23 +804,30 @@ export default function ClientZonePage() {
   // HANDLER 18: INVOICE DISPUTE
   // ============================================================================
 
-  const handleInvoiceDispute = useCallback(async (invoiceNumber: string) => {
+  const handleInvoiceDispute = useCallback((invoiceNumber: string) => {
     logger.info('Invoice dispute initiated', {
       invoiceNumber,
       userId
     })
 
-    const disputeReason = prompt('Please describe the dispute:')
-    if (!disputeReason) {
-      logger.debug('Dispute canceled')
+    // Open dialog instead of using prompt()
+    setDisputeInvoiceNumber(invoiceNumber)
+    setDisputeReason('')
+    setShowDisputeDialog(true)
+  }, [userId])
+
+  // Confirm invoice dispute from dialog
+  const confirmInvoiceDispute = async () => {
+    if (!disputeInvoiceNumber || !disputeReason.trim()) {
+      toast.error('Please describe the dispute')
       return
     }
 
     try {
       // TODO: Implement disputeInvoice database query when disputes table is ready
-      // await disputeInvoice({ invoice_id: invoiceNumber, reason: disputeReason })
+      // await disputeInvoice({ invoice_id: disputeInvoiceNumber, reason: disputeReason })
 
-      logger.info('Dispute submitted successfully', { invoiceNumber, userId })
+      logger.info('Dispute submitted successfully', { invoiceNumber: disputeInvoiceNumber, userId })
       toast.success('Dispute submitted', {
         description: 'Our team will review and respond within 24 hours'
       })
@@ -809,12 +837,16 @@ export default function ClientZonePage() {
       setDashboardData(data)
       setInvoices(data.pendingInvoices)
     } catch (error: any) {
-      logger.error('Failed to submit dispute', { error, invoiceNumber, userId })
+      logger.error('Failed to submit dispute', { error, invoiceNumber: disputeInvoiceNumber, userId })
       toast.error('Failed to submit dispute', {
         description: error.message
       })
+    } finally {
+      setShowDisputeDialog(false)
+      setDisputeInvoiceNumber(null)
+      setDisputeReason('')
     }
-  }, [userId])
+  }
 
   // ============================================================================
   // HANDLER 19: PAYMENT REMINDER
@@ -2080,6 +2112,76 @@ export default function ClientZonePage() {
           })
         }}
       />
+
+      {/* Revision Request Dialog */}
+      <Dialog open={showRevisionDialog} onOpenChange={setShowRevisionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5" />
+              Request Revision
+            </DialogTitle>
+            <DialogDescription>
+              Describe the changes you need for this deliverable.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="revision-feedback">Changes Needed</Label>
+              <Textarea
+                id="revision-feedback"
+                placeholder="Please describe the changes you need..."
+                value={revisionFeedback}
+                onChange={(e) => setRevisionFeedback(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRevisionDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmRevisionRequest}>
+              Submit Request
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invoice Dispute Dialog */}
+      <Dialog open={showDisputeDialog} onOpenChange={setShowDisputeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertCircle className="w-5 h-5" />
+              Dispute Invoice
+            </DialogTitle>
+            <DialogDescription>
+              Please describe the reason for disputing this invoice.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="dispute-reason">Dispute Reason</Label>
+              <Textarea
+                id="dispute-reason"
+                placeholder="Please describe the issue with this invoice..."
+                value={disputeReason}
+                onChange={(e) => setDisputeReason(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDisputeDialog(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmInvoiceDispute}>
+              Submit Dispute
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

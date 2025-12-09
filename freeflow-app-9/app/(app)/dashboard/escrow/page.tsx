@@ -254,6 +254,11 @@ export default function EscrowPage() {
   })
   const [isSaving, setIsSaving] = useState(false)
 
+  // Notes dialog state
+  const [showNotesDialog, setShowNotesDialog] = useState(false)
+  const [notesDepositId, setNotesDepositId] = useState<string | null>(null)
+  const [notesText, setNotesText] = useState('')
+
   // Mock data
   const mockDeposits: EscrowDeposit[] = [
     {
@@ -983,14 +988,23 @@ export default function EscrowPage() {
 
   const handleAddNotes = (depositId: string) => {
     logger.info('Add notes initiated', { depositId })
-    const notes = prompt('Enter notes:')
-    if (notes) {
-      logger.info('Notes added', { depositId, notes })
-      dispatch({ type: 'UPDATE_DEPOSIT', depositId, updates: { notes } })
+    const deposit = state.deposits.find(d => d.id === depositId)
+    setNotesDepositId(depositId)
+    setNotesText(deposit?.notes || '')
+    setShowNotesDialog(true)
+  }
+
+  const confirmAddNotes = () => {
+    if (notesDepositId && notesText.trim()) {
+      logger.info('Notes added', { depositId: notesDepositId, notes: notesText })
+      dispatch({ type: 'UPDATE_DEPOSIT', depositId: notesDepositId, updates: { notes: notesText } })
       toast.success('Notes Added', {
         description: 'Notes have been saved to deposit'
       })
     }
+    setShowNotesDialog(false)
+    setNotesDepositId(null)
+    setNotesText('')
   }
 
   const handleRequestApproval = (depositId: string) => {
@@ -2034,6 +2048,37 @@ export default function EscrowPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Notes Dialog */}
+      <Dialog open={showNotesDialog} onOpenChange={setShowNotesDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Add Notes
+            </DialogTitle>
+            <DialogDescription>
+              Add notes to this escrow deposit for your records.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Textarea
+              placeholder="Enter your notes here..."
+              value={notesText}
+              onChange={(e) => setNotesText(e.target.value)}
+              rows={4}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNotesDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAddNotes}>
+              Save Notes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Milestone Dialog */}
       <AlertDialog open={showDeleteMilestoneDialog} onOpenChange={setShowDeleteMilestoneDialog}>

@@ -53,6 +53,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function TeamPage() {
   // A+++ STATE MANAGEMENT
@@ -69,6 +74,23 @@ export default function TeamPage() {
   const [showRemoveMemberDialog, setShowRemoveMemberDialog] = useState(false)
   const [memberToRemove, setMemberToRemove] = useState<number | null>(null)
   const [isRemoving, setIsRemoving] = useState(false)
+
+  // Dialog states for replacing prompt()
+  const [showInviteDialog, setShowInviteDialog] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteName, setInviteName] = useState('')
+  const [inviteRole, setInviteRole] = useState('Team Member')
+
+  const [showChangeRoleDialog, setShowChangeRoleDialog] = useState(false)
+  const [changeRoleMemberId, setChangeRoleMemberId] = useState<number | null>(null)
+  const [newRole, setNewRole] = useState('')
+
+  const [showAssignProjectDialog, setShowAssignProjectDialog] = useState(false)
+  const [assignProjectMemberId, setAssignProjectMemberId] = useState<number | null>(null)
+  const [projectName, setProjectName] = useState('')
+
+  const [showBulkInviteDialog, setShowBulkInviteDialog] = useState(false)
+  const [bulkEmails, setBulkEmails] = useState('')
 
   const [teamMembers, setTeamMembers] = useState<any[]>([
     {
@@ -219,23 +241,27 @@ export default function TeamPage() {
 
   // Handlers
   const handleInviteMember = () => {
-    const email = prompt('Enter new member email:')
-    if (!email) return
+    setInviteEmail('')
+    setInviteName('')
+    setInviteRole('Team Member')
+    setShowInviteDialog(true)
+  }
 
-    const name = prompt('Enter member name:')
-    if (!name) return
-
-    const role = prompt('Enter role:') || 'Team Member'
+  const confirmInviteMember = () => {
+    if (!inviteEmail.trim() || !inviteName.trim()) {
+      toast.error('Please fill in all required fields')
+      return
+    }
 
     const newMember = {
       id: teamMembers.length + 1,
-      name,
-      role,
+      name: inviteName,
+      role: inviteRole,
       department: 'New',
-      email,
+      email: inviteEmail,
       phone: '+1 (555) 000-0000',
       location: 'Remote',
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${inviteName}`,
       status: 'offline',
       joinDate: new Date().toISOString().split('T')[0],
       projects: 0,
@@ -251,15 +277,17 @@ export default function TeamPage() {
 
     logger.info('Team member invited', {
       memberId: newMember.id,
-      name,
-      email,
-      role,
+      name: inviteName,
+      email: inviteEmail,
+      role: inviteRole,
       totalMembers: teamMembers.length + 1
     })
 
     toast.success('Invitation Sent!', {
-      description: `Invited ${name} as ${role} - Total team: ${teamMembers.length + 1} members`
+      description: `Invited ${inviteName} as ${inviteRole} - Total team: ${teamMembers.length + 1} members`
     })
+
+    setShowInviteDialog(false)
   }
 
   const handleViewMember = (id: number) => {
@@ -337,24 +365,36 @@ export default function TeamPage() {
     const member = teamMembers.find(m => m.id === id)
     if (!member) return
 
-    const roles = ['Lead Designer', 'Frontend Developer', 'Backend Developer', 'Project Manager', 'QA Engineer']
-    const newRole = prompt(`Select new role for ${member.name}:\n${roles.join('\n')}`)
-    if (!newRole) return
+    setChangeRoleMemberId(id)
+    setNewRole(member.role)
+    setShowChangeRoleDialog(true)
+  }
 
+  const confirmChangeRole = () => {
+    if (!changeRoleMemberId || !newRole) return
+
+    const member = teamMembers.find(m => m.id === changeRoleMemberId)
+    if (!member) return
+
+    const previousRole = member.role
     setTeamMembers(teamMembers.map(m =>
-      m.id === id ? { ...m, role: newRole } : m
+      m.id === changeRoleMemberId ? { ...m, role: newRole } : m
     ))
 
     logger.info('Member role changed', {
-      memberId: id,
+      memberId: changeRoleMemberId,
       memberName: member.name,
-      previousRole: member.role,
+      previousRole,
       newRole
     })
 
     toast.success('Role Updated', {
-      description: `${member.name} role changed from ${member.role} to ${newRole}`
+      description: `${member.name} role changed from ${previousRole} to ${newRole}`
     })
+
+    setShowChangeRoleDialog(false)
+    setChangeRoleMemberId(null)
+    setNewRole('')
   }
 
   const handleSetPermissions = (id: number) => {
@@ -411,15 +451,26 @@ export default function TeamPage() {
     const member = teamMembers.find(m => m.id === id)
     if (!member) return
 
-    const projectName = prompt('Enter project name to assign:')
-    if (!projectName) return
+    setAssignProjectMemberId(id)
+    setProjectName('')
+    setShowAssignProjectDialog(true)
+  }
+
+  const confirmAssignProject = () => {
+    if (!assignProjectMemberId || !projectName.trim()) {
+      toast.error('Please enter a project name')
+      return
+    }
+
+    const member = teamMembers.find(m => m.id === assignProjectMemberId)
+    if (!member) return
 
     setTeamMembers(teamMembers.map(m =>
-      m.id === id ? { ...m, projects: m.projects + 1 } : m
+      m.id === assignProjectMemberId ? { ...m, projects: m.projects + 1 } : m
     ))
 
     logger.info('Project assigned to member', {
-      memberId: id,
+      memberId: assignProjectMemberId,
       memberName: member.name,
       projectName,
       newProjectCount: member.projects + 1
@@ -428,6 +479,10 @@ export default function TeamPage() {
     toast.success('Project Assigned', {
       description: `${projectName} assigned to ${member.name} - Total: ${member.projects + 1} projects`
     })
+
+    setShowAssignProjectDialog(false)
+    setAssignProjectMemberId(null)
+    setProjectName('')
   }
 
   const handleViewProjects = (id: number) => {
@@ -506,10 +561,22 @@ export default function TeamPage() {
   }
 
   const handleBulkInvite = () => {
-    const emails = prompt('Enter email addresses (comma-separated):')
-    if (!emails) return
+    setBulkEmails('')
+    setShowBulkInviteDialog(true)
+  }
 
-    const emailList = emails.split(',').map(e => e.trim()).filter(Boolean)
+  const confirmBulkInvite = () => {
+    if (!bulkEmails.trim()) {
+      toast.error('Please enter at least one email address')
+      return
+    }
+
+    const emailList = bulkEmails.split(',').map(e => e.trim()).filter(Boolean)
+
+    if (emailList.length === 0) {
+      toast.error('Please enter valid email addresses')
+      return
+    }
 
     logger.info('Bulk invite initiated', {
       emailCount: emailList.length,
@@ -519,6 +586,9 @@ export default function TeamPage() {
     toast.success('Bulk Invitations Sent', {
       description: `${emailList.length} invitation emails sent`
     })
+
+    setShowBulkInviteDialog(false)
+    setBulkEmails('')
   }
 
   const handleTeamChat = () => {
@@ -971,6 +1041,175 @@ export default function TeamPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Invite Member Dialog */}
+      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5" />
+              Invite Team Member
+            </DialogTitle>
+            <DialogDescription>
+              Send an invitation to a new team member.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="invite-email">Email Address</Label>
+              <Input
+                id="invite-email"
+                type="email"
+                placeholder="member@company.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invite-name">Full Name</Label>
+              <Input
+                id="invite-name"
+                placeholder="John Doe"
+                value={inviteName}
+                onChange={(e) => setInviteName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invite-role">Role</Label>
+              <Select value={inviteRole} onValueChange={setInviteRole}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Team Member">Team Member</SelectItem>
+                  <SelectItem value="Lead Designer">Lead Designer</SelectItem>
+                  <SelectItem value="Frontend Developer">Frontend Developer</SelectItem>
+                  <SelectItem value="Backend Developer">Backend Developer</SelectItem>
+                  <SelectItem value="Project Manager">Project Manager</SelectItem>
+                  <SelectItem value="QA Engineer">QA Engineer</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowInviteDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmInviteMember}>
+              Send Invitation
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Role Dialog */}
+      <Dialog open={showChangeRoleDialog} onOpenChange={setShowChangeRoleDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Change Role
+            </DialogTitle>
+            <DialogDescription>
+              Select a new role for {teamMembers.find(m => m.id === changeRoleMemberId)?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-role">New Role</Label>
+              <Select value={newRole} onValueChange={setNewRole}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select new role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Lead Designer">Lead Designer</SelectItem>
+                  <SelectItem value="Frontend Developer">Frontend Developer</SelectItem>
+                  <SelectItem value="Backend Developer">Backend Developer</SelectItem>
+                  <SelectItem value="Project Manager">Project Manager</SelectItem>
+                  <SelectItem value="QA Engineer">QA Engineer</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowChangeRoleDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmChangeRole}>
+              Update Role
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Project Dialog */}
+      <Dialog open={showAssignProjectDialog} onOpenChange={setShowAssignProjectDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Assign Project
+            </DialogTitle>
+            <DialogDescription>
+              Assign a project to {teamMembers.find(m => m.id === assignProjectMemberId)?.name}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="project-name">Project Name</Label>
+              <Input
+                id="project-name"
+                placeholder="Enter project name"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAssignProjectDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAssignProject}>
+              Assign Project
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Invite Dialog */}
+      <Dialog open={showBulkInviteDialog} onOpenChange={setShowBulkInviteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Bulk Invite
+            </DialogTitle>
+            <DialogDescription>
+              Send invitations to multiple team members at once.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="bulk-emails">Email Addresses</Label>
+              <Textarea
+                id="bulk-emails"
+                placeholder="Enter email addresses separated by commas&#10;e.g., john@company.com, jane@company.com"
+                value={bulkEmails}
+                onChange={(e) => setBulkEmails(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBulkInviteDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmBulkInvite}>
+              Send Invitations
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

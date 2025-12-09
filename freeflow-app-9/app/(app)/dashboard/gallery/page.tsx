@@ -48,6 +48,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 // PRODUCTION LOGGER
 import { createFeatureLogger } from '@/lib/logger'
@@ -127,6 +131,21 @@ export default function GalleryPage() {
   const [imageToDelete, setImageToDelete] = useState<string | null>(null)
   const [albumToDelete, setAlbumToDelete] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Dialog states for replacing prompt()
+  const [showEditImageDialog, setShowEditImageDialog] = useState(false)
+  const [editImageId, setEditImageId] = useState<string | null>(null)
+  const [editImageForm, setEditImageForm] = useState({ title: '', description: '', tags: '' })
+
+  const [showCreateAlbumDialog, setShowCreateAlbumDialog] = useState(false)
+  const [createAlbumForm, setCreateAlbumForm] = useState({ name: '', description: '' })
+
+  const [showAddToAlbumDialog, setShowAddToAlbumDialog] = useState(false)
+  const [addToAlbumImageId, setAddToAlbumImageId] = useState<string | null>(null)
+  const [selectedAlbumIdForAdd, setSelectedAlbumIdForAdd] = useState<string>('')
+
+  const [showMoveToAlbumDialog, setShowMoveToAlbumDialog] = useState(false)
+  const [moveToAlbumId, setMoveToAlbumId] = useState<string>('')
 
   // A+++ LOAD GALLERY DATA FROM SUPABASE
   useEffect(() => {
@@ -490,26 +509,42 @@ export default function GalleryPage() {
   }
 
   // Edit Image
-  const handleEditImage = async (imageId: string) => {
+  const handleEditImage = (imageId: string) => {
     const image = images.find(img => img.id === imageId)
     if (!image) return
 
     logger.info('Edit image initiated', { imageId, fileName: image.fileName })
 
-    const newTitle = prompt('Enter new title:', image.title)
+    setEditImageId(imageId)
+    setEditImageForm({
+      title: image.title,
+      description: image.description,
+      tags: image.tags.join(', ')
+    })
+    setShowEditImageDialog(true)
+  }
+
+  // Confirm Edit Image from dialog
+  const confirmEditImage = async () => {
+    if (!editImageId) return
+
+    const image = images.find(img => img.id === editImageId)
+    if (!image) return
+
+    const newTitle = editImageForm.title.trim()
     if (!newTitle) {
-      logger.debug('Edit cancelled - no title provided', { imageId })
+      toast.error('Please enter a title')
       return
     }
 
-    const newDescription = prompt('Enter description:', image.description) || ''
-    const newTags = prompt('Enter tags (comma-separated):', image.tags.join(', '))?.split(',').map(t => t.trim()) || image.tags
+    const newDescription = editImageForm.description
+    const newTags = editImageForm.tags.split(',').map(t => t.trim()).filter(Boolean)
 
     try {
       // Update database
       const { updateGalleryImage } = await import('@/lib/gallery-queries')
 
-      const { data, error } = await updateGalleryImage(imageId, {
+      const { data, error } = await updateGalleryImage(editImageId, {
         title: newTitle,
         description: newDescription,
         tags: newTags
@@ -521,13 +556,13 @@ export default function GalleryPage() {
 
       // Update UI only on success
       setImages(prev => prev.map(img =>
-        img.id === imageId
+        img.id === editImageId
           ? { ...img, title: newTitle, description: newDescription, tags: newTags }
           : img
       ))
 
       logger.info('Image updated successfully', {
-        imageId,
+        imageId: editImageId,
         fileName: image.fileName,
         title: newTitle,
         tagsCount: newTags.length
@@ -536,8 +571,12 @@ export default function GalleryPage() {
       toast.success('Image updated', {
         description: `${newTitle} - ${newTags.length} tags`
       })
+
+      setShowEditImageDialog(false)
+      setEditImageId(null)
+      setEditImageForm({ title: '', description: '', tags: '' })
     } catch (err) {
-      logger.error('Failed to update image', { error: err, imageId })
+      logger.error('Failed to update image', { error: err, imageId: editImageId })
       toast.error('Failed to update image', {
         description: err instanceof Error ? err.message : 'Unknown error'
       })
@@ -545,7 +584,7 @@ export default function GalleryPage() {
   }
 
   // Create Album
-  const handleCreateAlbum = async () => {
+  const handleCreateAlbum = () => {
     if (!userId) {
       toast.error('Please log in to create albums')
       return
@@ -553,13 +592,21 @@ export default function GalleryPage() {
 
     logger.info('Create album initiated', { userId })
 
-    const name = prompt('Album name:')
+    setCreateAlbumForm({ name: '', description: '' })
+    setShowCreateAlbumDialog(true)
+  }
+
+  // Confirm Create Album from dialog
+  const confirmCreateAlbum = async () => {
+    if (!userId) return
+
+    const name = createAlbumForm.name.trim()
     if (!name) {
-      logger.debug('Album creation cancelled - no name provided')
+      toast.error('Please enter an album name')
       return
     }
 
-    const description = prompt('Album description (optional):') || ''
+    const description = createAlbumForm.description
 
     try {
       const { createGalleryAlbum } = await import('@/lib/gallery-queries')
@@ -600,6 +647,9 @@ export default function GalleryPage() {
       toast.success('Album created', {
         description: `"${name}" is ready for your media`
       })
+
+      setShowCreateAlbumDialog(false)
+      setCreateAlbumForm({ name: '', description: '' })
     } catch (err) {
       logger.error('Failed to create album', { error: err, userId })
       toast.error('Failed to create album', {
@@ -623,41 +673,64 @@ export default function GalleryPage() {
       return
     }
 
-    const albumNames = albums.map(a => `${a.name} (${a.id})`).join('\n')
-    const albumId = prompt(`Select album:\n${albumNames}\n\nEnter album ID:`)
+    setAddToAlbumImageId(imageId)
+    setSelectedAlbumIdForAdd('')
+    setShowAddToAlbumDialog(true)
+  }
 
-    if (!albumId) {
-      logger.debug('Add to album cancelled', { imageId })
+  // Confirm Add to Album from dialog
+  const confirmAddToAlbum = () => {
+    if (!addToAlbumImageId || !selectedAlbumIdForAdd) {
+      toast.error('Please select an album')
       return
     }
 
-    const album = albums.find(a => a.id === albumId)
+    const image = images.find(img => img.id === addToAlbumImageId)
+    if (!image) return
+
+    const album = albums.find(a => a.id === selectedAlbumIdForAdd)
     if (!album) {
       toast.error('Album not found')
-      logger.warn('Add to album failed - invalid album ID', { albumId })
+      logger.warn('Add to album failed - invalid album ID', { albumId: selectedAlbumIdForAdd })
       return
     }
 
     setImages(prev => prev.map(img =>
-      img.id === imageId ? { ...img, albumId } : img
+      img.id === addToAlbumImageId ? { ...img, albumId: selectedAlbumIdForAdd } : img
     ))
 
     setAlbums(prev => prev.map(a =>
-      a.id === albumId
+      a.id === selectedAlbumIdForAdd
         ? { ...a, imageCount: a.imageCount + 1, totalSize: a.totalSize + image.fileSize }
         : a
     ))
 
     logger.info('Image added to album', {
-      imageId,
+      imageId: addToAlbumImageId,
       fileName: image.fileName,
-      albumId,
+      albumId: selectedAlbumIdForAdd,
       albumName: album.name
     })
 
     toast.success('Added to album', {
       description: `${image.fileName} → ${album.name}`
     })
+
+    setShowAddToAlbumDialog(false)
+    setAddToAlbumImageId(null)
+    setSelectedAlbumIdForAdd('')
+  }
+
+  // Confirm Move to Album (for bulk move)
+  const confirmMoveToAlbum = () => {
+    if (!moveToAlbumId || selectedImages.size === 0) {
+      toast.error('Please select an album')
+      return
+    }
+
+    handleMoveImages(Array.from(selectedImages), moveToAlbumId)
+    setShowMoveToAlbumDialog(false)
+    setMoveToAlbumId('')
   }
 
   // Remove from Album
@@ -1169,10 +1242,12 @@ export default function GalleryPage() {
                   size="sm"
                   variant="outline"
                   onClick={() => {
-                    const albumId = prompt('Enter album ID to move to:')
-                    if (albumId) {
-                      handleMoveImages(Array.from(selectedImages), albumId)
+                    if (albums.length === 0) {
+                      toast.error('No albums available', { description: 'Create an album first' })
+                      return
                     }
+                    setMoveToAlbumId('')
+                    setShowMoveToAlbumDialog(true)
                   }}
                 >
                   <Move className="h-4 w-4 mr-2" />
@@ -1709,6 +1784,183 @@ export default function GalleryPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Image Dialog */}
+      <Dialog open={showEditImageDialog} onOpenChange={setShowEditImageDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5" />
+              Edit Image
+            </DialogTitle>
+            <DialogDescription>
+              Update the title, description, and tags for this image.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Title</Label>
+              <Input
+                id="edit-title"
+                value={editImageForm.title}
+                onChange={(e) => setEditImageForm({ ...editImageForm, title: e.target.value })}
+                placeholder="Enter image title"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editImageForm.description}
+                onChange={(e) => setEditImageForm({ ...editImageForm, description: e.target.value })}
+                placeholder="Enter description"
+                rows={3}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-tags">Tags (comma-separated)</Label>
+              <Input
+                id="edit-tags"
+                value={editImageForm.tags}
+                onChange={(e) => setEditImageForm({ ...editImageForm, tags: e.target.value })}
+                placeholder="nature, landscape, sunset"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditImageDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmEditImage}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Album Dialog */}
+      <Dialog open={showCreateAlbumDialog} onOpenChange={setShowCreateAlbumDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Folder className="h-5 w-5" />
+              Create Album
+            </DialogTitle>
+            <DialogDescription>
+              Create a new album to organize your media.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="album-name">Album Name</Label>
+              <Input
+                id="album-name"
+                value={createAlbumForm.name}
+                onChange={(e) => setCreateAlbumForm({ ...createAlbumForm, name: e.target.value })}
+                placeholder="Enter album name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="album-description">Description (optional)</Label>
+              <Textarea
+                id="album-description"
+                value={createAlbumForm.description}
+                onChange={(e) => setCreateAlbumForm({ ...createAlbumForm, description: e.target.value })}
+                placeholder="Enter album description"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateAlbumDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmCreateAlbum}>
+              Create Album
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add to Album Dialog */}
+      <Dialog open={showAddToAlbumDialog} onOpenChange={setShowAddToAlbumDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Folder className="h-5 w-5" />
+              Add to Album
+            </DialogTitle>
+            <DialogDescription>
+              Select an album to add this image to.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="select-album">Album</Label>
+              <Select value={selectedAlbumIdForAdd} onValueChange={setSelectedAlbumIdForAdd}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an album" />
+                </SelectTrigger>
+                <SelectContent>
+                  {albums.map(album => (
+                    <SelectItem key={album.id} value={album.id}>
+                      {album.name} ({album.imageCount} images)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddToAlbumDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAddToAlbum}>
+              Add to Album
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Move to Album Dialog */}
+      <Dialog open={showMoveToAlbumDialog} onOpenChange={setShowMoveToAlbumDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Move className="h-5 w-5" />
+              Move to Album
+            </DialogTitle>
+            <DialogDescription>
+              Move {selectedImages.size} selected image(s) to an album.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="move-album">Album</Label>
+              <Select value={moveToAlbumId} onValueChange={setMoveToAlbumId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an album" />
+                </SelectTrigger>
+                <SelectContent>
+                  {albums.map(album => (
+                    <SelectItem key={album.id} value={album.id}>
+                      {album.name} ({album.imageCount} images)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMoveToAlbumDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmMoveToAlbum}>
+              Move Images
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
