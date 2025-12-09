@@ -962,7 +962,7 @@ export default function MessagesPage() {
     setShowDeleteChatDialog(true)
   }
 
-  const confirmDeleteChat = () => {
+  const confirmDeleteChat = async () => {
     if (!chatToDelete) return
 
     const chat = state.chats.find(c => c.id === chatToDelete)
@@ -972,21 +972,37 @@ export default function MessagesPage() {
       chatName: chat?.name
     })
 
-    dispatch({ type: 'DELETE_CHAT', chatId: chatToDelete })
+    try {
+      // Delete from database
+      const { deleteChat } = await import('@/lib/messages-queries')
+      const { error } = await deleteChat(chatToDelete)
 
-    // REAL: Clear draft for deleted chat
-    setMessageDrafts(prev => {
-      const updated = { ...prev }
-      delete updated[chatToDelete]
-      return updated
-    })
+      if (error) {
+        throw new Error(error.message || 'Failed to delete chat')
+      }
 
-    toast.success('Chat deleted', {
-      description: `Conversation with ${chat?.name} permanently removed`
-    })
+      // Update local state
+      dispatch({ type: 'DELETE_CHAT', chatId: chatToDelete })
 
-    setShowDeleteChatDialog(false)
-    setChatToDelete(null)
+      // Clear draft for deleted chat
+      setMessageDrafts(prev => {
+        const updated = { ...prev }
+        delete updated[chatToDelete]
+        return updated
+      })
+
+      toast.success('Chat deleted', {
+        description: `Conversation with ${chat?.name} permanently removed`
+      })
+    } catch (err: any) {
+      logger.error('Failed to delete chat', { error: err })
+      toast.error('Failed to delete chat', {
+        description: err.message || 'Please try again'
+      })
+    } finally {
+      setShowDeleteChatDialog(false)
+      setChatToDelete(null)
+    }
   }
 
   const handleMarkAsRead = async (chatId: string) => {
@@ -1285,7 +1301,15 @@ export default function MessagesPage() {
     logger.warn('Message deletion confirmed', { messageId: messageToDelete })
 
     try {
-      // REAL: Delete message immediately (optimistic)
+      // Delete from database
+      const { deleteMessage } = await import('@/lib/messages-queries')
+      const { error } = await deleteMessage(messageToDelete)
+
+      if (error) {
+        throw new Error(error.message || 'Failed to delete message')
+      }
+
+      // Update local state
       dispatch({ type: 'DELETE_MESSAGE', messageId: messageToDelete })
 
       logger.info('Message deleted successfully', { messageId: messageToDelete })
@@ -1297,11 +1321,13 @@ export default function MessagesPage() {
         messageId: messageToDelete,
         error: errorMessage
       })
-      toast.error('Failed to delete message')
+      toast.error('Failed to delete message', {
+        description: errorMessage
+      })
+    } finally {
+      setShowDeleteMessageDialog(false)
+      setMessageToDelete(null)
     }
-
-    setShowDeleteMessageDialog(false)
-    setMessageToDelete(null)
   }
 
   const handleExportChat = async () => {
