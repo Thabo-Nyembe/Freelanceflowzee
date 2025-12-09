@@ -348,7 +348,7 @@ export default function EmailMarketingPage() {
     announce('Opening automation builder', 'polite')
   }
 
-  const handleSaveAutomation = useCallback(() => {
+  const handleSaveAutomation = useCallback(async () => {
     if (!automationForm.name.trim()) {
       toast.error('Please enter an automation name')
       return
@@ -363,38 +363,93 @@ export default function EmailMarketingPage() {
       tag_added: 'Tag Added'
     }
 
-    const newAutomation = {
-      id: Date.now(),
-      name: automationForm.name,
-      trigger: triggerLabels[automationForm.trigger] || automationForm.trigger,
-      status: 'active' as const,
-      emails: 1,
-      sent: 0,
-      opened: 0
+    try {
+      let automationId = Date.now()
+
+      // Create automation in database
+      if (userId) {
+        const { createEmailAutomation } = await import('@/lib/email-marketing-queries')
+        const { data, error } = await createEmailAutomation(userId, {
+          name: automationForm.name,
+          trigger: automationForm.trigger as any,
+          trigger_label: triggerLabels[automationForm.trigger] || automationForm.trigger,
+          status: 'active',
+          delay_hours: parseInt(automationForm.delay) || 1,
+          action: automationForm.action,
+          emails_count: 1,
+          sent_count: 0,
+          opened_count: 0
+        })
+        if (error) throw error
+        if (data?.id) automationId = data.id
+        logger.info('Automation created in database', { automationId })
+      }
+
+      const newAutomation = {
+        id: automationId,
+        name: automationForm.name,
+        trigger: triggerLabels[automationForm.trigger] || automationForm.trigger,
+        status: 'active' as const,
+        emails: 1,
+        sent: 0,
+        opened: 0
+      }
+
+      setAutomations(prev => [...prev, newAutomation])
+      setIsAutomationOpen(false)
+      toast.success('Automation created', {
+        description: `${automationForm.name} is now active`
+      })
+      announce('Automation created successfully', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to create automation', { error: error.message })
+      toast.error('Failed to create automation', { description: error.message || 'Please try again' })
     }
+  }, [automationForm, userId, announce])
 
-    setAutomations(prev => [...prev, newAutomation])
-    setIsAutomationOpen(false)
-    toast.success('Automation created', {
-      description: `${automationForm.name} is now active`
-    })
-    announce('Automation created successfully', 'polite')
-  }, [automationForm, announce])
+  const handleToggleAutomation = useCallback(async (id: number) => {
+    const automation = automations.find(a => a.id === id)
+    const newStatus = automation?.status === 'active' ? 'paused' : 'active'
 
-  const handleToggleAutomation = useCallback((id: number) => {
-    setAutomations(prev => prev.map(a =>
-      a.id === id
-        ? { ...a, status: a.status === 'active' ? 'paused' : 'active' }
-        : a
-    ))
-    announce('Automation status updated', 'polite')
-  }, [announce])
+    try {
+      // Update in database
+      if (userId) {
+        const { toggleAutomationStatus } = await import('@/lib/email-marketing-queries')
+        const { error } = await toggleAutomationStatus(String(id), newStatus as any)
+        if (error) throw error
+        logger.info('Automation status updated in database', { id, newStatus })
+      }
 
-  const handleDeleteAutomation = useCallback((id: number) => {
-    setAutomations(prev => prev.filter(a => a.id !== id))
-    toast.success('Automation deleted')
-    announce('Automation deleted', 'polite')
-  }, [announce])
+      setAutomations(prev => prev.map(a =>
+        a.id === id
+          ? { ...a, status: newStatus as 'active' | 'paused' }
+          : a
+      ))
+      announce('Automation status updated', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to toggle automation', { error: error.message })
+      toast.error('Failed to update automation status')
+    }
+  }, [automations, userId, announce])
+
+  const handleDeleteAutomation = useCallback(async (id: number) => {
+    try {
+      // Delete from database
+      if (userId) {
+        const { deleteEmailAutomation } = await import('@/lib/email-marketing-queries')
+        const { error } = await deleteEmailAutomation(String(id))
+        if (error) throw error
+        logger.info('Automation deleted from database', { id })
+      }
+
+      setAutomations(prev => prev.filter(a => a.id !== id))
+      toast.success('Automation deleted')
+      announce('Automation deleted', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete automation', { error: error.message })
+      toast.error('Failed to delete automation')
+    }
+  }, [userId, announce])
 
   const handleCreateTemplate = async () => {
     if (!userId) {

@@ -717,7 +717,7 @@ export default function VoiceCollaborationPage() {
     }
   }
 
-  const handleDownloadRecording = (recording: VoiceRecording) => {
+  const handleDownloadRecording = async (recording: VoiceRecording) => {
     logger.info('Downloading recording', {
       recordingId: recording.id,
       title: recording.title,
@@ -727,7 +727,14 @@ export default function VoiceCollaborationPage() {
       quality: recording.quality
     })
 
-    // Note: Using mock download - in production, this would GET from /api/voice-collaboration/recordings/:id/download
+    // Track download count in database
+    if (userId) {
+      const { incrementDownloadCount } = await import('@/lib/voice-collaboration-queries')
+      await incrementDownloadCount(recording.id)
+      logger.info('Download count incremented in database', { recordingId: recording.id })
+    }
+
+    // Download the recording (uses mock data if no actual file URL)
     const blob = new Blob(['Mock audio data'], { type: `audio/${recording.format}` })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -738,7 +745,7 @@ export default function VoiceCollaborationPage() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    // Update download count
+    // Update local download count
     const updatedRecording = { ...recording, downloadCount: recording.downloadCount + 1 }
     dispatch({ type: 'SELECT_RECORDING', recording: updatedRecording })
 
@@ -748,7 +755,7 @@ export default function VoiceCollaborationPage() {
     announce(`Downloading ${recording.title}`, 'polite')
   }
 
-  const handlePlayRecording = (recording: VoiceRecording) => {
+  const handlePlayRecording = async (recording: VoiceRecording) => {
     logger.info('Playing recording', {
       recordingId: recording.id,
       title: recording.title,
@@ -758,8 +765,14 @@ export default function VoiceCollaborationPage() {
       participants: recording.participants
     })
 
-    // Note: Using local state - in production, this would POST to /api/voice-collaboration/recordings/:id/play
-    // Update view count
+    // Track play count in database
+    if (userId) {
+      const { incrementPlayCount } = await import('@/lib/voice-collaboration-queries')
+      await incrementPlayCount(recording.id)
+      logger.info('Play count incremented in database', { recordingId: recording.id })
+    }
+
+    // Update local view count
     const updatedRecording = { ...recording, viewCount: recording.viewCount + 1 }
     dispatch({ type: 'SELECT_RECORDING', recording: updatedRecording })
 

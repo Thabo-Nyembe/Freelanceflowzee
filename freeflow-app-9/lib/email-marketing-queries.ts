@@ -233,3 +233,48 @@ export async function getEmailMarketingStats(userId: string) {
     error: campaignsResult.error || subscribersResult.error || activeSubsResult.error || templatesResult.error
   }
 }
+
+// AUTOMATIONS
+export type AutomationTrigger = 'signup' | 'purchase' | 'cart_abandon' | 'inactive' | 'birthday' | 'tag_added'
+export type AutomationStatus = 'active' | 'paused' | 'draft'
+
+export interface EmailAutomation {
+  id: string
+  user_id: string
+  name: string
+  trigger: AutomationTrigger
+  trigger_label: string
+  status: AutomationStatus
+  delay_hours: number
+  action: string
+  emails_count: number
+  sent_count: number
+  opened_count: number
+  created_at: string
+  updated_at: string
+}
+
+export async function getEmailAutomations(userId: string) {
+  const supabase = createClient()
+  return await supabase.from('email_automations').select('*').eq('user_id', userId).order('created_at', { ascending: false })
+}
+
+export async function createEmailAutomation(userId: string, automation: Partial<EmailAutomation>) {
+  const supabase = createClient()
+  return await supabase.from('email_automations').insert({ user_id: userId, ...automation }).select().single()
+}
+
+export async function updateEmailAutomation(automationId: string, updates: Partial<EmailAutomation>) {
+  const supabase = createClient()
+  return await supabase.from('email_automations').update(updates).eq('id', automationId).select().single()
+}
+
+export async function toggleAutomationStatus(automationId: string, status: AutomationStatus) {
+  const supabase = createClient()
+  return await supabase.from('email_automations').update({ status }).eq('id', automationId).select().single()
+}
+
+export async function deleteEmailAutomation(automationId: string) {
+  const supabase = createClient()
+  return await supabase.from('email_automations').delete().eq('id', automationId)
+}
