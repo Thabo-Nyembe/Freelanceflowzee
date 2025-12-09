@@ -86,6 +86,22 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 - Calculates average performance from member `performance_score` values
 - Replaces hardcoded 85% with real calculated average
 
+### 10. Profile Skills Add/Remove (profile)
+**File:** `app/(app)/dashboard/profile/page.tsx`
+**Status:** WIRED
+
+- `confirmAddSkill` now calls `addSkill()` from user-settings-queries
+- `handleConfirmRemoveSkill` now calls `removeSkill()` from user-settings-queries
+- Skills persist to `user_profiles` table in Supabase
+
+### 11. Canvas Creation (canvas-collaboration)
+**File:** `app/(app)/dashboard/canvas-collaboration/page.tsx`
+**Status:** WIRED
+
+- `confirmCreateCanvas` now calls `createCanvasProject()` from canvas-collaboration-queries
+- Canvas projects persist to `canvas_projects` table in Supabase
+- Parses size string (e.g. "1920x1080") to width/height for database
+
 ---
 
 ## Available Query Functions (92 Query Files)
@@ -143,6 +159,9 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | 6efeea44 | feat: Replace mock data with real user data in exports |
 | 20f92b47 | docs: Update audit report with session 2 fixes |
 | d595297a | feat: Wire avgPerformance to team member stats |
+| 92c95e60 | docs: Update audit report with session 3 fixes |
+| 82cebc3d | feat: Wire profile skills add/remove to database |
+| fd672a11 | feat: Wire canvas creation to database |
 
 ---
 
