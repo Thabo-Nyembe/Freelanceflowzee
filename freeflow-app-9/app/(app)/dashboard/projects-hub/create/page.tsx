@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -21,7 +22,8 @@ import {
   Target,
   Briefcase,
   Lightbulb,
-  Rocket
+  Rocket,
+  Loader2
 } from 'lucide-react'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
@@ -34,38 +36,19 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
+// DATABASE QUERIES
+import { createProject } from '@/lib/projects-hub-queries'
+
 export default function CreateProjectPage() {
+  const router = useRouter()
+
   // A+++ STATE MANAGEMENT
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
 
-  // A+++ LOAD CREATE PROJECT DATA
-  useEffect(() => {
-    const loadCreateProjectData = async () => {
-      try {
-        setIsLoading(true)
-        setError(null)
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load create project page'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
-        setIsLoading(false)
-        announce('Create project page loaded successfully', 'polite')
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load create project page')
-        setIsLoading(false)
-        announce('Error loading create project page', 'assertive')
-      }
-    }
-    loadCreateProjectData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null)
   const [projectType, setProjectType] = useState<any>('custom')
   const [formData, setFormData] = useState<any>({
@@ -172,41 +155,75 @@ export default function CreateProjectPage() {
   }
 
   const handleCreateProject = async () => {
-    const projectData = { ...formData, template: selectedTemplate }
+    // Validation
+    if (!formData.name.trim()) {
+      toast.error('Project name is required')
+      return
+    }
+
+    if (!userId) {
+      toast.error('Please sign in to create a project')
+      return
+    }
+
+    setIsCreating(true)
     const filledFields = Object.values(formData).filter(v => v !== '').length
 
     logger.info('Creating project', {
       projectName: formData.name,
       template: selectedTemplate?.name,
       category: formData.category,
-      filledFields,
-      formData: projectData
+      filledFields
     })
 
     toast.info('Creating project...', {
-      description: `${formData.name || 'New Project'} - ${selectedTemplate?.name || 'No template'} - ${formData.category || 'Uncategorized'}`
+      description: `${formData.name || 'New Project'} - ${selectedTemplate?.name || 'Custom'}`
     })
 
-    // Save project to localStorage
-    const projectId = Date.now()
-    const savedProjects = JSON.parse(localStorage.getItem('created_projects') || '[]')
-    savedProjects.push({
-      id: projectId,
-      ...formData,
-      template: selectedTemplate?.name,
-      createdAt: new Date().toISOString()
-    })
-    localStorage.setItem('created_projects', JSON.stringify(savedProjects))
+    try {
+      // Create project in database
+      const { data, error } = await createProject(userId, {
+        name: formData.name,
+        description: formData.description || '',
+        client: formData.client || 'Unnamed Client',
+        category: formData.category || 'other',
+        priority: formData.priority || 'medium',
+        budget: parseFloat(formData.budget) || 0,
+        deadline: formData.deadline || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        start_date: new Date().toISOString(),
+        status: 'Not Started',
+        progress: 0,
+        tags: selectedTemplate ? [selectedTemplate.id] : [],
+        hours_estimated: selectedTemplate?.tasks ? selectedTemplate.tasks * 2 : 0,
+      })
 
-    logger.info('Project created successfully', {
-      projectId,
-      projectName: formData.name,
-      template: selectedTemplate?.name
-    })
+      if (error) {
+        throw error
+      }
 
-    toast.success('Project created successfully', {
-      description: `${formData.name} - ${selectedTemplate?.name} template - ${filledFields}/6 fields completed - Ready to start working`
-    })
+      logger.info('Project created successfully', {
+        projectId: data?.id,
+        projectName: formData.name,
+        template: selectedTemplate?.name
+      })
+
+      toast.success('Project created successfully!', {
+        description: `${formData.name} is ready to start working on`
+      })
+
+      announce('Project created successfully', 'polite')
+
+      // Navigate to the new project or projects list
+      router.push('/dashboard/projects-hub')
+    } catch (err) {
+      logger.error('Failed to create project', { error: err })
+      toast.error('Failed to create project', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+      announce('Failed to create project', 'assertive')
+    } finally {
+      setIsCreating(false)
+    }
   }
 
   // A+++ LOADING STATE
@@ -244,9 +261,18 @@ export default function CreateProjectPage() {
             <FileText className="h-4 w-4 mr-2" />
             Save as Template
           </Button>
-          <Button size="sm" onClick={handleCreateProject}>
-            <Rocket className="h-4 w-4 mr-2" />
-            Create Project
+          <Button size="sm" onClick={handleCreateProject} disabled={isCreating}>
+            {isCreating ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              <>
+                <Rocket className="h-4 w-4 mr-2" />
+                Create Project
+              </>
+            )}
           </Button>
         </div>
       </div>

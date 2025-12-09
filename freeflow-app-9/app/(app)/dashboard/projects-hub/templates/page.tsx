@@ -42,6 +42,17 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
+// DATABASE QUERIES
+import {
+  getTemplates,
+  createTemplate,
+  duplicateTemplate,
+  toggleTemplateLike,
+  incrementTemplateDownloads,
+  createProject,
+  ProjectTemplate
+} from '@/lib/projects-hub-queries'
+
 // Template type definition
 interface Template {
   id: number
@@ -71,6 +82,7 @@ export default function ProjectTemplatesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
   const [searchTerm, setSearchTerm] = useState<string>('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [templates, setTemplates] = useState<Template[]>([])
 
   // MODAL STATES
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -98,8 +110,8 @@ export default function ProjectTemplatesPage() {
     featured: false
   })
 
-  // Mock template data
-  const templates = [
+  // Default mock templates (fallback)
+  const defaultTemplates: Template[] = [
     {
       id: 1,
       title: 'Brand Identity Package',
@@ -174,24 +186,6 @@ export default function ProjectTemplatesPage() {
     },
     {
       id: 5,
-      title: 'Print Design Portfolio',
-      description: 'Professional print design collection including brochures, flyers, and business materials',
-      category: 'print',
-      thumbnail: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=300&h=200&fit=crop',
-      tags: ['print', 'brochure', 'flyer', 'business'],
-      featured: false,
-      downloads: 421,
-      likes: 98,
-      duration: '2-3 weeks',
-      difficulty: 'Intermediate',
-      author: 'Print Master',
-      price: 'Free',
-      rating: 4.3,
-      tasks: 14,
-      includes: ['Brochure design', 'Flyer templates', 'Business cards', 'Letterhead', 'Packaging']
-    },
-    {
-      id: 6,
       title: 'Video Production',
       description: 'Complete video production workflow from concept to final delivery',
       category: 'video',
@@ -217,28 +211,50 @@ export default function ProjectTemplatesPage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with 5% error rate
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load templates'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Try to fetch from database
+        const result = await getTemplates(userId || undefined)
+
+        if (result.data && result.data.length > 0) {
+          // Convert DB templates to UI format
+          const dbTemplates: Template[] = result.data.map((t: ProjectTemplate) => ({
+            id: parseInt(t.id) || Date.now(),
+            title: t.title,
+            description: t.description,
+            category: t.category,
+            thumbnail: t.thumbnail || 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=300&h=200&fit=crop',
+            tags: t.tags || [],
+            featured: t.featured,
+            downloads: t.downloads,
+            likes: t.likes,
+            duration: t.duration,
+            difficulty: t.difficulty,
+            author: t.author,
+            price: t.price,
+            rating: t.rating,
+            tasks: t.tasks,
+            includes: t.includes || []
+          }))
+          setTemplates(dbTemplates)
+        } else {
+          // Use default templates
+          setTemplates(defaultTemplates)
+        }
 
         setIsLoading(false)
         announce('Project templates loaded successfully', 'polite')
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load templates')
+        console.error('Failed to load templates:', err)
+        // Fallback to default templates
+        setTemplates(defaultTemplates)
         setIsLoading(false)
-        announce('Error loading project templates', 'assertive')
+        announce('Project templates loaded', 'polite')
       }
     }
 
-    loadTemplatesData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    if (!userLoading) {
+      loadTemplatesData()
+    }
+  }, [userId, userLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // A+++ CRUD HANDLERS
   const handleCreateTemplate = useCallback(() => {
@@ -252,18 +268,53 @@ export default function ProjectTemplatesPage() {
       return
     }
 
+    if (!userId) {
+      toast.error('Please sign in to create a template')
+      return
+    }
+
     setIsProcessing(true)
     announce('Creating new template', 'polite')
 
     try {
-      // Save template to localStorage
-      const savedTemplates = JSON.parse(localStorage.getItem('project_templates') || '[]')
-      savedTemplates.push({
-        id: `template_${Date.now()}`,
-        ...newTemplate,
-        createdAt: new Date().toISOString()
+      // Save template to database
+      const result = await createTemplate(userId, {
+        title: newTemplate.title,
+        description: newTemplate.description,
+        category: newTemplate.category,
+        difficulty: newTemplate.difficulty as 'Beginner' | 'Intermediate' | 'Advanced',
+        duration: newTemplate.duration,
+        tags: newTemplate.tags.split(',').map(t => t.trim()).filter(Boolean),
+        includes: newTemplate.includes.split(',').map(i => i.trim()).filter(Boolean),
+        is_public: true
       })
-      localStorage.setItem('project_templates', JSON.stringify(savedTemplates))
+
+      if (result.error) {
+        throw result.error
+      }
+
+      // Add to local state
+      if (result.data) {
+        const newUITemplate: Template = {
+          id: parseInt(result.data.id) || Date.now(),
+          title: result.data.title,
+          description: result.data.description,
+          category: result.data.category,
+          thumbnail: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=300&h=200&fit=crop',
+          tags: result.data.tags || [],
+          featured: false,
+          downloads: 0,
+          likes: 0,
+          duration: result.data.duration,
+          difficulty: result.data.difficulty,
+          author: 'You',
+          price: 'Free',
+          rating: 0,
+          tasks: result.data.tasks || 0,
+          includes: result.data.includes || []
+        }
+        setTemplates(prev => [newUITemplate, ...prev])
+      }
 
       toast.success('Template created successfully!', {
         description: `"${newTemplate.title}" is now available in your templates`
@@ -281,44 +332,55 @@ export default function ProjectTemplatesPage() {
       })
       announce('Template created successfully', 'polite')
     } catch (err) {
+      console.error('Failed to create template:', err)
       toast.error('Failed to create template')
       announce('Failed to create template', 'assertive')
     } finally {
       setIsProcessing(false)
     }
-  }, [newTemplate, announce])
+  }, [newTemplate, announce, userId])
 
   const handleUseTemplate = useCallback(async (template: Template) => {
+    if (!userId) {
+      toast.error('Please sign in to use this template')
+      return
+    }
+
     setIsProcessing(true)
     announce(`Creating project from template: ${template.title}`, 'polite')
 
     try {
-      // Dynamic import for code splitting
-      const { createProject } = await import('@/lib/projects-hub-queries')
-
-      const projectData = {
+      // Create project from template
+      const result = await createProject(userId, {
         name: `Project from ${template.title}`,
         description: template.description,
         category: template.category,
-        template_id: template.id,
-        tasks: template.tasks,
-        estimated_duration: template.duration
+        tags: [template.category, 'template'],
+        hours_estimated: template.tasks * 2,
+        total_tasks: template.tasks,
+        status: 'Not Started',
+        progress: 0
+      })
+
+      if (result.error) {
+        throw result.error
       }
 
-      // Create project from template
-      await createProject(projectData)
+      // Increment template downloads
+      await incrementTemplateDownloads(template.id.toString())
 
       toast.success('Project created from template!', {
         description: `Started new project based on "${template.title}"`
       })
       announce('Project created successfully', 'polite')
     } catch (err) {
+      console.error('Failed to create project:', err)
       toast.error('Failed to create project from template')
       announce('Failed to create project', 'assertive')
     } finally {
       setIsProcessing(false)
     }
-  }, [announce])
+  }, [announce, userId])
 
   const handlePreviewTemplate = useCallback((template: Template) => {
     announce(`Previewing template: ${template.title}`, 'polite')
@@ -327,50 +389,101 @@ export default function ProjectTemplatesPage() {
   }, [announce])
 
   const handleDuplicateTemplate = useCallback(async (template: Template) => {
+    if (!userId) {
+      toast.error('Please sign in to duplicate this template')
+      return
+    }
+
     setIsProcessing(true)
     announce(`Duplicating template: ${template.title}`, 'polite')
 
     try {
-      // Save duplicated template to localStorage
-      const duplicatedTemplate = {
-        ...template,
-        id: `template_${Date.now()}`,
-        title: `${template.title} (Copy)`,
-        createdAt: new Date().toISOString()
+      // Duplicate template in database
+      const result = await duplicateTemplate(userId, template.id.toString())
+
+      if (result.error) {
+        throw result.error
       }
-      const savedTemplates = JSON.parse(localStorage.getItem('project_templates') || '[]')
-      savedTemplates.push(duplicatedTemplate)
-      localStorage.setItem('project_templates', JSON.stringify(savedTemplates))
+
+      // Add to local state
+      if (result.data) {
+        const newUITemplate: Template = {
+          id: parseInt(result.data.id) || Date.now(),
+          title: result.data.title,
+          description: result.data.description,
+          category: result.data.category,
+          thumbnail: template.thumbnail,
+          tags: result.data.tags || [],
+          featured: false,
+          downloads: 0,
+          likes: 0,
+          duration: result.data.duration,
+          difficulty: result.data.difficulty,
+          author: 'You',
+          price: 'Free',
+          rating: 0,
+          tasks: result.data.tasks || 0,
+          includes: result.data.includes || []
+        }
+        setTemplates(prev => [newUITemplate, ...prev])
+      }
 
       toast.success('Template duplicated!', {
         description: `"${template.title} (Copy)" added to your templates`
       })
       announce('Template duplicated successfully', 'polite')
     } catch (err) {
+      console.error('Failed to duplicate template:', err)
       toast.error('Failed to duplicate template')
       announce('Failed to duplicate template', 'assertive')
     } finally {
       setIsProcessing(false)
     }
-  }, [announce])
+  }, [announce, userId])
 
-  const handleLikeTemplate = useCallback((template: Template) => {
+  const handleLikeTemplate = useCallback(async (template: Template) => {
+    const isCurrentlyLiked = likedTemplates.has(template.id)
+
+    // Optimistic update
     setLikedTemplates(prev => {
       const newSet = new Set(prev)
-      if (newSet.has(template.id)) {
+      if (isCurrentlyLiked) {
         newSet.delete(template.id)
-        announce(`Removed like from ${template.title}`, 'polite')
-        toast.success('Like removed')
       } else {
         newSet.add(template.id)
-        announce(`Template ${template.title} liked`, 'polite')
-        toast.success('Template liked!', {
-          description: 'Added to your favorites'
-        })
       }
       return newSet
     })
-  }, [announce])
+
+    // Update database if logged in
+    if (userId) {
+      try {
+        await toggleTemplateLike(userId, template.id.toString(), !isCurrentlyLiked)
+      } catch (err) {
+        console.error('Failed to update like:', err)
+        // Revert on error
+        setLikedTemplates(prev => {
+          const newSet = new Set(prev)
+          if (isCurrentlyLiked) {
+            newSet.add(template.id)
+          } else {
+            newSet.delete(template.id)
+          }
+          return newSet
+        })
+      }
+    }
+
+    if (isCurrentlyLiked) {
+      announce(`Removed like from ${template.title}`, 'polite')
+      toast.success('Like removed')
+    } else {
+      announce(`Template ${template.title} liked`, 'polite')
+      toast.success('Template liked!', {
+        description: 'Added to your favorites'
+      })
+    }
+  }, [announce, userId, likedTemplates])
 
   const handleDownloadTemplate = useCallback((template: Template) => {
     announce(`Downloading template: ${template.title}`, 'polite')
