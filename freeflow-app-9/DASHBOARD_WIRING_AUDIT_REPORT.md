@@ -62,6 +62,22 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 - Canvas page now fetches real `totalDrawings` count from database
 - Templates count now fetched via `getCanvasTemplates()`
 
+### 7. Hours This Month (dashboard)
+**File:** `app/(app)/dashboard/page.tsx`
+**Status:** WIRED
+
+- Dashboard now fetches time entries for current month via `getTimeEntries()`
+- Calculates total hours from time entry durations (seconds → hours)
+- Displays actual tracked hours instead of hardcoded 0
+
+### 8. Export Data (dashboard + profile)
+**Files:** `app/(app)/dashboard/page.tsx`, `app/(app)/dashboard/profile/page.tsx`
+**Status:** WIRED
+
+- Dashboard export now uses `dashboardStats` state instead of mockData fallback
+- Profile export uses real `userName` and `userEmail` from `useCurrentUser` hook
+- Removed hardcoded placeholder values in export functions
+
 ---
 
 ## Available Query Functions (92 Query Files)
@@ -107,6 +123,9 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | 81986ac9 | feat: Add A+++ loading/error states to collaboration pages |
 | 1917d818 | feat: Wire critical dashboard features to database |
 | 784eff89 | feat: Wire remaining hardcoded values to database |
+| 8b26b00d | docs: Update audit report with additional wiring fixes |
+| f0a42771 | feat: Wire hoursThisMonth to time tracking data |
+| 6efeea44 | feat: Replace mock data with real user data in exports |
 
 ---
 
