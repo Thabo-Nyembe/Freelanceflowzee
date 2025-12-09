@@ -102,6 +102,21 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 - Canvas projects persist to `canvas_projects` table in Supabase
 - Parses size string (e.g. "1920x1080") to width/height for database
 
+### 12. Messages Delete Handlers (messages)
+**File:** `app/(app)/dashboard/messages/page.tsx`
+**Status:** WIRED
+
+- `confirmDeleteChat` now calls `deleteChat()` from messages-queries
+- `confirmDeleteMessage` now calls `deleteMessage()` from messages-queries
+- Chat and message deletions persist to database
+
+### 13. Settings Photo Removal (settings)
+**File:** `app/(app)/dashboard/settings/page.tsx`
+**Status:** WIRED
+
+- `confirmRemovePhoto` now calls `updateAvatar()` with empty string
+- Avatar removal persists to `user_profiles` table
+
 ---
 
 ## Available Query Functions (92 Query Files)
@@ -162,6 +177,9 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | 92c95e60 | docs: Update audit report with session 3 fixes |
 | 82cebc3d | feat: Wire profile skills add/remove to database |
 | fd672a11 | feat: Wire canvas creation to database |
+| 2df1a4a2 | docs: Update audit report with session 4 fixes |
+| df45a994 | feat: Wire messages delete handlers to database |
+| fd001a38 | feat: Wire settings photo removal to database |
 
 ---
 
