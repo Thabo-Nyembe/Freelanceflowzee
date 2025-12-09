@@ -94,12 +94,12 @@ export default function BillingPage() {
         logger.info('Loading billing data', { userId })
 
         // Dynamic import for code splitting
-        const { getActiveSubscription, getPaymentMethods, getInvoices } = await import('@/lib/billing-settings-queries')
+        const { getUserSubscription, getUserPaymentMethods, getUserInvoices } = await import('@/lib/billing-settings-queries')
 
         const [subscriptionResult, paymentMethodsResult, invoicesResult] = await Promise.all([
-          getActiveSubscription(userId),
-          getPaymentMethods(userId),
-          getInvoices(userId, { limit: 10 })
+          getUserSubscription(userId),
+          getUserPaymentMethods(userId),
+          getUserInvoices(userId, 10)
         ])
 
         setBilling({
@@ -146,12 +146,32 @@ export default function BillingPage() {
       const selectedPlan = plans.find(p => p.id === planId)
       logger.info('Plan change initiated', { planId, planName: selectedPlan?.name, userId })
 
-      // Save plan change to localStorage
-      localStorage.setItem(`billing_plan_${userId}`, JSON.stringify({
-        planId,
-        planName: selectedPlan?.name,
-        changedAt: new Date().toISOString()
-      }))
+      // Get subscription ID and update via database
+      const { changePlan, getUserSubscription, createSubscription } = await import('@/lib/billing-settings-queries')
+
+      if (billing.subscription?.id) {
+        // Update existing subscription
+        const priceMap: Record<string, number> = { free: 0, professional: 29, enterprise: 99 }
+        const result = await changePlan(billing.subscription.id, planId as any, priceMap[planId] || 0)
+        if (result.error) throw result.error
+        setBilling(prev => ({ ...prev, subscription: result.data }))
+      } else {
+        // Create new subscription
+        const priceMap: Record<string, number> = { free: 0, professional: 29, enterprise: 99 }
+        const result = await createSubscription(userId, {
+          plan_type: planId as any,
+          status: 'active',
+          billing_interval: 'monthly',
+          amount: priceMap[planId] || 0,
+          currency: 'USD',
+          current_period_start: new Date().toISOString(),
+          current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          cancel_at_period_end: false,
+          metadata: {}
+        })
+        if (result.error) throw result.error
+        setBilling(prev => ({ ...prev, subscription: result.data }))
+      }
 
       toast.success('Plan Updated', {
         description: `You are now on the ${selectedPlan?.name} plan`
@@ -176,38 +196,55 @@ export default function BillingPage() {
 
     setIsSaving(true)
     try {
-      logger.info('Saving payment method', { userId, lastFour: paymentForm.cardNumber.slice(-4) })
+      logger.info('Saving payment method to database', { userId, lastFour: paymentForm.cardNumber.slice(-4) })
 
-      // Save masked card info to localStorage (never store full card number)
-      const savedPaymentMethods = JSON.parse(localStorage.getItem(`payment_methods_${userId}`) || '[]')
-      savedPaymentMethods.push({
-        id: `card_${Date.now()}`,
-        lastFour: paymentForm.cardNumber.slice(-4),
-        expiryMonth: paymentForm.expiryMonth,
-        expiryYear: paymentForm.expiryYear,
-        cardholderName: paymentForm.cardholderName,
-        isDefault: paymentForm.setAsDefault,
-        addedAt: new Date().toISOString()
+      // Save to database (only store masked card info - never full card number)
+      const { createPaymentMethod, getUserPaymentMethods } = await import('@/lib/billing-settings-queries')
+
+      const result = await createPaymentMethod(userId, {
+        method_type: 'card',
+        is_default: paymentForm.setAsDefault,
+        card_brand: detectCardBrand(paymentForm.cardNumber),
+        card_last4: paymentForm.cardNumber.slice(-4),
+        card_exp_month: parseInt(paymentForm.expiryMonth),
+        card_exp_year: parseInt(`20${paymentForm.expiryYear}`),
+        is_verified: false,
+        is_active: true,
+        metadata: {
+          cardholder_name: paymentForm.cardholderName,
+          added_via: 'dashboard'
+        }
       })
-      localStorage.setItem(`payment_methods_${userId}`, JSON.stringify(savedPaymentMethods))
+
+      if (result.error) throw result.error
 
       toast.success('Payment Method Added', {
-        description: `Card ending in ${paymentForm.cardNumber.slice(-4)} has been added`
+        description: `Card ending in ${paymentForm.cardNumber.slice(-4)} saved securely`
       })
       announce('Payment method added successfully', 'polite')
       setPaymentForm({ cardNumber: '', expiryMonth: '', expiryYear: '', cvv: '', cardholderName: '', setAsDefault: true })
       setShowPaymentMethodDialog(false)
 
-      // Refresh billing data
-      const { getPaymentMethods } = await import('@/lib/billing-settings-queries')
-      const result = await getPaymentMethods(userId)
-      setBilling(prev => ({ ...prev, paymentMethods: result.data || [] }))
+      // Refresh payment methods from database
+      const paymentMethodsResult = await getUserPaymentMethods(userId)
+      setBilling(prev => ({ ...prev, paymentMethods: paymentMethodsResult.data || [] }))
     } catch (error) {
-      logger.error('Failed to save payment method', { error, userId })
+      logger.error('Failed to save payment method to database', { error, userId })
       toast.error('Failed to add payment method')
     } finally {
       setIsSaving(false)
     }
+  }
+
+  // Helper function to detect card brand
+  const detectCardBrand = (cardNumber: string): string => {
+    const firstDigit = cardNumber.charAt(0)
+    const firstTwo = cardNumber.substring(0, 2)
+    if (firstDigit === '4') return 'visa'
+    if (['51', '52', '53', '54', '55'].includes(firstTwo)) return 'mastercard'
+    if (['34', '37'].includes(firstTwo)) return 'amex'
+    if (firstTwo === '65' || cardNumber.startsWith('6011')) return 'discover'
+    return 'unknown'
   }
 
   const handleSaveBillingAddress = async () => {
@@ -220,21 +257,46 @@ export default function BillingPage() {
 
     setIsSaving(true)
     try {
-      logger.info('Saving billing address', { userId, city: billingAddress.city })
+      logger.info('Saving billing address to database', { userId, city: billingAddress.city })
 
-      // Save billing address to localStorage
-      localStorage.setItem(`billing_address_${userId}`, JSON.stringify({
-        ...billingAddress,
-        updatedAt: new Date().toISOString()
-      }))
+      // Save billing address to database
+      const { createBillingAddress, getDefaultBillingAddress, updateBillingAddress } = await import('@/lib/billing-settings-queries')
+
+      // Check if user already has a billing address
+      const existingAddress = await getDefaultBillingAddress(userId)
+
+      if (existingAddress.data) {
+        // Update existing address
+        const result = await updateBillingAddress(existingAddress.data.id, {
+          line1: billingAddress.addressLine1,
+          line2: billingAddress.addressLine2 || undefined,
+          city: billingAddress.city,
+          state: billingAddress.state || undefined,
+          postal_code: billingAddress.postalCode,
+          country: billingAddress.country
+        })
+        if (result.error) throw result.error
+      } else {
+        // Create new address
+        const result = await createBillingAddress(userId, {
+          line1: billingAddress.addressLine1,
+          line2: billingAddress.addressLine2 || undefined,
+          city: billingAddress.city,
+          state: billingAddress.state || undefined,
+          postal_code: billingAddress.postalCode,
+          country: billingAddress.country,
+          is_default: true
+        })
+        if (result.error) throw result.error
+      }
 
       toast.success('Billing Address Updated', {
-        description: 'Your billing address has been saved'
+        description: 'Your billing address has been saved securely'
       })
       announce('Billing address updated', 'polite')
       setShowBillingAddressDialog(false)
     } catch (error) {
-      logger.error('Failed to save billing address', { error, userId })
+      logger.error('Failed to save billing address to database', { error, userId })
       toast.error('Failed to update billing address')
     } finally {
       setIsSaving(false)
