@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved the most critical ones.
+Conducted a comprehensive audit of all dashboard sub-pages to identify unwired buttons, placeholder handlers, and incomplete features. Found **45+ issues** across multiple pages and resolved **16 critical features** across 6 sessions.
 
 ---
 
@@ -117,6 +117,30 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 - `confirmRemovePhoto` now calls `updateAvatar()` with empty string
 - Avatar removal persists to `user_profiles` table
 
+### 14. Invoice Delete & Send (invoices) - Session 6
+**File:** `app/(app)/dashboard/invoices/page.tsx`
+**Status:** WIRED
+
+- `handleConfirmDeleteInvoice` now calls `deleteInvoice()` from invoicing-queries
+- `handleSendInvoice` now calls `markInvoiceAsSent()` from invoicing-queries
+- Invoice deletions and send status persist to database
+
+### 15. Widget Delete Handlers (widgets) - Session 6
+**File:** `app/(app)/dashboard/widgets/page.tsx`
+**Status:** WIRED
+
+- `handleDeleteWidget` now calls `deleteWidget()` from widgets-queries
+- `handleBulkDelete` now deletes all selected widgets via `deleteWidget()` with Promise.all
+- Widget deletions persist to database
+
+### 16. Files Hub Share & Move (files-hub) - Session 6
+**File:** `app/(app)/dashboard/files-hub/page.tsx`
+**Status:** WIRED
+
+- `handleShare` now calls `updateFile()` to persist shared status and recipients
+- `handleMove` now calls `moveFileToFolder()` to persist file folder changes
+- File sharing and moving operations persist to database
+
 ---
 
 ## Available Query Functions (92 Query Files)
@@ -180,6 +204,9 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | 2df1a4a2 | docs: Update audit report with session 4 fixes |
 | df45a994 | feat: Wire messages delete handlers to database |
 | fd001a38 | feat: Wire settings photo removal to database |
+| (pending) | feat: Wire invoices delete and send to database (Session 6) |
+| (pending) | feat: Wire widgets delete handlers to database (Session 6) |
+| (pending) | feat: Wire files-hub share and move to database (Session 6) |
 
 ---
 

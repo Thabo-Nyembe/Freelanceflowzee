@@ -535,36 +535,48 @@ export default function WidgetsPage() {
   }
 
   const handleDeleteWidget = async () => {
-    if (!state.selectedWidget) return
+    if (!state.selectedWidget || !userId) return
 
     const widgetToDelete = state.selectedWidget
     logger.info('Deleting widget', {
       widgetId: widgetToDelete.id,
       name: widgetToDelete.name,
-      type: widgetToDelete.type
+      type: widgetToDelete.type,
+      userId
     })
 
     try {
       setIsSaving(true)
 
-      // Note: Using local state - in production, this would POST to /api/widgets with action 'delete'
+      // Dynamic import for code splitting
+      const { deleteWidget } = await import('@/lib/widgets-queries')
+
+      await deleteWidget(widgetToDelete.id)
+
       dispatch({ type: 'DELETE_WIDGET', widgetId: widgetToDelete.id })
       setIsDeleteModalOpen(false)
 
-      logger.info('Widget deleted successfully', { widgetId: widgetToDelete.id })
+      logger.info('Widget deleted from database', {
+        widgetId: widgetToDelete.id,
+        name: widgetToDelete.name,
+        userId
+      })
 
       toast.success('Widget deleted', {
         description: `${widgetToDelete.name} - ${widgetToDelete.type} - ${widgetToDelete.category} - Usage: ${widgetToDelete.usageCount} times`
       })
+      announce('Widget deleted successfully', 'polite')
     } catch (error: any) {
       logger.error('Widget deletion error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error,
-        widgetId: widgetToDelete.id
+        widgetId: widgetToDelete.id,
+        userId
       })
       toast.error('Failed to delete widget', {
         description: error.message || 'Please try again later'
       })
+      announce('Error deleting widget', 'assertive')
     } finally {
       setIsSaving(false)
     }
@@ -577,19 +589,33 @@ export default function WidgetsPage() {
       return
     }
 
+    if (!userId) {
+      toast.error('Please log in to delete widgets')
+      return
+    }
+
     const selectedWidgetsData = state.widgets.filter(w => state.selectedWidgets.includes(w.id))
     const widgetNames = selectedWidgetsData.map(w => w.name)
 
     logger.info('Bulk deleting widgets', {
       count: state.selectedWidgets.length,
       widgetIds: state.selectedWidgets,
-      widgetNames
+      widgetNames,
+      userId
     })
 
     try {
       setIsSaving(true)
 
-      // Note: Using local state - in production, this would POST to /api/widgets with action 'bulk-delete'
+      // Dynamic import for code splitting
+      const { deleteWidget } = await import('@/lib/widgets-queries')
+
+      // Delete all selected widgets from database
+      await Promise.all(
+        state.selectedWidgets.map(widgetId => deleteWidget(widgetId))
+      )
+
+      // Update local state
       state.selectedWidgets.forEach(widgetId => {
         dispatch({ type: 'DELETE_WIDGET', widgetId })
       })
@@ -597,20 +623,26 @@ export default function WidgetsPage() {
       const deletedCount = state.selectedWidgets.length
       dispatch({ type: 'CLEAR_SELECTED_WIDGETS' })
 
-      logger.info('Bulk delete successful', { count: deletedCount })
+      logger.info('Bulk delete successful from database', {
+        count: deletedCount,
+        userId
+      })
 
       toast.success(`Deleted ${deletedCount} widget(s)`, {
         description: `Removed: ${widgetNames.slice(0, 3).join(', ')}${widgetNames.length > 3 ? ` +${widgetNames.length - 3} more` : ''}`
       })
+      announce(`${deletedCount} widgets deleted successfully`, 'polite')
     } catch (error: any) {
       logger.error('Bulk delete error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         errorObject: error,
-        count: state.selectedWidgets.length
+        count: state.selectedWidgets.length,
+        userId
       })
       toast.error('Failed to delete widgets', {
         description: error.message || 'Please try again later'
       })
+      announce('Error deleting widgets', 'assertive')
     } finally {
       setIsSaving(false)
     }

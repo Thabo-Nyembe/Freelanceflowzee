@@ -865,54 +865,69 @@ export default function FilesHubPage() {
       return
     }
 
+    if (!userId) {
+      toast.error('Please log in to share files')
+      return
+    }
+
     const emails = shareEmails.split(',').map(e => e.trim()).filter(e => e)
 
     logger.info('File share initiated', {
       fileId: state.selectedFile.id,
       fileName: state.selectedFile.name,
       recipientCount: emails.length,
-      recipients: emails
+      recipients: emails,
+      userId
     })
 
     try {
       setIsSaving(true)
 
-      // PRODUCTION: Share via API
-      // await fetch(`/api/files/${state.selectedFile.id}/share`, {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ emails, permission: 'view' })
-      // })
+      // Dynamic import for code splitting
+      const { updateFile } = await import('@/lib/files-hub-queries')
 
-      // Mock share - in production, use API endpoint above
+      const newSharedWith = [...(state.selectedFile.sharedWith || []), ...emails]
+      const { error: shareError } = await updateFile(state.selectedFile.id, {
+        shared: true,
+        shared_with: newSharedWith
+      })
+
+      if (shareError) {
+        throw new Error(shareError.message || 'Failed to share file')
+      }
+
       const updatedFile = {
         ...state.selectedFile,
         shared: true,
-        sharedWith: [...(state.selectedFile.sharedWith || []), ...emails]
+        sharedWith: newSharedWith
       }
 
       dispatch({ type: 'UPDATE_FILE', file: updatedFile })
       setIsShareModalOpen(false)
       setShareEmails('')
 
-      logger.info('File shared successfully', {
+      logger.info('File shared successfully to database', {
         fileId: state.selectedFile.id,
         fileName: state.selectedFile.name,
-        recipientCount: emails.length
+        recipientCount: emails.length,
+        userId
       })
 
       toast.success('File shared', {
         description: `${state.selectedFile.name} - ${emails.length} recipients - ${emails.slice(0, 3).join(', ')}${emails.length > 3 ? '...' : ''}`
       })
+      announce('File shared successfully', 'polite')
     } catch (error: any) {
       logger.error('File share failed', {
         error: error.message,
         fileId: state.selectedFile.id,
-        fileName: state.selectedFile.name
+        fileName: state.selectedFile.name,
+        userId
       })
       toast.error('Failed to share file', {
         description: error.message || 'Please try again later'
       })
+      announce('Error sharing file', 'assertive')
     } finally {
       setIsSaving(false)
     }
@@ -928,49 +943,60 @@ export default function FilesHubPage() {
       return
     }
 
+    if (!userId) {
+      toast.error('Please log in to move files')
+      return
+    }
+
     logger.info('Moving file', {
       fileId: state.selectedFile.id,
       fileName: state.selectedFile.name,
       fromFolder: state.selectedFile.folder,
-      toFolder: moveToFolder
+      toFolder: moveToFolder,
+      userId
     })
 
     try {
       setIsSaving(true)
 
-      // PRODUCTION: Move via API
-      // await fetch(`/api/files/${state.selectedFile.id}/move`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ folderId: moveToFolder })
-      // })
+      // Dynamic import for code splitting
+      const { moveFileToFolder } = await import('@/lib/files-hub-queries')
 
-      // Mock move - in production, use API endpoint above
+      const { error: moveError } = await moveFileToFolder(state.selectedFile.id, moveToFolder)
+
+      if (moveError) {
+        throw new Error(moveError.message || 'Failed to move file')
+      }
+
       const previousFolder = state.selectedFile.folder
       const updatedFile = { ...state.selectedFile, folder: moveToFolder }
       dispatch({ type: 'UPDATE_FILE', file: updatedFile })
       setIsMoveModalOpen(false)
       setMoveToFolder('')
 
-      logger.info('File moved successfully', {
+      logger.info('File moved successfully to database', {
         fileId: state.selectedFile.id,
         fileName: state.selectedFile.name,
         fromFolder: previousFolder,
-        toFolder: moveToFolder
+        toFolder: moveToFolder,
+        userId
       })
 
       toast.success('File moved', {
         description: `${state.selectedFile.name} - ${previousFolder} → ${moveToFolder}`
       })
+      announce('File moved successfully', 'polite')
     } catch (error: any) {
       logger.error('File move failed', {
         error: error.message,
         fileId: state.selectedFile.id,
-        fileName: state.selectedFile.name
+        fileName: state.selectedFile.name,
+        userId
       })
       toast.error('Failed to move file', {
         description: error.message || 'Please try again later'
       })
+      announce('Error moving file', 'assertive')
     } finally {
       setIsSaving(false)
     }

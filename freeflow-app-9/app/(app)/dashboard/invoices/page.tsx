@@ -352,48 +352,102 @@ export default function InvoicesPage() {
     setDeleteInvoice({ id, client: invoice.client })
   }
 
-  const handleConfirmDeleteInvoice = () => {
-    if (!deleteInvoice) return
+  const handleConfirmDeleteInvoice = async () => {
+    if (!deleteInvoice || !userId) return
 
     const invoice = invoices.find(inv => inv.id === deleteInvoice.id)
-    setInvoices(invoices.filter(inv => inv.id !== deleteInvoice.id))
+    logger.info('Delete invoice confirmed', { invoiceId: deleteInvoice.id })
 
-    logger.info('Invoice deleted', {
-      invoiceId: deleteInvoice.id,
-      client: deleteInvoice.client,
-      amount: invoice?.amount
-    })
+    try {
+      // Dynamic import for code splitting
+      const { deleteInvoice: deleteInvoiceFromDB } = await import('@/lib/invoicing-queries')
 
-    toast.success('Invoice deleted', {
-      description: `${deleteInvoice.id} - ${deleteInvoice.client} - $${invoice?.amount.toLocaleString()} - Removed from system`
-    })
-    setDeleteInvoice(null)
+      const { success, error: deleteError } = await deleteInvoiceFromDB(deleteInvoice.id, userId)
+
+      if (deleteError || !success) {
+        throw new Error(deleteError?.message || 'Failed to delete invoice')
+      }
+
+      setInvoices(invoices.filter(inv => inv.id !== deleteInvoice.id))
+
+      logger.info('Invoice deleted from database', {
+        invoiceId: deleteInvoice.id,
+        client: deleteInvoice.client,
+        amount: invoice?.amount,
+        userId
+      })
+
+      toast.success('Invoice deleted', {
+        description: `${deleteInvoice.id} - ${deleteInvoice.client} - $${invoice?.amount.toLocaleString()} - Removed from system`
+      })
+      announce('Invoice deleted successfully', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to delete invoice', {
+        error: error.message,
+        invoiceId: deleteInvoice.id,
+        userId
+      })
+      toast.error('Failed to delete invoice', {
+        description: error.message || 'Please try again later'
+      })
+      announce('Error deleting invoice', 'assertive')
+    } finally {
+      setDeleteInvoice(null)
+    }
   }
 
-  const handleSendInvoice = (id: string) => {
+  const handleSendInvoice = async (id: string) => {
     const invoice = invoices.find(inv => inv.id === id)
     if (!invoice) {
       logger.warn('Invoice not found for sending', { invoiceId: id })
       return
     }
 
-    const sentDate = new Date().toISOString()
+    if (!userId) {
+      toast.error('Please log in to send invoices')
+      return
+    }
 
-    setInvoices(invoices.map(inv =>
-      inv.id === id ? { ...inv, sentDate, status: inv.status === 'draft' ? 'pending' : inv.status } : inv
-    ))
+    try {
+      // Dynamic import for code splitting
+      const { markInvoiceAsSent } = await import('@/lib/invoicing-queries')
 
-    logger.info('Invoice sent to client', {
-      invoiceId: id,
-      client: invoice.client,
-      clientEmail: invoice.clientEmail,
-      amount: invoice.amount,
-      sentDate
-    })
+      const { success, error: sendError } = await markInvoiceAsSent(id, userId)
 
-    toast.success('Invoice sent', {
-      description: `${id} - ${invoice.client} - ${invoice.clientEmail} - $${invoice.amount.toLocaleString()} - Due ${invoice.dueDate}`
-    })
+      if (sendError || !success) {
+        throw new Error(sendError?.message || 'Failed to send invoice')
+      }
+
+      const sentDate = new Date().toISOString()
+
+      setInvoices(invoices.map(inv =>
+        inv.id === id ? { ...inv, sentDate, status: inv.status === 'draft' ? 'pending' : inv.status } : inv
+      ))
+
+      logger.info('Invoice sent to client and saved to database', {
+        invoiceId: id,
+        client: invoice.client,
+        clientEmail: invoice.clientEmail,
+        amount: invoice.amount,
+        sentDate,
+        userId
+      })
+
+      toast.success('Invoice sent', {
+        description: `${id} - ${invoice.client} - ${invoice.clientEmail} - $${invoice.amount.toLocaleString()} - Due ${invoice.dueDate}`
+      })
+      announce('Invoice sent successfully', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to send invoice', {
+        error: error.message,
+        invoiceId: id,
+        userId
+      })
+      toast.error('Failed to send invoice', {
+        description: error.message || 'Please try again later'
+      })
+      announce('Error sending invoice', 'assertive')
+    }
   }
 
   const handleDownloadPDF = (id: string) => {
