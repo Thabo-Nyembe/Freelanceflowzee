@@ -5,6 +5,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
@@ -71,6 +90,20 @@ export default function InvoicesPage() {
   const [searchTerm, setSearchTerm] = useState<any>('')
   const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
   const [sortBy, setSortBy] = useState<string>('date')
+  const [deleteInvoice, setDeleteInvoice] = useState<{ id: string; client: string } | null>(null)
+  const [voidInvoice, setVoidInvoice] = useState<{ id: string; client: string } | null>(null)
+
+  // View and Edit invoice dialog states
+  const [viewInvoice, setViewInvoice] = useState<any | null>(null)
+  const [editInvoice, setEditInvoice] = useState<any | null>(null)
+  const [editForm, setEditForm] = useState({
+    client: '',
+    clientEmail: '',
+    project: '',
+    description: '',
+    dueDate: ''
+  })
+  const [isSavingEdit, setIsSavingEdit] = useState(false)
 
   // Invoice state with mock data
   const [invoices, setInvoices] = useState([
@@ -226,6 +259,7 @@ export default function InvoicesPage() {
     const invoice = invoices.find(inv => inv.id === id)
     if (!invoice) {
       logger.warn('Invoice not found', { invoiceId: id })
+      toast.error('Invoice not found')
       return
     }
 
@@ -236,15 +270,14 @@ export default function InvoicesPage() {
       status: invoice.status
     })
 
-    toast.info('View Invoice', {
-      description: `${id} - ${invoice.client} - $${invoice.amount.toLocaleString()} - ${invoice.status}`
-    })
+    setViewInvoice(invoice)
   }
 
   const handleEditInvoice = (id: string) => {
     const invoice = invoices.find(inv => inv.id === id)
     if (!invoice) {
       logger.warn('Invoice not found for editing', { invoiceId: id })
+      toast.error('Invoice not found')
       return
     }
 
@@ -255,9 +288,53 @@ export default function InvoicesPage() {
       itemCount: invoice.items?.length || 0
     })
 
-    toast.info('Edit Invoice', {
-      description: `${id} - ${invoice.client} - ${invoice.project} - ${invoice.items?.length || 0} items`
+    // Populate edit form
+    setEditForm({
+      client: invoice.client,
+      clientEmail: invoice.clientEmail,
+      project: invoice.project,
+      description: invoice.description,
+      dueDate: invoice.dueDate
     })
+    setEditInvoice(invoice)
+  }
+
+  const handleSaveEditInvoice = async () => {
+    if (!editInvoice) return
+
+    setIsSavingEdit(true)
+    try {
+      // Update invoice in state
+      setInvoices(invoices.map(inv =>
+        inv.id === editInvoice.id
+          ? {
+              ...inv,
+              client: editForm.client,
+              clientEmail: editForm.clientEmail,
+              project: editForm.project,
+              description: editForm.description,
+              dueDate: editForm.dueDate
+            }
+          : inv
+      ))
+
+      logger.info('Invoice updated successfully', {
+        invoiceId: editInvoice.id,
+        client: editForm.client,
+        project: editForm.project
+      })
+
+      toast.success('Invoice updated', {
+        description: `${editInvoice.id} - ${editForm.client} - ${editForm.project}`
+      })
+      setEditInvoice(null)
+      announce('Invoice updated successfully', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to update invoice', { error: error.message })
+      toast.error('Failed to update invoice')
+    } finally {
+      setIsSavingEdit(false)
+    }
   }
 
   const handleDeleteInvoice = (id: string) => {
@@ -274,19 +351,25 @@ export default function InvoicesPage() {
       status: invoice.status
     })
 
-    if (confirm(`Delete invoice ${id} for ${invoice.client}?`)) {
-      setInvoices(invoices.filter(inv => inv.id !== id))
+    setDeleteInvoice({ id, client: invoice.client })
+  }
 
-      logger.info('Invoice deleted', {
-        invoiceId: id,
-        client: invoice.client,
-        amount: invoice.amount
-      })
+  const handleConfirmDeleteInvoice = () => {
+    if (!deleteInvoice) return
 
-      toast.success('Invoice deleted', {
-        description: `${id} - ${invoice.client} - $${invoice.amount.toLocaleString()} - Removed from system`
-      })
-    }
+    const invoice = invoices.find(inv => inv.id === deleteInvoice.id)
+    setInvoices(invoices.filter(inv => inv.id !== deleteInvoice.id))
+
+    logger.info('Invoice deleted', {
+      invoiceId: deleteInvoice.id,
+      client: deleteInvoice.client,
+      amount: invoice?.amount
+    })
+
+    toast.success('Invoice deleted', {
+      description: `${deleteInvoice.id} - ${deleteInvoice.client} - $${invoice?.amount.toLocaleString()} - Removed from system`
+    })
+    setDeleteInvoice(null)
   }
 
   const handleSendInvoice = (id: string) => {
@@ -515,25 +598,31 @@ Status: ${invoice.status.toUpperCase()}
       currentStatus: invoice.status
     })
 
-    if (confirm(`Void invoice ${id} for ${invoice.client}?`)) {
-      const voidDate = new Date().toISOString().split('T')[0]
+    setVoidInvoice({ id, client: invoice.client })
+  }
 
-      setInvoices(invoices.map(inv =>
-        inv.id === id ? { ...inv, status: 'void', voidDate } : inv
-      ))
+  const handleConfirmVoidInvoice = () => {
+    if (!voidInvoice) return
 
-      logger.info('Invoice voided', {
-        invoiceId: id,
-        client: invoice.client,
-        amount: invoice.amount,
-        voidDate,
-        previousStatus: invoice.status
-      })
+    const invoice = invoices.find(inv => inv.id === voidInvoice.id)
+    const voidDate = new Date().toISOString().split('T')[0]
 
-      toast.success('Invoice voided', {
-        description: `${id} - ${invoice.client} - $${invoice.amount.toLocaleString()} - Voided on ${voidDate} - ${invoice.status} → void`
-      })
-    }
+    setInvoices(invoices.map(inv =>
+      inv.id === voidInvoice.id ? { ...inv, status: 'void', voidDate } : inv
+    ))
+
+    logger.info('Invoice voided', {
+      invoiceId: voidInvoice.id,
+      client: voidInvoice.client,
+      amount: invoice?.amount,
+      voidDate,
+      previousStatus: invoice?.status
+    })
+
+    toast.success('Invoice voided', {
+      description: `${voidInvoice.id} - ${voidInvoice.client} - $${invoice?.amount.toLocaleString()} - Voided on ${voidDate} - ${invoice?.status} → void`
+    })
+    setVoidInvoice(null)
   }
 
   const handleExportInvoices = () => {
@@ -1429,6 +1518,231 @@ ${invoices.map(inv =>
         </CardContent>
       </Card>
       </div>
+
+      {/* Delete Invoice Confirmation */}
+      <AlertDialog open={!!deleteInvoice} onOpenChange={() => setDeleteInvoice(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Invoice?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Delete invoice {deleteInvoice?.id} for {deleteInvoice?.client}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDeleteInvoice} className="bg-red-500 hover:bg-red-600">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Void Invoice Confirmation */}
+      <AlertDialog open={!!voidInvoice} onOpenChange={() => setVoidInvoice(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Void Invoice?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Void invoice {voidInvoice?.id} for {voidInvoice?.client}? Voided invoices cannot be restored and won't count toward revenue.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmVoidInvoice} className="bg-orange-500 hover:bg-orange-600">
+              Void Invoice
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* View Invoice Dialog */}
+      <Dialog open={!!viewInvoice} onOpenChange={() => setViewInvoice(null)}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Invoice {viewInvoice?.id}
+            </DialogTitle>
+            <DialogDescription>
+              View invoice details
+            </DialogDescription>
+          </DialogHeader>
+          {viewInvoice && (
+            <div className="space-y-6 py-4">
+              {/* Invoice Status */}
+              <div className="flex items-center justify-between">
+                <Badge variant={
+                  viewInvoice.status === 'paid' ? 'default' :
+                  viewInvoice.status === 'pending' ? 'secondary' :
+                  viewInvoice.status === 'overdue' ? 'destructive' : 'outline'
+                } className="text-sm">
+                  {viewInvoice.status.toUpperCase()}
+                </Badge>
+                <span className="text-2xl font-bold">${viewInvoice.amount.toLocaleString()}</span>
+              </div>
+
+              {/* Client Info */}
+              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-sm text-gray-500">Client</p>
+                  <p className="font-semibold">{viewInvoice.client}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="font-semibold">{viewInvoice.clientEmail}</p>
+                </div>
+              </div>
+
+              {/* Project & Dates */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Project</p>
+                  <p className="font-semibold">{viewInvoice.project}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Description</p>
+                  <p className="text-sm">{viewInvoice.description}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <p className="text-sm text-gray-500">Issue Date</p>
+                  <p className="font-medium">{viewInvoice.issueDate}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Due Date</p>
+                  <p className="font-medium">{viewInvoice.dueDate}</p>
+                </div>
+                {viewInvoice.paidDate && (
+                  <div>
+                    <p className="text-sm text-gray-500">Paid Date</p>
+                    <p className="font-medium text-green-600">{viewInvoice.paidDate}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Line Items */}
+              {viewInvoice.items && viewInvoice.items.length > 0 && (
+                <div>
+                  <p className="text-sm font-semibold mb-2">Line Items</p>
+                  <div className="border rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-3 py-2 text-left">Description</th>
+                          <th className="px-3 py-2 text-right">Qty</th>
+                          <th className="px-3 py-2 text-right">Rate</th>
+                          <th className="px-3 py-2 text-right">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {viewInvoice.items.map((item: any, index: number) => (
+                          <tr key={index} className="border-t">
+                            <td className="px-3 py-2">{item.description}</td>
+                            <td className="px-3 py-2 text-right">{item.quantity}</td>
+                            <td className="px-3 py-2 text-right">${item.rate}</td>
+                            <td className="px-3 py-2 text-right">${item.amount}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot className="bg-gray-50 font-semibold">
+                        <tr className="border-t">
+                          <td colSpan={3} className="px-3 py-2 text-right">Total</td>
+                          <td className="px-3 py-2 text-right">${viewInvoice.amount.toLocaleString()}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewInvoice(null)}>
+              Close
+            </Button>
+            <Button onClick={() => {
+              if (viewInvoice) {
+                setViewInvoice(null)
+                handleEditInvoice(viewInvoice.id)
+              }
+            }}>
+              Edit Invoice
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Invoice Dialog */}
+      <Dialog open={!!editInvoice} onOpenChange={() => setEditInvoice(null)}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5" />
+              Edit Invoice {editInvoice?.id}
+            </DialogTitle>
+            <DialogDescription>
+              Update the invoice details below
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-client">Client Name</Label>
+                <Input
+                  id="edit-client"
+                  value={editForm.client}
+                  onChange={(e) => setEditForm({ ...editForm, client: e.target.value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-email">Client Email</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={editForm.clientEmail}
+                  onChange={(e) => setEditForm({ ...editForm, clientEmail: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-project">Project</Label>
+              <Input
+                id="edit-project"
+                value={editForm.project}
+                onChange={(e) => setEditForm({ ...editForm, project: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                rows={3}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-due">Due Date</Label>
+              <Input
+                id="edit-due"
+                type="date"
+                value={editForm.dueDate}
+                onChange={(e) => setEditForm({ ...editForm, dueDate: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditInvoice(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEditInvoice} disabled={isSavingEdit}>
+              {isSavingEdit ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

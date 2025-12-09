@@ -91,6 +91,10 @@ export default function CRMPage() {
   const [activities, setActivities] = useState<any[]>([])
   const [stats, setStats] = useState<any>(null)
 
+  // View Contact/Deal dialog states
+  const [viewingContact, setViewingContact] = useState<any | null>(null)
+  const [viewingDeal, setViewingDeal] = useState<any | null>(null)
+
   // A+++ LOAD CRM DATA
   useEffect(() => {
     const loadCRMData = async () => {
@@ -239,9 +243,7 @@ export default function CRMPage() {
   const handleViewContact = (contact: any) => {
     logger.info('Viewing contact', { contactId: contact.id, contactName: contact.name })
     announce(`Viewing contact ${contact.name}`, 'polite')
-    toast.info('Contact details', {
-      description: `${contact.name} - ${contact.email}`
-    })
+    setViewingContact(contact)
   }
 
   const handleEmailContact = async (contact: any) => {
@@ -269,9 +271,7 @@ export default function CRMPage() {
   const handleViewDeal = (deal: any) => {
     logger.info('Viewing deal', { dealId: deal.id, dealName: deal.name })
     announce(`Viewing deal ${deal.name}`, 'polite')
-    toast.info('Deal details', {
-      description: `${deal.name} - ${formatCurrency(deal.value)}`
-    })
+    setViewingDeal(deal)
   }
 
   const handleUpdateDealStage = async (deal: any, newStage: string) => {
@@ -1107,6 +1107,161 @@ export default function CRMPage() {
               className="bg-blue-500 hover:bg-blue-600"
             >
               {isSaving ? 'Creating...' : 'Create Contact'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Contact Dialog */}
+      <Dialog open={!!viewingContact} onOpenChange={() => setViewingContact(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Contact Details
+            </DialogTitle>
+          </DialogHeader>
+          {viewingContact && (
+            <div className="space-y-4 py-4">
+              {/* Contact Header */}
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarFallback className="text-xl bg-blue-100 text-blue-600">
+                    {viewingContact.name?.split(' ').map((n: string) => n[0]).join('').toUpperCase() || 'C'}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-lg font-semibold">{viewingContact.name}</h3>
+                  <p className="text-sm text-gray-500">{viewingContact.position || 'No position'}</p>
+                  <Badge className={getContactTypeColor(viewingContact.type || 'lead')}>
+                    {viewingContact.type || 'Lead'}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Contact Info */}
+              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-gray-400" />
+                  <div>
+                    <p className="text-xs text-gray-500">Email</p>
+                    <p className="text-sm font-medium">{viewingContact.email || 'N/A'}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-gray-400" />
+                  <div>
+                    <p className="text-xs text-gray-500">Phone</p>
+                    <p className="text-sm font-medium">{viewingContact.phone || 'N/A'}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-gray-400" />
+                  <div>
+                    <p className="text-xs text-gray-500">Company</p>
+                    <p className="text-sm font-medium">{viewingContact.company || 'N/A'}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-gray-400" />
+                  <div>
+                    <p className="text-xs text-gray-500">Status</p>
+                    <Badge className={getLeadStatusColor(viewingContact.status || 'new')}>
+                      {viewingContact.status || 'New'}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              {/* Notes */}
+              {viewingContact.notes && (
+                <div>
+                  <p className="text-sm font-semibold mb-1">Notes</p>
+                  <p className="text-sm text-gray-600">{viewingContact.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewingContact(null)}>
+              Close
+            </Button>
+            <Button onClick={() => viewingContact && handleEmailContact(viewingContact)}>
+              <Mail className="h-4 w-4 mr-2" />
+              Send Email
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Deal Dialog */}
+      <Dialog open={!!viewingDeal} onOpenChange={() => setViewingDeal(null)}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Deal Details
+            </DialogTitle>
+          </DialogHeader>
+          {viewingDeal && (
+            <div className="space-y-4 py-4">
+              {/* Deal Header */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">{viewingDeal.name}</h3>
+                  <p className="text-sm text-gray-500">{viewingDeal.company || 'No company'}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-green-600">{formatCurrency(viewingDeal.value || 0)}</p>
+                  <Badge className={getDealStageColor(viewingDeal.stage || 'lead')}>
+                    {viewingDeal.stage || 'Lead'}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Deal Info */}
+              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-xs text-gray-500">Contact</p>
+                  <p className="text-sm font-medium">{viewingDeal.contact || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Expected Close</p>
+                  <p className="text-sm font-medium">{viewingDeal.expected_close || viewingDeal.expectedClose || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Probability</p>
+                  <p className="text-sm font-medium">{viewingDeal.probability || 0}%</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Priority</p>
+                  <Badge className={getPriorityColor(viewingDeal.priority || 'medium')}>
+                    {viewingDeal.priority || 'Medium'}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Probability Progress */}
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>Deal Probability</span>
+                  <span>{viewingDeal.probability || 0}%</span>
+                </div>
+                <Progress value={viewingDeal.probability || 0} className="h-2" />
+              </div>
+
+              {/* Description */}
+              {viewingDeal.description && (
+                <div>
+                  <p className="text-sm font-semibold mb-1">Description</p>
+                  <p className="text-sm text-gray-600">{viewingDeal.description}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewingDeal(null)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>
