@@ -4,6 +4,26 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
@@ -57,6 +77,21 @@ export default function ProfilePage() {
 
   const [activeTab, setActiveTab] = useState<any>('overview')
   const [isEditing, setIsEditing] = useState<any>(false)
+  const [removeSkill, setRemoveSkill] = useState<string | null>(null)
+  const [showDeleteAccountConfirm, setShowDeleteAccountConfirm] = useState(false)
+
+  // Profile settings dialog states
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false)
+  const [passwordForm, setPasswordForm] = useState({ current: '', new: '', confirm: '' })
+  const [isSavingPassword, setIsSavingPassword] = useState(false)
+
+  const [showEmailDialog, setShowEmailDialog] = useState(false)
+  const [emailForm, setEmailForm] = useState({ email: '', password: '' })
+  const [isSavingEmail, setIsSavingEmail] = useState(false)
+
+  const [showPhoneDialog, setShowPhoneDialog] = useState(false)
+  const [phoneForm, setPhoneForm] = useState({ phone: '', code: '' })
+  const [isSavingPhone, setIsSavingPhone] = useState(false)
 
   // A+++ LOAD PROFILE DATA
   useEffect(() => {
@@ -199,20 +234,22 @@ export default function ProfilePage() {
       skill,
       action: 'confirmRemoval'
     })
+    setRemoveSkill(skill)
+  }
 
-    if (confirm(`Remove "${skill}" from your skills?`)) {
-      logger.info('Skill removed', {
-        skill,
-        action: 'updateSkillsList'
-      })
+  const handleConfirmRemoveSkill = () => {
+    if (!removeSkill) return
 
-      // Note: Using local state - in production, this would DELETE to /api/profile/skills/:id
-      toast.success('Skill removed', {
-        description: `${skill} - Successfully removed from your profile`
-      })
-    } else {
-      logger.debug('Skill removal cancelled', { skill })
-    }
+    logger.info('Skill removed', {
+      skill: removeSkill,
+      action: 'updateSkillsList'
+    })
+
+    // Note: Using local state - in production, this would DELETE to /api/profile/skills/:id
+    toast.success('Skill removed', {
+      description: `${removeSkill} - Successfully removed from your profile`
+    })
+    setRemoveSkill(null)
   }
 
   const handleAddSocial = () => {
@@ -233,10 +270,41 @@ export default function ProfilePage() {
       action: 'openSecureDialog',
       encryption: 'bcrypt'
     })
+    setPasswordForm({ current: '', new: '', confirm: '' })
+    setShowPasswordDialog(true)
+  }
 
-    toast.info('Update password', {
-      description: 'Change your account password - Encrypted before storage'
-    })
+  const handleSavePassword = async () => {
+    if (!passwordForm.current || !passwordForm.new || !passwordForm.confirm) {
+      toast.error('All fields are required')
+      return
+    }
+    if (passwordForm.new !== passwordForm.confirm) {
+      toast.error('New passwords do not match')
+      return
+    }
+    if (passwordForm.new.length < 8) {
+      toast.error('Password must be at least 8 characters')
+      return
+    }
+
+    setIsSavingPassword(true)
+    try {
+      // In production, this would call /api/profile/password
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      logger.info('Password updated successfully')
+      toast.success('Password updated', {
+        description: 'Your password has been changed successfully'
+      })
+      setShowPasswordDialog(false)
+      announce('Password updated successfully', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to update password', { error: error.message })
+      toast.error('Failed to update password')
+    } finally {
+      setIsSavingPassword(false)
+    }
   }
 
   const handleUpdateEmail = () => {
@@ -244,20 +312,71 @@ export default function ProfilePage() {
       action: 'openEmailDialog',
       requiresVerification: true
     })
+    setEmailForm({ email: '', password: '' })
+    setShowEmailDialog(true)
+  }
 
-    toast.info('Update email', {
-      description: 'Change your email - Verification email will be sent to new address'
-    })
+  const handleSaveEmail = async () => {
+    if (!emailForm.email || !emailForm.password) {
+      toast.error('Email and password are required')
+      return
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(emailForm.email)) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+
+    setIsSavingEmail(true)
+    try {
+      // In production, this would call /api/profile/email
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      logger.info('Email update initiated', { newEmail: emailForm.email })
+      toast.success('Verification email sent', {
+        description: `A verification link has been sent to ${emailForm.email}`
+      })
+      setShowEmailDialog(false)
+      announce('Verification email sent', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to update email', { error: error.message })
+      toast.error('Failed to update email')
+    } finally {
+      setIsSavingEmail(false)
+    }
   }
 
   const handleUpdatePhone = () => {
     logger.info('Phone update initiated', {
       action: 'openPhoneDialog'
     })
+    setPhoneForm({ phone: '', code: '' })
+    setShowPhoneDialog(true)
+  }
 
-    toast.info('Update phone', {
-      description: 'Change your contact phone number'
-    })
+  const handleSavePhone = async () => {
+    if (!phoneForm.phone) {
+      toast.error('Phone number is required')
+      return
+    }
+
+    setIsSavingPhone(true)
+    try {
+      // In production, this would call /api/profile/phone
+      await new Promise(resolve => setTimeout(resolve, 1000))
+
+      logger.info('Phone updated successfully', { phone: phoneForm.phone })
+      toast.success('Phone number updated', {
+        description: 'Your contact number has been changed'
+      })
+      setShowPhoneDialog(false)
+      announce('Phone number updated', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to update phone', { error: error.message })
+      toast.error('Failed to update phone')
+    } finally {
+      setIsSavingPhone(false)
+    }
   }
 
   const handleUpdateLocation = () => {
@@ -299,22 +418,22 @@ export default function ProfilePage() {
       action: 'criticalAction',
       requiresConfirmation: true
     })
+    setShowDeleteAccountConfirm(true)
+  }
 
-    if (confirm('Delete account? This action cannot be undone! All your data will be permanently deleted.')) {
-      const deletionDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+  const handleConfirmDeleteAccount = () => {
+    const deletionDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
 
-      logger.error('Account deletion confirmed', {
-        scheduledDeletion: deletionDate.toISOString(),
-        gracePeriod: '7 days'
-      })
+    logger.error('Account deletion confirmed', {
+      scheduledDeletion: deletionDate.toISOString(),
+      gracePeriod: '7 days'
+    })
 
-      // Note: Using mock deletion - in production, this would POST to /api/account/delete
-      toast.error('Account deletion requested', {
-        description: `Your account will be permanently deleted on ${deletionDate.toLocaleDateString()} - 7 day grace period`
-      })
-    } else {
-      logger.debug('Account deletion cancelled')
-    }
+    // Note: Using mock deletion - in production, this would POST to /api/account/delete
+    toast.error('Account deletion requested', {
+      description: `Your account will be permanently deleted on ${deletionDate.toLocaleDateString()} - 7 day grace period`
+    })
+    setShowDeleteAccountConfirm(false)
   }
 
   const handleExportData = () => {
@@ -878,6 +997,177 @@ export default function ProfilePage() {
         </TabsContent>
       </Tabs>
       </div>
+
+      {/* Remove Skill Confirmation */}
+      <AlertDialog open={!!removeSkill} onOpenChange={() => setRemoveSkill(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Skill?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Remove "{removeSkill}" from your skills? This action can be undone by adding the skill again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmRemoveSkill} className="bg-red-500 hover:bg-red-600">
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Account Confirmation */}
+      <AlertDialog open={showDeleteAccountConfirm} onOpenChange={setShowDeleteAccountConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone! All your data will be permanently deleted after a 7-day grace period.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDeleteAccount} className="bg-red-500 hover:bg-red-600">
+              Delete Account
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Update Password Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Update Password
+            </DialogTitle>
+            <DialogDescription>
+              Choose a strong password with at least 8 characters
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="current-password">Current Password</Label>
+              <Input
+                id="current-password"
+                type="password"
+                value={passwordForm.current}
+                onChange={(e) => setPasswordForm({ ...passwordForm, current: e.target.value })}
+                placeholder="Enter current password"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={passwordForm.new}
+                onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
+                placeholder="Enter new password (min 8 characters)"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="confirm-password">Confirm New Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={passwordForm.confirm}
+                onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                placeholder="Confirm new password"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSavePassword} disabled={isSavingPassword}>
+              {isSavingPassword ? 'Updating...' : 'Update Password'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Email Dialog */}
+      <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Update Email
+            </DialogTitle>
+            <DialogDescription>
+              A verification link will be sent to your new email address
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="new-email">New Email Address</Label>
+              <Input
+                id="new-email"
+                type="email"
+                value={emailForm.email}
+                onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })}
+                placeholder="Enter new email address"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email-password">Current Password</Label>
+              <Input
+                id="email-password"
+                type="password"
+                value={emailForm.password}
+                onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
+                placeholder="Enter your password to confirm"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEmailDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEmail} disabled={isSavingEmail}>
+              {isSavingEmail ? 'Sending...' : 'Send Verification'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Phone Dialog */}
+      <Dialog open={showPhoneDialog} onOpenChange={setShowPhoneDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Phone className="h-5 w-5" />
+              Update Phone Number
+            </DialogTitle>
+            <DialogDescription>
+              Update your contact phone number
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="phone-number">Phone Number</Label>
+              <Input
+                id="phone-number"
+                type="tel"
+                value={phoneForm.phone}
+                onChange={(e) => setPhoneForm({ ...phoneForm, phone: e.target.value })}
+                placeholder="+1 (555) 000-0000"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPhoneDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSavePhone} disabled={isSavingPhone}>
+              {isSavingPhone ? 'Updating...' : 'Update Phone'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
