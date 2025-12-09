@@ -20,6 +20,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { BorderTrail } from '@/components/ui/border-trail'
 import { GlowEffect } from '@/components/ui/glow-effect'
@@ -83,6 +85,30 @@ export default function TimeTrackingPage() {
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null)
   const [entryToArchive, setEntryToArchive] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Dialog states for prompt() replacements
+  const [showEditEntryDialog, setShowEditEntryDialog] = useState(false)
+  const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null)
+  const [newEntryDescription, setNewEntryDescription] = useState('')
+
+  const [showManualEntryDialog, setShowManualEntryDialog] = useState(false)
+  const [manualHours, setManualHours] = useState('')
+
+  const [showDateRangeDialog, setShowDateRangeDialog] = useState(false)
+  const [filterStartDate, setFilterStartDate] = useState('')
+  const [filterEndDate, setFilterEndDate] = useState('')
+
+  const [showAddProjectDialog, setShowAddProjectDialog] = useState(false)
+  const [newProjectName, setNewProjectName] = useState('')
+
+  const [showEditProjectDialog, setShowEditProjectDialog] = useState(false)
+  const [editProjectName, setEditProjectName] = useState('')
+
+  const [showAddTaskDialog, setShowAddTaskDialog] = useState(false)
+  const [newTaskName, setNewTaskName] = useState('')
+
+  const [showEditTaskDialog, setShowEditTaskDialog] = useState(false)
+  const [editTaskName, setEditTaskName] = useState('')
 
   // Mock data - replace with real data from your API
   const projects: Project[] = [
@@ -481,21 +507,30 @@ export default function TimeTrackingPage() {
       entryId: entry.id,
       currentDescription: entry.description
     })
-    const newDescription = prompt('Edit description:', entry.description)
-    if (newDescription !== null) {
-      setTimeEntries((prev) =>
-        prev.map((e) =>
-          e.id === entry.id ? { ...e, description: newDescription } : e
-        )
+    setEditingEntry(entry)
+    setNewEntryDescription(entry.description)
+    setShowEditEntryDialog(true)
+  }
+
+  const confirmEditEntry = () => {
+    if (!editingEntry) return
+
+    setTimeEntries((prev) =>
+      prev.map((e) =>
+        e.id === editingEntry.id ? { ...e, description: newEntryDescription } : e
       )
-      logger.info('Entry updated successfully', {
-        entryId: entry.id,
-        newDescription
-      })
-      toast.success('Entry Updated', {
-        description: 'Time entry description has been updated successfully'
-      })
-    }
+    )
+    logger.info('Entry updated successfully', {
+      entryId: editingEntry.id,
+      newDescription: newEntryDescription
+    })
+    toast.success('Entry Updated', {
+      description: 'Time entry description has been updated successfully'
+    })
+    announce('Time entry updated', 'polite')
+    setShowEditEntryDialog(false)
+    setEditingEntry(null)
+    setNewEntryDescription('')
   }
 
   const handleDeleteEntry = async (entryId: string) => {
@@ -557,28 +592,39 @@ export default function TimeTrackingPage() {
       })
       return
     }
-    const hours = prompt('Enter hours worked:')
-    if (hours) {
-      const duration = parseInt(hours) * 3600
-      const newEntry: TimeEntry = {
-        id: Date.now().toString(),
-        projectId: selectedProject,
-        taskId: selectedTask,
-        description: description || 'Manual entry',
-        startTime: new Date(),
-        endTime: new Date(),
-        duration: duration,
-        isRunning: false,
-      }
-      setTimeEntries((prev) => [...prev, newEntry])
-      logger.info('Manual entry added successfully', {
-        duration: hours + ' hour(s)',
-        totalEntries: timeEntries.length + 1
-      })
-      toast.success('Manual Entry Added', {
-        description: 'Added ' + hours + ' hour(s) to your time tracking records'
-      })
+    setManualHours('')
+    setShowManualEntryDialog(true)
+  }
+
+  const confirmAddManualEntry = () => {
+    const hours = parseFloat(manualHours)
+    if (isNaN(hours) || hours <= 0) {
+      toast.error('Invalid Hours', { description: 'Please enter a valid number of hours' })
+      return
     }
+
+    const duration = Math.floor(hours * 3600)
+    const newEntry: TimeEntry = {
+      id: Date.now().toString(),
+      projectId: selectedProject,
+      taskId: selectedTask,
+      description: description || 'Manual entry',
+      startTime: new Date(),
+      endTime: new Date(),
+      duration: duration,
+      isRunning: false,
+    }
+    setTimeEntries((prev) => [...prev, newEntry])
+    logger.info('Manual entry added successfully', {
+      duration: hours + ' hour(s)',
+      totalEntries: timeEntries.length + 1
+    })
+    toast.success('Manual Entry Added', {
+      description: 'Added ' + hours + ' hour(s) to your time tracking records'
+    })
+    announce('Manual entry added', 'polite')
+    setShowManualEntryDialog(false)
+    setManualHours('')
   }
 
   const handleDuplicateEntry = (entry: TimeEntry) => {
@@ -661,14 +707,25 @@ export default function TimeTrackingPage() {
 
   const handleFilterByDateRange = () => {
     logger.debug('Date range filter initiated')
-    const start = prompt('Enter start date (YYYY-MM-DD):')
-    const end = prompt('Enter end date (YYYY-MM-DD):')
-    if (start && end) {
-      logger.info('Date range filter applied', { start, end })
-      toast.info('Date Filter Applied', {
-        description: 'Filtering entries from ' + start + ' to ' + end
-      })
+    setFilterStartDate('')
+    setFilterEndDate('')
+    setShowDateRangeDialog(true)
+  }
+
+  const confirmFilterByDateRange = () => {
+    if (!filterStartDate || !filterEndDate) {
+      toast.error('Please select both start and end dates')
+      return
     }
+
+    logger.info('Date range filter applied', { start: filterStartDate, end: filterEndDate })
+    toast.info('Date Filter Applied', {
+      description: 'Filtering entries from ' + filterStartDate + ' to ' + filterEndDate
+    })
+    announce('Date filter applied', 'polite')
+    setShowDateRangeDialog(false)
+    setFilterStartDate('')
+    setFilterEndDate('')
   }
 
   const handleClearFilters = () => {
@@ -749,13 +806,23 @@ export default function TimeTrackingPage() {
 
   const handleAddProject = () => {
     logger.info('Add project initiated')
-    const projectName = prompt('Enter new project name:')
-    if (projectName) {
-      logger.info('Project added successfully', { projectName })
-      toast.success('Project Added', {
-        description: 'Project "' + projectName + '" created - you can now add tasks'
-      })
+    setNewProjectName('')
+    setShowAddProjectDialog(true)
+  }
+
+  const confirmAddProject = () => {
+    if (!newProjectName.trim()) {
+      toast.error('Please enter a project name')
+      return
     }
+
+    logger.info('Project added successfully', { projectName: newProjectName.trim() })
+    toast.success('Project Added', {
+      description: 'Project "' + newProjectName.trim() + '" created - you can now add tasks'
+    })
+    announce('Project added', 'polite')
+    setShowAddProjectDialog(false)
+    setNewProjectName('')
   }
 
   const handleEditProject = () => {
@@ -768,17 +835,28 @@ export default function TimeTrackingPage() {
       return
     }
     const project = projects.find((p) => p.id === selectedProject)
-    const newName = prompt('Edit project name:', project?.name)
-    if (newName) {
-      logger.info('Project updated successfully', {
-        projectId: selectedProject,
-        oldName: project?.name,
-        newName
-      })
-      toast.success('Project Updated', {
-        description: 'Project name changed to "' + newName + '"'
-      })
+    setEditProjectName(project?.name || '')
+    setShowEditProjectDialog(true)
+  }
+
+  const confirmEditProject = () => {
+    if (!editProjectName.trim()) {
+      toast.error('Please enter a project name')
+      return
     }
+
+    const project = projects.find((p) => p.id === selectedProject)
+    logger.info('Project updated successfully', {
+      projectId: selectedProject,
+      oldName: project?.name,
+      newName: editProjectName.trim()
+    })
+    toast.success('Project Updated', {
+      description: 'Project name changed to "' + editProjectName.trim() + '"'
+    })
+    announce('Project updated', 'polite')
+    setShowEditProjectDialog(false)
+    setEditProjectName('')
   }
 
   const handleDeleteProject = () => {
@@ -829,16 +907,26 @@ export default function TimeTrackingPage() {
       })
       return
     }
-    const taskName = prompt('Enter new task name:')
-    if (taskName) {
-      logger.info('Task added successfully', {
-        taskName,
-        projectId: selectedProject
-      })
-      toast.success('Task Added', {
-        description: 'Task "' + taskName + '" added to project'
-      })
+    setNewTaskName('')
+    setShowAddTaskDialog(true)
+  }
+
+  const confirmAddTask = () => {
+    if (!newTaskName.trim()) {
+      toast.error('Please enter a task name')
+      return
     }
+
+    logger.info('Task added successfully', {
+      taskName: newTaskName.trim(),
+      projectId: selectedProject
+    })
+    toast.success('Task Added', {
+      description: 'Task "' + newTaskName.trim() + '" added to project'
+    })
+    announce('Task added', 'polite')
+    setShowAddTaskDialog(false)
+    setNewTaskName('')
   }
 
   const handleEditTask = () => {
@@ -853,17 +941,30 @@ export default function TimeTrackingPage() {
     const task = projects
       .find((p) => p.id === selectedProject)
       ?.tasks.find((t) => t.id === selectedTask)
-    const newName = prompt('Edit task name:', task?.name)
-    if (newName) {
-      logger.info('Task updated successfully', {
-        taskId: selectedTask,
-        oldName: task?.name,
-        newName
-      })
-      toast.success('Task Updated', {
-        description: 'Task name changed to "' + newName + '"'
-      })
+    setEditTaskName(task?.name || '')
+    setShowEditTaskDialog(true)
+  }
+
+  const confirmEditTask = () => {
+    if (!editTaskName.trim()) {
+      toast.error('Please enter a task name')
+      return
     }
+
+    const task = projects
+      .find((p) => p.id === selectedProject)
+      ?.tasks.find((t) => t.id === selectedTask)
+    logger.info('Task updated successfully', {
+      taskId: selectedTask,
+      oldName: task?.name,
+      newName: editTaskName.trim()
+    })
+    toast.success('Task Updated', {
+      description: 'Task name changed to "' + editTaskName.trim() + '"'
+    })
+    announce('Task updated', 'polite')
+    setShowEditTaskDialog(false)
+    setEditTaskName('')
   }
 
   const handleDeleteTask = () => {
@@ -1480,6 +1581,256 @@ export default function TimeTrackingPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Entry Dialog */}
+      <Dialog open={showEditEntryDialog} onOpenChange={setShowEditEntryDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5 text-blue-500" />
+              Edit Time Entry
+            </DialogTitle>
+            <DialogDescription>
+              Update the description for this time entry
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="entryDescription">Description</Label>
+              <Input
+                id="entryDescription"
+                value={newEntryDescription}
+                onChange={(e) => setNewEntryDescription(e.target.value)}
+                placeholder="What were you working on?"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowEditEntryDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmEditEntry}>
+              Update Entry
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manual Entry Dialog */}
+      <Dialog open={showManualEntryDialog} onOpenChange={setShowManualEntryDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-green-500" />
+              Add Manual Entry
+            </DialogTitle>
+            <DialogDescription>
+              Manually add hours to your time tracking
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="manualHours">Hours Worked</Label>
+              <Input
+                id="manualHours"
+                type="number"
+                value={manualHours}
+                onChange={(e) => setManualHours(e.target.value)}
+                placeholder="e.g., 2.5"
+                step="0.5"
+                min="0.5"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowManualEntryDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAddManualEntry} className="bg-green-600 hover:bg-green-700">
+              Add Entry
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Date Range Filter Dialog */}
+      <Dialog open={showDateRangeDialog} onOpenChange={setShowDateRangeDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-purple-500" />
+              Filter by Date Range
+            </DialogTitle>
+            <DialogDescription>
+              Select a date range to filter time entries
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="startDate">Start Date</Label>
+              <Input
+                id="startDate"
+                type="date"
+                value={filterStartDate}
+                onChange={(e) => setFilterStartDate(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="endDate">End Date</Label>
+              <Input
+                id="endDate"
+                type="date"
+                value={filterEndDate}
+                onChange={(e) => setFilterEndDate(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowDateRangeDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmFilterByDateRange} className="bg-purple-600 hover:bg-purple-700">
+              Apply Filter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Project Dialog */}
+      <Dialog open={showAddProjectDialog} onOpenChange={setShowAddProjectDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-emerald-500" />
+              Add New Project
+            </DialogTitle>
+            <DialogDescription>
+              Create a new project to track time against
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="projectName">Project Name</Label>
+              <Input
+                id="projectName"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+                placeholder="e.g., Website Redesign"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowAddProjectDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAddProject} className="bg-emerald-600 hover:bg-emerald-700">
+              Add Project
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Project Dialog */}
+      <Dialog open={showEditProjectDialog} onOpenChange={setShowEditProjectDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5 text-blue-500" />
+              Edit Project
+            </DialogTitle>
+            <DialogDescription>
+              Update the project name
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="editProjectName">Project Name</Label>
+              <Input
+                id="editProjectName"
+                value={editProjectName}
+                onChange={(e) => setEditProjectName(e.target.value)}
+                placeholder="Enter project name"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowEditProjectDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmEditProject}>
+              Update Project
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Task Dialog */}
+      <Dialog open={showAddTaskDialog} onOpenChange={setShowAddTaskDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5 text-teal-500" />
+              Add New Task
+            </DialogTitle>
+            <DialogDescription>
+              Create a new task for the selected project
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="taskName">Task Name</Label>
+              <Input
+                id="taskName"
+                value={newTaskName}
+                onChange={(e) => setNewTaskName(e.target.value)}
+                placeholder="e.g., UI Design"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowAddTaskDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmAddTask} className="bg-teal-600 hover:bg-teal-700">
+              Add Task
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Task Dialog */}
+      <Dialog open={showEditTaskDialog} onOpenChange={setShowEditTaskDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5 text-blue-500" />
+              Edit Task
+            </DialogTitle>
+            <DialogDescription>
+              Update the task name
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="editTaskName">Task Name</Label>
+              <Input
+                id="editTaskName"
+                value={editTaskName}
+                onChange={(e) => setEditTaskName(e.target.value)}
+                placeholder="Enter task name"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowEditTaskDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmEditTask}>
+              Update Task
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 } 

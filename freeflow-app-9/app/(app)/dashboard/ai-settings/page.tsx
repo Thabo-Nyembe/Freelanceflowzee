@@ -13,6 +13,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import { ErrorBoundary } from '@/components/ui/error-boundary-system'
 import {
   Key, Shield, Zap, Eye, EyeOff, CheckCircle, AlertTriangle,
@@ -182,6 +184,25 @@ export default function AISettingsPage() {
   const [showClearCacheDialog, setShowClearCacheDialog] = useState(false)
   const [providerToDelete, setProviderToDelete] = useState<string | null>(null)
   const [providerToRotate, setProviderToRotate] = useState<string | null>(null)
+
+  // Dialog States for prompt() replacements
+  const [showBudgetDialog, setShowBudgetDialog] = useState(false)
+  const [newBudget, setNewBudget] = useState('')
+
+  const [showRateLimitDialog, setShowRateLimitDialog] = useState(false)
+  const [newPerMinute, setNewPerMinute] = useState('')
+  const [newPerHour, setNewPerHour] = useState('')
+
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [webhookUrl, setWebhookUrl] = useState('')
+
+  const [showRetryDialog, setShowRetryDialog] = useState(false)
+  const [newMaxRetries, setNewMaxRetries] = useState('')
+  const [newTimeout, setNewTimeout] = useState('')
+
+  const [showFallbackDialog, setShowFallbackDialog] = useState(false)
+  const [newPrimaryProvider, setNewPrimaryProvider] = useState('')
+  const [newFallbackProvider, setNewFallbackProvider] = useState('')
 
   // ============================================
   // AI SETTINGS HANDLERS
@@ -354,13 +375,12 @@ export default function AISettingsPage() {
   }
 
   const handleSetBudget = () => {
-    const budget = prompt('Monthly budget ($):', monthlyBudget.toString())
-    if (!budget) {
-      logger.info('Budget setup cancelled', {})
-      return
-    }
+    setNewBudget(monthlyBudget.toString())
+    setShowBudgetDialog(true)
+  }
 
-    const budgetAmount = parseFloat(budget)
+  const confirmSetBudget = () => {
+    const budgetAmount = parseFloat(newBudget)
     if (isNaN(budgetAmount) || budgetAmount <= 0) {
       toast.error('Invalid Budget', { description: 'Please enter a valid amount' })
       return
@@ -377,18 +397,21 @@ export default function AISettingsPage() {
     toast.success('Budget Set', {
       description: `Monthly limit: $${budgetAmount}/month - Alerts at 80% usage`
     })
+    announce('Budget set successfully', 'polite')
+    setShowBudgetDialog(false)
+    setNewBudget('')
   }
   const handleEnableRateLimiting = () => {
-    const perMinute = prompt('Max requests per minute:', rateLimits.perMinute.toString())
-    if (!perMinute) return
+    setNewPerMinute(rateLimits.perMinute.toString())
+    setNewPerHour(rateLimits.perHour.toString())
+    setShowRateLimitDialog(true)
+  }
 
-    const perHour = prompt('Max requests per hour:', rateLimits.perHour.toString())
-    if (!perHour) return
+  const confirmEnableRateLimiting = () => {
+    const perMinute = parseInt(newPerMinute) || 60
+    const perHour = parseInt(newPerHour) || 1000
 
-    const newLimits = {
-      perMinute: parseInt(perMinute) || 60,
-      perHour: parseInt(perHour) || 1000
-    }
+    const newLimits = { perMinute, perHour }
 
     setRateLimits(newLimits)
     localStorage.setItem('kazi-ai-rate-limits', JSON.stringify(newLimits))
@@ -401,6 +424,10 @@ export default function AISettingsPage() {
     toast.success('Rate Limiting Configured', {
       description: `${newLimits.perMinute}/min • ${newLimits.perHour}/hr - Requests will be throttled`
     })
+    announce('Rate limiting configured successfully', 'polite')
+    setShowRateLimitDialog(false)
+    setNewPerMinute('')
+    setNewPerHour('')
   }
 
   const handleConfigureSecurity = () => {
@@ -510,19 +537,29 @@ export default function AISettingsPage() {
     // In real app, would open: window.open(url, '_blank')
   }
   const handleConfigureWebhooks = () => {
-    const webhookUrl = prompt('Webhook endpoint URL:')
-    if (!webhookUrl) return
+    setWebhookUrl('')
+    setShowWebhookDialog(true)
+  }
+
+  const confirmConfigureWebhooks = () => {
+    if (!webhookUrl.trim()) {
+      toast.error('Please enter a webhook URL')
+      return
+    }
 
     const events = ['model.complete', 'model.error', 'quota.warning', 'quota.exceeded']
 
     logger.info('Webhook configured', {
-      webhookUrl,
+      webhookUrl: webhookUrl.trim(),
       events: events.length
     })
 
     toast.success('Webhook Configured', {
-      description: `${events.length} events will notify: ${webhookUrl.slice(0, 30)}...`
+      description: `${events.length} events will notify: ${webhookUrl.trim().slice(0, 30)}...`
     })
+    announce('Webhook configured successfully', 'polite')
+    setShowWebhookDialog(false)
+    setWebhookUrl('')
   }
 
   const handleEnableLogging = () => {
@@ -603,21 +640,28 @@ export default function AISettingsPage() {
   }
 
   const handleConfigureRetry = () => {
-    const maxRetries = prompt('Maximum retries:', '3')
-    if (!maxRetries) return
+    setNewMaxRetries('3')
+    setNewTimeout('30')
+    setShowRetryDialog(true)
+  }
 
-    const timeout = prompt('Timeout (seconds):', '30')
-    if (!timeout) return
+  const confirmConfigureRetry = () => {
+    const maxRetries = parseInt(newMaxRetries) || 3
+    const timeout = parseInt(newTimeout) || 30
 
     logger.info('Retry configuration set', {
-      maxRetries: parseInt(maxRetries),
-      timeout: parseInt(timeout),
+      maxRetries,
+      timeout,
       backoffStrategy: 'exponential'
     })
 
     toast.success('Retry Configuration Set', {
       description: `Max ${maxRetries} retries • ${timeout}s timeout • Exponential backoff`
     })
+    announce('Retry configuration set successfully', 'polite')
+    setShowRetryDialog(false)
+    setNewMaxRetries('')
+    setNewTimeout('')
   }
 
   const handleEnableAnalytics = () => {
@@ -633,20 +677,29 @@ export default function AISettingsPage() {
   }
 
   const handleConfigureFallback = () => {
-    const primaryProvider = prompt('Primary provider (openai, anthropic, google):')
-    if (!primaryProvider) return
+    setNewPrimaryProvider('')
+    setNewFallbackProvider('')
+    setShowFallbackDialog(true)
+  }
 
-    const fallbackProvider = prompt('Fallback provider:')
-    if (!fallbackProvider) return
+  const confirmConfigureFallback = () => {
+    if (!newPrimaryProvider.trim() || !newFallbackProvider.trim()) {
+      toast.error('Please select both primary and fallback providers')
+      return
+    }
 
     logger.info('Fallback provider configured', {
-      primaryProvider,
-      fallbackProvider
+      primaryProvider: newPrimaryProvider.trim(),
+      fallbackProvider: newFallbackProvider.trim()
     })
 
     toast.success('Fallback Configured', {
-      description: `${primaryProvider} → ${fallbackProvider} on failure`
+      description: `${newPrimaryProvider.trim()} → ${newFallbackProvider.trim()} on failure`
     })
+    announce('Fallback configured successfully', 'polite')
+    setShowFallbackDialog(false)
+    setNewPrimaryProvider('')
+    setNewFallbackProvider('')
   }
 
   // A+++ LOAD AI SETTINGS DATA
@@ -1398,6 +1451,227 @@ export default function AISettingsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Set Budget Dialog */}
+      <Dialog open={showBudgetDialog} onOpenChange={setShowBudgetDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5 text-green-500" />
+              Set Monthly Budget
+            </DialogTitle>
+            <DialogDescription>
+              Set a monthly spending limit for AI API usage
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="budget">Monthly Budget ($)</Label>
+              <Input
+                id="budget"
+                type="number"
+                value={newBudget}
+                onChange={(e) => setNewBudget(e.target.value)}
+                placeholder="100"
+                min="1"
+              />
+              <p className="text-xs text-muted-foreground">You&apos;ll be alerted at 80% usage</p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowBudgetDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmSetBudget} className="bg-green-600 hover:bg-green-700">
+              Set Budget
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rate Limit Dialog */}
+      <Dialog open={showRateLimitDialog} onOpenChange={setShowRateLimitDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-blue-500" />
+              Configure Rate Limiting
+            </DialogTitle>
+            <DialogDescription>
+              Set request limits to prevent excessive API usage
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="perMinute">Max requests per minute</Label>
+              <Input
+                id="perMinute"
+                type="number"
+                value={newPerMinute}
+                onChange={(e) => setNewPerMinute(e.target.value)}
+                placeholder="60"
+                min="1"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="perHour">Max requests per hour</Label>
+              <Input
+                id="perHour"
+                type="number"
+                value={newPerHour}
+                onChange={(e) => setNewPerHour(e.target.value)}
+                placeholder="1000"
+                min="1"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowRateLimitDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmEnableRateLimiting} className="bg-blue-600 hover:bg-blue-700">
+              Configure
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Webhook Dialog */}
+      <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5 text-purple-500" />
+              Configure Webhooks
+            </DialogTitle>
+            <DialogDescription>
+              Set up webhook notifications for AI events
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="webhookUrl">Webhook Endpoint URL</Label>
+              <Input
+                id="webhookUrl"
+                type="url"
+                value={webhookUrl}
+                onChange={(e) => setWebhookUrl(e.target.value)}
+                placeholder="https://your-app.com/webhooks/ai"
+              />
+              <p className="text-xs text-muted-foreground">Events: model.complete, model.error, quota.warning, quota.exceeded</p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowWebhookDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmConfigureWebhooks} className="bg-purple-600 hover:bg-purple-700">
+              Configure
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Retry Configuration Dialog */}
+      <Dialog open={showRetryDialog} onOpenChange={setShowRetryDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RefreshCw className="h-5 w-5 text-orange-500" />
+              Configure Retry Settings
+            </DialogTitle>
+            <DialogDescription>
+              Set retry behavior for failed API requests
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="maxRetries">Maximum Retries</Label>
+              <Input
+                id="maxRetries"
+                type="number"
+                value={newMaxRetries}
+                onChange={(e) => setNewMaxRetries(e.target.value)}
+                placeholder="3"
+                min="0"
+                max="10"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="timeout">Timeout (seconds)</Label>
+              <Input
+                id="timeout"
+                type="number"
+                value={newTimeout}
+                onChange={(e) => setNewTimeout(e.target.value)}
+                placeholder="30"
+                min="5"
+                max="120"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">Uses exponential backoff strategy</p>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowRetryDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmConfigureRetry} className="bg-orange-600 hover:bg-orange-700">
+              Configure
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Fallback Provider Dialog */}
+      <Dialog open={showFallbackDialog} onOpenChange={setShowFallbackDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Cpu className="h-5 w-5 text-cyan-500" />
+              Configure Fallback Provider
+            </DialogTitle>
+            <DialogDescription>
+              Set up automatic failover to backup AI provider
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="primaryProvider">Primary Provider</Label>
+              <Select value={newPrimaryProvider} onValueChange={setNewPrimaryProvider}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select primary provider" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="openai">OpenAI</SelectItem>
+                  <SelectItem value="anthropic">Anthropic</SelectItem>
+                  <SelectItem value="google">Google AI</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="fallbackProvider">Fallback Provider</Label>
+              <Select value={newFallbackProvider} onValueChange={setNewFallbackProvider}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select fallback provider" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="openai">OpenAI</SelectItem>
+                  <SelectItem value="anthropic">Anthropic</SelectItem>
+                  <SelectItem value="google">Google AI</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowFallbackDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmConfigureFallback} className="bg-cyan-600 hover:bg-cyan-700">
+              Configure
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </ErrorBoundary>
   )
 }
