@@ -36,6 +36,17 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
+// DATABASE QUERIES - Secure API Key Storage
+import {
+  getAPIKeys,
+  createAPIKey,
+  updateAPIKey,
+  deleteAPIKey,
+  getProviders,
+  updateProvider,
+  APIKey
+} from '@/lib/ai-settings-queries'
+
 const logger = createFeatureLogger('AISettings')
 
 interface AIProvider {
@@ -166,6 +177,7 @@ export default function AISettingsPage() {
   const [providers, setProviders] = useState<AIProvider[]>(AI_PROVIDERS)
   const [features, setFeatures] = useState(FEATURE_CONFIGS)
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({})
+  const [savedKeyIds, setSavedKeyIds] = useState<Record<string, string>>({})
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({})
   const [isTestingConnection, setIsTestingConnection] = useState<string | null>(null)
   const [testResults, setTestResults] = useState<Record<string, any>>({})
@@ -174,6 +186,39 @@ export default function AISettingsPage() {
   const [usageData, setUsageData] = useState<Record<string, { tokens: number; cost: number; requests: number }>>({})
   const [defaultProviders, setDefaultProviders] = useState<Record<string, string>>({})
   const [rateLimits, setRateLimits] = useState<{ perMinute: number; perHour: number }>({ perMinute: 60, perHour: 1000 })
+
+  // Load API Keys from Database
+  useEffect(() => {
+    const loadAPIKeysFromDB = async () => {
+      if (!userId || userLoading) return
+
+      try {
+        const result = await getAPIKeys(userId)
+        if (result.data && result.data.length > 0) {
+          const keyMap: Record<string, string> = {}
+          const idMap: Record<string, string> = {}
+
+          result.data.forEach((key: APIKey) => {
+            // Show masked key with last 4 characters
+            keyMap[key.provider_id] = key.key_last_four ? `****${key.key_last_four}` : ''
+            idMap[key.provider_id] = key.id
+
+            // Update provider status
+            setProviders(prev => prev.map(p =>
+              p.id === key.provider_id ? { ...p, status: 'connected' as const } : p
+            ))
+          })
+
+          setApiKeys(keyMap)
+          setSavedKeyIds(idMap)
+        }
+      } catch (err) {
+        logger.error('Failed to load API keys from database', err)
+      }
+    }
+
+    loadAPIKeysFromDB()
+  }, [userId, userLoading])
 
   // AlertDialog States
   const [showDeleteProviderDialog, setShowDeleteProviderDialog] = useState(false)
@@ -250,6 +295,11 @@ export default function AISettingsPage() {
 
   // Additional Handlers
   const handleImportConfig = () => {
+    if (!userId) {
+      toast.error('Authentication Required', { description: 'Please log in to import configuration' })
+      return
+    }
+
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = '.json'
@@ -261,10 +311,42 @@ export default function AISettingsPage() {
         const text = await file.text()
         const config = JSON.parse(text)
 
-        // Import API keys
+        // Import API keys to database
         if (config.apiKeys) {
-          setApiKeys(config.apiKeys)
-          localStorage.setItem('kazi-ai-keys', JSON.stringify(config.apiKeys))
+          let keysImported = 0
+          for (const [providerId, apiKey] of Object.entries(config.apiKeys)) {
+            if (apiKey && typeof apiKey === 'string' && apiKey.length > 10) {
+              const existingKeyId = savedKeyIds[providerId]
+              if (existingKeyId) {
+                await updateAPIKey(existingKeyId, { api_key: apiKey })
+              } else {
+                const result = await createAPIKey(userId, {
+                  provider_id: providerId,
+                  api_key: apiKey,
+                  is_active: true
+                })
+                if (result.data) {
+                  setSavedKeyIds(prev => ({ ...prev, [providerId]: result.data.id }))
+                }
+              }
+              keysImported++
+            }
+          }
+
+          // Update local state with masked keys
+          const maskedKeys: Record<string, string> = {}
+          for (const [providerId, apiKey] of Object.entries(config.apiKeys)) {
+            if (apiKey && typeof apiKey === 'string') {
+              maskedKeys[providerId] = apiKey.length > 4 ? `****${apiKey.slice(-4)}` : apiKey
+            }
+          }
+          setApiKeys(maskedKeys)
+
+          // Update provider statuses
+          setProviders(prev => prev.map(p => ({
+            ...p,
+            status: config.apiKeys[p.id] ? 'connected' as const : p.status
+          })))
         }
 
         // Import features
@@ -277,15 +359,15 @@ export default function AISettingsPage() {
           })))
         }
 
-        logger.info('Configuration imported successfully', {
+        logger.info('Configuration imported to database', {
           fileName: file.name,
           fileSize: file.size,
           keysImported: Object.keys(config.apiKeys || {}).length,
           featuresImported: Object.keys(config.features || {}).length
         })
 
-        toast.success('Configuration Imported!', {
-          description: `${file.name} - ${Object.keys(config.apiKeys || {}).length} keys, ${Object.keys(config.features || {}).length} features loaded`
+        toast.success('Configuration Imported Securely!', {
+          description: `${file.name} - API keys saved to database`
         })
       } catch (error) {
         logger.error('Configuration import failed', { error })
@@ -306,29 +388,45 @@ export default function AISettingsPage() {
     setShowDeleteProviderDialog(true)
   }
 
-  const confirmDeleteProvider = () => {
+  const confirmDeleteProvider = async () => {
     if (!providerToDelete) return
 
     const provider = providers.find(p => p.id === providerToDelete)
+    const keyId = savedKeyIds[providerToDelete]
 
-    // Remove provider's API key
-    const newKeys = { ...apiKeys }
-    delete newKeys[providerToDelete]
-    setApiKeys(newKeys)
-    localStorage.setItem('kazi-ai-keys', JSON.stringify(newKeys))
+    try {
+      // Delete API key from database if exists
+      if (keyId) {
+        const result = await deleteAPIKey(keyId)
+        if (result.error) throw result.error
+      }
 
-    // Remove from providers list
-    setProviders(prev => prev.filter(p => p.id !== providerToDelete))
+      // Remove from local state
+      const newKeys = { ...apiKeys }
+      delete newKeys[providerToDelete]
+      setApiKeys(newKeys)
 
-    logger.info('Provider deleted successfully', {
-      providerId: providerToDelete,
-      providerName: provider?.name,
-      remainingProviders: providers.length - 1
-    })
+      const newKeyIds = { ...savedKeyIds }
+      delete newKeyIds[providerToDelete]
+      setSavedKeyIds(newKeyIds)
 
-    toast.success('Provider Removed', {
-      description: `${provider?.name} removed - ${providers.length - 1} providers remaining`
-    })
+      // Update provider status to disconnected
+      setProviders(prev => prev.map(p =>
+        p.id === providerToDelete ? { ...p, status: 'disconnected' as const } : p
+      ))
+
+      logger.info('Provider API key deleted from database', {
+        providerId: providerToDelete,
+        providerName: provider?.name
+      })
+
+      toast.success('Provider Disconnected', {
+        description: `${provider?.name} API key removed securely`
+      })
+    } catch (error) {
+      logger.error('Failed to delete provider API key', { error, providerId: providerToDelete })
+      toast.error('Delete Failed', { description: 'Could not remove provider API key' })
+    }
 
     setShowDeleteProviderDialog(false)
     setProviderToDelete(null)
@@ -466,25 +564,45 @@ export default function AISettingsPage() {
     setShowRotateKeyDialog(true)
   }
 
-  const confirmRotateApiKey = () => {
+  const confirmRotateApiKey = async () => {
     if (!providerToRotate) return
 
     const provider = providers.find(p => p.id === providerToRotate)
+    const keyId = savedKeyIds[providerToRotate]
 
-    // Clear current key
-    const newKeys = { ...apiKeys }
-    delete newKeys[providerToRotate]
-    setApiKeys(newKeys)
-    localStorage.setItem('kazi-ai-keys', JSON.stringify(newKeys))
+    try {
+      // Delete current key from database if exists
+      if (keyId) {
+        const result = await deleteAPIKey(keyId)
+        if (result.error) throw result.error
+      }
 
-    logger.info('API key rotation initiated', {
-      providerId: providerToRotate,
-      providerName: provider?.name
-    })
+      // Clear local state
+      const newKeys = { ...apiKeys }
+      delete newKeys[providerToRotate]
+      setApiKeys(newKeys)
 
-    toast.success('Key Rotation Scheduled', {
-      description: `${provider?.name} API key cleared - Please enter new key and test connection`
-    })
+      const newKeyIds = { ...savedKeyIds }
+      delete newKeyIds[providerToRotate]
+      setSavedKeyIds(newKeyIds)
+
+      // Update provider status
+      setProviders(prev => prev.map(p =>
+        p.id === providerToRotate ? { ...p, status: 'disconnected' as const } : p
+      ))
+
+      logger.info('API key rotation initiated - old key deleted', {
+        providerId: providerToRotate,
+        providerName: provider?.name
+      })
+
+      toast.success('Key Rotation Ready', {
+        description: `${provider?.name} old key removed - Please enter new key and test connection`
+      })
+    } catch (error) {
+      logger.error('Failed to rotate API key', { error, providerId: providerToRotate })
+      toast.error('Rotation Failed', { description: 'Could not delete old API key' })
+    }
 
     setShowRotateKeyDialog(false)
     setProviderToRotate(null)
@@ -756,51 +874,48 @@ export default function AISettingsPage() {
     loadAISettingsData()
   }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Load saved API keys on component mount
-  useEffect(() => {
-    loadSavedKeys()
-  }, [])
-
-  const loadSavedKeys = () => {
-    try {
-      const saved = localStorage.getItem('kazi-ai-keys')
-      if (saved) {
-        const keys = JSON.parse(saved)
-        setApiKeys(keys)
-        const connectedCount = Object.keys(keys).filter(k => keys[k]).length
-
-        logger.info('Saved API keys loaded', {
-          connectedCount,
-          totalProviders: providers.length
-        })
-
-        // Update provider status based on saved keys
-        setProviders(prev => prev.map(provider => ({
-          ...provider,
-          status: keys[provider.id] ? 'connected' : 'disconnected'
-        })))
-      } else {
-        logger.info('No saved API keys found', {})
-      }
-    } catch (error) {
-      logger.error('Failed to load saved keys', { error })
-    }
-  }
+  // Note: API keys are now loaded from database via useEffect at line 191
+  // The localStorage loading has been removed for security
 
   const saveApiKey = async (providerId: string, key: string) => {
+    if (!userId) {
+      toast.error('Authentication Required', { description: 'Please log in to save API keys' })
+      return
+    }
+
     const provider = providers.find(p => p.id === providerId)
-    const newKeys = { ...apiKeys, [providerId]: key }
-    setApiKeys(newKeys)
 
-    // Save to localStorage (in production, use secure backend storage)
     try {
-      localStorage.setItem('kazi-ai-keys', JSON.stringify(newKeys))
+      // Check if key already exists in database
+      const existingKeyId = savedKeyIds[providerId]
 
-      logger.info('API key saved successfully', {
+      if (existingKeyId) {
+        // Update existing key
+        const result = await updateAPIKey(existingKeyId, { api_key: key })
+        if (result.error) throw result.error
+      } else {
+        // Create new key
+        const result = await createAPIKey(userId, {
+          provider_id: providerId,
+          api_key: key,
+          is_active: true
+        })
+        if (result.error) throw result.error
+
+        // Store the new key ID
+        if (result.data) {
+          setSavedKeyIds(prev => ({ ...prev, [providerId]: result.data.id }))
+        }
+      }
+
+      // Update local state with masked key
+      const maskedKey = key.length > 4 ? `****${key.slice(-4)}` : key
+      setApiKeys(prev => ({ ...prev, [providerId]: maskedKey }))
+
+      logger.info('API key saved to database', {
         providerId,
         providerName: provider?.name,
-        keyLength: key.length,
-        totalKeys: Object.keys(newKeys).length
+        keyLength: key.length
       })
 
       // Update provider status
@@ -810,18 +925,18 @@ export default function AISettingsPage() {
           : p
       ))
 
-      toast.success('API Key Saved', {
-        description: `${provider?.name} key saved - ${Object.keys(newKeys).length} providers configured`
+      toast.success('API Key Saved Securely', {
+        description: `${provider?.name} key stored in database`
       })
     } catch (error) {
-      logger.error('Failed to save API key', {
+      logger.error('Failed to save API key to database', {
         providerId,
         providerName: provider?.name,
         error
       })
 
       toast.error('Save Failed', {
-        description: `Could not save ${provider?.name} API key`
+        description: `Could not save ${provider?.name} API key to database`
       })
     }
   }
