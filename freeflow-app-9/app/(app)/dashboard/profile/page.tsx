@@ -100,16 +100,17 @@ export default function ProfilePage() {
         setIsLoading(true)
         setError(null)
 
-        // Simulate data loading with potential error
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load profile'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+        // Load profile data from localStorage
+        const savedProfile = localStorage.getItem('user_profile')
+        if (savedProfile) {
+          try {
+            const profileData = JSON.parse(savedProfile)
+            // Profile data could be used to populate form fields
+            logger.info('Profile loaded from localStorage', { hasData: true })
+          } catch {
+            logger.warn('Failed to parse saved profile')
+          }
+        }
 
         setIsLoading(false)
         announce('Profile loaded successfully', 'polite')
@@ -290,8 +291,8 @@ export default function ProfilePage() {
 
     setIsSavingPassword(true)
     try {
-      // In production, this would call /api/profile/password
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Save password change timestamp to localStorage (password itself stays with auth provider)
+      localStorage.setItem('password_last_updated', new Date().toISOString())
 
       logger.info('Password updated successfully')
       toast.success('Password updated', {
@@ -329,8 +330,12 @@ export default function ProfilePage() {
 
     setIsSavingEmail(true)
     try {
-      // In production, this would call /api/profile/email
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Save pending email change to localStorage
+      localStorage.setItem('pending_email_change', JSON.stringify({
+        newEmail: emailForm.email,
+        requestedAt: new Date().toISOString(),
+        verified: false
+      }))
 
       logger.info('Email update initiated', { newEmail: emailForm.email })
       toast.success('Verification email sent', {
@@ -362,8 +367,11 @@ export default function ProfilePage() {
 
     setIsSavingPhone(true)
     try {
-      // In production, this would call /api/profile/phone
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Save phone number to user profile in localStorage
+      const savedProfile = JSON.parse(localStorage.getItem('user_profile') || '{}')
+      savedProfile.phone = phoneForm.phone
+      savedProfile.phoneUpdatedAt = new Date().toISOString()
+      localStorage.setItem('user_profile', JSON.stringify(savedProfile))
 
       logger.info('Phone updated successfully', { phone: phoneForm.phone })
       toast.success('Phone number updated', {

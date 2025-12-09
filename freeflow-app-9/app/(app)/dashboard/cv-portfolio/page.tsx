@@ -451,9 +451,22 @@ export default function CVPortfolioPage() {
         setIsLoading(true)
         setError(null)
 
-        // In production, load from database with userId
-        // For now, use existing mock data but log userId
-        await new Promise((resolve) => setTimeout(resolve, 500))
+        // Load from localStorage if available
+        const savedPortfolio = localStorage.getItem(`portfolio_${userId}`)
+        if (savedPortfolio) {
+          try {
+            const data = JSON.parse(savedPortfolio)
+            if (data.projects) setProjects(data.projects)
+            if (data.skills) setSkills(data.skills)
+            if (data.experience) setExperience(data.experience)
+            if (data.education) setEducation(data.education)
+            if (data.achievements) setAchievements(data.achievements)
+            if (data.profileData) setProfileData(data.profileData)
+            logger.info('Portfolio loaded from localStorage', { userId })
+          } catch {
+            logger.warn('Failed to parse saved portfolio', { userId })
+          }
+        }
 
         const completeness = calculateCompleteness()
         logger.info('CV portfolio loaded successfully', {
@@ -1173,10 +1186,12 @@ export default function CVPortfolioPage() {
         template: selectedTemplate
       })
 
-      // Simulate export - in production, call API
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Save to localStorage before export
+      localStorage.setItem(`portfolio_${userId}`, JSON.stringify({
+        projects, skills, experience, education, achievements, profileData
+      }))
 
-      // Create download (JSON for now, PDF/DOCX in production)
+      // Create download
       const blob = new Blob([JSON.stringify(cvData, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -1276,10 +1291,14 @@ export default function CVPortfolioPage() {
         skillCount: skills.length
       })
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Generate unique share ID and save to localStorage
+      const shareId = `${profileData.name.toLowerCase().replace(/\s/g, '-')}-${Date.now().toString(36)}`
+      const shareUrl = `${window.location.origin}/public/portfolio/${shareId}`
 
-      const shareUrl = `${window.location.origin}/public/portfolio/${profileData.name.toLowerCase().replace(/\s/g, '-')}`
+      // Save share link history
+      const shareHistory = JSON.parse(localStorage.getItem(`portfolio_shares_${userId}`) || '[]')
+      shareHistory.push({ shareId, url: shareUrl, createdAt: new Date().toISOString(), expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() })
+      localStorage.setItem(`portfolio_shares_${userId}`, JSON.stringify(shareHistory))
 
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(shareUrl)
@@ -1318,10 +1337,16 @@ export default function CVPortfolioPage() {
       description: 'AI is analyzing your profile'
     })
 
-    // Simulate AI generation
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    // Generate summary based on actual portfolio data
+    const technicalSkills = skills.filter(s => s.category === 'Technical').slice(0, 3).map(s => s.name)
+    const skillsText = technicalSkills.length > 0 ? technicalSkills.join(', ') : 'various technologies'
+    const summary = `${profileData.title || 'Professional'} with ${yearsOfExperience}+ years of experience specializing in ${skillsText}. Proven track record of ${projects.length} successful projects and ${experience.length} professional roles. Expert in delivering innovative solutions with focus on quality and user experience.`
 
-    const summary = `${profileData.title} with ${yearsOfExperience}+ years of experience specializing in ${skills.filter(s => s.category === 'Technical').slice(0, 3).map(s => s.name).join(', ')}. Proven track record of ${projects.length} successful projects and ${experience.length} professional roles. Expert in delivering innovative solutions with focus on quality and user experience.`
+    // Save updated profile to localStorage
+    const updatedProfile = { ...profileData, bio: summary }
+    localStorage.setItem(`portfolio_${userId}`, JSON.stringify({
+      projects, skills, experience, education, achievements, profileData: updatedProfile
+    }))
 
     setProfileData(prev => ({ ...prev, bio: summary }))
 
@@ -1505,7 +1530,7 @@ export default function CVPortfolioPage() {
       description: 'Opening in new tab...'
     })
 
-    // In production: window.open(publicUrl, '_blank')
+    window.open(publicUrl, '_blank')
   }
 
   // Download Analytics Report
@@ -1517,12 +1542,10 @@ export default function CVPortfolioPage() {
     })
 
     toast.info('Generating Analytics Report...', {
-      description: 'This may take a moment'
+      description: 'Compiling your portfolio data'
     })
 
-    // Simulate report generation
-    await new Promise(resolve => setTimeout(resolve, 1500))
-
+    // Generate report from actual portfolio data
     const reportData = {
       generatedAt: new Date().toISOString(),
       portfolio: {

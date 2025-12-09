@@ -733,8 +733,9 @@ export default function TimeTrackingPage() {
   const confirmDeleteAllEntries = async () => {
     setIsDeleting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
       setTimeEntries([])
+      // Persist to localStorage
+      localStorage.setItem(`time_entries_${userId}`, JSON.stringify([]))
       logger.info('All entries deleted successfully')
       toast.success('All Entries Deleted', {
         description: 'All time entries have been permanently removed'
@@ -800,8 +801,10 @@ export default function TimeTrackingPage() {
 
     setIsDeleting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
       setSelectedProject('')
+      // Persist updated projects list to localStorage
+      const updatedProjects = projects.filter(p => p.id !== projectToDelete)
+      localStorage.setItem(`time_projects_${userId}`, JSON.stringify(updatedProjects))
       logger.info('Project deleted successfully', {
         projectId: projectToDelete,
         projectName: project?.name
@@ -885,8 +888,15 @@ export default function TimeTrackingPage() {
 
     setIsDeleting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
       setSelectedTask('')
+      // Persist updated projects (with task removed) to localStorage
+      const updatedProjects = projects.map(p => {
+        if (p.id === selectedProject) {
+          return { ...p, tasks: p.tasks.filter(t => t.id !== taskToDelete) }
+        }
+        return p
+      })
+      localStorage.setItem(`time_projects_${userId}`, JSON.stringify(updatedProjects))
       logger.info('Task deleted successfully', {
         taskId: taskToDelete,
         taskName: task?.name
@@ -923,7 +933,15 @@ export default function TimeTrackingPage() {
 
     setIsDeleting(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 300))
+      // Archive the entry to localStorage
+      const archivedEntries = JSON.parse(localStorage.getItem(`archived_entries_${userId}`) || '[]')
+      const entryToMove = timeEntries.find(e => e.id === entryToArchive)
+      if (entryToMove) {
+        archivedEntries.push({ ...entryToMove, archivedAt: new Date().toISOString() })
+        localStorage.setItem(`archived_entries_${userId}`, JSON.stringify(archivedEntries))
+        setTimeEntries(prev => prev.filter(e => e.id !== entryToArchive))
+        localStorage.setItem(`time_entries_${userId}`, JSON.stringify(timeEntries.filter(e => e.id !== entryToArchive)))
+      }
       logger.info('Entry archived successfully', { entryId: entryToArchive })
       toast.success('Entry Archived', {
         description: 'Time entry archived - can be restored later'

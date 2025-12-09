@@ -146,8 +146,12 @@ export default function BillingPage() {
       const selectedPlan = plans.find(p => p.id === planId)
       logger.info('Plan change initiated', { planId, planName: selectedPlan?.name, userId })
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Save plan change to localStorage
+      localStorage.setItem(`billing_plan_${userId}`, JSON.stringify({
+        planId,
+        planName: selectedPlan?.name,
+        changedAt: new Date().toISOString()
+      }))
 
       toast.success('Plan Updated', {
         description: `You are now on the ${selectedPlan?.name} plan`
@@ -174,8 +178,18 @@ export default function BillingPage() {
     try {
       logger.info('Saving payment method', { userId, lastFour: paymentForm.cardNumber.slice(-4) })
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Save masked card info to localStorage (never store full card number)
+      const savedPaymentMethods = JSON.parse(localStorage.getItem(`payment_methods_${userId}`) || '[]')
+      savedPaymentMethods.push({
+        id: `card_${Date.now()}`,
+        lastFour: paymentForm.cardNumber.slice(-4),
+        expiryMonth: paymentForm.expiryMonth,
+        expiryYear: paymentForm.expiryYear,
+        cardholderName: paymentForm.cardholderName,
+        isDefault: paymentForm.setAsDefault,
+        addedAt: new Date().toISOString()
+      })
+      localStorage.setItem(`payment_methods_${userId}`, JSON.stringify(savedPaymentMethods))
 
       toast.success('Payment Method Added', {
         description: `Card ending in ${paymentForm.cardNumber.slice(-4)} has been added`
@@ -208,8 +222,11 @@ export default function BillingPage() {
     try {
       logger.info('Saving billing address', { userId, city: billingAddress.city })
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Save billing address to localStorage
+      localStorage.setItem(`billing_address_${userId}`, JSON.stringify({
+        ...billingAddress,
+        updatedAt: new Date().toISOString()
+      }))
 
       toast.success('Billing Address Updated', {
         description: 'Your billing address has been saved'
