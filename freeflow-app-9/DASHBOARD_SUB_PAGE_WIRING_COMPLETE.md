@@ -23,6 +23,7 @@ This session completed comprehensive database wiring for critical dashboard sub-
 | `e1c753d6` | feat: Wire Time-tracking delete operations to database |
 | `2e6e9744` | feat: Wire CV-Portfolio to database |
 | `f8cb04b5` | feat: Wire AI-Create History refresh to database |
+| `df75123c` | feat: Wire Time-tracking archive to database, remove vestigial localStorage |
 
 ---
 
@@ -154,16 +155,17 @@ await createPaymentMethod(userId, {
 
 ### 5. Time-Tracking Page (`/dashboard/time-tracking`)
 
-**Problem:** Time entries deleted via localStorage instead of database
+**Problem:** Time entries deleted/archived via localStorage instead of database
 
 **Solution:**
 - Added `deleteAllTimeEntries()` bulk delete function
-- Replaced localStorage with database call in `confirmDeleteAllEntries`
-- Removed unused localStorage calls
+- Added `archiveTimeEntry()` database function for soft-delete/archive
+- Replaced localStorage with database calls in `confirmDeleteAllEntries` and `confirmArchiveEntry`
+- Removed vestigial localStorage.setItem in `confirmDeleteTask` (projects is hardcoded demo data)
 
 **Files Modified:**
-- `lib/time-tracking-queries.ts` (+36 lines)
-- `app/(app)/dashboard/time-tracking/page.tsx` (+15/-5 lines)
+- `lib/time-tracking-queries.ts` (+69 lines)
+- `app/(app)/dashboard/time-tracking/page.tsx` (+50/-17 lines)
 
 ### 6. CV-Portfolio Page (`/dashboard/cv-portfolio`)
 
