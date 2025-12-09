@@ -515,10 +515,21 @@ export default function AIAssistantPage() {
     setInputMessage(suggestion)
   }
 
-  const handleMessageRating = (messageId: string, rating: 'up' | 'down') => {
-    setMessages(prev => prev.map(msg => 
+  const handleMessageRating = async (messageId: string, rating: 'up' | 'down') => {
+    setMessages(prev => prev.map(msg =>
       msg.id === messageId ? { ...msg, rating } : msg
     ))
+
+    // Persist rating to database
+    if (userId) {
+      try {
+        const { rateMessage } = await import('@/lib/ai-assistant-queries')
+        await rateMessage(messageId, rating)
+        logger.info('Message rating persisted to database', { messageId, rating })
+      } catch (error: any) {
+        logger.error('Failed to persist message rating', { error: error.message })
+      }
+    }
   }
 
   const toggleVoiceMode = () => {
@@ -664,7 +675,7 @@ export default function AIAssistantPage() {
     })
   }
 
-  const handleImplementAction = (insightId: string, action: string) => {
+  const handleImplementAction = async (insightId: string, action: string) => {
     const insight = aiInsights.find(i => i.id === insightId)
 
     logger.info('Implementing action', {
@@ -684,7 +695,17 @@ export default function AIAssistantPage() {
       return
     }
 
-    // Note: Using local state - in production, this would POST to /api/ai/actions
+    // Track implementation in database
+    if (userId) {
+      try {
+        const { implementInsight } = await import('@/lib/ai-assistant-queries')
+        await implementInsight(insightId, action)
+        logger.info('Insight implementation tracked in database', { insightId, action })
+      } catch (error: any) {
+        logger.error('Failed to track insight implementation', { error: error.message })
+      }
+    }
+
     toast.success('Implementing action', {
       description: `${action} - ${insight?.category} - ${insight?.priority} priority`
     })

@@ -371,12 +371,23 @@ export default function AICodeCompletionPage() {
     }
   }
 
-  const handleLoadSnippet = (snippetId: string) => {
+  const handleLoadSnippet = async (snippetId: string) => {
     const snippet = snippets.find(s => s.id === snippetId)
     if (!snippet) return
 
     setCodeInput(snippet.code)
     setSelectedLanguage(snippet.language)
+
+    // Track snippet usage in database
+    if (userId) {
+      try {
+        const { incrementSnippetUsage } = await import('@/lib/ai-code-queries')
+        await incrementSnippetUsage(snippetId)
+        logger.info('Snippet usage tracked in database', { snippetId })
+      } catch (error: any) {
+        logger.error('Failed to track snippet usage', { error: error.message })
+      }
+    }
 
     logger.info('Snippet loaded successfully', {
       snippetId,
