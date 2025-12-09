@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -16,14 +17,44 @@ import {
   SelectValue
 } from '@/components/ui/select'
 
+// A+++ UTILITIES
+import { ListSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+
 const logger = createFeatureLogger('BookingsHistory')
 
 export default function HistoryPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [pastBookings, setPastBookings] = useState<ReturnType<typeof getPastBookings>>([])
+
   // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
-  const pastBookings = getPastBookings(mockBookings)
+  // A+++ LOAD BOOKING HISTORY
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate API call - in production, fetch from database
+        await new Promise(resolve => setTimeout(resolve, 500))
+        setPastBookings(getPastBookings(mockBookings))
+
+        announce('Booking history loaded', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load booking history')
+        announce('Error loading booking history', 'assertive')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadHistory()
+  }, [announce])
 
   const handleExportHistory = () => {
     logger.info('Exporting booking history', {
@@ -59,6 +90,33 @@ export default function HistoryPage() {
       default:
         return <Badge variant="outline">{status}</Badge>
     }
+  }
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Booking History</h3>
+        </div>
+        <ListSkeleton items={5} />
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 space-y-4">
+        <ErrorEmptyState
+          error={error}
+          action={{
+            label: 'Retry',
+            onClick: () => window.location.reload()
+          }}
+        />
+      </div>
+    )
   }
 
   return (

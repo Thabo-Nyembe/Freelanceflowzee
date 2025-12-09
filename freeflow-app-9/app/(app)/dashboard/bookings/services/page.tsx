@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -16,12 +17,44 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { mockServices } from '@/lib/bookings-utils'
 
+// A+++ UTILITIES
+import { CardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
+
 const logger = createFeatureLogger('BookingsServices')
 
 export default function ServicesPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [services, setServices] = useState<typeof mockServices>([])
+
   // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
+
+  // A+++ LOAD SERVICES
+  useEffect(() => {
+    const loadServices = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate API call - in production, fetch from database
+        await new Promise(resolve => setTimeout(resolve, 500))
+        setServices(mockServices)
+
+        announce('Services loaded', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load services')
+        announce('Error loading services', 'assertive')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadServices()
+  }, [announce])
 
   const handleManageServices = () => {
     logger.info('Manage services opened')
@@ -45,7 +78,7 @@ export default function ServicesPage() {
   }
 
   const handleViewBookings = (serviceId: string) => {
-    const service = mockServices.find(s => s.id === serviceId)
+    const service = services.find(s => s.id === serviceId)
     logger.info('Viewing service bookings', { serviceId, serviceName: service?.name })
     toast.info('Service Bookings', {
       description: `Viewing bookings for ${service?.name}`
@@ -53,11 +86,58 @@ export default function ServicesPage() {
   }
 
   const handleEditService = (serviceId: string) => {
-    const service = mockServices.find(s => s.id === serviceId)
+    const service = services.find(s => s.id === serviceId)
     logger.info('Editing service', { serviceId, serviceName: service?.name })
     toast.info('Edit Service', {
       description: `Editing ${service?.name}`
     })
+  }
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Services Management</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <CardSkeleton />
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 space-y-4">
+        <ErrorEmptyState
+          error={error}
+          action={{
+            label: 'Retry',
+            onClick: () => window.location.reload()
+          }}
+        />
+      </div>
+    )
+  }
+
+  // A+++ EMPTY STATE
+  if (services.length === 0) {
+    return (
+      <div className="container mx-auto px-4 space-y-4">
+        <NoDataEmptyState
+          entityName="services"
+          description="Create your first service to start accepting bookings."
+          action={{
+            label: 'Create Service',
+            onClick: handleManageServices
+          }}
+        />
+      </div>
+    )
   }
 
   return (
@@ -94,7 +174,7 @@ export default function ServicesPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {mockServices.map((service, index) => (
+        {services.map((service, index) => (
           <Card key={service.id} className="hover:shadow-lg transition-shadow">
             <CardHeader>
               <div className="flex items-start justify-between">

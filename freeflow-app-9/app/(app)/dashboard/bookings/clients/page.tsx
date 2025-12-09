@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -9,12 +10,44 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { mockBookings, getClientBookingCount } from '@/lib/bookings-utils'
 
+// A+++ UTILITIES
+import { ListSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
+
 const logger = createFeatureLogger('BookingsClients')
 
 export default function ClientsPage() {
+  // A+++ STATE MANAGEMENT
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [clients, setClients] = useState<typeof mockBookings>([])
+
   // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
+
+  // A+++ LOAD CLIENT DATA
+  useEffect(() => {
+    const loadClients = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Simulate API call - in production, fetch from database
+        await new Promise(resolve => setTimeout(resolve, 500))
+        setClients(mockBookings)
+
+        announce('Client directory loaded', 'polite')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load clients')
+        announce('Error loading clients', 'assertive')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadClients()
+  }, [announce])
 
   const handleImportClients = () => {
     logger.info('Import clients initiated')
@@ -62,6 +95,49 @@ export default function ClientsPage() {
     toast.info('Create Booking', {
       description: `Creating new booking for ${clientName}`
     })
+  }
+
+  // A+++ LOADING STATE
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Client Directory</h3>
+        </div>
+        <ListSkeleton items={5} />
+      </div>
+    )
+  }
+
+  // A+++ ERROR STATE
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 space-y-4">
+        <ErrorEmptyState
+          error={error}
+          action={{
+            label: 'Retry',
+            onClick: () => window.location.reload()
+          }}
+        />
+      </div>
+    )
+  }
+
+  // A+++ EMPTY STATE
+  if (clients.length === 0) {
+    return (
+      <div className="container mx-auto px-4 space-y-4">
+        <NoDataEmptyState
+          entityName="clients"
+          description="Start building your client directory by adding your first client."
+          action={{
+            label: 'Add Client',
+            onClick: handleAddClient
+          }}
+        />
+      </div>
+    )
   }
 
   return (
@@ -131,7 +207,7 @@ export default function ClientsPage() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {mockBookings.map((booking, idx) => (
+            {clients.map((booking, idx) => (
               <tr key={booking.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
