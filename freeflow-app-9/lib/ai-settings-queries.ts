@@ -700,3 +700,100 @@ export async function updateUsageStats(
     return { data, error }
   }
 }
+
+// ============================================================================
+// AI USER PREFERENCES
+// ============================================================================
+
+export interface AIUserPreferences {
+  id: string
+  user_id: string
+  monthly_budget: number
+  rate_limit_per_minute: number
+  rate_limit_per_hour: number
+  default_providers: Record<string, string>
+  logging_enabled: boolean
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Get AI user preferences
+ */
+export async function getAIPreferences(
+  userId: string
+): Promise<{ data: AIUserPreferences | null; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('ai_user_preferences')
+    .select('*')
+    .eq('user_id', userId)
+    .single()
+
+  return { data, error }
+}
+
+/**
+ * Create or update AI user preferences (upsert)
+ */
+export async function upsertAIPreferences(
+  userId: string,
+  preferences: Partial<Omit<AIUserPreferences, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
+): Promise<{ data: AIUserPreferences | null; error: any }> {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('ai_user_preferences')
+    .upsert({
+      user_id: userId,
+      ...preferences,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' })
+    .select()
+    .single()
+
+  return { data, error }
+}
+
+/**
+ * Update monthly budget
+ */
+export async function updateAIBudget(
+  userId: string,
+  monthlyBudget: number
+): Promise<{ data: AIUserPreferences | null; error: any }> {
+  return upsertAIPreferences(userId, { monthly_budget: monthlyBudget })
+}
+
+/**
+ * Update rate limits
+ */
+export async function updateAIRateLimits(
+  userId: string,
+  perMinute: number,
+  perHour: number
+): Promise<{ data: AIUserPreferences | null; error: any }> {
+  return upsertAIPreferences(userId, {
+    rate_limit_per_minute: perMinute,
+    rate_limit_per_hour: perHour
+  })
+}
+
+/**
+ * Update default providers
+ */
+export async function updateDefaultProviders(
+  userId: string,
+  defaultProviders: Record<string, string>
+): Promise<{ data: AIUserPreferences | null; error: any }> {
+  return upsertAIPreferences(userId, { default_providers: defaultProviders })
+}
+
+/**
+ * Toggle logging
+ */
+export async function toggleAILogging(
+  userId: string,
+  enabled: boolean
+): Promise<{ data: AIUserPreferences | null; error: any }> {
+  return upsertAIPreferences(userId, { logging_enabled: enabled })
+}

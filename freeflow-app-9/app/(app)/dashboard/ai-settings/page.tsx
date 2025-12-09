@@ -36,7 +36,7 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
-// DATABASE QUERIES - Secure API Key Storage
+// DATABASE QUERIES - Secure API Key Storage & Preferences
 import {
   getAPIKeys,
   createAPIKey,
@@ -44,7 +44,12 @@ import {
   deleteAPIKey,
   getProviders,
   updateProvider,
-  APIKey
+  APIKey,
+  getAIPreferences,
+  updateAIBudget,
+  updateAIRateLimits,
+  updateDefaultProviders,
+  toggleAILogging
 } from '@/lib/ai-settings-queries'
 
 const logger = createFeatureLogger('AISettings')
@@ -475,27 +480,37 @@ export default function AISettingsPage() {
     setShowBudgetDialog(true)
   }
 
-  const confirmSetBudget = () => {
+  const confirmSetBudget = async () => {
     const budgetAmount = parseFloat(newBudget)
     if (isNaN(budgetAmount) || budgetAmount <= 0) {
       toast.error('Invalid Budget', { description: 'Please enter a valid amount' })
       return
     }
 
-    setMonthlyBudget(budgetAmount)
-    localStorage.setItem('kazi-ai-budget', budgetAmount.toString())
+    try {
+      // Save to database
+      if (userId) {
+        await updateAIBudget(userId, budgetAmount)
+      }
 
-    logger.info('Monthly budget set', {
-      previousBudget: monthlyBudget,
-      newBudget: budgetAmount
-    })
+      setMonthlyBudget(budgetAmount)
 
-    toast.success('Budget Set', {
-      description: `Monthly limit: $${budgetAmount}/month - Alerts at 80% usage`
-    })
-    announce('Budget set successfully', 'polite')
-    setShowBudgetDialog(false)
-    setNewBudget('')
+      logger.info('Monthly budget set', {
+        previousBudget: monthlyBudget,
+        newBudget: budgetAmount
+      })
+
+      toast.success('Budget Set', {
+        description: `Monthly limit: $${budgetAmount}/month - Alerts at 80% usage`
+      })
+      announce('Budget set successfully', 'polite')
+    } catch (error) {
+      logger.error('Failed to save budget', { error })
+      toast.error('Failed to save budget')
+    } finally {
+      setShowBudgetDialog(false)
+      setNewBudget('')
+    }
   }
   const handleEnableRateLimiting = () => {
     setNewPerMinute(rateLimits.perMinute.toString())
@@ -503,27 +518,37 @@ export default function AISettingsPage() {
     setShowRateLimitDialog(true)
   }
 
-  const confirmEnableRateLimiting = () => {
+  const confirmEnableRateLimiting = async () => {
     const perMinute = parseInt(newPerMinute) || 60
     const perHour = parseInt(newPerHour) || 1000
 
     const newLimits = { perMinute, perHour }
 
-    setRateLimits(newLimits)
-    localStorage.setItem('kazi-ai-rate-limits', JSON.stringify(newLimits))
+    try {
+      // Save to database
+      if (userId) {
+        await updateAIRateLimits(userId, perMinute, perHour)
+      }
 
-    logger.info('Rate limiting configured', {
-      previousLimits: rateLimits,
-      newLimits
-    })
+      setRateLimits(newLimits)
 
-    toast.success('Rate Limiting Configured', {
-      description: `${newLimits.perMinute}/min • ${newLimits.perHour}/hr - Requests will be throttled`
-    })
-    announce('Rate limiting configured successfully', 'polite')
-    setShowRateLimitDialog(false)
-    setNewPerMinute('')
-    setNewPerHour('')
+      logger.info('Rate limiting configured', {
+        previousLimits: rateLimits,
+        newLimits
+      })
+
+      toast.success('Rate Limiting Configured', {
+        description: `${newLimits.perMinute}/min • ${newLimits.perHour}/hr - Requests will be throttled`
+      })
+      announce('Rate limiting configured successfully', 'polite')
+    } catch (error) {
+      logger.error('Failed to save rate limits', { error })
+      toast.error('Failed to save rate limits')
+    } finally {
+      setShowRateLimitDialog(false)
+      setNewPerMinute('')
+      setNewPerHour('')
+    }
   }
 
   const handleConfigureSecurity = () => {
@@ -608,12 +633,21 @@ export default function AISettingsPage() {
     setProviderToRotate(null)
   }
 
-  const handleSetDefaultProvider = (providerId: string, feature: string) => {
+  const handleSetDefaultProvider = async (providerId: string, feature: string) => {
     const provider = providers.find(p => p.id === providerId)
     if (!provider) return
 
-    setDefaultProviders(prev => ({ ...prev, [feature]: providerId }))
-    localStorage.setItem('kazi-default-providers', JSON.stringify({ ...defaultProviders, [feature]: providerId }))
+    const newDefaults = { ...defaultProviders, [feature]: providerId }
+    setDefaultProviders(newDefaults)
+
+    // Save to database
+    if (userId) {
+      try {
+        await updateDefaultProviders(userId, newDefaults)
+      } catch (error) {
+        logger.error('Failed to save default provider', { error })
+      }
+    }
 
     logger.info('Default provider set', {
       feature,
@@ -682,8 +716,15 @@ export default function AISettingsPage() {
     setShowEnableLoggingDialog(true)
   }
 
-  const confirmEnableLogging = () => {
-    localStorage.setItem('kazi-ai-logging', 'true')
+  const confirmEnableLogging = async () => {
+    // Save to database
+    if (userId) {
+      try {
+        await toggleAILogging(userId, true)
+      } catch (error) {
+        logger.error('Failed to save logging preference', { error })
+      }
+    }
 
     logger.info('Request logging enabled', {
       logLevel: 'detailed',
