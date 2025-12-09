@@ -40,6 +40,16 @@ import {
   Calendar,
   DollarSign
 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 const logger = createFeatureLogger('admin-crm')
 
@@ -64,6 +74,8 @@ export default function CRMPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null)
   const [showDealModal, setShowDealModal] = useState(false)
+  const [deleteDeal, setDeleteDeal] = useState<{ id: string; title: string } | null>(null)
+  const [deleteContact, setDeleteContact] = useState<{ id: string; name: string } | null>(null)
 
   // Filtered deals by stage
   const dealsByStage = useMemo(() => {
@@ -114,18 +126,18 @@ export default function CRMPage() {
           getContacts(userId)
         ])
 
-        setDeals(dealsResult.data || [])
-        setContacts(contactsResult.data || [])
+        setDeals(dealsResult || [])
+        setContacts(contactsResult || [])
 
         setIsLoading(false)
         announce('CRM data loaded successfully', 'polite')
         toast.success('CRM loaded', {
-          description: `${dealsResult.data?.length || 0} deals, ${contactsResult.data?.length || 0} contacts`
+          description: `${dealsResult?.length || 0} deals, ${contactsResult?.length || 0} contacts`
         })
         logger.info('CRM loaded', {
           success: true,
-          dealCount: dealsResult.data?.length || 0,
-          contactCount: contactsResult.data?.length || 0
+          dealCount: dealsResult?.length || 0,
+          contactCount: contactsResult?.length || 0
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load CRM'
@@ -170,7 +182,7 @@ export default function CRMPage() {
 
       // Reload deals
       const dealsResult = await getDeals(userId)
-      setDeals(dealsResult.data || [])
+      setDeals(dealsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Add failed'
       toast.error('Add Failed', { description: message })
@@ -180,8 +192,6 @@ export default function CRMPage() {
   }
 
   // Button 2: Edit Deal
-  // NOTE: No updateDeal function in admin-overview-queries.ts yet
-  // Keeping as API call for now - would need backend endpoint
   const handleEditDeal = async (dealId: string) => {
     if (!userId) {
       toast.error('Authentication required', { description: 'Please sign in to edit deals' })
@@ -191,27 +201,18 @@ export default function CRMPage() {
     try {
       logger.info('Editing deal', { dealId })
 
-      // TODO: When updateDeal function is added to admin-overview-queries.ts, use:
-      // const { updateDeal, getDeals } = await import('@/lib/admin-overview-queries')
-      // await updateDeal(dealId, { deal_value: 150000, probability: 85 })
-
-      const response = await fetch(`/api/admin/crm/deals/${dealId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ value: 150000, probability: 85 })
-      })
-
-      if (!response.ok) throw new Error('Failed to edit deal')
-      const result = await response.json()
+      const { updateDeal, getDeals } = await import('@/lib/admin-overview-queries')
+      await updateDeal(dealId, { deal_value: 150000, probability: 85 })
 
       toast.success('Deal Updated', {
         description: `Deal has been updated with new information`
       })
-      logger.info('Deal edited', { success: true, dealId, result })
+      logger.info('Deal edited', { success: true, dealId })
       announce('Deal updated successfully', 'polite')
 
-      // Optimistic update - ideally reload from database
-      setDeals(prev => prev.map(d => d.id === dealId ? { ...d, value: 150000, probability: 85 } : d))
+      // Reload deals from database
+      const dealsResult = await getDeals(userId)
+      setDeals(dealsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Edit failed'
       toast.error('Edit Failed', { description: message })
@@ -220,46 +221,32 @@ export default function CRMPage() {
     }
   }
 
-  // Button 3: Delete Deal
-  // NOTE: No deleteDeal function in admin-overview-queries.ts yet
-  // Keeping as API call for now - would need backend endpoint
-  const handleDeleteDeal = async (dealId: string, dealTitle: string) => {
-    if (!confirm(`Are you sure you want to delete "${dealTitle}"? This action cannot be undone.`)) {
-      return
-    }
-
-    if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to delete deals' })
-      return
-    }
+  // Button 3: Delete Deal - now uses AlertDialog state
+  const handleConfirmDeleteDeal = async () => {
+    if (!deleteDeal || !userId) return
 
     try {
-      logger.info('Deleting deal', { dealId })
+      logger.info('Deleting deal', { dealId: deleteDeal.id })
 
-      // TODO: When deleteDeal function is added to admin-overview-queries.ts, use:
-      // const { deleteDeal } = await import('@/lib/admin-overview-queries')
-      // await deleteDeal(dealId)
-
-      const response = await fetch(`/api/admin/crm/deals/${dealId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      })
-
-      if (!response.ok) throw new Error('Failed to delete deal')
+      const { deleteDeal: deleteDealQuery, getDeals } = await import('@/lib/admin-overview-queries')
+      await deleteDealQuery(deleteDeal.id)
 
       toast.success('Deal Deleted', {
-        description: `"${dealTitle}" has been permanently removed from pipeline`
+        description: `"${deleteDeal.title}" has been permanently removed from pipeline`
       })
-      logger.info('Deal deleted', { success: true, dealId })
+      logger.info('Deal deleted', { success: true, dealId: deleteDeal.id })
       announce('Deal deleted successfully', 'polite')
 
-      // Optimistic update - ideally reload from database
-      setDeals(prev => prev.filter(d => d.id !== dealId))
+      // Reload deals from database
+      const dealsResult = await getDeals(userId)
+      setDeals(dealsResult || [])
+      setDeleteDeal(null)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
       toast.error('Delete Failed', { description: message })
       logger.error('Delete deal failed', { error: message })
       announce('Failed to delete deal', 'assertive')
+      setDeleteDeal(null)
     }
   }
 
@@ -285,7 +272,7 @@ export default function CRMPage() {
 
       // Reload deals
       const dealsResult = await getDeals(userId)
-      setDeals(dealsResult.data || [])
+      setDeals(dealsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Move failed'
       toast.error('Move Failed', { description: message })
@@ -325,7 +312,7 @@ export default function CRMPage() {
 
       // Reload contacts
       const contactsResult = await getContacts(userId)
-      setContacts(contactsResult.data || [])
+      setContacts(contactsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Add failed'
       toast.error('Add Failed', { description: message })
@@ -335,8 +322,6 @@ export default function CRMPage() {
   }
 
   // Button 6: Edit Contact
-  // NOTE: No updateContact function in admin-overview-queries.ts yet
-  // Keeping as API call for now - would need backend endpoint
   const handleEditContact = async (contactId: string) => {
     if (!userId) {
       toast.error('Authentication required', { description: 'Please sign in to edit contacts' })
@@ -346,27 +331,18 @@ export default function CRMPage() {
     try {
       logger.info('Editing contact', { contactId })
 
-      // TODO: When updateContact function is added to admin-overview-queries.ts, use:
-      // const { updateContact, getContacts } = await import('@/lib/admin-overview-queries')
-      // await updateContact(contactId, { position: 'Senior Manager' })
-
-      const response = await fetch(`/api/admin/crm/contacts/${contactId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ position: 'Senior Manager' })
-      })
-
-      if (!response.ok) throw new Error('Failed to edit contact')
-      const result = await response.json()
+      const { updateContact, getContacts } = await import('@/lib/admin-overview-queries')
+      await updateContact(contactId, { position: 'Senior Manager' })
 
       toast.success('Contact Updated', {
         description: 'Contact information has been updated successfully'
       })
-      logger.info('Contact edited', { success: true, contactId, result })
+      logger.info('Contact edited', { success: true, contactId })
       announce('Contact updated successfully', 'polite')
 
-      // Optimistic update - ideally reload from database
-      setContacts(prev => prev.map(c => c.id === contactId ? { ...c, position: 'Senior Manager' } : c))
+      // Reload contacts from database
+      const contactsResult = await getContacts(userId)
+      setContacts(contactsResult || [])
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Edit failed'
       toast.error('Edit Failed', { description: message })
@@ -375,46 +351,32 @@ export default function CRMPage() {
     }
   }
 
-  // Button 7: Delete Contact
-  // NOTE: No deleteContact function in admin-overview-queries.ts yet
-  // Keeping as API call for now - would need backend endpoint
-  const handleDeleteContact = async (contactId: string, contactName: string) => {
-    if (!confirm(`Are you sure you want to delete "${contactName}"? This action cannot be undone.`)) {
-      return
-    }
-
-    if (!userId) {
-      toast.error('Authentication required', { description: 'Please sign in to delete contacts' })
-      return
-    }
+  // Button 7: Delete Contact - now uses AlertDialog state
+  const handleConfirmDeleteContact = async () => {
+    if (!deleteContact || !userId) return
 
     try {
-      logger.info('Deleting contact', { contactId })
+      logger.info('Deleting contact', { contactId: deleteContact.id })
 
-      // TODO: When deleteContact function is added to admin-overview-queries.ts, use:
-      // const { deleteContact } = await import('@/lib/admin-overview-queries')
-      // await deleteContact(contactId)
-
-      const response = await fetch(`/api/admin/crm/contacts/${contactId}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      })
-
-      if (!response.ok) throw new Error('Failed to delete contact')
+      const { deleteContact: deleteContactQuery, getContacts } = await import('@/lib/admin-overview-queries')
+      await deleteContactQuery(deleteContact.id)
 
       toast.success('Contact Deleted', {
-        description: `${contactName} has been removed from your contacts`
+        description: `${deleteContact.name} has been removed from your contacts`
       })
-      logger.info('Contact deleted', { success: true, contactId })
+      logger.info('Contact deleted', { success: true, contactId: deleteContact.id })
       announce('Contact deleted successfully', 'polite')
 
-      // Optimistic update - ideally reload from database
-      setContacts(prev => prev.filter(c => c.id !== contactId))
+      // Reload contacts from database
+      const contactsResult = await getContacts(userId)
+      setContacts(contactsResult || [])
+      setDeleteContact(null)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Delete failed'
       toast.error('Delete Failed', { description: message })
       logger.error('Delete contact failed', { error: message })
       announce('Failed to delete contact', 'assertive')
+      setDeleteContact(null)
     }
   }
 
@@ -507,10 +469,8 @@ export default function CRMPage() {
     announce('Deal details opened', 'polite')
   }
 
-  // Button 11: Export Pipeline
-  // NOTE: CSV generation requires backend processing (formatting, file creation)
-  // Keeping as API call - this is correct implementation for export operations
-  const handleExportPipeline = async () => {
+  // Button 11: Export Pipeline - client-side JSON export
+  const handleExportPipeline = () => {
     if (!userId) {
       toast.error('Authentication required', { description: 'Please sign in to export pipeline' })
       return
@@ -519,20 +479,39 @@ export default function CRMPage() {
     try {
       logger.info('Exporting pipeline')
 
-      // CSV/Excel export requires backend API for file generation and download
-      const response = await fetch('/api/admin/crm/export', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ format: 'csv', includeContacts: true })
-      })
+      const exportData = {
+        deals,
+        contacts,
+        pipelineStats,
+        exportedAt: new Date().toISOString(),
+        exportedBy: userId,
+        summary: {
+          totalDeals: deals.length,
+          totalContacts: contacts.length,
+          pipelineValue: pipelineStats.totalValue,
+          winRate: pipelineStats.winRate,
+          dealsByStage: {
+            lead: dealsByStage.lead.length,
+            qualified: dealsByStage.qualified.length,
+            proposal: dealsByStage.proposal.length,
+            negotiation: dealsByStage.negotiation.length,
+            won: dealsByStage.won.length
+          }
+        }
+      }
 
-      if (!response.ok) throw new Error('Failed to export pipeline')
-      const result = await response.json()
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `crm-pipeline-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
 
       toast.success('Pipeline Exported', {
-        description: 'CRM pipeline data has been exported to CSV file'
+        description: `Exported ${deals.length} deals and ${contacts.length} contacts`
       })
-      logger.info('Pipeline export completed', { success: true, result })
+      logger.info('Pipeline export completed', { success: true, dealCount: deals.length, contactCount: contacts.length })
       announce('Pipeline exported successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Export failed'
@@ -559,16 +538,16 @@ export default function CRMPage() {
         getContacts(userId)
       ])
 
-      setDeals(dealsResult.data || [])
-      setContacts(contactsResult.data || [])
+      setDeals(dealsResult || [])
+      setContacts(contactsResult || [])
 
       toast.success('CRM Refreshed', {
-        description: `Reloaded ${dealsResult.data?.length || 0} deals and ${contactsResult.data?.length || 0} contacts`
+        description: `Reloaded ${dealsResult?.length || 0} deals and ${contactsResult?.length || 0} contacts`
       })
       logger.info('CRM refresh completed', {
         success: true,
-        dealCount: dealsResult.data?.length || 0,
-        contactCount: contactsResult.data?.length || 0
+        dealCount: dealsResult?.length || 0,
+        contactCount: contactsResult?.length || 0
       })
       announce('CRM refreshed successfully', 'polite')
     } catch (error) {
@@ -809,7 +788,7 @@ export default function CRMPage() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation()
-                                handleDeleteDeal(deal.id, deal.title)
+                                setDeleteDeal({ id: deal.id, title: deal.title })
                               }}
                               className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors"
                             >
@@ -889,7 +868,7 @@ export default function CRMPage() {
                       <Edit className="w-3 h-3" />
                     </button>
                     <button
-                      onClick={() => handleDeleteContact(contact.id, contact.name)}
+                      onClick={() => setDeleteContact({ id: contact.id, name: contact.name })}
                       className="px-3 py-1.5 bg-red-500 text-white rounded text-xs hover:bg-red-600 transition-colors"
                     >
                       <Trash2 className="w-3 h-3" />
@@ -985,6 +964,42 @@ export default function CRMPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Delete Deal Confirmation */}
+      <AlertDialog open={!!deleteDeal} onOpenChange={() => setDeleteDeal(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Deal?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete "{deleteDeal?.title}". This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDeleteDeal} className="bg-red-500 hover:bg-red-600">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Contact Confirmation */}
+      <AlertDialog open={!!deleteContact} onOpenChange={() => setDeleteContact(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Contact?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete "{deleteContact?.name}". This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDeleteContact} className="bg-red-500 hover:bg-red-600">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

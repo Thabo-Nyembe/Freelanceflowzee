@@ -622,7 +622,24 @@ export default function ModelingStudioPage() {
                     <button
                       variant="outline"
                       size="sm"
-                      onClick={() => {}}
+                      onClick={() => {
+                        logger.info('Sharing 3D model', {
+                          objectsCount: objects.length,
+                          materialsCount: materials.length,
+                          lightsCount: lights.length
+                        })
+                        // Copy model JSON to clipboard
+                        const modelData = {
+                          objects,
+                          materials,
+                          lights,
+                          scene: { camera: cameraPosition, settings: { renderQuality: renderQuality[0] } }
+                        }
+                        navigator.clipboard.writeText(JSON.stringify(modelData, null, 2))
+                        toast.success('Model copied to clipboard', {
+                          description: `${objects.length} objects • ${materials.length} materials • Ready to share`
+                        })
+                      }}
                       data-testid="share-model-btn"
                     >
                       <Share2 className="w-4 h-4" />
@@ -941,7 +958,31 @@ export default function ModelingStudioPage() {
                           </div>
                         </motion.div>
                       ))}
-                      <button variant="outline" className="w-full gap-2">
+                      <button
+                        variant="outline"
+                        className="w-full gap-2"
+                        onClick={() => {
+                          const newMaterial: Material = {
+                            id: `mat-${Date.now()}`,
+                            name: `Custom Material ${materials.length + 1}`,
+                            type: 'standard',
+                            color: '#888888',
+                            roughness: 0.5,
+                            metallic: 0.0,
+                            emission: 0
+                          }
+                          logger.info('Adding new material', {
+                            materialId: newMaterial.id,
+                            materialName: newMaterial.name,
+                            materialsCount: materials.length + 1
+                          })
+                          setMaterials([...materials, newMaterial])
+                          toast.success('Material added', {
+                            description: `${newMaterial.name} - ${materials.length + 1} total materials`
+                          })
+                        }}
+                        data-testid="add-material-btn"
+                      >
                         <Plus className="w-4 h-4" />
                         Add Material
                       </button>
@@ -994,7 +1035,32 @@ export default function ModelingStudioPage() {
                           )}
                         </motion.div>
                       ))}
-                      <button variant="outline" className="w-full gap-2">
+                      <button
+                        variant="outline"
+                        className="w-full gap-2"
+                        onClick={() => {
+                          const newLight: Light = {
+                            id: `light-${Date.now()}`,
+                            name: `Light ${lights.length + 1}`,
+                            type: 'point',
+                            intensity: 50,
+                            color: '#ffffff',
+                            position: { x: 0, y: 5, z: 0 },
+                            enabled: true
+                          }
+                          logger.info('Adding new light', {
+                            lightId: newLight.id,
+                            lightName: newLight.name,
+                            lightType: newLight.type,
+                            lightsCount: lights.length + 1
+                          })
+                          setLights([...lights, newLight])
+                          toast.success('Light added', {
+                            description: `${newLight.name} (${newLight.type}) - ${lights.length + 1} total lights`
+                          })
+                        }}
+                        data-testid="add-light-btn"
+                      >
                         <Plus className="w-4 h-4" />
                         Add Light
                       </button>

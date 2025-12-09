@@ -566,6 +566,16 @@ export async function updateGenerationStatus(
   return { data, error }
 }
 
+/**
+ * Delete a generation record
+ */
+export async function deleteGeneration(generationId: string): Promise<{ error: any }> {
+  const supabase = createClient()
+  const { error } = await supabase.from('ai_create_generations').delete().eq('id', generationId)
+
+  return { error }
+}
+
 // ============================================================================
 // PREFERENCES OPERATIONS
 // ============================================================================
@@ -622,6 +632,29 @@ export async function upsertPreferences(
     .single()
 
   return { data, error }
+}
+
+/**
+ * Update user preferences (alias for upsertPreferences)
+ */
+export async function updatePreferences(
+  userId: string,
+  preferences: Partial<
+    Pick<
+      AICreatePreferences,
+      | 'default_model'
+      | 'default_style'
+      | 'default_color_scheme'
+      | 'batch_mode_enabled'
+      | 'auto_save_enabled'
+      | 'quality_preset'
+      | 'favorite_fields'
+      | 'recent_prompts'
+      | 'metadata'
+    >
+  >
+): Promise<{ data: AICreatePreferences | null; error: any }> {
+  return upsertPreferences(userId, preferences)
 }
 
 /**

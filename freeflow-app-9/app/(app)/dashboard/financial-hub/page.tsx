@@ -5,6 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -56,6 +66,8 @@ export default function FinancialHubPage() {
   const [_selectedPeriod, setSelectedPeriod] = useState<string>('monthly')
   const [activeTab, setActiveTab] = useState<string>('overview')
   const [showAIWidget, setShowAIWidget] = useState(true)
+  const [deleteClient, setDeleteClient] = useState<{ id: number; name: string } | null>(null)
+  const [deleteGoal, setDeleteGoal] = useState<string | null>(null)
 
   // REAL DATA STATE
   const [financialData, setFinancialData] = useState({
@@ -408,20 +420,23 @@ Overdue: ${financialData.invoices.overdue}
     const client = financialData.clients.topClients.find((_, index) => index === id)
 
     logger.info('Deleting client', { clientId: id, clientName: client?.name })
+    setDeleteClient({ id, name: client?.name || `Client #${id}` })
+  }
 
-    if (confirm(`Delete client "${client?.name || id}"?`)) {
-      logger.info('Client deletion confirmed', {
-        clientId: id,
-        clientName: client?.name,
-        lostRevenue: client?.revenue
-      })
+  const handleConfirmDeleteClient = () => {
+    if (!deleteClient) return
 
-      toast.success('Client deleted', {
-        description: client ? `${client.name} - $${client.revenue.toLocaleString()} revenue removed` : `Client #${id} removed`
-      })
-    } else {
-      logger.debug('Client deletion cancelled', { clientId: id })
-    }
+    const client = financialData.clients.topClients.find((_, index) => index === deleteClient.id)
+    logger.info('Client deletion confirmed', {
+      clientId: deleteClient.id,
+      clientName: deleteClient.name,
+      lostRevenue: client?.revenue
+    })
+
+    toast.success('Client deleted', {
+      description: client ? `${client.name} - $${client.revenue.toLocaleString()} revenue removed` : `${deleteClient.name} removed`
+    })
+    setDeleteClient(null)
   }
 
   const handleViewClientDetails = (id: number) => {
@@ -470,16 +485,18 @@ Overdue: ${financialData.invoices.overdue}
 
   const handleDeleteGoal = (id: string) => {
     logger.info('Deleting goal', { goalId: id })
+    setDeleteGoal(id)
+  }
 
-    if (confirm(`Delete ${id} goal?`)) {
-      logger.info('Goal deletion confirmed', { goalId: id })
+  const handleConfirmDeleteGoal = () => {
+    if (!deleteGoal) return
 
-      toast.success('Goal deleted', {
-        description: `${id === 'monthly' ? 'Monthly' : 'Yearly'} financial goal removed`
-      })
-    } else {
-      logger.debug('Goal deletion cancelled', { goalId: id })
-    }
+    logger.info('Goal deletion confirmed', { goalId: deleteGoal })
+
+    toast.success('Goal deleted', {
+      description: `${deleteGoal === 'monthly' ? 'Monthly' : 'Yearly'} financial goal removed`
+    })
+    setDeleteGoal(null)
   }
 
   const handleTrackGoalProgress = () => {
@@ -1091,6 +1108,42 @@ Overdue: ${financialData.invoices.overdue}
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Delete Client Confirmation */}
+      <AlertDialog open={!!deleteClient} onOpenChange={() => setDeleteClient(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Client?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Delete client "{deleteClient?.name}"? This will remove them from your financial records.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDeleteClient} className="bg-red-500 hover:bg-red-600">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Goal Confirmation */}
+      <AlertDialog open={!!deleteGoal} onOpenChange={() => setDeleteGoal(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Goal?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Delete {deleteGoal === 'monthly' ? 'Monthly' : 'Yearly'} financial goal? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDeleteGoal} className="bg-red-500 hover:bg-red-600">
+              Delete Goal
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

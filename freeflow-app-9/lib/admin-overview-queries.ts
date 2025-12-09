@@ -563,6 +563,61 @@ export async function logActivity(userId: string, activityData: Partial<AdminCrm
   return data as AdminCrmActivity
 }
 
+export async function updateDeal(dealId: string, updates: Partial<AdminCrmDeal>) {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('admin_crm_deals')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+      last_activity_at: new Date().toISOString()
+    })
+    .eq('id', dealId)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as AdminCrmDeal
+}
+
+export async function deleteDeal(dealId: string) {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('admin_crm_deals')
+    .delete()
+    .eq('id', dealId)
+
+  if (error) throw error
+  return { success: true }
+}
+
+export async function updateContact(contactId: string, updates: Partial<AdminCrmContact>) {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('admin_crm_contacts')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', contactId)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as AdminCrmContact
+}
+
+export async function deleteContact(contactId: string) {
+  const supabase = createClient()
+  const { error } = await supabase
+    .from('admin_crm_contacts')
+    .delete()
+    .eq('id', contactId)
+
+  if (error) throw error
+  return { success: true }
+}
+
 // ============================================================================
 // INVOICING MODULE - CRUD & QUERIES
 // ============================================================================

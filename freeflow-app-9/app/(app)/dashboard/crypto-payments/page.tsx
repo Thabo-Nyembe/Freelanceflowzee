@@ -57,6 +57,16 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Checkbox } from '@/components/ui/checkbox'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -447,6 +457,10 @@ export default function CryptoPaymentsPage() {
   const [paymentDescription, setPaymentDescription] = useState('')
   const [customerEmail, setCustomerEmail] = useState('')
 
+  // Confirmation Dialog States
+  const [cancelTransaction, setCancelTransaction] = useState<CryptoTransaction | null>(null)
+  const [refundTransaction, setRefundTransaction] = useState<CryptoTransaction | null>(null)
+
   // Load mock data
   useEffect(() => {
     logger.info('Loading initial data')
@@ -661,29 +675,32 @@ export default function CryptoPaymentsPage() {
       return
     }
 
-    if (confirm(`Cancel transaction "${transaction.id}"?`)) {
-      const updatedTransaction: CryptoTransaction = {
-        ...transaction,
-        status: 'cancelled',
-        updatedAt: new Date().toISOString()
-      }
+    setCancelTransaction(transaction)
+  }
 
-      dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
+  const handleConfirmCancelTransaction = () => {
+    if (!cancelTransaction) return
 
-      logger.info('Transaction cancelled', {
-        transactionId: transaction.id,
-        amount: transaction.amount,
-        currency: transaction.currency,
-        previousStatus: 'pending'
-      })
-
-      toast.success('Transaction cancelled', {
-        description: `${transaction.id} - ${formatCryptoAmount(transaction.amount, transaction.currency)} - ${transaction.description}`
-      })
-      announce('Transaction cancelled', 'polite')
-    } else {
-      logger.debug('Transaction cancellation declined', { transactionId })
+    const updatedTransaction: CryptoTransaction = {
+      ...cancelTransaction,
+      status: 'cancelled',
+      updatedAt: new Date().toISOString()
     }
+
+    dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
+
+    logger.info('Transaction cancelled', {
+      transactionId: cancelTransaction.id,
+      amount: cancelTransaction.amount,
+      currency: cancelTransaction.currency,
+      previousStatus: 'pending'
+    })
+
+    toast.success('Transaction cancelled', {
+      description: `${cancelTransaction.id} - ${formatCryptoAmount(cancelTransaction.amount, cancelTransaction.currency)} - ${cancelTransaction.description}`
+    })
+    announce('Transaction cancelled', 'polite')
+    setCancelTransaction(null)
   }
 
   const handleRefundTransaction = (transactionId: string) => {
@@ -704,30 +721,33 @@ export default function CryptoPaymentsPage() {
       return
     }
 
-    if (confirm(`Refund ${formatCryptoAmount(transaction.amount, transaction.currency)} to customer?`)) {
-      const updatedTransaction: CryptoTransaction = {
-        ...transaction,
-        status: 'refunded',
-        updatedAt: new Date().toISOString()
-      }
+    setRefundTransaction(transaction)
+  }
 
-      dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
+  const handleConfirmRefundTransaction = () => {
+    if (!refundTransaction) return
 
-      logger.info('Transaction refunded', {
-        transactionId: transaction.id,
-        amount: transaction.amount,
-        currency: transaction.currency,
-        usdAmount: transaction.usdAmount,
-        customerEmail: transaction.metadata.customerEmail
-      })
-
-      toast.success('Transaction refunded', {
-        description: `${formatCryptoAmount(transaction.amount, transaction.currency)} - ${formatUSD(transaction.usdAmount)} - Refunded to ${transaction.metadata.customerEmail || 'customer'}`
-      })
-      announce('Transaction refunded', 'polite')
-    } else {
-      logger.debug('Transaction refund declined', { transactionId })
+    const updatedTransaction: CryptoTransaction = {
+      ...refundTransaction,
+      status: 'refunded',
+      updatedAt: new Date().toISOString()
     }
+
+    dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
+
+    logger.info('Transaction refunded', {
+      transactionId: refundTransaction.id,
+      amount: refundTransaction.amount,
+      currency: refundTransaction.currency,
+      usdAmount: refundTransaction.usdAmount,
+      customerEmail: refundTransaction.metadata.customerEmail
+    })
+
+    toast.success('Transaction refunded', {
+      description: `${formatCryptoAmount(refundTransaction.amount, refundTransaction.currency)} - ${formatUSD(refundTransaction.usdAmount)} - Refunded to ${refundTransaction.metadata.customerEmail || 'customer'}`
+    })
+    announce('Transaction refunded', 'polite')
+    setRefundTransaction(null)
   }
 
   const handleCopyAddress = (address: string) => {
@@ -1536,6 +1556,42 @@ export default function CryptoPaymentsPage() {
           </Dialog>
         )}
       </AnimatePresence>
+
+      {/* Cancel Transaction Confirmation */}
+      <AlertDialog open={!!cancelTransaction} onOpenChange={() => setCancelTransaction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Transaction?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cancel transaction "{cancelTransaction?.id}"? This will mark the transaction as cancelled.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Transaction</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmCancelTransaction} className="bg-red-500 hover:bg-red-600">
+              Cancel Transaction
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Refund Transaction Confirmation */}
+      <AlertDialog open={!!refundTransaction} onOpenChange={() => setRefundTransaction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Refund Transaction?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Refund {refundTransaction ? formatCryptoAmount(refundTransaction.amount, refundTransaction.currency) : ''} to customer? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmRefundTransaction} className="bg-orange-500 hover:bg-orange-600">
+              Process Refund
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

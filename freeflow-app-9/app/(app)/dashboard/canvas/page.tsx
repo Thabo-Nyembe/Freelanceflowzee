@@ -17,6 +17,16 @@ import {
   DialogFooter
 } from '@/components/ui/dialog'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -525,6 +535,8 @@ export default function CanvasPage() {
   const [showExportModal, setShowExportModal] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [deleteCanvas, setDeleteCanvas] = useState<{ id: string; name: string } | null>(null)
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false)
 
   // Form states
   const [canvasName, setCanvasName] = useState('')
@@ -723,7 +735,7 @@ export default function CanvasPage() {
     setShowViewModal(true)
   }
 
-  const handleDeleteCanvas = async (canvasId: string) => {
+  const handleDeleteCanvas = (canvasId: string) => {
     logger.info('Deleting canvas', { canvasId })
     const canvas = state.canvases.find(c => c.id === canvasId)
 
@@ -732,21 +744,24 @@ export default function CanvasPage() {
       return
     }
 
-    logger.info('Deleting canvas', { canvasId, canvasName: canvas.name })
-
-    if (confirm(`Delete "${canvas.name}"?`)) {
-      logger.info('Canvas deletion confirmed', { canvasId, canvasName: canvas.name })
-      dispatch({ type: 'DELETE_CANVAS', canvasId })
-      toast.success('Canvas deleted', {
-        description: `${canvas.name} - ${canvas.artboards.length} artboards - ${canvas.totalLayers} layers - ${canvas.size.toFixed(2)}MB`
-      })
-      announce('Canvas deleted', 'polite')
-    } else {
-      logger.debug('Canvas deletion cancelled', { canvasId })
-    }
+    logger.info('Opening delete confirmation', { canvasId, canvasName: canvas.name })
+    setDeleteCanvas({ id: canvasId, name: canvas.name })
   }
 
-  const handleBulkDelete = async () => {
+  const handleConfirmDeleteCanvas = () => {
+    if (!deleteCanvas) return
+
+    const canvas = state.canvases.find(c => c.id === deleteCanvas.id)
+    logger.info('Canvas deletion confirmed', { canvasId: deleteCanvas.id, canvasName: deleteCanvas.name })
+    dispatch({ type: 'DELETE_CANVAS', canvasId: deleteCanvas.id })
+    toast.success('Canvas deleted', {
+      description: `${deleteCanvas.name} - ${canvas?.artboards.length || 0} artboards - ${canvas?.totalLayers || 0} layers - ${canvas?.size.toFixed(2) || 0}MB`
+    })
+    announce('Canvas deleted', 'polite')
+    setDeleteCanvas(null)
+  }
+
+  const handleBulkDelete = () => {
     logger.info('Bulk delete initiated', { count: state.selectedCanvases.length })
 
     if (state.selectedCanvases.length === 0) {
@@ -755,17 +770,19 @@ export default function CanvasPage() {
       return
     }
 
-    if (confirm(`Delete ${state.selectedCanvases.length} canvas(es)?`)) {
-      logger.info('Bulk deletion confirmed', { count: state.selectedCanvases.length })
-      state.selectedCanvases.forEach(canvasId => {
-        dispatch({ type: 'DELETE_CANVAS', canvasId })
-      })
-      dispatch({ type: 'CLEAR_SELECTED_CANVASES' })
-      toast.success(`${state.selectedCanvases.length} canvas(es) deleted`)
-      announce('Selected canvases deleted', 'polite')
-    } else {
-      logger.debug('Bulk deletion cancelled')
-    }
+    setShowBulkDeleteConfirm(true)
+  }
+
+  const handleConfirmBulkDelete = () => {
+    logger.info('Bulk deletion confirmed', { count: state.selectedCanvases.length })
+    const count = state.selectedCanvases.length
+    state.selectedCanvases.forEach(canvasId => {
+      dispatch({ type: 'DELETE_CANVAS', canvasId })
+    })
+    dispatch({ type: 'CLEAR_SELECTED_CANVASES' })
+    toast.success(`${count} canvas(es) deleted`)
+    announce('Selected canvases deleted', 'polite')
+    setShowBulkDeleteConfirm(false)
   }
 
   const handleDuplicateCanvas = (canvasId: string) => {
@@ -1686,6 +1703,42 @@ export default function CanvasPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Canvas Confirmation */}
+      <AlertDialog open={!!deleteCanvas} onOpenChange={() => setDeleteCanvas(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Canvas?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete "{deleteCanvas?.name}". This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDeleteCanvas} className="bg-red-500 hover:bg-red-600">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Confirmation */}
+      <AlertDialog open={showBulkDeleteConfirm} onOpenChange={setShowBulkDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {state.selectedCanvases.length} Canvas(es)?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all selected canvases. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmBulkDelete} className="bg-red-500 hover:bg-red-600">
+              Delete All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
