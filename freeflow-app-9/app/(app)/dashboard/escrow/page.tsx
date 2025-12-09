@@ -234,6 +234,26 @@ export default function EscrowPage() {
   const [selectedMilestoneId, setSelectedMilestoneId] = useState<string | null>(null)
   const [disputeReason, setDisputeReason] = useState('')
 
+  // Dialog states for view/edit features
+  const [viewingDeposit, setViewingDeposit] = useState<EscrowDeposit | null>(null)
+  const [editingDeposit, setEditingDeposit] = useState<EscrowDeposit | null>(null)
+  const [editForm, setEditForm] = useState({
+    projectTitle: '',
+    clientName: '',
+    clientEmail: '',
+    notes: ''
+  })
+  const [viewingContract, setViewingContract] = useState<EscrowDeposit | null>(null)
+  const [viewingTransactions, setViewingTransactions] = useState<EscrowDeposit | null>(null)
+  const [addingMilestone, setAddingMilestone] = useState<string | null>(null)
+  const [newMilestoneForm, setNewMilestoneForm] = useState({
+    title: '',
+    description: '',
+    amount: '',
+    dueDate: ''
+  })
+  const [isSaving, setIsSaving] = useState(false)
+
   // Mock data
   const mockDeposits: EscrowDeposit[] = [
     {
@@ -773,10 +793,47 @@ export default function EscrowPage() {
   }
 
   const handleEditDeposit = (depositId: string) => {
+    const deposit = state.deposits.find(d => d.id === depositId)
+    if (!deposit) {
+      toast.error('Deposit not found')
+      return
+    }
     logger.info('Edit deposit initiated', { depositId })
-    toast.info('Edit Deposit', {
-      description: 'Update deposit details, milestones, and payment terms'
+    setEditForm({
+      projectTitle: deposit.projectTitle,
+      clientName: deposit.clientName,
+      clientEmail: deposit.clientEmail,
+      notes: deposit.notes || ''
     })
+    setEditingDeposit(deposit)
+  }
+
+  const handleSaveEditDeposit = async () => {
+    if (!editingDeposit) return
+    setIsSaving(true)
+    try {
+      dispatch({
+        type: 'UPDATE_DEPOSIT',
+        depositId: editingDeposit.id,
+        updates: {
+          projectTitle: editForm.projectTitle,
+          clientName: editForm.clientName,
+          clientEmail: editForm.clientEmail,
+          notes: editForm.notes
+        }
+      })
+      logger.info('Deposit updated', { depositId: editingDeposit.id })
+      toast.success('Deposit Updated', {
+        description: `${editForm.projectTitle} has been updated`
+      })
+      setEditingDeposit(null)
+      announce('Deposit updated successfully', 'polite')
+    } catch (error: any) {
+      logger.error('Failed to update deposit', { error: error.message })
+      toast.error('Failed to update deposit')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const handleDeleteDeposit = (depositId: string) => {
@@ -799,10 +856,13 @@ export default function EscrowPage() {
   }
 
   const handleViewContract = (depositId: string) => {
+    const deposit = state.deposits.find(d => d.id === depositId)
+    if (!deposit) {
+      toast.error('Deposit not found')
+      return
+    }
     logger.info('View contract initiated', { depositId })
-    toast.info('Opening Contract', {
-      description: 'Contract document is being loaded'
-    })
+    setViewingContract(deposit)
   }
 
   const handleUploadContract = (depositId: string) => {
@@ -862,10 +922,63 @@ export default function EscrowPage() {
   }
 
   const handleViewTransactionHistory = (depositId: string) => {
+    const deposit = state.deposits.find(d => d.id === depositId)
+    if (!deposit) {
+      toast.error('Deposit not found')
+      return
+    }
     logger.info('View transaction history initiated', { depositId })
-    toast.info('Transaction History', {
-      description: 'Showing all transactions for this deposit'
+    setViewingTransactions(deposit)
+  }
+
+  const handleViewDepositDetails = (depositId: string) => {
+    const deposit = state.deposits.find(d => d.id === depositId)
+    if (!deposit) {
+      toast.error('Deposit not found')
+      return
+    }
+    logger.info('View deposit details', { depositId })
+    setViewingDeposit(deposit)
+  }
+
+  const handleAddMilestone = (depositId: string) => {
+    logger.info('Add milestone initiated', { depositId })
+    setNewMilestoneForm({ title: '', description: '', amount: '', dueDate: '' })
+    setAddingMilestone(depositId)
+  }
+
+  const handleSaveNewMilestone = () => {
+    if (!addingMilestone || !newMilestoneForm.title || !newMilestoneForm.amount) {
+      toast.error('Please fill in milestone title and amount')
+      return
+    }
+
+    const deposit = state.deposits.find(d => d.id === addingMilestone)
+    if (!deposit) return
+
+    const newMilestone: EscrowMilestone = {
+      id: `ms_${Date.now()}`,
+      title: newMilestoneForm.title,
+      description: newMilestoneForm.description,
+      amount: parseFloat(newMilestoneForm.amount),
+      status: 'pending',
+      dueDate: newMilestoneForm.dueDate || undefined
+    }
+
+    dispatch({
+      type: 'UPDATE_DEPOSIT',
+      depositId: addingMilestone,
+      updates: {
+        milestones: [...deposit.milestones, newMilestone]
+      }
     })
+
+    logger.info('Milestone added', { depositId: addingMilestone, milestoneId: newMilestone.id })
+    toast.success('Milestone Added', {
+      description: `${newMilestoneForm.title} has been added to the project`
+    })
+    setAddingMilestone(null)
+    announce('Milestone added successfully', 'polite')
   }
 
   const handleAddNotes = (depositId: string) => {
@@ -961,20 +1074,6 @@ export default function EscrowPage() {
     setShowDeleteMilestoneDialog(false)
     setSelectedDepositId(null)
     setSelectedMilestoneId(null)
-  }
-
-  const handleAddMilestone = (depositId: string) => {
-    logger.info('Add milestone initiated', { depositId })
-    toast.info('Add Milestone', {
-      description: 'Create a new milestone for this deposit'
-    })
-  }
-
-  const handleViewDepositDetails = (depositId: string) => {
-    logger.info('View deposit details initiated', { depositId })
-    toast.info('Viewing Details', {
-      description: 'Loading detailed deposit information'
-    })
   }
 
   // A+++ LOADING STATE
@@ -1991,6 +2090,339 @@ export default function EscrowPage() {
               className="bg-orange-600 hover:bg-orange-700"
             >
               Submit Dispute
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Deposit Details Dialog */}
+      <Dialog open={!!viewingDeposit} onOpenChange={() => setViewingDeposit(null)}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-blue-500" />
+              Escrow Deposit Details
+            </DialogTitle>
+          </DialogHeader>
+          {viewingDeposit && (
+            <div className="space-y-6 py-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">{viewingDeposit.projectTitle}</h3>
+                  <p className="text-sm text-gray-500">{viewingDeposit.clientName}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold">${viewingDeposit.amount.toLocaleString()}</p>
+                  <Badge variant={
+                    viewingDeposit.status === 'completed' ? 'default' :
+                    viewingDeposit.status === 'active' ? 'secondary' :
+                    viewingDeposit.status === 'disputed' ? 'destructive' : 'outline'
+                  }>
+                    {viewingDeposit.status.toUpperCase()}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <p className="text-xs text-gray-500">Client Email</p>
+                  <p className="text-sm font-medium">{viewingDeposit.clientEmail}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Payment Method</p>
+                  <p className="text-sm font-medium">{viewingDeposit.paymentMethod}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Created</p>
+                  <p className="text-sm font-medium">{new Date(viewingDeposit.createdAt).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Progress</p>
+                  <p className="text-sm font-medium">{viewingDeposit.progressPercentage}%</p>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-sm mb-2">
+                  <span>Overall Progress</span>
+                  <span>{viewingDeposit.progressPercentage}%</span>
+                </div>
+                <Progress value={viewingDeposit.progressPercentage} className="h-2" />
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold mb-2">Milestones ({viewingDeposit.milestones.length})</p>
+                <div className="space-y-2">
+                  {viewingDeposit.milestones.map((ms) => (
+                    <div key={ms.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <div className="flex items-center gap-2">
+                        {ms.status === 'completed' ? (
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Clock className="h-4 w-4 text-yellow-500" />
+                        )}
+                        <span className="text-sm">{ms.title}</span>
+                      </div>
+                      <span className="text-sm font-medium">${ms.amount.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {viewingDeposit.notes && (
+                <div>
+                  <p className="text-sm font-semibold mb-1">Notes</p>
+                  <p className="text-sm text-gray-600">{viewingDeposit.notes}</p>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewingDeposit(null)}>
+              Close
+            </Button>
+            <Button onClick={() => {
+              if (viewingDeposit) {
+                setViewingDeposit(null)
+                handleEditDeposit(viewingDeposit.id)
+              }
+            }}>
+              Edit Deposit
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Deposit Dialog */}
+      <Dialog open={!!editingDeposit} onOpenChange={() => setEditingDeposit(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Edit Deposit
+            </DialogTitle>
+            <DialogDescription>
+              Update the deposit details below
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="edit-project">Project Title</Label>
+              <Input
+                id="edit-project"
+                value={editForm.projectTitle}
+                onChange={(e) => setEditForm({ ...editForm, projectTitle: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-client">Client Name</Label>
+                <Input
+                  id="edit-client"
+                  value={editForm.clientName}
+                  onChange={(e) => setEditForm({ ...editForm, clientName: e.target.value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="edit-email">Client Email</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  value={editForm.clientEmail}
+                  onChange={(e) => setEditForm({ ...editForm, clientEmail: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="edit-notes">Notes</Label>
+              <Textarea
+                id="edit-notes"
+                value={editForm.notes}
+                onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingDeposit(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEditDeposit} disabled={isSaving}>
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Contract Dialog */}
+      <Dialog open={!!viewingContract} onOpenChange={() => setViewingContract(null)}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Contract Details
+            </DialogTitle>
+          </DialogHeader>
+          {viewingContract && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <p className="text-sm font-semibold mb-2">Project: {viewingContract.projectTitle}</p>
+                <p className="text-sm text-gray-600">Client: {viewingContract.clientName}</p>
+                <p className="text-sm text-gray-600">Amount: ${viewingContract.amount.toLocaleString()}</p>
+              </div>
+              {viewingContract.contractUrl ? (
+                <div className="flex items-center gap-2 p-4 border rounded-lg">
+                  <FileText className="h-8 w-8 text-blue-500" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Contract Document</p>
+                    <p className="text-xs text-gray-500">{viewingContract.contractUrl}</p>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-1" />
+                    Download
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <FileText className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p>No contract uploaded yet</p>
+                  <Button variant="outline" size="sm" className="mt-2" onClick={() => {
+                    setViewingContract(null)
+                    handleUploadContract(viewingContract.id)
+                  }}>
+                    Upload Contract
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewingContract(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Transaction History Dialog */}
+      <Dialog open={!!viewingTransactions} onOpenChange={() => setViewingTransactions(null)}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Transaction History
+            </DialogTitle>
+          </DialogHeader>
+          {viewingTransactions && (
+            <div className="space-y-4 py-4">
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm font-semibold">{viewingTransactions.projectTitle}</p>
+                <p className="text-xs text-gray-500">Total: ${viewingTransactions.amount.toLocaleString()}</p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    <div>
+                      <p className="text-sm font-medium">Deposit Created</p>
+                      <p className="text-xs text-gray-500">{new Date(viewingTransactions.createdAt).toLocaleString()}</p>
+                    </div>
+                  </div>
+                  <span className="text-sm font-medium text-green-600">+${viewingTransactions.amount.toLocaleString()}</span>
+                </div>
+                {viewingTransactions.milestones.filter(ms => ms.status === 'completed').map((ms) => (
+                  <div key={ms.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-blue-500" />
+                      <div>
+                        <p className="text-sm font-medium">{ms.title} Completed</p>
+                        <p className="text-xs text-gray-500">{ms.completedAt ? new Date(ms.completedAt).toLocaleString() : 'N/A'}</p>
+                      </div>
+                    </div>
+                    <span className="text-sm font-medium">${ms.amount.toLocaleString()}</span>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
+                  <div>
+                    <p className="text-sm font-medium">Platform Fee</p>
+                  </div>
+                  <span className="text-sm font-medium text-red-600">-${viewingTransactions.fees.platform.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setViewingTransactions(null)}>
+              Close
+            </Button>
+            <Button variant="outline">
+              <Download className="h-4 w-4 mr-1" />
+              Export
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Milestone Dialog */}
+      <Dialog open={!!addingMilestone} onOpenChange={() => setAddingMilestone(null)}>
+        <DialogContent className="sm:max-w-[450px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Add New Milestone
+            </DialogTitle>
+            <DialogDescription>
+              Add a new milestone to track project progress
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="ms-title">Milestone Title</Label>
+              <Input
+                id="ms-title"
+                placeholder="e.g., Design Phase"
+                value={newMilestoneForm.title}
+                onChange={(e) => setNewMilestoneForm({ ...newMilestoneForm, title: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="ms-desc">Description</Label>
+              <Textarea
+                id="ms-desc"
+                placeholder="Describe what this milestone includes..."
+                value={newMilestoneForm.description}
+                onChange={(e) => setNewMilestoneForm({ ...newMilestoneForm, description: e.target.value })}
+                rows={2}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="ms-amount">Amount ($)</Label>
+                <Input
+                  id="ms-amount"
+                  type="number"
+                  placeholder="0.00"
+                  value={newMilestoneForm.amount}
+                  onChange={(e) => setNewMilestoneForm({ ...newMilestoneForm, amount: e.target.value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="ms-due">Due Date</Label>
+                <Input
+                  id="ms-due"
+                  type="date"
+                  value={newMilestoneForm.dueDate}
+                  onChange={(e) => setNewMilestoneForm({ ...newMilestoneForm, dueDate: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddingMilestone(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveNewMilestone}>
+              Add Milestone
             </Button>
           </DialogFooter>
         </DialogContent>
