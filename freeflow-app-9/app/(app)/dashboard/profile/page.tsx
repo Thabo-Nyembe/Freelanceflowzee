@@ -215,22 +215,45 @@ export default function ProfilePage() {
     setShowAddSkillDialog(true)
   }
 
-  const confirmAddSkill = () => {
-    if (newSkillName && newSkillName.trim()) {
-      logger.info('Skill added', {
+  const confirmAddSkill = async () => {
+    if (!newSkillName || !newSkillName.trim()) {
+      toast.error('Please enter a skill name')
+      return
+    }
+
+    if (!userId) {
+      toast.error('Please log in to add skills')
+      return
+    }
+
+    try {
+      logger.info('Adding skill to database', {
         skill: newSkillName.trim(),
-        action: 'updateSkillsList'
+        userId
       })
 
-      // Note: Using local state - in production, this would POST to /api/profile/skills
+      const { addSkill } = await import('@/lib/user-settings-queries')
+      const { error } = await addSkill(userId, newSkillName.trim())
+
+      if (error) {
+        throw new Error(error.message || 'Failed to add skill')
+      }
+
+      logger.info('Skill added successfully', {
+        skill: newSkillName.trim()
+      })
+
       toast.success('Skill added', {
         description: `${newSkillName.trim()} - Successfully added to your profile`
       })
 
       setShowAddSkillDialog(false)
       setNewSkillName('')
-    } else {
-      toast.error('Please enter a skill name')
+    } catch (err: any) {
+      logger.error('Failed to add skill', { error: err })
+      toast.error('Failed to add skill', {
+        description: err.message || 'Please try again'
+      })
     }
   }
 
@@ -242,19 +265,41 @@ export default function ProfilePage() {
     setRemoveSkill(skill)
   }
 
-  const handleConfirmRemoveSkill = () => {
+  const handleConfirmRemoveSkill = async () => {
     if (!removeSkill) return
 
-    logger.info('Skill removed', {
-      skill: removeSkill,
-      action: 'updateSkillsList'
-    })
+    if (!userId) {
+      toast.error('Please log in to remove skills')
+      return
+    }
 
-    // Note: Using local state - in production, this would DELETE to /api/profile/skills/:id
-    toast.success('Skill removed', {
-      description: `${removeSkill} - Successfully removed from your profile`
-    })
-    setRemoveSkill(null)
+    try {
+      logger.info('Removing skill from database', {
+        skill: removeSkill,
+        userId
+      })
+
+      const { removeSkill: removeSkillFromDB } = await import('@/lib/user-settings-queries')
+      const { error } = await removeSkillFromDB(userId, removeSkill)
+
+      if (error) {
+        throw new Error(error.message || 'Failed to remove skill')
+      }
+
+      logger.info('Skill removed successfully', {
+        skill: removeSkill
+      })
+
+      toast.success('Skill removed', {
+        description: `${removeSkill} - Successfully removed from your profile`
+      })
+      setRemoveSkill(null)
+    } catch (err: any) {
+      logger.error('Failed to remove skill', { error: err })
+      toast.error('Failed to remove skill', {
+        description: err.message || 'Please try again'
+      })
+    }
   }
 
   const handleAddSocial = () => {
