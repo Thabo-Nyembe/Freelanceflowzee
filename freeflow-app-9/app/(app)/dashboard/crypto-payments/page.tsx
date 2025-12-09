@@ -585,15 +585,40 @@ export default function CryptoPaymentsPage() {
       const network = paymentCurrency === 'BTC' ? 'Bitcoin' : paymentCurrency === 'SOL' ? 'Solana' : 'Ethereum'
       const requiredConfirmations = paymentCurrency === 'BTC' ? 6 : 12
 
+      let transactionId = `TX-${Date.now()}`
+      const toAddress = `0x${Math.random().toString(36).substr(2, 40)}`
+
+      // Create transaction in database
+      if (userId) {
+        const { createCryptoTransaction } = await import('@/lib/crypto-payment-queries')
+        const createdTx = await createCryptoTransaction({
+          type: 'payment',
+          amount: cryptoAmount,
+          currency: paymentCurrency,
+          usd_amount: paymentAmount,
+          fee,
+          status: 'pending',
+          to_address: toAddress,
+          network,
+          description: paymentDescription,
+          customer_email: customerEmail || undefined,
+          user_id: userId
+        })
+        if (createdTx?.id) {
+          transactionId = createdTx.id
+        }
+        logger.info('Transaction created in database', { transactionId })
+      }
+
       const newTransaction: CryptoTransaction = {
-        id: `TX-${Date.now()}`,
+        id: transactionId,
         type: 'payment',
         amount: cryptoAmount,
         currency: paymentCurrency,
         usdAmount: paymentAmount,
         fee,
         status: 'pending',
-        toAddress: `0x${Math.random().toString(36).substr(2, 40)}`,
+        toAddress,
         confirmations: 0,
         requiredConfirmations,
         network,
