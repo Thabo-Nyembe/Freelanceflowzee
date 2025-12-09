@@ -118,9 +118,15 @@ export default function TeamsPage() {
       logger.info("Fetching teams from Supabase", { userId });
 
       const { getTeams } = await import("@/lib/collaboration-queries");
-      const { data: teamsData, error } = await getTeams(userId, {
-        status: "active",
-      });
+      const { getTeamMemberStats } = await import("@/lib/collaboration-analytics-queries");
+
+      const [teamsResult, memberStatsResult] = await Promise.all([
+        getTeams(userId, { status: "active" }),
+        getTeamMemberStats(userId, '30days')
+      ]);
+
+      const { data: teamsData, error } = teamsResult;
+      const { data: memberStats } = memberStatsResult;
 
       if (error) {
         throw new Error(error.message || "Failed to load teams");
@@ -146,11 +152,21 @@ export default function TeamsPage() {
           0
         );
 
+        // Calculate average performance from member stats
+        let avgPerformance = 0;
+        if (memberStats && memberStats.length > 0) {
+          const totalPerformance = memberStats.reduce(
+            (sum: number, m: any) => sum + (m.performance_score || 0),
+            0
+          );
+          avgPerformance = Math.round(totalPerformance / memberStats.length);
+        }
+
         setStats({
           totalTeams: teamsData.length,
           totalMembers: totalMembers,
           activeMembers: teamsData.filter((t) => t.status === "active").length,
-          avgPerformance: 85, // TODO: Calculate from real performance data
+          avgPerformance: avgPerformance || 0,
         });
 
         logger.info("Teams loaded successfully", { count: teamsData.length });
