@@ -36,6 +36,17 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
+// DATABASE QUERIES
+import {
+  getImportHistory,
+  createImport,
+  retryImport,
+  deleteImport,
+  getImportSources,
+  connectImportSource,
+  ProjectImport
+} from '@/lib/projects-hub-queries'
+
 // Types
 interface ImportItem {
   id: number
@@ -83,125 +94,78 @@ export default function ProjectImportPage() {
     allowedTypes: ['all']
   })
 
-  // A+++ LOAD IMPORT PAGE DATA
+  // DATABASE STATE
+  const [importHistory, setImportHistory] = useState<ImportItem[]>([])
+  const [importSources, setImportSources] = useState<ImportSource[]>([])
+  const [importStatus, setImportStatus] = useState<'idle' | 'importing' | 'success' | 'error'>('idle')
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
+  const [importProgress, setImportProgress] = useState(0)
+
+  // DEFAULT DATA (fallback when no database records)
+  const defaultImportSources: ImportSource[] = [
+    { id: 'figma', name: 'Figma', icon: '🎨', description: 'Import designs and prototypes from Figma', connected: false },
+    { id: 'google-drive', name: 'Google Drive', icon: '📁', description: 'Import files from Google Drive', connected: false },
+    { id: 'dropbox', name: 'Dropbox', icon: '📦', description: 'Import files from Dropbox', connected: false },
+    { id: 'onedrive', name: 'OneDrive', icon: '☁️', description: 'Import files from Microsoft OneDrive', connected: false },
+    { id: 'github', name: 'GitHub', icon: '🐙', description: 'Import code repositories from GitHub', connected: false },
+    { id: 'trello', name: 'Trello', icon: '📋', description: 'Import boards and cards from Trello', connected: false }
+  ]
+
+  // A+++ LOAD IMPORT PAGE DATA FROM DATABASE
   useEffect(() => {
     const loadImportData = async () => {
+      if (userLoading) return
+
       try {
         setIsLoading(true)
         setError(null)
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to load import page'))
-            } else {
-              resolve(null)
-            }
-          }, 1000)
-        })
+
+        // Load import history from database
+        if (userId) {
+          const historyResult = await getImportHistory(userId, 20)
+          if (historyResult.data && historyResult.data.length > 0) {
+            const dbHistory: ImportItem[] = historyResult.data.map((item: ProjectImport) => ({
+              id: parseInt(item.id) || Date.now(),
+              name: item.name,
+              source: item.source,
+              date: item.created_at ? new Date(item.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+              status: item.status as 'success' | 'failed' | 'processing',
+              filesCount: item.files_count || 0,
+              size: item.file_size || '0 MB',
+              type: item.import_type || 'files'
+            }))
+            setImportHistory(dbHistory)
+          }
+
+          // Load connected sources from database
+          const sourcesResult = await getImportSources(userId)
+          if (sourcesResult.data && sourcesResult.data.length > 0) {
+            const connectedIds = sourcesResult.data.map((s: any) => s.source_type)
+            const mergedSources = defaultImportSources.map(source => ({
+              ...source,
+              connected: connectedIds.includes(source.id)
+            }))
+            setImportSources(mergedSources)
+          } else {
+            setImportSources(defaultImportSources)
+          }
+        } else {
+          setImportSources(defaultImportSources)
+        }
+
         setIsLoading(false)
         announce('Import page loaded successfully', 'polite')
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load import page')
+        setImportSources(defaultImportSources)
         setIsLoading(false)
         announce('Error loading import page', 'assertive')
       }
     }
     loadImportData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-  const [importStatus, setImportStatus] = useState<any>('idle') // idle, importing, success, error
-  const [selectedFiles, setSelectedFiles] = useState<any>([])
-  const [importProgress, setImportProgress] = useState<any>(0)
+  }, [userId, userLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Mock import history data
-  const importHistory = [
-    {
-      id: 1,
-      name: 'Brand Identity Project',
-      source: 'Figma',
-      date: '2024-01-15',
-      status: 'success',
-      filesCount: 24,
-      size: '45.2 MB',
-      type: 'design'
-    },
-    {
-      id: 2,
-      name: 'Website Assets',
-      source: 'Google Drive',
-      date: '2024-01-12',
-      status: 'success',
-      filesCount: 156,
-      size: '128.7 MB',
-      type: 'web'
-    },
-    {
-      id: 3,
-      name: 'Client Feedback',
-      source: 'Dropbox',
-      date: '2024-01-10',
-      status: 'failed',
-      filesCount: 8,
-      size: '12.3 MB',
-      type: 'documents'
-    },
-    {
-      id: 4,
-      name: 'Video Assets',
-      source: 'OneDrive',
-      date: '2024-01-08',
-      status: 'processing',
-      filesCount: 12,
-      size: '2.1 GB',
-      type: 'video'
-    }
-  ]
-
-  const importSources = [
-    {
-      id: 'figma',
-      name: 'Figma',
-      icon: '🎨',
-      description: 'Import designs and prototypes from Figma',
-      connected: true
-    },
-    {
-      id: 'google-drive',
-      name: 'Google Drive',
-      icon: '📁',
-      description: 'Import files from Google Drive',
-      connected: true
-    },
-    {
-      id: 'dropbox',
-      name: 'Dropbox',
-      icon: '📦',
-      description: 'Import files from Dropbox',
-      connected: false
-    },
-    {
-      id: 'onedrive',
-      name: 'OneDrive',
-      icon: '☁️',
-      description: 'Import files from Microsoft OneDrive',
-      connected: true
-    },
-    {
-      id: 'github',
-      name: 'GitHub',
-      icon: '🐙',
-      description: 'Import code repositories from GitHub',
-      connected: false
-    },
-    {
-      id: 'trello',
-      name: 'Trello',
-      icon: '📋',
-      description: 'Import boards and cards from Trello',
-      connected: false
-    }
-  ]
-
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'success': return 'bg-green-100 text-green-800'
       case 'failed': return 'bg-red-100 text-red-800'
@@ -210,7 +174,7 @@ export default function ProjectImportPage() {
     }
   }
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'success': return <CheckCircle className="h-4 w-4" />
       case 'failed': return <XCircle className="h-4 w-4" />
@@ -219,26 +183,79 @@ export default function ProjectImportPage() {
     }
   }
 
-  const handleFileUpload = (event) => {
-    const files = Array.from(event.target.files)
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || [])
     setSelectedFiles(files)
   }
 
-  const simulateImport = () => {
+  const simulateImport = useCallback(async () => {
+    if (!userId) {
+      toast.error('Please sign in to import files')
+      return
+    }
+    if (selectedFiles.length === 0) {
+      toast.error('Please select files to import')
+      return
+    }
+
     setImportStatus('importing')
     setImportProgress(0)
 
-    const interval = setInterval(() => {
-      setImportProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          setImportStatus('success')
-          return 100
-        }
-        return prev + 10
+    try {
+      // Calculate total size
+      const totalSize = selectedFiles.reduce((acc: number, file: File) => acc + file.size, 0)
+      const sizeStr = totalSize > 1024 * 1024 * 1024
+        ? `${(totalSize / (1024 * 1024 * 1024)).toFixed(1)} GB`
+        : totalSize > 1024 * 1024
+          ? `${(totalSize / (1024 * 1024)).toFixed(1)} MB`
+          : `${(totalSize / 1024).toFixed(1)} KB`
+
+      // Create import record in database
+      const result = await createImport(userId, {
+        name: selectedFiles.length === 1 ? selectedFiles[0].name : `${selectedFiles.length} Files Import`,
+        source: 'Local Upload',
+        status: 'processing',
+        files_count: selectedFiles.length,
+        file_size: sizeStr,
+        import_type: 'files'
       })
-    }, 500)
-  }
+
+      const importId = result.data?.id
+
+      // Simulate progress
+      const interval = setInterval(async () => {
+        setImportProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(interval)
+            setImportStatus('success')
+
+            // Add to local history
+            const newItem: ImportItem = {
+              id: importId ? parseInt(importId) : Date.now(),
+              name: selectedFiles.length === 1 ? selectedFiles[0].name : `${selectedFiles.length} Files Import`,
+              source: 'Local Upload',
+              date: new Date().toISOString().split('T')[0],
+              status: 'success',
+              filesCount: selectedFiles.length,
+              size: sizeStr,
+              type: 'files'
+            }
+            setImportHistory(prev => [newItem, ...prev])
+            setSelectedFiles([])
+
+            toast.success('Files imported successfully!', {
+              description: `${selectedFiles.length} file(s) imported`
+            })
+            return 100
+          }
+          return prev + 10
+        })
+      }, 500)
+    } catch (err) {
+      setImportStatus('error')
+      toast.error('Failed to import files')
+    }
+  }, [userId, selectedFiles])
 
   const handleImportSettings = useCallback(() => {
     announce('Opening import settings', 'polite')
@@ -301,23 +318,29 @@ export default function ProjectImportPage() {
   }, [announce])
 
   const handleRetryImport = useCallback(async (importItem: ImportItem) => {
+    if (!userId) {
+      toast.error('Please sign in to retry imports')
+      return
+    }
+
     setIsProcessing(true)
     announce(`Retrying import: ${importItem.name}`, 'polite')
 
     try {
-      // Try to use the real retry function
-      try {
-        const { retryImport } = await import('@/lib/projects-hub-queries')
-        if (retryImport && userId) {
-          await retryImport(userId, importItem.id.toString())
-        }
-      } catch {
-        // Function may not exist yet - continue with local handling
+      // Call database retry function
+      const result = await retryImport(userId, importItem.id.toString())
+      if (result.error) {
+        throw result.error
       }
 
       // Update local state to show processing
       setImportStatus('importing')
       setImportProgress(0)
+
+      // Update the item status in local state
+      setImportHistory(prev => prev.map(item =>
+        item.id === importItem.id ? { ...item, status: 'processing' as const } : item
+      ))
 
       // Simulate progress for visual feedback
       let progress = 0
@@ -328,6 +351,10 @@ export default function ProjectImportPage() {
           clearInterval(progressInterval)
           setImportStatus('success')
           setIsProcessing(false)
+          // Update status to success
+          setImportHistory(prev => prev.map(item =>
+            item.id === importItem.id ? { ...item, status: 'success' as const } : item
+          ))
         }
       }, 500)
 
@@ -356,28 +383,21 @@ export default function ProjectImportPage() {
 
   const handleConfirmDelete = useCallback(async () => {
     if (!selectedImport) return
+    if (!userId) {
+      toast.error('Please sign in to delete imports')
+      return
+    }
 
     setIsProcessing(true)
     try {
-      // Try to delete from database
-      if (userId) {
-        try {
-          const { deleteImport } = await import('@/lib/projects-hub-queries')
-          if (deleteImport) {
-            await deleteImport(userId, selectedImport.id.toString())
-          }
-        } catch {
-          // Function may not exist - continue with local handling
-        }
+      // Delete from database
+      const result = await deleteImport(userId, selectedImport.id.toString())
+      if (result.error) {
+        throw result.error
       }
 
-      // Remove from local storage history
-      const savedHistory = localStorage.getItem('importHistory')
-      if (savedHistory) {
-        const history = JSON.parse(savedHistory)
-        const updatedHistory = history.filter((item: ImportItem) => item.id !== selectedImport.id)
-        localStorage.setItem('importHistory', JSON.stringify(updatedHistory))
-      }
+      // Remove from local state
+      setImportHistory(prev => prev.filter(item => item.id !== selectedImport.id))
 
       toast.success('Import deleted successfully!', {
         description: `${selectedImport.name} has been removed`
@@ -401,17 +421,34 @@ export default function ProjectImportPage() {
 
   const handleConfirmConnect = useCallback(async () => {
     if (!selectedSource) return
+    if (!userId) {
+      toast.error('Please sign in to connect sources')
+      return
+    }
 
     setIsProcessing(true)
     try {
-      // Store connection intent for OAuth callback
-      localStorage.setItem('pendingOAuthConnect', JSON.stringify({
-        sourceId: selectedSource.id,
-        sourceName: selectedSource.name,
-        timestamp: Date.now()
-      }))
+      // Save connection to database
+      const result = await connectImportSource(userId, {
+        source_type: selectedSource.id,
+        source_name: selectedSource.name,
+        is_connected: true,
+        // In production, OAuth tokens would be stored here
+        access_token: null,
+        refresh_token: null,
+        expires_at: null
+      })
 
-      // Redirect to OAuth flow based on source
+      if (result.error) {
+        throw result.error
+      }
+
+      // Update local state
+      setImportSources(prev => prev.map(source =>
+        source.id === selectedSource.id ? { ...source, connected: true } : source
+      ))
+
+      // Redirect to OAuth flow based on source (in production)
       const oauthUrls: Record<string, string> = {
         'figma': 'https://www.figma.com/oauth',
         'google-drive': 'https://accounts.google.com/o/oauth2/auth',
@@ -423,18 +460,10 @@ export default function ProjectImportPage() {
 
       const oauthUrl = oauthUrls[selectedSource.id]
       if (oauthUrl && window.location.hostname !== 'localhost') {
-        // In production, redirect to actual OAuth
-        // window.location.href = `/api/oauth/${selectedSource.id}/connect`
         toast.info('OAuth connection', {
           description: `Redirecting to ${selectedSource.name} authorization...`
         })
-      }
-
-      // For demo, mark as connected locally
-      const connectedSources = JSON.parse(localStorage.getItem('connectedSources') || '[]')
-      if (!connectedSources.includes(selectedSource.id)) {
-        connectedSources.push(selectedSource.id)
-        localStorage.setItem('connectedSources', JSON.stringify(connectedSources))
+        // In production: window.location.href = `/api/oauth/${selectedSource.id}/connect`
       }
 
       toast.success(`Connected to ${selectedSource.name}!`, {
@@ -449,7 +478,7 @@ export default function ProjectImportPage() {
     } finally {
       setIsProcessing(false)
     }
-  }, [selectedSource, announce])
+  }, [selectedSource, announce, userId])
 
   // A+++ LOADING STATE
   if (isLoading) {
@@ -613,49 +642,57 @@ export default function ProjectImportPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {importHistory.map((item) => (
-              <Card key={item.id} className="kazi-card">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="p-2 bg-blue-50 rounded-lg">
-                        <FolderOpen className="h-6 w-6 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold">{item.name}</h3>
-                          <Badge className={getStatusColor(item.status)}>
-                            {getStatusIcon(item.status)}
-                            <span className="ml-1 capitalize">{item.status}</span>
-                          </Badge>
+            {importHistory.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                <Database className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <h3 className="font-medium text-lg mb-2">No Import History</h3>
+                <p className="text-sm">Upload files or connect a cloud source to get started</p>
+              </div>
+            ) : (
+              importHistory.map((item) => (
+                <Card key={item.id} className="kazi-card">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 bg-blue-50 rounded-lg">
+                          <FolderOpen className="h-6 w-6 text-blue-600" />
                         </div>
-                        <div className="text-sm text-gray-600 space-y-1">
-                          <p>Source: {item.source}</p>
-                          <p>Date: {item.date}</p>
-                          <p>{item.filesCount} files • {item.size}</p>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold">{item.name}</h3>
+                            <Badge className={getStatusColor(item.status)}>
+                              {getStatusIcon(item.status)}
+                              <span className="ml-1 capitalize">{item.status}</span>
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-gray-600 space-y-1">
+                            <p>Source: {item.source}</p>
+                            <p>Date: {item.date}</p>
+                            <p>{item.filesCount} files - {item.size}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleViewDetails(item)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={handleDownloadTemplate}>
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      {item.status === 'failed' && (
-                        <Button size="sm" variant="outline" onClick={() => handleRetryImport(item)}>
-                          <RefreshCw className="h-4 w-4" />
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" onClick={() => handleViewDetails(item)}>
+                          <Eye className="h-4 w-4" />
                         </Button>
-                      )}
-                      <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => handleDeleteImport(item)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                        <Button size="sm" variant="outline" onClick={handleDownloadTemplate}>
+                          <Download className="h-4 w-4" />
+                        </Button>
+                        {item.status === 'failed' && (
+                          <Button size="sm" variant="outline" onClick={() => handleRetryImport(item)}>
+                            <RefreshCw className="h-4 w-4" />
+                          </Button>
+                        )}
+                        <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => handleDeleteImport(item)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>
