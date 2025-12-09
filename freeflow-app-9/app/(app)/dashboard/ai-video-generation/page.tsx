@@ -17,17 +17,13 @@
  */
 
 import { useState, useEffect, useReducer, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
-  Video, Sparkles, Wand2, Play, Download, Share2, Settings, Trash2,
-  CheckCircle, Clock, Zap, Star, TrendingUp, Music, Mic, Edit3,
-  FileVideo, Image as ImageIcon, Type, Palette, LayoutTemplate,
-  ArrowRight, X, Loader2, Info, ChevronDown, Eye, Search, Filter,
-  Grid3x3, List, Plus, Calendar, BarChart3, Film, Hash, Globe,
-  Users, Heart, MessageSquare, Copy, Check, AlertCircle, RefreshCw
+  Video, Sparkles, Wand2, Play, Download, Settings, Trash2,
+  CheckCircle, Clock, Star, Edit3,
+  FileVideo, LayoutTemplate, Loader2, Eye, Search, Plus, Heart, Copy, Check, AlertCircle
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Input } from '@/components/ui/input'
@@ -51,7 +47,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Checkbox } from '@/components/ui/checkbox'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
-import { GlowEffect } from '@/components/ui/glow-effect'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
@@ -66,20 +61,10 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   getGeneratedVideos,
   getVideoTemplates,
-  createGeneratedVideo,
-  updateGeneratedVideo,
-  deleteGeneratedVideo,
-  updateVideoProgress,
-  getUserVideoStats,
-  getGenerationSettings,
   getOrCreateGenerationSettings,
-  type GeneratedVideo as DBVideo,
-  type VideoTemplate as DBTemplate,
   type VideoStyle,
   type VideoFormat,
-  type VideoQuality,
-  type AIVideoModel,
-  type GenerationStatus as DBGenerationStatus
+  type VideoQuality
 } from '@/lib/ai-video-queries'
 
 const logger = createFeatureLogger('AI-Video-Generation')

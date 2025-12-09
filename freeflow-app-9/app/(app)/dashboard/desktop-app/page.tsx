@@ -1,23 +1,19 @@
 'use client'
 
-import React, { useState, useRef, useCallback, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 // ErrorBoundary removed for build compatibility
 import {
-  Monitor, Laptop, Download, Upload, Settings, Maximize2, Minimize2,
-  Square, X, Minus, Circle, Chrome, Firefox, Safari, Edge,
-  Monitor as Windows, Apple, Terminal as Linux, Code, Layout, Palette, Layers,
-  Eye, ZoomIn, ZoomOut, RotateCcw, Share2, Save, FileText,
-  Folder, Search, Menu, MoreVertical, Grid, List, Calendar,
-  Mail, Calculator, Camera, Music, Video, Globe, Terminal,
-  Package, Cpu, HardDrive, Wifi, Battery, Volume2, Brightness
+  Monitor, Laptop, Download,
+  Square, X, Minus,
+  Monitor as Windows, Terminal as Linux, Code, Layout, Layers, ZoomIn, ZoomOut, Share2,
+  Folder,
+  Mail, Calculator, Music, Globe, Terminal,
+  Package, Cpu, Wifi, Volume2
 } from 'lucide-react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'

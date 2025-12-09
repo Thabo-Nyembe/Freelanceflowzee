@@ -25,12 +25,7 @@ import {
   getDesignTemplates,
   getDesignProjectStats,
   getAIToolStats,
-  getTemplateStats,
-  type AIDesignProject as DBProject,
-  type AITool as DBTool,
-  type DesignTemplate as DBTemplate,
-  type AIToolType,
-  type ProjectStatus
+  getTemplateStats
 } from '@/lib/ai-design-queries'
 
 // ============================================================================

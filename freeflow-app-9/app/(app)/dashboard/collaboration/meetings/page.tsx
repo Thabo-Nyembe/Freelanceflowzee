@@ -11,47 +11,23 @@ import {
   PhoneOff,
   Monitor,
   MonitorOff,
-  Users,
   UserPlus,
-  Settings,
   Calendar,
   Clock,
   Plus,
   Search,
-  Filter,
   Download,
-  Upload,
   Share2,
-  Copy,
-  Edit,
   Trash2,
-  PlayCircle,
-  PauseCircle,
-  StopCircle,
   RefreshCw,
   Volume2,
   VolumeX,
-  Maximize,
-  Minimize,
   Grid3x3,
-  User,
   MessageSquare,
   Hand,
   MoreVertical,
-  ChevronDown,
-  ChevronUp,
   Circle as Record,
-  Save,
-  FileText,
   CheckCircle,
-  XCircle,
-  AlertCircle,
-  Eye,
-  EyeOff,
-  Lock,
-  Unlock,
-  Star,
-  StarOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,7 +55,6 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -94,7 +69,6 @@ import {
   createMeeting,
   updateMeeting,
   deleteMeeting,
-  type Meeting as CollaborationMeeting,
 } from "@/lib/collaboration-queries";
 
 const logger = createFeatureLogger("CollaborationMeetings");

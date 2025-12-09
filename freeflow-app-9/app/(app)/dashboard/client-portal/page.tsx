@@ -1,18 +1,14 @@
 'use client'
 
 import React, { useState, useEffect, useReducer, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   Users,
   Building2,
   FolderKanban,
   MessageSquare,
-  FileText,
   Plus,
   Search,
-  Filter,
   Eye,
-  Edit,
   Trash2,
   MoreVertical,
   Mail,
@@ -21,14 +17,7 @@ import {
   DollarSign,
   TrendingUp,
   Award,
-  CheckCircle2,
-  AlertCircle,
-  Clock,
-  Download,
-  Upload,
-  Send,
-  X,
-  Check
+  CheckCircle2
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
@@ -40,7 +29,6 @@ const logger = createFeatureLogger('Client-Portal')
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,

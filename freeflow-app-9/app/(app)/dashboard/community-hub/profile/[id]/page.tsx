@@ -16,12 +16,10 @@ import {
   Briefcase,
   Calendar,
   Globe,
-  Mail,
   MessageSquare,
   UserPlus,
   UserCheck,
   Share2,
-  MoreHorizontal,
   Award,
   TrendingUp,
   Clock,
@@ -31,18 +29,11 @@ import {
   Linkedin,
   Twitter,
   ExternalLink,
-  Download,
   Heart,
   Eye,
-  ThumbsUp,
-  Package,
-  FileText,
-  Video,
   Image as ImageIcon,
-  Code,
   Sparkles,
-  Send,
-  X
+  Send
 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'

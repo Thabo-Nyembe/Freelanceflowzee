@@ -1,38 +1,23 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   MessageSquare,
   Plus,
   Search,
-  Filter,
   ThumbsUp,
   ThumbsDown,
   Star,
-  StarOff,
   Send,
-  Reply,
-  Edit,
   Trash2,
   Flag,
   CheckCircle,
-  XCircle,
   AlertCircle,
-  Clock,
-  User,
-  Tag,
   MoreVertical,
   Download,
-  Upload,
   RefreshCw,
-  Heart,
   Share2,
-  Bookmark,
-  Eye,
-  TrendingUp,
-  Award,
-  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,7 +41,6 @@ import {
   getFeedbackReplies,
   addFeedbackReply,
   getFeedbackStats,
-  type CollaborationFeedback,
   type FeedbackCategory,
   type FeedbackPriority,
   type FeedbackStatus,

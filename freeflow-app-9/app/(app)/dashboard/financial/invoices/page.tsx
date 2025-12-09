@@ -39,7 +39,6 @@ import {
   CheckCircle,
   FileText,
   Search,
-  Printer,
   Mail,
   Loader2,
   AlertTriangle

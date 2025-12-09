@@ -29,13 +29,11 @@
 import { useReducer, useMemo, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Mic, MicOff, PhoneCall, Users, Radio, Lock, Play, Pause,
-  Settings, Plus, Search, Filter, Star, Download, Share2,
-  Clock, TrendingUp, CheckCircle, AlertCircle, Info, Sparkles,
-  ArrowRight, FileAudio, MessageSquare, Headphones, Volume2,
-  Eye, Hash, Globe, Shield, X, Upload, BarChart3, UserPlus,
-  UserMinus, Video, VideoOff, MoreVertical, Phone, PhoneOff,
-  UserCheck, Award, Activity, Zap
+  Mic, MicOff, PhoneCall, Users, Radio, Lock, Play,
+  Settings, Plus, Search, Filter, Download, Share2,
+  Clock, TrendingUp, CheckCircle, Info, Sparkles, FileAudio, MessageSquare, Headphones, Volume2,
+  Eye, X, BarChart3,
+  UserCheck
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -69,7 +67,6 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
-import { GlowEffect } from '@/components/ui/glow-effect'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { EmptyState } from '@/components/ui/empty-states'

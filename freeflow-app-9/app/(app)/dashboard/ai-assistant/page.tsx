@@ -53,7 +53,7 @@ import {
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
-import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useKaziAI } from '@/lib/hooks/use-kazi-ai'
@@ -62,19 +62,9 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 // A+++ SUPABASE INTEGRATION
 import {
   getConversations,
-  getMessages,
-  createConversation,
-  createMessage,
-  rateMessage,
   getInsights,
-  dismissInsight,
-  implementInsight,
   getProjectAnalyses,
-  getConversationStats,
-  type AIConversation as DBConversation,
-  type AIMessage as DBMessage,
-  type AIInsight as DBInsight,
-  type ProjectAnalysis as DBProjectAnalysis
+  getConversationStats
 } from '@/lib/ai-assistant-queries'
 
 const logger = createFeatureLogger('AIAssistant')

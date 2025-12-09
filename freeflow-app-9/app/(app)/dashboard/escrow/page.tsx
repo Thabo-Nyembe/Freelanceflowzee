@@ -46,11 +46,13 @@ import {
   Mail,
   Target,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  Star,
+  TrendingUp
 } from 'lucide-react'
 
 // A+++ UTILITIES
-import { CardSkeleton, ListSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'

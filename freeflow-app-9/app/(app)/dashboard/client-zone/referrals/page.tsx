@@ -19,8 +19,6 @@ import {
   Award,
   Zap,
   Mail,
-  Phone,
-  ExternalLink,
   Crown,
   Sparkles
 } from 'lucide-react'

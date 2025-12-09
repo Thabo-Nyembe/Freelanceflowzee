@@ -8,33 +8,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import {
   TrendingUp,
-  TrendingDown,
   BarChart3,
   PieChart,
   LineChart,
   Target,
   Award,
-  Clock,
   DollarSign,
   Users,
   CheckCircle,
-  AlertCircle,
   Star,
-  Calendar,
-  Activity,
   Zap,
   Eye,
   Download,
-  Share2,
-  Filter,
   RefreshCw,
-  Settings,
   ArrowUp,
   ArrowDown,
-  Minus,
-  Plus,
-  Maximize2,
-  MoreHorizontal
+  Minus
 } from 'lucide-react'
 
 // A+++ UTILITIES

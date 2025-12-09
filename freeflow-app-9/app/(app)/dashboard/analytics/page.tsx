@@ -22,8 +22,7 @@ import {
   Search,
   Brain,
   Activity,
-  Bookmark,
-  Calendar
+  Bookmark
 } from 'lucide-react'
 
 // A+++ UTILITIES

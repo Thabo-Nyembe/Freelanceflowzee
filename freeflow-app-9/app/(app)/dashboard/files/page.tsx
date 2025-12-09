@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState, useEffect, useReducer, useMemo, useCallback, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useState, useEffect, useReducer, useMemo, useCallback } from 'react'
+import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -21,10 +21,8 @@ import {
   Upload,
   Download,
   Search,
-  Filter,
   Grid,
   List,
-  MoreHorizontal,
   Star,
   Share2,
   Eye,
@@ -38,17 +36,7 @@ import {
   Plus,
   Trash2,
   Edit,
-  Copy,
-  Move,
-  Clock,
-  Users,
-  Lock,
-  Unlock,
-  Tag,
-  Folder,
-  X,
-  Check,
-  AlertCircle
+  Move
 } from 'lucide-react'
 import { NumberFlow } from '@/components/ui/number-flow'
 
@@ -62,7 +50,7 @@ import { useInfiniteScroll } from '@/lib/hooks/use-infinite-scroll'
 
 // SECURE FILE DELIVERY INTEGRATION
 import { SecureFileUpload } from '@/components/secure-files/secure-file-upload'
-import { Shield, DollarSign } from 'lucide-react'
+import { Shield } from 'lucide-react'
 
 const logger = createFeatureLogger('Files')
 

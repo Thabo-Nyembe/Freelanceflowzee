@@ -11,9 +11,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Calendar, CreditCard, MessageSquare, Users, Eye, EyeOff,
-  ExternalLink, PlayCircle, CheckCircle, Info, Loader2,
-  Clock, DollarSign, Zap, TrendingUp, Phone, Mail,
-  Shield, AlertCircle, Globe, Video
+  ExternalLink, PlayCircle, CheckCircle, Info, Loader2, DollarSign, Zap, TrendingUp, Phone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

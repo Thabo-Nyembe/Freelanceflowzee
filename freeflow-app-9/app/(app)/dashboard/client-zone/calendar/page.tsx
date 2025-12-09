@@ -17,7 +17,6 @@ import {
   Plus,
   ArrowLeft,
   CheckCircle,
-  AlertCircle,
   Bell,
   Edit,
   X

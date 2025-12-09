@@ -8,7 +8,7 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 import { NumberFlow } from '@/components/ui/number-flow'
-import { formatCurrency, formatPercentage } from '@/lib/admin-overview-utils'
+import { formatPercentage } from '@/lib/admin-overview-utils'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'
 import {
@@ -22,8 +22,7 @@ import {
   RefreshCw,
   Download,
   Settings,
-  TrendingUp,
-  TrendingDown
+  TrendingUp
 } from 'lucide-react'
 
 const logger = createFeatureLogger('admin-overview-layout')

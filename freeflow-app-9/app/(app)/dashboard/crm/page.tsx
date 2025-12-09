@@ -17,10 +17,9 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import {
   Users, DollarSign, TrendingUp, Target, Phone, Mail, Calendar,
-  Plus, Search, Filter, MoreVertical, Building2, MapPin, Star,
-  Activity, Clock, CheckCircle, XCircle, AlertCircle, Zap,
-  ArrowRight, Eye, Edit, Trash2, Send, FileText, BarChart3,
-  PieChart, LineChart, Award, Briefcase, Download, Upload
+  Plus, Search, Filter, MoreVertical, Building2,
+  Activity, Clock, CheckCircle, XCircle, Eye, Edit, Send, BarChart3,
+  PieChart, LineChart, Award, Briefcase, Download
 } from 'lucide-react'
 
 import {
@@ -29,7 +28,6 @@ import {
   getDealStageColor,
   getPriorityColor,
   formatCurrency,
-  getLeadTemperature,
   formatDaysUntilClose,
   filterContacts,
   sortContacts,

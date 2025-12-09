@@ -1,12 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  FolderOpen,
-  Plus,
   Search,
-  Filter,
   MoreVertical,
   FileText,
   Image,
@@ -18,32 +15,23 @@ import {
   Edit,
   Copy,
   Star,
-  StarOff,
   Lock,
   Unlock,
   Eye,
-  EyeOff,
   Clock,
   User,
   Users,
-  Calendar,
-  Tag,
   Grid3x3,
   List,
   RefreshCw,
-  Settings,
   Archive,
   FolderPlus,
   File,
   Folder,
-  CheckCircle,
-  AlertCircle,
-  XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
@@ -60,13 +48,8 @@ import {
   updateFile,
   deleteFolder as deleteFolderDB,
   deleteFile as deleteFileDB,
-  moveFile,
   shareFile,
   getWorkspaceStats,
-  getFolderContents,
-  type WorkspaceFolder,
-  type WorkspaceFile,
-  type FileVisibility,
 } from "@/lib/collaboration-workspace-queries";
 import {
   Select,

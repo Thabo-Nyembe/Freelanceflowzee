@@ -112,7 +112,7 @@ import { useState, useRef, useEffect, useReducer } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AIEnhancedInput } from '@/components/ai-create/ai-enhanced-input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
@@ -129,11 +129,8 @@ import {
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import {
-  Send, Search, Filter, MessageSquare, Paperclip, Image as ImageIcon, Mic, Plus, Pin,
-  Bell, BellOff, Archive, Trash2, CheckCheck, Reply, Forward, Smile, X, Users,
-  Settings, Info, Download, Upload, Edit2, Check, MoreVertical, Phone, Video,
-  Camera, File, MapPin, Hash, AtSign, Clock, Star, Bookmark, Eye, EyeOff, AlertTriangle
+import { Search, MessageSquare, Paperclip, Image as ImageIcon, Mic, Plus, Pin,
+  Bell, BellOff, Archive, Trash2, CheckCheck, Reply, Forward, Smile, X, Users, Info, Download, Edit2, Check, Phone, Video, Hash, AlertTriangle
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
@@ -153,61 +150,8 @@ import { createFeatureLogger } from '@/lib/logger'
 const logger = createFeatureLogger('Messages')
 
 // Messages Utilities - World-class A+++ messaging system
-import {
-  type Message as MessageType,
-  type Chat as ChatType,
-  type ChatMember,
-  type MessageReaction,
-  type MessageAttachment,
-  type ChatSettings,
-  type ChatPermissions,
-  formatMessageTime,
-  formatTime,
-  formatDateTime,
-  getMessageIcon,
-  getStatusIcon,
-  sortChatsByActivity,
-  sortChatsByUnread,
-  sortChatsByPinned,
-  filterChatsByType,
-  filterPinnedChats,
-  filterArchivedChats,
-  filterUnreadChats,
-  filterMutedChats,
-  searchChats,
-  searchMessages,
-  getUnreadCount,
-  getTotalMessageCount,
-  groupMessagesByDate,
-  getMentions,
-  highlightMentions,
-  getHashtags,
-  extractUrls,
-  isImageFile,
-  isVideoFile,
-  isAudioFile,
-  isDocumentFile,
-  formatFileSize,
-  canUserSendMessage,
-  canUserSendMedia,
-  canUserAddMembers,
-  canUserRemoveMembers,
-  getOnlineMembers,
-  getTypingUsers,
-  getAdminMembers,
-  calculateActivityScore,
-  getAttachmentsByType,
-  filterMessagesByDateRange,
-  getMessageStats,
-  validateMessage,
-  generateChatExport,
-  MESSAGE_TYPES,
-  MESSAGE_STATUSES,
-  CHAT_TYPES,
-  MEMBER_ROLES,
-  MAX_MESSAGE_LENGTH,
-  MAX_ATTACHMENTS_PER_MESSAGE
-} from '@/lib/messages-utils'
+
+
 
 // ============================================================================
 // FRAMER MOTION ANIMATION COMPONENTS

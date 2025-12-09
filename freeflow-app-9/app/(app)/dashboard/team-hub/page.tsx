@@ -23,8 +23,6 @@ import {
   Star,
   Phone,
   Mail,
-  MapPin,
-  Clock,
   CheckCircle,
   AlertCircle,
   Trophy,

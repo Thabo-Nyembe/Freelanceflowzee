@@ -9,8 +9,6 @@ import {
   Users,
   BarChart,
   MessageSquare,
-  Shield,
-  Settings,
   Video,
   FileText,
   BookOpen,
@@ -19,8 +17,6 @@ import {
   Clock,
   ChevronRight,
   Play,
-  Download,
-  Star,
   TrendingUp
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'

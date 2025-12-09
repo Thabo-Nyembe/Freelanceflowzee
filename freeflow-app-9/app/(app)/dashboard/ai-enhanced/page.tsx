@@ -9,11 +9,11 @@
 import { useState, useReducer, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Brain, Palette, MessageSquare, Clock, Target, TrendingUp,
-  Zap, Star, Rocket, Users, BarChart3, CheckCircle, Sparkles,
-  Plus, X, Search, Trash2, Edit, MoreVertical, Play, Settings,
-  Download, Filter, Eye, Code, Cpu, Database, Globe, Lock,
-  Wand2, Mic, Image, FileText, Video, Music, Tool, PenTool
+  Brain, Target, TrendingUp,
+  Zap, Star, Rocket, CheckCircle, Sparkles,
+  Plus, Search, Trash2, MoreVertical, Play,
+  Download, Eye, Code, Cpu, Database, Globe,
+  Wand2, Image, FileText, Video, Music
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -60,18 +60,10 @@ import { createClient } from '@/lib/supabase/client'
 import {
   getAIEnhancedTools,
   createAIEnhancedTool,
-  updateAIEnhancedTool,
   deleteAIEnhancedTool,
   toggleFavorite as toggleFavoriteDB,
   incrementUsageCount,
-  bulkDeleteTools,
-  getToolStatistics,
-  type AIEnhancedTool as DBTool,
-  type AIToolType as DBAIToolType,
-  type AIToolCategory as DBAIToolCategory,
-  type AIToolStatus as DBAIToolStatus,
-  type PricingTier as DBPricingTier,
-  type PerformanceLevel as DBPerformanceLevel
+  bulkDeleteTools
 } from '@/lib/ai-enhanced-queries'
 
 const logger = createFeatureLogger('AI-Enhanced')

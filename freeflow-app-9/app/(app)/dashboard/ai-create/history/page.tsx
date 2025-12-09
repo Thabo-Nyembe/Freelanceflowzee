@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { Card } from '@/components/ui/card'
 import { Clock, Download, Copy, Trash2, RefreshCw, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'

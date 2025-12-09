@@ -1,25 +1,17 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { ErrorBoundary } from '@/components/ui/error-boundary-system'
 import {
-  Smartphone, Tablet, Download, Upload, QrCode, Share2, Settings,
-  Play, Pause, RotateCcw, ZoomIn, ZoomOut, Monitor, Eye,
-  Code, Palette, Layout, Layers, Cpu, Battery, Wifi, Signal,
-  User, Bell, MessageSquare, Camera, Mic, Video, Globe,
-  Zap, Star, Heart, ShoppingCart, Calendar, Music, Map,
-  Search, Filter, Menu, MoreVertical, ArrowLeft, ArrowRight,
-  Home, Plus, X, Check, Info, AlertCircle, RefreshCw, Power
+  Smartphone, Download, QrCode, Share2, Settings, RotateCcw, ZoomIn, ZoomOut, Monitor, Layout, Battery, Wifi, Signal,
+  User, Bell, MessageSquare,
+  Home
 } from 'lucide-react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { Progress } from '@/components/ui/progress'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
 

@@ -2,12 +2,11 @@
 
 import { useState, useEffect, useReducer, useMemo } from 'react'
 import { PageHeader } from '@/components/ui/page-header'
-import { Card, CardContent } from '@/components/ui/card'
+import { CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Dialog,
   DialogContent,
@@ -27,14 +26,11 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
-import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -45,7 +41,7 @@ const logger = createFeatureLogger('A-Plus-Showcase')
 // ============================================================================
 // A+++ UTILITIES
 // ============================================================================
-import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -54,40 +50,25 @@ import {
   Code,
   Copy,
   Eye,
-  Star,
   MoreVertical,
   Search,
   FileCode,
   Layout,
-  Palette,
   Zap,
-  Layers,
   Database,
   Bell,
   Menu,
   Grid,
   List,
-  Play,
   Download,
   Share2,
   Heart,
   TrendingUp,
   Award,
   Sparkles,
-  Plus,
-  ChevronRight,
-  Check,
   BookOpen,
   Settings,
-  Filter,
-  SortAsc,
-  X,
-  Code2,
-  Component,
-  Briefcase,
-  Lightbulb,
-  Target,
-  Rocket
+  Component
 } from 'lucide-react'
 
 // ============================================================================

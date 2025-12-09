@@ -23,34 +23,23 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { toast } from 'sonner'
 import {
   Users,
   UserPlus,
   Crown,
   Star,
-  Calendar,
-  Clock,
   TrendingUp,
   MessageSquare,
   Settings,
-  Shield,
   Target,
   Award,
   Activity,
-  Mail,
-  Phone,
   MapPin,
   Edit,
-  MoreHorizontal,
   Search,
   Filter,
   Download,
-  Upload,
-  CheckCircle,
-  AlertCircle,
-  XCircle,
   Trash2,
   Send,
   Loader2,

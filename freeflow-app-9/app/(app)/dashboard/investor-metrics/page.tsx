@@ -5,7 +5,6 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { toast } from 'sonner'
 import {
   TrendingUp,
@@ -13,23 +12,19 @@ import {
   Users,
   DollarSign,
   Activity,
-  BarChart3,
-  PieChart,
   Download,
   RefreshCw,
   Zap,
   Target,
   Award,
-  Clock,
-  CheckCircle2,
-  AlertCircle
+  CheckCircle2
 } from 'lucide-react'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { createFeatureLogger } from '@/lib/logger'
 
 // AI FEATURES & DATABASE
-import { getPlatformMetrics, getUserMetrics } from '@/lib/supabase/ai-features'
+import { getPlatformMetrics } from '@/lib/supabase/ai-features'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('InvestorMetrics')

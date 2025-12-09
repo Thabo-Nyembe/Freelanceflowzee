@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { Card } from '@/components/ui/card'
-import { FileText, Download, Eye, Star, Plus, X } from 'lucide-react'
+import { Download, Eye, Star, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'

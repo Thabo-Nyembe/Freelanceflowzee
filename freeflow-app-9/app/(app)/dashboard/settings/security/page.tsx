@@ -19,7 +19,7 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { Shield, AlertCircle, Download, Key, Eye, EyeOff, AlertTriangle } from 'lucide-react'
-import { SecuritySettings, defaultSecurity, defaultProfile } from '@/lib/settings-utils'
+import { SecuritySettings, defaultSecurity } from '@/lib/settings-utils'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { useAnnouncer } from '@/lib/accessibility'

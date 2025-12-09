@@ -12,19 +12,16 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import {
   Mail, Brain, Calendar, CreditCard, MessageSquare, Users,
-  CheckCircle, XCircle, AlertCircle, RefreshCw, Settings,
-  Eye, EyeOff, Edit, Trash2, PlayCircle, TrendingUp,
-  DollarSign, Zap, Shield, Clock, Activity, BarChart3,
-  Plus, ExternalLink
+  CheckCircle, XCircle, AlertCircle, RefreshCw, Settings, Edit, Trash2, PlayCircle,
+  DollarSign, Zap, Shield, Activity,
+  Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
@@ -37,8 +34,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import logger from '@/lib/logger';

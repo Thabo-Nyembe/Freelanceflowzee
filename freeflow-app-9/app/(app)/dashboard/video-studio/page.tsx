@@ -30,8 +30,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
-import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
@@ -46,7 +45,7 @@ const logger = createFeatureLogger('VideoStudio')
 // ============================================================================
 // A+++ UTILITIES
 // ============================================================================
-import { DashboardSkeleton, CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { formatFileSize } from '@/lib/video/config'
@@ -56,14 +55,10 @@ import {
   Square,
   RotateCcw,
   Volume2,
-  VolumeX,
-  Maximize,
-  Minimize,
   Camera,
   Video,
   Mic,
   MicOff,
-  Monitor,
   Users,
   Share2,
   Download,
@@ -85,20 +80,14 @@ import {
   Eye,
   MessageSquare,
   Star,
-  Trash2,
   Copy,
-  Save,
   Folder,
-  Filter,
   Search,
   Grid,
   List,
-  ChevronLeft,
-  ChevronRight,
   MoreHorizontal,
   Zap,
   Target,
-  Award,
   Activity,
   RefreshCw,
   Pencil,

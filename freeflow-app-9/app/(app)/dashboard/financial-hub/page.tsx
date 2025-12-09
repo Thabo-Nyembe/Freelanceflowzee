@@ -24,19 +24,15 @@ import {
   TrendingUp,
   TrendingDown,
   CreditCard,
-  Wallet,
   FileText,
   Calendar,
   ArrowUpRight,
   ArrowDownRight,
-  PieChart,
-  BarChart3,
   Target,
   Receipt,
   Building,
   Users,
   Clock,
-  AlertCircle,
   CheckCircle,
   XCircle
 } from 'lucide-react'
@@ -160,7 +156,7 @@ export default function FinancialHubPage() {
 
           // Calculate growth from trend data
           let monthlyGrowth = 0
-          let yearlyGrowth = 0
+          const yearlyGrowth = 0
 
           if (trendResult.data && trendResult.data.length >= 2) {
             const currentMonth = trendResult.data[0]

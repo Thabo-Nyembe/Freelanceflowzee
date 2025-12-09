@@ -18,9 +18,7 @@ import {
   User,
   Share2,
   Eye,
-  MoreVertical,
   FolderOpen,
-  Archive,
   Copy,
   Shield,
   Lock,
@@ -318,7 +316,7 @@ export default function FilesPage() {
       input.onchange = async (e: any) => {
         const uploadedFiles = e.target.files
 
-        for (let file of uploadedFiles) {
+        for (const file of uploadedFiles) {
           try {
             logger.info('Uploading file', {
               fileName: file.name,

@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useCallback, useEffect, useReducer, useMemo, useDeferredValue } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useReducer, useMemo, useDeferredValue } from 'react'
+import { motion } from 'framer-motion'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
-import { GlowEffect } from '@/components/ui/glow-effect'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -18,13 +17,9 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import {
-  File, FolderOpen, Upload, Download, Share2, Star, Trash2,
-  Search, Filter, MoreVertical, Eye, Edit, Move, Clock,
-  FileText, FileImage, FileVideo, FileArchive, Grid, List,
-  RefreshCw, BarChart3, Cloud, Copy, ArrowUpDown, ChevronDown,
-  Folder, Tag, Calendar, User, HardDrive, TrendingUp, Users,
-  Lock, Unlock, ExternalLink, FileCheck, Settings, Plus,
-  X, Check, AlertCircle, Info, Zap, Sparkles, FileCode
+  File, Upload, Download, Share2, Star, Trash2,
+  Search, Eye, Clock, FileArchive, Grid, List, Cloud, Copy, HardDrive, TrendingUp,
+  Lock, FileCheck, Info, Zap, Sparkles
 } from 'lucide-react'
 import { NumberFlow } from '@/components/ui/number-flow'
 
@@ -93,7 +88,6 @@ const PulsingDot = ({ color = 'green' }: { color?: string }) => {
 import {
   // Types
   FileItem,
-  FolderStructure,
   FilesHubState,
   FilesHubAction,
 
@@ -102,32 +96,8 @@ import {
   getFileIcon,
   getFileExtension,
   getFileType,
-  sortFilesByName,
-  sortFilesByDate,
-  sortFilesBySize,
-  sortFilesByDownloads,
-  sortFilesByViews,
-  filterFilesByType,
-  filterFilesByFolder,
-  searchFiles,
-  getRecentFiles,
-  getSharedFiles,
-  getStarredFiles,
-  getTotalStorageUsed,
-  getStorageByType,
-  getMostDownloadedFiles,
-  getMostViewedFiles,
-  calculateFileAnalytics,
-  calculateStorageStats,
   formatDate,
-  formatDateTime,
-  getRelativeTime,
-  getFileTypeColor,
-  isImageFile,
-  isVideoFile,
-  isDocumentFile,
-  validateFile,
-  generateFileId
+  getFileTypeColor
 } from '@/lib/files-hub-utils'
 
 // ============================================================================

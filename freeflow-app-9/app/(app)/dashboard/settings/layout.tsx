@@ -20,7 +20,6 @@ import {
   CreditCard,
   Download,
   Save,
-  RefreshCw,
   Info
 } from 'lucide-react'
 

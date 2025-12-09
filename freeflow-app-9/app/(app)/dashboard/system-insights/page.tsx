@@ -15,24 +15,17 @@ import {
   Copy,
   Database,
   Download,
-  FileText,
   Loader2,
-  Save,
-  Send,
-  Settings,
   TrendingUp,
-  Upload,
   Zap,
   CheckCircle2,
   XCircle,
   AlertCircle,
-  Info,
   Eye,
   Trash2
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'

@@ -11,13 +11,8 @@ import {
   Brain,
   Sparkles,
   CheckCircle,
-  RefreshCw,
   Eye,
-  Settings,
-  Image,
   Palette,
-  Zap,
-  Copy,
   Share2,
   Download,
   Loader

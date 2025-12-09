@@ -16,8 +16,7 @@ import {
   List,
   ArrowLeft,
   Eye,
-  Trash2,
-  Edit
+  Trash2
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -29,13 +28,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import ClientZoneGallery from '@/components/client-zone-gallery'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { formatCurrency, getStatusColor } from '@/lib/client-zone-utils'
+import { getStatusColor } from '@/lib/client-zone-utils'
 
 const logger = createFeatureLogger('ClientZoneGallery')
 

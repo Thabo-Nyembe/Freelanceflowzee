@@ -17,9 +17,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button'
 import { ErrorBoundary } from '@/components/ui/error-boundary-system'
 import {
-  Key, Shield, Zap, Eye, EyeOff, CheckCircle, AlertTriangle,
-  Settings, Brain, Code, Camera, Mic, FileText, Globe,
-  Cpu, Database, Lock, Unlock, RefreshCw, Save, FlaskConical
+  Key, Shield, Zap, Eye, EyeOff, CheckCircle, AlertTriangle, Brain, Code, Camera, Mic, FileText, Globe,
+  Cpu, Database, RefreshCw, Save, FlaskConical
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -28,7 +27,6 @@ import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 

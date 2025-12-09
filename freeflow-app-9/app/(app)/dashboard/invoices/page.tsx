@@ -29,7 +29,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
-import { NumberFlow } from '@/components/ui/number-flow'
 import { BorderTrail } from '@/components/ui/border-trail'
 import { GlowEffect } from '@/components/ui/glow-effect'
 
@@ -56,7 +55,6 @@ import {
   Edit,
   Receipt,
   Trash2,
-  Calendar,
   DollarSign,
   Clock,
   CheckCircle,
@@ -692,7 +690,7 @@ ${invoices.map(inv =>
 
     setSortBy(by)
 
-    let sorted = [...invoices]
+    const sorted = [...invoices]
     if (by === 'date') {
       sorted.sort((a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime())
     } else if (by === 'amount') {

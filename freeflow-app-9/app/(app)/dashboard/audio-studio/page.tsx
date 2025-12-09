@@ -20,15 +20,12 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('AudioStudio')
 
-import {
-  Music, Mic, Headphones, Radio, Activity, Volume2, VolumeX,
-  Play, Pause, SkipBack, SkipForward, Square, Circle,
-  Upload, Download, Save, Share2, Settings, Sliders,
-  Plus, Trash2, Copy, Scissors, Layers, Eye, EyeOff,
-  Zap, Sparkles, Target, Award, Clock, HardDrive,
-  Users, FolderOpen, FileAudio, Library, Grid3x3,
-  ChevronDown, ChevronRight, MoreVertical, Search,
-  Filter, RefreshCw, CheckCircle, AlertCircle, Info
+import { Mic, Headphones, Activity, Volume2, VolumeX,
+  Play, Pause, Square, Circle,
+  Upload, Download, Share2,
+  Plus, Eye,
+  Zap, Sparkles, Award, Clock, HardDrive, FolderOpen, FileAudio, Library, Grid3x3, MoreVertical,
+  Filter
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -37,26 +34,19 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { Slider } from '@/components/ui/slider'
 import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
 import {
   AudioProject,
-  AudioTrack,
   AudioFile,
-  AudioRecording,
-  AudioTemplate,
   AudioStats
 } from '@/lib/audio-studio-types'
 import {
   AUDIO_FORMATS,
   QUALITY_PRESETS,
-  AUDIO_EFFECT_PRESETS,
   AUDIO_TEMPLATES,
   formatDuration,
   formatFileSize,
-  formatBitRate,
   formatSampleRate,
-  calculateStoragePercentage,
-  getTrackColor
+  calculateStoragePercentage
 } from '@/lib/audio-studio-utils'
 
 type ViewMode = 'projects' | 'recorder' | 'library' | 'templates'

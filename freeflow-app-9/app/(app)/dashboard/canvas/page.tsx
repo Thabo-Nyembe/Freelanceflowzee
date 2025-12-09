@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useReducer, useMemo } from 'react'
 import { PageHeader } from '@/components/ui/page-header'
-import { Card, CardContent } from '@/components/ui/card'
+import { CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -44,7 +44,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
-import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -52,7 +51,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 // ============================================================================
 // A+++ UTILITIES
 // ============================================================================
-import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
@@ -62,48 +61,40 @@ import {
   Palette,
   Users,
   Layers,
-  MousePointer,
   Grid,
   Share2,
   Download,
   Trash2,
   Copy,
   Eye,
-  Edit,
   Lock,
-  Unlock,
   Star,
   MoreVertical,
   Plus,
   Search,
   FileImage,
   Layout,
-  Type,
-  Circle,
-  Square,
-  Triangle,
-  Image as ImageIcon,
   Zap,
-  Settings,
-  Upload,
-  FolderPlus,
-  Archive,
-  Clock,
-  UserPlus,
-  Link,
-  FileDown,
-  X,
-  Check,
-  ChevronDown,
   Maximize2,
-  Minimize2,
-  RotateCcw,
-  RefreshCw,
   Award,
   TrendingUp
 } from 'lucide-react'
 
 const logger = createFeatureLogger('Canvas')
+
+// Simple decorative wrapper components
+const FloatingParticle = ({ children, color: _color, size: _size }: { children: React.ReactNode; color?: string; size?: string }) => (
+  <motion.div
+    animate={{ y: [0, -5, 0] }}
+    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+  >
+    {children}
+  </motion.div>
+)
+
+const PulsingDot = ({ color = "blue" }: { color?: string }) => (
+  <span className={`inline-block w-2 h-2 rounded-full bg-${color}-500 animate-pulse`} />
+)
 
 // ============================================================================
 // A++++ TYPES

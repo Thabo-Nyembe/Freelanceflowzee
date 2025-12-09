@@ -10,10 +10,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Mail, Brain, Calendar, CreditCard, MessageSquare, Users,
-  Eye, EyeOff, Copy, ExternalLink, PlayCircle, CheckCircle,
-  Info, AlertCircle, Loader2, HelpCircle, Sparkles, Shield,
-  Zap, TrendingUp, Clock, DollarSign, Globe, Phone
+  Mail, Brain,
+  Eye, EyeOff, ExternalLink, PlayCircle, CheckCircle,
+  Info, Loader2, HelpCircle, Sparkles, Shield,
+  Zap, Clock, DollarSign, Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,7 +22,6 @@ import { Input } from '@/components/ui/enhanced-input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
 

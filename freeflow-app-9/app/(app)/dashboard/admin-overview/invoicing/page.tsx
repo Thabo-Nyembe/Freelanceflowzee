@@ -13,7 +13,6 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   formatCurrency,
-  formatRelativeTime,
   getInvoiceStatusColor,
   getInvoiceStatusIcon,
   filterInvoicesByStatus,
@@ -24,7 +23,6 @@ import {
 } from '@/lib/admin-overview-utils'
 import type { AdminInvoice } from '@/lib/admin-overview-queries'
 import {
-  FileText,
   Plus,
   Edit,
   Trash2,
@@ -36,11 +34,7 @@ import {
   Eye,
   RefreshCw,
   Search,
-  Filter,
-  Calendar,
-  DollarSign,
-  AlertCircle,
-  CheckCircle
+  AlertCircle
 } from 'lucide-react'
 import {
   AlertDialog,

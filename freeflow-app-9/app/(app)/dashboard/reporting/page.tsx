@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import Link from 'next/link'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
@@ -11,11 +10,9 @@ import {
   SECTION_TEMPLATES,
   getStatusColor,
   getFormatIcon,
-  getChartTypeIcon,
-  formatScheduleText,
-  exportReport
+  getChartTypeIcon
 } from '@/lib/reporting-utils'
-import type { ExportFormat, ReportType } from '@/lib/reporting-types'
+import type { ExportFormat } from '@/lib/reporting-types'
 
 // A+++ UTILITIES
 import { CardSkeleton } from '@/components/ui/loading-skeleton'

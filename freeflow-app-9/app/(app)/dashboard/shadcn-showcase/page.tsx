@@ -10,7 +10,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -41,15 +40,8 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+
+
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 
@@ -67,24 +59,14 @@ import {
   Palette,
   Sparkles,
   Zap,
-  Heart,
-  Star,
   Calendar as CalendarIcon,
-  Clock,
-  Users,
-  Settings,
   Download,
-  Upload,
-  Search,
-  Filter,
-  Plus,
   Edit,
   Trash2,
   MoreHorizontal,
   CheckCircle,
   AlertTriangle,
-  Info,
-  X
+  Info
 } from 'lucide-react'
 
 // A+++ UTILITIES

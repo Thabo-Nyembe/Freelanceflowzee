@@ -1,51 +1,31 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Image,
   Video,
   FileText,
   Music,
-  Plus,
   Search,
-  Filter,
   Download,
   Upload,
   Share2,
   Trash2,
-  Edit,
   Copy,
   Star,
-  StarOff,
   Eye,
-  EyeOff,
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
-  Maximize,
   Grid3x3,
   List,
   MoreVertical,
   Folder,
-  Tag,
   Clock,
   User,
-  Heart,
   RefreshCw,
   Archive,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  Film,
-  Camera,
-  Mic,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
@@ -67,7 +47,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -78,15 +57,10 @@ import { useCurrentUser } from "@/hooks/use-ai-data";
 import { useAnnouncer } from "@/lib/accessibility";
 import {
   getMedia,
-  createMedia,
-  updateMedia,
   deleteMedia,
   toggleFavorite,
-  shareMedia,
-  incrementViewCount,
   incrementDownloadCount,
   getMediaStats,
-  type CollaborationMedia,
   type MediaType,
 } from "@/lib/collaboration-media-queries";
 

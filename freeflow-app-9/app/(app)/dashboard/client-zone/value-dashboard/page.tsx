@@ -19,8 +19,7 @@ import {
   Zap,
   CheckCircle,
   ArrowUpRight,
-  ArrowDownRight,
-  Clock
+  ArrowDownRight
 } from 'lucide-react'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'

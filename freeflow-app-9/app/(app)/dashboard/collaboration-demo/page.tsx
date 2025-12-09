@@ -22,7 +22,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { Input } from '@/components/ui/input'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import {
   Users,
@@ -34,10 +33,6 @@ import {
   CheckCircle2,
   Circle,
   Eraser,
-  Square,
-  CircleIcon,
-  Minus,
-  Type,
   Download,
   Trash2,
   Undo,

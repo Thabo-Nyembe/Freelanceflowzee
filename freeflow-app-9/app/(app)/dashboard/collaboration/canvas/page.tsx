@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Pencil,
   Eraser,
@@ -9,9 +9,7 @@ import {
   Circle,
   Triangle,
   Type,
-  Image,
   Download,
-  Upload,
   Save,
   Trash2,
   Undo,
@@ -20,43 +18,20 @@ import {
   ZoomOut,
   Move,
   MousePointer,
-  Palette,
   Settings,
   Users,
   UserPlus,
   Share2,
   Copy,
   Grid3x3,
-  Maximize,
-  Minimize,
-  Eye,
-  EyeOff,
-  Lock,
-  Unlock,
-  Layers,
   Plus,
-  Minus,
-  RotateCw,
-  RotateCcw,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  Bold,
-  Italic,
-  Underline,
-  RefreshCw,
   FileText,
   Sparkles,
   Star,
-  Heart,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
@@ -70,13 +45,8 @@ import {
   updateCanvasProject,
   deleteCanvasProject,
 } from "@/lib/canvas-collaboration-queries";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+
 import {
   Dialog,
   DialogContent,

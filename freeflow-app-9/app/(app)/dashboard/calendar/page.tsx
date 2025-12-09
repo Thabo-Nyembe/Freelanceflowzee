@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import { format, addMonths, subMonths } from 'date-fns'
@@ -24,9 +24,7 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
-import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import {
-  Calendar,
   Clock,
   Plus,
   Users,
@@ -35,11 +33,9 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Filter,
   Search,
   Brain,
-  AlertTriangle,
-  Trash2
+  AlertTriangle
 } from 'lucide-react'
 
 // ============================================================================

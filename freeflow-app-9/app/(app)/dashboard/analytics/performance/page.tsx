@@ -25,7 +25,7 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
-import { KAZI_ANALYTICS_DATA, formatCurrency } from '@/lib/analytics-utils'
+import { KAZI_ANALYTICS_DATA } from '@/lib/analytics-utils'
 
 const logger = createFeatureLogger('Analytics - Performance')
 

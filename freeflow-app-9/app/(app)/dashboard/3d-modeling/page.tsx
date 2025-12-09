@@ -1,22 +1,14 @@
 'use client'
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Card } from '@/components/ui/card'
+import { motion } from 'framer-motion'
 // ErrorBoundary removed for build compatibility
 import {
-  Box, Circle as Sphere, Box as Cylinder, Triangle as Cone, Triangle as Pyramid, Box as Hexagon, Box as Cube, Move3D,
-  RotateCcw, Scale, Eye, EyeOff, Grid3x3, Layers, Palette,
-  Save, Download, Upload, Share2, Settings, Play, Pause,
-  ZoomIn, ZoomOut, Move, RotateCw, Maximize, Minimize,
-  Sun, Moon, Lightbulb, Camera, Video, Image, Code,
-  Box as Mesh, Box as MaterialSymbol, Brush, Pipette, Scissors, Copy,
-  Undo, Redo, Trash2, Plus, Minus, Edit, Lock, Unlock,
-  Target, Crosshair, MousePointer, Hand, Grab, Box as Selector
+  Box, Circle as Sphere, Box as Cylinder, Triangle as Cone, Box as Cube,
+  RotateCcw, Scale, Eye, EyeOff, Grid3x3, Download, Share2, Settings, Play, Move, Lightbulb, Copy, Trash2, Plus, Lock, MousePointer
 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Slider } from '@/components/ui/slider'
-import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -26,31 +18,7 @@ import { toast } from 'sonner'
 // A+++ SUPABASE INTEGRATION
 import {
   getProjects,
-  createProject,
-  getScenes,
-  createScene,
-  getSceneObjects,
-  createSceneObject,
-  updateObjectTransform,
-  toggleObjectVisibility,
-  getMaterials,
-  createMaterial,
-  getLights,
-  createLight,
-  toggleLight,
-  getCameras,
-  createRenderJob,
-  createExportJob,
-  getProjectStats,
-  type ModelingProject,
-  type ModelingScene,
-  type SceneObject as DBSceneObject,
-  type Material as DBMaterial,
-  type Light as DBLight,
-  type Camera,
-  type ObjectType,
-  type MaterialType,
-  type LightType
+  getProjectStats
 } from '@/lib/3d-modeling-queries'
 
 const logger = createFeatureLogger('3D-Modeling')

@@ -31,12 +31,8 @@
 import { useReducer, useMemo, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Wallet, Shield, Zap, Globe, TrendingUp, CheckCircle,
-  ArrowRight, Info, Star, Lock, Plus, Search, Filter,
-  Download, Share2, Clock, Eye, X, Copy, RefreshCw,
-  DollarSign, AlertCircle, Activity, BarChart3, Settings,
-  Users, CreditCard, FileText, Link2, Calendar, ArrowUpRight,
-  ArrowDownRight, History, Repeat, QrCode, Send, Receipt
+  Wallet, CheckCircle, Info, Plus, Search, Filter, Clock, Eye, X, Copy, RefreshCw,
+  DollarSign, Activity, BarChart3, Receipt
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -67,10 +63,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Checkbox } from '@/components/ui/checkbox'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
-import { GlowEffect } from '@/components/ui/glow-effect'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { EmptyState } from '@/components/ui/empty-states'

@@ -12,28 +12,25 @@
  * - AI providers (OpenAI, Anthropic)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Mail, Calendar, CreditCard, MessageSquare, Users, Brain,
+  Mail,
   Check, ChevronRight, ChevronLeft, Loader2, AlertCircle,
-  CheckCircle, XCircle, Eye, EyeOff, Copy, ExternalLink,
-  Zap, Shield, Clock, TrendingUp, Settings, RefreshCw,
-  Info, HelpCircle, Sparkles, ArrowRight, PlayCircle
+  CheckCircle, XCircle, Eye, EyeOff, ExternalLink,
+  Zap, Shield, Clock, TrendingUp, Settings,
+  Info, Sparkles, ArrowRight, PlayCircle
 } from 'lucide-react';
 import logger from '@/lib/logger';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 
 // A+++ UTILITIES

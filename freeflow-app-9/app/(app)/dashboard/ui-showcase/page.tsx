@@ -1,8 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Plus, Heart, Star, Send, Download, Play } from 'lucide-react'
+import { Plus, Heart, Star } from 'lucide-react'
 
 // A+++ UTILITIES
 import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'

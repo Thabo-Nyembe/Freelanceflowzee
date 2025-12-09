@@ -12,8 +12,7 @@ import {
   Zap,
   CheckCircle,
   RefreshCw,
-  Calendar,
-  Users
+  Calendar
 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

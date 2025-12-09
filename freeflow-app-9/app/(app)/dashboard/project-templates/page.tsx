@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
-import { Progress } from '@/components/ui/progress'
 import {
   FileText,
   Plus,
@@ -14,26 +13,17 @@ import {
   Clock,
   DollarSign,
   Users,
-  Calendar,
   Palette,
   Code,
-  Globe,
   Smartphone,
   Video,
-  Camera,
-  PenTool,
   Layers,
   Search,
   Filter,
-  Download,
   Upload,
   Copy,
-  Edit,
-  Trash2,
   Eye,
   MoreHorizontal,
-  CheckCircle,
-  AlertCircle,
   TrendingUp,
   Target,
   Zap,

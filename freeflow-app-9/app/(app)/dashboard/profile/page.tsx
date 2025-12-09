@@ -32,7 +32,6 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { NumberFlow } from '@/components/ui/number-flow'
 import {
   User,
-  Settings,
   Edit,
   Camera,
   Phone,
@@ -42,16 +41,10 @@ import {
   Globe,
   Briefcase,
   Award,
-  BookOpen,
   Star,
-  TrendingUp,
   Users,
-  FileText,
-  Link,
   Shield,
-  Bell,
   Eye,
-  Download,
   Share2,
   Heart,
   MessageSquare
@@ -61,7 +54,7 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
-import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'

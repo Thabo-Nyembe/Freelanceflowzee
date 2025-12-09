@@ -23,7 +23,6 @@ import {
   type UserStatus
 } from '@/lib/admin-overview-utils'
 import {
-  Users,
   UserPlus,
   Edit,
   Trash2,
@@ -37,8 +36,6 @@ import {
   Phone,
   MapPin,
   TrendingUp,
-  CheckCircle,
-  AlertCircle,
   Clock,
   Eye,
   Plus

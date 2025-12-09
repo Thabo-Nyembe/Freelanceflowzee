@@ -1,37 +1,23 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Users,
   UserPlus,
   Search,
-  Filter,
   MoreVertical,
-  Mail,
   MessageSquare,
   Video,
   Star,
   StarOff,
   UserMinus,
-  Crown,
-  Shield,
-  Edit,
-  Trash2,
   Download,
   Upload,
   RefreshCw,
-  Award,
-  Target,
   TrendingUp,
-  Calendar,
-  Clock,
   CheckCircle,
-  XCircle,
-  AlertCircle,
-  Settings,
   Eye,
-  EyeOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,7 +45,6 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { useCurrentUser } from "@/hooks/use-ai-data";
 import { useAnnouncer } from "@/lib/accessibility";
 import type { Team as DBTeam, TeamType } from "@/lib/collaboration-queries";

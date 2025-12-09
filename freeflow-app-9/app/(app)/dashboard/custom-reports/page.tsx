@@ -6,40 +6,35 @@
  */
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   FileText, BarChart3, PieChart, TrendingUp, Users, Clock,
-  DollarSign, Filter, Download, Calendar, Play, Plus, Search,
-  Star, CheckCircle, AlertCircle, Info, Sparkles, ArrowRight,
+  DollarSign, Download, Calendar, Play,
+  Star, CheckCircle, Info, Sparkles, ArrowRight,
   LineChart, Table, Hash, Zap
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
-import { GlowEffect } from '@/components/ui/glow-effect'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import {
   ReportTemplate,
-  Report,
   Widget,
   DateRange,
-  ExportFormat,
-  MetricCard as MetricCardType
+  ExportFormat
 } from '@/lib/report-builder-types'
 import {
   WIDGET_TYPES,
   DATE_RANGE_PRESETS,
   EXPORT_FORMATS,
-  formatDate,
   formatNumber,
-  calculateDateRange,
   estimateExportTime
 } from '@/lib/report-builder-utils'
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
-import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'

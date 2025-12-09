@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
-import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
@@ -25,25 +25,17 @@ import {
   type Lead,
   type Campaign,
   type LeadStatus,
-  type CampaignStatus,
-  type LeadScore
+  type CampaignStatus
 } from '@/lib/admin-overview-utils'
 import {
-  Target,
-  Mail,
   Plus,
   Edit,
   Trash2,
   Send,
-  CheckCircle,
   Download,
   RefreshCw,
   Search,
-  Filter,
-  Eye,
-  Users,
   TrendingUp,
-  Calendar,
   BarChart3,
   Copy,
   FlaskConical,

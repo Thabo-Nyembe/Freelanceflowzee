@@ -35,12 +35,9 @@ import {
   Edit,
   Trash2,
   Download,
-  Filter,
   Search,
   TrendingUp,
   TrendingDown,
-  ArrowUpRight,
-  ArrowDownRight,
   Loader2
 } from 'lucide-react'
 import {

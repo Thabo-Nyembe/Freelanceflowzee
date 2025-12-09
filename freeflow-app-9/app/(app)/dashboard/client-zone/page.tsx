@@ -51,8 +51,8 @@ import {
 import ClientZoneGallery from '@/components/client-zone-gallery'
 
 // A+++ UTILITIES
-import { CardSkeleton, ListSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
-import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'
@@ -60,10 +60,6 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 // CLIENT ZONE DATABASE QUERIES
 import {
   getClientZoneDashboard,
-  getClientProjects,
-  getProjectMessages,
-  getProjectFiles,
-  getProjectInvoices,
   createRevisionRequest,
   approveDeliverable,
   sendMessage,

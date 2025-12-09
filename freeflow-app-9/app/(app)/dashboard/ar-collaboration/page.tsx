@@ -33,14 +33,9 @@
 import { useReducer, useMemo, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  Headset, Play, Users, Settings, Globe, Box, Zap, Clock,
-  Wifi, Signal, Mic, MicOff, Hand, Video, VideoOff, Share2,
-  Grid, Layers, Sparkles, Map, Compass, Activity, BarChart,
-  User, Crown, MessageSquare, Camera, Layout, Monitor, Smartphone,
-  Tablet, Plus, Search, Filter, TrendingUp, Award, Radio,
-  Eye, X, Download, Upload, Maximize, RefreshCw, Volume2,
-  Palette, Pen, Move, RotateCcw, Trash2, CheckCircle,
-  AlertCircle, Info, Star, Lock, Unlock, Copy
+  Headset, Users, Globe, Box, Clock, Mic, MicOff, Sparkles, Map, Activity, BarChart, Monitor, Smartphone,
+  Tablet, Plus, Search, Filter, Award, Radio,
+  Eye, X, Volume2, Pen, CheckCircle, Lock, UserCheck
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -74,7 +69,6 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
-import { GlowEffect } from '@/components/ui/glow-effect'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { EmptyState } from '@/components/ui/empty-states'

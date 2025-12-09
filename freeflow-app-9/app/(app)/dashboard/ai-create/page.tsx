@@ -1,11 +1,9 @@
 "use client"
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { CreativeAssetGenerator } from '@/components/ai-create/creative-asset-generator'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import {
   Wand2,
@@ -15,8 +13,7 @@ import {
   GitCompare,
   Settings,
   Palette,
-  Sparkles,
-  ArrowRight
+  Sparkles
 } from 'lucide-react'
 
 // A+++ UTILITIES

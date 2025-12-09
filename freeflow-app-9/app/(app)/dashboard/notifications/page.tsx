@@ -2,13 +2,12 @@
 
 import { useState, useReducer, useEffect } from 'react'
 import { toast } from 'sonner'
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Label } from '@/components/ui/label'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -16,33 +15,17 @@ import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import {
   Bell,
   Search,
-  Filter,
   CheckCircle,
   X,
   Check,
   Archive,
   Trash2,
-  Volume2,
-  VolumeX,
   Settings,
-  Mail,
   MessageSquare,
   DollarSign,
-  Clock,
-  User,
   FileText,
   AlertTriangle,
   Info,
-  Target,
-  Zap,
-  Calendar,
-  Star,
-  Eye,
-  EyeOff,
-  MoreHorizontal,
-  Bookmark,
-  Download,
-  Share2,
   RefreshCw
 } from 'lucide-react'
 import {

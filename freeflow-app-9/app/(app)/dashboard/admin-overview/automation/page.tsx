@@ -33,11 +33,9 @@ import {
   calculateTotalTimeSaved,
   type Workflow,
   type Integration,
-  type AutomationStatus,
-  type IntegrationStatus
+  type AutomationStatus
 } from '@/lib/admin-overview-utils'
 import {
-  Zap,
   Plus,
   Edit,
   Trash2,
@@ -49,13 +47,8 @@ import {
   Link,
   Unlink,
   Webhook,
-  Clock,
   TrendingUp,
-  CheckCircle,
-  AlertCircle,
-  Eye,
-  Download,
-  Settings
+  Eye
 } from 'lucide-react'
 
 const logger = createFeatureLogger('admin-automation')

@@ -10,7 +10,6 @@ import { Progress } from '@/components/ui/progress'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
-import { Textarea } from '@/components/ui/textarea'
 import { AIEnhancedInput } from '@/components/ai-create/ai-enhanced-input'
 import { Label } from '@/components/ui/label'
 import {
@@ -21,7 +20,6 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import {
-  FolderOpen,
   Plus,
   Search,
   DollarSign,
@@ -65,7 +63,6 @@ import { useCurrentUser, useRevenueData } from '@/hooks/use-ai-data'
 // Shared utilities
 import {
   Project,
-  mockProjects,
   calculateStats,
   filterProjects,
   getStatusColor,

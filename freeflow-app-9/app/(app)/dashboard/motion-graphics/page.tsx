@@ -8,13 +8,9 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
-  Play, Pause, Square, SkipBack, SkipForward, Film, Layers,
-  Type, Image, Video, Zap, Settings, Download, Upload,
-  Plus, Eye, Grid3x3, Clock, Award, Sparkles, Target,
-  Wand2, Palette, RotateCw, Maximize2, Move, Copy,
-  Trash2, Lock, Unlock, EyeOff, Save, Share2, Users,
-  TrendingUp, BarChart3, RefreshCw, Search, Filter,
-  ChevronDown, Info, CheckCircle, AlertCircle, Star
+  Play, Pause, SkipBack, SkipForward, Film, Layers,
+  Type, Image, Video, Zap, Download, Upload,
+  Plus, Eye, Grid3x3, Sparkles, RotateCw, Maximize2, Move, Copy, Lock, Share2, BarChart3, Filter, Star
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -23,29 +19,19 @@ import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { Slider } from '@/components/ui/slider'
 import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
 import {
-  MotionProject,
-  MotionTemplate,
-  MotionPreset,
-  Layer,
-  LayerType
+  MotionProject
 } from '@/lib/motion-graphics-types'
 import {
-  ANIMATION_TYPES,
-  EASING_FUNCTIONS,
   MOTION_TEMPLATES,
-  MOTION_PRESETS,
   formatDuration,
   formatFileSize,
   formatResolution,
-  calculateStoragePercentage,
-  getLayerIcon,
-  getAnimationIcon
+  calculateStoragePercentage
 } from '@/lib/motion-graphics-utils'
 
 // A+++ UTILITIES
-import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'

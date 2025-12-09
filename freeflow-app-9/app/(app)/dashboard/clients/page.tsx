@@ -8,11 +8,9 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import {
-  Users, UserPlus, Search, Filter, MoreHorizontal, Mail, Phone, MapPin,
-  Star, Briefcase, DollarSign, Edit2, Trash2, Eye, MessageSquare, Calendar,
-  FileText, TrendingUp, Award, Building, Globe, Clock, CheckCircle, X,
-  Download, Upload, Settings, Tag, Activity, BarChart3, PieChart, Target,
-  UserCheck, UserX, Zap, Heart, Share2, Send, Plus, AlertCircle, Info, Brain,
+  Users, UserPlus, Search, MoreHorizontal, Mail, Phone, MapPin,
+  Star, Briefcase, DollarSign, Edit2, Trash2, Eye, MessageSquare, Calendar, Award, Clock, CheckCircle, X,
+  Download, Upload, Tag, BarChart3, Target, Zap, Brain,
   AlertTriangle
 } from 'lucide-react'
 
@@ -452,7 +450,7 @@ export default function ClientsPage() {
 
   // Filtered and Sorted Clients
   const filteredAndSortedClients = useMemo(() => {
-    let filtered = state.clients.filter(client => {
+    const filtered = state.clients.filter(client => {
       const matchesSearch =
         client.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
         client.company.toLowerCase().includes(state.searchTerm.toLowerCase()) ||

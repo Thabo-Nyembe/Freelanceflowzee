@@ -17,10 +17,7 @@ import {
   Archive,
   Trash2,
   Clock,
-  CheckCircle,
-  AlertCircle,
   Upload,
-  MoreVertical,
   Pin
 } from 'lucide-react'
 

@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 
 // A+++ UTILITIES
-import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
+import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
@@ -26,8 +26,7 @@ import {
   formatTime,
   formatDuration,
   getPriorityColor,
-  calculateMetrics,
-  type Task
+  calculateMetrics
 } from '@/lib/my-day-utils'
 
 import {
@@ -48,13 +47,11 @@ import {
   Lightbulb,
   Clock,
   BarChart3,
-  LineChart,
   FolderKanban,
   CalendarDays
 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { motion } from 'framer-motion'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer as TextShimmerComponent } from '@/components/ui/text-shimmer'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'

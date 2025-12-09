@@ -1,12 +1,11 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
-import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
-import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { CardSkeleton } from '@/components/ui/loading-skeleton'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
@@ -20,7 +19,6 @@ import {
 } from '@/lib/admin-overview-utils'
 import {
   TrendingUp,
-  TrendingDown,
   AlertCircle,
   CheckCircle,
   Clock,
@@ -29,7 +27,6 @@ import {
   Target,
   Mail,
   Zap,
-  ExternalLink,
   Eye,
   BarChart3,
   FileText,

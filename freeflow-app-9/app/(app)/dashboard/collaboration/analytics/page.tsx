@@ -1,45 +1,27 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  BarChart3,
-  LineChart,
-  PieChart,
   TrendingUp,
-  TrendingDown,
   Calendar,
   Download,
-  Upload,
   RefreshCw,
-  Filter,
-  Search,
   Users,
   MessageSquare,
   Video,
   FileText,
-  Clock,
   Target,
   Award,
   Activity,
-  Eye,
-  Heart,
   Share2,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
   ArrowUp,
   ArrowDown,
   Minus,
-  Settings,
-  Plus,
   Zap,
   Star,
-  ThumbsUp,
-  Send,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -53,15 +35,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+
+
 import { useCurrentUser } from "@/hooks/use-ai-data";
 import { useAnnouncer } from "@/lib/accessibility";
 import {
@@ -71,7 +46,6 @@ import {
   exportCollaborationReport,
   type CollaborationAnalyticsData,
   type TeamMemberStats as TeamMemberStatsType,
-  type CollaborationStats as CollaborationStatsType,
 } from "@/lib/collaboration-analytics-queries";
 
 const logger = createFeatureLogger("CollaborationAnalytics");

@@ -2,12 +2,11 @@
 
 import { useState, useCallback, useReducer } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Target, Calendar, BarChart3, CheckCircle, Timer, MessageSquare, Lightbulb, Plus, Edit2, Trash2, Download, RotateCcw } from 'lucide-react'
+import { Target, Calendar, BarChart3, CheckCircle, Lightbulb, Plus, Edit2, Trash2, Download, RotateCcw } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Dialog,

@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
-import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
@@ -15,13 +15,10 @@ import {
   formatCurrency,
   formatPercentage,
   formatNumber,
-  getTrendIcon,
   type DateRange
 } from '@/lib/admin-overview-utils'
 import {
-  BarChart3,
   TrendingUp,
-  TrendingDown,
   RefreshCw,
   Download,
   FileText,
@@ -33,10 +30,7 @@ import {
   Percent,
   Eye,
   ChevronDown,
-  Filter,
-  ZoomIn,
-  Clock,
-  Send
+  Clock
 } from 'lucide-react'
 
 const logger = createFeatureLogger('admin-analytics')

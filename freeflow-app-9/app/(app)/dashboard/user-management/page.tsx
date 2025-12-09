@@ -14,7 +14,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
 // A+++ UTILITIES
@@ -28,15 +27,13 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 const logger = createFeatureLogger('UserManagement')
 
 import {
-  Users, UserPlus, Mail, MoreVertical, Search, Filter, Download,
-  Edit, Trash2, Shield, Activity, Clock, MapPin, Phone,
-  Settings, TrendingUp, CheckCircle, XCircle, AlertCircle,
-  Crown, Star, Zap, Globe, Calendar, BarChart, FileText,
-  UserCheck, UserX, UserMinus, Send, Copy, Eye, EyeOff
+  Users, UserPlus, Mail, MoreVertical, Search, Download,
+  Edit, Trash2, Shield, Activity, MapPin, TrendingUp, CheckCircle, XCircle,
+  Crown, Star,
+  UserCheck, Send, Copy, Eye
 } from 'lucide-react'
 
 import {
-  ROLE_TEMPLATES,
   getRoleBadgeColor,
   getStatusColor,
   formatLastActive,
@@ -45,7 +42,7 @@ import {
   formatBytes
 } from '@/lib/user-management-utils'
 
-import type { User, UserRole, UserStatus } from '@/lib/user-management-types'
+import type { User } from '@/lib/user-management-types'
 
 type ViewMode = 'users' | 'teams' | 'invitations' | 'activity'
 

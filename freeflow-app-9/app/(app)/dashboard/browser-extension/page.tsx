@@ -35,18 +35,12 @@ import { useReducer, useMemo, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Download, CheckCircle, Settings, Zap, Star, Users, Globe,
-  Search, Filter, Clock, Image, FileText, Video, Scissors,
-  Bookmark, Share2, Languages, FileDown, Activity, BarChart,
-  Keyboard, Bell, Cloud, Command, ExternalLink, Plus, Eye,
-  X, Copy, Trash2, RefreshCw, Upload, Camera, Monitor,
-  Chrome, Firefox, AlertCircle, Info, Sparkles, TrendingUp,
-  Award, Hash, Link2, MessageSquare, Brain, Play, Pause
+  Search, Filter, Image, FileText, Share2, FileDown, BarChart,
+  Keyboard, Cloud, Eye, Copy, Trash2, Camera, Sparkles
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -71,11 +65,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
-import { GlowEffect } from '@/components/ui/glow-effect'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { EmptyState } from '@/components/ui/empty-states'

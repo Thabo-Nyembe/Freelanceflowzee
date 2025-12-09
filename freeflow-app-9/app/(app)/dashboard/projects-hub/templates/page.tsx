@@ -30,7 +30,6 @@ import {
   Zap,
   Grid,
   List,
-  X,
   Plus,
   Check,
   Loader2

@@ -10,11 +10,9 @@ import { useState, useReducer, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Brain, TrendingUp, AlertTriangle, Lightbulb, Zap, Target,
-  BarChart3, Users, DollarSign, Shield, Star, CheckCircle,
-  ArrowUp, ArrowDown, Minus, Info, Sparkles, Activity,
-  Clock, Eye, Filter, Download, Plus, X, Settings,
-  Search, Trash2, Edit, MoreVertical, Play, Pause,
-  RefreshCw, Calendar, Tag, Database, Cpu, BarChart2
+  BarChart3, Users, CheckCircle, Sparkles, Activity, Eye, Download, Plus,
+  Search, Trash2, MoreVertical,
+  RefreshCw, Cpu
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

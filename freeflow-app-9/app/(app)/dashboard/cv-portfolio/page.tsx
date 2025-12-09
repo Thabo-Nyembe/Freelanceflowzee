@@ -25,12 +25,9 @@ import {
   Trash2,
   Upload,
   Eye,
-  EyeOff,
   Printer,
   FileText,
   Link as LinkIcon,
-  ArrowUp,
-  ArrowDown,
   Check,
   AlertCircle,
   AlertTriangle,
@@ -62,24 +59,8 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
 
 // CV PORTFOLIO UTILITIES - World-Class A+++ System
-import {
-  sortProjectsByDate,
-  sortProjectsByViews,
-  getFeaturedProjects,
-  getSkillsByCategory,
-  sortExperiencesByDate,
-  sortEducationByDate,
-  calculateTotalExperience,
-  calculateCompletenessScore,
-  exportToJSON,
-  exportToPDF,
-  generatePublicUrl,
-  type Project as ProjectType,
-  type Skill as SkillType,
-  type Experience as ExperienceType,
-  type Education as EducationType,
-  type Certification as CertificationType
-} from '@/lib/cv-portfolio-utils'
+
+
 
 /**
  * CV PORTFOLIO API ENDPOINTS

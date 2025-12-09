@@ -1,10 +1,9 @@
 'use client'
 
 import * as React from 'react'
-import { useMemo, useCallback, memo } from 'react'
+import { useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
@@ -89,11 +88,8 @@ import {
   BarChart3,
   Zap,
   Star,
-  Heart,
-  Eye,
   Download,
-  Share2,
-  RefreshCw
+  Share2
 } from 'lucide-react'
 
 const logger = createFeatureLogger('Advanced-Micro-Features')

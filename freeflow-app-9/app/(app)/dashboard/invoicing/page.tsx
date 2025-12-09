@@ -19,8 +19,7 @@ import {
   Invoice,
   InvoiceStatus,
   Payment,
-  InvoiceTemplate,
-  BillingCycle
+  InvoiceTemplate
 } from '@/lib/invoice-types'
 
 // A+++ UTILITIES

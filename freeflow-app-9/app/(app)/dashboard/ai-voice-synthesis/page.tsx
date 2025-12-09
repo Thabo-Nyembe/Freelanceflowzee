@@ -6,7 +6,6 @@ import { Card } from '@/components/ui/card'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
-import { GlowEffect } from '@/components/ui/glow-effect'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,23 +13,21 @@ import { Textarea } from '@/components/ui/textarea'
 import { Slider } from '@/components/ui/slider'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  Mic, Play, Pause, Download, Save, Share2, Settings, Sparkles,
-  User, Volume2, Gauge, Music, Clock, DollarSign, Star,
-  Search, Filter, Grid, List, BarChart, History, FileAudio,
-  Wand2, Languages, BookOpen, Code, Upload, Copy, Check
+  Mic, Play, Download, Share2, Settings, Sparkles,
+  User, Clock, DollarSign, Star,
+  Search, Grid, List, BarChart, FileAudio,
+  Wand2, BookOpen, Code, Check
 } from 'lucide-react'
 
 import {
   VOICE_CATEGORIES,
   SSML_TAGS,
   formatDuration,
-  formatFileSize,
   estimateDuration,
   calculateCost,
   getVoiceIcon,
   getAgeLabel,
-  filterVoices,
-  sortVoices
+  filterVoices
 } from '@/lib/ai-voice-synthesis-utils'
 
 import type { Voice } from '@/lib/ai-voice-synthesis-types'
@@ -50,11 +47,7 @@ import {
   getVoices,
   getVoiceSyntheses,
   getVoiceProjects,
-  getUserVoiceStats,
-  createVoiceSynthesis,
-  type Voice as DBVoice,
-  type VoiceSynthesis as DBSynthesis,
-  type VoiceProject as DBProject
+  getUserVoiceStats
 } from '@/lib/ai-voice-queries'
 
 type ViewMode = 'synthesize' | 'voices' | 'projects' | 'analytics'

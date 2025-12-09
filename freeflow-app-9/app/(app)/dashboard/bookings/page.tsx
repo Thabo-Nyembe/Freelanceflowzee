@@ -83,9 +83,7 @@ import {
   calculateRevenue,
   countByStatus,
   formatDate,
-  generateBookingId,
-  validateBookingDate,
-  checkDoubleBooking
+  validateBookingDate
 } from '@/lib/bookings-utils'
 
 const logger = createFeatureLogger('Bookings')

@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { Button } from '@/components/ui/button'
-import { TrendingUp, TrendingDown, DollarSign, Zap, Clock, Target, RefreshCw, BarChart3, Layers } from 'lucide-react'
+import { TrendingUp, TrendingDown, Zap, Target, RefreshCw, BarChart3, Layers } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 

@@ -3,17 +3,11 @@
 import { useState, useEffect } from 'react'
 import {
   Calendar,
-  Clock,
-  Users,
   Settings as SettingsIcon,
-  Bell,
-  ArrowRight,
   FileText
 } from 'lucide-react'
 
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import EnhancedCalendarBooking from '@/components/booking/enhanced-calendar-booking'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'

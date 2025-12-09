@@ -8,11 +8,8 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
-  Palette, Type, Image, Globe, Mail, Code, Eye, Download,
-  Settings, Sparkles, CheckCircle, AlertCircle, Copy, Upload,
-  ExternalLink, RefreshCw, Save, Star, Crown, Shield, Zap,
-  Monitor, Smartphone, Tablet, Search, Plus, Edit, Trash2,
-  ChevronDown, Info, Award
+  Palette, Type, Image, Globe, Code, Eye, Download,
+  Settings, Sparkles, CheckCircle, AlertCircle, Copy, Upload, RefreshCw, Save, Star, Crown, Shield, Zap, Info, Award
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -25,9 +22,7 @@ import { Switch } from '@/components/ui/switch'
 import {
   WhiteLabelConfig,
   BrandingPreset,
-  WhiteLabelTemplate,
-  ColorScheme,
-  CustomizationSection
+  ColorScheme
 } from '@/lib/white-label-types'
 import {
   BRANDING_PRESETS,
@@ -39,13 +34,12 @@ import {
   DEFAULT_DARK_COLORS,
   calculateBrandingScore,
   formatDomainStatus,
-  validateCustomDomain,
   generateBrandingExportCss
 } from '@/lib/white-label-utils'
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
-import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 

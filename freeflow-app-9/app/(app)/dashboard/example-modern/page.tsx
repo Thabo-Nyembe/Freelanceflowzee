@@ -11,7 +11,7 @@
  */
 
 import { Suspense } from 'react'
-import { getUser, getProjects, getDashboardData, preloadUser } from '@/lib/data-fetching'
+import { getProjects, getDashboardData, preloadUser } from '@/lib/data-fetching'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { HeroImage, ContentImage } from '@/components/ui/optimized-image-v2'
 import { Skeleton } from '@/components/ui/skeleton'

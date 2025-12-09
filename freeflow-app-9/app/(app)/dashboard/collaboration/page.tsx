@@ -54,12 +54,10 @@ import {
   Mail,
   Eye,
   Edit,
-  LogOut,
   BarChart3,
   PieChart,
   Briefcase,
   FolderOpen,
-  PhoneCall,
   Monitor,
   Square,
   Smile,
@@ -76,7 +74,7 @@ import {
 
 // A+++ UTILITIES
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
-import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'

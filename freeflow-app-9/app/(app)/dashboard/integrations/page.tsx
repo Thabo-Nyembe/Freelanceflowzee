@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useReducer, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
@@ -12,15 +12,12 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Card, CardContent } from '@/components/ui/card'
 import { toast } from 'sonner'
 import {
-  Plug, Zap, Check, X, Settings, Play, Pause, RefreshCw,
-  Search, Filter, AlertCircle, CheckCircle, Clock, Shield,
-  Database, Cloud, Mail, MessageSquare, CreditCard, BarChart,
-  Folder, Code, Users, Lock, Unlock, Eye, Trash2, Edit,
-  Plus, Download, Upload, Share2, Link, ExternalLink, Star
+  Plug, Settings, Play, RefreshCw,
+  Search, AlertCircle, CheckCircle,
+  Database, MessageSquare, CreditCard, BarChart, Code, Users,
+  Plus
 } from 'lucide-react'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { createFeatureLogger } from '@/lib/logger'

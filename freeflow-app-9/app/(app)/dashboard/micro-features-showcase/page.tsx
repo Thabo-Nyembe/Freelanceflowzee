@@ -7,13 +7,10 @@ import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Progress } from '@/components/ui/progress'
 
 // Import lightweight components (keep as regular imports)
 import { EnhancedBreadcrumb } from '@/components/ui/enhanced-breadcrumb'
-import { EnhancedSearch } from '@/components/ui/enhanced-search'
 import { ErrorBoundary } from '@/components/ui/error-boundary-system'
 
 // A++++ DYNAMIC IMPORTS - Lazy load heavy showcase components
@@ -112,12 +109,7 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('MicroFeaturesShowcase')
 
-import {
-  Sparkles, TrendingUp, Users, MessageSquare, Settings, Palette,
-  Bell, BarChart3, Zap, Star, Heart, Eye, Download, Share2,
-  RefreshCw, CheckCircle, AlertTriangle, Info, Keyboard,
-  MousePointer, Layers, Wand2, Boxes, Grid3x3, Clock, Shield
-} from 'lucide-react'
+
 
 export default function MicroFeaturesShowcase() {
   // A+++ STATE MANAGEMENT

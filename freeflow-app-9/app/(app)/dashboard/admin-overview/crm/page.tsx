@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
-import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
@@ -13,7 +13,6 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
   formatCurrency,
-  formatNumber,
   formatRelativeTime,
   getDealStageColor,
   getDealPriorityIcon,
@@ -30,12 +29,9 @@ import {
   MoveRight,
   Mail,
   Phone,
-  Eye,
   Download,
   RefreshCw,
   Search,
-  Filter,
-  MoreVertical,
   Building,
   Calendar,
   DollarSign

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useReducer, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   BarChart3,
   FileText,
@@ -10,25 +10,15 @@ import {
   Download,
   Plus,
   Search,
-  Filter,
   Calendar,
   Users,
   DollarSign,
   Eye,
-  Edit,
   Trash2,
   MoreVertical,
   Share2,
-  Clock,
   CheckCircle2,
-  AlertCircle,
-  FileSpreadsheet,
-  FilePdf,
-  FileJson,
   Mail,
-  Repeat,
-  X,
-  Check,
   Sparkles,
   Settings,
   ArrowUpRight,
@@ -50,7 +40,6 @@ const logger = createFeatureLogger('Reports')
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -66,7 +55,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import {
   DropdownMenu,

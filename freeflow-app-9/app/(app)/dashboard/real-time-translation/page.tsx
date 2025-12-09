@@ -8,27 +8,22 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
-  Globe, Languages, FileText, Video, MessageSquare, Mic,
-  Clock, Zap, Shield, Users, Settings, Download,
-  Upload, Play, Pause, Volume2, VolumeX, RefreshCw,
-  CheckCircle, AlertCircle, Info, ArrowRight, Search,
-  Filter, Star, Bookmark, Plus, X, Eye, Save,
-  ChevronDown, Copy, ExternalLink
+  Globe, Languages, FileText, Video,
+  Clock, Zap, Settings, Download,
+  Upload, Pause, Volume2, RefreshCw,
+  CheckCircle, ArrowRight,
+  Filter, Star, Plus, Eye, Save,
+  ChevronDown, Copy
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
-import { GlowEffect } from '@/components/ui/glow-effect'
 import {
   Language,
-  TranslationMode,
   TranslationQuality,
-  TranslationEngine,
-  TranslationResult,
-  LiveTranslation,
-  DocumentTranslation
+  TranslationEngine
 } from '@/lib/real-time-translation-types'
 import {
   SUPPORTED_LANGUAGES,
@@ -37,13 +32,10 @@ import {
   formatProcessingTime,
   formatFileSize,
   getLanguageInfo,
-  getConfidenceLabel,
   getConfidenceColor
 } from '@/lib/real-time-translation-utils'
 
 // A+++ UTILITIES
-import { CardSkeleton } from '@/components/ui/loading-skeleton'
-import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'

@@ -3,13 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
-import { EnhancedCard, EnhancedCardContent, EnhancedCardHeader, EnhancedCardTitle } from '@/components/ui/enhanced-card'
-import { EnhancedButton } from '@/components/ui/enhanced-button'
-import { EnhancedBadge } from '@/components/ui/enhanced-badge'
+import { EnhancedCard } from '@/components/ui/enhanced-card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
 import {
@@ -21,7 +19,6 @@ import {
   FileText,
   Globe,
   Settings,
-  Plus,
   Zap,
   Brain,
   TrendingUp,
@@ -40,21 +37,16 @@ import {
   ArrowRight,
   Activity,
   Star,
-  CheckCircle,
   Building,
-  ChevronLeft,
-  ChevronRight,
   Workflow,
   Receipt,
   UserCheck,
   Archive,
   Monitor,
-  Headphones,
   RefreshCw,
   Lightbulb,
   Sparkles,
   CheckCircle2,
-  Presentation,
   Mic,
   Eye,
   PlayCircle
@@ -67,7 +59,7 @@ import { LiquidGlassCard, LiquidGlassCardHeader, LiquidGlassCardTitle, LiquidGla
 import { BorderTrail } from '@/components/ui/border-trail'
 
 // A+++ Utilities
-import { DashboardSkeleton, CardSkeleton } from '@/components/ui/loading-skeleton'
+import { DashboardSkeleton } from '@/components/ui/loading-skeleton'
 import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'

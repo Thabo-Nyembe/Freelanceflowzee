@@ -5,9 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Card } from '@/components/ui/card'
 import { ErrorBoundary } from '@/components/ui/error-boundary-system'
 import {
-  Code, Play, Bug, Zap, FileText, Download, Copy, Share2,
-  CheckCircle, AlertTriangle, Lightbulb, Terminal, Cpu,
-  BookOpen, Sparkles, Eye, Settings, Layers
+  Code, Bug, Zap, FileText, Download, Copy,
+  CheckCircle, AlertTriangle, Lightbulb, Terminal, Sparkles, Layers
 } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -25,13 +24,7 @@ import { useAnnouncer } from '@/lib/accessibility'
 import {
   getCodeCompletions,
   getCodeSnippets,
-  createCodeCompletion,
-  createCodeSnippet,
   getAICodeStats,
-  getCompletionStats,
-  getCodeQualityTrend,
-  type CodeCompletion as DBCompletion,
-  type CodeSnippet as DBSnippet,
   type ProgrammingLanguage
 } from '@/lib/ai-code-queries'
 

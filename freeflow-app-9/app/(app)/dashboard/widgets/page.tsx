@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useReducer, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
@@ -13,15 +13,12 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Card, CardContent } from '@/components/ui/card'
 import { toast } from 'sonner'
 import {
-  Layout, Grid, BarChart3, PieChart, Activity, TrendingUp,
-  Search, Filter, Plus, Edit, Trash2, Eye, EyeOff, Settings,
-  Download, Upload, RefreshCw, Copy, Move, Lock, Unlock,
-  Maximize2, Minimize2, AlertCircle, CheckCircle, Star,
-  Calendar, Users, DollarSign, ShoppingCart, FileText, Zap,
-  X, Check, MoreVertical, ArrowUpDown, Layers, Square
+  Layout, Activity, TrendingUp,
+  Search, Plus, Edit, Trash2, Eye, EyeOff, Settings,
+  Download, Lock, Unlock, AlertCircle,
+  X
 } from 'lucide-react'
 import { NumberFlow } from '@/components/ui/number-flow'
 

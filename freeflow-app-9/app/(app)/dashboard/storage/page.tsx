@@ -1,7 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useEffect, useReducer, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { useState, useEffect, useReducer, useMemo } from 'react'
 import {
   Cloud,
   HardDrive,
@@ -9,7 +8,6 @@ import {
   Archive,
   Upload,
   Download,
-  Folder,
   File,
   FileText,
   Image,
@@ -19,21 +17,16 @@ import {
   Code,
   MoreVertical,
   Search,
-  Filter,
-  SortAsc,
   Eye,
   Share2,
   Trash2,
   FolderOpen,
   Grid,
   List,
-  Plus,
   X,
   Check,
-  AlertCircle,
   Server,
-  Globe,
-  Lock
+  Globe
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
@@ -42,7 +35,6 @@ import { NumberFlow } from '@/components/ui/number-flow'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -67,17 +59,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Textarea } from '@/components/ui/textarea'
 
 // Premium Components
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
-import { GlowEffect } from '@/components/ui/glow-effect'
 
 // A+++ UTILITIES
-import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
-import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { CardSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { useCurrentUser } from '@/hooks/use-ai-data'

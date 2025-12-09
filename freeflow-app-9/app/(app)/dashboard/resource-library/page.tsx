@@ -4,11 +4,8 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
-import { Progress } from '@/components/ui/progress'
 import {
-  BookOpen,
   FileText,
   Image,
   Video,
@@ -26,25 +23,10 @@ import {
   Plus,
   Grid,
   List,
-  Folder,
-  FolderOpen,
-  Tag,
-  Clock,
   Users,
-  TrendingUp,
   Award,
-  Target,
-  Zap,
-  CheckCircle,
-  AlertCircle,
   MoreHorizontal,
-  Edit,
-  Trash2,
-  Copy,
-  ExternalLink,
   Heart,
-  MessageSquare,
-  Calendar,
   Archive,
   Database
 } from 'lucide-react'
