@@ -78,6 +78,14 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 - Profile export uses real `userName` and `userEmail` from `useCurrentUser` hook
 - Removed hardcoded placeholder values in export functions
 
+### 9. Team Average Performance (collaboration/teams)
+**File:** `app/(app)/dashboard/collaboration/teams/page.tsx`
+**Status:** WIRED
+
+- Fetches team member stats via `getTeamMemberStats()` from collaboration-analytics-queries
+- Calculates average performance from member `performance_score` values
+- Replaces hardcoded 85% with real calculated average
+
 ---
 
 ## Available Query Functions (92 Query Files)
@@ -109,8 +117,15 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | Page | Issue | Priority | Status |
 |------|-------|----------|--------|
 | collaboration/canvas | totalDrawings hardcoded | Low | ✅ FIXED |
-| collaboration/workspace | isShared always false | Medium | Acceptable (default) |
+| collaboration/workspace | isShared folder default | Medium | Acceptable (files have visibility) |
+| collaboration/teams | avgPerformance hardcoded | Low | ✅ FIXED |
 | projects-hub | team_members, comments empty | Medium | Needs new DB tables |
+| time-tracking | projects list hardcoded | Medium | Needs schema design |
+
+### Notes on Remaining Items
+- **projects-hub team_members**: Requires `team_project_members` join table
+- **time-tracking projects**: Requires nested tasks structure in schema
+- **Various mock data pages**: Demo/showcase pages (acceptable as-is)
 
 ---
 
@@ -126,6 +141,8 @@ Conducted a comprehensive audit of all dashboard sub-pages to identify unwired b
 | 8b26b00d | docs: Update audit report with additional wiring fixes |
 | f0a42771 | feat: Wire hoursThisMonth to time tracking data |
 | 6efeea44 | feat: Replace mock data with real user data in exports |
+| 20f92b47 | docs: Update audit report with session 2 fixes |
+| d595297a | feat: Wire avgPerformance to team member stats |
 
 ---
 
