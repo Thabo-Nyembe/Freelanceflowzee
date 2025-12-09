@@ -747,15 +747,32 @@ export default function ClientPortalPage() {
     try {
       setIsSaving(true)
 
-      // Note: Using local state - in production, this would POST to /api/communications
+      let commId = `CM-${String(state.communications.length + 1).padStart(3, '0')}`
+
+      // Create communication in database
+      if (userId) {
+        const { createCommunication } = await import('@/lib/client-portal-queries')
+        const createdComm = await createCommunication({
+          client_id: state.selectedClient.id,
+          type: communicationForm.type,
+          subject: communicationForm.subject,
+          content: communicationForm.content,
+          created_by: userId
+        })
+        if (createdComm?.id) {
+          commId = createdComm.id
+        }
+        logger.info('Communication created in database', { commId, clientId: state.selectedClient.id })
+      }
+
       const newComm: Communication = {
-        id: `CM-${String(state.communications.length + 1).padStart(3, '0')}`,
+        id: commId,
         clientId: state.selectedClient.id,
         type: communicationForm.type,
         subject: communicationForm.subject,
         content: communicationForm.content,
         createdAt: new Date().toISOString(),
-        createdBy: 'Current User'
+        createdBy: userId || 'Current User'
       }
 
       dispatch({ type: 'ADD_COMMUNICATION', communication: newComm })

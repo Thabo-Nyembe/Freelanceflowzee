@@ -595,10 +595,26 @@ export default function VoiceCollaborationPage() {
         roomName: room.name
       })
 
-      // Note: Using local state - in production, this would POST to /api/voice-collaboration/rooms/join
+      let participantId = `PART-${Date.now()}`
+
+      // Create participant in database
+      if (userId) {
+        const { createVoiceParticipant } = await import('@/lib/voice-collaboration-queries')
+        const result = await createVoiceParticipant(room.id, userId, {
+          role: 'listener',
+          status: 'listening',
+          is_muted: false,
+          is_video_enabled: false
+        })
+        if (result.data?.id) {
+          participantId = result.data.id
+        }
+        logger.info('Participant created in database', { participantId, roomId: room.id })
+      }
+
       const newParticipant: VoiceParticipant = {
-        id: `PART-${Date.now()}`,
-        userId: 'USER-CURRENT',
+        id: participantId,
+        userId: userId || 'USER-CURRENT',
         name: 'Current User',
         avatar: '',
         role: 'listener',

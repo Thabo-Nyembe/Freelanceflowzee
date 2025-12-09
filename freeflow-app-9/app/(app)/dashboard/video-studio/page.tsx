@@ -317,8 +317,27 @@ export default function VideoStudioPage() {
     toast.info('Creating video project...')
 
     try {
-      // Note: In production, this would POST to /api/video/projects
-      const projectId = `proj_${Date.now()}`
+      let projectId = `proj_${Date.now()}`
+
+      // Create project in database
+      if (userId) {
+        const { createVideoProject } = await import('@/lib/video-studio-queries')
+        const [width, height] = newProject.resolution.split('x').map(Number)
+        const { data: createdProject, error } = await createVideoProject(userId, {
+          title: newProject.title,
+          description: newProject.description,
+          status: 'draft',
+          resolution_width: width || 1920,
+          resolution_height: height || 1080,
+          format: newProject.format || 'mp4',
+          duration_seconds: 0
+        })
+        if (error) throw new Error(error.message)
+        if (createdProject?.id) {
+          projectId = createdProject.id
+        }
+        logger.info('Project created in database', { projectId, userId })
+      }
 
       logger.info('Project created successfully', {
         projectId,
