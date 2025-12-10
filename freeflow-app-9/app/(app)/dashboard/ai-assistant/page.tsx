@@ -548,8 +548,8 @@ export default function AIAssistantPage() {
     }
   }
 
-  // Additional Handlers
-  const handleNewConversation = () => {
+  // Additional Handlers - WIRED TO DATABASE
+  const handleNewConversation = async () => {
     const previousMessageCount = messages.length
     const newMessage = { id: Date.now().toString(), content: 'Hello! How can I help you today?', type: 'assistant' as const, timestamp: new Date() }
 
@@ -558,14 +558,45 @@ export default function AIAssistantPage() {
       conversationReset: true
     })
 
+    // Create new conversation in database
+    if (userId && previousMessageCount > 1) {
+      try {
+        const { createConversation } = await import('@/lib/ai-assistant-queries')
+        const firstUserMessage = messages.find(m => m.type === 'user')
+        const title = firstUserMessage?.content?.slice(0, 50) || `Conversation ${new Date().toLocaleDateString()}`
+
+        const { data: newConv, error } = await createConversation(userId, title, {
+          model: selectedModel as any,
+          tags: ['auto-saved'],
+          metadata: { messageCount: previousMessageCount }
+        })
+
+        if (!error && newConv) {
+          // Add to conversations list
+          setConversations(prev => [{
+            id: newConv.id,
+            title: newConv.title,
+            preview: firstUserMessage?.content?.slice(0, 100) || '',
+            timestamp: new Date(newConv.created_at),
+            tags: newConv.tags,
+            messageCount: previousMessageCount
+          }, ...prev])
+          logger.info('Previous conversation saved to database', { conversationId: newConv.id })
+        }
+      } catch (err) {
+        logger.error('Failed to save previous conversation', { error: err })
+      }
+    }
+
     setMessages([newMessage])
 
     toast.success('New conversation started', {
       description: `Fresh chat session ready - Previous: ${previousMessageCount} messages`
     })
+    announce('New conversation started', 'polite')
   }
 
-  const handleLoadConversation = (conversationId: string, title: string) => {
+  const handleLoadConversation = async (conversationId: string, title: string) => {
     const conversation = conversations.find(c => c.id === conversationId)
 
     logger.info('Loading conversation', {
@@ -575,10 +606,45 @@ export default function AIAssistantPage() {
       tags: conversation?.tags || []
     })
 
-    // Note: Using mock data - in production, this would fetch from /api/conversations/:id
-    toast.info('Loading conversation', {
-      description: `${title} - ${conversation?.messageCount || 0} messages - ${conversation?.tags.join(', ') || 'No tags'}`
-    })
+    // Load messages from database
+    if (userId) {
+      try {
+        setIsLoading(true)
+        const { getMessages } = await import('@/lib/ai-assistant-queries')
+        const { data: loadedMessages, error } = await getMessages(conversationId)
+
+        if (error) throw new Error(error.message || 'Failed to load messages')
+
+        if (loadedMessages && loadedMessages.length > 0) {
+          // Transform database messages to UI format
+          const transformedMessages: Message[] = loadedMessages.map(m => ({
+            id: m.id,
+            content: m.content,
+            type: m.type as 'user' | 'assistant',
+            timestamp: new Date(m.created_at),
+            rating: m.rating as 'up' | 'down' | null,
+            suggestions: m.suggestions || []
+          }))
+          setMessages(transformedMessages)
+          logger.info('Conversation loaded from database', { messageCount: transformedMessages.length })
+          toast.success('Conversation loaded', {
+            description: `${title} - ${transformedMessages.length} messages restored`
+          })
+        } else {
+          toast.info('Loading conversation', {
+            description: `${title} - ${conversation?.messageCount || 0} messages - ${conversation?.tags.join(', ') || 'No tags'}`
+          })
+        }
+        announce(`Loaded conversation: ${title}`, 'polite')
+      } catch (err) {
+        logger.error('Failed to load conversation', { error: err })
+        toast.error('Failed to load conversation', {
+          description: err instanceof Error ? err.message : 'Please try again'
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
   }
 
   const handleDeleteConversation = (conversationId: string) => {
@@ -659,7 +725,7 @@ export default function AIAssistantPage() {
     })
   }
 
-  const handleRefreshInsights = () => {
+  const handleRefreshInsights = async () => {
     const highPriority = aiInsights.filter(i => i.priority === 'high').length
     const categories = [...new Set(aiInsights.map(i => i.category))]
 
@@ -669,10 +735,50 @@ export default function AIAssistantPage() {
       categories
     })
 
-    // Note: Using mock data - in production, this would fetch from /api/ai/insights
-    toast.info('Refreshing AI insights', {
-      description: `Analyzing ${aiInsights.length} insights - ${highPriority} high priority - ${categories.length} categories`
-    })
+    // Load fresh insights from database
+    if (userId) {
+      try {
+        setIsLoading(true)
+        const { getInsights } = await import('@/lib/ai-assistant-queries')
+        const { data: freshInsights, error } = await getInsights(userId, { status: 'active' })
+
+        if (error) throw new Error(error.message || 'Failed to refresh insights')
+
+        if (freshInsights && freshInsights.length > 0) {
+          const transformedInsights: AIInsight[] = freshInsights.map((i) => ({
+            id: i.id,
+            title: i.title,
+            description: i.description,
+            category: i.category as 'productivity' | 'business' | 'optimization' | 'opportunity',
+            priority: i.priority as 'high' | 'medium' | 'low',
+            action: i.action,
+            icon: getIconForCategory(i.category)
+          }))
+          setAiInsights(transformedInsights)
+          const newHighPriority = transformedInsights.filter(i => i.priority === 'high').length
+          toast.success('Insights refreshed', {
+            description: `${transformedInsights.length} insights loaded - ${newHighPriority} high priority`
+          })
+          logger.info('Insights refreshed from database', { count: transformedInsights.length })
+        } else {
+          toast.info('No new insights', {
+            description: 'All insights are up to date'
+          })
+        }
+        announce('Insights refreshed', 'polite')
+      } catch (err) {
+        logger.error('Failed to refresh insights', { error: err })
+        toast.error('Failed to refresh insights', {
+          description: err instanceof Error ? err.message : 'Please try again'
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    } else {
+      toast.info('Refreshing AI insights', {
+        description: `Analyzing ${aiInsights.length} insights - ${highPriority} high priority - ${categories.length} categories`
+      })
+    }
   }
 
   const handleImplementAction = async (insightId: string, action: string) => {
