@@ -527,7 +527,7 @@ export default function CanvasCollaboration() {
     }
   }
 
-  const handleSaveCanvas = () => {
+  const handleSaveCanvas = async () => {
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -540,6 +540,30 @@ export default function CanvasCollaboration() {
 
     const imageData = canvas.toDataURL()
 
+    // Save to database
+    if (userId) {
+      try {
+        const { updateCanvasProject } = await import('@/lib/canvas-collaboration-queries')
+
+        // Find current canvas project
+        const currentProject = recentProjects.find(p => p.name === canvasName)
+        if (currentProject?.id) {
+          const { error } = await updateCanvasProject(currentProject.id, {
+            thumbnail: imageData.slice(0, 500), // Store truncated thumbnail
+            updated_at: new Date().toISOString()
+          })
+
+          if (error) {
+            logger.error('Failed to save canvas to database', { error })
+          } else {
+            logger.info('Canvas saved to database', { canvasId: currentProject.id })
+          }
+        }
+      } catch (err) {
+        logger.error('Exception saving canvas', { error: err })
+      }
+    }
+
     logger.info('Canvas saved successfully', {
       canvasName,
       layers: layers.length,
@@ -551,6 +575,7 @@ export default function CanvasCollaboration() {
     toast.success('Canvas Saved', {
       description: `${canvasName} - ${layers.length} layers, synced with ${collaborators.filter(c => c.isActive).length} active collaborators`
     })
+    announce('Canvas saved', 'polite')
   }
 
   const handleExportCanvas = (format: string) => {
@@ -632,7 +657,7 @@ export default function CanvasCollaboration() {
     setShowInviteDialog(true)
   }
 
-  const confirmInviteCollaborator = () => {
+  const confirmInviteCollaborator = async () => {
     if (!inviteEmail.trim()) {
       toast.error('Please enter an email address')
       return
@@ -643,8 +668,31 @@ export default function CanvasCollaboration() {
     const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3']
     const randomColor = colors[Math.floor(Math.random() * colors.length)]
 
+    let collaboratorId = (collaborators.length + 1).toString()
+
+    // Save to database
+    if (userId) {
+      try {
+        const { joinCanvas } = await import('@/lib/canvas-collaboration-queries')
+        const currentProject = recentProjects.find(p => p.name === canvasName)
+
+        if (currentProject?.id) {
+          const { data: collab, error } = await joinCanvas(currentProject.id, email, 'editor')
+
+          if (error) {
+            logger.error('Failed to invite collaborator', { error })
+          } else if (collab?.id) {
+            collaboratorId = collab.id
+            logger.info('Collaborator saved to database', { collaboratorId })
+          }
+        }
+      } catch (err) {
+        logger.error('Exception inviting collaborator', { error: err })
+      }
+    }
+
     const newCollaborator: Collaborator = {
-      id: (collaborators.length + 1).toString(),
+      id: collaboratorId,
       name,
       avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`,
       color: randomColor,
@@ -677,8 +725,28 @@ export default function CanvasCollaboration() {
     }
   }
 
-  const handleConfirmRemoveCollaborator = () => {
+  const handleConfirmRemoveCollaborator = async () => {
     if (!removeCollaborator) return
+
+    // Remove from database
+    if (userId) {
+      try {
+        const { leaveCanvas } = await import('@/lib/canvas-collaboration-queries')
+        const currentProject = recentProjects.find(p => p.name === canvasName)
+
+        if (currentProject?.id) {
+          const { error } = await leaveCanvas(currentProject.id, removeCollaborator.id)
+
+          if (error) {
+            logger.error('Failed to remove collaborator from database', { error })
+          } else {
+            logger.info('Collaborator removed from database', { collaboratorId: removeCollaborator.id })
+          }
+        }
+      } catch (err) {
+        logger.error('Exception removing collaborator', { error: err })
+      }
+    }
 
     setCollaborators(collaborators.filter(c => c.name !== removeCollaborator.name))
 
@@ -691,6 +759,7 @@ export default function CanvasCollaboration() {
     toast.success('Collaborator Removed', {
       description: `${removeCollaborator.name} has been removed - ${collaborators.length - 1} collaborators remaining`
     })
+    announce('Collaborator removed', 'polite')
     setRemoveCollaborator(null)
   }
 
@@ -699,13 +768,37 @@ export default function CanvasCollaboration() {
     setShowCommentDialog(true)
   }
 
-  const confirmAddComment = () => {
+  const confirmAddComment = async () => {
     if (!newComment.trim()) {
       toast.error('Please enter a comment')
       return
     }
 
     const comment = newComment.trim()
+
+    // Save comment to database
+    if (userId) {
+      try {
+        const { createCanvasComment } = await import('@/lib/canvas-collaboration-queries')
+        const currentProject = recentProjects.find(p => p.name === canvasName)
+
+        if (currentProject?.id) {
+          const { data: savedComment, error } = await createCanvasComment(currentProject.id, userId, {
+            content: comment,
+            x_position: 100, // Default position, will be updated on canvas click
+            y_position: 100
+          })
+
+          if (error) {
+            logger.error('Failed to save comment to database', { error })
+          } else {
+            logger.info('Comment saved to database', { commentId: savedComment?.id })
+          }
+        }
+      } catch (err) {
+        logger.error('Exception saving comment', { error: err })
+      }
+    }
 
     logger.info('Comment mode activated', {
       canvasName,

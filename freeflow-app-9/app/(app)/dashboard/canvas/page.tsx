@@ -826,28 +826,92 @@ export default function CanvasPage() {
     }
   }
 
-  const handleDuplicateCanvas = (canvasId: string) => {
+  const handleDuplicateCanvas = async (canvasId: string) => {
     logger.info('Duplicating canvas', { canvasId })
     const canvas = state.canvases.find(c => c.id === canvasId)
 
     if (canvas) {
       logger.info('Canvas to duplicate', { canvasId, name: canvas.name, template: canvas.template })
-      dispatch({ type: 'DUPLICATE_CANVAS', canvasId })
-      toast.success(`Canvas duplicated`, {
-        description: `${canvas.name} (Copy) - ${canvas.template} - ${canvas.artboards.length} artboards - ${canvas.totalLayers} layers`
-      })
-      announce('Canvas duplicated', 'polite')
+
+      try {
+        if (userId) {
+          const { duplicateCanvasProject } = await import('@/lib/canvas-collaboration-queries')
+          const { data: duplicatedCanvas, error } = await duplicateCanvasProject(canvasId, `${canvas.name} (Copy)`)
+
+          if (error) throw new Error(error.message || 'Failed to duplicate canvas')
+
+          if (duplicatedCanvas) {
+            const newCanvas: CanvasProject = {
+              id: duplicatedCanvas.id,
+              name: duplicatedCanvas.name,
+              description: duplicatedCanvas.description || '',
+              thumbnail: canvas.thumbnail,
+              template: canvas.template,
+              status: 'in-progress',
+              artboards: canvas.artboards,
+              collaborators: [],
+              totalLayers: canvas.totalLayers,
+              size: canvas.size,
+              version: 1,
+              isStarred: false,
+              isShared: false,
+              createdAt: duplicatedCanvas.created_at,
+              updatedAt: duplicatedCanvas.updated_at,
+              lastModifiedBy: 'You',
+              tags: []
+            }
+            dispatch({ type: 'ADD_CANVAS', canvas: newCanvas })
+            logger.info('Canvas duplicated in database', { newCanvasId: duplicatedCanvas.id })
+          }
+        } else {
+          dispatch({ type: 'DUPLICATE_CANVAS', canvasId })
+        }
+
+        toast.success(`Canvas duplicated`, {
+          description: `${canvas.name} (Copy) - ${canvas.template} - ${canvas.artboards.length} artboards - ${canvas.totalLayers} layers`
+        })
+        announce('Canvas duplicated', 'polite')
+      } catch (err: any) {
+        logger.error('Failed to duplicate canvas', { error: err.message, canvasId })
+        toast.error('Failed to duplicate canvas', {
+          description: err.message || 'Please try again'
+        })
+      }
     }
   }
 
-  const handleToggleStar = (canvasId: string) => {
+  const handleToggleStar = async (canvasId: string) => {
     logger.info('Toggling star', { canvasId })
     const canvas = state.canvases.find(c => c.id === canvasId)
 
     if (canvas) {
-      logger.debug('Current starred state', { canvasId, isStarred: canvas.isStarred })
+      const newStarredState = !canvas.isStarred
+      logger.debug('Current starred state', { canvasId, isStarred: canvas.isStarred, newState: newStarredState })
+
+      // Optimistic update
       dispatch({ type: 'TOGGLE_STAR', canvasId })
-      toast.success(canvas.isStarred ? 'Removed from favorites' : 'Added to favorites')
+
+      try {
+        if (userId) {
+          const { updateCanvasProject } = await import('@/lib/canvas-collaboration-queries')
+          const { error } = await updateCanvasProject(canvasId, { is_starred: newStarredState })
+
+          if (error) {
+            // Revert on error
+            dispatch({ type: 'TOGGLE_STAR', canvasId })
+            throw new Error(error.message || 'Failed to update star status')
+          }
+          logger.info('Star status saved to database', { canvasId, isStarred: newStarredState })
+        }
+
+        toast.success(newStarredState ? 'Added to favorites' : 'Removed from favorites')
+        announce(newStarredState ? 'Added to favorites' : 'Removed from favorites', 'polite')
+      } catch (err: any) {
+        logger.error('Failed to toggle star', { error: err.message, canvasId })
+        toast.error('Failed to update favorites', {
+          description: err.message || 'Please try again'
+        })
+      }
     }
   }
 
@@ -878,8 +942,6 @@ export default function CanvasPage() {
 
   const handleShareCanvas = async () => {
     logger.info('Sharing canvas', { email: shareEmail, role: shareRole })
-    
-    
 
     if (!state.selectedCanvas) {
       logger.warn('No canvas selected for export')
@@ -895,33 +957,58 @@ export default function CanvasPage() {
 
     logger.info('Sharing canvas', { canvasName: state.selectedCanvas.name, email: shareEmail, role: shareRole })
 
-    const newCollaborator: CanvasCollaborator = {
-      id: `COL-${Date.now()}`,
-      name: shareEmail.split('@')[0],
-      email: shareEmail,
-      avatar: '👤',
-      role: shareRole,
-      color: '#' + Math.floor(Math.random()*16777215).toString(16),
-      lastSeen: 'Just now',
-      isOnline: true
+    try {
+      let collaboratorId = `COL-${Date.now()}`
+
+      // Save collaborator to database
+      if (userId) {
+        const { joinCanvas, updateCanvasProject } = await import('@/lib/canvas-collaboration-queries')
+
+        // Create collaborator record
+        const { data: collaborator, error } = await joinCanvas(state.selectedCanvas.id, shareEmail, shareRole)
+
+        if (error) throw new Error(error.message || 'Failed to add collaborator')
+        if (collaborator?.id) collaboratorId = collaborator.id
+
+        // Update canvas is_public status
+        await updateCanvasProject(state.selectedCanvas.id, { is_public: true })
+
+        logger.info('Collaborator saved to database', { collaboratorId })
+      }
+
+      const newCollaborator: CanvasCollaborator = {
+        id: collaboratorId,
+        name: shareEmail.split('@')[0],
+        email: shareEmail,
+        avatar: '👤',
+        role: shareRole,
+        color: '#' + Math.floor(Math.random()*16777215).toString(16),
+        lastSeen: 'Just now',
+        isOnline: true
+      }
+
+      const updatedCanvas = {
+        ...state.selectedCanvas,
+        collaborators: [...state.selectedCanvas.collaborators, newCollaborator],
+        isShared: true
+      }
+
+      dispatch({ type: 'UPDATE_CANVAS', canvas: updatedCanvas })
+
+      logger.info('Canvas shared', { canvasName: state.selectedCanvas.name, email: shareEmail, role: shareRole })
+      setShowShareModal(false)
+      setShareEmail('')
+      setShareRole('viewer')
+      toast.success('Canvas shared', {
+        description: `${state.selectedCanvas.name} - Shared with ${shareEmail} as ${shareRole} - ${updatedCanvas.collaborators.length} total collaborators`
+      })
+      announce('Canvas shared with collaborator', 'polite')
+    } catch (err: any) {
+      logger.error('Failed to share canvas', { error: err.message, canvasId: state.selectedCanvas.id })
+      toast.error('Failed to share canvas', {
+        description: err.message || 'Please try again'
+      })
     }
-
-    const updatedCanvas = {
-      ...state.selectedCanvas,
-      collaborators: [...state.selectedCanvas.collaborators, newCollaborator],
-      isShared: true
-    }
-
-    dispatch({ type: 'UPDATE_CANVAS', canvas: updatedCanvas })
-
-    logger.info('Canvas shared', { canvasName: state.selectedCanvas.name, email: shareEmail, role: shareRole })
-    setShowShareModal(false)
-    setShareEmail('')
-    setShareRole('viewer')
-    toast.success('Canvas shared', {
-      description: `${state.selectedCanvas.name} - Shared with ${shareEmail} as ${shareRole} - ${updatedCanvas.collaborators.length} total collaborators`
-    })
-    announce('Canvas shared with collaborator', 'polite')
   }
 
   // ============================================================================
