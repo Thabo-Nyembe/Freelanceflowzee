@@ -437,7 +437,7 @@ export default function ModelingStudioPage() {
     }
   }
 
-  const exportModel = () => {
+  const exportModel = async () => {
     const modelData = {
       objects,
       materials,
@@ -468,14 +468,38 @@ export default function ModelingStudioPage() {
 
     const fileSizeKB = (blob.size / 1024).toFixed(1)
 
+    // Save export job to database if user is authenticated
+    if (userId) {
+      try {
+        const { createExportJob } = await import('@/lib/3d-modeling-queries')
+        // Create a placeholder scene ID for demo exports
+        const demoSceneId = `demo-scene-${userId}`
+        const { data: exportJob, error } = await createExportJob(demoSceneId, userId, {
+          format: 'gltf',
+          include_textures: true,
+          include_materials: true,
+          include_lights: true,
+          include_camera: true,
+          scale: 1.0
+        })
+        if (!error && exportJob) {
+          logger.info('Export job saved to database', { exportJobId: exportJob.id, userId })
+        }
+      } catch (err) {
+        logger.error('Failed to save export job', { error: err, userId })
+      }
+    }
+
     toast.success('3D model exported', {
       description: `${fileName} - ${fileSizeKB} KB - ${objects.length} objects - ${materials.length} materials - ${lights.length} lights`
     })
   }
 
-  const renderScene = () => {
+  const renderScene = async () => {
     const qualityLabels = { 25: 'Low', 50: 'Medium', 75: 'High', 100: 'Ultra' }
+    const qualityMap: Record<number, 'low' | 'medium' | 'high' | 'ultra'> = { 25: 'low', 50: 'medium', 75: 'high', 100: 'ultra' }
     const quality = qualityLabels[renderQuality[0] as keyof typeof qualityLabels] || 'Medium'
+    const qualityValue = qualityMap[renderQuality[0] as keyof typeof qualityMap] || 'medium'
 
     logger.info('Rendering scene', {
       renderQuality: renderQuality[0],
@@ -488,6 +512,40 @@ export default function ModelingStudioPage() {
     toast.info('Rendering 3D scene...', {
       description: `${quality} quality (${renderQuality[0]}%) - ${objects.length} objects - ${lights.length} lights - ${objects.filter(o => o.visible).length} visible`
     })
+
+    // Save render job to database if user is authenticated
+    if (userId) {
+      try {
+        const { createRenderJob, updateRenderJobStatus } = await import('@/lib/3d-modeling-queries')
+        const demoSceneId = `demo-scene-${userId}`
+        const { data: renderJob, error } = await createRenderJob(demoSceneId, userId, {
+          quality: qualityValue,
+          resolution_width: 1920,
+          resolution_height: 1080,
+          samples: qualityValue === 'ultra' ? 256 : qualityValue === 'high' ? 128 : 64,
+          max_bounces: qualityValue === 'ultra' ? 8 : qualityValue === 'high' ? 6 : 4,
+          enable_shadows: true,
+          enable_reflections: true,
+          enable_ambient_occlusion: qualityValue !== 'low',
+          output_format: 'png'
+        })
+        if (!error && renderJob) {
+          logger.info('Render job created in database', { renderJobId: renderJob.id, quality: qualityValue, userId })
+
+          // Simulate rendering completion and update job status
+          setTimeout(async () => {
+            try {
+              await updateRenderJobStatus(renderJob.id, 'completed', 100)
+              logger.info('Render job marked complete', { renderJobId: renderJob.id })
+            } catch (err) {
+              logger.error('Failed to update render job status', { error: err })
+            }
+          }, 2000)
+        }
+      } catch (err) {
+        logger.error('Failed to create render job', { error: err, userId })
+      }
+    }
 
     // Simulate rendering
     setTimeout(() => {
