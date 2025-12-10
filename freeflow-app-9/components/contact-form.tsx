@@ -4,16 +4,17 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { toast } from 'sonner'
 
 export function ContactForm() {
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState({
     name: '',
     email: '',
     message: ''
   })
   const [errors, setErrors] = useState<{[key: string]: string}>({})
-  const [isSubmitting, setIsSubmitting] = useState<any>(false)
-  const [isSuccess, setIsSuccess] = useState<any>(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {}
@@ -43,25 +44,47 @@ export function ContactForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) {
       return
     }
-    
+
     setIsSubmitting(true)
     setErrors({})
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Import contact queries dynamically for code splitting
+      const { createContactMessage } = await import('@/lib/contact-queries')
+
+      const { data, error } = await createContactMessage({
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+        source: 'contact_form'
+      }, {
+        user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+        referrer: typeof document !== 'undefined' ? document.referrer : undefined
+      })
+
+      if (error) {
+        throw new Error(error.message || 'Failed to send message')
+      }
+
       setIsSuccess(true)
       setFormData({ name: '', email: '', message: '' })
-      
-      // Reset success message after 3 seconds
-      setTimeout(() => setIsSuccess(false), 3000)
+      toast.success('Message sent successfully!', {
+        description: "We'll get back to you as soon as possible."
+      })
+
+      // Reset success message after 5 seconds
+      setTimeout(() => setIsSuccess(false), 5000)
     } catch (error) {
       console.error('Form submission failed:', error)
-      setErrors({ submit: 'Failed to send message. Please try again.' })
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send message. Please try again.'
+      setErrors({ submit: errorMessage })
+      toast.error('Failed to send message', {
+        description: errorMessage
+      })
     } finally {
       setIsSubmitting(false)
     }

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { MessageSquare, Clock, Reply, ThumbsUp, User, Send } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { MessageSquare, Clock, Reply, ThumbsUp, User, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface VideoComment {
   id: string;
@@ -37,13 +38,16 @@ interface VideoCommentsProps {
   className?: string;
 }
 
-export function VideoComments({ 
-  videoId, currentUserId, currentTime = 0, onSeekToTimestamp, className 
+export function VideoComments({
+  videoId, currentUserId, currentTime = 0, onSeekToTimestamp, className
 }: VideoCommentsProps) {
   const [comments, setComments] = useState<VideoComment[]>([]);
-  const [loading, setLoading] = useState<any>(true);
-  const [newComment, setNewComment] = useState<any>('');
-  const [useTimestamp, setUseTimestamp] = useState<any>(false);
+  const [loading, setLoading] = useState(true);
+  const [newComment, setNewComment] = useState('');
+  const [useTimestamp, setUseTimestamp] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [likingComment, setLikingComment] = useState<string | null>(null);
 
   useEffect(() => {
     loadComments();
@@ -92,11 +96,82 @@ export function VideoComments({
         setComments(prev => [newCommentData.comment, ...prev]);
         setNewComment('');
         setUseTimestamp(false);
+        toast.success('Comment posted!');
       }
     } catch (error) {
       console.error('Error posting comment:', error);
+      toast.error('Failed to post comment');
     }
   };
+
+  // Handle liking a comment
+  const handleLikeComment = useCallback(async (commentId: string) => {
+    if (!currentUserId) {
+      toast.error('Please sign in to like comments');
+      return;
+    }
+
+    setLikingComment(commentId);
+
+    try {
+      const response = await fetch(`/api/video/${videoId}/comments/${commentId}/like`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        const { liked, likes_count } = await response.json();
+
+        // Update local state optimistically
+        setComments(prev => prev.map(comment =>
+          comment.id === commentId
+            ? { ...comment, likes_count, is_liked: liked }
+            : comment
+        ));
+
+        toast.success(liked ? 'Comment liked!' : 'Like removed');
+      }
+    } catch (error) {
+      console.error('Error liking comment:', error);
+      toast.error('Failed to like comment');
+    } finally {
+      setLikingComment(null);
+    }
+  }, [videoId, currentUserId]);
+
+  // Handle replying to a comment
+  const handleReplyToComment = useCallback(async (parentCommentId: string) => {
+    if (!currentUserId || !replyText.trim()) return;
+
+    try {
+      const response = await fetch(`/api/video/${videoId}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: replyText,
+          parent_comment_id: parentCommentId
+        })
+      });
+
+      if (response.ok) {
+        const { comment: newReply } = await response.json();
+
+        // Add reply to the parent comment's replies
+        setComments(prev => prev.map(comment =>
+          comment.id === parentCommentId
+            ? { ...comment, replies: [...(comment.replies || []), newReply] }
+            : comment
+        ));
+
+        setReplyText('');
+        setReplyingTo(null);
+        toast.success('Reply posted!');
+      }
+    } catch (error) {
+      console.error('Error posting reply:', error);
+      toast.error('Failed to post reply');
+    }
+  }, [videoId, currentUserId, replyText]);
 
   const CommentCard = ({ comment }: { comment: VideoComment }) => (
     <Card className="mb-4">
@@ -141,18 +216,92 @@ export function VideoComments({
             <p className="text-sm mb-3 whitespace-pre-wrap">{comment.content}</p>
             
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" className="h-8 px-2">
-                <ThumbsUp className="h-3 w-3 mr-1" />
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn("h-8 px-2", comment.is_liked && "text-blue-500")}
+                onClick={() => handleLikeComment(comment.id)}
+                disabled={likingComment === comment.id}
+              >
+                {likingComment === comment.id ? (
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                ) : (
+                  <ThumbsUp className={cn("h-3 w-3 mr-1", comment.is_liked && "fill-current")} />
+                )}
                 {comment.likes_count || 0}
               </Button>
-              
+
               {currentUserId && (
-                <Button variant="ghost" size="sm" className="h-8 px-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2"
+                  onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                >
                   <Reply className="h-3 w-3 mr-1" />
                   Reply
                 </Button>
               )}
             </div>
+
+            {/* Reply Form */}
+            {replyingTo === comment.id && (
+              <div className="mt-3 pl-11 space-y-2">
+                <Textarea
+                  placeholder={`Reply to ${comment.user.display_name}...`}
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  className="min-h-[60px] resize-none text-sm"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => handleReplyToComment(comment.id)}
+                    disabled={!replyText.trim()}
+                  >
+                    <Send className="h-3 w-3 mr-1" />
+                    Reply
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setReplyingTo(null);
+                      setReplyText('');
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Nested Replies */}
+            {comment.replies && comment.replies.length > 0 && (
+              <div className="mt-3 pl-11 space-y-3 border-l-2 border-muted">
+                {comment.replies.map((reply) => (
+                  <div key={reply.id} className="pl-3">
+                    <div className="flex items-start gap-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={reply.user.avatar_url} alt={reply.user.display_name || 'User'} />
+                        <AvatarFallback className="text-xs">
+                          {reply.user.display_name?.charAt(0) || <User className="h-3 w-3" />}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-xs">{reply.user.display_name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(reply.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{reply.content}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
