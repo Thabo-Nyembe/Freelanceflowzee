@@ -179,7 +179,7 @@ export default function AIVoiceSynthesisPage() {
   const estimatedDuration = estimateDuration(characterCount, speed[0])
   const estimatedCost = calculateCost(characterCount, selectedVoice?.isPremium || false)
 
-  const handleSynthesize = () => {
+  const handleSynthesize = async () => {
     logger.info('Starting voice synthesis', {
       voice: selectedVoice.name,
       voiceId: selectedVoice.id,
@@ -199,24 +199,77 @@ export default function AIVoiceSynthesisPage() {
     })
 
     setIsSynthesizing(true)
-    setTimeout(() => {
-      setIsSynthesizing(false)
 
-      const fileSize = Math.round(estimatedDuration * (audioQuality === 'high' ? 128 : audioQuality === 'medium' ? 96 : 64) / 8)
+    const startTime = Date.now()
+    const fileSize = Math.round(estimatedDuration * (audioQuality === 'high' ? 128 : audioQuality === 'medium' ? 96 : 64) / 8)
 
-      logger.info('Voice synthesized successfully', {
-        voice: selectedVoice.name,
-        characterCount,
-        duration: estimatedDuration,
-        cost: estimatedCost,
-        fileSize,
-        format: audioFormat
-      })
+    // Save synthesis to database
+    if (userId) {
+      try {
+        const { createVoiceSynthesis, incrementVoiceUsage, trackVoiceAnalytics } = await import('@/lib/ai-voice-queries')
 
-      toast.success('Voice synthesized successfully', {
-        description: `${selectedVoice.name} - ${characterCount} chars - ${estimatedDuration}s - ${fileSize}KB ${audioFormat.toUpperCase()} - $${estimatedCost.toFixed(4)} - Ready to download`
-      })
-    }, 2000)
+        // Simulate synthesis processing
+        await new Promise(resolve => setTimeout(resolve, 2000))
+        const processingTime = (Date.now() - startTime) / 1000
+
+        // Create synthesis record
+        const { data: synthesis, error } = await createVoiceSynthesis(userId, {
+          voice_id: selectedVoice.id,
+          text: text,
+          style: 'professional',
+          speed: speed[0],
+          pitch: pitch[0],
+          volume: volume[0],
+          format: audioFormat as any,
+          quality: audioQuality as any,
+          duration: estimatedDuration,
+          file_size: fileSize * 1024,
+          character_count: characterCount,
+          processing_time: processingTime,
+          cost: estimatedCost
+        })
+
+        if (error) throw new Error(error.message || 'Failed to save synthesis')
+
+        // Track voice usage
+        await incrementVoiceUsage(selectedVoice.id)
+
+        // Track analytics
+        await trackVoiceAnalytics(userId, {
+          total_syntheses: 1,
+          total_characters: characterCount,
+          total_duration: estimatedDuration,
+          total_cost: estimatedCost
+        })
+
+        setIsSynthesizing(false)
+        logger.info('Voice synthesis saved to database', {
+          synthesisId: synthesis?.id,
+          voice: selectedVoice.name,
+          characterCount,
+          duration: estimatedDuration
+        })
+
+        toast.success('Voice synthesized successfully', {
+          description: `${selectedVoice.name} - ${characterCount} chars - ${estimatedDuration}s - ${fileSize}KB ${audioFormat.toUpperCase()} - $${estimatedCost.toFixed(4)} - Ready to download`
+        })
+        announce('Voice synthesis completed', 'polite')
+      } catch (err) {
+        setIsSynthesizing(false)
+        logger.error('Voice synthesis failed', { error: err })
+        toast.error('Synthesis failed', {
+          description: err instanceof Error ? err.message : 'Please try again'
+        })
+      }
+    } else {
+      // Fallback for non-authenticated users
+      setTimeout(() => {
+        setIsSynthesizing(false)
+        toast.success('Voice synthesized successfully', {
+          description: `${selectedVoice.name} - ${characterCount} chars - ${estimatedDuration}s - ${fileSize}KB ${audioFormat.toUpperCase()} - $${estimatedCost.toFixed(4)} - Ready to download`
+        })
+      }, 2000)
+    }
   }
 
   const handleCopySSML = () => {

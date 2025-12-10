@@ -215,24 +215,86 @@ export default function AICodeCompletionPage() {
     loadAICodeData()
   }, [userId, announce, selectedLanguage]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleComplete = useCallback(() => {
+  const handleComplete = useCallback(async () => {
+    if (!codeInput.trim()) {
+      toast.error('Please enter some code first')
+      return
+    }
+
     setIsCompleting(true)
-    setTimeout(() => {
-      const mockCompletion = '// AI-generated completion\n' +
-        codeInput + '\n' +
-        '  try {\n' +
-        '    // Implementation logic here\n' +
-        '    const result = await processData(data)\n' +
-        '    return result\n' +
-        '  } catch (error) {\n' +
-        '    console.error(\'Error:\', error)\n' +
-        '    throw new Error(\'Processing failed\')\n' +
-        '  }\n'
-      setCompletion(mockCompletion)
-      setSuggestions(['Add error handling', 'Optimize performance', 'Add TypeScript types'])
-      setIsCompleting(false)
-    }, 1500)
-  }, [codeInput])
+    const startTime = Date.now()
+
+    const mockCompletion = '// AI-generated completion\n' +
+      codeInput + '\n' +
+      '  try {\n' +
+      '    // Implementation logic here\n' +
+      '    const result = await processData(data)\n' +
+      '    return result\n' +
+      '  } catch (error) {\n' +
+      '    console.error(\'Error:\', error)\n' +
+      '    throw new Error(\'Processing failed\')\n' +
+      '  }\n'
+
+    const completionSuggestions = ['Add error handling', 'Optimize performance', 'Add TypeScript types']
+
+    // Save completion to database
+    if (userId) {
+      try {
+        const { createCodeCompletion, updateCodeStats } = await import('@/lib/ai-code-queries')
+        const processingTime = Date.now() - startTime
+
+        const { data: completionData, error } = await createCodeCompletion(userId, {
+          language: selectedLanguage as ProgrammingLanguage,
+          original_code: codeInput,
+          completed_code: mockCompletion,
+          prompt: 'Auto-complete code',
+          model: 'gpt-4',
+          confidence: 0.92,
+          tokens_used: Math.ceil(codeInput.length / 4) + Math.ceil(mockCompletion.length / 4),
+          processing_time: processingTime,
+          suggestions: completionSuggestions
+        })
+
+        if (error) {
+          logger.error('Failed to save completion to database', { error })
+        } else {
+          // Update user stats
+          await updateCodeStats(userId, {
+            total_completions: 1,
+            total_tokens_used: Math.ceil(codeInput.length / 4) + Math.ceil(mockCompletion.length / 4)
+          })
+          logger.info('Code completion saved to database', { completionId: completionData?.id })
+        }
+
+        setCompletion(mockCompletion)
+        setSuggestions(completionSuggestions)
+        setIsCompleting(false)
+
+        toast.success('Code Completed', {
+          description: `${mockCompletion.split('\n').length} lines generated - ${completionSuggestions.length} suggestions`
+        })
+        announce('Code completion generated', 'polite')
+      } catch (err) {
+        logger.error('Exception during completion', { error: err })
+        setCompletion(mockCompletion)
+        setSuggestions(completionSuggestions)
+        setIsCompleting(false)
+        toast.success('Code Completed', {
+          description: `${mockCompletion.split('\n').length} lines generated`
+        })
+      }
+    } else {
+      // Fallback for non-authenticated users
+      setTimeout(() => {
+        setCompletion(mockCompletion)
+        setSuggestions(completionSuggestions)
+        setIsCompleting(false)
+        toast.success('Code Completed', {
+          description: `${mockCompletion.split('\n').length} lines generated`
+        })
+      }, 1500)
+    }
+  }, [codeInput, userId, selectedLanguage, announce])
 
   const analyzeBugs = () => {
     const mockBugs = [
