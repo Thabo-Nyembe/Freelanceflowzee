@@ -37,7 +37,7 @@ BEGIN
     RAISE NOTICE '📝 Please create a user first:';
     RAISE NOTICE '   1. Go to Auth > Users in Supabase Dashboard';
     RAISE NOTICE '   2. Click "Add user" > "Create new user"';
-    RAISE NOTICE '   3. Email: test@kazi.dev, Password: Trapster103';
+    RAISE NOTICE '   3. Email: test@kazi.dev, Password: test12345';
     RAISE NOTICE '   4. Enable "Auto-confirm user"';
     RAISE NOTICE '   5. Then run this script again';
     RETURN;

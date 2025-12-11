@@ -11,7 +11,7 @@ echo ""
 
 # Database connection details
 PROJECT_REF="gcinvwprtlnwuwuvmrux"
-DB_PASSWORD="Trapster103"
+DB_PASSWORD="test12345"
 DB_HOST="aws-0-us-east-1.pooler.supabase.com"
 DB_PORT="5432"
 DB_NAME="postgres"

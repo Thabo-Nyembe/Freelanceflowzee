@@ -90,7 +90,7 @@ Users can now sign in with:
 1. ✅ **Google** - One-click sign in
 2. ✅ **GitHub** - One-click sign in
 3. ✅ **Email/Password** - Traditional login
-   - Test account: `test@kazi.dev` / `Trapster103`
+   - Test account: `test@kazi.dev` / `test12345`
 
 ### Automatic Features
 

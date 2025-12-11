@@ -11,7 +11,7 @@ const path = require('path')
 const { Client } = require('pg')
 
 const PROJECT_REF = 'gcinvwprtlnwuwuvmrux'
-const DB_PASSWORD = 'Trapster103'
+const DB_PASSWORD = 'test12345'
 
 // Try direct connection (non-pooler)
 const connectionString = `postgresql://postgres:${DB_PASSWORD}@db.${PROJECT_REF}.supabase.co:5432/postgres`

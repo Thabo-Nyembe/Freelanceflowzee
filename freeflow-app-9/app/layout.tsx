@@ -6,6 +6,7 @@ import { Analytics } from '@vercel/analytics/react'
 
 import { Context7Provider } from '@/components/providers/context7-provider'
 import { Providers } from '@/components/providers'
+import { SessionProvider } from '@/components/providers/session-provider'
 import { RouteProgress } from '@/components/ui/route-progress'
 import './globals.css'
 import { ErrorBoundary } from "react-error-boundary"
@@ -106,12 +107,14 @@ export default function RootLayout({
             {/* Premium Route Progress Bar */}
             <RouteProgress height={3} showSpinner={false} />
 
-            <Providers>
-              <Context7Provider>
-                <Toaster />
-                {children}
-              </Context7Provider>
-            </Providers>
+            <SessionProvider>
+              <Providers>
+                <Context7Provider>
+                  <Toaster />
+                  {children}
+                </Context7Provider>
+              </Providers>
+            </SessionProvider>
             <Analytics />
           </ThemeProvider>
         </ErrorBoundary>

@@ -31,47 +31,63 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.agreedToTerms) {
-      alert('Please agree to the Terms of Service and Privacy Policy')
+      toast.error('Please agree to the Terms of Service and Privacy Policy')
       return
     }
 
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
-      alert('Please fill in all required fields')
+      toast.error('Please fill in all required fields')
       return
     }
 
     if (formData.password.length < 8) {
-      alert('Password must be at least 8 characters long')
+      toast.error('Password must be at least 8 characters long')
       return
     }
 
     setIsLoading(true)
 
-    // Simulate signup delay
-    setTimeout(() => {
-      // Store auth state
-      localStorage.setItem('kazi-auth', 'true')
-      localStorage.setItem('kazi-user', JSON.stringify({
-        email: formData.email,
-        name: `${formData.firstName} ${formData.lastName}`,
-        firstName: formData.firstName,
-        lastName: formData.lastName
-      }))
+    try {
+      // Call the signup API
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          name: `${formData.firstName} ${formData.lastName}`,
+          role: 'user',
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Signup failed')
+      }
 
       // Success feedback
       toast.success('Account created successfully!')
+      toast.success(`🎉 Welcome to KAZI, ${formData.firstName}!`)
 
+      // Show next steps
       setTimeout(() => {
-        alert(`🎉 Welcome to KAZI, ${formData.firstName}!\n\nNext Steps:\n• Complete your profile setup\n• Take the interactive platform tour\n• Create your first project\n• Explore AI-powered tools\n• Connect with the community\n• Invite team members to collaborate\n• Your 30-day free trial is now active!`)
-      }, 500)
+        toast.success('Please check your email to verify your account')
+      }, 1000)
 
-      // Redirect to dashboard after 2.5 seconds (longer for celebration)
+      // Redirect to login after 2.5 seconds
       setTimeout(() => {
-        router.push('/dashboard')
+        router.push('/login?message=Account created! Please log in.')
       }, 2500)
-    }, 1000)
+    } catch (error: any) {
+      console.error('Signup error:', error)
+      toast.error(error.message || 'Failed to create account')
+      setIsLoading(false)
+    }
   }
 
   const handleInputChange = (field: string, value: string | boolean) => {

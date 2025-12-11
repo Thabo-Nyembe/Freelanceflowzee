@@ -189,7 +189,7 @@ User logged in to dashboard!
 
 ```
 Email: test@kazi.dev
-Password: Trapster103
+Password: test12345
 ```
 
 ### Test OAuth (After Configuration)

@@ -1,0 +1,143 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
+import bcrypt from 'bcryptjs'
+import { z } from 'zod'
+
+// Initialize Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+)
+
+// Validation schema
+const signupSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  role: z.enum(['user', 'freelancer', 'client']).optional().default('user')
+})
+
+/**
+ * User Registration API Route
+ *
+ * POST /api/auth/signup
+ *
+ * Creates a new user account with email/password authentication
+ *
+ * @body email - User email address
+ * @body password - User password (min 8 characters)
+ * @body name - User full name
+ * @body role - User role (optional, defaults to 'user')
+ *
+ * @returns User object (without password)
+ */
+export async function POST(request: NextRequest) {
+  try {
+    // Parse request body
+    const body = await request.json()
+
+    // Validate input
+    const validationResult = signupSchema.safeParse(body)
+    if (!validationResult.success) {
+      return NextResponse.json(
+        {
+          error: 'Validation failed',
+          details: validationResult.error.errors
+        },
+        { status: 400 }
+      )
+    }
+
+    const { email, password, name, role } = validationResult.data
+
+    // Check if user already exists
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email.toLowerCase())
+      .single()
+
+    if (existingUser) {
+      return NextResponse.json(
+        { error: 'User with this email already exists' },
+        { status: 409 }
+      )
+    }
+
+    // Hash password
+    const saltRounds = 12
+    const passwordHash = await bcrypt.hash(password, saltRounds)
+
+    // Create user in database
+    const { data: newUser, error: insertError } = await supabase
+      .from('users')
+      .insert({
+        email: email.toLowerCase(),
+        password_hash: passwordHash,
+        name,
+        role,
+        email_verified: false, // Set to false initially
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select('id, email, name, role, created_at')
+      .single()
+
+    if (insertError) {
+      console.error('Database insert error:', insertError)
+      return NextResponse.json(
+        { error: 'Failed to create user account' },
+        { status: 500 }
+      )
+    }
+
+    // TODO: Send email verification email
+    // await sendVerificationEmail(newUser.email, newUser.id)
+
+    // Return success response (without password)
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Account created successfully. Please check your email to verify your account.',
+        user: {
+          id: newUser.id,
+          email: newUser.email,
+          name: newUser.name,
+          role: newUser.role
+        }
+      },
+      { status: 201 }
+    )
+  } catch (error) {
+    console.error('Signup error:', error)
+    return NextResponse.json(
+      { error: 'An unexpected error occurred during signup' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * Get signup configuration
+ *
+ * GET /api/auth/signup
+ *
+ * Returns available signup options and configuration
+ */
+export async function GET() {
+  return NextResponse.json({
+    availableRoles: ['user', 'freelancer', 'client'],
+    passwordRequirements: {
+      minLength: 8,
+      requiresUppercase: false,
+      requiresLowercase: false,
+      requiresNumber: false,
+      requiresSpecial: false
+    },
+    emailVerificationRequired: true,
+    oauthProviders: [
+      ...(process.env.GOOGLE_CLIENT_ID ? ['google'] : []),
+      ...(process.env.GITHUB_CLIENT_ID ? ['github'] : [])
+    ]
+  })
+}

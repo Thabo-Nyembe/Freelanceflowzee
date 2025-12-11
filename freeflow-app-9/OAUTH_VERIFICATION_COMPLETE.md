@@ -34,7 +34,7 @@ Visit: http://localhost:9323/login
 **Test Credentials:**
 ```
 Email: test@kazi.dev
-Password: Trapster103
+Password: test12345
 ```
 
 **Expected Flow:**
@@ -101,7 +101,7 @@ Password: Trapster103
 
 4. **Test Credentials** (development only):
    - Email: test@kazi.dev
-   - Password: Trapster103
+   - Password: test12345
 
 5. **Sign Up Link:**
    - "Don't have an account? Sign up for free"

@@ -1,66 +1,135 @@
 /**
- * KAZI – Ultra-light Middleware
- * Executes ONLY when strictly necessary to minimise Vercel Edge Function
- * invocations and associated costs.
+ * KAZI – Production Middleware with NextAuth Integration
+ * Handles authentication, authorization, and security headers
  */
-import type { NextRequest } from 'next/server';
-import { NextResponse } from 'next/server';
+import { withAuth } from 'next-auth/middleware'
+import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server'
 
+// Public routes that don't require authentication
 const publicRoutes = [
   '/',
-  '/landing', '/login', '/signup', '/features', '/how-it-works', '/docs', '/tutorials',
-  '/community', '/api-docs', '/demo', '/support', '/contact', '/payment', '/blog',
-  '/newsletter', '/privacy', '/terms', '/pricing', '/careers', '/cookies',
-  '/book-appointment', '/community-showcase', '/enhanced-collaboration-demo'
-];
+  '/landing',
+  '/login',
+  '/signup',
+  '/features',
+  '/how-it-works',
+  '/docs',
+  '/tutorials',
+  '/community',
+  '/api-docs',
+  '/demo',
+  '/support',
+  '/contact',
+  '/payment',
+  '/blog',
+  '/newsletter',
+  '/privacy',
+  '/terms',
+  '/pricing',
+  '/careers',
+  '/cookies',
+  '/book-appointment',
+  '/community-showcase',
+  '/enhanced-collaboration-demo',
+  '/verify-email',
+  '/forgot-password',
+  '/reset-password'
+]
 
-// Allow all dashboard routes
-const isDashboardRoute = (pathname: string) => pathname.startsWith('/dashboard');
+// API routes that don't require authentication
+const publicApiRoutes = [
+  '/api/auth',
+  '/api/health',
+  '/api/contact'
+]
 
-export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-
-  // ----------------------------------------------------------
-  // 1. Bypass middleware for static assets and most API routes
-  // ----------------------------------------------------------
-  if (
-    pathname.startsWith('/_next') ||          // Next.js internals
-    pathname.startsWith('/static') ||
-    pathname.startsWith('/images') ||
-    pathname.match(/^\/favicon\.(?:ico|png|svg)$/) ||
-    (pathname.startsWith('/api') && !pathname.startsWith('/api/health')) // allow /api/health
-  ) {
-    return NextResponse.next();
-  }
-
-  // ----------------------------------------------------------
-  // 2. Allow public pages and all dashboard routes through with zero processing
-  // ----------------------------------------------------------
-  if (publicRoutes.includes(pathname) || isDashboardRoute(pathname)) {
-    return NextResponse.next();
-  }
-
-  // ----------------------------------------------------------
-  // 3. Apply ultra-light security headers (single execution)
-  // ----------------------------------------------------------
-  const res = NextResponse.next();
-
-  // Basic security headers – add only once per matching request
-  res.headers.set('X-Content-Type-Options', 'nosniff');
-  res.headers.set('Referrer-Policy', 'origin-when-cross-origin');
-  res.headers.set('X-Frame-Options', 'DENY');
-  res.headers.set('X-XSS-Protection', '1; mode=block');
-
-  // Only add a strict CSP in production to avoid local-dev issues
-  if (process.env.NODE_ENV === 'production') {
-    res.headers.set(
-      'Content-Security-Policy',
-      "default-src 'self'; img-src 'self' data: blob:; object-src 'none'; frame-ancestors 'none';"
-    );
-  }
-
-  return res;
+// Check if route is public
+function isPublicRoute(pathname: string): boolean {
+  return publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
 }
+
+// Check if API route is public
+function isPublicApiRoute(pathname: string): boolean {
+  return publicApiRoutes.some(route => pathname.startsWith(route))
+}
+
+// Protected routes that require authentication
+const isDashboardRoute = (pathname: string) => pathname.startsWith('/dashboard')
+const isProtectedRoute = (pathname: string) =>
+  isDashboardRoute(pathname) ||
+  pathname.startsWith('/app') ||
+  pathname.startsWith('/projects') ||
+  pathname.startsWith('/analytics')
+
+export default withAuth(
+  function middleware(req: NextRequest) {
+    const { pathname } = req.nextUrl
+
+    // ----------------------------------------------------------
+    // 1. Bypass middleware for static assets
+    // ----------------------------------------------------------
+    if (
+      pathname.startsWith('/_next') ||
+      pathname.startsWith('/static') ||
+      pathname.startsWith('/images') ||
+      pathname.match(/^\/favicon\.(?:ico|png|svg)$/)
+    ) {
+      return NextResponse.next()
+    }
+
+    // ----------------------------------------------------------
+    // 2. Apply security headers
+    // ----------------------------------------------------------
+    const res = NextResponse.next()
+
+    // Basic security headers
+    res.headers.set('X-Content-Type-Options', 'nosniff')
+    res.headers.set('Referrer-Policy', 'origin-when-cross-origin')
+    res.headers.set('X-Frame-Options', 'DENY')
+    res.headers.set('X-XSS-Protection', '1; mode=block')
+
+    // Strict CSP in production
+    if (process.env.NODE_ENV === 'production') {
+      res.headers.set(
+        'Content-Security-Policy',
+        "default-src 'self'; img-src 'self' data: blob: https:; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none';"
+      )
+    }
+
+    return res
+  },
+  {
+    callbacks: {
+      // Only check authentication for protected routes
+      authorized: ({ req, token }) => {
+        const { pathname } = req.nextUrl
+
+        // Allow public routes
+        if (isPublicRoute(pathname)) {
+          return true
+        }
+
+        // Allow public API routes
+        if (isPublicApiRoute(pathname)) {
+          return true
+        }
+
+        // Require authentication for protected routes
+        if (isProtectedRoute(pathname)) {
+          return !!token
+        }
+
+        // Allow everything else (will be caught by security headers)
+        return true
+      }
+    },
+    pages: {
+      signIn: '/login',
+      error: '/login'
+    }
+  }
+)
 
 // ----------------------------------------------------------
 // 4. Path matcher – ensures the middleware is only invoked on

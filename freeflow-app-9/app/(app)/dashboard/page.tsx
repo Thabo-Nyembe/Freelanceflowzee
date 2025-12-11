@@ -1888,6 +1888,72 @@ export default function DashboardPage() {
             </div>
           </LiquidGlassCardContent>
         </LiquidGlassCard>
+
+        {/* Recent Activity Feed */}
+        <ScrollReveal animation="fade-up" delay={0.4}>
+          <LiquidGlassCard variant="tinted" hoverEffect={false}>
+            <LiquidGlassCardHeader>
+              <div className="flex items-center justify-between">
+                <LiquidGlassCardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-blue-500" />
+                  <span>Recent Activity</span>
+                  <Badge className="bg-blue-500 text-white text-xs">
+                    Live
+                  </Badge>
+                </LiquidGlassCardTitle>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Last 10 updates</p>
+              </div>
+            </LiquidGlassCardHeader>
+            <LiquidGlassCardContent>
+              {liveActivities && liveActivities.length > 0 ? (
+                <div className="space-y-3">
+                  {liveActivities.map((activity, index) => (
+                    <div
+                      key={activity.id || index}
+                      className="flex items-start gap-3 p-3 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-white/80 dark:hover:bg-gray-800/80 transition-colors border border-gray-200 dark:border-gray-700"
+                    >
+                      <div className={cn(
+                        "p-2 rounded-lg flex-shrink-0",
+                        activity.type === 'project' && "bg-blue-100 dark:bg-blue-900/30",
+                        activity.type === 'task' && "bg-green-100 dark:bg-green-900/30",
+                        activity.type === 'file' && "bg-purple-100 dark:bg-purple-900/30"
+                      )}>
+                        {activity.type === 'project' && <FolderOpen className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
+                        {activity.type === 'task' && <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />}
+                        {activity.type === 'file' && <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          {activity.message}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          {activity.time}
+                        </p>
+                      </div>
+                      <Badge
+                        className={cn(
+                          "flex-shrink-0",
+                          activity.status === 'success' && "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+                          activity.status === 'info' && "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                        )}
+                      >
+                        {activity.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Activity className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                  <p className="text-sm text-gray-600 dark:text-gray-400">No recent activity</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                    Your activity will appear here once you start using the platform
+                  </p>
+                </div>
+              )}
+            </LiquidGlassCardContent>
+          </LiquidGlassCard>
+        </ScrollReveal>
       </div>
     </ScrollArea>
   )

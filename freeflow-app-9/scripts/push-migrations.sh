@@ -10,7 +10,7 @@ echo "============================================================"
 echo ""
 
 PROJECT_REF="gcinvwprtlnwuwuvmrux"
-DB_PASSWORD="Trapster103"
+DB_PASSWORD="test12345"
 
 export SUPABASE_DB_PASSWORD="$DB_PASSWORD"
 

@@ -25,7 +25,7 @@ Visit: https://supabase.com/dashboard/project/gcinvwprtlnwuwuvmrux/auth/provider
 3. Click **"Create new user"**
 4. Fill in:
    - **Email:** test@kazi.dev
-   - **Password:** Trapster103
+   - **Password:** test12345
    - **Auto-confirm user:** ✅ Yes (IMPORTANT!)
 5. Click **"Create user"**
 
@@ -52,7 +52,7 @@ This creates:
 
 ```
 Email: test@kazi.dev
-Password: Trapster103
+Password: test12345
 ```
 
 **Important:** Save these credentials! You'll use them for all testing.
@@ -256,4 +256,4 @@ localStorage.clear()
 
 *Last Updated: November 25, 2025*
 *Test User: test@kazi.dev*
-*Password: Trapster103*
+*Password: test12345*

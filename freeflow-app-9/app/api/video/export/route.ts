@@ -1,138 +1,205 @@
+/**
+ * Video Export API
+ *
+ * Production-ready video export endpoint with real FFmpeg processing
+ * Supports multiple formats, quality presets, and background processing
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createFeatureLogger } from '@/lib/logger'
+import { createClient } from '@/lib/supabase/server'
+import { queueExportJob, getJobStatus } from '@/lib/video/video-queue'
+import { getVideoMetadata, checkFFmpegAvailability } from '@/lib/video/ffmpeg-processor'
+import path from 'path'
+import fs from 'fs/promises'
 
 const logger = createFeatureLogger('API-VideoExport')
 
-/**
- * Video Export API
- * Handles video export with multiple format options
- */
+// Supported formats and their configurations
+const SUPPORTED_FORMATS = ['mp4', 'webm', 'mov', 'avi', 'mkv'] as const
+const QUALITY_PRESETS = ['low', 'medium', 'high', 'ultra'] as const
+const RESOLUTION_PRESETS = ['720p', '1080p', '1440p', '4k', 'original'] as const
 
+// Export directory
+const EXPORT_DIR = process.env.VIDEO_EXPORT_DIR || '/tmp/video-exports'
+
+interface ExportRequest {
+  projectId: string
+  projectName?: string
+  format: typeof SUPPORTED_FORMATS[number]
+  quality: typeof QUALITY_PRESETS[number]
+  resolution: typeof RESOLUTION_PRESETS[number]
+  fps?: number
+  codec?: string
+  audioCodec?: string
+  audioBitrate?: string
+  videoBitrate?: string
+  twoPass?: boolean
+  metadata?: {
+    title?: string
+    author?: string
+    description?: string
+    tags?: string[]
+  }
+}
+
+/**
+ * POST /api/video/export
+ * Start a video export job
+ */
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const {
-      projectId,
-      projectName,
-      format,
-      quality,
-      resolution,
-      fps,
-      codec,
-      clips,
-      effects,
-      audioSettings,
-      metadata
-    } = body
+    const body: ExportRequest = await request.json()
 
     // Validate required fields
-    if (!projectId || !format) {
+    if (!body.projectId) {
       return NextResponse.json(
-        { error: 'Missing required fields: projectId, format' },
+        { success: false, error: 'Missing required field: projectId' },
         { status: 400 }
       )
     }
 
     // Validate format
-    const supportedFormats = ['mp4', 'webm', 'mov', 'avi', 'mkv']
-    if (!supportedFormats.includes(format.toLowerCase())) {
+    if (!body.format || !SUPPORTED_FORMATS.includes(body.format)) {
       return NextResponse.json(
-        { error: `Unsupported format. Supported formats: ${supportedFormats.join(', ')}` },
+        { success: false, error: `Invalid format. Supported: ${SUPPORTED_FORMATS.join(', ')}` },
         { status: 400 }
       )
     }
 
-    // Generate export job
-    const exportId = `export-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-    const outputFilename = `${projectName || 'video'}-${Date.now()}.${format}`
-
-    // Build export configuration
-    const exportConfig = {
-      exportId,
-      projectId,
-      projectName: projectName || 'Untitled Project',
-      status: 'queued',
-      progress: 0,
-      currentStep: 'Initializing',
-
-      // Output settings
-      format: format.toLowerCase(),
-      quality: quality || 'high',
-      resolution: resolution || '1920x1080',
-      fps: fps || 30,
-      codec: codec || getDefaultCodec(format),
-
-      // Audio settings
-      audioSettings: audioSettings || {
-        codec: 'aac',
-        bitrate: '192k',
-        sampleRate: 48000,
-        channels: 2
-      },
-
-      // Content
-      clips: clips || [],
-      effects: effects || [],
-
-      // Metadata
-      metadata: {
-        title: metadata?.title || projectName,
-        author: metadata?.author || 'Unknown',
-        description: metadata?.description || '',
-        tags: metadata?.tags || [],
-        ...metadata
-      },
-
-      // Output
-      outputFilename,
-      outputUrl: null,
-      outputSize: null,
-
-      // Timing
-      createdAt: new Date().toISOString(),
-      startedAt: null,
-      completedAt: null,
-      estimatedDuration: estimateExportDuration(clips, format, quality),
-
-      // Error handling
-      error: null,
-      retryCount: 0
+    // Validate quality
+    const quality = body.quality || 'high'
+    if (!QUALITY_PRESETS.includes(quality)) {
+      return NextResponse.json(
+        { success: false, error: `Invalid quality. Supported: ${QUALITY_PRESETS.join(', ')}` },
+        { status: 400 }
+      )
     }
 
-    logger.info('Export job created', {
-      exportId: exportConfig.exportId,
-      projectId: exportConfig.projectId,
-      projectName: exportConfig.projectName,
-      format: exportConfig.format,
-      quality: exportConfig.quality,
-      resolution: exportConfig.resolution,
-      fps: exportConfig.fps,
-      codec: exportConfig.codec,
-      audioCodec: exportConfig.audioSettings.codec,
-      audioBitrate: exportConfig.audioSettings.bitrate,
-      clipsCount: exportConfig.clips.length,
-      effectsCount: exportConfig.effects.length,
-      estimatedDuration: exportConfig.estimatedDuration,
-      outputFilename: exportConfig.outputFilename
+    // Validate resolution
+    const resolution = body.resolution || '1080p'
+    if (!RESOLUTION_PRESETS.includes(resolution)) {
+      return NextResponse.json(
+        { success: false, error: `Invalid resolution. Supported: ${RESOLUTION_PRESETS.join(', ')}` },
+        { status: 400 }
+      )
+    }
+
+    // Get authenticated user
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
+
+    // Get project from database
+    const { data: project, error: projectError } = await supabase
+      .from('video_projects')
+      .select('*')
+      .eq('id', body.projectId)
+      .eq('user_id', user.id)
+      .single()
+
+    if (projectError || !project) {
+      return NextResponse.json(
+        { success: false, error: 'Project not found or access denied' },
+        { status: 404 }
+      )
+    }
+
+    // Check if source file exists
+    const inputPath = project.file_path
+    if (!inputPath) {
+      return NextResponse.json(
+        { success: false, error: 'No source video file found for this project' },
+        { status: 400 }
+      )
+    }
+
+    // Check FFmpeg availability
+    const ffmpegAvailable = await checkFFmpegAvailability()
+    if (!ffmpegAvailable) {
+      logger.error('FFmpeg not available')
+      return NextResponse.json(
+        { success: false, error: 'Video processing service unavailable' },
+        { status: 503 }
+      )
+    }
+
+    // Ensure export directory exists
+    await fs.mkdir(EXPORT_DIR, { recursive: true })
+
+    // Get video metadata for duration estimation
+    let estimatedDuration = 60 // Default 1 minute
+    try {
+      const metadata = await getVideoMetadata(inputPath)
+      estimatedDuration = estimateExportTime(metadata.duration, body.format, quality, resolution)
+    } catch (err) {
+      logger.warn('Could not get video metadata', { error: err })
+    }
+
+    // Build export options
+    const exportOptions = {
+      format: body.format,
+      quality,
+      resolution,
+      fps: body.fps,
+      codec: body.codec,
+      audioCodec: body.audioCodec,
+      audioBitrate: body.audioBitrate,
+      videoBitrate: body.videoBitrate,
+      twoPass: body.twoPass
+    }
+
+    // Queue the export job
+    const jobId = await queueExportJob(
+      body.projectId,
+      user.id,
+      inputPath,
+      EXPORT_DIR,
+      exportOptions,
+      {
+        title: body.metadata?.title || body.projectName || project.title,
+        author: body.metadata?.author || user.email,
+        description: body.metadata?.description,
+        tags: body.metadata?.tags
+      }
+    )
+
+    // Update project status
+    await supabase
+      .from('video_projects')
+      .update({
+        status: 'processing',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', body.projectId)
+
+    logger.info('Export job queued', {
+      jobId,
+      projectId: body.projectId,
+      userId: user.id,
+      format: body.format,
+      quality,
+      resolution
     })
-
-    // In production:
-    // 1. Store job in database
-    // 2. Queue in background worker (Bull/BullMQ)
-    // 3. Process with FFmpeg
-    // 4. Upload to storage (S3/CDN)
-    // 5. Update job status
-
-    // Start async export processing
-    processExportJob(exportConfig)
 
     return NextResponse.json({
       success: true,
-      exportId,
+      jobId,
       status: 'queued',
       message: 'Export job queued successfully',
-      estimatedDuration: exportConfig.estimatedDuration,
-      outputFilename
+      estimatedDuration,
+      config: {
+        format: body.format,
+        quality,
+        resolution,
+        fps: body.fps || 'auto'
+      }
     })
 
   } catch (error) {
@@ -140,149 +207,149 @@ export async function POST(request: NextRequest) {
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined
     })
+
     return NextResponse.json(
-      { error: 'Failed to queue export job' },
+      {
+        success: false,
+        error: 'Failed to queue export job',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
 }
 
-// GET endpoint to check export status
+/**
+ * GET /api/video/export?jobId=xxx
+ * Get export job status
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const exportId = searchParams.get('exportId')
+    const jobId = searchParams.get('jobId')
 
-    if (!exportId) {
+    // If no jobId, return endpoint info
+    if (!jobId) {
+      const ffmpegAvailable = await checkFFmpegAvailability()
+
+      return NextResponse.json({
+        status: 'active',
+        endpoint: '/api/video/export',
+        version: '2.0.0',
+        ffmpegAvailable,
+        supportedFormats: SUPPORTED_FORMATS,
+        qualityPresets: QUALITY_PRESETS,
+        resolutionPresets: RESOLUTION_PRESETS,
+        features: [
+          'Multi-format export (MP4, WebM, MOV, AVI, MKV)',
+          'Quality presets (low, medium, high, ultra)',
+          'Resolution scaling (720p to 4K)',
+          'Custom codec selection',
+          'Audio configuration',
+          'Background processing',
+          'Progress tracking',
+          'Automatic thumbnail generation'
+        ]
+      })
+    }
+
+    // Get job status
+    const status = await getJobStatus(jobId)
+
+    if (!status) {
       return NextResponse.json(
-        { error: 'Missing exportId parameter' },
-        { status: 400 }
+        { success: false, error: 'Job not found' },
+        { status: 404 }
       )
     }
 
-    // In production: fetch from database/redis
-    // const exportJob = await redis.get(`export:${exportId}`)
-
-    // Mock export status with realistic progression
-    const mockStatuses = [
-      { progress: 10, currentStep: 'Preparing video clips' },
-      { progress: 25, currentStep: 'Processing effects' },
-      { progress: 45, currentStep: 'Encoding video' },
-      { progress: 65, currentStep: 'Processing audio' },
-      { progress: 85, currentStep: 'Finalizing export' },
-      { progress: 100, currentStep: 'Complete', status: 'completed' }
-    ]
-
-    // Simulate progression based on time
-    const randomProgress = mockStatuses[Math.floor(Math.random() * mockStatuses.length)]
-
-    const mockExportStatus = {
-      exportId,
-      status: randomProgress.status || 'processing',
-      progress: randomProgress.progress,
-      currentStep: randomProgress.currentStep,
-      outputUrl: randomProgress.progress === 100 ? `/exports/video-${exportId}.mp4` : null,
-      outputSize: randomProgress.progress === 100 ? '45.2 MB' : null,
-      error: null
+    // Build response
+    const response: any = {
+      success: true,
+      jobId: status.jobId,
+      type: status.type,
+      status: status.status,
+      progress: status.progress,
+      currentStep: status.currentStep,
+      createdAt: status.createdAt
     }
 
-    return NextResponse.json(mockExportStatus)
+    if (status.startedAt) {
+      response.startedAt = status.startedAt
+    }
+
+    if (status.status === 'completed') {
+      response.completedAt = status.completedAt
+      response.result = status.result
+    }
+
+    if (status.status === 'failed') {
+      response.completedAt = status.completedAt
+      response.error = status.error
+    }
+
+    return NextResponse.json(response)
 
   } catch (error) {
     logger.error('Export status API error', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
+      error: error instanceof Error ? error.message : 'Unknown error'
     })
+
     return NextResponse.json(
-      { error: 'Failed to get export status' },
+      {
+        success: false,
+        error: 'Failed to get export status',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
 }
 
-// Helper: Get default codec for format
-function getDefaultCodec(format: string): string {
-  const codecMap: Record<string, string> = {
-    'mp4': 'h264',
-    'webm': 'vp9',
-    'mov': 'h264',
-    'avi': 'h264',
-    'mkv': 'h265'
+/**
+ * Estimate export time based on video properties
+ */
+function estimateExportTime(
+  duration: number,
+  format: string,
+  quality: string,
+  resolution: string
+): number {
+  // Base: 1x realtime for medium quality 1080p
+  let multiplier = 1
+
+  // Quality multiplier
+  const qualityMultipliers: Record<string, number> = {
+    low: 0.5,
+    medium: 1,
+    high: 1.5,
+    ultra: 2.5
   }
-  return codecMap[format.toLowerCase()] || 'h264'
-}
+  multiplier *= qualityMultipliers[quality] || 1
 
-// Helper: Estimate export duration
-function estimateExportDuration(clips: any[], format: string, quality: string): number {
-  const totalDuration = clips?.reduce((sum, clip) => sum + (parseInt(clip.duration) || 10), 0) || 60
-
-  // Quality multipliers
-  const qualityMultiplier: Record<string, number> = {
-    'low': 0.5,
-    'medium': 1,
-    'high': 1.5,
-    'ultra': 2
+  // Resolution multiplier
+  const resolutionMultipliers: Record<string, number> = {
+    '720p': 0.7,
+    '1080p': 1,
+    '1440p': 1.5,
+    '4k': 2.5,
+    'original': 1
   }
+  multiplier *= resolutionMultipliers[resolution] || 1
 
-  // Format multipliers
-  const formatMultiplier: Record<string, number> = {
-    'mp4': 1,
-    'webm': 1.2,
-    'mov': 1.1,
-    'avi': 0.9,
-    'mkv': 1.3
+  // Format multiplier
+  const formatMultipliers: Record<string, number> = {
+    mp4: 1,
+    webm: 1.5,  // VP9 is slower
+    mov: 1,
+    avi: 0.9,
+    mkv: 1.2
   }
+  multiplier *= formatMultipliers[format] || 1
 
-  const baseTime = totalDuration
-  const qMult = qualityMultiplier[quality] || 1
-  const fMult = formatMultiplier[format] || 1
+  // Calculate estimated time in seconds
+  const estimatedSeconds = Math.ceil(duration * multiplier)
 
-  return Math.ceil(baseTime * qMult * fMult)
-}
-
-// Simulated export processing
-async function processExportJob(config: any) {
-  logger.info('Starting export job', {
-    exportId: config.exportId,
-    format: config.format,
-    quality: config.quality,
-    resolution: config.resolution,
-    codec: config.codec,
-    fps: config.fps,
-    audioCodec: config.audioSettings.codec,
-    audioBitrate: config.audioSettings.bitrate,
-    clipsCount: config.clips.length,
-    effectsCount: config.effects.length
-  })
-
-  // Simulate export stages
-  const stages = [
-    { name: 'Preparing video clips', duration: 2000 },
-    { name: 'Applying effects and transitions', duration: 3000 },
-    { name: 'Encoding video', duration: 5000 },
-    { name: 'Processing audio', duration: 2000 },
-    { name: 'Muxing streams', duration: 1500 },
-    { name: 'Finalizing export', duration: 1500 }
-  ]
-
-  let cumulativeTime = 0
-  for (const stage of stages) {
-    setTimeout(() => {
-      logger.debug('Export stage processing', {
-        exportId: config.exportId,
-        stage: stage.name
-      })
-    }, cumulativeTime)
-    cumulativeTime += stage.duration
-  }
-
-  setTimeout(() => {
-    logger.info('Export job completed', {
-      exportId: config.exportId,
-      outputFilename: config.outputFilename,
-      totalDuration: cumulativeTime
-    })
-    // In production: update database/redis with completion status
-    // and upload file to CDN
-  }, cumulativeTime)
+  // Add overhead for startup/finalization (30 seconds)
+  return estimatedSeconds + 30
 }

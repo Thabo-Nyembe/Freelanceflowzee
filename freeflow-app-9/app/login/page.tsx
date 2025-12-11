@@ -27,11 +27,10 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { BorderTrail } from '@/components/ui/border-trail'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { OAuthProviders } from '@/components/auth/OAuthProviders'
-import { createClient } from '@/lib/supabase/client'
+import { signIn } from 'next-auth/react'
 
 export default function LoginPage() {
   const router = useRouter()
-  const supabase = createClient()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -45,27 +44,36 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      console.log('🔐 Starting login process...')
+
+      // Use NextAuth.js credentials provider
+      const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
+        redirect: false, // Handle redirect manually to show toast
       })
 
-      if (error) {
-        throw error
+      console.log('📡 Login result:', result)
+
+      if (result?.error) {
+        console.error('❌ Login error:', result.error)
+        throw new Error(result.error)
       }
 
-      // Success feedback
+      if (!result?.ok) {
+        console.error('❌ Login failed: not ok')
+        throw new Error('Invalid email or password')
+      }
+
+      // Success! Session is now established
+      console.log('✅ Login successful, redirecting to dashboard...')
       toast.success('Login successful!')
 
+      // Use window.location for hard navigation (ensures middleware sees session)
       setTimeout(() => {
-        toast.success('✨ Welcome Back to KAZI! Redirecting to dashboard...')
+        window.location.href = '/dashboard'
       }, 500)
 
-      // Redirect to dashboard
-      setTimeout(() => {
-        router.push('/dashboard')
-        router.refresh()
-      }, 1500)
     } catch (error: any) {
       console.error('Login error:', error)
       toast.error(error.message || 'Invalid email or password')
@@ -253,7 +261,7 @@ export default function LoginPage() {
                 <LiquidGlassCard className="p-3 mt-4">
                   <p className="text-xs font-medium text-blue-400 mb-1">Test Account:</p>
                   <p className="text-xs text-gray-400">Email: test@kazi.dev</p>
-                  <p className="text-xs text-gray-400">Password: Trapster103</p>
+                  <p className="text-xs text-gray-400">Password: test12345</p>
                 </LiquidGlassCard>
               )}
 

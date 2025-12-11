@@ -13,7 +13,7 @@ Click **"Add user"** → **"Create new user"**
 Fill in:
 ```
 Email: test@kazi.dev
-Password: Trapster103
+Password: test12345
 Auto-confirm user: ✅ YES (Important!)
 ```
 
@@ -53,7 +53,7 @@ Visit: http://localhost:9323/auth/login
 Login:
 ```
 Email: test@kazi.dev
-Password: Trapster103
+Password: test12345
 ```
 
 **✅ You should see the dashboard with sample data!**
@@ -87,7 +87,7 @@ If you see this, **database is fully wired and working!** 🎊
 
 ### Can't login?
 - Check email is exactly: `test@kazi.dev`
-- Password: `Trapster103`
+- Password: `test12345`
 - Make sure "Auto-confirm" was checked
 
 ### No data showing?
