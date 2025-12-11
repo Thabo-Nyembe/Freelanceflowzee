@@ -36,6 +36,28 @@
   --radius: 0.75rem;
 }
 
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 240 5.9% 10%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+}
+
 * {
   @apply border-neutral-200;
 }
@@ -50,31 +72,9 @@
   }
 
   body {
-    @apply bg-white text-black;
+    @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
     min-height: 100vh;
-  }
-
-  /* FORCE WHITE BACKGROUNDS GLOBALLY - NO DARK MODE */
-  body, html, #__next, [data-theme="dark"], .dark,
-  div, section, article, aside, main, header, footer, nav,
-  [class*="bg-gray-"], [class*="bg-slate-"], [class*="bg-neutral-"],
-  [class*="bg-zinc-"], [class*="bg-stone-"] {
-    background-color: white !important;
-  }
-
-  /* Force black text for visibility */
-  h1, h2, h3, h4, h5, h6, p, span, a, button, input, textarea, label {
-    color: black !important;
-  }
-
-  /* Override specific dark background classes */
-  .bg-black, .bg-gray-900, .bg-gray-800, .bg-gray-700, .bg-gray-600,
-  .bg-slate-900, .bg-slate-800, .bg-slate-700, .bg-slate-600,
-  .bg-neutral-900, .bg-neutral-800, .bg-neutral-700, .bg-neutral-600,
-  .bg-zinc-900, .bg-zinc-800, .bg-zinc-700, .bg-zinc-600 {
-    background-color: white !important;
-    color: black !important;
   }
 
   /* Ensure proper font rendering across all devices */
@@ -83,19 +83,57 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
+
+  /* Skip to content link for accessibility (WCAG 2.4.1) */
+  .skip-to-content {
+    @apply absolute -top-10 left-4 z-50;
+    @apply bg-primary text-primary-foreground;
+    @apply px-4 py-2 rounded-md;
+    @apply focus:top-4 transition-all duration-200;
+    @apply font-medium shadow-lg;
+  }
+
+  /* Reduced motion support (WCAG 2.3.3) */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    :root {
+      --border: 240 10% 20%;
+      --input: 240 10% 20%;
+    }
+
+    .dark {
+      --border: 0 0% 80%;
+      --input: 0 0% 80%;
+    }
+  }
 }
 
-/* Glass morphism styles - Light mode only */
+/* Glassmorphism styles - Adaptive for light/dark mode */
 .glass-nav {
-  @apply bg-white/60 backdrop-blur-xl border-b border-[hsl(var(--border))] shadow-sm;
+  @apply bg-background/60 backdrop-blur-xl border-b border-[hsl(var(--border))] shadow-sm;
 }
 
 .glass-card {
-  @apply bg-white/60 backdrop-blur-xl border border-[hsl(var(--border))] rounded-2xl shadow-lg;
+  @apply bg-card/60 backdrop-blur-xl border border-[hsl(var(--border))] rounded-2xl shadow-lg;
 }
 
 .gradient-bg {
   @apply bg-gradient-to-br from-slate-50 via-rose-50/30 to-violet-50/40;
+}
+
+.dark .gradient-bg {
+  @apply bg-gradient-to-br from-slate-950 via-rose-950/30 to-violet-950/40;
 }
 
 /* Kazi Brand Button Styles */
@@ -484,6 +522,35 @@
 @keyframes pulse-ring {
   0% { transform: scale(0.8); opacity: 1; }
   100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* Kinetic Typography Keyframes - 2025 UI/UX Trends */
+@keyframes glitch-1 {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes glitch-2 {
+  0% { transform: translate(0); }
+  20% { transform: translate(2px, -2px); }
+  40% { transform: translate(2px, 2px); }
+  60% { transform: translate(-2px, -2px); }
+  80% { transform: translate(-2px, 2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
 }
 
 /* Animation utility classes */
