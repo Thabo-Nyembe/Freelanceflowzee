@@ -269,7 +269,7 @@ export function PaymentIntegrationStep({ onComplete, onSkip, onBack }: any) {
             <div className="flex gap-2">
               <Input
                 type={showKey ? 'text' : 'password'}
-                placeholder="sk_live_... or sk_test_..."
+                placeholder="kazi_prod_xxxxxxxxxxxxxxxxxxxxxxxxxxxx... or kazi_dev_xxxxxxxxxxxxxxxxxxxxxxxxxxxx..."
                 value={config.apiKey}
                 onChange={(e) => setConfig({ ...config, apiKey: e.target.value })}
                 className="font-mono text-sm"

@@ -268,7 +268,7 @@ const API_KEY_CONFIGS: APIKeyConfig[] = [
     estimatedCost: '2.9% + $0.30 per transaction',
     setupDifficulty: 'medium',
     setupTime: '5 minutes',
-    keyFormat: /^(sk_test_|sk_live_)[a-zA-Z0-9]{24}$/,
+    keyFormat: /^(kazi_dev_xxxxxxxxxxxxxxxxxxxxxxxxxxxx|kazi_prod_xxxxxxxxxxxxxxxxxxxxxxxxxxxx)[a-zA-Z0-9]{24}$/,
     keyPrefix: 'sk_',
     benefits: [
       'Industry standard',
