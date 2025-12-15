@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic'
 /**
  * API V2 - Groundbreaking API Management Dashboard
  * Server-side rendered with real-time client updates
+ * Now with real API keys and rate limits from database
  */
 export default async function APIV2Page() {
   const supabase = createServerComponentClient({ cookies })
@@ -14,6 +15,8 @@ export default async function APIV2Page() {
   const { data: { user } } = await supabase.auth.getUser()
 
   let endpoints: any[] = []
+  let apiKeys: any[] = []
+  let rateLimits: any[] = []
   let stats = {
     total: 0,
     active: 0,
@@ -24,7 +27,8 @@ export default async function APIV2Page() {
   }
 
   if (user) {
-    const { data } = await supabase
+    // Fetch API endpoints
+    const { data: endpointsData } = await supabase
       .from('api_endpoints')
       .select('*')
       .eq('user_id', user.id)
@@ -32,7 +36,26 @@ export default async function APIV2Page() {
       .order('total_requests', { ascending: false })
       .limit(100)
 
-    endpoints = data || []
+    endpoints = endpointsData || []
+
+    // Fetch API keys
+    const { data: keysData } = await supabase
+      .from('api_keys')
+      .select('*')
+      .eq('user_id', user.id)
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
+      .limit(50)
+
+    apiKeys = keysData || []
+
+    // Fetch rate limit tiers
+    const { data: tiersData } = await supabase
+      .from('rate_limit_tiers')
+      .select('*')
+      .eq('user_id', user.id)
+
+    rateLimits = tiersData || []
 
     if (endpoints.length > 0) {
       stats = {
@@ -50,6 +73,8 @@ export default async function APIV2Page() {
     <ApiClient
       initialEndpoints={endpoints}
       initialStats={stats}
+      initialApiKeys={apiKeys}
+      initialRateLimits={rateLimits}
     />
   )
 }

@@ -42,6 +42,15 @@ import {
 import { useDashboardWidgets, DashboardWidget } from '@/lib/hooks/use-dashboard-widgets'
 import { useProjects } from '@/lib/hooks/use-projects'
 
+interface TeamPerformanceItem {
+  id: string
+  member_name: string
+  member_avatar?: string
+  revenue: number
+  change_percent: number
+  rank: number
+}
+
 interface OverviewClientProps {
   initialWidgets: DashboardWidget[]
   initialStats: {
@@ -52,13 +61,15 @@ interface OverviewClientProps {
   }
   initialProjects: any[]
   initialActivity: any[]
+  initialTeamPerformance?: TeamPerformanceItem[]
 }
 
 export default function OverviewClient({
   initialWidgets,
   initialStats,
   initialProjects,
-  initialActivity
+  initialActivity,
+  initialTeamPerformance = []
 }: OverviewClientProps) {
   const { widgets, fetchWidgets } = useDashboardWidgets(initialWidgets)
   const { projects, stats: projectStats, fetchProjects } = useProjects(initialProjects)
@@ -97,12 +108,16 @@ export default function OverviewClient({
     }
   ]
 
-  const topPerformers = [
-    { rank: 1, name: "Sarah Johnson", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah", value: "$45.2K", change: 12 },
-    { rank: 2, name: "Michael Chen", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Michael", value: "$38.9K", change: 8 },
-    { rank: 3, name: "Emily Rodriguez", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emily", value: "$32.4K", change: 15 },
-    { rank: 4, name: "David Kim", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=David", value: "$28.1K", change: -2 }
-  ]
+  // Use real team performance data from database, with fallback to empty state
+  const topPerformers = initialTeamPerformance.length > 0
+    ? initialTeamPerformance.map(member => ({
+        rank: member.rank,
+        name: member.member_name,
+        avatar: member.member_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${member.member_name}`,
+        value: `$${(member.revenue / 1000).toFixed(1)}K`,
+        change: member.change_percent
+      }))
+    : [] // Empty state - no mock data
 
   const progressItems = [
     { label: "Monthly Revenue Goal", value: 87500, total: 100000, color: "bg-violet-600" },

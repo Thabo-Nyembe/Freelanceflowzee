@@ -36,6 +36,14 @@ import {
   Trash2
 } from 'lucide-react'
 import { useApiEndpoints, ApiEndpoint, getMethodColor, getStatusColor, formatRequests, formatLatency } from '@/lib/hooks/use-api-endpoints'
+import { useApiKeys, ApiKey, getKeyStatusColor as getApiKeyStatusColor, getEnvironmentColor, formatKeyDate } from '@/lib/hooks/use-api-keys'
+
+interface RateLimitTier {
+  id: string
+  tier_name: string
+  requests_limit: number
+  requests_used: number
+}
 
 interface ApiClientProps {
   initialEndpoints: ApiEndpoint[]
@@ -47,9 +55,11 @@ interface ApiClientProps {
     avgLatency: number
     avgSuccessRate: number
   }
+  initialApiKeys?: ApiKey[]
+  initialRateLimits?: RateLimitTier[]
 }
 
-export default function ApiClient({ initialEndpoints, initialStats }: ApiClientProps) {
+export default function ApiClient({ initialEndpoints, initialStats, initialApiKeys, initialRateLimits }: ApiClientProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<'hour' | 'day' | 'week'>('day')
   const [showApiKey, setShowApiKey] = useState<{ [key: string]: boolean }>({})
 
@@ -75,39 +85,31 @@ export default function ApiClient({ initialEndpoints, initialStats }: ApiClientP
     { label: 'Active Endpoints', value: String(stats.active || initialStats.active), change: 15.7, icon: <Key className="w-5 h-5" /> }
   ]
 
-  // Mock API keys for display (in production, these would come from a separate API)
-  const apiKeys = [
-    {
-      id: '1',
-      name: 'Production API Key',
-      key: 'kazi_prod_xxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-      environment: 'production',
-      status: 'active',
-      requests: 847000,
-      lastUsed: '2 minutes ago',
-      created: '2024-01-15',
-      rateLimit: 10000,
-      permissions: ['read', 'write', 'delete']
-    },
-    {
-      id: '2',
-      name: 'Development API Key',
-      key: 'kazi_dev_xxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-      environment: 'development',
-      status: 'active',
-      requests: 124000,
-      lastUsed: '5 minutes ago',
-      created: '2024-02-01',
-      rateLimit: 1000,
-      permissions: ['read', 'write']
-    }
-  ]
+  // Real API keys from database via props and hooks
+  const { keys: apiKeys, stats: keyStats, fetchKeys, createKey, revokeKey } = useApiKeys(initialApiKeys || [])
 
-  const rateLimits = [
-    { tier: 'Free', limit: 1000, used: 847, percentage: 84.7, color: 'from-gray-500 to-slate-500' },
-    { tier: 'Starter', limit: 10000, used: 6420, percentage: 64.2, color: 'from-blue-500 to-cyan-500' },
-    { tier: 'Professional', limit: 50000, used: 18900, percentage: 37.8, color: 'from-purple-500 to-pink-500' },
-    { tier: 'Enterprise', limit: 0, used: 847000, percentage: 0, color: 'from-green-500 to-emerald-500' }
+  // Fetch keys on mount if not provided
+  useEffect(() => {
+    if (!initialApiKeys?.length) {
+      fetchKeys()
+    }
+  }, [fetchKeys, initialApiKeys])
+
+  // Rate limits from database
+  const rateLimits = initialRateLimits?.length ? initialRateLimits.map(tier => ({
+    tier: tier.tier_name.charAt(0).toUpperCase() + tier.tier_name.slice(1),
+    limit: tier.requests_limit,
+    used: tier.requests_used,
+    percentage: tier.requests_limit > 0 ? (tier.requests_used / tier.requests_limit) * 100 : 0,
+    color: tier.tier_name === 'free' ? 'from-gray-500 to-slate-500' :
+           tier.tier_name === 'starter' ? 'from-blue-500 to-cyan-500' :
+           tier.tier_name === 'professional' ? 'from-purple-500 to-pink-500' :
+           'from-green-500 to-emerald-500'
+  })) : [
+    { tier: 'Free', limit: 1000, used: 0, percentage: 0, color: 'from-gray-500 to-slate-500' },
+    { tier: 'Starter', limit: 10000, used: 0, percentage: 0, color: 'from-blue-500 to-cyan-500' },
+    { tier: 'Professional', limit: 50000, used: 0, percentage: 0, color: 'from-purple-500 to-pink-500' },
+    { tier: 'Enterprise', limit: 0, used: 0, percentage: 0, color: 'from-green-500 to-emerald-500' }
   ]
 
   const topEndpoints = endpoints.slice(0, 5).map((endpoint, index) => ({
@@ -223,7 +225,15 @@ export default function ApiClient({ initialEndpoints, initialStats }: ApiClientP
             <BentoCard className="p-6 mb-6">
               <h3 className="text-xl font-semibold mb-4">API Keys</h3>
               <div className="space-y-3">
-                {apiKeys.map((apiKey) => (
+                {apiKeys.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Key className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                    <p>No API keys yet</p>
+                    <ModernButton variant="outline" size="sm" className="mt-3" onClick={() => createKey({ name: 'My API Key', environment: 'development' })}>
+                      Create Your First Key
+                    </ModernButton>
+                  </div>
+                ) : apiKeys.map((apiKey) => (
                   <div key={apiKey.id} className="p-4 rounded-xl border border-border bg-background">
                     <div className="space-y-3">
                       <div className="flex items-start justify-between">
@@ -233,23 +243,18 @@ export default function ApiClient({ initialEndpoints, initialStats }: ApiClientP
                             <span className={`text-xs px-2 py-1 rounded-md ${getEnvironmentColor(apiKey.environment)}`}>
                               {apiKey.environment}
                             </span>
-                            <span className={`text-xs px-2 py-1 rounded-md ${getKeyStatusColor(apiKey.status)}`}>
+                            <span className={`text-xs px-2 py-1 rounded-md ${getApiKeyStatusColor(apiKey.status)}`}>
                               {apiKey.status}
                             </span>
                           </div>
                           <div className="flex items-center gap-2">
                             <code className="text-xs font-mono bg-muted px-2 py-1 rounded">
-                              {showApiKey[apiKey.id] ? apiKey.key : maskApiKey(apiKey.key)}
+                              {apiKey.key_prefix}{'•'.repeat(24)}
                             </code>
                             <button
-                              onClick={() => setShowApiKey({ ...showApiKey, [apiKey.id]: !showApiKey[apiKey.id] })}
+                              onClick={() => navigator.clipboard.writeText(apiKey.key_prefix)}
                               className="p-1 hover:bg-muted rounded"
-                            >
-                              {showApiKey[apiKey.id] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                            </button>
-                            <button
-                              onClick={() => navigator.clipboard.writeText(apiKey.key)}
-                              className="p-1 hover:bg-muted rounded"
+                              title="Copy key prefix"
                             >
                               <Copy className="w-3 h-3" />
                             </button>
@@ -260,27 +265,27 @@ export default function ApiClient({ initialEndpoints, initialStats }: ApiClientP
                       <div className="grid grid-cols-4 gap-3 text-xs">
                         <div>
                           <p className="text-muted-foreground">Requests</p>
-                          <p className="font-semibold">{(apiKey.requests / 1000).toFixed(0)}K</p>
+                          <p className="font-semibold">{formatRequests(apiKey.total_requests || 0)}</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Rate Limit</p>
-                          <p className="font-semibold">{apiKey.rateLimit === 0 ? 'Unlimited' : `${apiKey.rateLimit}/hr`}</p>
+                          <p className="font-semibold">{apiKey.rate_limit_per_hour === 0 ? 'Unlimited' : `${apiKey.rate_limit_per_hour}/hr`}</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Last Used</p>
-                          <p className="font-semibold">{apiKey.lastUsed}</p>
+                          <p className="font-semibold">{formatKeyDate(apiKey.last_used_at)}</p>
                         </div>
                         <div>
                           <p className="text-muted-foreground">Created</p>
-                          <p className="font-semibold">{apiKey.created}</p>
+                          <p className="font-semibold">{formatKeyDate(apiKey.created_at)}</p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2 pt-2 border-t">
                         <div className="flex flex-wrap gap-1">
-                          {apiKey.permissions.map((permission) => (
-                            <span key={permission} className="text-xs px-2 py-1 rounded-md bg-muted">
-                              {permission}
+                          {(apiKey.scopes || [apiKey.permission]).map((scope) => (
+                            <span key={scope} className="text-xs px-2 py-1 rounded-md bg-muted">
+                              {scope}
                             </span>
                           ))}
                         </div>
@@ -288,7 +293,7 @@ export default function ApiClient({ initialEndpoints, initialStats }: ApiClientP
                           <ModernButton variant="outline" size="sm" onClick={() => console.log('Edit', apiKey.id)}>
                             Edit
                           </ModernButton>
-                          <ModernButton variant="outline" size="sm" onClick={() => console.log('Revoke', apiKey.id)}>
+                          <ModernButton variant="outline" size="sm" onClick={() => revokeKey(apiKey.id, 'User requested revocation')}>
                             Revoke
                           </ModernButton>
                         </div>
