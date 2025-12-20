@@ -1,5 +1,7 @@
-// 
-import { useSupabase } from '../../__mocks__/supabase-provider'
+'use client'
+
+import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 // import { Button } from '@/components/ui/button'
@@ -18,7 +20,7 @@ interface Project {
 }
 
 const ClientDashboard = () => {
-  const { supabase } = useSupabase()
+  const supabase = createClient()
   const [statusFilter, setStatusFilter] = useState<any>('all')
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [showNewProjectDialog, setShowNewProjectDialog] = useState<any>(false)

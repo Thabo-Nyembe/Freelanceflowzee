@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react';
+import { createClient } from '@/lib/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { PortfolioEnhancer } from '../video/ai/portfolio-enhancer';
@@ -125,8 +126,8 @@ export const FreelancerDashboard = () => {
 };
 
 // Projects List Component
-const ProjectsList = ({ onProjectSelect }: { onProjectSelect: (project) => void }) => {
-  const supabase = useSupabase();
+const ProjectsList = ({ onProjectSelect }: { onProjectSelect: (project: any) => void }) => {
+  const supabase = createClient();
   const [projects, setProjects] = React.useState<any[]>([]);
 
   React.useEffect(() => {

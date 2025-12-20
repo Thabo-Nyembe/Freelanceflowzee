@@ -1,5 +1,7 @@
-// import React, { useState, useEffect } from 'react'
-import { useSupabase } from '../../__mocks__/supabase-provider'
+'use client'
+
+import { useState, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 // import { Input } from '@/components/ui/input'
 // import { Button } from '@/components/ui/button'
@@ -22,7 +24,7 @@ interface Chat {
 }
 
 const Chat = () => {
-  const { supabase } = useSupabase()
+  const supabase = createClient()
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState<any>('')

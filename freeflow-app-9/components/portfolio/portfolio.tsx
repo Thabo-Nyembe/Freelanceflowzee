@@ -1,5 +1,7 @@
-// import React, {} from 'react'
-import { useSupabase } from '../../__mocks__/supabase-provider'
+'use client'
+
+import { useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 // import { Input } from '@/components/ui/input'
 // import { Button } from '@/components/ui/button'
@@ -22,7 +24,7 @@ interface Project {
 }
 
 const Portfolio = () => {
-  const { supabase: _supabase } = useSupabase()
+  const _supabase = createClient()
   const [isEditingAbout, setIsEditingAbout] = useState<any>(false)
   const [aboutText, setAboutText] = useState<any>('I am a passionate developer with experience in web development...')
   const [skills, setSkills] = useState<Skill[]>([
