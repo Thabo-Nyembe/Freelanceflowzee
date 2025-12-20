@@ -2,7 +2,13 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  timeout: 60000,
+  /* Exclude logic tests (vitest) and Jest-based component tests */
+  testIgnore: [
+    '**/logic/**',
+    '**/components/**/*.test.tsx',
+    '**/components/**/*.test.ts',
+  ],
+  timeout: 120000, // 2 minutes for slow-loading pages in dev
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

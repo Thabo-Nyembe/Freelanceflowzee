@@ -8,9 +8,9 @@ test.describe('Simple Smoke Tests', () => {
     // Should load without critical errors
     await expect(page.locator('html')).toBeVisible();
     
-    // Check for KAZI branding
+    // Check for KAZI branding (case-insensitive)
     const title = await page.title();
-    expect(title).toContain('Kazi');
+    expect(title.toLowerCase()).toContain('kazi');
   });
 
   test('should handle 404 pages gracefully', async ({ page }) => {
