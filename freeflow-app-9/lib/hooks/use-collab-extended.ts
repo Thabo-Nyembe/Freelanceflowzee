@@ -1,0 +1,138 @@
+'use client'
+
+/**
+ * Extended Collaboration Hooks
+ * Tables: collab_spaces, collab_documents, collab_cursors, collab_comments
+ */
+
+import { useState, useEffect, useCallback } from 'react'
+import { createClient } from '@/lib/supabase/client'
+
+export function useCollabSpace(spaceId?: string) {
+  const [space, setSpace] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient()
+  const fetch = useCallback(async () => {
+    if (!spaceId) { setIsLoading(false); return }
+    setIsLoading(true)
+    try { const { data } = await supabase.from('collab_spaces').select('*, collab_documents(*)').eq('id', spaceId).single(); setSpace(data) } finally { setIsLoading(false) }
+  }, [spaceId, supabase])
+  useEffect(() => { fetch() }, [fetch])
+  return { space, isLoading, refresh: fetch }
+}
+
+export function useCollabSpaces(options?: { owner_id?: string; visibility?: string; type?: string; limit?: number }) {
+  const [spaces, setSpaces] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient()
+  const fetch = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      let query = supabase.from('collab_spaces').select('*')
+      if (options?.owner_id) query = query.eq('owner_id', options.owner_id)
+      if (options?.visibility) query = query.eq('visibility', options.visibility)
+      if (options?.type) query = query.eq('type', options.type)
+      const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
+      setSpaces(data || [])
+    } finally { setIsLoading(false) }
+  }, [options?.owner_id, options?.visibility, options?.type, options?.limit, supabase])
+  useEffect(() => { fetch() }, [fetch])
+  return { spaces, isLoading, refresh: fetch }
+}
+
+export function useCollabDocument(docId?: string) {
+  const [document, setDocument] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient()
+  const fetch = useCallback(async () => {
+    if (!docId) { setIsLoading(false); return }
+    setIsLoading(true)
+    try { const { data } = await supabase.from('collab_documents').select('*').eq('id', docId).single(); setDocument(data) } finally { setIsLoading(false) }
+  }, [docId, supabase])
+  useEffect(() => { fetch() }, [fetch])
+  return { document, isLoading, refresh: fetch }
+}
+
+export function useCollabDocuments(spaceId?: string, options?: { type?: string; limit?: number }) {
+  const [documents, setDocuments] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient()
+  const fetch = useCallback(async () => {
+    if (!spaceId) { setIsLoading(false); return }
+    setIsLoading(true)
+    try {
+      let query = supabase.from('collab_documents').select('*').eq('space_id', spaceId)
+      if (options?.type) query = query.eq('type', options.type)
+      const { data } = await query.order('updated_at', { ascending: false }).limit(options?.limit || 50)
+      setDocuments(data || [])
+    } finally { setIsLoading(false) }
+  }, [spaceId, options?.type, options?.limit, supabase])
+  useEffect(() => { fetch() }, [fetch])
+  return { documents, isLoading, refresh: fetch }
+}
+
+export function useCollabDocumentRealtime(docId?: string) {
+  const [document, setDocument] = useState<any>(null)
+  const [cursors, setCursors] = useState<any[]>([])
+  const supabase = createClient()
+  useEffect(() => {
+    if (!docId) return
+    supabase.from('collab_documents').select('*').eq('id', docId).single().then(({ data }) => setDocument(data))
+    supabase.from('collab_cursors').select('*').eq('document_id', docId).then(({ data }) => setCursors(data || []))
+    const channel = supabase.channel(`collab_doc_${docId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'collab_documents', filter: `id=eq.${docId}` }, (payload) => {
+        setDocument(payload.new)
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'collab_cursors', filter: `document_id=eq.${docId}` }, () => {
+        supabase.from('collab_cursors').select('*').eq('document_id', docId).then(({ data }) => setCursors(data || []))
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [docId, supabase])
+  return { document, cursors }
+}
+
+export function useCollabComments(docId?: string) {
+  const [comments, setComments] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient()
+  const fetch = useCallback(async () => {
+    if (!docId) { setIsLoading(false); return }
+    setIsLoading(true)
+    try { const { data } = await supabase.from('collab_comments').select('*').eq('document_id', docId).order('created_at', { ascending: true }); setComments(data || []) } finally { setIsLoading(false) }
+  }, [docId, supabase])
+  useEffect(() => { fetch() }, [fetch])
+  return { comments, isLoading, refresh: fetch }
+}
+
+export function useCollabCommentsRealtime(docId?: string) {
+  const [comments, setComments] = useState<any[]>([])
+  const supabase = createClient()
+  useEffect(() => {
+    if (!docId) return
+    supabase.from('collab_comments').select('*').eq('document_id', docId).order('created_at', { ascending: true }).then(({ data }) => setComments(data || []))
+    const channel = supabase.channel(`collab_comments_${docId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'collab_comments', filter: `document_id=eq.${docId}` }, () => {
+        supabase.from('collab_comments').select('*').eq('document_id', docId).order('created_at', { ascending: true }).then(({ data }) => setComments(data || []))
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [docId, supabase])
+  return { comments }
+}
+
+export function useActiveCollaborators(docId?: string) {
+  const [collaborators, setCollaborators] = useState<any[]>([])
+  const supabase = createClient()
+  useEffect(() => {
+    if (!docId) return
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+    supabase.from('collab_cursors').select('*').eq('document_id', docId).gte('last_seen', fiveMinutesAgo).then(({ data }) => setCollaborators(data || []))
+    const interval = setInterval(() => {
+      const ago = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+      supabase.from('collab_cursors').select('*').eq('document_id', docId).gte('last_seen', ago).then(({ data }) => setCollaborators(data || []))
+    }, 10000)
+    return () => clearInterval(interval)
+  }, [docId, supabase])
+  return { collaborators }
+}

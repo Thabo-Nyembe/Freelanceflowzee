@@ -1,0 +1,81 @@
+'use client'
+
+/**
+ * Extended Audit Hooks - Covers all 5 Audit-related tables
+ */
+
+import { useState, useEffect, useCallback } from 'react'
+import { createClient } from '@/lib/supabase/client'
+
+export function useAuditAlertRules(userId?: string) {
+  const [data, setData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient()
+  const fetch = useCallback(async () => {
+    if (!userId) { setIsLoading(false); return }
+    setIsLoading(true)
+    try { const { data: result } = await supabase.from('audit_alert_rules').select('*').eq('user_id', userId).order('name', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
+  }, [userId, supabase])
+  useEffect(() => { fetch() }, [fetch])
+  return { data, isLoading, refresh: fetch }
+}
+
+export function useAuditEvents(entityType?: string, entityId?: string) {
+  const [data, setData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient()
+  const fetch = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      let query = supabase.from('audit_events').select('*').order('created_at', { ascending: false }).limit(100)
+      if (entityType) query = query.eq('entity_type', entityType)
+      if (entityId) query = query.eq('entity_id', entityId)
+      const { data: result } = await query
+      setData(result || [])
+    } finally { setIsLoading(false) }
+  }, [entityType, entityId, supabase])
+  useEffect(() => { fetch() }, [fetch])
+  return { data, isLoading, refresh: fetch }
+}
+
+export function useAuditFindings(auditId?: string) {
+  const [data, setData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient()
+  const fetch = useCallback(async () => {
+    if (!auditId) { setIsLoading(false); return }
+    setIsLoading(true)
+    try { const { data: result } = await supabase.from('audit_findings').select('*').eq('audit_id', auditId).order('severity', { ascending: false }); setData(result || []) } finally { setIsLoading(false) }
+  }, [auditId, supabase])
+  useEffect(() => { fetch() }, [fetch])
+  return { data, isLoading, refresh: fetch }
+}
+
+export function useAuditLogs(userId?: string) {
+  const [data, setData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient()
+  const fetch = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      let query = supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(100)
+      if (userId) query = query.eq('user_id', userId)
+      const { data: result } = await query
+      setData(result || [])
+    } finally { setIsLoading(false) }
+  }, [userId, supabase])
+  useEffect(() => { fetch() }, [fetch])
+  return { data, isLoading, refresh: fetch }
+}
+
+export function useAuditRetentionPolicies() {
+  const [data, setData] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const supabase = createClient()
+  const fetch = useCallback(async () => {
+    setIsLoading(true)
+    try { const { data: result } = await supabase.from('audit_retention_policies').select('*').order('name', { ascending: true }); setData(result || []) } finally { setIsLoading(false) }
+  }, [supabase])
+  useEffect(() => { fetch() }, [fetch])
+  return { data, isLoading, refresh: fetch }
+}
