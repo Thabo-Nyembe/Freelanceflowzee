@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { extractProviderProfile, mergeOAuthProfile } from '@/lib/auth/profile-sync'
+import { extractProviderProfile, mergeOAuthProfileServer } from '@/lib/auth/profile-sync-server'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
           const profileData = extractProviderProfile(provider, providerData)
 
           // Merge OAuth profile with existing profile (preserves user customizations)
-          await mergeOAuthProfile(data.user.id, {
+          await mergeOAuthProfileServer(supabase, data.user.id, {
             email: data.user.email,
             ...profileData,
           })

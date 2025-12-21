@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
+import { createClient } from '@/lib/supabase/client'
 
 const logger = createFeatureLogger('ForgotPassword')
 
@@ -47,20 +48,34 @@ export default function ForgotPasswordPage() {
       description: `Sending email to ${email}`
     })
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const supabase = createClient()
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      })
+
+      if (error) {
+        throw error
+      }
+
       logger.info('Password reset email sent', {
         email,
         success: true
       })
 
       setIsSubmitted(true)
-      setIsLoading(false)
-
       toast.success('Password reset email sent', {
         description: `Check your inbox at ${email} - Link expires in 1 hour`
       })
-    }, 1500)
+    } catch (error: any) {
+      logger.error('Password reset failed', { email, error: error.message })
+      toast.error('Failed to send reset email', {
+        description: error.message || 'Please try again later'
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   if (isSubmitted) {

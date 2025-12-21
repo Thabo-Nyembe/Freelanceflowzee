@@ -127,3 +127,12 @@ export function useAuth(): UseAuthReturn {
     refreshSession
   }
 }
+
+/**
+ * Alias for useAuth - returns user state from Supabase session
+ * Used by components that expect a useUser hook
+ */
+export function useUser() {
+  const { user, loading, error } = useAuth()
+  return { user, loading, error, isLoading: loading }
+}
