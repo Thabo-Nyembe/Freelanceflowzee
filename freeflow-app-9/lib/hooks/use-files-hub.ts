@@ -214,3 +214,34 @@ export function useFolders(initialFolders: Folder[] = []) {
     deleteFolder
   }
 }
+
+// Combined hook for Files Hub that provides both files and folders
+export function useFilesHub(initialFiles: FileItem[] = [], initialFolders: Folder[] = []) {
+  const filesHook = useFiles(null, initialFiles)
+  const foldersHook = useFolders(initialFolders)
+
+  const stats = {
+    totalFiles: filesHook.files.length,
+    totalFolders: foldersHook.folders.length,
+    totalSize: filesHook.files.reduce((acc, f) => acc + (f.size_bytes || 0), 0),
+    starredFiles: filesHook.files.filter(f => f.is_starred).length
+  }
+
+  return {
+    files: filesHook.files,
+    folders: foldersHook.folders,
+    stats,
+    isLoading: filesHook.isLoading || foldersHook.isLoading,
+    error: filesHook.error,
+    fetchFiles: filesHook.fetchFiles,
+    fetchFolders: foldersHook.fetchFolders,
+    uploadFile: filesHook.uploadFile,
+    updateFile: filesHook.updateFile,
+    toggleStar: filesHook.toggleStar,
+    moveFile: filesHook.moveFile,
+    deleteFile: filesHook.deleteFile,
+    createFolder: foldersHook.createFolder,
+    updateFolder: foldersHook.updateFolder,
+    deleteFolder: foldersHook.deleteFolder
+  }
+}

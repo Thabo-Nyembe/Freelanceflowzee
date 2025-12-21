@@ -272,3 +272,13 @@ export function formatCurrency(amount: number, currency: string = 'USD'): string
     maximumFractionDigits: 0
   }).format(amount)
 }
+
+export function getPaymentMethodColor(method: string): string {
+  switch (method) {
+    case 'bank_transfer': return 'bg-blue-100 text-blue-800 border-blue-200'
+    case 'check': return 'bg-purple-100 text-purple-800 border-purple-200'
+    case 'cash': return 'bg-green-100 text-green-800 border-green-200'
+    case 'direct_deposit': return 'bg-cyan-100 text-cyan-800 border-cyan-200'
+    default: return 'bg-gray-100 text-gray-800 border-gray-200'
+  }
+}

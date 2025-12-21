@@ -1,7 +1,9 @@
 // Base hook for Supabase mutations (Create, Update, Delete)
 // Created: December 14, 2024
 
-import { useState } from 'react'
+'use client'
+
+import { useState, useEffect, useCallback } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 
@@ -9,15 +11,50 @@ interface UseSupabaseMutationOptions {
   table: string
   onSuccess?: () => void
   onError?: (error: Error) => void
+  enableRealtime?: boolean // Optional: enable realtime notifications for this table
+  onRealtimeUpdate?: (payload: any) => void // Callback when realtime update occurs
 }
 
 export function useSupabaseMutation({
   table,
   onSuccess,
-  onError
+  onError,
+  enableRealtime = false,
+  onRealtimeUpdate
 }: UseSupabaseMutationOptions) {
   const [loading, setLoading] = useState(false)
+  const [lastMutation, setLastMutation] = useState<{ type: string; id?: string; timestamp: number } | null>(null)
   const supabase = createClientComponentClient()
+
+  // Realtime subscription for mutation confirmations
+  useEffect(() => {
+    if (!enableRealtime) return
+
+    const channel = supabase
+      .channel(`mutation-${table}-changes`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table },
+        (payload) => {
+          // Track realtime updates
+          setLastMutation({
+            type: payload.eventType,
+            id: (payload.new as any)?.id || (payload.old as any)?.id,
+            timestamp: Date.now()
+          })
+
+          // Call the callback if provided
+          if (onRealtimeUpdate) {
+            onRealtimeUpdate(payload)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, table, enableRealtime, onRealtimeUpdate])
 
   const create = async <T extends Record<string, any>>(data: T) => {
     try {
@@ -102,5 +139,5 @@ export function useSupabaseMutation({
     }
   }
 
-  return { create, update, remove, loading }
+  return { create, update, remove, loading, lastMutation }
 }

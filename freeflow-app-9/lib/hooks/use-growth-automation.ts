@@ -4,7 +4,10 @@
  * Easy integration of AI growth automation features into any component
  */
 
-import { useState, useCallback } from 'react';
+'use client'
+
+import { useState, useCallback, useEffect } from 'react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import type {
   Lead,
   LeadScore,
@@ -45,6 +48,51 @@ export function useGrowthAutomation(): UseGrowthAutomationReturn {
   const [actionPlan, setActionPlan] = useState<GrowthActionPlan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const supabase = createClientComponentClient()
+
+  // Realtime subscription for growth automation updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('growth-automation-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'leads' },
+        (payload) => {
+          // Refresh lead scores when leads table changes
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            // Trigger a refresh of lead scores
+            setLeadScores(prev => {
+              const newLead = payload.new as any
+              const exists = prev.find(l => l.leadId === newLead.id)
+              if (exists) {
+                return prev.map(l => l.leadId === newLead.id ? { ...l, ...newLead } : l)
+              }
+              return prev
+            })
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'market_opportunities' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setOpportunities(prev => [payload.new as MarketOpportunity, ...prev])
+          } else if (payload.eventType === 'UPDATE') {
+            setOpportunities(prev => prev.map(o =>
+              (o as any).id === (payload.new as any).id ? payload.new as MarketOpportunity : o
+            ))
+          } else if (payload.eventType === 'DELETE') {
+            setOpportunities(prev => prev.filter(o => (o as any).id !== (payload.old as any).id))
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase])
 
   /**
    * Helper to make API calls

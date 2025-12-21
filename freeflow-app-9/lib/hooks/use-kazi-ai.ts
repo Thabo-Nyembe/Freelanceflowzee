@@ -3,7 +3,10 @@
  * React hook for easy AI integration across the app
  */
 
-import { useState, useCallback } from 'react'
+'use client'
+
+import { useState, useCallback, useEffect } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('useKaziAI')
@@ -43,6 +46,40 @@ export interface UseKaziAIReturn {
 export function useKaziAI(userId?: string): UseKaziAIReturn {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const supabase = createClientComponentClient()
+
+  // Realtime subscription for AI chat history updates
+  useEffect(() => {
+    if (!userId) return
+
+    const channel = supabase
+      .channel('kazi-ai-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'ai_chat_history', filter: `user_id=eq.${userId}` },
+        (payload) => {
+          logger.info('AI chat history updated', {
+            eventType: payload.eventType,
+            userId
+          })
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'ai_usage_logs', filter: `user_id=eq.${userId}` },
+        (payload) => {
+          logger.info('AI usage updated', {
+            eventType: payload.eventType,
+            userId
+          })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, userId])
 
   const chat = useCallback(async (
     message: string,

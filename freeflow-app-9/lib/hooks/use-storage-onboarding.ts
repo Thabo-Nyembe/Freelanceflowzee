@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { createClient } from '@/lib/supabase/client'
 import {
   shouldShowStorageOnboarding,
@@ -26,6 +27,7 @@ export function useStorageOnboarding(): UseStorageOnboardingReturn {
   const [loading, setLoading] = useState(true)
   const [preferences, setPreferences] = useState<UserPreferences | null>(null)
   const [hasConnections, setHasConnections] = useState(false)
+  const supabase = createClientComponentClient()
 
   useEffect(() => {
     async function checkOnboardingStatus() {
@@ -69,6 +71,52 @@ export function useStorageOnboarding(): UseStorageOnboardingReturn {
 
     checkOnboardingStatus()
   }, [])
+
+  // Realtime subscription for storage connection changes
+  useEffect(() => {
+    const channel = supabase
+      .channel('storage-onboarding-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'storage_connections' },
+        async (payload) => {
+          // When a new connection is added, update hasConnections
+          if (payload.eventType === 'INSERT') {
+            setHasConnections(true)
+            // Auto-close wizard when first connection is made
+            if (showWizard) {
+              setShowWizard(false)
+            }
+          } else if (payload.eventType === 'DELETE') {
+            // Check if there are remaining connections
+            const supabaseClient = createClient()
+            const { data: { user } } = await supabaseClient.auth.getUser()
+            if (user) {
+              const connections = await getStorageConnections(user.id)
+              setHasConnections(connections.length > 0)
+            }
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'user_preferences' },
+        async (payload) => {
+          if (payload.eventType === 'UPDATE') {
+            const newPrefs = payload.new as any
+            if (newPrefs.storage_onboarding_completed || newPrefs.storage_onboarding_skipped) {
+              setShowWizard(false)
+            }
+            setPreferences(newPrefs)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, showWizard])
 
   const handleComplete = async () => {
     try {

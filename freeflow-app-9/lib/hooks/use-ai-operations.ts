@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { EnhancedAIService } from '@/lib/ai/enhanced-ai-service'
 import { toast } from '@/components/ui/use-toast'
 
@@ -53,6 +54,37 @@ export function useAIOperations() {
   const [isLoading, setIsLoading] = useState<any>(false)
   const [error, setError] = useState<string | null>(null)
   const [aiData, setAIData] = useState<AIData>({})
+  const supabase = createClientComponentClient()
+
+  // Realtime subscription for AI operations updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('ai-operations-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'ai_operations' },
+        (payload) => {
+          // Handle realtime AI operation updates
+          if (payload.eventType === 'UPDATE' && payload.new) {
+            const operation = payload.new as any
+            if (operation.operation_type === 'transcription' && operation.result) {
+              setAIData(prev => ({ ...prev, transcription: operation.result }))
+            } else if (operation.operation_type === 'analysis' && operation.result) {
+              setAIData(prev => ({ ...prev, analysis: operation.result }))
+            } else if (operation.operation_type === 'chapters' && operation.result) {
+              setAIData(prev => ({ ...prev, chapters: operation.result }))
+            } else if (operation.operation_type === 'insights' && operation.result) {
+              setAIData(prev => ({ ...prev, insights: operation.result }))
+            }
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase])
 
   const transcribeVideo = useCallback(async (videoUrl: string, language = 'en') => {
     try {

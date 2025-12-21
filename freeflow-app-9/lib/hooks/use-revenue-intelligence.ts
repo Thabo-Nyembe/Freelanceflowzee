@@ -4,7 +4,10 @@
  * Easy integration of AI revenue intelligence features into any component
  */
 
-import { useState, useCallback } from 'react';
+'use client'
+
+import { useState, useCallback, useEffect } from 'react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import type {
   RevenueData,
   RevenueIntelligenceReport,
@@ -29,6 +32,50 @@ export function useRevenueIntelligence(): UseRevenueIntelligenceReturn {
   const [forecast, setForecast] = useState<RevenueForecast | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const supabase = createClientComponentClient()
+
+  // Realtime subscription for revenue data updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('revenue-intelligence-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'transactions' },
+        () => {
+          // Invalidate report when transactions change
+          if (report) {
+            setReport(prev => prev ? { ...prev, needsRefresh: true } as any : null)
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'invoices' },
+        () => {
+          // Invalidate forecast when invoices change
+          if (forecast) {
+            setForecast(prev => prev ? { ...prev, needsRefresh: true } as any : null)
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'revenue_reports' },
+        (payload) => {
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const newReport = payload.new as any
+            if (newReport.report_data) {
+              setReport(newReport.report_data)
+            }
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, report, forecast])
 
   /**
    * Generate comprehensive revenue intelligence report

@@ -1,4 +1,7 @@
+'use client'
+
 import { useEffect, useRef, useCallback, useState } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 interface UseInfiniteScrollOptions {
   threshold?: number // Distance from bottom to trigger load (in pixels)
@@ -13,12 +16,37 @@ interface UseInfiniteScrollReturn {
 
 export function useInfiniteScroll(
   onLoadMore: () => void | Promise<void>,
-  options: UseInfiniteScrollOptions = {}
+  options: UseInfiniteScrollOptions = {},
+  tableName?: string // Optional table to listen for realtime updates
 ): UseInfiniteScrollReturn {
   const { threshold = 200, enabled = true } = options
   const ref = useRef<HTMLDivElement>(null)
   const [isLoading, setIsLoading] = useState(false)
   const loadingRef = useRef(false)
+  const supabase = createClientComponentClient()
+
+  // Realtime subscription for data updates (triggers reload when new items are added)
+  useEffect(() => {
+    if (!tableName) return
+
+    const channel = supabase
+      .channel(`infinite-scroll-${tableName}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: tableName },
+        () => {
+          // When new data is inserted, trigger a refresh
+          if (!loadingRef.current && enabled) {
+            onLoadMore()
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, tableName, enabled, onLoadMore])
 
   const handleScroll = useCallback(async () => {
     if (!enabled || loadingRef.current || !ref.current) return

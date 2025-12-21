@@ -128,3 +128,96 @@ export function useSupabaseQuery<T>({
 
   return { data, loading, error, refetch }
 }
+
+// Mutation hook for create/update/delete operations
+interface UseSupabaseMutationOptions {
+  table: string
+  onSuccess?: () => void
+  onError?: (error: Error) => void
+}
+
+export function useSupabaseMutation<T = unknown>({
+  table,
+  onSuccess,
+  onError
+}: UseSupabaseMutationOptions) {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+  const supabase = createClientComponentClient()
+
+  const mutate = async (data: Partial<T>, id?: string): Promise<T | null> => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      let result
+      if (id) {
+        // Update existing record
+        const { data: updateResult, error: updateError } = await supabase
+          .from(table)
+          .update({ ...data, updated_at: new Date().toISOString() })
+          .eq('id', id)
+          .eq('user_id', user.id)
+          .select()
+          .single()
+
+        if (updateError) throw new Error(updateError.message)
+        result = updateResult
+      } else {
+        // Create new record
+        const { data: insertResult, error: insertError } = await supabase
+          .from(table)
+          .insert({ ...data, user_id: user.id })
+          .select()
+          .single()
+
+        if (insertError) throw new Error(insertError.message)
+        result = insertResult
+      }
+
+      onSuccess?.()
+      return result as T
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      setError(error)
+      onError?.(error)
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const remove = async (id: string): Promise<boolean> => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Soft delete
+      const { error: deleteError } = await supabase
+        .from(table)
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('user_id', user.id)
+
+      if (deleteError) throw new Error(deleteError.message)
+
+      onSuccess?.()
+      return true
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      setError(error)
+      onError?.(error)
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { mutate, remove, loading, error }
+}

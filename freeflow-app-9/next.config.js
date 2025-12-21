@@ -111,32 +111,34 @@ const nextConfig = {
         test: /[\\/]app[\\/]api[\\/]ai[\\/].*\.ts$/,
         use: 'null-loader',
       });
-      
-      // A+++ Bundle optimization
-      config.optimization.splitChunks = {
-        ...config.optimization.splitChunks,
-        cacheGroups: {
-          ...config.optimization.splitChunks.cacheGroups,
-          default: false,
-          vendors: false,
-          // Framework chunk
-          framework: {
-            chunks: 'all',
-            name: 'framework',
-            test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
-            priority: 40,
-            enforce: true,
+
+      // A+++ Bundle optimization - only for client bundles
+      if (!isServer) {
+        config.optimization.splitChunks = {
+          ...config.optimization.splitChunks,
+          cacheGroups: {
+            ...config.optimization.splitChunks.cacheGroups,
+            default: false,
+            vendors: false,
+            // Framework chunk
+            framework: {
+              chunks: 'all',
+              name: 'framework',
+              test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
+              priority: 40,
+              enforce: true,
+            },
+            // UI library chunk
+            lib: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'lib',
+              priority: 30,
+              chunks: 'all',
+              maxSize: 200000,
+            },
           },
-          // UI library chunk
-          lib: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'lib',
-            priority: 30,
-            chunks: 'all',
-            maxSize: 200000,
-          },
-        },
-      };
+        };
+      }
     }
     
     // Fallbacks for Node.js modules
