@@ -27,7 +27,7 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { BorderTrail } from '@/components/ui/border-trail'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { OAuthProviders } from '@/components/auth/OAuthProviders'
-import { signIn } from 'next-auth/react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -46,22 +46,23 @@ export default function LoginPage() {
     try {
       console.log('🔐 Starting login process...')
 
-      // Use NextAuth.js credentials provider
-      const result = await signIn('credentials', {
+      const supabase = createClient()
+
+      // Use Supabase Auth for login
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
-        redirect: false, // Handle redirect manually to show toast
       })
 
-      console.log('📡 Login result:', result)
+      console.log('📡 Login result:', { data, error })
 
-      if (result?.error) {
-        console.error('❌ Login error:', result.error)
-        throw new Error(result.error)
+      if (error) {
+        console.error('❌ Login error:', error.message)
+        throw new Error(error.message)
       }
 
-      if (!result?.ok) {
-        console.error('❌ Login failed: not ok')
+      if (!data.user) {
+        console.error('❌ Login failed: no user returned')
         throw new Error('Invalid email or password')
       }
 

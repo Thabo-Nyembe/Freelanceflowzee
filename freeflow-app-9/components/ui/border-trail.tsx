@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
 interface BorderTrailProps {
-  children: React.ReactNode
+  children?: React.ReactNode
   className?: string
   trailColor?: string
   duration?: number
@@ -61,7 +61,7 @@ export function BorderTrail({
 
 // Variant: Simple border glow (no rotation)
 interface BorderGlowProps {
-  children: React.ReactNode
+  children?: React.ReactNode
   className?: string
   glowColor?: string
   animated?: boolean
