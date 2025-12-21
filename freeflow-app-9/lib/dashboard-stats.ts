@@ -83,118 +83,160 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
 }
 
 async function getProjectStats(userId: string, supabase: ReturnType<typeof createClient>) {
-  const { data, error } = await supabase
-    .from('projects')
-    .select('id, status')
-    .eq('user_id', userId)
+  try {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('id, status')
+      .eq('user_id', userId)
 
-  if (error) throw error
+    if (error) {
+      logger.warn('Projects query failed, using defaults', { error: error.message })
+      return { total: 0, active: 0, completed: 0, onHold: 0 }
+    }
 
-  const total = data?.length || 0
-  const active = data?.filter((p) => p.status === 'active').length || 0
-  const completed = data?.filter((p) => p.status === 'completed').length || 0
-  const onHold = data?.filter((p) => p.status === 'on_hold').length || 0
+    const total = data?.length || 0
+    const active = data?.filter((p) => p.status === 'active').length || 0
+    const completed = data?.filter((p) => p.status === 'completed').length || 0
+    const onHold = data?.filter((p) => p.status === 'on_hold').length || 0
 
-  return { total, active, completed, onHold }
+    return { total, active, completed, onHold }
+  } catch {
+    return { total: 0, active: 0, completed: 0, onHold: 0 }
+  }
 }
 
 async function getClientStats(userId: string, supabase: ReturnType<typeof createClient>) {
-  const { data, error } = await supabase
-    .from('clients')
-    .select('id, status, created_at')
-    .eq('user_id', userId)
+  try {
+    const { data, error } = await supabase
+      .from('clients')
+      .select('id, status, created_at')
+      .eq('user_id', userId)
 
-  if (error) throw error
+    if (error) {
+      logger.warn('Clients query failed, using defaults', { error: error.message })
+      return { total: 0, active: 0, new: 0 }
+    }
 
-  const total = data?.length || 0
-  const active = data?.filter((c) => c.status === 'active').length || 0
+    const total = data?.length || 0
+    const active = data?.filter((c) => c.status === 'active').length || 0
 
-  // New clients in last 30 days
-  const thirtyDaysAgo = new Date()
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-  const newCount = data?.filter((c) => new Date(c.created_at) > thirtyDaysAgo).length || 0
+    // New clients in last 30 days
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+    const newCount = data?.filter((c) => new Date(c.created_at) > thirtyDaysAgo).length || 0
 
-  return { total, active, new: newCount }
+    return { total, active, new: newCount }
+  } catch {
+    return { total: 0, active: 0, new: 0 }
+  }
 }
 
 async function getRevenueStats(userId: string, supabase: ReturnType<typeof createClient>) {
-  const { data, error } = await supabase
-    .from('invoices')
-    .select('total, status, created_at')
-    .eq('user_id', userId)
+  try {
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('total, status, created_at')
+      .eq('user_id', userId)
 
-  if (error) throw error
+    if (error) {
+      logger.warn('Invoices query failed, using defaults', { error: error.message })
+      return { total: 0, pending: 0, thisMonth: 0, lastMonth: 0, growth: 0 }
+    }
 
-  const total = data?.reduce((sum, inv) => sum + (inv.total || 0), 0) || 0
-  const pending = data?.filter((inv) => inv.status === 'pending').reduce((sum, inv) => sum + (inv.total || 0), 0) || 0
+    const total = data?.reduce((sum, inv) => sum + (inv.total || 0), 0) || 0
+    const pending = data?.filter((inv) => inv.status === 'pending').reduce((sum, inv) => sum + (inv.total || 0), 0) || 0
 
-  // This month's revenue
-  const now = new Date()
-  const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-  const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    // This month's revenue
+    const now = new Date()
+    const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
 
-  const thisMonth = data?.filter((inv) =>
-    new Date(inv.created_at) >= firstDayThisMonth && inv.status === 'paid'
-  ).reduce((sum, inv) => sum + (inv.total || 0), 0) || 0
+    const thisMonth = data?.filter((inv) =>
+      new Date(inv.created_at) >= firstDayThisMonth && inv.status === 'paid'
+    ).reduce((sum, inv) => sum + (inv.total || 0), 0) || 0
 
-  const lastMonth = data?.filter((inv) =>
-    new Date(inv.created_at) >= firstDayLastMonth &&
-    new Date(inv.created_at) < firstDayThisMonth &&
-    inv.status === 'paid'
-  ).reduce((sum, inv) => sum + (inv.total || 0), 0) || 0
+    const lastMonth = data?.filter((inv) =>
+      new Date(inv.created_at) >= firstDayLastMonth &&
+      new Date(inv.created_at) < firstDayThisMonth &&
+      inv.status === 'paid'
+    ).reduce((sum, inv) => sum + (inv.total || 0), 0) || 0
 
-  const growth = lastMonth > 0 ? ((thisMonth - lastMonth) / lastMonth) * 100 : 0
+    const growth = lastMonth > 0 ? ((thisMonth - lastMonth) / lastMonth) * 100 : 0
 
-  return { total, pending, thisMonth, lastMonth, growth }
+    return { total, pending, thisMonth, lastMonth, growth }
+  } catch {
+    return { total: 0, pending: 0, thisMonth: 0, lastMonth: 0, growth: 0 }
+  }
 }
 
 async function getTaskStats(userId: string, supabase: ReturnType<typeof createClient>) {
-  const { data, error } = await supabase
-    .from('tasks')
-    .select('id, status, due_date')
-    .eq('user_id', userId)
+  try {
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('id, status, due_date')
+      .eq('user_id', userId)
 
-  if (error) throw error
+    if (error) {
+      logger.warn('Tasks query failed, using defaults', { error: error.message })
+      return { total: 0, completed: 0, inProgress: 0, overdue: 0 }
+    }
 
-  const total = data?.length || 0
-  const completed = data?.filter((t) => t.status === 'completed').length || 0
-  const inProgress = data?.filter((t) => t.status === 'in_progress').length || 0
+    const total = data?.length || 0
+    const completed = data?.filter((t) => t.status === 'completed').length || 0
+    const inProgress = data?.filter((t) => t.status === 'in_progress').length || 0
 
-  // Overdue tasks
-  const now = new Date()
-  const overdue = data?.filter((t) =>
-    t.due_date && new Date(t.due_date) < now && t.status !== 'completed'
-  ).length || 0
+    // Overdue tasks
+    const now = new Date()
+    const overdue = data?.filter((t) =>
+      t.due_date && new Date(t.due_date) < now && t.status !== 'completed'
+    ).length || 0
 
-  return { total, completed, inProgress, overdue }
+    return { total, completed, inProgress, overdue }
+  } catch {
+    return { total: 0, completed: 0, inProgress: 0, overdue: 0 }
+  }
 }
 
 async function getFileStats(userId: string, supabase: ReturnType<typeof createClient>) {
-  const { data, error } = await supabase
-    .from('files')
-    .select('id, size')
-    .eq('user_id', userId)
+  try {
+    const { data, error } = await supabase
+      .from('files')
+      .select('id, size')
+      .eq('user_id', userId)
 
-  if (error) throw error
+    if (error) {
+      logger.warn('Files query failed, using defaults', { error: error.message })
+      return { total: 0, size: 0 }
+    }
 
-  const total = data?.length || 0
-  const size = data?.reduce((sum, file) => sum + (file.size || 0), 0) || 0
+    const total = data?.length || 0
+    const size = data?.reduce((sum, file) => sum + (file.size || 0), 0) || 0
 
-  return { total, size }
+    return { total, size }
+  } catch {
+    return { total: 0, size: 0 }
+  }
 }
 
 async function getTeamStats(userId: string, supabase: ReturnType<typeof createClient>) {
-  const { data, error } = await supabase
-    .from('team_members')
-    .select('id, status')
-    .eq('team_owner_id', userId)
+  try {
+    const { data, error } = await supabase
+      .from('team_members')
+      .select('id, status')
+      .eq('team_owner_id', userId)
 
-  if (error) throw error
+    if (error) {
+      logger.warn('Team members query failed, using defaults', { error: error.message })
+      return { total: 0, active: 0 }
+    }
 
-  const total = data?.length || 0
-  const active = data?.filter((m) => m.status === 'active').length || 0
+    const total = data?.length || 0
+    const active = data?.filter((m) => m.status === 'active').length || 0
 
-  return { total, active }
+    return { total, active }
+  } catch {
+    return { total: 0, active: 0 }
+  }
 }
 
 /**
@@ -317,6 +359,6 @@ export async function getRecentActivity(userId: string, limit: number = 10) {
     return activities
   } catch (error) {
     logger.error('Failed to fetch recent activity', { error, userId })
-    throw error
+    return []
   }
 }

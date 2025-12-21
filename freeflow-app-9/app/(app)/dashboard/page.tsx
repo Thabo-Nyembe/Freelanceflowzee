@@ -71,6 +71,8 @@ import { useCurrentUser, useAIData } from '@/hooks/use-ai-data'
 
 // ONBOARDING
 import { OnboardingTourLauncher } from '@/components/onboarding-tour-launcher'
+import { NewUserChecklist } from '@/components/onboarding/new-user-checklist'
+import { useNewUserDetection } from '@/lib/hooks/use-new-user-detection'
 
 // Initialize logger
 const logger = createFeatureLogger('Dashboard')
@@ -167,6 +169,14 @@ export default function DashboardPage() {
   // REAL USER AUTH & AI DATA
   const { userId, loading: userLoading } = useCurrentUser()
   const aiData = useAIData(userId || undefined)
+
+  // NEW USER ONBOARDING DETECTION
+  const {
+    shouldShowOnboarding,
+    dismissOnboarding,
+    isNewUser,
+    projectCount
+  } = useNewUserDetection(userId || undefined)
 
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('overview')
@@ -2211,6 +2221,14 @@ export default function DashboardPage() {
 
         {/* Main Content - Flexible */}
         <div className="flex-1 container mx-auto px-4 sm:px-6 py-4 sm:py-6">
+          {/* New User Onboarding Checklist */}
+          {shouldShowOnboarding && (
+            <NewUserChecklist
+              userId={userId || undefined}
+              onDismiss={dismissOnboarding}
+            />
+          )}
+
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
             {/* Scrollable Tab List */}
             <div className="mb-6">
