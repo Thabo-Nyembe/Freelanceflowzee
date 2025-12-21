@@ -6,6 +6,10 @@
 import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('forms-actions')
 
 interface CreateFormData {
   title: string
@@ -54,258 +58,330 @@ interface UpdateFormData extends Partial<CreateFormData> {
 }
 
 // Create new form
-export async function createForm(data: CreateFormData) {
-  const supabase = createServerActionClient({ cookies })
+export async function createForm(data: CreateFormData): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { data: form, error } = await supabase
+      .from('forms')
+      .insert({
+        ...data,
+        user_id: user.id
+      })
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to create form', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/forms-v2')
+    logger.info('Form created successfully', { formId: form.id })
+    return actionSuccess(form, 'Form created successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error creating form', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data: form, error } = await supabase
-    .from('forms')
-    .insert({
-      ...data,
-      user_id: user.id
-    })
-    .select()
-    .single()
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/forms-v2')
-  return form
 }
 
 // Update existing form
-export async function updateForm({ id, ...data }: UpdateFormData) {
-  const supabase = createServerActionClient({ cookies })
+export async function updateForm({ id, ...data }: UpdateFormData): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { data: form, error } = await supabase
+      .from('forms')
+      .update(data)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to update form', { error, formId: id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/forms-v2')
+    logger.info('Form updated successfully', { formId: id })
+    return actionSuccess(form, 'Form updated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error updating form', { error, formId: id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data: form, error } = await supabase
-    .from('forms')
-    .update(data)
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/forms-v2')
-  return form
 }
 
 // Delete form (soft delete)
-export async function deleteForm(id: string) {
-  const supabase = createServerActionClient({ cookies })
+export async function deleteForm(id: string): Promise<ActionResult<void>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { error } = await supabase
+      .from('forms')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('user_id', user.id)
+
+    if (error) {
+      logger.error('Failed to delete form', { error, formId: id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/forms-v2')
+    logger.info('Form deleted successfully', { formId: id })
+    return actionSuccess(undefined, 'Form deleted successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error deleting form', { error, formId: id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { error } = await supabase
-    .from('forms')
-    .update({ deleted_at: new Date().toISOString() })
-    .eq('id', id)
-    .eq('user_id', user.id)
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/forms-v2')
 }
 
 // Publish form (activate)
-export async function publishForm(id: string) {
-  const supabase = createServerActionClient({ cookies })
+export async function publishForm(id: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { data: form, error } = await supabase
+      .from('forms')
+      .update({
+        status: 'active',
+        starts_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to publish form', { error, formId: id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/forms-v2')
+    logger.info('Form published successfully', { formId: id })
+    return actionSuccess(form, 'Form published successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error publishing form', { error, formId: id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data: form, error } = await supabase
-    .from('forms')
-    .update({
-      status: 'active',
-      starts_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/forms-v2')
-  return form
 }
 
 // Pause form
-export async function pauseForm(id: string) {
-  const supabase = createServerActionClient({ cookies })
+export async function pauseForm(id: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { data: form, error } = await supabase
+      .from('forms')
+      .update({ status: 'paused' })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to pause form', { error, formId: id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/forms-v2')
+    logger.info('Form paused successfully', { formId: id })
+    return actionSuccess(form, 'Form paused successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error pausing form', { error, formId: id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data: form, error } = await supabase
-    .from('forms')
-    .update({ status: 'paused' })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/forms-v2')
-  return form
 }
 
 // Close form
-export async function closeForm(id: string) {
-  const supabase = createServerActionClient({ cookies })
+export async function closeForm(id: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { data: form, error } = await supabase
+      .from('forms')
+      .update({
+        status: 'closed',
+        ends_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to close form', { error, formId: id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/forms-v2')
+    logger.info('Form closed successfully', { formId: id })
+    return actionSuccess(form, 'Form closed successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error closing form', { error, formId: id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data: form, error } = await supabase
-    .from('forms')
-    .update({
-      status: 'closed',
-      ends_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/forms-v2')
-  return form
 }
 
 // Duplicate form
-export async function duplicateForm(id: string) {
-  const supabase = createServerActionClient({ cookies })
+export async function duplicateForm(id: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    // Get original form
+    const { data: originalForm, error: fetchError } = await supabase
+      .from('forms')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (fetchError) {
+      logger.error('Failed to fetch form for duplication', { error: fetchError, formId: id })
+      return actionError(fetchError.message, 'DATABASE_ERROR')
+    }
+
+    // Create duplicate
+    const { id: _, created_at, updated_at, deleted_at, ...formData } = originalForm
+    const { data: duplicatedForm, error: duplicateError } = await supabase
+      .from('forms')
+      .insert({
+        ...formData,
+        title: `${formData.title} (Copy)`,
+        status: 'draft',
+        total_submissions: 0,
+        total_views: 0,
+        total_started: 0,
+        total_completed: 0,
+        completion_rate: 0,
+        average_completion_time: 0
+      })
+      .select()
+      .single()
+
+    if (duplicateError) {
+      logger.error('Failed to duplicate form', { error: duplicateError, formId: id })
+      return actionError(duplicateError.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/forms-v2')
+    logger.info('Form duplicated successfully', { originalId: id, duplicateId: duplicatedForm.id })
+    return actionSuccess(duplicatedForm, 'Form duplicated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error duplicating form', { error, formId: id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  // Get original form
-  const { data: originalForm, error: fetchError } = await supabase
-    .from('forms')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single()
-
-  if (fetchError) throw fetchError
-
-  // Create duplicate
-  const { id: _, created_at, updated_at, deleted_at, ...formData } = originalForm
-  const { data: duplicatedForm, error: duplicateError } = await supabase
-    .from('forms')
-    .insert({
-      ...formData,
-      title: `${formData.title} (Copy)`,
-      status: 'draft',
-      total_submissions: 0,
-      total_views: 0,
-      total_started: 0,
-      total_completed: 0,
-      completion_rate: 0,
-      average_completion_time: 0
-    })
-    .select()
-    .single()
-
-  if (duplicateError) throw duplicateError
-
-  revalidatePath('/dashboard/forms-v2')
-  return duplicatedForm
 }
 
 // Increment form views
-export async function incrementFormViews(id: string) {
-  const supabase = createServerActionClient({ cookies })
+export async function incrementFormViews(id: string): Promise<ActionResult<void>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { error } = await supabase.rpc('increment_form_views', { form_id: id })
+    const { error } = await supabase.rpc('increment_form_views', { form_id: id })
 
-  if (error) {
-    // Fallback if RPC doesn't exist
-    const { data: form } = await supabase
-      .from('forms')
-      .select('total_views')
-      .eq('id', id)
-      .single()
-
-    if (form) {
-      await supabase
+    if (error) {
+      // Fallback if RPC doesn't exist
+      const { data: form } = await supabase
         .from('forms')
-        .update({ total_views: (form.total_views || 0) + 1 })
+        .select('total_views')
         .eq('id', id)
-    }
-  }
+        .single()
 
-  revalidatePath('/dashboard/forms-v2')
+      if (form) {
+        const { error: updateError } = await supabase
+          .from('forms')
+          .update({ total_views: (form.total_views || 0) + 1 })
+          .eq('id', id)
+
+        if (updateError) {
+          logger.error('Failed to increment form views (fallback)', { error: updateError, formId: id })
+          return actionError(updateError.message, 'DATABASE_ERROR')
+        }
+      }
+    }
+
+    revalidatePath('/dashboard/forms-v2')
+    logger.info('Form views incremented successfully', { formId: id })
+    return actionSuccess(undefined, 'Form views incremented successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error incrementing form views', { error, formId: id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
 // Get form statistics
-export async function getFormStats() {
-  const supabase = createServerActionClient({ cookies })
+export async function getFormStats(): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
-  }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
-  const { data: forms, error } = await supabase
-    .from('forms')
-    .select('status, form_type, total_submissions, total_views, completion_rate')
-    .eq('user_id', user.id)
-    .is('deleted_at', null)
+    const { data: forms, error } = await supabase
+      .from('forms')
+      .select('status, form_type, total_submissions, total_views, completion_rate')
+      .eq('user_id', user.id)
+      .is('deleted_at', null)
 
-  if (error) throw error
-
-  const stats = {
-    total: forms?.length || 0,
-    byStatus: {} as Record<string, number>,
-    byType: {} as Record<string, number>,
-    totalSubmissions: 0,
-    totalViews: 0,
-    averageCompletionRate: 0
-  }
-
-  let totalCompletionRate = 0
-  let formsWithSubmissions = 0
-
-  forms?.forEach(form => {
-    stats.byStatus[form.status] = (stats.byStatus[form.status] || 0) + 1
-    stats.byType[form.form_type] = (stats.byType[form.form_type] || 0) + 1
-    stats.totalSubmissions += form.total_submissions || 0
-    stats.totalViews += form.total_views || 0
-    if (form.completion_rate > 0) {
-      totalCompletionRate += form.completion_rate
-      formsWithSubmissions++
+    if (error) {
+      logger.error('Failed to get form stats', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
     }
-  })
 
-  stats.averageCompletionRate = formsWithSubmissions > 0
-    ? totalCompletionRate / formsWithSubmissions
-    : 0
+    const stats = {
+      total: forms?.length || 0,
+      byStatus: {} as Record<string, number>,
+      byType: {} as Record<string, number>,
+      totalSubmissions: 0,
+      totalViews: 0,
+      averageCompletionRate: 0
+    }
 
-  return stats
+    let totalCompletionRate = 0
+    let formsWithSubmissions = 0
+
+    forms?.forEach(form => {
+      stats.byStatus[form.status] = (stats.byStatus[form.status] || 0) + 1
+      stats.byType[form.form_type] = (stats.byType[form.form_type] || 0) + 1
+      stats.totalSubmissions += form.total_submissions || 0
+      stats.totalViews += form.total_views || 0
+      if (form.completion_rate > 0) {
+        totalCompletionRate += form.completion_rate
+        formsWithSubmissions++
+      }
+    })
+
+    stats.averageCompletionRate = formsWithSubmissions > 0
+      ? totalCompletionRate / formsWithSubmissions
+      : 0
+
+    logger.info('Form stats retrieved successfully', { total: stats.total })
+    return actionSuccess(stats, 'Form stats retrieved successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error getting form stats', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }

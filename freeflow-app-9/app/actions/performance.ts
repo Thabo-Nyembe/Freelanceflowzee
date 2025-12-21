@@ -3,6 +3,10 @@
 import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('performance-actions')
 
 // Performance Types
 type ReviewStatus = 'pending' | 'in_progress' | 'submitted' | 'approved' | 'completed' | 'rejected'
@@ -27,40 +31,50 @@ export async function createPerformanceReview(data: {
   feedback?: string
   self_assessment?: string
   next_review_date?: string
-}) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
+}): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) throw new Error('Unauthorized')
+    if (!user) {
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
 
-  const { data: review, error } = await supabase
-    .from('performance_reviews')
-    .insert({
-      user_id: user.id,
-      employee_id: data.employee_id,
-      employee_name: data.employee_name,
-      employee_email: data.employee_email,
-      department: data.department,
-      position: data.position,
-      reviewer_id: data.reviewer_id,
-      reviewer_name: data.reviewer_name,
-      review_period: data.review_period,
-      review_date: data.review_date,
-      strengths: data.strengths || [],
-      improvements: data.improvements || [],
-      achievements: data.achievements || [],
-      feedback: data.feedback,
-      self_assessment: data.self_assessment,
-      next_review_date: data.next_review_date,
-      status: 'pending'
-    })
-    .select()
-    .single()
+    const { data: review, error } = await supabase
+      .from('performance_reviews')
+      .insert({
+        user_id: user.id,
+        employee_id: data.employee_id,
+        employee_name: data.employee_name,
+        employee_email: data.employee_email,
+        department: data.department,
+        position: data.position,
+        reviewer_id: data.reviewer_id,
+        reviewer_name: data.reviewer_name,
+        review_period: data.review_period,
+        review_date: data.review_date,
+        strengths: data.strengths || [],
+        improvements: data.improvements || [],
+        achievements: data.achievements || [],
+        feedback: data.feedback,
+        self_assessment: data.self_assessment,
+        next_review_date: data.next_review_date,
+        status: 'pending'
+      })
+      .select()
+      .single()
 
-  if (error) throw error
+    if (error) {
+      logger.error('Failed to create performance review', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
 
-  revalidatePath('/dashboard/performance-v2')
-  return review
+    revalidatePath('/dashboard/performance-v2')
+    return actionSuccess(review, 'Performance review created successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error creating performance review', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
 // Update Performance Review
@@ -83,24 +97,34 @@ export async function updatePerformanceReview(reviewId: string, data: Partial<{
   status: ReviewStatus
   next_review_date: string
   metadata: Record<string, any>
-}>) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
+}>): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) throw new Error('Unauthorized')
+    if (!user) {
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
 
-  const { data: review, error } = await supabase
-    .from('performance_reviews')
-    .update(data)
-    .eq('id', reviewId)
-    .eq('user_id', user.id)
-    .select()
-    .single()
+    const { data: review, error } = await supabase
+      .from('performance_reviews')
+      .update(data)
+      .eq('id', reviewId)
+      .eq('user_id', user.id)
+      .select()
+      .single()
 
-  if (error) throw error
+    if (error) {
+      logger.error('Failed to update performance review', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
 
-  revalidatePath('/dashboard/performance-v2')
-  return review
+    revalidatePath('/dashboard/performance-v2')
+    return actionSuccess(review, 'Performance review updated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error updating performance review', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
 // Update Review Status
@@ -114,27 +138,37 @@ export async function submitReview(reviewId: string) {
 }
 
 // Approve Review
-export async function approveReview(reviewId: string, managerComments?: string) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
+export async function approveReview(reviewId: string, managerComments?: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) throw new Error('Unauthorized')
+    if (!user) {
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
 
-  const { data: review, error } = await supabase
-    .from('performance_reviews')
-    .update({
-      status: 'approved',
-      manager_comments: managerComments
-    })
-    .eq('id', reviewId)
-    .eq('user_id', user.id)
-    .select()
-    .single()
+    const { data: review, error } = await supabase
+      .from('performance_reviews')
+      .update({
+        status: 'approved',
+        manager_comments: managerComments
+      })
+      .eq('id', reviewId)
+      .eq('user_id', user.id)
+      .select()
+      .single()
 
-  if (error) throw error
+    if (error) {
+      logger.error('Failed to approve review', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
 
-  revalidatePath('/dashboard/performance-v2')
-  return review
+    revalidatePath('/dashboard/performance-v2')
+    return actionSuccess(review, 'Review approved successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error approving review', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
 // Complete Review
@@ -143,22 +177,32 @@ export async function completeReview(reviewId: string) {
 }
 
 // Delete Review (soft delete)
-export async function deletePerformanceReview(reviewId: string) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
+export async function deletePerformanceReview(reviewId: string): Promise<ActionResult<{ success: boolean }>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) throw new Error('Unauthorized')
+    if (!user) {
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
 
-  const { error } = await supabase
-    .from('performance_reviews')
-    .update({ deleted_at: new Date().toISOString() })
-    .eq('id', reviewId)
-    .eq('user_id', user.id)
+    const { error } = await supabase
+      .from('performance_reviews')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', reviewId)
+      .eq('user_id', user.id)
 
-  if (error) throw error
+    if (error) {
+      logger.error('Failed to delete performance review', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
 
-  revalidatePath('/dashboard/performance-v2')
-  return { success: true }
+    revalidatePath('/dashboard/performance-v2')
+    return actionSuccess({ success: true }, 'Performance review deleted successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error deleting performance review', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
 // Create Performance Goal
@@ -169,37 +213,47 @@ export async function createPerformanceGoal(reviewId: string, data: {
   target_value: number
   priority?: GoalPriority
   due_date?: string
-}) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
+}): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) throw new Error('Unauthorized')
+    if (!user) {
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
 
-  const { data: goal, error } = await supabase
-    .from('performance_goals')
-    .insert({
-      review_id: reviewId,
-      user_id: user.id,
-      goal_title: data.goal_title,
-      description: data.description,
-      target_metric: data.target_metric,
-      current_value: 0,
-      target_value: data.target_value,
-      progress_percentage: 0,
-      priority: data.priority || 'medium',
-      status: 'not_started',
-      due_date: data.due_date
-    })
-    .select()
-    .single()
+    const { data: goal, error } = await supabase
+      .from('performance_goals')
+      .insert({
+        review_id: reviewId,
+        user_id: user.id,
+        goal_title: data.goal_title,
+        description: data.description,
+        target_metric: data.target_metric,
+        current_value: 0,
+        target_value: data.target_value,
+        progress_percentage: 0,
+        priority: data.priority || 'medium',
+        status: 'not_started',
+        due_date: data.due_date
+      })
+      .select()
+      .single()
 
-  if (error) throw error
+    if (error) {
+      logger.error('Failed to create performance goal', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
 
-  // Update review goals_total
-  await updateReviewGoalCounts(reviewId)
+    // Update review goals_total
+    await updateReviewGoalCounts(reviewId)
 
-  revalidatePath('/dashboard/performance-v2')
-  return goal
+    revalidatePath('/dashboard/performance-v2')
+    return actionSuccess(goal, 'Performance goal created successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error creating performance goal', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
 // Update Performance Goal
@@ -214,53 +268,63 @@ export async function updatePerformanceGoal(goalId: string, data: Partial<{
   due_date: string
   completed_date: string
   notes: string
-}>) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
+}>): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) throw new Error('Unauthorized')
+    if (!user) {
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
 
-  // Calculate progress if values updated
-  let updateData: any = { ...data }
-  if (data.current_value !== undefined || data.target_value !== undefined) {
-    const { data: currentGoal } = await supabase
+    // Calculate progress if values updated
+    let updateData: any = { ...data }
+    if (data.current_value !== undefined || data.target_value !== undefined) {
+      const { data: currentGoal } = await supabase
+        .from('performance_goals')
+        .select('current_value, target_value')
+        .eq('id', goalId)
+        .single()
+
+      if (currentGoal) {
+        const currentVal = data.current_value ?? currentGoal.current_value
+        const targetVal = data.target_value ?? currentGoal.target_value
+        updateData.progress_percentage = targetVal > 0 ? Math.min(100, (currentVal / targetVal) * 100) : 0
+      }
+    }
+
+    const { data: goal, error } = await supabase
       .from('performance_goals')
-      .select('current_value, target_value')
+      .update(updateData)
       .eq('id', goalId)
+      .eq('user_id', user.id)
+      .select()
       .single()
 
-    if (currentGoal) {
-      const currentVal = data.current_value ?? currentGoal.current_value
-      const targetVal = data.target_value ?? currentGoal.target_value
-      updateData.progress_percentage = targetVal > 0 ? Math.min(100, (currentVal / targetVal) * 100) : 0
+    if (error) {
+      logger.error('Failed to update performance goal', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
     }
-  }
 
-  const { data: goal, error } = await supabase
-    .from('performance_goals')
-    .update(updateData)
-    .eq('id', goalId)
-    .eq('user_id', user.id)
-    .select()
-    .single()
+    // Update review goal counts if status changed
+    if (data.status) {
+      const { data: goalData } = await supabase
+        .from('performance_goals')
+        .select('review_id')
+        .eq('id', goalId)
+        .single()
 
-  if (error) throw error
-
-  // Update review goal counts if status changed
-  if (data.status) {
-    const { data: goalData } = await supabase
-      .from('performance_goals')
-      .select('review_id')
-      .eq('id', goalId)
-      .single()
-
-    if (goalData?.review_id) {
-      await updateReviewGoalCounts(goalData.review_id)
+      if (goalData?.review_id) {
+        await updateReviewGoalCounts(goalData.review_id)
+      }
     }
-  }
 
-  revalidatePath('/dashboard/performance-v2')
-  return goal
+    revalidatePath('/dashboard/performance-v2')
+    return actionSuccess(goal, 'Performance goal updated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error updating performance goal', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
 // Update Goal Progress
@@ -277,34 +341,44 @@ export async function completeGoal(goalId: string, exceeded: boolean = false) {
 }
 
 // Delete Goal
-export async function deletePerformanceGoal(goalId: string) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
+export async function deletePerformanceGoal(goalId: string): Promise<ActionResult<{ success: boolean }>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) throw new Error('Unauthorized')
+    if (!user) {
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
 
-  // Get goal to find review
-  const { data: goal } = await supabase
-    .from('performance_goals')
-    .select('review_id')
-    .eq('id', goalId)
-    .single()
+    // Get goal to find review
+    const { data: goal } = await supabase
+      .from('performance_goals')
+      .select('review_id')
+      .eq('id', goalId)
+      .single()
 
-  const { error } = await supabase
-    .from('performance_goals')
-    .delete()
-    .eq('id', goalId)
-    .eq('user_id', user.id)
+    const { error } = await supabase
+      .from('performance_goals')
+      .delete()
+      .eq('id', goalId)
+      .eq('user_id', user.id)
 
-  if (error) throw error
+    if (error) {
+      logger.error('Failed to delete performance goal', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
 
-  // Update review goal counts
-  if (goal?.review_id) {
-    await updateReviewGoalCounts(goal.review_id)
+    // Update review goal counts
+    if (goal?.review_id) {
+      await updateReviewGoalCounts(goal.review_id)
+    }
+
+    revalidatePath('/dashboard/performance-v2')
+    return actionSuccess({ success: true }, 'Performance goal deleted successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error deleting performance goal', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  revalidatePath('/dashboard/performance-v2')
-  return { success: true }
 }
 
 // Helper: Update Review Goal Counts
@@ -330,69 +404,91 @@ export async function calculateOverallScore(reviewId: string, scores: {
   goalCompletion?: number // 0-100
   skillRatings?: number[] // Array of 1-5 ratings
   managerRating?: number // 1-5
-}) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
+}): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) throw new Error('Unauthorized')
+    if (!user) {
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
 
-  let overallScore = 0
-  let weightTotal = 0
+    let overallScore = 0
+    let weightTotal = 0
 
-  if (scores.goalCompletion !== undefined) {
-    overallScore += scores.goalCompletion * 0.4 // 40% weight
-    weightTotal += 0.4
+    if (scores.goalCompletion !== undefined) {
+      overallScore += scores.goalCompletion * 0.4 // 40% weight
+      weightTotal += 0.4
+    }
+
+    if (scores.skillRatings && scores.skillRatings.length > 0) {
+      const avgSkill = scores.skillRatings.reduce((a, b) => a + b, 0) / scores.skillRatings.length
+      overallScore += (avgSkill / 5) * 100 * 0.3 // 30% weight
+      weightTotal += 0.3
+    }
+
+    if (scores.managerRating !== undefined) {
+      overallScore += (scores.managerRating / 5) * 100 * 0.3 // 30% weight
+      weightTotal += 0.3
+    }
+
+    // Normalize score
+    const finalScore = weightTotal > 0 ? overallScore / weightTotal : 0
+
+    const { data: review, error } = await supabase
+      .from('performance_reviews')
+      .update({ overall_score: Math.round(finalScore * 100) / 100 })
+      .eq('id', reviewId)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to calculate overall score', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/performance-v2')
+    return actionSuccess(review, 'Overall score calculated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error calculating overall score', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  if (scores.skillRatings && scores.skillRatings.length > 0) {
-    const avgSkill = scores.skillRatings.reduce((a, b) => a + b, 0) / scores.skillRatings.length
-    overallScore += (avgSkill / 5) * 100 * 0.3 // 30% weight
-    weightTotal += 0.3
-  }
-
-  if (scores.managerRating !== undefined) {
-    overallScore += (scores.managerRating / 5) * 100 * 0.3 // 30% weight
-    weightTotal += 0.3
-  }
-
-  // Normalize score
-  const finalScore = weightTotal > 0 ? overallScore / weightTotal : 0
-
-  const { data: review, error } = await supabase
-    .from('performance_reviews')
-    .update({ overall_score: Math.round(finalScore * 100) / 100 })
-    .eq('id', reviewId)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/performance-v2')
-  return review
 }
 
 // Get Performance Stats
-export async function getPerformanceStats() {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
+export async function getPerformanceStats(): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) throw new Error('Unauthorized')
+    if (!user) {
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
 
-  const { data: reviews } = await supabase
-    .from('performance_reviews')
-    .select('status, overall_score, goals_achieved, goals_total, department')
-    .eq('user_id', user.id)
-    .is('deleted_at', null)
+    const { data: reviews, error } = await supabase
+      .from('performance_reviews')
+      .select('status, overall_score, goals_achieved, goals_total, department')
+      .eq('user_id', user.id)
+      .is('deleted_at', null)
 
-  const stats = {
-    totalReviews: reviews?.length || 0,
-    averageScore: reviews?.length ? reviews.reduce((sum, r) => sum + (r.overall_score || 0), 0) / reviews.length : 0,
-    completedReviews: reviews?.filter(r => r.status === 'completed').length || 0,
-    pendingReviews: reviews?.filter(r => r.status === 'pending').length || 0,
-    totalGoalsAchieved: reviews?.reduce((sum, r) => sum + (r.goals_achieved || 0), 0) || 0,
-    totalGoals: reviews?.reduce((sum, r) => sum + (r.goals_total || 0), 0) || 0
+    if (error) {
+      logger.error('Failed to get performance stats', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    const stats = {
+      totalReviews: reviews?.length || 0,
+      averageScore: reviews?.length ? reviews.reduce((sum, r) => sum + (r.overall_score || 0), 0) / reviews.length : 0,
+      completedReviews: reviews?.filter(r => r.status === 'completed').length || 0,
+      pendingReviews: reviews?.filter(r => r.status === 'pending').length || 0,
+      totalGoalsAchieved: reviews?.reduce((sum, r) => sum + (r.goals_achieved || 0), 0) || 0,
+      totalGoals: reviews?.reduce((sum, r) => sum + (r.goals_total || 0), 0) || 0
+    }
+
+    return actionSuccess(stats, 'Performance stats retrieved successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error getting performance stats', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  return stats
 }

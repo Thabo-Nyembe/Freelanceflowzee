@@ -3,94 +3,159 @@
 import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
+import { createFeatureLogger } from '@/lib/logger'
 
-export async function createPerformanceAnalytic(data: any) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
+const logger = createFeatureLogger('performance-analytics-actions')
 
-  const { data: analytic, error } = await supabase
-    .from('performance_analytics')
-    .insert({ ...data, user_id: user.id })
-    .select()
-    .single()
+export async function createPerformanceAnalytic(data: any): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  if (error) throw error
-  revalidatePath('/dashboard/performance-analytics-v2')
-  return analytic
+    if (!user) {
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
+
+    const { data: analytic, error } = await supabase
+      .from('performance_analytics')
+      .insert({ ...data, user_id: user.id })
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to create performance analytic', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/performance-analytics-v2')
+    return actionSuccess(analytic, 'Performance analytic created successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error creating performance analytic', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
-export async function updatePerformanceAnalytic(id: string, data: any) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
+export async function updatePerformanceAnalytic(id: string, data: any): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: analytic, error } = await supabase
-    .from('performance_analytics')
-    .update(data)
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
+    if (!user) {
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
 
-  if (error) throw error
-  revalidatePath('/dashboard/performance-analytics-v2')
-  return analytic
+    const { data: analytic, error } = await supabase
+      .from('performance_analytics')
+      .update(data)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to update performance analytic', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/performance-analytics-v2')
+    return actionSuccess(analytic, 'Performance analytic updated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error updating performance analytic', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
-export async function deletePerformanceAnalytic(id: string) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
+export async function deletePerformanceAnalytic(id: string): Promise<ActionResult<{ success: boolean }>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  const { error } = await supabase
-    .from('performance_analytics')
-    .update({ deleted_at: new Date().toISOString() })
-    .eq('id', id)
-    .eq('user_id', user.id)
+    if (!user) {
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
 
-  if (error) throw error
-  revalidatePath('/dashboard/performance-analytics-v2')
+    const { error } = await supabase
+      .from('performance_analytics')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('user_id', user.id)
+
+    if (error) {
+      logger.error('Failed to delete performance analytic', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/performance-analytics-v2')
+    return actionSuccess({ success: true }, 'Performance analytic deleted successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error deleting performance analytic', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
-export async function resolveAlert(id: string) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
+export async function resolveAlert(id: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: analytic, error } = await supabase
-    .from('performance_analytics')
-    .update({
-      is_alert_active: false,
-      alert_resolved_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
+    if (!user) {
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
 
-  if (error) throw error
-  revalidatePath('/dashboard/performance-analytics-v2')
-  return analytic
+    const { data: analytic, error } = await supabase
+      .from('performance_analytics')
+      .update({
+        is_alert_active: false,
+        alert_resolved_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to resolve alert', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/performance-analytics-v2')
+    return actionSuccess(analytic, 'Alert resolved successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error resolving alert', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
-export async function markDegraded(id: string, reason: string) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
+export async function markDegraded(id: string, reason: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: analytic, error } = await supabase
-    .from('performance_analytics')
-    .update({
-      is_degraded: true,
-      degradation_reason: reason
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
+    if (!user) {
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
 
-  if (error) throw error
-  revalidatePath('/dashboard/performance-analytics-v2')
-  return analytic
+    const { data: analytic, error } = await supabase
+      .from('performance_analytics')
+      .update({
+        is_degraded: true,
+        degradation_reason: reason
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to mark degraded', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/performance-analytics-v2')
+    return actionSuccess(analytic, 'Marked as degraded successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error marking degraded', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }

@@ -3,6 +3,10 @@
 import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('logistics-actions')
 
 // Types
 export interface LogisticsRouteInput {
@@ -90,155 +94,200 @@ export interface FleetVehicleInput {
 }
 
 // Logistics Route Actions
-export async function createLogisticsRoute(input: LogisticsRouteInput) {
-  const supabase = createServerActionClient({ cookies })
+export async function createLogisticsRoute(input: LogisticsRouteInput): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
-  const { data, error } = await supabase
-    .from('logistics_routes')
-    .insert([{
-      ...input,
-      user_id: user.id,
-      status: 'planned',
-      total_stops: 0,
-      completed_stops: 0,
-      total_packages: 0,
-      delivered_packages: 0,
-      actual_distance_km: 0,
-      actual_duration_minutes: 0,
-      total_cost: (input.fuel_cost || 0) + (input.labor_cost || 0) + (input.toll_cost || 0) + (input.other_costs || 0),
-      progress_percent: 0
-    }])
-    .select()
-    .single()
+    const { data, error } = await supabase
+      .from('logistics_routes')
+      .insert([{
+        ...input,
+        user_id: user.id,
+        status: 'planned',
+        total_stops: 0,
+        completed_stops: 0,
+        total_packages: 0,
+        delivered_packages: 0,
+        actual_distance_km: 0,
+        actual_duration_minutes: 0,
+        total_cost: (input.fuel_cost || 0) + (input.labor_cost || 0) + (input.toll_cost || 0) + (input.other_costs || 0),
+        progress_percent: 0
+      }])
+      .select()
+      .single()
 
-  if (error) throw error
+    if (error) {
+      logger.error('Failed to create logistics route', { error, input })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
 
-  revalidatePath('/dashboard/logistics-v2')
-  return data
+    logger.info('Logistics route created successfully', { routeId: data.id })
+    revalidatePath('/dashboard/logistics-v2')
+    return actionSuccess(data, 'Logistics route created successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error creating logistics route', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
-export async function updateLogisticsRoute(id: string, updates: Partial<LogisticsRouteInput>) {
-  const supabase = createServerActionClient({ cookies })
+export async function updateLogisticsRoute(id: string, updates: Partial<LogisticsRouteInput>): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
-  // Recalculate total cost if any cost field is updated
-  let totalCost: number | undefined
-  if (updates.fuel_cost !== undefined || updates.labor_cost !== undefined ||
-      updates.toll_cost !== undefined || updates.other_costs !== undefined) {
-    const { data: current } = await supabase
+    // Recalculate total cost if any cost field is updated
+    let totalCost: number | undefined
+    if (updates.fuel_cost !== undefined || updates.labor_cost !== undefined ||
+        updates.toll_cost !== undefined || updates.other_costs !== undefined) {
+      const { data: current } = await supabase
+        .from('logistics_routes')
+        .select('fuel_cost, labor_cost, toll_cost, other_costs')
+        .eq('id', id)
+        .single()
+
+      if (current) {
+        totalCost = (updates.fuel_cost ?? current.fuel_cost ?? 0) +
+                    (updates.labor_cost ?? current.labor_cost ?? 0) +
+                    (updates.toll_cost ?? current.toll_cost ?? 0) +
+                    (updates.other_costs ?? current.other_costs ?? 0)
+      }
+    }
+
+    const { data, error } = await supabase
       .from('logistics_routes')
-      .select('fuel_cost, labor_cost, toll_cost, other_costs')
+      .update({
+        ...updates,
+        ...(totalCost !== undefined ? { total_cost: totalCost } : {}),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to update logistics route', { error, id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    logger.info('Logistics route updated successfully', { routeId: id })
+    revalidatePath('/dashboard/logistics-v2')
+    return actionSuccess(data, 'Logistics route updated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error updating logistics route', { error, id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
+}
+
+export async function deleteLogisticsRoute(id: string): Promise<ActionResult<{ success: boolean }>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { error } = await supabase
+      .from('logistics_routes')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('user_id', user.id)
+
+    if (error) {
+      logger.error('Failed to delete logistics route', { error, id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    logger.info('Logistics route deleted successfully', { routeId: id })
+    revalidatePath('/dashboard/logistics-v2')
+    return actionSuccess({ success: true }, 'Logistics route deleted successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error deleting logistics route', { error, id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
+}
+
+export async function startRoute(id: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { data, error } = await supabase
+      .from('logistics_routes')
+      .update({
+        status: 'in-progress',
+        actual_start: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to start route', { error, id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    logger.info('Route started successfully', { routeId: id })
+    revalidatePath('/dashboard/logistics-v2')
+    return actionSuccess(data, 'Route started successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error starting route', { error, id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
+}
+
+export async function completeRoute(id: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    // Get route to calculate actual duration
+    const { data: route } = await supabase
+      .from('logistics_routes')
+      .select('actual_start, total_stops')
       .eq('id', id)
       .single()
 
-    if (current) {
-      totalCost = (updates.fuel_cost ?? current.fuel_cost ?? 0) +
-                  (updates.labor_cost ?? current.labor_cost ?? 0) +
-                  (updates.toll_cost ?? current.toll_cost ?? 0) +
-                  (updates.other_costs ?? current.other_costs ?? 0)
+    const actualStart = route?.actual_start ? new Date(route.actual_start) : new Date()
+    const duration = Math.floor((Date.now() - actualStart.getTime()) / 60000)
+
+    const { data, error } = await supabase
+      .from('logistics_routes')
+      .update({
+        status: 'completed',
+        actual_end: new Date().toISOString(),
+        actual_duration_minutes: duration,
+        completed_stops: route?.total_stops || 0,
+        progress_percent: 100,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to complete route', { error, id })
+      return actionError(error.message, 'DATABASE_ERROR')
     }
+
+    logger.info('Route completed successfully', { routeId: id })
+    revalidatePath('/dashboard/logistics-v2')
+    return actionSuccess(data, 'Route completed successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error completing route', { error, id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data, error } = await supabase
-    .from('logistics_routes')
-    .update({
-      ...updates,
-      ...(totalCost !== undefined ? { total_cost: totalCost } : {}),
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/logistics-v2')
-  return data
-}
-
-export async function deleteLogisticsRoute(id: string) {
-  const supabase = createServerActionClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
-
-  const { error } = await supabase
-    .from('logistics_routes')
-    .update({ deleted_at: new Date().toISOString() })
-    .eq('id', id)
-    .eq('user_id', user.id)
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/logistics-v2')
-  return { success: true }
-}
-
-export async function startRoute(id: string) {
-  const supabase = createServerActionClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
-
-  const { data, error } = await supabase
-    .from('logistics_routes')
-    .update({
-      status: 'in-progress',
-      actual_start: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/logistics-v2')
-  return data
-}
-
-export async function completeRoute(id: string) {
-  const supabase = createServerActionClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
-
-  // Get route to calculate actual duration
-  const { data: route } = await supabase
-    .from('logistics_routes')
-    .select('actual_start, total_stops')
-    .eq('id', id)
-    .single()
-
-  const actualStart = route?.actual_start ? new Date(route.actual_start) : new Date()
-  const duration = Math.floor((Date.now() - actualStart.getTime()) / 60000)
-
-  const { data, error } = await supabase
-    .from('logistics_routes')
-    .update({
-      status: 'completed',
-      actual_end: new Date().toISOString(),
-      actual_duration_minutes: duration,
-      completed_stops: route?.total_stops || 0,
-      progress_percent: 100,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/logistics-v2')
-  return data
 }
 
 export async function delayRoute(id: string, reason?: string) {

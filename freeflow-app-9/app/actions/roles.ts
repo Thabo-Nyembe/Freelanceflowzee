@@ -3,6 +3,11 @@
 import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
+import { createFeatureLogger } from '@/lib/logger'
+import { hasPermission } from '@/lib/auth/permissions'
+
+const logger = createFeatureLogger('roles-actions')
 
 // Types
 interface RoleInput {
@@ -25,290 +30,362 @@ interface PermissionInput {
 }
 
 // Create role
-export async function createRole(input: RoleInput) {
-  const supabase = createServerActionClient({ cookies })
+export async function createRole(input: RoleInput): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      logger.warn('Unauthorized role creation attempt')
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
 
-  // If setting as default, unset other defaults first
-  if (input.is_default) {
-    await supabase
+    // Permission check - manage_team required for role management
+    if (!(await hasPermission(user.id, 'manage_team'))) {
+      logger.warn('Permission denied for role creation', { userId: user.id })
+      return actionError('Insufficient permissions to manage roles', 'FORBIDDEN')
+    }
+
+    // If setting as default, unset other defaults first
+    if (input.is_default) {
+      await supabase
+        .from('user_roles')
+        .update({ is_default: false })
+        .eq('user_id', user.id)
+        .eq('is_default', true)
+    }
+
+    const { data, error } = await supabase
       .from('user_roles')
-      .update({ is_default: false })
-      .eq('user_id', user.id)
-      .eq('is_default', true)
+      .insert([{
+        user_id: user.id,
+        created_by: user.id,
+        name: input.name,
+        description: input.description,
+        type: input.type || 'custom',
+        status: 'active',
+        access_level: input.access_level || 'read',
+        permissions: input.permissions || [],
+        can_delegate: input.can_delegate || false,
+        is_default: input.is_default || false,
+        is_system: false,
+        tags: input.tags || [],
+        metadata: input.metadata || {}
+      }])
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to create role', { error: error.message })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    logger.info('Role created successfully', { name: input.name })
+    revalidatePath('/dashboard/roles-v2')
+    return actionSuccess(data, 'Role created successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error creating role', { error: error.message })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data, error } = await supabase
-    .from('user_roles')
-    .insert([{
-      user_id: user.id,
-      created_by: user.id,
-      name: input.name,
-      description: input.description,
-      type: input.type || 'custom',
-      status: 'active',
-      access_level: input.access_level || 'read',
-      permissions: input.permissions || [],
-      can_delegate: input.can_delegate || false,
-      is_default: input.is_default || false,
-      is_system: false,
-      tags: input.tags || [],
-      metadata: input.metadata || {}
-    }])
-    .select()
-    .single()
-
-  if (error) {
-    return { error: error.message }
-  }
-
-  revalidatePath('/dashboard/roles-v2')
-  return { data }
 }
 
 // Update role
-export async function updateRole(id: string, input: Partial<RoleInput>) {
-  const supabase = createServerActionClient({ cookies })
+export async function updateRole(id: string, input: Partial<RoleInput>): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return { error: 'Not authenticated' }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      logger.warn('Unauthorized role update attempt')
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
+
+    // If setting as default, unset other defaults first
+    if (input.is_default) {
+      await supabase
+        .from('user_roles')
+        .update({ is_default: false })
+        .eq('user_id', user.id)
+        .eq('is_default', true)
+        .neq('id', id)
+    }
+
+    const { data, error } = await supabase
+      .from('user_roles')
+      .update({
+        ...input,
+        last_modified_by: user.id
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to update role', { error: error.message, id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    logger.info('Role updated successfully', { id })
+    revalidatePath('/dashboard/roles-v2')
+    return actionSuccess(data, 'Role updated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error updating role', { error: error.message })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
+}
 
-  // If setting as default, unset other defaults first
-  if (input.is_default) {
+// Delete role
+export async function deleteRole(id: string): Promise<ActionResult<{ success: boolean }>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      logger.warn('Unauthorized role deletion attempt')
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
+
+    // Check if role is system role
+    const { data: role } = await supabase
+      .from('user_roles')
+      .select('is_system')
+      .eq('id', id)
+      .single()
+
+    if (role?.is_system) {
+      logger.warn('Attempted to delete system role', { id })
+      return actionError('Cannot delete system roles', 'FORBIDDEN')
+    }
+
+    const { error } = await supabase
+      .from('user_roles')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('user_id', user.id)
+
+    if (error) {
+      logger.error('Failed to delete role', { error: error.message, id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    logger.info('Role deleted successfully', { id })
+    revalidatePath('/dashboard/roles-v2')
+    return actionSuccess({ success: true }, 'Role deleted successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error deleting role', { error: error.message })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
+}
+
+// Activate role
+export async function activateRole(id: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      logger.warn('Unauthorized role activation attempt')
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
+
+    const { data, error } = await supabase
+      .from('user_roles')
+      .update({
+        status: 'active',
+        last_modified_by: user.id
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to activate role', { error: error.message, id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    logger.info('Role activated successfully', { id })
+    revalidatePath('/dashboard/roles-v2')
+    return actionSuccess(data, 'Role activated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error activating role', { error: error.message })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
+}
+
+// Deactivate role
+export async function deactivateRole(id: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      logger.warn('Unauthorized role deactivation attempt')
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
+
+    const { data, error } = await supabase
+      .from('user_roles')
+      .update({
+        status: 'inactive',
+        last_modified_by: user.id
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to deactivate role', { error: error.message, id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    logger.info('Role deactivated successfully', { id })
+    revalidatePath('/dashboard/roles-v2')
+    return actionSuccess(data, 'Role deactivated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error deactivating role', { error: error.message })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
+}
+
+// Set as default
+export async function setDefaultRole(id: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      logger.warn('Unauthorized default role setting attempt')
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
+
+    // Unset all defaults first
     await supabase
       .from('user_roles')
       .update({ is_default: false })
       .eq('user_id', user.id)
       .eq('is_default', true)
-      .neq('id', id)
+
+    // Set new default
+    const { data, error } = await supabase
+      .from('user_roles')
+      .update({
+        is_default: true,
+        last_modified_by: user.id
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to set default role', { error: error.message, id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    logger.info('Default role set successfully', { id })
+    revalidatePath('/dashboard/roles-v2')
+    return actionSuccess(data, 'Default role set successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error setting default role', { error: error.message })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data, error } = await supabase
-    .from('user_roles')
-    .update({
-      ...input,
-      last_modified_by: user.id
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) {
-    return { error: error.message }
-  }
-
-  revalidatePath('/dashboard/roles-v2')
-  return { data }
-}
-
-// Delete role
-export async function deleteRole(id: string) {
-  const supabase = createServerActionClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
-
-  // Check if role is system role
-  const { data: role } = await supabase
-    .from('user_roles')
-    .select('is_system')
-    .eq('id', id)
-    .single()
-
-  if (role?.is_system) {
-    return { error: 'Cannot delete system roles' }
-  }
-
-  const { error } = await supabase
-    .from('user_roles')
-    .update({ deleted_at: new Date().toISOString() })
-    .eq('id', id)
-    .eq('user_id', user.id)
-
-  if (error) {
-    return { error: error.message }
-  }
-
-  revalidatePath('/dashboard/roles-v2')
-  return { success: true }
-}
-
-// Activate role
-export async function activateRole(id: string) {
-  const supabase = createServerActionClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
-
-  const { data, error } = await supabase
-    .from('user_roles')
-    .update({
-      status: 'active',
-      last_modified_by: user.id
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) {
-    return { error: error.message }
-  }
-
-  revalidatePath('/dashboard/roles-v2')
-  return { data }
-}
-
-// Deactivate role
-export async function deactivateRole(id: string) {
-  const supabase = createServerActionClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
-
-  const { data, error } = await supabase
-    .from('user_roles')
-    .update({
-      status: 'inactive',
-      last_modified_by: user.id
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) {
-    return { error: error.message }
-  }
-
-  revalidatePath('/dashboard/roles-v2')
-  return { data }
-}
-
-// Set as default
-export async function setDefaultRole(id: string) {
-  const supabase = createServerActionClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return { error: 'Not authenticated' }
-  }
-
-  // Unset all defaults first
-  await supabase
-    .from('user_roles')
-    .update({ is_default: false })
-    .eq('user_id', user.id)
-    .eq('is_default', true)
-
-  // Set new default
-  const { data, error } = await supabase
-    .from('user_roles')
-    .update({
-      is_default: true,
-      last_modified_by: user.id
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) {
-    return { error: error.message }
-  }
-
-  revalidatePath('/dashboard/roles-v2')
-  return { data }
 }
 
 // Clone role
-export async function cloneRole(id: string, newName: string) {
-  const supabase = createServerActionClient({ cookies })
+export async function cloneRole(id: string, newName: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return { error: 'Not authenticated' }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      logger.warn('Unauthorized role cloning attempt')
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
+
+    // Get role to clone
+    const { data: roleToClone } = await supabase
+      .from('user_roles')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (!roleToClone) {
+      logger.warn('Role not found for cloning', { id })
+      return actionError('Role not found', 'NOT_FOUND')
+    }
+
+    const { data, error } = await supabase
+      .from('user_roles')
+      .insert([{
+        user_id: user.id,
+        created_by: user.id,
+        name: newName,
+        description: `Clone of ${roleToClone.name}`,
+        type: 'custom',
+        status: 'active',
+        access_level: roleToClone.access_level,
+        permissions: roleToClone.permissions,
+        can_delegate: roleToClone.can_delegate,
+        is_default: false,
+        is_system: false,
+        tags: roleToClone.tags,
+        metadata: roleToClone.metadata
+      }])
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to clone role', { error: error.message, id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    logger.info('Role cloned successfully', { id, newName })
+    revalidatePath('/dashboard/roles-v2')
+    return actionSuccess(data, 'Role cloned successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error cloning role', { error: error.message })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  // Get role to clone
-  const { data: roleToClone } = await supabase
-    .from('user_roles')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single()
-
-  if (!roleToClone) {
-    return { error: 'Role not found' }
-  }
-
-  const { data, error } = await supabase
-    .from('user_roles')
-    .insert([{
-      user_id: user.id,
-      created_by: user.id,
-      name: newName,
-      description: `Clone of ${roleToClone.name}`,
-      type: 'custom',
-      status: 'active',
-      access_level: roleToClone.access_level,
-      permissions: roleToClone.permissions,
-      can_delegate: roleToClone.can_delegate,
-      is_default: false,
-      is_system: false,
-      tags: roleToClone.tags,
-      metadata: roleToClone.metadata
-    }])
-    .select()
-    .single()
-
-  if (error) {
-    return { error: error.message }
-  }
-
-  revalidatePath('/dashboard/roles-v2')
-  return { data }
 }
 
 // Update permissions
-export async function updateRolePermissions(id: string, permissions: string[]) {
-  const supabase = createServerActionClient({ cookies })
+export async function updateRolePermissions(id: string, permissions: string[]): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return { error: 'Not authenticated' }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      logger.warn('Unauthorized role permissions update attempt')
+      return actionError('Not authenticated', 'UNAUTHORIZED')
+    }
+
+    const { data, error } = await supabase
+      .from('user_roles')
+      .update({
+        permissions,
+        last_modified_by: user.id
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to update role permissions', { error: error.message, id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    logger.info('Role permissions updated successfully', { id })
+    revalidatePath('/dashboard/roles-v2')
+    return actionSuccess(data, 'Role permissions updated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error updating role permissions', { error: error.message })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data, error } = await supabase
-    .from('user_roles')
-    .update({
-      permissions,
-      last_modified_by: user.id
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) {
-    return { error: error.message }
-  }
-
-  revalidatePath('/dashboard/roles-v2')
-  return { data }
 }
 
 // =====================================================

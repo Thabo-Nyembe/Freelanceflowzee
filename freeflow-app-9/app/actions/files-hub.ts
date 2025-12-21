@@ -3,6 +3,10 @@
 import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('files-hub-actions')
 
 export interface FileInput {
   name: string
@@ -28,169 +32,259 @@ export interface FolderInput {
   icon?: string
 }
 
-export async function createFile(input: FileInput) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+export async function createFile(input: FileInput): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
-  const { data, error } = await supabase
-    .from('files')
-    .insert([{ ...input, user_id: user.id, status: 'active' }])
-    .select()
-    .single()
+    const { data, error } = await supabase
+      .from('files')
+      .insert([{ ...input, user_id: user.id, status: 'active' }])
+      .select()
+      .single()
 
-  if (error) throw error
-  revalidatePath('/dashboard/files-hub-v2')
-  return data
+    if (error) {
+      logger.error('Failed to create file', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/files-hub-v2')
+    logger.info('File created successfully', { fileId: data.id })
+    return actionSuccess(data, 'File created successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error creating file', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
-export async function updateFile(id: string, updates: Partial<FileInput>) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+export async function updateFile(id: string, updates: Partial<FileInput>): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
-  const { data, error } = await supabase
-    .from('files')
-    .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
+    const { data, error } = await supabase
+      .from('files')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
 
-  if (error) throw error
-  revalidatePath('/dashboard/files-hub-v2')
-  return data
+    if (error) {
+      logger.error('Failed to update file', { error, fileId: id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/files-hub-v2')
+    logger.info('File updated successfully', { fileId: id })
+    return actionSuccess(data, 'File updated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error updating file', { error, fileId: id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
-export async function toggleFileStar(id: string) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+export async function toggleFileStar(id: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
-  const { data: file } = await supabase
-    .from('files')
-    .select('is_starred')
-    .eq('id', id)
-    .single()
+    const { data: file } = await supabase
+      .from('files')
+      .select('is_starred')
+      .eq('id', id)
+      .single()
 
-  const { data, error } = await supabase
-    .from('files')
-    .update({ is_starred: !file?.is_starred, updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
+    const { data, error } = await supabase
+      .from('files')
+      .update({ is_starred: !file?.is_starred, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
 
-  if (error) throw error
-  revalidatePath('/dashboard/files-hub-v2')
-  return data
+    if (error) {
+      logger.error('Failed to toggle file star', { error, fileId: id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/files-hub-v2')
+    logger.info('File star toggled successfully', { fileId: id, isStarred: data.is_starred })
+    return actionSuccess(data, 'File star toggled successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error toggling file star', { error, fileId: id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
-export async function moveFile(id: string, folderId: string | null) {
+export async function moveFile(id: string, folderId: string | null): Promise<ActionResult<any>> {
   return updateFile(id, { folder_id: folderId })
 }
 
-export async function deleteFile(id: string) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+export async function deleteFile(id: string): Promise<ActionResult<{ success: boolean }>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
-  const { error } = await supabase
-    .from('files')
-    .update({ status: 'deleted', deleted_at: new Date().toISOString() })
-    .eq('id', id)
-    .eq('user_id', user.id)
+    const { error } = await supabase
+      .from('files')
+      .update({ status: 'deleted', deleted_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('user_id', user.id)
 
-  if (error) throw error
-  revalidatePath('/dashboard/files-hub-v2')
-  return { success: true }
+    if (error) {
+      logger.error('Failed to delete file', { error, fileId: id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/files-hub-v2')
+    logger.info('File deleted successfully', { fileId: id })
+    return actionSuccess({ success: true }, 'File deleted successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error deleting file', { error, fileId: id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
-export async function getFiles(folderId?: string) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return []
+export async function getFiles(folderId?: string): Promise<ActionResult<any[]>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
-  let query = supabase
-    .from('files')
-    .select('*')
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-    .order('updated_at', { ascending: false })
+    let query = supabase
+      .from('files')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .order('updated_at', { ascending: false })
 
-  if (folderId) {
-    query = query.eq('folder_id', folderId)
-  } else {
-    query = query.is('folder_id', null)
+    if (folderId) {
+      query = query.eq('folder_id', folderId)
+    } else {
+      query = query.is('folder_id', null)
+    }
+
+    const { data, error } = await query
+    if (error) {
+      logger.error('Failed to get files', { error, folderId })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    logger.info('Files retrieved successfully', { count: data?.length || 0, folderId })
+    return actionSuccess(data || [], 'Files retrieved successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error getting files', { error, folderId })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data, error } = await query
-  if (error) throw error
-  return data || []
 }
 
 // Folder actions
-export async function createFolder(input: FolderInput) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+export async function createFolder(input: FolderInput): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
-  const { data, error } = await supabase
-    .from('folders')
-    .insert([{ ...input, user_id: user.id }])
-    .select()
-    .single()
+    const { data, error } = await supabase
+      .from('folders')
+      .insert([{ ...input, user_id: user.id }])
+      .select()
+      .single()
 
-  if (error) throw error
-  revalidatePath('/dashboard/files-hub-v2')
-  return data
+    if (error) {
+      logger.error('Failed to create folder', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/files-hub-v2')
+    logger.info('Folder created successfully', { folderId: data.id })
+    return actionSuccess(data, 'Folder created successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error creating folder', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
-export async function updateFolder(id: string, updates: Partial<FolderInput>) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+export async function updateFolder(id: string, updates: Partial<FolderInput>): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
-  const { data, error } = await supabase
-    .from('folders')
-    .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
+    const { data, error } = await supabase
+      .from('folders')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
 
-  if (error) throw error
-  revalidatePath('/dashboard/files-hub-v2')
-  return data
+    if (error) {
+      logger.error('Failed to update folder', { error, folderId: id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/files-hub-v2')
+    logger.info('Folder updated successfully', { folderId: id })
+    return actionSuccess(data, 'Folder updated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error updating folder', { error, folderId: id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
-export async function deleteFolder(id: string) {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Not authenticated')
+export async function deleteFolder(id: string): Promise<ActionResult<{ success: boolean }>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
-  const { error } = await supabase
-    .from('folders')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', user.id)
+    const { error } = await supabase
+      .from('folders')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id)
 
-  if (error) throw error
-  revalidatePath('/dashboard/files-hub-v2')
-  return { success: true }
+    if (error) {
+      logger.error('Failed to delete folder', { error, folderId: id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/files-hub-v2')
+    logger.info('Folder deleted successfully', { folderId: id })
+    return actionSuccess({ success: true }, 'Folder deleted successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error deleting folder', { error, folderId: id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
-export async function getFolders() {
-  const supabase = createServerActionClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return []
+export async function getFolders(): Promise<ActionResult<any[]>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
-  const { data, error } = await supabase
-    .from('folders')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('name', { ascending: true })
+    const { data, error } = await supabase
+      .from('folders')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('name', { ascending: true })
 
-  if (error) throw error
-  return data || []
+    if (error) {
+      logger.error('Failed to get folders', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    logger.info('Folders retrieved successfully', { count: data?.length || 0 })
+    return actionSuccess(data || [], 'Folders retrieved successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error getting folders', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }

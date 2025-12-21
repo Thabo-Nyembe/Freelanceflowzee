@@ -6,6 +6,10 @@
 import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('events-actions')
 
 export type EventType = 'conference' | 'workshop' | 'meetup' | 'training' | 'seminar' | 'networking' | 'launch' | 'other'
 export type EventStatus = 'upcoming' | 'ongoing' | 'completed' | 'cancelled' | 'postponed'
@@ -30,105 +34,161 @@ export interface CreateEventData {
   is_public?: boolean
 }
 
-export async function createEvent(data: CreateEventData) {
-  const supabase = createServerActionClient({ cookies })
+export async function createEvent(data: CreateEventData): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
-  const { data: event, error } = await supabase
-    .from('events')
-    .insert({
-      ...data,
-      user_id: user.id,
-    })
-    .select()
-    .single()
+    const { data: event, error } = await supabase
+      .from('events')
+      .insert({
+        ...data,
+        user_id: user.id,
+      })
+      .select()
+      .single()
 
-  if (error) throw error
+    if (error) {
+      logger.error('Failed to create event', { error, data })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
 
-  revalidatePath('/dashboard/events-v2')
-  return event
-}
-
-export async function updateEvent(id: string, data: Partial<CreateEventData>) {
-  const supabase = createServerActionClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
-
-  const { data: event, error } = await supabase
-    .from('events')
-    .update(data)
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/events-v2')
-  return event
-}
-
-export async function deleteEvent(id: string) {
-  const supabase = createServerActionClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
-
-  // Soft delete
-  const { error } = await supabase
-    .from('events')
-    .update({ deleted_at: new Date().toISOString() })
-    .eq('id', id)
-    .eq('user_id', user.id)
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/events-v2')
-  return { success: true }
-}
-
-export async function getEventStats() {
-  const supabase = createServerActionClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
-
-  const { data: events } = await supabase
-    .from('events')
-    .select('*')
-    .eq('user_id', user.id)
-    .is('deleted_at', null)
-
-  if (!events) return null
-
-  return {
-    total: events.length,
-    upcoming: events.filter(e => e.status === 'upcoming').length,
-    ongoing: events.filter(e => e.status === 'ongoing').length,
-    completed: events.filter(e => e.status === 'completed').length,
-    totalAttendees: events.reduce((sum, e) => sum + (e.current_attendees || 0), 0),
+    logger.info('Event created successfully', { id: event.id })
+    revalidatePath('/dashboard/events-v2')
+    return actionSuccess(event, 'Event created successfully')
+  } catch (error) {
+    logger.error('Unexpected error creating event', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
 }
 
-export async function updateEventStatus(id: string, status: EventStatus) {
-  const supabase = createServerActionClient({ cookies })
+export async function updateEvent(id: string, data: Partial<CreateEventData>): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
-  const { data: event, error } = await supabase
-    .from('events')
-    .update({ status })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
+    const { data: event, error } = await supabase
+      .from('events')
+      .update(data)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
 
-  if (error) throw error
+    if (error) {
+      logger.error('Failed to update event', { error, id, data })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
 
-  revalidatePath('/dashboard/events-v2')
-  return event
+    logger.info('Event updated successfully', { id })
+    revalidatePath('/dashboard/events-v2')
+    return actionSuccess(event, 'Event updated successfully')
+  } catch (error) {
+    logger.error('Unexpected error updating event', { error, id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
+}
+
+export async function deleteEvent(id: string): Promise<ActionResult<{ success: boolean }>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    // Soft delete
+    const { error } = await supabase
+      .from('events')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('user_id', user.id)
+
+    if (error) {
+      logger.error('Failed to delete event', { error, id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    logger.info('Event deleted successfully', { id })
+    revalidatePath('/dashboard/events-v2')
+    return actionSuccess({ success: true }, 'Event deleted successfully')
+  } catch (error) {
+    logger.error('Unexpected error deleting event', { error, id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
+}
+
+export async function getEventStats(): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { data: events, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('user_id', user.id)
+      .is('deleted_at', null)
+
+    if (error) {
+      logger.error('Failed to get event stats', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    if (!events) {
+      return actionSuccess({
+        total: 0,
+        upcoming: 0,
+        ongoing: 0,
+        completed: 0,
+        totalAttendees: 0
+      }, 'Event stats retrieved successfully')
+    }
+
+    const stats = {
+      total: events.length,
+      upcoming: events.filter(e => e.status === 'upcoming').length,
+      ongoing: events.filter(e => e.status === 'ongoing').length,
+      completed: events.filter(e => e.status === 'completed').length,
+      totalAttendees: events.reduce((sum, e) => sum + (e.current_attendees || 0), 0),
+    }
+
+    return actionSuccess(stats, 'Event stats retrieved successfully')
+  } catch (error) {
+    logger.error('Unexpected error getting event stats', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
+}
+
+export async function updateEventStatus(id: string, status: EventStatus): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { data: event, error } = await supabase
+      .from('events')
+      .update({ status })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to update event status', { error, id, status })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    logger.info('Event status updated successfully', { id, status })
+    revalidatePath('/dashboard/events-v2')
+    return actionSuccess(event, 'Event status updated successfully')
+  } catch (error) {
+    logger.error('Unexpected error updating event status', { error, id })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }

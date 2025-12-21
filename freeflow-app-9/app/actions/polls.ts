@@ -6,6 +6,10 @@
 import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('polls-actions')
 
 interface CreatePollData {
   question: string
@@ -46,249 +50,320 @@ interface UpdatePollData extends Partial<CreatePollData> {
 }
 
 // Create new poll
-export async function createPoll(data: CreatePollData) {
-  const supabase = createServerActionClient({ cookies })
+export async function createPoll(data: CreatePollData): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { data: poll, error } = await supabase
+      .from('polls')
+      .insert({
+        ...data,
+        user_id: user.id
+      })
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to create poll', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/polls-v2')
+    logger.info('Poll created successfully', { pollId: poll.id })
+    return actionSuccess(poll, 'Poll created successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error creating poll', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data: poll, error } = await supabase
-    .from('polls')
-    .insert({
-      ...data,
-      user_id: user.id
-    })
-    .select()
-    .single()
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/polls-v2')
-  return poll
 }
 
 // Update existing poll
-export async function updatePoll({ id, ...data }: UpdatePollData) {
-  const supabase = createServerActionClient({ cookies })
+export async function updatePoll({ id, ...data }: UpdatePollData): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { data: poll, error } = await supabase
+      .from('polls')
+      .update(data)
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to update poll', { error, pollId: id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/polls-v2')
+    logger.info('Poll updated successfully', { pollId: id })
+    return actionSuccess(poll, 'Poll updated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error updating poll', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data: poll, error } = await supabase
-    .from('polls')
-    .update(data)
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/polls-v2')
-  return poll
 }
 
 // Delete poll (soft delete)
-export async function deletePoll(id: string) {
-  const supabase = createServerActionClient({ cookies })
+export async function deletePoll(id: string): Promise<ActionResult<{ success: boolean }>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { error } = await supabase
+      .from('polls')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('user_id', user.id)
+
+    if (error) {
+      logger.error('Failed to delete poll', { error, pollId: id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/polls-v2')
+    logger.info('Poll deleted successfully', { pollId: id })
+    return actionSuccess({ success: true }, 'Poll deleted successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error deleting poll', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { error } = await supabase
-    .from('polls')
-    .update({ deleted_at: new Date().toISOString() })
-    .eq('id', id)
-    .eq('user_id', user.id)
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/polls-v2')
 }
 
 // Activate poll
-export async function activatePoll(id: string) {
-  const supabase = createServerActionClient({ cookies })
+export async function activatePoll(id: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { data: poll, error } = await supabase
+      .from('polls')
+      .update({
+        status: 'active',
+        starts_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to activate poll', { error, pollId: id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/polls-v2')
+    logger.info('Poll activated successfully', { pollId: id })
+    return actionSuccess(poll, 'Poll activated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error activating poll', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data: poll, error } = await supabase
-    .from('polls')
-    .update({
-      status: 'active',
-      starts_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/polls-v2')
-  return poll
 }
 
 // Pause poll
-export async function pausePoll(id: string) {
-  const supabase = createServerActionClient({ cookies })
+export async function pausePoll(id: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { data: poll, error } = await supabase
+      .from('polls')
+      .update({ status: 'paused' })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to pause poll', { error, pollId: id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/polls-v2')
+    logger.info('Poll paused successfully', { pollId: id })
+    return actionSuccess(poll, 'Poll paused successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error pausing poll', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data: poll, error } = await supabase
-    .from('polls')
-    .update({ status: 'paused' })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/polls-v2')
-  return poll
 }
 
 // Close poll
-export async function closePoll(id: string) {
-  const supabase = createServerActionClient({ cookies })
+export async function closePoll(id: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { data: poll, error } = await supabase
+      .from('polls')
+      .update({
+        status: 'closed',
+        ends_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to close poll', { error, pollId: id })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/polls-v2')
+    logger.info('Poll closed successfully', { pollId: id })
+    return actionSuccess(poll, 'Poll closed successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error closing poll', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data: poll, error } = await supabase
-    .from('polls')
-    .update({
-      status: 'closed',
-      ends_at: new Date().toISOString()
-    })
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error) throw error
-
-  revalidatePath('/dashboard/polls-v2')
-  return poll
 }
 
 // Duplicate poll
-export async function duplicatePoll(id: string) {
-  const supabase = createServerActionClient({ cookies })
+export async function duplicatePoll(id: string): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    // Get original poll
+    const { data: originalPoll, error: fetchError } = await supabase
+      .from('polls')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (fetchError) {
+      logger.error('Failed to fetch original poll', { error: fetchError, pollId: id })
+      return actionError(fetchError.message, 'DATABASE_ERROR')
+    }
+
+    // Create duplicate
+    const { id: _, created_at, updated_at, deleted_at, ...pollData } = originalPoll
+    const { data: duplicatedPoll, error: duplicateError } = await supabase
+      .from('polls')
+      .insert({
+        ...pollData,
+        question: `${pollData.question} (Copy)`,
+        status: 'draft',
+        total_votes: 0,
+        total_voters: 0,
+        views_count: 0,
+        shares_count: 0,
+        comments_count: 0,
+        results: {},
+        winner_option_id: null
+      })
+      .select()
+      .single()
+
+    if (duplicateError) {
+      logger.error('Failed to duplicate poll', { error: duplicateError, pollId: id })
+      return actionError(duplicateError.message, 'DATABASE_ERROR')
+    }
+
+    revalidatePath('/dashboard/polls-v2')
+    logger.info('Poll duplicated successfully', { originalId: id, duplicateId: duplicatedPoll.id })
+    return actionSuccess(duplicatedPoll, 'Poll duplicated successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error duplicating poll', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  // Get original poll
-  const { data: originalPoll, error: fetchError } = await supabase
-    .from('polls')
-    .select('*')
-    .eq('id', id)
-    .eq('user_id', user.id)
-    .single()
-
-  if (fetchError) throw fetchError
-
-  // Create duplicate
-  const { id: _, created_at, updated_at, deleted_at, ...pollData } = originalPoll
-  const { data: duplicatedPoll, error: duplicateError } = await supabase
-    .from('polls')
-    .insert({
-      ...pollData,
-      question: `${pollData.question} (Copy)`,
-      status: 'draft',
-      total_votes: 0,
-      total_voters: 0,
-      views_count: 0,
-      shares_count: 0,
-      comments_count: 0,
-      results: {},
-      winner_option_id: null
-    })
-    .select()
-    .single()
-
-  if (duplicateError) throw duplicateError
-
-  revalidatePath('/dashboard/polls-v2')
-  return duplicatedPoll
 }
 
 // Increment poll views
-export async function incrementPollViews(id: string) {
-  const supabase = createServerActionClient({ cookies })
+export async function incrementPollViews(id: string): Promise<ActionResult<{ success: boolean }>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { error } = await supabase.rpc('increment_poll_views', { poll_id: id })
+    const { error } = await supabase.rpc('increment_poll_views', { poll_id: id })
 
-  if (error) {
-    // Fallback if RPC doesn't exist
-    const { data: poll } = await supabase
-      .from('polls')
-      .select('views_count')
-      .eq('id', id)
-      .single()
-
-    if (poll) {
-      await supabase
+    if (error) {
+      // Fallback if RPC doesn't exist
+      const { data: poll } = await supabase
         .from('polls')
-        .update({ views_count: (poll.views_count || 0) + 1 })
+        .select('views_count')
         .eq('id', id)
-    }
-  }
+        .single()
 
-  revalidatePath('/dashboard/polls-v2')
+      if (poll) {
+        const { error: updateError } = await supabase
+          .from('polls')
+          .update({ views_count: (poll.views_count || 0) + 1 })
+          .eq('id', id)
+
+        if (updateError) {
+          logger.error('Failed to increment poll views', { error: updateError, pollId: id })
+          return actionError(updateError.message, 'DATABASE_ERROR')
+        }
+      }
+    }
+
+    revalidatePath('/dashboard/polls-v2')
+    return actionSuccess({ success: true }, 'Poll views incremented successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error incrementing poll views', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
+  }
 }
 
 // Get poll statistics
-export async function getPollStats() {
-  const supabase = createServerActionClient({ cookies })
+export async function getPollStats(): Promise<ActionResult<any>> {
+  try {
+    const supabase = createServerActionClient({ cookies })
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('Unauthorized')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
+
+    const { data: polls, error } = await supabase
+      .from('polls')
+      .select('status, poll_type, total_votes, total_voters, views_count')
+      .eq('user_id', user.id)
+      .is('deleted_at', null)
+
+    if (error) {
+      logger.error('Failed to fetch poll stats', { error })
+      return actionError(error.message, 'DATABASE_ERROR')
+    }
+
+    const stats = {
+      total: polls?.length || 0,
+      byStatus: {} as Record<string, number>,
+      byType: {} as Record<string, number>,
+      totalVotes: 0,
+      totalVoters: 0,
+      totalViews: 0
+    }
+
+    polls?.forEach(poll => {
+      stats.byStatus[poll.status] = (stats.byStatus[poll.status] || 0) + 1
+      stats.byType[poll.poll_type] = (stats.byType[poll.poll_type] || 0) + 1
+      stats.totalVotes += poll.total_votes || 0
+      stats.totalVoters += poll.total_voters || 0
+      stats.totalViews += poll.views_count || 0
+    })
+
+    logger.info('Poll stats fetched successfully')
+    return actionSuccess(stats, 'Poll statistics retrieved successfully')
+  } catch (error: any) {
+    logger.error('Unexpected error fetching poll stats', { error })
+    return actionError('An unexpected error occurred', 'INTERNAL_ERROR')
   }
-
-  const { data: polls, error } = await supabase
-    .from('polls')
-    .select('status, poll_type, total_votes, total_voters, views_count')
-    .eq('user_id', user.id)
-    .is('deleted_at', null)
-
-  if (error) throw error
-
-  const stats = {
-    total: polls?.length || 0,
-    byStatus: {} as Record<string, number>,
-    byType: {} as Record<string, number>,
-    totalVotes: 0,
-    totalVoters: 0,
-    totalViews: 0
-  }
-
-  polls?.forEach(poll => {
-    stats.byStatus[poll.status] = (stats.byStatus[poll.status] || 0) + 1
-    stats.byType[poll.poll_type] = (stats.byType[poll.poll_type] || 0) + 1
-    stats.totalVotes += poll.total_votes || 0
-    stats.totalVoters += poll.total_voters || 0
-    stats.totalViews += poll.views_count || 0
-  })
-
-  return stats
 }
