@@ -35,7 +35,7 @@ import {
   Trash2
 } from 'lucide-react'
 import { useInvoices } from '@/lib/hooks/use-invoices'
-import { createInvoice, deleteInvoice, markInvoicePaid, sendInvoice } from '@/app/actions/invoices'
+import { createInvoice, deleteInvoice, markInvoiceAsPaid, markInvoiceAsSent } from '@/app/actions/invoices'
 
 interface InvoicingClientProps {
   initialInvoices: any[]
@@ -127,7 +127,7 @@ export default function InvoicingClient({ initialInvoices, initialStats }: Invoi
 
   const handleMarkPaid = async (id: string) => {
     try {
-      await markInvoicePaid(id)
+      await markInvoiceAsPaid(id)
       refetch()
     } catch (error) {
       console.error('Error marking invoice paid:', error)
@@ -136,7 +136,7 @@ export default function InvoicingClient({ initialInvoices, initialStats }: Invoi
 
   const handleSendInvoice = async (id: string) => {
     try {
-      await sendInvoice(id)
+      await markInvoiceAsSent(id)
       refetch()
     } catch (error) {
       console.error('Error sending invoice:', error)

@@ -26,7 +26,7 @@ import {
   Upload,
   Download,
   Settings,
-  Waveform,
+  AudioWaveform as Waveform,
   Sliders,
   Scissors,
   Zap,

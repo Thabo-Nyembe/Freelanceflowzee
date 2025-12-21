@@ -100,7 +100,7 @@ export default function ComplianceClient({ initialCompliance }: { initialComplia
           <PillButton onClick={() => setStatusFilter('non_compliant')} isActive={statusFilter === 'non_compliant'} variant="default">
             Non-Compliant
           </PillButton>
-          <PillButton onClick={() => setStatusFilter('pending')} isActive={statusFilter === 'pending')} variant="default">
+          <PillButton onClick={() => setStatusFilter('pending')} isActive={statusFilter === 'pending'} variant="default">
             Pending
           </PillButton>
         </div>
