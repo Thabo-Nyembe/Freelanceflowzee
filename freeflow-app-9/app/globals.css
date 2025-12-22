@@ -217,11 +217,7 @@ html.dark .bg-background {
   background-color: rgb(17 24 39) !important;
 }
 
-/* Fix stat cards */
-html.dark .bg-gradient-to-br,
-html.dark [class*="gradient"] {
-  /* Keep gradients but ensure they're visible */
-}
+/* Gradients are preserved in dark mode - no override needed */
 
 /* Fix tab panels */
 html.dark [role="tabpanel"] {
