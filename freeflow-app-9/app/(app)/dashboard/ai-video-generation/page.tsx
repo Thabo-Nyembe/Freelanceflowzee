@@ -73,9 +73,7 @@ const logger = createFeatureLogger('AI-Video-Generation')
 // TYPESCRIPT INTERFACES
 // ============================================================================
 
-type VideoStyle = 'cinematic' | 'professional' | 'casual' | 'animated' | 'explainer' | 'social-media'
-type VideoFormat = 'landscape' | 'portrait' | 'square' | 'widescreen'
-type VideoQuality = 'sd' | 'hd' | 'full-hd' | '4k'
+// Note: VideoStyle, VideoFormat, VideoQuality are imported from @/lib/ai-video-queries
 type AIModel = 'kazi-ai' | 'runway-gen3' | 'pika-labs' | 'stable-video'
 type GenerationStatus = 'idle' | 'analyzing' | 'generating' | 'rendering' | 'completed' | 'failed'
 type ViewMode = 'generation' | 'library' | 'templates' | 'settings'
