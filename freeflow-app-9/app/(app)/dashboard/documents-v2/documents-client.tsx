@@ -12,7 +12,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const [typeFilter, setTypeFilter] = useState<DocumentType | 'all'>('all')
   const { documents, loading, error } = useDocuments({ status: statusFilter, type: typeFilter })
 
-  const displayDocuments = documents.length > 0 ? documents : initialDocuments
+  const displayDocuments = (documents && documents.length > 0) ? documents : (initialDocuments || [])
 
   const stats = [
     {
