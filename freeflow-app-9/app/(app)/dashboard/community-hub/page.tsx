@@ -2461,9 +2461,9 @@ export default function CommunityHubPage() {
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="postType">Post Type</Label>
-                    <Select value={state.postType} onValueChange={(value) => dispatch({ type: 'SET_POST_TYPE', payload: value })}>
+                    <Select value={state.postType} defaultValue="text" onValueChange={(value) => dispatch({ type: 'SET_POST_TYPE', payload: value })}>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select post type" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="text">Text Post</SelectItem>
@@ -2537,9 +2537,9 @@ export default function CommunityHubPage() {
               </div>
               
               <div className="flex gap-2">
-                <Select value={state.feedFilter} onValueChange={(value) => dispatch({ type: 'SET_FEED_FILTER', payload: value })}>
+                <Select value={state.feedFilter} defaultValue="all" onValueChange={(value) => dispatch({ type: 'SET_FEED_FILTER', payload: value })}>
                   <SelectTrigger className="w-32">
-                    <SelectValue />
+                    <SelectValue placeholder="Filter" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Posts</SelectItem>
@@ -2551,9 +2551,9 @@ export default function CommunityHubPage() {
                   </SelectContent>
                 </Select>
                 
-                <Select value={state.sortBy} onValueChange={(value) => dispatch({ type: 'SET_SORT_BY', payload: value })}>
+                <Select value={state.sortBy} defaultValue="relevance" onValueChange={(value) => dispatch({ type: 'SET_SORT_BY', payload: value })}>
                   <SelectTrigger className="w-32">
-                    <SelectValue />
+                    <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="newest">Newest</SelectItem>
@@ -2601,9 +2601,9 @@ export default function CommunityHubPage() {
               </div>
               
               <div className="flex gap-2">
-                <Select value={state.filterBy} onValueChange={(value) => dispatch({ type: 'SET_FILTER_BY', payload: value })}>
+                <Select value={state.filterBy} defaultValue="all" onValueChange={(value) => dispatch({ type: 'SET_FILTER_BY', payload: value })}>
                   <SelectTrigger className="w-32">
-                    <SelectValue />
+                    <SelectValue placeholder="Filter" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Members</SelectItem>
@@ -2613,10 +2613,10 @@ export default function CommunityHubPage() {
                     <SelectItem value="students">Students</SelectItem>
                   </SelectContent>
                 </Select>
-                
-                <Select value={state.sortBy} onValueChange={(value) => dispatch({ type: 'SET_SORT_BY', payload: value })}>
+
+                <Select value={state.sortBy} defaultValue="relevance" onValueChange={(value) => dispatch({ type: 'SET_SORT_BY', payload: value })}>
                   <SelectTrigger className="w-32">
-                    <SelectValue />
+                    <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="relevance">Relevance</SelectItem>
@@ -2664,9 +2664,9 @@ export default function CommunityHubPage() {
                     <Label>Premium Only</Label>
                   </div>
                   
-                  <Select value={state.availabilityFilter} onValueChange={(value) => dispatch({ type: 'SET_AVAILABILITY_FILTER', payload: value })}>
+                  <Select value={state.availabilityFilter} defaultValue="all" onValueChange={(value) => dispatch({ type: 'SET_AVAILABILITY_FILTER', payload: value })}>
                     <SelectTrigger className="w-32">
-                      <SelectValue />
+                      <SelectValue placeholder="Availability" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Availability</SelectItem>
