@@ -133,8 +133,14 @@ export default function TimeTrackingPage() {
   // A+++ LOAD TIME TRACKING DATA
   useEffect(() => {
     const loadTimeTrackingData = async () => {
-      if (!userId) {
+      if (userLoading) {
         logger.info('Waiting for user authentication')
+        return // Keep loading state while auth is loading
+      }
+
+      if (!userId) {
+        logger.info('No user found, stopping load')
+        setIsLoading(false)
         return
       }
 
@@ -239,7 +245,7 @@ export default function TimeTrackingPage() {
     }
 
     loadTimeTrackingData()
-  }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, userLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -1132,7 +1138,7 @@ export default function TimeTrackingPage() {
   }
 
   return (
-    <div className="min-h-screen relative p-6">
+    <div className="min-h-screen relative p-6 bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50/40 dark:bg-transparent">
       {/* Pattern Craft Background */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
       <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
@@ -1148,10 +1154,10 @@ export default function TimeTrackingPage() {
             </div>
           </div>
           <div>
-            <TextShimmer className="text-4xl font-bold text-white mb-2" duration={2}>
+            <TextShimmer className="text-4xl font-bold text-gray-900 dark:text-white mb-2" duration={2}>
               Time Tracking
             </TextShimmer>
-            <p className="text-gray-400">Track time across projects and tasks</p>
+            <p className="text-gray-600 dark:text-gray-400">Track time across projects and tasks</p>
           </div>
         </div>
 
@@ -1163,7 +1169,7 @@ export default function TimeTrackingPage() {
               <LiquidGlassCard className="relative">
                 <BorderTrail className="bg-gradient-to-r from-emerald-500 to-teal-600" size={60} duration={6} />
                 <CardHeader>
-                  <CardTitle className="text-white">Timer</CardTitle>
+                  <CardTitle className="text-gray-900 dark:text-white">Timer</CardTitle>
                 </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -1305,7 +1311,7 @@ export default function TimeTrackingPage() {
                 <BorderTrail className="bg-gradient-to-r from-cyan-500 to-blue-600" size={60} duration={6} />
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-white">Recent Time Entries</CardTitle>
+                    <CardTitle className="text-gray-900 dark:text-white">Recent Time Entries</CardTitle>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={handleFilterByProject}>
                       <Filter className="h-4 w-4 mr-2" />
@@ -1332,10 +1338,10 @@ export default function TimeTrackingPage() {
                   {timeEntries.map((entry) => (
                     <div
                       key={entry.id}
-                      className="flex items-center justify-between p-4 rounded-lg border group hover:shadow-md transition-all"
+                      className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 group hover:shadow-md transition-all"
                     >
                       <div className="flex-1">
-                        <div className="font-medium">
+                        <div className="font-medium text-gray-900 dark:text-gray-100">
                           {
                             projects.find((p) => p.id === entry.projectId)?.name
                           }{' '}
@@ -1346,12 +1352,12 @@ export default function TimeTrackingPage() {
                               ?.tasks.find((t) => t.id === entry.taskId)?.name
                           }
                         </div>
-                        <div className="text-sm text-gray-600">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
                           {entry.description}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="font-mono mr-4">
+                        <div className="font-mono mr-4 text-gray-900 dark:text-gray-100">
                           {formatTime(entry.duration)}
                         </div>
                         <Button size="sm" variant="ghost" onClick={() => handleEditEntry(entry)}>
@@ -1367,7 +1373,7 @@ export default function TimeTrackingPage() {
                     </div>
                   ))}
                   {timeEntries.length === 0 && (
-                    <div className="text-center py-8 text-gray-500">
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                       <Clock className="h-16 w-16 mx-auto mb-4 opacity-50" />
                       <p>No time entries yet. Start tracking time!</p>
                     </div>
@@ -1385,7 +1391,7 @@ export default function TimeTrackingPage() {
               <LiquidGlassCard className="relative">
                 <BorderTrail className="bg-gradient-to-r from-purple-500 to-pink-600" size={60} duration={6} />
                 <CardHeader>
-                  <CardTitle className="text-white">Reports</CardTitle>
+                  <CardTitle className="text-gray-900 dark:text-white">Reports</CardTitle>
                 </CardHeader>
               <CardContent>
                 <Tabs defaultValue="daily">
@@ -1407,10 +1413,10 @@ export default function TimeTrackingPage() {
                   <TabsContent value="daily" className="space-y-4">
                     <div className="text-center py-8">
                       <Clock className="h-16 w-16 text-blue-500 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold mb-2">
+                      <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">
                         Daily Overview
                       </h3>
-                      <p className="text-gray-600">
+                      <p className="text-gray-600 dark:text-gray-400">
                         View your daily time tracking stats
                       </p>
                       <Button onClick={handleGenerateDailyReport} className="mt-4">
@@ -1422,10 +1428,10 @@ export default function TimeTrackingPage() {
                   <TabsContent value="weekly" className="space-y-4">
                     <div className="text-center py-8">
                       <Calendar className="h-16 w-16 text-green-500 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold mb-2">
+                      <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">
                         Weekly Report
                       </h3>
-                      <p className="text-gray-600">
+                      <p className="text-gray-600 dark:text-gray-400">
                         Analyze your weekly productivity
                       </p>
                       <Button onClick={handleGenerateWeeklyReport} className="mt-4">
@@ -1437,10 +1443,10 @@ export default function TimeTrackingPage() {
                   <TabsContent value="monthly" className="space-y-4">
                     <div className="text-center py-8">
                       <BarChart3 className="h-16 w-16 text-purple-500 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold mb-2">
+                      <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">
                         Monthly Analysis
                       </h3>
-                      <p className="text-gray-600">
+                      <p className="text-gray-600 dark:text-gray-400">
                         Track long-term time patterns
                       </p>
                       <Button onClick={handleGenerateMonthlyReport} className="mt-4">
