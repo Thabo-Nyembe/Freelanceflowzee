@@ -232,6 +232,9 @@ export default function DashboardPage() {
 
   // A+++ Initial Data Loading Effect - REAL SUPABASE DATA
   useEffect(() => {
+    // Wait for auth to complete before loading data
+    if (userLoading) return
+
     const loadDashboardData = async () => {
       if (!userId) {
         setIsLoading(false)
@@ -329,7 +332,7 @@ export default function DashboardPage() {
     }
 
     loadDashboardData()
-  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, userLoading, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
