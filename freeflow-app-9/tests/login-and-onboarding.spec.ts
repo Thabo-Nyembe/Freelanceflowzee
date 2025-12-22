@@ -6,8 +6,8 @@ test.describe('Login and Onboarding Test', () => {
   const testPassword = 'Test123456!'
 
   test('signup new user and check onboarding', async ({ page }) => {
-    // Go to signup page
-    await page.goto('http://localhost:9323/signup')
+    // Go to signup page - use domcontentloaded to avoid slow load events
+    await page.goto('http://localhost:9323/signup', { waitUntil: 'domcontentloaded', timeout: 30000 })
     console.log('📍 Navigated to signup page')
 
     // Wait for the form to load
@@ -63,8 +63,8 @@ test.describe('Login and Onboarding Test', () => {
   })
 
   test('login page UI and form interaction', async ({ page }) => {
-    // Go to login page
-    await page.goto('http://localhost:9323/login')
+    // Go to login page - use domcontentloaded to avoid slow load events
+    await page.goto('http://localhost:9323/login', { waitUntil: 'domcontentloaded', timeout: 30000 })
     console.log('📍 Navigated to login page')
 
     // Wait for the form to load
