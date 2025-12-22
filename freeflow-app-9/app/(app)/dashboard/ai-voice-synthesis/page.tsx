@@ -411,24 +411,36 @@ export default function AIVoiceSynthesisPage() {
                     Selected Voice
                   </h3>
 
-                  <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
-                    <div className="text-4xl">{getVoiceIcon(selectedVoice.gender)}</div>
-                    <div className="flex-1">
-                      <div className="font-semibold flex items-center gap-2">
-                        {selectedVoice.displayName}
-                        {selectedVoice.isPremium && <Star className="w-4 h-4 text-yellow-500 fill-current" />}
-                        {selectedVoice.isNew && <Badge variant="secondary">New</Badge>}
+                  {selectedVoice ? (
+                    <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+                      <div className="text-4xl">{getVoiceIcon(selectedVoice.gender)}</div>
+                      <div className="flex-1">
+                        <div className="font-semibold flex items-center gap-2">
+                          {selectedVoice.displayName}
+                          {selectedVoice.isPremium && <Star className="w-4 h-4 text-yellow-500 fill-current" />}
+                          {selectedVoice.isNew && <Badge variant="secondary">New</Badge>}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{selectedVoice.description}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="text-xs">{selectedVoice.language}</Badge>
+                          <Badge variant="outline" className="text-xs">{getAgeLabel(selectedVoice.age)}</Badge>
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground">{selectedVoice.description}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline" className="text-xs">{selectedVoice.language}</Badge>
-                        <Badge variant="outline" className="text-xs">{getAgeLabel(selectedVoice.age)}</Badge>
-                      </div>
+                      <Button variant="outline" size="sm" onClick={() => setViewMode('voices')}>
+                        Change
+                      </Button>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => setViewMode('voices')}>
-                      Change
-                    </Button>
-                  </div>
+                  ) : (
+                    <div className="flex items-center gap-4 p-4 bg-muted/50 rounded-lg">
+                      <div className="text-4xl">🎙️</div>
+                      <div className="flex-1">
+                        <p className="text-muted-foreground">No voice selected</p>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => setViewMode('voices')}>
+                        Select Voice
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </LiquidGlassCard>
 
