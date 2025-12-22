@@ -719,8 +719,10 @@ html.dark .kazi-gradient-light {
   border: 1px solid rgba(110, 75, 255, 0.1);
 }
 
-/* Dark mode for kazi cards */
-html.dark .kazi-card {
+/* Dark mode for kazi cards - support both html.dark and .dark selectors */
+html.dark .kazi-card,
+.dark .kazi-card,
+:root.dark .kazi-card {
   background: rgb(31 41 55) !important; /* gray-800 */
   border-color: rgba(110, 75, 255, 0.2) !important;
 }

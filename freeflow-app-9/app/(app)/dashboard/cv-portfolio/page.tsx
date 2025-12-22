@@ -2481,11 +2481,11 @@ export default function CVPortfolioPage() {
                           className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
                             selectedTemplate === template.id
                               ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
-                              : 'border-gray-200 hover:border-gray-300'
+                              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                           onClick={() => handleChangeTemplate(template.id)}
                         >
-                          <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 rounded mb-2" />
+                          <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 rounded mb-2" />
                           <h4 className="font-medium text-sm">{template.name}</h4>
                           <p className="text-xs text-gray-600 dark:text-gray-400">{template.description}</p>
                         </div>
