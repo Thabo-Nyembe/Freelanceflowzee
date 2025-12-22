@@ -1393,7 +1393,7 @@ export default function EscrowPage() {
 
       {/* EDUCATIONAL SECTION - USER MANUAL SPEC */}
       <div className="p-6">
-        <Card className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 border-purple-200 mb-6">
+        <Card className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-indigo-900/30 border-purple-200 dark:border-purple-700 mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl">
               <Shield className="w-6 h-6 text-purple-600" />
@@ -1402,12 +1402,12 @@ export default function EscrowPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* What is Escrow */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm">
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 shadow-sm">
               <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
                 <AlertCircle className="w-5 h-5 text-blue-600" />
                 What is Escrow?
               </h3>
-              <p className="text-gray-700 leading-relaxed">
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 Escrow is a <strong>secure payment system</strong> where client funds are held safely until project
                 milestones are completed, <strong>protecting both parties</strong>. Think of it as a trusted third party
                 that holds payment until work is approved.
@@ -1417,76 +1417,76 @@ export default function EscrowPage() {
             {/* Benefits Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Benefits for Freelancers */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm border-2 border-green-200">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-green-700">
+              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 shadow-sm border-2 border-green-200 dark:border-green-700">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-green-700 dark:text-green-400">
                   <CheckCircle className="w-5 h-5" />
                   Benefits for Freelancers
                 </h3>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3">
-                    <Shield className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <Shield className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold">Guaranteed Payment Security</p>
-                      <p className="text-sm text-gray-600">Funds are secured upfront, ensuring you get paid for your work</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Funds are secured upfront, ensuring you get paid for your work</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <Star className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <Star className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold">Professional Credibility</p>
-                      <p className="text-sm text-gray-600">Using escrow demonstrates professionalism and builds trust</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Using escrow demonstrates professionalism and builds trust</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <FileText className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <FileText className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold">Clear Payment Terms</p>
-                      <p className="text-sm text-gray-600">Milestone-based releases with defined deliverables</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Milestone-based releases with defined deliverables</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <Shield className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <Shield className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold">Dispute Protection</p>
-                      <p className="text-sm text-gray-600">Fair resolution process if disagreements arise</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Fair resolution process if disagreements arise</p>
                     </div>
                   </li>
                 </ul>
               </div>
 
               {/* Benefits for Clients */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm border-2 border-blue-200">
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-blue-700">
+              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 shadow-sm border-2 border-blue-200 dark:border-blue-700">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-blue-700 dark:text-blue-400">
                   <CheckCircle className="w-5 h-5" />
                   Benefits for Clients
                 </h3>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold">Work Quality Assurance</p>
-                      <p className="text-sm text-gray-600">Only release payment when you're satisfied with deliverables</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Only release payment when you're satisfied with deliverables</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <Target className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <Target className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold">Milestone-Based Releases</p>
-                      <p className="text-sm text-gray-600">Pay as work progresses, not all upfront</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Pay as work progresses, not all upfront</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <DollarSign className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold">Refund Protection</p>
-                      <p className="text-sm text-gray-600">Get your money back if work doesn't meet standards</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Get your money back if work doesn't meet standards</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-3">
-                    <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold">Professional Service Guarantee</p>
-                      <p className="text-sm text-gray-600">Freelancers are committed to delivering quality work</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Freelancers are committed to delivering quality work</p>
                     </div>
                   </li>
                 </ul>
@@ -1494,9 +1494,9 @@ export default function EscrowPage() {
             </div>
 
             {/* How It Works Process Flow */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-sm">
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-6 shadow-sm">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Activity className="w-5 h-5 text-purple-600" />
+                <Activity className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                 How Escrow Works
               </h3>
               <div className="space-y-4">
@@ -1540,10 +1540,10 @@ export default function EscrowPage() {
                     </div>
                     <div className="flex-1 pt-1">
                       <div className="flex items-start gap-2">
-                        <Icon className="w-5 h-5 text-purple-600 mt-0.5" />
+                        <Icon className="w-5 h-5 text-purple-600 dark:text-purple-400 mt-0.5" />
                         <div>
-                          <h4 className="font-semibold text-gray-900">{title}</h4>
-                          <p className="text-sm text-gray-600">{description}</p>
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100">{title}</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
                         </div>
                       </div>
                     </div>
@@ -1554,22 +1554,22 @@ export default function EscrowPage() {
 
             {/* Trust Indicators */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 text-center border border-green-200">
-                <Shield className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                <p className="font-semibold text-green-900">100% Money-Back Guarantee</p>
-                <p className="text-xs text-green-700 mt-1">If work doesn't meet standards</p>
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-4 text-center border border-green-200 dark:border-green-700">
+                <Shield className="w-8 h-8 text-green-600 dark:text-green-400 mx-auto mb-2" />
+                <p className="font-semibold text-green-900 dark:text-green-300">100% Money-Back Guarantee</p>
+                <p className="text-xs text-green-700 dark:text-green-400 mt-1">If work doesn't meet standards</p>
               </div>
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 text-center border border-blue-200">
-                <Lock className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                <p className="font-semibold text-blue-900">Funds Protected by Escrow</p>
-                <p className="text-xs text-blue-700 mt-1">Bank-level security</p>
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-4 text-center border border-blue-200 dark:border-blue-700">
+                <Lock className="w-8 h-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
+                <p className="font-semibold text-blue-900 dark:text-blue-300">Funds Protected by Escrow</p>
+                <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">Bank-level security</p>
               </div>
-              <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-lg p-4 text-center border border-purple-200">
-                <TrendingUp className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                <p className="font-semibold text-purple-900">
+              <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/30 dark:to-violet-900/30 rounded-lg p-4 text-center border border-purple-200 dark:border-purple-700">
+                <TrendingUp className="w-8 h-8 text-purple-600 dark:text-purple-400 mx-auto mb-2" />
+                <p className="font-semibold text-purple-900 dark:text-purple-300">
                   <NumberFlow value={1247} className="inline" /> Successful Releases
                 </p>
-                <p className="text-xs text-purple-700 mt-1">This month alone</p>
+                <p className="text-xs text-purple-700 dark:text-purple-400 mt-1">This month alone</p>
               </div>
             </div>
           </CardContent>
@@ -1593,48 +1593,48 @@ export default function EscrowPage() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Total Escrow Value</p>
-                      <NumberFlow value={stats.totalValue} format="currency" className="text-2xl font-bold text-gray-900" />
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Escrow Value</p>
+                      <NumberFlow value={stats.totalValue} format="currency" className="text-2xl font-bold text-gray-900 dark:text-gray-100" />
                     </div>
-                    <DollarSign className="w-8 h-8 text-green-600" />
+                    <DollarSign className="w-8 h-8 text-green-600 dark:text-green-400" />
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Active Deposits</p>
-                      <NumberFlow value={stats.activeDeposits} className="text-2xl font-bold text-blue-600" />
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active Deposits</p>
+                      <NumberFlow value={stats.activeDeposits} className="text-2xl font-bold text-blue-600 dark:text-blue-400" />
                     </div>
-                    <Shield className="w-8 h-8 text-blue-600" />
+                    <Shield className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Completed Projects</p>
-                      <NumberFlow value={stats.completedProjects} className="text-2xl font-bold text-emerald-600" />
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed Projects</p>
+                      <NumberFlow value={stats.completedProjects} className="text-2xl font-bold text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <CheckCircle className="w-8 h-8 text-emerald-600" />
+                    <CheckCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">Success Rate</p>
-                      <p className="text-2xl font-bold text-purple-600">
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Success Rate</p>
+                      <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                         <NumberFlow value={stats.successRate} decimals={1} className="inline-block" />%
                       </p>
                     </div>
-                    <Target className="w-8 h-8 text-purple-600" />
+                    <Target className="w-8 h-8 text-purple-600 dark:text-purple-400" />
                   </div>
                 </CardContent>
               </Card>
@@ -1648,7 +1648,7 @@ export default function EscrowPage() {
               <CardContent>
                 <div className="space-y-4">
                   {state.deposits.slice(0, 3).map(deposit => (
-                    <div key={deposit.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div key={deposit.id} className="flex items-center justify-between p-4 border dark:border-gray-700 rounded-lg">
                       <div className="flex items-center gap-4">
                         <Avatar className="w-10 h-10">
                           <AvatarImage src={deposit.clientAvatar} alt={deposit.clientName} />
@@ -1656,7 +1656,7 @@ export default function EscrowPage() {
                         </Avatar>
                         <div>
                           <h4 className="font-medium">{deposit.projectTitle}</h4>
-                          <p className="text-sm text-gray-600">{deposit.clientName}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{deposit.clientName}</p>
                         </div>
                       </div>
                       <div className="text-right">
