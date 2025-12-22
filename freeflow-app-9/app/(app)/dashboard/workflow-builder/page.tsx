@@ -398,17 +398,17 @@ export default function WorkflowBuilderPage() {
 
   const getComplexityColor = (complexity: string) => {
     switch (complexity) {
-      case 'simple': return 'bg-green-100 text-green-800'
-      case 'moderate': return 'bg-yellow-100 text-yellow-800'
-      case 'advanced': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'simple': return 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300'
+      case 'moderate': return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300'
+      case 'advanced': return 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300'
+      default: return 'bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-300'
     }
   }
 
   // A+++ LOADING STATE
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
         <div className="container mx-auto p-6 space-y-6">
           <CardSkeleton />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -425,7 +425,7 @@ export default function WorkflowBuilderPage() {
   // A+++ ERROR STATE
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
         <div className="container mx-auto p-6">
           <ErrorEmptyState
             error={error}
@@ -439,7 +439,7 @@ export default function WorkflowBuilderPage() {
   // A+++ EMPTY STATE
   if (workflows.length === 0 && !isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
         <div className="container mx-auto p-6">
           <NoDataEmptyState
             entityName="workflows"
@@ -467,7 +467,7 @@ export default function WorkflowBuilderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
       <div className="container mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -476,10 +476,10 @@ export default function WorkflowBuilderPage() {
               <GitBranch className="h-8 w-8" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
                 Workflow Builder
               </h1>
-              <p className="text-gray-600 mt-2 text-lg">
+              <p className="text-gray-600 dark:text-gray-300 mt-2 text-lg">
                 Create powerful automations to streamline your freelance business
               </p>
             </div>
@@ -512,61 +512,61 @@ export default function WorkflowBuilderPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Active Workflows</p>
-                  <p className="text-3xl font-bold text-gray-900">12</p>
-                  <p className="text-sm text-green-600">+2 this month</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Active Workflows</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">12</p>
+                  <p className="text-sm text-green-600 dark:text-green-400">+2 this month</p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-xl">
-                  <Workflow className="h-6 w-6 text-blue-600" />
+                <div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-xl">
+                  <Workflow className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Time Saved</p>
-                  <p className="text-3xl font-bold text-gray-900">24h</p>
-                  <p className="text-sm text-purple-600">This week</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Time Saved</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">24h</p>
+                  <p className="text-sm text-purple-600 dark:text-purple-400">This week</p>
                 </div>
-                <div className="p-3 bg-purple-100 rounded-xl">
-                  <Clock className="h-6 w-6 text-purple-600" />
+                <div className="p-3 bg-purple-100 dark:bg-purple-900/50 rounded-xl">
+                  <Clock className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Success Rate</p>
-                  <p className="text-3xl font-bold text-gray-900">98%</p>
-                  <p className="text-sm text-green-600">Excellent</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Success Rate</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">98%</p>
+                  <p className="text-sm text-green-600 dark:text-green-400">Excellent</p>
                 </div>
-                <div className="p-3 bg-green-100 rounded-xl">
-                  <CheckCircle2 className="h-6 w-6 text-green-600" />
+                <div className="p-3 bg-green-100 dark:bg-green-900/50 rounded-xl">
+                  <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Runs</p>
-                  <p className="text-3xl font-bold text-gray-900">1,247</p>
-                  <p className="text-sm text-blue-600">All time</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Runs</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">1,247</p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400">All time</p>
                 </div>
-                <div className="p-3 bg-orange-100 rounded-xl">
-                  <BarChart3 className="h-6 w-6 text-orange-600" />
+                <div className="p-3 bg-orange-100 dark:bg-orange-900/50 rounded-xl">
+                  <BarChart3 className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                 </div>
               </div>
             </CardContent>
@@ -575,7 +575,7 @@ export default function WorkflowBuilderPage() {
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-xl border border-white/30">
+          <TabsList className="grid w-full grid-cols-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-white/30 dark:border-gray-700/30">
             <TabsTrigger value="workflows" className="flex items-center gap-2">
               <Workflow className="h-4 w-4" />
               My Workflows
@@ -612,7 +612,7 @@ export default function WorkflowBuilderPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {workflows.map((workflow) => (
-                <Card key={workflow.id} className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
+                <Card key={workflow.id} className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg hover:shadow-xl transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-3">
@@ -620,8 +620,8 @@ export default function WorkflowBuilderPage() {
                           <Workflow className="h-4 w-4" />
                         </div>
                         <div>
-                          <CardTitle className="text-lg">{workflow.name}</CardTitle>
-                          <p className="text-sm text-gray-600 mt-1">{workflow.description}</p>
+                          <CardTitle className="text-lg text-gray-900 dark:text-gray-100">{workflow.name}</CardTitle>
+                          <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{workflow.description}</p>
                         </div>
                       </div>
                       <Switch
@@ -633,15 +633,15 @@ export default function WorkflowBuilderPage() {
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <p className="text-gray-600">Total Runs</p>
-                        <p className="font-semibold">{workflow.totalRuns}</p>
+                        <p className="text-gray-600 dark:text-gray-400">Total Runs</p>
+                        <p className="font-semibold text-gray-900 dark:text-gray-100">{workflow.totalRuns}</p>
                       </div>
                       <div>
-                        <p className="text-gray-600">Success Rate</p>
-                        <p className="font-semibold text-green-600">{workflow.successRate}%</p>
+                        <p className="text-gray-600 dark:text-gray-400">Success Rate</p>
+                        <p className="font-semibold text-green-600 dark:text-green-400">{workflow.successRate}%</p>
                       </div>
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
                       Last run: {workflow.lastRun.toLocaleDateString()}
                     </div>
                     <div className="flex items-center space-x-2">
@@ -698,7 +698,7 @@ export default function WorkflowBuilderPage() {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 >
                   <option value="all">All Categories</option>
                   <option value="invoicing">Invoicing</option>
@@ -710,7 +710,7 @@ export default function WorkflowBuilderPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredTemplates.map((template) => (
-                <Card key={template.id} className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
+                <Card key={template.id} className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg hover:shadow-xl transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-3">
@@ -719,14 +719,14 @@ export default function WorkflowBuilderPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <CardTitle className="text-lg">{template.name}</CardTitle>
+                            <CardTitle className="text-lg text-gray-900 dark:text-gray-100">{template.name}</CardTitle>
                             {template.isPopular && (
-                              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+                              <Badge variant="secondary" className="bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300">
                                 Popular
                               </Badge>
                             )}
                           </div>
-                          <p className="text-sm text-gray-600 mt-1">{template.description}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{template.description}</p>
                         </div>
                       </div>
                     </div>
@@ -736,7 +736,7 @@ export default function WorkflowBuilderPage() {
                       <Badge className={getComplexityColor(template.complexity)}>
                         {template.complexity}
                       </Badge>
-                      <span className="text-sm font-medium text-green-600">
+                      <span className="text-sm font-medium text-green-600 dark:text-green-400">
                         Saves {template.estimatedSavings}
                       </span>
                     </div>
@@ -759,23 +759,23 @@ export default function WorkflowBuilderPage() {
           <TabsContent value="builder" className="space-y-6">
             <div className="grid grid-cols-4 gap-6">
               {/* Components Panel */}
-              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+              <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center gap-2">
+                  <CardTitle className="text-sm flex items-center gap-2 text-gray-900 dark:text-gray-100">
                     <Plus className="h-4 w-4" />
                     Components
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {[
-                    { icon: '🎯', name: 'Trigger', desc: 'Start your workflow', color: 'bg-blue-100 border-blue-300' },
-                    { icon: '📧', name: 'Send Email', desc: 'Send notification', color: 'bg-green-100 border-green-300' },
-                    { icon: '⏱️', name: 'Wait', desc: 'Add delay', color: 'bg-yellow-100 border-yellow-300' },
-                    { icon: '🔀', name: 'Condition', desc: 'If/else branch', color: 'bg-purple-100 border-purple-300' },
-                    { icon: '📋', name: 'Create Task', desc: 'Add to-do item', color: 'bg-orange-100 border-orange-300' },
-                    { icon: '🔔', name: 'Notification', desc: 'Push alert', color: 'bg-pink-100 border-pink-300' },
-                    { icon: '📊', name: 'Update Data', desc: 'Modify record', color: 'bg-cyan-100 border-cyan-300' },
-                    { icon: '🔗', name: 'Webhook', desc: 'External API', color: 'bg-gray-100 border-gray-300' }
+                    { icon: '🎯', name: 'Trigger', desc: 'Start your workflow', color: 'bg-blue-100 dark:bg-blue-900/50 border-blue-300 dark:border-blue-700' },
+                    { icon: '📧', name: 'Send Email', desc: 'Send notification', color: 'bg-green-100 dark:bg-green-900/50 border-green-300 dark:border-green-700' },
+                    { icon: '⏱️', name: 'Wait', desc: 'Add delay', color: 'bg-yellow-100 dark:bg-yellow-900/50 border-yellow-300 dark:border-yellow-700' },
+                    { icon: '🔀', name: 'Condition', desc: 'If/else branch', color: 'bg-purple-100 dark:bg-purple-900/50 border-purple-300 dark:border-purple-700' },
+                    { icon: '📋', name: 'Create Task', desc: 'Add to-do item', color: 'bg-orange-100 dark:bg-orange-900/50 border-orange-300 dark:border-orange-700' },
+                    { icon: '🔔', name: 'Notification', desc: 'Push alert', color: 'bg-pink-100 dark:bg-pink-900/50 border-pink-300 dark:border-pink-700' },
+                    { icon: '📊', name: 'Update Data', desc: 'Modify record', color: 'bg-cyan-100 dark:bg-cyan-900/50 border-cyan-300 dark:border-cyan-700' },
+                    { icon: '🔗', name: 'Webhook', desc: 'External API', color: 'bg-gray-100 dark:bg-gray-700/50 border-gray-300 dark:border-gray-600' }
                   ].map((comp, i) => (
                     <div
                       key={i}
@@ -789,8 +789,8 @@ export default function WorkflowBuilderPage() {
                       <div className="flex items-center gap-2">
                         <span className="text-xl">{comp.icon}</span>
                         <div>
-                          <div className="text-sm font-medium">{comp.name}</div>
-                          <div className="text-xs text-gray-500">{comp.desc}</div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{comp.name}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{comp.desc}</div>
                         </div>
                       </div>
                     </div>
@@ -800,10 +800,10 @@ export default function WorkflowBuilderPage() {
 
               {/* Canvas Area */}
               <div className="col-span-3">
-                <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg h-full">
-                  <CardHeader className="pb-3 border-b">
+                <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg h-full">
+                  <CardHeader className="pb-3 border-b dark:border-gray-700">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
+                      <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
                         <Wand2 className="h-5 w-5" />
                         Workflow Canvas
                       </CardTitle>
@@ -839,8 +839,8 @@ export default function WorkflowBuilderPage() {
                     }}
                   >
                     {/* Grid background */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-blue-50/30" style={{
-                      backgroundImage: 'radial-gradient(circle, #ddd 1px, transparent 1px)',
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-blue-50/30 dark:from-gray-900 dark:to-gray-800" style={{
+                      backgroundImage: 'radial-gradient(circle, var(--grid-color, #ddd) 1px, transparent 1px)',
                       backgroundSize: '20px 20px'
                     }} />
 
@@ -851,43 +851,43 @@ export default function WorkflowBuilderPage() {
                         <div className="px-6 py-3 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium shadow-lg flex items-center gap-2">
                           <span>▶️</span> Start
                         </div>
-                        <div className="absolute left-1/2 top-full -translate-x-1/2 w-0.5 h-8 bg-gray-400" />
+                        <div className="absolute left-1/2 top-full -translate-x-1/2 w-0.5 h-8 bg-gray-400 dark:bg-gray-600" />
                       </div>
 
                       {/* Trigger Node */}
                       <div className="absolute left-1/2 top-24 -translate-x-1/2">
-                        <div className="px-6 py-4 rounded-xl bg-white border-2 border-blue-400 shadow-lg min-w-[200px]">
+                        <div className="px-6 py-4 rounded-xl bg-white dark:bg-gray-800 border-2 border-blue-400 dark:border-blue-500 shadow-lg min-w-[200px]">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-xl">🎯</span>
-                            <span className="font-semibold">New Client Signup</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">New Client Signup</span>
                           </div>
-                          <div className="text-xs text-gray-500">Triggers when new client registers</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Triggers when new client registers</div>
                         </div>
-                        <div className="absolute left-1/2 top-full -translate-x-1/2 w-0.5 h-8 bg-gray-400" />
+                        <div className="absolute left-1/2 top-full -translate-x-1/2 w-0.5 h-8 bg-gray-400 dark:bg-gray-600" />
                       </div>
 
                       {/* Wait Node */}
                       <div className="absolute left-1/2 top-52 -translate-x-1/2">
-                        <div className="px-6 py-4 rounded-xl bg-white border-2 border-yellow-400 shadow-lg min-w-[200px]">
+                        <div className="px-6 py-4 rounded-xl bg-white dark:bg-gray-800 border-2 border-yellow-400 dark:border-yellow-500 shadow-lg min-w-[200px]">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-xl">⏱️</span>
-                            <span className="font-semibold">Wait 1 Hour</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">Wait 1 Hour</span>
                           </div>
-                          <div className="text-xs text-gray-500">Delay before next action</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Delay before next action</div>
                         </div>
-                        <div className="absolute left-1/2 top-full -translate-x-1/2 w-0.5 h-8 bg-gray-400" />
+                        <div className="absolute left-1/2 top-full -translate-x-1/2 w-0.5 h-8 bg-gray-400 dark:bg-gray-600" />
                       </div>
 
                       {/* Email Node */}
                       <div className="absolute left-1/2 top-80 -translate-x-1/2">
-                        <div className="px-6 py-4 rounded-xl bg-white border-2 border-green-400 shadow-lg min-w-[200px]">
+                        <div className="px-6 py-4 rounded-xl bg-white dark:bg-gray-800 border-2 border-green-400 dark:border-green-500 shadow-lg min-w-[200px]">
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-xl">📧</span>
-                            <span className="font-semibold">Send Welcome Email</span>
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">Send Welcome Email</span>
                           </div>
-                          <div className="text-xs text-gray-500">Welcome message template</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Welcome message template</div>
                         </div>
-                        <div className="absolute left-1/2 top-full -translate-x-1/2 w-0.5 h-8 bg-gray-400" />
+                        <div className="absolute left-1/2 top-full -translate-x-1/2 w-0.5 h-8 bg-gray-400 dark:bg-gray-600" />
                       </div>
 
                       {/* End Node */}
@@ -898,10 +898,10 @@ export default function WorkflowBuilderPage() {
                       </div>
 
                       {/* Drop zone hint */}
-                      <div className="absolute right-6 top-1/2 -translate-y-1/2 text-center p-6 border-2 border-dashed border-gray-300 rounded-xl bg-white/50">
-                        <Wand2 className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                        <p className="text-sm text-gray-500">Drag components here</p>
-                        <p className="text-xs text-gray-400">to add to workflow</p>
+                      <div className="absolute right-6 top-1/2 -translate-y-1/2 text-center p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl bg-white/50 dark:bg-gray-800/50">
+                        <Wand2 className="h-8 w-8 mx-auto mb-2 text-gray-400 dark:text-gray-500" />
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Drag components here</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">to add to workflow</p>
                       </div>
                     </div>
                   </CardContent>
