@@ -304,7 +304,7 @@ export default function ResourceLibraryPage() {
   // A+++ LOADING STATE
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 p-6">
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 -left-4 w-72 h-72 bg-gradient-to-r from-indigo-400/20 to-purple-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
           <div className="absolute bottom-1/4 -right-4 w-72 h-72 bg-gradient-to-r from-purple-400/20 to-blue-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-700"></div>
@@ -320,7 +320,7 @@ export default function ResourceLibraryPage() {
   // A+++ ERROR STATE
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 p-6">
         <div className="max-w-2xl mx-auto mt-20">
           <ErrorEmptyState
             error={error}
@@ -332,7 +332,7 @@ export default function ResourceLibraryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
       <div className="container mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -341,10 +341,10 @@ export default function ResourceLibraryPage() {
               <Archive className="h-8 w-8" />
             </div>
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 bg-clip-text text-transparent">
                 Resource Library
               </h1>
-              <p className="text-gray-600 mt-2 text-lg">
+              <p className="text-gray-600 dark:text-gray-300 mt-2 text-lg">
                 Discover, organize, and share creative resources and assets
               </p>
             </div>
@@ -363,61 +363,61 @@ export default function ResourceLibraryPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Resources</p>
-                  <p className="text-3xl font-bold text-gray-900">{libraryStats.totalResources}</p>
-                  <p className="text-sm text-blue-600">+12 this month</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Resources</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{libraryStats.totalResources}</p>
+                  <p className="text-sm text-blue-600 dark:text-blue-400">+12 this month</p>
                 </div>
-                <div className="p-3 bg-blue-100 rounded-xl">
-                  <Database className="h-6 w-6 text-blue-600" />
+                <div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-xl">
+                  <Database className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Downloads</p>
-                  <p className="text-3xl font-bold text-gray-900">{libraryStats.totalDownloads.toLocaleString()}</p>
-                  <p className="text-sm text-green-600">+18% this month</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Downloads</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{libraryStats.totalDownloads.toLocaleString()}</p>
+                  <p className="text-sm text-green-600 dark:text-green-400">+18% this month</p>
                 </div>
-                <div className="p-3 bg-green-100 rounded-xl">
-                  <Download className="h-6 w-6 text-green-600" />
+                <div className="p-3 bg-green-100 dark:bg-green-900/50 rounded-xl">
+                  <Download className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Avg Rating</p>
-                  <p className="text-3xl font-bold text-gray-900">{libraryStats.avgRating}</p>
-                  <p className="text-sm text-yellow-600">⭐ Excellent</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Avg Rating</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{libraryStats.avgRating}</p>
+                  <p className="text-sm text-yellow-600 dark:text-yellow-400">⭐ Excellent</p>
                 </div>
-                <div className="p-3 bg-yellow-100 rounded-xl">
-                  <Star className="h-6 w-6 text-yellow-600" />
+                <div className="p-3 bg-yellow-100 dark:bg-yellow-900/50 rounded-xl">
+                  <Star className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Contributors</p>
-                  <p className="text-3xl font-bold text-gray-900">{libraryStats.totalAuthors}</p>
-                  <p className="text-sm text-purple-600">Active creators</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Contributors</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{libraryStats.totalAuthors}</p>
+                  <p className="text-sm text-purple-600 dark:text-purple-400">Active creators</p>
                 </div>
-                <div className="p-3 bg-purple-100 rounded-xl">
-                  <Users className="h-6 w-6 text-purple-600" />
+                <div className="p-3 bg-purple-100 dark:bg-purple-900/50 rounded-xl">
+                  <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
               </div>
             </CardContent>
@@ -439,7 +439,7 @@ export default function ResourceLibraryPage() {
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
             >
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
@@ -475,19 +475,19 @@ export default function ResourceLibraryPage() {
           {categories.slice(1).map((category) => {
             const Icon = category.icon
             return (
-              <Card 
-                key={category.id} 
-                className={`bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-all cursor-pointer ${
+              <Card
+                key={category.id}
+                className={`bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg hover:shadow-xl transition-all cursor-pointer ${
                   selectedCategory === category.id ? 'ring-2 ring-indigo-500' : ''
                 }`}
                 onClick={() => setSelectedCategory(category.id)}
               >
                 <CardContent className="p-4 text-center">
-                  <div className="p-3 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl inline-block mb-2">
-                    <Icon className="h-6 w-6 text-indigo-600" />
+                  <div className="p-3 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/50 dark:to-purple-900/50 rounded-xl inline-block mb-2">
+                    <Icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
                   </div>
-                  <h4 className="font-medium text-gray-900 text-sm">{category.name}</h4>
-                  <p className="text-xs text-gray-600">{category.count} items</p>
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm">{category.name}</h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">{category.count} items</p>
                 </CardContent>
               </Card>
             )
@@ -501,17 +501,17 @@ export default function ResourceLibraryPage() {
             
             if (viewMode === 'list') {
               return (
-                <Card key={resource.id} className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
+                <Card key={resource.id} className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg hover:shadow-xl transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-center space-x-4">
-                      <div className="h-16 w-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
-                        <TypeIcon className="h-8 w-8 text-gray-600" />
+                      <div className="h-16 w-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-lg flex items-center justify-center">
+                        <TypeIcon className="h-8 w-8 text-gray-600 dark:text-gray-300" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-start justify-between">
                           <div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-1">{resource.title}</h3>
-                            <p className="text-sm text-gray-600 mb-2">{resource.description}</p>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{resource.title}</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">{resource.description}</p>
                             <div className="flex items-center gap-2 mb-2">
                               <Badge className={getTypeColor(resource.type)}>
                                 {resource.type}
@@ -526,7 +526,7 @@ export default function ResourceLibraryPage() {
                                 </Badge>
                               )}
                             </div>
-                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                               <span className="flex items-center gap-1">
                                 <Download className="h-3 w-3" />
                                 {resource.downloads}
@@ -562,10 +562,10 @@ export default function ResourceLibraryPage() {
             }
 
             return (
-              <Card key={resource.id} className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-all duration-200 group">
+              <Card key={resource.id} className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg hover:shadow-xl transition-all duration-200 group">
                 <div className="relative">
-                  <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 rounded-t-lg flex items-center justify-center">
-                    <TypeIcon className="h-12 w-12 text-gray-400" />
+                  <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-t-lg flex items-center justify-center">
+                    <TypeIcon className="h-12 w-12 text-gray-400 dark:text-gray-300" />
                   </div>
                   <div className="absolute top-4 left-4 flex gap-2">
                     {resource.isFeatured && (
@@ -597,8 +597,8 @@ export default function ResourceLibraryPage() {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-lg mb-2">{resource.title}</CardTitle>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{resource.description}</p>
+                      <CardTitle className="text-lg mb-2 dark:text-gray-100">{resource.title}</CardTitle>
+                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">{resource.description}</p>
                       <div className="flex items-center gap-2 mb-3">
                         <Badge className={getTypeColor(resource.type)}>
                           {resource.type}
@@ -644,7 +644,7 @@ export default function ResourceLibraryPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between text-sm text-gray-600">
+                  <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                     <span>by {resource.author}</span>
                     <span>{resource.size}</span>
                   </div>
@@ -668,11 +668,11 @@ export default function ResourceLibraryPage() {
         </div>
 
         {filteredResources.length === 0 && (
-          <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg">
             <CardContent className="p-12 text-center">
               <Search className="h-16 w-16 text-gray-400 mx-auto mb-6" />
-              <h3 className="text-2xl font-semibold text-gray-700 mb-4">No Resources Found</h3>
-              <p className="text-gray-500 mb-6 max-w-md mx-auto">
+              <h3 className="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4">No Resources Found</h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
                 Try adjusting your search terms or filters to find what you're looking for.
               </p>
               <Button variant="outline" onClick={() => {setSearchQuery(''); setSelectedCategory('all')}}>

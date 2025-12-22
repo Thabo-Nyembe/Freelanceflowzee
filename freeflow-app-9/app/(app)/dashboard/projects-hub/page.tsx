@@ -87,39 +87,39 @@ interface ProjectCardProps {
 
 const ProjectCard = memo(({ project, onView, onEdit, onDelete, onUpdateStatus }: ProjectCardProps) => {
   return (
-    <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
+    <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg hover:shadow-xl transition-shadow">
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
-              <h3 className="text-xl font-semibold text-gray-900">{project.title}</h3>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{project.title}</h3>
               <Badge variant="outline" className={cn("text-xs", getStatusColor(project.status))}>
                 {project.status}
               </Badge>
               <div className={cn("w-3 h-3 rounded-full", getPriorityColor(project.priority))} title={`${project.priority} priority`}></div>
             </div>
 
-            <p className="text-gray-600 mb-4">{project.description}</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">{project.description}</p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
-                <p className="text-sm text-gray-500">Client</p>
-                <p className="font-medium">{project.client_name}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Client</p>
+                <p className="font-medium dark:text-gray-200">{project.client_name}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Budget</p>
-                <p className="font-medium">${project.budget.toLocaleString()}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Budget</p>
+                <p className="font-medium dark:text-gray-200">${project.budget.toLocaleString()}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500">Due Date</p>
-                <p className="font-medium">{formatDate(project.end_date)}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Due Date</p>
+                <p className="font-medium dark:text-gray-200">{formatDate(project.end_date)}</p>
               </div>
             </div>
 
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-600">Progress</span>
-                <span className="text-sm font-medium">{project.progress}%</span>
+                <span className="text-sm text-gray-600 dark:text-gray-300">Progress</span>
+                <span className="text-sm font-medium dark:text-gray-200">{project.progress}%</span>
               </div>
               <Progress value={project.progress} className="h-2" />
             </div>
@@ -127,12 +127,12 @@ const ProjectCard = memo(({ project, onView, onEdit, onDelete, onUpdateStatus }:
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">{project.team_members.length} members</span>
+                  <Users className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <span className="text-sm text-gray-600 dark:text-gray-300">{project.team_members.length} members</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">{project.comments_count} comments</span>
+                  <Calendar className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <span className="text-sm text-gray-600 dark:text-gray-300">{project.comments_count} comments</span>
                 </div>
               </div>
 
@@ -687,64 +687,64 @@ export default function ProjectsOverviewPage() {
                 <Briefcase className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-800">Projects Hub</h1>
-                <p className="text-sm text-gray-600">Manage all your projects</p>
+                <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Projects Hub</h1>
+                <p className="text-sm text-gray-600 dark:text-gray-300">Manage all your projects</p>
               </div>
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <Link href="/dashboard/projects-hub/create">
-              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300 dark:bg-gray-800/70 dark:border-gray-700 dark:hover:border-blue-500">
                 <CardContent className="p-4 text-center">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Plus className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="font-semibold text-sm">Create</h3>
-                  <p className="text-xs text-gray-500">New project</p>
+                  <h3 className="font-semibold text-sm dark:text-gray-100">Create</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">New project</p>
                 </CardContent>
               </Card>
             </Link>
             <Link href="/dashboard/projects-hub/active">
-              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300 dark:bg-gray-800/70 dark:border-gray-700 dark:hover:border-blue-500">
                 <CardContent className="p-4 text-center">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Activity className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="font-semibold text-sm">Active</h3>
-                  <p className="text-xs text-gray-500">In progress</p>
+                  <h3 className="font-semibold text-sm dark:text-gray-100">Active</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">In progress</p>
                 </CardContent>
               </Card>
             </Link>
             <Link href="/dashboard/projects-hub/templates">
-              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300 dark:bg-gray-800/70 dark:border-gray-700 dark:hover:border-blue-500">
                 <CardContent className="p-4 text-center">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <LayoutTemplate className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="font-semibold text-sm">Templates</h3>
-                  <p className="text-xs text-gray-500">Quick start</p>
+                  <h3 className="font-semibold text-sm dark:text-gray-100">Templates</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Quick start</p>
                 </CardContent>
               </Card>
             </Link>
             <Link href="/dashboard/projects-hub/import">
-              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300 dark:bg-gray-800/70 dark:border-gray-700 dark:hover:border-blue-500">
                 <CardContent className="p-4 text-center">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Upload className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="font-semibold text-sm">Import</h3>
-                  <p className="text-xs text-gray-500">From file</p>
+                  <h3 className="font-semibold text-sm dark:text-gray-100">Import</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">From file</p>
                 </CardContent>
               </Card>
             </Link>
             <Link href="/dashboard/projects-hub/analytics">
-              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-blue-300 dark:bg-gray-800/70 dark:border-gray-700 dark:hover:border-blue-500">
                 <CardContent className="p-4 text-center">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <BarChart3 className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="font-semibold text-sm">Analytics</h3>
-                  <p className="text-xs text-gray-500">Insights</p>
+                  <h3 className="font-semibold text-sm dark:text-gray-100">Analytics</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Insights</p>
                 </CardContent>
               </Card>
             </Link>
@@ -759,14 +759,14 @@ export default function ProjectsOverviewPage() {
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Total Projects</p>
-                  <NumberFlow value={stats.total} className="text-3xl font-bold text-gray-900" />
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Projects</p>
+                  <NumberFlow value={stats.total} className="text-3xl font-bold text-gray-900 dark:text-gray-100" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     <NumberFlow value={stats.active} className="inline-block" /> active
                   </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-xl backdrop-blur-sm">
-                  <Briefcase className="h-6 w-6 text-blue-600" />
+                  <Briefcase className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
             </div>
@@ -777,12 +777,12 @@ export default function ProjectsOverviewPage() {
           <div className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700">Completed</p>
-                <NumberFlow value={stats.completed} className="text-3xl font-bold text-gray-900" />
-                <p className="text-sm text-gray-500">Projects finished</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Completed</p>
+                <NumberFlow value={stats.completed} className="text-3xl font-bold text-gray-900 dark:text-gray-100" />
+                <p className="text-sm text-gray-500 dark:text-gray-400">Projects finished</p>
               </div>
               <div className="p-3 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-xl backdrop-blur-sm">
-                <CheckCircle className="h-6 w-6 text-green-600" />
+                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
           </div>
@@ -792,12 +792,12 @@ export default function ProjectsOverviewPage() {
           <div className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700">Revenue</p>
-                <NumberFlow value={stats.revenue} format="currency" className="text-3xl font-bold text-gray-900" />
-                <p className="text-sm text-gray-500">Total earned</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Revenue</p>
+                <NumberFlow value={stats.revenue} format="currency" className="text-3xl font-bold text-gray-900 dark:text-gray-100" />
+                <p className="text-sm text-gray-500 dark:text-gray-400">Total earned</p>
               </div>
               <div className="p-3 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-xl backdrop-blur-sm">
-                <DollarSign className="h-6 w-6 text-emerald-600" />
+                <DollarSign className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
               </div>
             </div>
           </div>
@@ -807,15 +807,15 @@ export default function ProjectsOverviewPage() {
           <div className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-700">Efficiency</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Efficiency</p>
                 <div className="flex items-baseline">
-                  <NumberFlow value={stats.efficiency} className="text-3xl font-bold text-gray-900" />
-                  <span className="text-3xl font-bold text-gray-900">%</span>
+                  <NumberFlow value={stats.efficiency} className="text-3xl font-bold text-gray-900 dark:text-gray-100" />
+                  <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">%</span>
                 </div>
-                <p className="text-sm text-gray-500">Average progress</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Average progress</p>
               </div>
               <div className="p-3 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-xl backdrop-blur-sm">
-                <TrendingUp className="h-6 w-6 text-purple-600" />
+                <TrendingUp className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
           </div>
@@ -888,7 +888,7 @@ export default function ProjectsOverviewPage() {
       </div>
 
       {/* Filters and Search */}
-      <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+      <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -908,7 +908,7 @@ export default function ProjectsOverviewPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 data-testid="status-filter"
               >
                 <option value="all">All Status</option>
@@ -922,7 +922,7 @@ export default function ProjectsOverviewPage() {
               <select
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 data-testid="priority-filter"
               >
                 <option value="all">All Priority</option>
@@ -967,12 +967,12 @@ export default function ProjectsOverviewPage() {
             {isLoadingMore && displayedProjectsCount < filteredProjects.length && (
               <div className="text-center py-6">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                <p className="text-sm text-gray-500 mt-2">Loading more projects...</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Loading more projects...</p>
               </div>
             )}
 
             {displayedProjectsCount < filteredProjects.length && !isLoadingMore && (
-              <div className="text-center py-6 text-sm text-gray-500">
+              <div className="text-center py-6 text-sm text-gray-500 dark:text-gray-400">
                 Showing {displayedProjectsCount} of {filteredProjects.length} projects - Scroll down for more
               </div>
             )}

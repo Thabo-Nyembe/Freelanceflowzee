@@ -45,7 +45,7 @@ export default function ProjectsHubLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 p-6">
       {/* Floating decorative elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-4 w-72 h-72 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
@@ -60,17 +60,17 @@ export default function ProjectsHubLayout({ children }: { children: React.ReactN
             <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
               <FolderOpen className="h-6 w-6 text-white" />
             </div>
-            <TextShimmerComponent className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+            <TextShimmerComponent className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 dark:from-gray-100 dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent">
               Projects Hub
             </TextShimmerComponent>
           </div>
-          <p className="text-lg text-gray-600 font-light">
+          <p className="text-lg text-gray-600 dark:text-gray-300 font-light">
             Manage and track all your creative projects in one place
           </p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl p-2 shadow-xl">
+        <div className="grid w-full grid-cols-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-white/30 dark:border-gray-700/30 rounded-3xl p-2 shadow-xl">
           {MAIN_TABS.map((tab) => {
             const Icon = tab.icon
             const active = isActive(tab.path)
@@ -84,7 +84,7 @@ export default function ProjectsHubLayout({ children }: { children: React.ReactN
                   flex items-center justify-center gap-2 rounded-2xl px-4 py-2 transition-all
                   ${active
                     ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   }
                 `}
               >

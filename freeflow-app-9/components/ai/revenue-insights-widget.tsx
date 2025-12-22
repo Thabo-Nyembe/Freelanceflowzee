@@ -119,18 +119,18 @@ export function RevenueInsightsWidget({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Current MRR</span>
-            <span className="font-semibold text-sm">${summary.currentMRR.toLocaleString()}</span>
+            <span className="font-semibold text-sm">${(summary.currentMRR ?? 0).toLocaleString()}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Projected MRR</span>
             <span className="font-semibold text-sm text-green-600">
-              ${summary.projectedMRR.toLocaleString()}
+              ${(summary.projectedMRR ?? 0).toLocaleString()}
             </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-xs text-muted-foreground">Growth Potential</span>
             <Badge variant="default" className="text-xs">
-              +{summary.growthRate.toFixed(1)}%
+              +{(summary.growthRate ?? 0).toFixed(1)}%
             </Badge>
           </div>
         </div>
@@ -168,19 +168,19 @@ export function RevenueInsightsWidget({
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="p-4 bg-muted/50 rounded-lg">
             <p className="text-sm text-muted-foreground mb-1">Current MRR</p>
-            <p className="text-2xl font-bold">${summary.currentMRR.toLocaleString()}</p>
+            <p className="text-2xl font-bold">${(summary.currentMRR ?? 0).toLocaleString()}</p>
           </div>
           <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
             <p className="text-sm text-muted-foreground mb-1">Projected MRR</p>
-            <p className="text-2xl font-bold text-green-600">${summary.projectedMRR.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-green-600">${(summary.projectedMRR ?? 0).toLocaleString()}</p>
           </div>
           <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
             <p className="text-sm text-muted-foreground mb-1">Growth Rate</p>
-            <p className="text-2xl font-bold text-blue-600">+{summary.growthRate.toFixed(1)}%</p>
+            <p className="text-2xl font-bold text-blue-600">+{(summary.growthRate ?? 0).toFixed(1)}%</p>
           </div>
           <div className="p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
             <p className="text-sm text-muted-foreground mb-1">Opportunity Value</p>
-            <p className="text-2xl font-bold text-purple-600">${summary.totalOpportunityValue.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-purple-600">${(summary.totalOpportunityValue ?? 0).toLocaleString()}</p>
           </div>
         </div>
       </Card>

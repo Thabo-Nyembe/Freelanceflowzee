@@ -116,7 +116,7 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
       <div className="container mx-auto p-6 space-y-8">
         {/* ============================================================================
             HEADER SECTION (Lines 950-1048 from original)
@@ -127,10 +127,10 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
               <UserCheck className="h-8 w-8" />
             </div>
             <div>
-              <TextShimmer className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+              <TextShimmer className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 dark:from-gray-100 dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent">
                 {userRole === 'freelancer' ? 'Client Management' : 'My Projects'}
               </TextShimmer>
-              <p className="text-gray-600 mt-2 text-lg">
+              <p className="text-gray-600 dark:text-gray-300 mt-2 text-lg">
                 {userRole === 'freelancer'
                   ? `Manage your clients and track all project deliverables`
                   : `Welcome back, ${KAZI_CLIENT_DATA.clientInfo.contactPerson}! Here's your project overview.`
@@ -153,9 +153,9 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-3 z-50"
+                  className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 p-3 z-50"
                 >
-                  <h4 className="text-sm font-semibold mb-3 text-gray-900">Switch Perspective</h4>
+                  <h4 className="text-sm font-semibold mb-3 text-gray-900 dark:text-gray-100">Switch Perspective</h4>
                   <div className="space-y-2">
                     <button
                       onClick={() => {
@@ -169,8 +169,8 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
                       }}
                       className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
                         userRole === 'client'
-                          ? 'bg-blue-100 text-blue-900 font-semibold'
-                          : 'hover:bg-gray-100 text-gray-700'
+                          ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-900 dark:text-blue-100 font-semibold'
+                          : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -193,8 +193,8 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
                       }}
                       className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
                         userRole === 'freelancer'
-                          ? 'bg-purple-100 text-purple-900 font-semibold'
-                          : 'hover:bg-gray-100 text-gray-700'
+                          ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-900 dark:text-purple-100 font-semibold'
+                          : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                       }`}
                     >
                       <div className="flex items-center gap-2">
@@ -235,7 +235,7 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
                   <FolderOpen className="h-8 w-8 text-blue-600" />
                 </div>
                 <NumberFlow value={KAZI_CLIENT_DATA.clientInfo.activeProjects} className="text-2xl font-bold text-blue-600 block" />
-                <p className="text-gray-600">Active Projects</p>
+                <p className="text-gray-600 dark:text-gray-300">Active Projects</p>
               </div>
             </LiquidGlassCard>
           </motion.div>
@@ -251,7 +251,7 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
                   <CheckCircle className="h-8 w-8 text-emerald-600" />
                 </div>
                 <NumberFlow value={KAZI_CLIENT_DATA.clientInfo.completedProjects} className="text-2xl font-bold text-emerald-600 block" />
-                <p className="text-gray-600">Completed</p>
+                <p className="text-gray-600 dark:text-gray-300">Completed</p>
               </div>
             </LiquidGlassCard>
           </motion.div>
@@ -267,7 +267,7 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
                   <DollarSign className="h-8 w-8 text-purple-600" />
                 </div>
                 <NumberFlow value={KAZI_CLIENT_DATA.clientInfo.totalInvestment} format="currency" className="text-2xl font-bold text-purple-600 block" />
-                <p className="text-gray-600">Total Investment</p>
+                <p className="text-gray-600 dark:text-gray-300">Total Investment</p>
               </div>
             </LiquidGlassCard>
           </motion.div>
@@ -283,7 +283,7 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
                   <Star className="h-8 w-8 text-amber-600" />
                 </div>
                 <NumberFlow value={parseFloat(KAZI_CLIENT_DATA.clientInfo.satisfaction)} decimals={1} className="text-2xl font-bold text-amber-600 block" />
-                <p className="text-gray-600">Satisfaction Rating</p>
+                <p className="text-gray-600 dark:text-gray-300">Satisfaction Rating</p>
               </div>
             </LiquidGlassCard>
           </motion.div>
@@ -298,59 +298,59 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            <Card className="bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 border-purple-200">
+            <Card className="bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:from-purple-950/50 dark:via-indigo-950/50 dark:to-blue-950/50 border-purple-200 dark:border-purple-800">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Briefcase className="w-6 h-6 text-purple-600" />
+                <CardTitle className="flex items-center gap-2 dark:text-gray-100">
+                  <Briefcase className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                   Freelancer Dashboard
                 </CardTitle>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
                   Manage your clients, track deliverables, and monitor payment status
                 </p>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Freelancer Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="bg-white/80 rounded-lg p-4 border border-purple-200">
+                  <div className="bg-white/80 dark:bg-gray-800/80 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
                     <div className="flex items-center gap-3 mb-2">
-                      <Users className="w-5 h-5 text-purple-600" />
-                      <span className="text-sm font-medium text-gray-600">Total Clients</span>
+                      <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Clients</span>
                     </div>
-                    <p className="text-3xl font-bold text-purple-600">
+                    <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                       <NumberFlow value={8} />
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">3 active this month</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">3 active this month</p>
                   </div>
 
-                  <div className="bg-white/80 rounded-lg p-4 border border-green-200">
+                  <div className="bg-white/80 dark:bg-gray-800/80 rounded-lg p-4 border border-green-200 dark:border-green-800">
                     <div className="flex items-center gap-3 mb-2">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                      <span className="text-sm font-medium text-gray-600">Deliverables</span>
+                      <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Deliverables</span>
                     </div>
-                    <p className="text-3xl font-bold text-green-600">
+                    <p className="text-3xl font-bold text-green-600 dark:text-green-400">
                       <NumberFlow value={12} />
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">4 pending approval</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">4 pending approval</p>
                   </div>
 
-                  <div className="bg-white/80 rounded-lg p-4 border border-blue-200">
+                  <div className="bg-white/80 dark:bg-gray-800/80 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
                     <div className="flex items-center gap-3 mb-2">
-                      <DollarSign className="w-5 h-5 text-blue-600" />
-                      <span className="text-sm font-medium text-gray-600">Revenue</span>
+                      <DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Revenue</span>
                     </div>
-                    <p className="text-3xl font-bold text-blue-600">
+                    <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
                       <NumberFlow value={24500} format="currency" />
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">$12,300 pending</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">$12,300 pending</p>
                   </div>
 
-                  <div className="bg-white/80 rounded-lg p-4 border border-orange-200">
+                  <div className="bg-white/80 dark:bg-gray-800/80 rounded-lg p-4 border border-orange-200 dark:border-orange-800">
                     <div className="flex items-center gap-3 mb-2">
-                      <TrendingUp className="w-5 h-5 text-orange-600" />
-                      <span className="text-sm font-medium text-gray-600">Growth</span>
+                      <TrendingUp className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Growth</span>
                     </div>
-                    <p className="text-3xl font-bold text-orange-600">+23%</p>
-                    <p className="text-xs text-gray-500 mt-1">vs last month</p>
+                    <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">+23%</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">vs last month</p>
                   </div>
                 </div>
 
@@ -358,7 +358,7 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Active Clients */}
                   <div className="space-y-3">
-                    <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                       <Users className="w-4 h-4" />
                       Active Clients
                     </h3>
@@ -368,7 +368,7 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
                         { name: 'Tech Startup Inc', projects: 1, status: 'Review', color: 'yellow' },
                         { name: 'Design Agency', projects: 1, status: 'Active', color: 'green' }
                       ].map((client, idx) => (
-                        <div key={idx} className="bg-white rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow">
+                        <div key={idx} className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8">
@@ -377,8 +377,8 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
                                 </AvatarFallback>
                               </Avatar>
                               <div>
-                                <p className="text-sm font-medium text-gray-900">{client.name}</p>
-                                <p className="text-xs text-gray-500">{client.projects} project(s)</p>
+                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{client.name}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{client.projects} project(s)</p>
                               </div>
                             </div>
                             <Badge variant="outline" className={`bg-${client.color}-100 text-${client.color}-700 border-${client.color}-300`}>
@@ -396,7 +396,7 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
 
                   {/* Pending Approvals */}
                   <div className="space-y-3">
-                    <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                       <CheckCircle className="w-4 h-4" />
                       Pending Approvals
                     </h3>
@@ -406,17 +406,17 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
                         { project: 'Mobile App', client: 'Tech Startup', type: 'Final Delivery', amount: 5000 },
                         { project: 'Brand Identity', client: 'Design Agency', type: 'Logo Design', amount: 1200 }
                       ].map((approval, idx) => (
-                        <div key={idx} className="bg-white rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow">
+                        <div key={idx} className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
                           <div className="flex items-center justify-between mb-2">
                             <div>
-                              <p className="text-sm font-medium text-gray-900">{approval.project}</p>
-                              <p className="text-xs text-gray-500">{approval.client}</p>
+                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{approval.project}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{approval.client}</p>
                             </div>
-                            <p className="text-sm font-bold text-blue-600">${approval.amount.toLocaleString()}</p>
+                            <p className="text-sm font-bold text-blue-600 dark:text-blue-400">${approval.amount.toLocaleString()}</p>
                           </div>
                           <div className="flex items-center justify-between">
                             <Badge variant="outline" className="text-xs">{approval.type}</Badge>
-                            <span className="text-xs text-gray-500">Awaiting approval</span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Awaiting approval</span>
                           </div>
                         </div>
                       ))}
@@ -429,25 +429,25 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg p-4 border border-purple-200">
-                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <div className="bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/50 dark:to-blue-900/50 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
                     <Zap className="w-4 h-4" />
                     Quick Actions
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <Button variant="outline" className="flex-col h-auto py-3 bg-white">
+                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-800">
                       <FileText className="w-5 h-5 mb-1" />
                       <span className="text-xs">Upload Deliverable</span>
                     </Button>
-                    <Button variant="outline" className="flex-col h-auto py-3 bg-white">
+                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-800">
                       <MessageSquare className="w-5 h-5 mb-1" />
                       <span className="text-xs">Message Client</span>
                     </Button>
-                    <Button variant="outline" className="flex-col h-auto py-3 bg-white">
+                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-800">
                       <Receipt className="w-5 h-5 mb-1" />
                       <span className="text-xs">Create Invoice</span>
                     </Button>
-                    <Button variant="outline" className="flex-col h-auto py-3 bg-white">
+                    <Button variant="outline" className="flex-col h-auto py-3 bg-white dark:bg-gray-800">
                       <BarChart3 className="w-5 h-5 mb-1" />
                       <span className="text-xs">View Reports</span>
                     </Button>
@@ -462,7 +462,7 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
             TAB NAVIGATION (Lines 1302-1357 from original - converted to Next.js routing)
             ============================================================================ */}
         <div className="overflow-x-auto">
-          <div className="inline-flex w-max min-w-full bg-white/60 backdrop-blur-xl border border-white/30 rounded-lg p-1">
+          <div className="inline-flex w-max min-w-full bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-white/30 dark:border-gray-700/30 rounded-lg p-1">
             {tabs.map((tab) => {
               const Icon = tab.icon
               const isActive = pathname === tab.path
@@ -473,8 +473,8 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
                   onClick={() => handleTabClick(tab.path, tab.label)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-md whitespace-nowrap transition-all ${
                     isActive
-                      ? 'bg-white text-blue-600 shadow-md font-semibold'
-                      : 'text-gray-700 hover:bg-white/50 hover:text-gray-900'
+                      ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-md font-semibold'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-100'
                   }`}
                   data-testid={`tab-${tab.id}`}
                 >
