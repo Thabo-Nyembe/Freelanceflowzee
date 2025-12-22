@@ -12,7 +12,7 @@ export default function ExpensesClient({ initialExpenses }: { initialExpenses: E
   const [categoryFilter, setCategoryFilter] = useState<ExpenseCategory | 'all'>('all')
   const { expenses, loading, error } = useExpenses({ status: statusFilter, category: categoryFilter })
 
-  const displayExpenses = expenses.length > 0 ? expenses : initialExpenses
+  const displayExpenses = (expenses && expenses.length > 0) ? expenses : (initialExpenses || [])
 
   const stats = [
     {
