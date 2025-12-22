@@ -148,7 +148,10 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'ai-voice-synthesis', name: 'AI Voice Synthesis', href: '/dashboard/ai-voice-synthesis', icon: Mic, description: 'AI voice generation', badge: 'New' },
           { id: 'ai-code-completion', name: 'AI Code Completion', href: '/dashboard/ai-code-completion', icon: Code, description: 'AI coding assistant', badge: 'New' },
           { id: 'ml-insights', name: 'ML Insights', href: '/dashboard/ml-insights', icon: Brain, description: 'Machine learning', badge: 'New' },
-          { id: 'ai-settings', name: 'AI Settings', href: '/dashboard/ai-settings', icon: Settings, description: 'AI configuration', badge: 'New' }
+          { id: 'ai-settings', name: 'AI Settings', href: '/dashboard/ai-settings', icon: Settings, description: 'AI configuration', badge: 'New' },
+          { id: 'ai-business-advisor', name: 'AI Business Advisor', href: '/dashboard/ai-business-advisor', icon: Brain, description: 'Business AI advisor', badge: 'New' },
+          { id: 'ai-content-studio', name: 'AI Content Studio', href: '/dashboard/ai-content-studio', icon: Sparkles, description: 'Content generation', badge: 'New' },
+          { id: 'real-time-translation', name: 'Real-time Translation', href: '/dashboard/real-time-translation', icon: MessageSquare, description: 'AI translation', badge: 'New' }
         ]
       }
     ]
@@ -189,7 +192,12 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'cloud-storage', name: 'Cloud Storage', href: '/dashboard/cloud-storage', icon: Cloud, description: 'Cloud files', badge: 'New' },
           { id: 'resource-library', name: 'Resource Library', href: '/dashboard/resource-library', icon: BookOpen, description: 'Asset library', badge: 'New' },
           { id: 'widgets', name: 'Widgets', href: '/dashboard/widgets', icon: Layers, description: 'Dashboard widgets', badge: 'New' },
-          { id: 'knowledge-base', name: 'Knowledge Base', href: '/dashboard/client-zone/knowledge-base', icon: BookOpen, description: 'Help center & docs', badge: 'New' }
+          { id: 'knowledge-base', name: 'Knowledge Base', href: '/dashboard/client-zone/knowledge-base', icon: BookOpen, description: 'Help center & docs', badge: 'New' },
+          { id: 'assets', name: 'Assets', href: '/dashboard/assets-v2', icon: Image, description: 'Asset management', badge: 'New' },
+          { id: 'media-library', name: 'Media Library', href: '/dashboard/media-library-v2', icon: Image, description: 'Media files', badge: 'New' },
+          { id: 'backups', name: 'Backups', href: '/dashboard/backups-v2', icon: Cloud, description: 'Data backups', badge: 'New' },
+          { id: 'data-export', name: 'Data Export', href: '/dashboard/data-export-v2', icon: FileText, description: 'Export data', badge: 'New' },
+          { id: 'templates', name: 'Templates', href: '/dashboard/templates-v2', icon: FileText, description: 'Template library', badge: 'New' }
         ]
       }
     ]
@@ -243,7 +251,10 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'expenses', name: 'Expenses', href: '/dashboard/expenses-v2', icon: Receipt, description: 'Expense tracking', badge: 'New' },
           { id: 'contracts', name: 'Contracts', href: '/dashboard/contracts-v2', icon: FileText, description: 'Contract management', badge: 'New' },
           { id: 'crypto-payments', name: 'Crypto Payments', href: '/dashboard/crypto-payments', icon: DollarSign, description: 'Crypto support', badge: 'New' },
-          { id: 'transactions', name: 'Transactions', href: '/dashboard/transactions-v2', icon: DollarSign, description: 'Transaction history', badge: 'New' }
+          { id: 'transactions', name: 'Transactions', href: '/dashboard/transactions-v2', icon: DollarSign, description: 'Transaction history', badge: 'New' },
+          { id: 'budgets', name: 'Budgets', href: '/dashboard/budgets-v2', icon: DollarSign, description: 'Budget planning', badge: 'New' },
+          { id: 'billing', name: 'Billing', href: '/dashboard/billing-v2', icon: Receipt, description: 'Billing management', badge: 'New' },
+          { id: 'payroll', name: 'Payroll', href: '/dashboard/payroll-v2', icon: DollarSign, description: 'Payroll management', badge: 'New' }
         ]
       },
       {
@@ -294,7 +305,21 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         visible: true,
         items: [
           { id: 'calendar', name: 'Calendar', href: '/dashboard/calendar', icon: Calendar, description: 'Scheduling' },
-          { id: 'bookings', name: 'Bookings', href: '/dashboard/bookings', icon: Calendar, description: 'Booking system' }
+          { id: 'bookings', name: 'Bookings', href: '/dashboard/bookings', icon: Calendar, description: 'Booking system' },
+          { id: 'events', name: 'Events', href: '/dashboard/events-v2', icon: Calendar, description: 'Event management', badge: 'New' },
+          { id: 'webinars', name: 'Webinars', href: '/dashboard/webinars-v2', icon: Video, description: 'Online events', badge: 'New' }
+        ]
+      },
+      {
+        id: 'marketing',
+        name: 'Marketing',
+        visible: true,
+        items: [
+          { id: 'campaigns', name: 'Campaigns', href: '/dashboard/campaigns-v2', icon: Target, description: 'Marketing campaigns', badge: 'New' },
+          { id: 'social-media', name: 'Social Media', href: '/dashboard/social-media-v2', icon: Users, description: 'Social management', badge: 'New' },
+          { id: 'seo', name: 'SEO', href: '/dashboard/seo-v2', icon: TrendingUp, description: 'SEO tools', badge: 'New' },
+          { id: 'surveys', name: 'Surveys', href: '/dashboard/surveys-v2', icon: FileText, description: 'Customer surveys', badge: 'New' },
+          { id: 'feedback', name: 'Feedback', href: '/dashboard/feedback-v2', icon: MessageSquare, description: 'Customer feedback', badge: 'New' }
         ]
       }
     ]
@@ -340,7 +365,22 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         items: [
           { id: 'user-management', name: 'User Management', href: '/dashboard/user-management', icon: UserPlus, description: 'Team & permissions', badge: 'New' },
           { id: 'system-insights', name: 'System Insights', href: '/dashboard/system-insights', icon: Gauge, description: 'System analytics', badge: 'New' },
-          { id: 'investor-metrics', name: 'Investor Metrics', href: '/dashboard/investor-metrics', icon: TrendingUp, description: 'Investor dashboard', badge: 'New' }
+          { id: 'investor-metrics', name: 'Investor Metrics', href: '/dashboard/investor-metrics', icon: TrendingUp, description: 'Investor dashboard', badge: 'New' },
+          { id: 'roles', name: 'Roles & Permissions', href: '/dashboard/roles-v2', icon: Shield, description: 'Access control', badge: 'New' },
+          { id: 'compliance', name: 'Compliance', href: '/dashboard/compliance-v2', icon: Shield, description: 'Regulatory compliance', badge: 'New' },
+          { id: 'monitoring', name: 'Monitoring', href: '/dashboard/monitoring-v2', icon: Gauge, description: 'System monitoring', badge: 'New' },
+          { id: 'onboarding', name: 'Onboarding', href: '/dashboard/onboarding-v2', icon: UserPlus, description: 'User onboarding', badge: 'New' }
+        ]
+      },
+      {
+        id: 'hr',
+        name: 'Human Resources',
+        visible: true,
+        items: [
+          { id: 'recruitment', name: 'Recruitment', href: '/dashboard/recruitment-v2', icon: UserPlus, description: 'Hiring management', badge: 'New' },
+          { id: 'training', name: 'Training', href: '/dashboard/training-v2', icon: BookOpen, description: 'Employee training', badge: 'New' },
+          { id: 'learning', name: 'Learning', href: '/dashboard/learning-v2', icon: BookOpen, description: 'Learning platform', badge: 'New' },
+          { id: 'courses', name: 'Courses', href: '/dashboard/courses-v2', icon: BookOpen, description: 'Course management', badge: 'New' }
         ]
       },
       {
@@ -438,6 +478,18 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'audit-logs', name: 'Audit Logs', href: '/dashboard/audit-logs-v2', icon: FileText, description: 'Activity audit trail', badge: 'New' },
           { id: 'security-audit', name: 'Security Audit', href: '/dashboard/security-audit-v2', icon: Shield, description: 'Security analysis', badge: 'New' },
           { id: 'access-logs', name: 'Access Logs', href: '/dashboard/access-logs-v2', icon: FileText, description: 'Access history', badge: 'New' }
+        ]
+      },
+      {
+        id: 'help-support',
+        name: 'Help & Support',
+        visible: true,
+        items: [
+          { id: 'help-center', name: 'Help Center', href: '/dashboard/help-center-v2', icon: BookOpen, description: 'Help documentation', badge: 'New' },
+          { id: 'faq', name: 'FAQ', href: '/dashboard/faq-v2', icon: MessageSquare, description: 'Common questions', badge: 'New' },
+          { id: 'tutorials', name: 'Tutorials', href: '/dashboard/tutorials-v2', icon: BookOpen, description: 'How-to guides', badge: 'New' },
+          { id: 'changelog', name: 'Changelog', href: '/dashboard/changelog-v2', icon: FileText, description: 'Release notes', badge: 'New' },
+          { id: 'roadmap', name: 'Roadmap', href: '/dashboard/roadmap-v2', icon: Target, description: 'Product roadmap', badge: 'New' }
         ]
       }
     ]
