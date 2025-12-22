@@ -136,7 +136,9 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         items: [
           { id: 'ai-assistant', name: 'AI Assistant', href: '/dashboard/ai-assistant', icon: Brain, description: 'AI-powered assistant' },
           { id: 'ai-design', name: 'AI Design', href: '/dashboard/ai-design', icon: Zap, description: 'AI design generation' },
-          { id: 'ai-create', name: 'AI Create', href: '/dashboard/ai-create', icon: Sparkles, description: 'AI content creation' }
+          { id: 'ai-create', name: 'AI Create', href: '/dashboard/ai-create', icon: Sparkles, description: 'AI content creation' },
+          { id: 'ai-image-generator', name: 'AI Image Generator', href: '/dashboard/ai-image-generator', icon: Image, description: 'Nano Banana image generation', badge: 'Hot' },
+          { id: 'ai-music-studio', name: 'AI Music Studio', href: '/dashboard/ai-music-studio', icon: Music, description: 'Suno AI music creation', badge: 'Hot' }
         ]
       },
       {
