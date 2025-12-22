@@ -126,10 +126,15 @@ export default function TransactionsPage() {
   const [deleteTransaction, setDeleteTransaction] = useState<{ id: string; description: string } | null>(null)
 
   useEffect(() => {
+    if (userLoading) return // Wait for auth to complete
+
     if (userId) {
       loadTransactions()
+    } else {
+      // No user logged in, stop loading
+      setIsLoading(false)
     }
-  }, [userId])
+  }, [userId, userLoading])
 
   const loadTransactions = async () => {
     if (!userId) return

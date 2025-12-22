@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
@@ -60,9 +59,15 @@ export default function FinancialOverviewPage() {
   })
 
   useEffect(() => {
-    if (!userId) return
-    loadFinancialOverview()
-  }, [userId])
+    if (userLoading) return // Wait for auth to complete
+
+    if (userId) {
+      loadFinancialOverview()
+    } else {
+      // No user logged in, stop loading
+      setIsLoading(false)
+    }
+  }, [userId, userLoading])
 
   const loadFinancialOverview = async () => {
     if (!userId) {
@@ -611,30 +616,16 @@ export default function FinancialOverviewPage() {
             {/* Transaction Type */}
             <div className="space-y-2">
               <Label>Type</Label>
-              <Select
+              <select
                 value={transactionForm.type}
-                onValueChange={(value: 'income' | 'expense') =>
-                  setTransactionForm(prev => ({ ...prev, type: value }))
+                onChange={(e) =>
+                  setTransactionForm(prev => ({ ...prev, type: e.target.value as 'income' | 'expense' }))
                 }
+                className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="income">
-                    <span className="flex items-center gap-2">
-                      <TrendingUp className="h-4 w-4 text-green-500" />
-                      Income
-                    </span>
-                  </SelectItem>
-                  <SelectItem value="expense">
-                    <span className="flex items-center gap-2">
-                      <TrendingDown className="h-4 w-4 text-red-500" />
-                      Expense
-                    </span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
             </div>
 
             {/* Amount */}
@@ -658,35 +649,32 @@ export default function FinancialOverviewPage() {
             {/* Category */}
             <div className="space-y-2">
               <Label>Category</Label>
-              <Select
+              <select
                 value={transactionForm.category}
-                onValueChange={(value) => setTransactionForm(prev => ({ ...prev, category: value }))}
+                onChange={(e) => setTransactionForm(prev => ({ ...prev, category: e.target.value }))}
+                className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {transactionForm.type === 'income' ? (
-                    <>
-                      <SelectItem value="client_payment">Client Payment</SelectItem>
-                      <SelectItem value="project_revenue">Project Revenue</SelectItem>
-                      <SelectItem value="subscription">Subscription</SelectItem>
-                      <SelectItem value="consulting">Consulting</SelectItem>
-                      <SelectItem value="other_income">Other Income</SelectItem>
-                    </>
-                  ) : (
-                    <>
-                      <SelectItem value="software">Software & Tools</SelectItem>
-                      <SelectItem value="marketing">Marketing</SelectItem>
-                      <SelectItem value="office">Office Expenses</SelectItem>
-                      <SelectItem value="travel">Travel</SelectItem>
-                      <SelectItem value="contractor">Contractor Payments</SelectItem>
-                      <SelectItem value="utilities">Utilities</SelectItem>
-                      <SelectItem value="other_expense">Other Expense</SelectItem>
-                    </>
-                  )}
-                </SelectContent>
-              </Select>
+                <option value="">Select category</option>
+                {transactionForm.type === 'income' ? (
+                  <>
+                    <option value="client_payment">Client Payment</option>
+                    <option value="project_revenue">Project Revenue</option>
+                    <option value="subscription">Subscription</option>
+                    <option value="consulting">Consulting</option>
+                    <option value="other_income">Other Income</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="software">Software & Tools</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="office">Office Expenses</option>
+                    <option value="travel">Travel</option>
+                    <option value="contractor">Contractor Payments</option>
+                    <option value="utilities">Utilities</option>
+                    <option value="other_expense">Other Expense</option>
+                  </>
+                )}
+              </select>
             </div>
 
             {/* Date */}
