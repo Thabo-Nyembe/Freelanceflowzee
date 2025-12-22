@@ -253,3 +253,6 @@ export async function verifyAuthToken(request: NextRequest): Promise<AuthUser | 
  * ```
  */
 export { useSession, signIn, signOut } from 'next-auth/react'
+
+// Re-export authOptions for API routes
+export { authOptions } from './auth.config'

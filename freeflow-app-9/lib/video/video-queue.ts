@@ -5,7 +5,8 @@
  * Supports exports, thumbnails, compression, and transcription
  */
 
-import { Queue, Worker, Job, QueueEvents } from 'bullmq'
+// BullMQ types only - not using the actual queue in serverless
+// import { Queue, Worker, Job, QueueEvents } from 'bullmq'
 import { Redis } from '@upstash/redis'
 import { createFeatureLogger } from '@/lib/logger'
 import {
