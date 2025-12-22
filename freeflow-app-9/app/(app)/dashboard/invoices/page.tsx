@@ -850,11 +850,11 @@ ${invoices.map(inv =>
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'paid': return 'bg-green-100 text-green-800'
-      case 'pending': return 'bg-yellow-100 text-yellow-800'
-      case 'overdue': return 'bg-red-100 text-red-800'
-      case 'draft': return 'bg-gray-100 text-gray-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'paid': return 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300'
+      case 'pending': return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300'
+      case 'overdue': return 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300'
+      case 'draft': return 'bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-300'
+      default: return 'bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-300'
     }
   }
 
@@ -1076,7 +1076,7 @@ ${invoices.map(inv =>
       </div>
 
       {/* PROFESSIONAL INVOICE TEMPLATES - USER MANUAL SPEC (Gap #8) */}
-      <Card className="bg-gradient-to-br from-indigo-50/50 via-purple-50/50 to-pink-50/50 border-2 border-indigo-200">
+      <Card className="bg-gradient-to-br from-indigo-50/50 via-purple-50/50 to-pink-50/50 dark:from-indigo-950/30 dark:via-purple-950/30 dark:to-pink-950/30 border-2 border-indigo-200 dark:border-indigo-800">
         <CardHeader>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
@@ -1084,10 +1084,10 @@ ${invoices.map(inv =>
             </div>
             <div className="flex-1">
               <CardTitle className="text-2xl flex items-center gap-2">
-                <Palette className="w-6 h-6 text-indigo-600" />
+                <Palette className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
                 Professional Invoice Templates
               </CardTitle>
-              <CardDescription className="text-gray-700">
+              <CardDescription className="text-gray-700 dark:text-gray-300">
                 Customize your invoice branding, colors, and layout for a professional appearance
               </CardDescription>
             </div>
@@ -1096,8 +1096,8 @@ ${invoices.map(inv =>
         <CardContent className="space-y-6">
           {/* Template Selector */}
           <div>
-            <label className="text-sm font-semibold text-gray-900 mb-3 block flex items-center gap-2">
-              <Layout className="w-4 h-4 text-indigo-600" />
+            <label className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 block flex items-center gap-2">
+              <Layout className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               Invoice Layout Template
             </label>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -1121,14 +1121,14 @@ ${invoices.map(inv =>
                   }}
                   className={`p-4 rounded-lg border-2 text-left transition-all ${
                     invoiceTemplate.layout === template.id
-                      ? `border-${template.color}-500 bg-${template.color}-50 shadow-md`
-                      : 'border-gray-200 hover:border-gray-300 bg-white'
+                      ? `border-${template.color}-500 bg-${template.color}-50 dark:bg-${template.color}-900/30 shadow-md`
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800/50'
                   }`}
                 >
-                  <div className="font-semibold text-gray-900">{template.name}</div>
-                  <div className="text-xs text-gray-600 mt-1">{template.desc}</div>
+                  <div className="font-semibold text-gray-900 dark:text-gray-100">{template.name}</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">{template.desc}</div>
                   {invoiceTemplate.layout === template.id && (
-                    <CheckCircle className="w-4 h-4 text-green-600 mt-2" />
+                    <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400 mt-2" />
                   )}
                 </button>
               ))}
@@ -1139,11 +1139,11 @@ ${invoices.map(inv =>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Logo Upload */}
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-indigo-600" />
+              <label className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 Business Logo
               </label>
-              <div className="border-2 border-dashed border-indigo-300 rounded-lg p-6 text-center hover:border-indigo-400 transition-colors bg-white">
+              <div className="border-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-lg p-6 text-center hover:border-indigo-400 dark:hover:border-indigo-600 transition-colors bg-white dark:bg-gray-800/50">
                 <input
                   type="file"
                   accept="image/*"
@@ -1170,8 +1170,8 @@ ${invoices.map(inv =>
                 />
                 <label htmlFor="logo-upload" className="cursor-pointer">
                   <Upload className="w-8 h-8 mx-auto text-indigo-400 mb-2" />
-                  <p className="text-sm text-gray-700 font-medium">Click to upload logo</p>
-                  <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 2MB</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">Click to upload logo</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">PNG, JPG up to 2MB</p>
                 </label>
                 {invoiceTemplate.logo && (
                   <div className="mt-3">
@@ -1197,13 +1197,13 @@ ${invoices.map(inv =>
 
             {/* Color Picker */}
             <div className="space-y-3">
-              <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <Palette className="w-4 h-4 text-indigo-600" />
+              <label className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <Palette className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 Brand Colors
               </label>
-              <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200">
+              <div className="space-y-3 bg-white dark:bg-gray-800/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Primary Color</label>
+                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Primary Color</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
@@ -1223,7 +1223,7 @@ ${invoices.map(inv =>
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-gray-700 mb-1 block">Secondary Color</label>
+                  <label className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Secondary Color</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="color"
@@ -1264,43 +1264,43 @@ ${invoices.map(inv =>
           {/* Header and Footer Text */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <Type className="w-4 h-4 text-indigo-600" />
+              <label className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <Type className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 Header Text
               </label>
               <Input
                 value={invoiceTemplate.headerText}
                 onChange={(e) => setInvoiceTemplate({ ...invoiceTemplate, headerText: e.target.value })}
                 placeholder="Your Business Name"
-                className="bg-white"
+                className="bg-white dark:bg-gray-800/50"
               />
-              <p className="text-xs text-gray-600">Appears at the top of every invoice</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Appears at the top of every invoice</p>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <Type className="w-4 h-4 text-indigo-600" />
+              <label className="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                <Type className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 Footer Text
               </label>
               <Textarea
                 value={invoiceTemplate.footerText}
                 onChange={(e) => setInvoiceTemplate({ ...invoiceTemplate, footerText: e.target.value })}
                 placeholder="Thank you for your business!"
-                className="bg-white"
+                className="bg-white dark:bg-gray-800/50"
                 rows={2}
               />
-              <p className="text-xs text-gray-600">Appears at the bottom of every invoice</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">Appears at the bottom of every invoice</p>
             </div>
           </div>
 
           {/* Tax Calculation */}
-          <div className="bg-white p-5 rounded-lg border-2 border-indigo-200 space-y-4">
-            <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-              <Percent className="w-5 h-5 text-indigo-600" />
+          <div className="bg-white dark:bg-gray-800/50 p-5 rounded-lg border-2 border-indigo-200 dark:border-indigo-800 space-y-4">
+            <h4 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <Percent className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               Tax Calculation
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Tax Type</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tax Type</label>
                 <select
                   value={invoiceTemplate.taxType}
                   onChange={(e) => {
@@ -1325,7 +1325,7 @@ ${invoices.map(inv =>
                       description: `${taxType === 'none' ? 'No tax' : taxType === 'sales' ? '8% Sales Tax' : taxType === 'vat' ? '20% VAT' : 'Custom rate'} - ${taxType === 'none' ? 'Tax disabled' : `${defaultRates[taxType]}% will be applied`}`
                     })
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-gray-800 dark:text-white"
                 >
                   <option value="none">No Tax</option>
                   <option value="sales">Sales Tax (8%)</option>
@@ -1335,7 +1335,7 @@ ${invoices.map(inv =>
               </div>
               {invoiceTemplate.taxType === 'custom' && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Tax Rate (%)</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tax Rate (%)</label>
                   <Input
                     type="number"
                     value={invoiceTemplate.taxRate}
@@ -1344,13 +1344,13 @@ ${invoices.map(inv =>
                     min="0"
                     max="100"
                     step="0.1"
-                    className="bg-white"
+                    className="bg-white dark:bg-gray-800/50"
                   />
                 </div>
               )}
             </div>
-            <div className="bg-indigo-50 p-3 rounded-md">
-              <p className="text-sm text-indigo-900">
+            <div className="bg-indigo-50 dark:bg-indigo-950/30 p-3 rounded-md">
+              <p className="text-sm text-indigo-900 dark:text-indigo-200">
                 💡 <strong>Tax Preview:</strong> For a $1,000 invoice, tax would be{' '}
                 <strong>${(1000 * invoiceTemplate.taxRate / 100).toFixed(2)}</strong>, total{' '}
                 <strong>${(1000 + 1000 * invoiceTemplate.taxRate / 100).toFixed(2)}</strong>
@@ -1359,9 +1359,9 @@ ${invoices.map(inv =>
           </div>
 
           {/* Payment Methods */}
-          <div className="bg-white p-5 rounded-lg border-2 border-indigo-200 space-y-4">
-            <h4 className="font-semibold text-gray-900 flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-indigo-600" />
+          <div className="bg-white dark:bg-gray-800/50 p-5 rounded-lg border-2 border-indigo-200 dark:border-indigo-800 space-y-4">
+            <h4 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <CreditCard className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               Accepted Payment Methods
             </h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -1400,31 +1400,31 @@ ${invoices.map(inv =>
                   }}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     invoiceTemplate.paymentMethods[method.key as keyof typeof invoiceTemplate.paymentMethods]
-                      ? `border-${method.color}-500 bg-${method.color}-50`
-                      : 'border-gray-200 bg-white hover:border-gray-300'
+                      ? `border-${method.color}-500 bg-${method.color}-50 dark:bg-${method.color}-900/30`
+                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 hover:border-gray-300 dark:hover:border-gray-600'
                   }`}
                 >
                   <method.icon className={`w-6 h-6 mx-auto mb-2 ${
                     invoiceTemplate.paymentMethods[method.key as keyof typeof invoiceTemplate.paymentMethods]
-                      ? `text-${method.color}-600`
+                      ? `text-${method.color}-600 dark:text-${method.color}-400`
                       : 'text-gray-400'
                   }`} />
-                  <div className="text-xs font-medium text-gray-900">{method.label}</div>
+                  <div className="text-xs font-medium text-gray-900 dark:text-gray-100">{method.label}</div>
                   {invoiceTemplate.paymentMethods[method.key as keyof typeof invoiceTemplate.paymentMethods] && (
-                    <CheckCircle className="w-4 h-4 text-green-600 mx-auto mt-2" />
+                    <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400 mx-auto mt-2" />
                   )}
                 </button>
               ))}
             </div>
-            <div className="bg-indigo-50 p-3 rounded-md">
-              <p className="text-sm text-indigo-900">
+            <div className="bg-indigo-50 dark:bg-indigo-950/30 p-3 rounded-md">
+              <p className="text-sm text-indigo-900 dark:text-indigo-200">
                 ✓ {Object.values(invoiceTemplate.paymentMethods).filter(Boolean).length} payment method{Object.values(invoiceTemplate.paymentMethods).filter(Boolean).length !== 1 ? 's' : ''} enabled - These will appear on your invoices
               </p>
             </div>
           </div>
 
           {/* Save Template Button */}
-          <div className="flex gap-3 pt-4 border-t border-indigo-200">
+          <div className="flex gap-3 pt-4 border-t border-indigo-200 dark:border-indigo-800">
             <Button
               className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
               onClick={() => {
@@ -1513,7 +1513,7 @@ ${invoices.map(inv =>
                     placeholder="Search invoices..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   />
                 </div>
                 <Button variant="outline" size="sm">
@@ -1526,7 +1526,7 @@ ${invoices.map(inv =>
             <TabsContent value="all" className="space-y-4">
               {/* Bulk Actions Toolbar - Appears when invoices are selected */}
               {selectedInvoices.length > 0 && (
-                <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
                   <div className="flex items-center gap-3">
                     <input
                       type="checkbox"
@@ -1538,12 +1538,12 @@ ${invoices.map(inv =>
                           setSelectedInvoices([])
                         }
                       }}
-                      className="w-4 h-4 rounded border-gray-300"
+                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600"
                     />
-                    <span className="text-sm font-medium text-blue-800">
+                    <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
                       {selectedInvoices.length} invoice{selectedInvoices.length !== 1 ? 's' : ''} selected
                     </span>
-                    <span className="text-sm text-blue-600">
+                    <span className="text-sm text-blue-600 dark:text-blue-400">
                       (${filteredInvoices.filter(inv => selectedInvoices.includes(inv.id)).reduce((sum, inv) => sum + inv.amount, 0).toLocaleString()} total)
                     </span>
                   </div>
@@ -1552,7 +1552,7 @@ ${invoices.map(inv =>
                       size="sm"
                       variant="outline"
                       onClick={() => handleBulkAction('send')}
-                      className="bg-white hover:bg-blue-50"
+                      className="bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/30"
                     >
                       Send All
                     </Button>
@@ -1560,7 +1560,7 @@ ${invoices.map(inv =>
                       size="sm"
                       variant="outline"
                       onClick={() => handleBulkAction('markPaid')}
-                      className="bg-white hover:bg-green-50 text-green-700"
+                      className="bg-white dark:bg-gray-800 hover:bg-green-50 dark:hover:bg-green-900/30 text-green-700 dark:text-green-400"
                     >
                       <CheckCircle className="h-4 w-4 mr-1" />
                       Mark as Paid
@@ -1569,7 +1569,7 @@ ${invoices.map(inv =>
                       size="sm"
                       variant="outline"
                       onClick={() => handleBulkAction('delete')}
-                      className="bg-white hover:bg-red-50 text-red-600"
+                      className="bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400"
                     >
                       <Trash2 className="h-4 w-4 mr-1" />
                       Delete
@@ -1604,8 +1604,8 @@ ${invoices.map(inv =>
                             }}
                             className="w-4 h-4 rounded border-gray-300"
                           />
-                          <div className="p-2 bg-blue-50 rounded-lg">
-                            <FileText className="h-6 w-6 text-blue-600" />
+                          <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                            <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                           </div>
                           <div>
                             <div className="flex items-center gap-2 mb-1">
@@ -1615,16 +1615,16 @@ ${invoices.map(inv =>
                                 <span className="ml-1 capitalize">{invoice.status}</span>
                               </Badge>
                             </div>
-                            <p className="text-gray-600 font-medium">{invoice.client}</p>
-                            <p className="text-sm text-gray-500">{invoice.project}</p>
-                            <p className="text-xs text-gray-400 mt-1">{invoice.description}</p>
+                            <p className="text-gray-600 dark:text-gray-300 font-medium">{invoice.client}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{invoice.project}</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{invoice.description}</p>
                           </div>
                         </div>
                         <div className="text-right">
                           <div className="text-2xl font-bold kazi-text-accent mb-1">
                             ${invoice.amount.toLocaleString()}
                           </div>
-                          <div className="text-sm text-gray-500 space-y-1">
+                          <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
                             <p>Issued: {invoice.issueDate}</p>
                             <p>Due: {invoice.dueDate}</p>
                           </div>
@@ -1762,13 +1762,13 @@ ${invoices.map(inv =>
               </div>
 
               {/* Client Info */}
-              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                 <div>
-                  <p className="text-sm text-gray-500">Client</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Client</p>
                   <p className="font-semibold">{viewInvoice.client}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
                   <p className="font-semibold">{viewInvoice.clientEmail}</p>
                 </div>
               </div>
@@ -1776,28 +1776,28 @@ ${invoices.map(inv =>
               {/* Project & Dates */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">Project</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Project</p>
                   <p className="font-semibold">{viewInvoice.project}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Description</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Description</p>
                   <p className="text-sm">{viewInvoice.description}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <p className="text-sm text-gray-500">Issue Date</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Issue Date</p>
                   <p className="font-medium">{viewInvoice.issueDate}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Due Date</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Due Date</p>
                   <p className="font-medium">{viewInvoice.dueDate}</p>
                 </div>
                 {viewInvoice.paidDate && (
                   <div>
-                    <p className="text-sm text-gray-500">Paid Date</p>
-                    <p className="font-medium text-green-600">{viewInvoice.paidDate}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Paid Date</p>
+                    <p className="font-medium text-green-600 dark:text-green-400">{viewInvoice.paidDate}</p>
                   </div>
                 )}
               </div>
@@ -1806,9 +1806,9 @@ ${invoices.map(inv =>
               {viewInvoice.items && viewInvoice.items.length > 0 && (
                 <div>
                   <p className="text-sm font-semibold mb-2">Line Items</p>
-                  <div className="border rounded-lg overflow-hidden">
+                  <div className="border dark:border-gray-700 rounded-lg overflow-hidden">
                     <table className="w-full text-sm">
-                      <thead className="bg-gray-50">
+                      <thead className="bg-gray-50 dark:bg-gray-800">
                         <tr>
                           <th className="px-3 py-2 text-left">Description</th>
                           <th className="px-3 py-2 text-right">Qty</th>
@@ -1818,7 +1818,7 @@ ${invoices.map(inv =>
                       </thead>
                       <tbody>
                         {viewInvoice.items.map((item: any, index: number) => (
-                          <tr key={index} className="border-t">
+                          <tr key={index} className="border-t dark:border-gray-700">
                             <td className="px-3 py-2">{item.description}</td>
                             <td className="px-3 py-2 text-right">{item.quantity}</td>
                             <td className="px-3 py-2 text-right">${item.rate}</td>
@@ -1826,8 +1826,8 @@ ${invoices.map(inv =>
                           </tr>
                         ))}
                       </tbody>
-                      <tfoot className="bg-gray-50 font-semibold">
-                        <tr className="border-t">
+                      <tfoot className="bg-gray-50 dark:bg-gray-800 font-semibold">
+                        <tr className="border-t dark:border-gray-700">
                           <td colSpan={3} className="px-3 py-2 text-right">Total</td>
                           <td className="px-3 py-2 text-right">${viewInvoice.amount.toLocaleString()}</td>
                         </tr>
