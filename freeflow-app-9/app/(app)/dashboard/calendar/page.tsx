@@ -1323,7 +1323,7 @@ export default function CalendarPage() {
   // ============================================================================
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           <CardSkeleton />
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -1344,7 +1344,7 @@ export default function CalendarPage() {
   // ============================================================================
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <div className="max-w-7xl mx-auto">
           <ErrorEmptyState
             error={error}
@@ -1363,7 +1363,7 @@ export default function CalendarPage() {
   // ============================================================================
   if (events.length === 0 && !isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <div className="max-w-7xl mx-auto">
           <NoDataEmptyState
             entityName="events"
@@ -1379,7 +1379,7 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">

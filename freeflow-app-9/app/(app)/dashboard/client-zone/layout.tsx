@@ -116,7 +116,7 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900">
       <div className="container mx-auto p-6 space-y-8">
         {/* ============================================================================
             HEADER SECTION (Lines 950-1048 from original)
@@ -298,7 +298,7 @@ export default function ClientZoneLayout({ children }: ClientZoneLayoutProps) {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            <Card className="bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-slate-800 dark:from-transparent/50 dark:via-indigo-950/50 dark:to-blue-950/50 border-purple-200 dark:border-purple-800">
+            <Card className="bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-slate-800 dark:from-transparent/50 dark:via-indigo-950/50 dark:to-blue-950/50 border-purple-200 dark:border-purple-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 dark:text-gray-100">
                   <Briefcase className="w-6 h-6 text-purple-600 dark:text-purple-400" />

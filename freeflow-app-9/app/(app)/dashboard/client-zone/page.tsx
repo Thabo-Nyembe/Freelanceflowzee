@@ -1014,7 +1014,7 @@ export default function ClientZonePage() {
   // A+++ LOADING STATE
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <div className="container mx-auto space-y-6">
           <CardSkeleton />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1031,7 +1031,7 @@ export default function ClientZonePage() {
   // A+++ ERROR STATE
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <div className="container mx-auto">
           <ErrorEmptyState
             error={error}
@@ -1043,7 +1043,7 @@ export default function ClientZonePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900">
       <div className="container mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -1219,7 +1219,7 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            <Card className="bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-slate-800 dark:from-transparent/30 dark:via-indigo-950/30 dark:to-blue-950/30 border-purple-200 dark:border-purple-800">
+            <Card className="bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-slate-800 dark:from-transparent/30 dark:via-indigo-950/30 dark:to-blue-950/30 border-purple-200 dark:border-purple-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Briefcase className="w-6 h-6 text-purple-600" />
