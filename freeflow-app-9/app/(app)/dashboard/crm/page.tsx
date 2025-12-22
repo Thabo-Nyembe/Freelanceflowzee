@@ -87,7 +87,15 @@ export default function CRMPage() {
   const [contacts, setContacts] = useState<any[]>([])
   const [deals, setDeals] = useState<any[]>([])
   const [activities, setActivities] = useState<any[]>([])
-  const [stats, setStats] = useState<any>(null)
+  const [stats, setStats] = useState<any>({
+    totalContacts: 0,
+    totalDeals: 0,
+    totalLeads: 0,
+    conversionRate: 0,
+    pipelineValue: 0,
+    wonDeals: 0,
+    lostDeals: 0
+  })
 
   // View Contact/Deal dialog states
   const [viewingContact, setViewingContact] = useState<any | null>(null)
