@@ -40,13 +40,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -419,7 +412,7 @@ const getCurrencyIcon = (currency: CryptoCurrency): string => {
 export default function CryptoPaymentsPage() {
   logger.debug('Component mounting')
 
-  const announce = useAnnouncer()
+  const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
 
   // State Management
@@ -1057,23 +1050,19 @@ export default function CryptoPaymentsPage() {
                   ))}
 
                   <span className="text-sm text-gray-400 ml-4">Sort:</span>
-                  <Select
+                  <select
                     value={state.sortBy}
-                    onValueChange={(value) => {
-                      logger.debug('Sort changed', { sortBy: value })
-                      dispatch({ type: 'SET_SORT', sortBy: value as any })
+                    onChange={(e) => {
+                      logger.debug('Sort changed', { sortBy: e.target.value })
+                      dispatch({ type: 'SET_SORT', sortBy: e.target.value as any })
                     }}
+                    className="w-[180px] px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
-                    <SelectTrigger className="w-[180px] bg-slate-900/50 border-gray-700">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="date">Date</SelectItem>
-                      <SelectItem value="amount">Amount</SelectItem>
-                      <SelectItem value="status">Status</SelectItem>
-                      <SelectItem value="confirmations">Confirmations</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <option value="date">Date</option>
+                    <option value="amount">Amount</option>
+                    <option value="status">Status</option>
+                    <option value="confirmations">Confirmations</option>
+                  </select>
                 </div>
               </LiquidGlassCard>
 
@@ -1319,21 +1308,20 @@ export default function CryptoPaymentsPage() {
 
                 <div>
                   <Label className="text-gray-300">Cryptocurrency</Label>
-                  <Select value={paymentCurrency} onValueChange={(value) => setPaymentCurrency(value as CryptoCurrency)}>
-                    <SelectTrigger className="bg-slate-800 border-gray-700">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="BTC">Bitcoin (BTC)</SelectItem>
-                      <SelectItem value="ETH">Ethereum (ETH)</SelectItem>
-                      <SelectItem value="USDT">Tether (USDT)</SelectItem>
-                      <SelectItem value="USDC">USD Coin (USDC)</SelectItem>
-                      <SelectItem value="BNB">Binance Coin (BNB)</SelectItem>
-                      <SelectItem value="SOL">Solana (SOL)</SelectItem>
-                      <SelectItem value="ADA">Cardano (ADA)</SelectItem>
-                      <SelectItem value="DOGE">Dogecoin (DOGE)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select
+                    value={paymentCurrency}
+                    onChange={(e) => setPaymentCurrency(e.target.value as CryptoCurrency)}
+                    className="w-full px-3 py-2 bg-slate-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="BTC">Bitcoin (BTC)</option>
+                    <option value="ETH">Ethereum (ETH)</option>
+                    <option value="USDT">Tether (USDT)</option>
+                    <option value="USDC">USD Coin (USDC)</option>
+                    <option value="BNB">Binance Coin (BNB)</option>
+                    <option value="SOL">Solana (SOL)</option>
+                    <option value="ADA">Cardano (ADA)</option>
+                    <option value="DOGE">Dogecoin (DOGE)</option>
+                  </select>
                 </div>
 
                 <div>
