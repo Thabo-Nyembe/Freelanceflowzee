@@ -94,7 +94,10 @@ export default function CRMPage() {
     conversionRate: 0,
     pipelineValue: 0,
     wonDeals: 0,
-    lostDeals: 0
+    lostDeals: 0,
+    revenueByMonth: [],
+    dealsByStage: [],
+    leadsByStatus: {}
   })
 
   // View Contact/Deal dialog states
