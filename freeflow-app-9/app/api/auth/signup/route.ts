@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
-// Initialize Supabase client
+// Initialize Supabase client for user creation
+// Using anon key for regular signUp flow (not admin)
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 )
 
 // Validation schema
@@ -22,14 +22,14 @@ const signupSchema = z.object({
  *
  * POST /api/auth/signup
  *
- * Creates a new user account with email/password authentication
+ * Creates a new user account using Supabase Auth
  *
  * @body email - User email address
  * @body password - User password (min 8 characters)
  * @body name - User full name
  * @body role - User role (optional, defaults to 'user')
  *
- * @returns User object (without password)
+ * @returns User object
  */
 export async function POST(request: NextRequest) {
   try {
@@ -50,60 +50,53 @@ export async function POST(request: NextRequest) {
 
     const { email, password, name, role } = validationResult.data
 
-    // Check if user already exists
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', email.toLowerCase())
-      .single()
+    // Create user with Supabase Auth (regular signUp flow)
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: email.toLowerCase(),
+      password: password,
+      options: {
+        data: {
+          name,
+          full_name: name,
+          role
+        }
+      }
+    })
 
-    if (existingUser) {
+    if (authError) {
+      console.error('Supabase Auth error:', authError)
+
+      // Handle specific errors
+      if (authError.message.includes('already registered')) {
+        return NextResponse.json(
+          { error: 'User with this email already exists' },
+          { status: 409 }
+        )
+      }
+
       return NextResponse.json(
-        { error: 'User with this email already exists' },
-        { status: 409 }
+        { error: authError.message || 'Failed to create user account' },
+        { status: 500 }
       )
     }
 
-    // Hash password
-    const saltRounds = 12
-    const passwordHash = await bcrypt.hash(password, saltRounds)
-
-    // Create user in database
-    const { data: newUser, error: insertError } = await supabase
-      .from('users')
-      .insert({
-        email: email.toLowerCase(),
-        password_hash: passwordHash,
-        name,
-        role,
-        email_verified: false, // Set to false initially
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .select('id, email, name, role, created_at')
-      .single()
-
-    if (insertError) {
-      console.error('Database insert error:', insertError)
+    if (!authData.user) {
       return NextResponse.json(
         { error: 'Failed to create user account' },
         { status: 500 }
       )
     }
 
-    // TODO: Send email verification email
-    // await sendVerificationEmail(newUser.email, newUser.id)
-
-    // Return success response (without password)
+    // Return success response
     return NextResponse.json(
       {
         success: true,
-        message: 'Account created successfully. Please check your email to verify your account.',
+        message: 'Account created successfully!',
         user: {
-          id: newUser.id,
-          email: newUser.email,
-          name: newUser.name,
-          role: newUser.role
+          id: authData.user.id,
+          email: authData.user.email,
+          name: name,
+          role: role
         }
       },
       { status: 201 }
