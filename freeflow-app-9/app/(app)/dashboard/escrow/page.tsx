@@ -20,7 +20,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { toast } from 'sonner'
 import { NumberFlow } from '@/components/ui/number-flow'
@@ -48,7 +47,8 @@ import {
   Trash2,
   RefreshCw,
   Star,
-  TrendingUp
+  TrendingUp,
+  Zap
 } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -1260,32 +1260,32 @@ export default function EscrowPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="currency">Currency</Label>
-                      <Select value={newDeposit.currency} onValueChange={(value) => setNewDeposit({...newDeposit, currency: value})}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="USD">USD ($)</SelectItem>
-                          <SelectItem value="EUR">EUR (€)</SelectItem>
-                          <SelectItem value="GBP">GBP (£)</SelectItem>
-                          <SelectItem value="CAD">CAD (C$)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <select
+                        id="currency"
+                        value={newDeposit.currency}
+                        onChange={(e) => setNewDeposit({...newDeposit, currency: e.target.value})}
+                        className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring dark:bg-gray-800 dark:border-gray-700"
+                      >
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="CAD">CAD (C$)</option>
+                      </select>
                     </div>
-                    
+
                     <div>
                       <Label htmlFor="paymentMethod">Payment Method</Label>
-                      <Select value={newDeposit.paymentMethod} onValueChange={(value) => setNewDeposit({...newDeposit, paymentMethod: value})}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="stripe">Stripe</SelectItem>
-                          <SelectItem value="paypal">PayPal</SelectItem>
-                          <SelectItem value="bank">Bank Transfer</SelectItem>
-                          <SelectItem value="crypto">Cryptocurrency</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <select
+                        id="paymentMethod"
+                        value={newDeposit.paymentMethod}
+                        onChange={(e) => setNewDeposit({...newDeposit, paymentMethod: e.target.value})}
+                        className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring dark:bg-gray-800 dark:border-gray-700"
+                      >
+                        <option value="stripe">Stripe</option>
+                        <option value="paypal">PayPal</option>
+                        <option value="bank">Bank Transfer</option>
+                        <option value="crypto">Cryptocurrency</option>
+                      </select>
                     </div>
                   </div>
                   
@@ -1686,18 +1686,17 @@ export default function EscrowPage() {
               </div>
               
               <div className="flex gap-2">
-                <Select value={state.filter} onValueChange={(value) => dispatch({ type: 'SET_FILTER', filter: value as EscrowState['filter'] })}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="disputed">Disputed</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select
+                  value={state.filter}
+                  onChange={(e) => dispatch({ type: 'SET_FILTER', filter: e.target.value as EscrowState['filter'] })}
+                  className="w-32 px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring dark:bg-gray-800 dark:border-gray-700"
+                >
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="active">Active</option>
+                  <option value="completed">Completed</option>
+                  <option value="disputed">Disputed</option>
+                </select>
               </div>
             </div>
 
