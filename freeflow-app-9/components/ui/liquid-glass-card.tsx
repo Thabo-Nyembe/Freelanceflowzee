@@ -22,18 +22,18 @@ export function LiquidGlassCard({
   const getVariantClasses = () => {
     switch (variant) {
       case 'gradient':
-        return 'bg-gradient-to-br from-white/40 via-white/30 to-white/20 dark:from-gray-800/80 dark:via-gray-800/60 dark:to-gray-900/50'
+        return 'bg-gradient-to-br from-white/40 via-white/30 to-white/20 dark:from-gray-800 dark:via-gray-800 dark:to-gray-900 dark:bg-gray-800'
       case 'tinted':
-        return 'bg-gradient-to-br from-blue-50/60 via-purple-50/40 to-pink-50/30 dark:from-gray-800/70 dark:via-gray-800/50 dark:to-gray-900/40'
+        return 'bg-gradient-to-br from-blue-50/60 via-purple-50/40 to-pink-50/30 dark:from-gray-800 dark:via-gray-800 dark:to-gray-900 dark:bg-gray-800'
       default:
-        return 'bg-white/30 dark:bg-gray-800/50'
+        return 'bg-white/30 dark:bg-gray-800'
     }
   }
 
   const baseClasses = cn(
     'relative overflow-hidden rounded-2xl',
     'backdrop-blur-xl backdrop-saturate-150',
-    'border border-white/20 dark:border-white/10',
+    'border border-white/20 dark:border-gray-700',
     'shadow-xl shadow-black/5 dark:shadow-black/20',
     getVariantClasses(),
     className
@@ -62,11 +62,11 @@ export function LiquidGlassCard({
   return (
     <CardComponent className={baseClasses} {...animationProps} {...hoverProps}>
       {/* Glass reflection effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-50 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-50 dark:opacity-10 pointer-events-none" />
 
       {/* Animated liquid blob (subtle) */}
       <motion.div
-        className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-to-br from-blue-400/10 via-purple-400/10 to-pink-400/10 dark:from-blue-400/5 dark:via-purple-400/5 dark:to-pink-400/5 rounded-full blur-3xl pointer-events-none"
+        className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-to-br from-blue-400/10 via-purple-400/10 to-pink-400/10 dark:from-blue-400/3 dark:via-purple-400/3 dark:to-pink-400/3 rounded-full blur-3xl pointer-events-none"
         animate={{
           x: [0, 30, 0],
           y: [0, -30, 0],
