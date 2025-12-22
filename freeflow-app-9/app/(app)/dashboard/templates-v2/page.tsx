@@ -1,26 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+'use client'
+
 import TemplatesClient from './templates-client'
 
-export const dynamic = 'force-dynamic'
-
-export default async function TemplatesPage() {
-  const supabase = createServerComponentClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  const { data: templates } = await supabase
-    .from('templates')
-    .select('*')
-    .eq('user_id', user.id)
-    .is('deleted_at', null)
-    .order('updated_at', { ascending: false })
-    .limit(100)
-
-  return <TemplatesClient initialTemplates={templates || []} />
+export default function Page() {
+  // Auth is handled by NextAuth middleware
+  // Data fetching is handled by the client component's hooks
+  return <TemplatesClient initialTemplates={[]} />
 }

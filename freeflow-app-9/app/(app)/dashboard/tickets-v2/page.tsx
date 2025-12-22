@@ -1,27 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+'use client'
+
 import TicketsClient from './tickets-client'
 
-export const dynamic = 'force-dynamic'
-
-export default async function TicketsPage() {
-  const supabase = createServerComponentClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  // Fetch tickets data
-  const { data: tickets } = await supabase
-    .from('support_tickets')
-    .select('*')
-    .eq('user_id', user.id)
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false })
-    .limit(50)
-
-  return <TicketsClient initialTickets={tickets || []} />
+export default function Page() {
+  // Auth is handled by NextAuth middleware
+  // Data fetching is handled by the client component's hooks
+  return <TicketsClient initialTickets={[]} />
 }

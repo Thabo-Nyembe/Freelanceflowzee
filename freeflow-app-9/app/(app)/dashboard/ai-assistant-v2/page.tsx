@@ -1,25 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+'use client'
+
 import AIAssistantClient from './ai-assistant-client'
 
-export const dynamic = 'force-dynamic'
-
-export default async function AIAssistantPage() {
-  const supabase = createServerComponentClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    redirect('/login')
-  }
-
-  const { data: conversations } = await supabase
-    .from('ai_conversations')
-    .select('*')
-    .eq('user_id', user.id)
-    .is('deleted_at', null)
-    .order('updated_at', { ascending: false })
-    .limit(50)
-
-  return <AIAssistantClient initialConversations={conversations || []} />
+export default function Page() {
+  // Auth is handled by NextAuth middleware
+  // Data fetching is handled by the client component's hooks
+  return <AIAssistantClient initialConversations={[]} />
 }

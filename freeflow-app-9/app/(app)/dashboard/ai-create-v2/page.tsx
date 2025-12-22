@@ -1,25 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+'use client'
+
 import AICreateClient from './ai-create-client'
 
-export const dynamic = 'force-dynamic'
-
-export default async function AICreatePage() {
-  const supabase = createServerComponentClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    redirect('/login')
-  }
-
-  const { data: generations } = await supabase
-    .from('ai_generations')
-    .select('*')
-    .eq('user_id', user.id)
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false })
-    .limit(100)
-
-  return <AICreateClient initialGenerations={generations || []} />
+export default function Page() {
+  // Auth is handled by NextAuth middleware
+  // Data fetching is handled by the client component's hooks
+  return <AICreateClient initialGenerations={[]} />
 }

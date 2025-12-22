@@ -1,21 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+'use client'
+
 import TimeTrackingClient from './time-tracking-client'
 
-export default async function TimeTrackingPage() {
-  const supabase = createServerComponentClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
-
-  const { data: timeEntries, error } = await supabase
-    .from('time_tracking')
-    .select('*')
-    .eq('user_id', user.id)
-    .is('deleted_at', null)
-    .order('start_time', { ascending: false })
-    .limit(50)
-
-  return <TimeTrackingClient initialTimeEntries={timeEntries || []} />
+export default function Page() {
+  // Auth is handled by NextAuth middleware
+  // Data fetching is handled by the client component's hooks
+  return <TimeTrackingClient initialTimeEntries={[]} />
 }

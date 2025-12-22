@@ -1,35 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+'use client'
+
 import MarketingClient from './marketing-client'
 
-export const dynamic = 'force-dynamic'
-
-export default async function MarketingV2Page() {
-  const supabase = createServerComponentClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  let campaigns: any[] = []
-  let channels: any[] = []
-
-  if (user) {
-    const [campaignsResult, channelsResult] = await Promise.all([
-      supabase
-        .from('marketing_campaigns')
-        .select('*')
-        .eq('user_id', user.id)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false }),
-      supabase
-        .from('marketing_channels')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('total_reach', { ascending: false })
-    ])
-
-    campaigns = campaignsResult.data || []
-    channels = channelsResult.data || []
-  }
-
-  return <MarketingClient initialCampaigns={campaigns} initialChannels={channels} />
+export default function Page() {
+  // Auth is handled by NextAuth middleware
+  // Data fetching is handled by the client component's hooks
+  return <MarketingClient initialCampaigns={[]} />
 }

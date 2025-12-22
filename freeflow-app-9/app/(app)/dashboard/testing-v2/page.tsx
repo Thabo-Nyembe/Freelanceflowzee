@@ -1,26 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+'use client'
+
 import TestingClient from './testing-client'
 
-export const dynamic = 'force-dynamic'
-
-export default async function TestingPage() {
-  const supabase = createServerComponentClient({ cookies })
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  // Fetch test runs data
-  const { data: runs } = await supabase
-    .from('test_runs')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('start_time', { ascending: false })
-    .limit(50)
-
-  return <TestingClient initialRuns={runs || []} />
+export default function Page() {
+  // Auth is handled by NextAuth middleware
+  // Data fetching is handled by the client component's hooks
+  return <TestingClient initialRuns={[]} />
 }

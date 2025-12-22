@@ -1,21 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+'use client'
+
 import CalendarClient from './calendar-client'
 
-export default async function CalendarPage() {
-  const supabase = createServerComponentClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
-
-  const { data: events, error } = await supabase
-    .from('calendar_events')
-    .select('*')
-    .eq('user_id', user.id)
-    .is('deleted_at', null)
-    .order('start_time', { ascending: true })
-    .limit(50)
-
-  return <CalendarClient initialEvents={events || []} />
+export default function Page() {
+  // Auth is handled by NextAuth middleware
+  // Data fetching is handled by the client component's hooks
+  return <CalendarClient initialEvents={[]} />
 }

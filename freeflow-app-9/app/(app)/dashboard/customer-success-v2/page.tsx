@@ -1,21 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+'use client'
+
 import CustomerSuccessClient from './customer-success-client'
 
-export default async function CustomerSuccessPage() {
-  const supabase = createServerComponentClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
-
-  const { data: customers, error } = await supabase
-    .from('customer_success')
-    .select('*')
-    .eq('user_id', user.id)
-    .is('deleted_at', null)
-    .order('health_score', { ascending: false })
-    .limit(50)
-
-  return <CustomerSuccessClient initialCustomers={customers || []} />
+export default function Page() {
+  // Auth is handled by NextAuth middleware
+  // Data fetching is handled by the client component's hooks
+  return <CustomerSuccessClient initialCustomers={[]} />
 }

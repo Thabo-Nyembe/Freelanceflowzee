@@ -1,27 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+'use client'
+
 import PerformanceClient from './performance-client'
 
-export default async function PerformancePage() {
-  const supabase = createServerComponentClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
-
-  const [reviewsResult] = await Promise.all([
-    supabase
-      .from('performance_reviews')
-      .select('*')
-      .eq('user_id', user.id)
-      .is('deleted_at', null)
-      .order('review_date', { ascending: false, nullsFirst: false })
-      .limit(50)
-  ])
-
-  return (
-    <PerformanceClient
-      initialReviews={reviewsResult.data || []}
-    />
-  )
+export default function Page() {
+  // Auth is handled by NextAuth middleware
+  // Data fetching is handled by the client component's hooks
+  return <PerformanceClient initialData={[]} />
 }

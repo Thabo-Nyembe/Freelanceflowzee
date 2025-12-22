@@ -1,36 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+'use client'
+
 import AssetsClient from './assets-client'
 
-export default async function AssetsPage() {
-  const supabase = createServerComponentClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
-
-  const [assetsResult, collectionsResult] = await Promise.all([
-    supabase
-      .from('digital_assets')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('status', 'active')
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
-      .limit(50),
-    supabase
-      .from('asset_collections')
-      .select('*')
-      .eq('user_id', user.id)
-      .is('deleted_at', null)
-      .order('sort_order', { ascending: true })
-      .limit(20)
-  ])
-
-  return (
-    <AssetsClient
-      initialAssets={assetsResult.data || []}
-      initialCollections={collectionsResult.data || []}
-    />
-  )
+export default function Page() {
+  // Auth is handled by NextAuth middleware
+  // Data fetching is handled by the client component's hooks
+  return <AssetsClient initialData={[]} />
 }

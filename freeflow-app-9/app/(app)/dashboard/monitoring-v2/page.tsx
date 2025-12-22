@@ -1,34 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+'use client'
+
 import MonitoringClient from './monitoring-client'
 
-export default async function MonitoringPage() {
-  const supabase = createServerComponentClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
-
-  const [serversResult, alertsResult] = await Promise.all([
-    supabase
-      .from('servers')
-      .select('*')
-      .eq('user_id', user.id)
-      .is('deleted_at', null)
-      .order('server_name', { ascending: true })
-      .limit(50),
-    supabase
-      .from('system_alerts')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(20)
-  ])
-
-  return (
-    <MonitoringClient
-      initialServers={serversResult.data || []}
-      initialAlerts={alertsResult.data || []}
-    />
-  )
+export default function Page() {
+  // Auth is handled by NextAuth middleware
+  // Data fetching is handled by the client component's hooks
+  return <MonitoringClient initialData={[]} />
 }

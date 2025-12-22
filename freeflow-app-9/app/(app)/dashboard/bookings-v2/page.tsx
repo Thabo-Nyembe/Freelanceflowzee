@@ -1,21 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+'use client'
+
 import BookingsClient from './bookings-client'
 
-export default async function BookingsPage() {
-  const supabase = createServerComponentClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
-
-  const { data: bookings, error } = await supabase
-    .from('bookings')
-    .select('*')
-    .eq('user_id', user.id)
-    .is('deleted_at', null)
-    .order('start_time', { ascending: false })
-    .limit(50)
-
-  return <BookingsClient initialBookings={bookings || []} />
+export default function Page() {
+  // Auth is handled by NextAuth middleware
+  // Data fetching is handled by the client component's hooks
+  return <BookingsClient initialBookings={[]} />
 }

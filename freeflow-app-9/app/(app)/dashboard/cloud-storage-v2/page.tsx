@@ -1,21 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+'use client'
+
 import CloudStorageClient from './cloud-storage-client'
 
-export default async function CloudStoragePage() {
-  const supabase = createServerComponentClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
-
-  const { data: files, error } = await supabase
-    .from('cloud_storage')
-    .select('*')
-    .eq('user_id', user.id)
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false })
-    .limit(50)
-
-  return <CloudStorageClient initialFiles={files || []} />
+export default function Page() {
+  // Auth is handled by NextAuth middleware
+  // Data fetching is handled by the client component's hooks
+  return <CloudStorageClient initialFiles={[]} />
 }

@@ -1,26 +1,9 @@
-// Performance Analytics V2 - Server Component
-// Created: December 14, 2024
+'use client'
 
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import PerformanceAnalyticsClient from './performance-analytics-client'
 
-export const metadata = { title: 'Performance Analytics | Dashboard', description: 'Monitor system performance metrics' }
-
-export default async function PerformanceAnalyticsPage() {
-  const supabase = createServerComponentClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: performanceAnalytics, error } = await supabase
-    .from('performance_analytics')
-    .select('*')
-    .eq('user_id', user.id)
-    .is('deleted_at', null)
-    .order('measured_at', { ascending: false })
-    .limit(50)
-
-  if (error) console.error('Error:', error)
-  return <PerformanceAnalyticsClient initialPerformanceAnalytics={performanceAnalytics || []} />
+export default function Page() {
+  // Auth is handled by NextAuth middleware
+  // Data fetching is handled by the client component's hooks
+  return <PerformanceAnalyticsClient initialPerformanceAnalytics={[]} />
 }
