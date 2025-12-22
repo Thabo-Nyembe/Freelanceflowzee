@@ -27,7 +27,7 @@ import { GlowEffect } from '@/components/ui/glow-effect'
 import { BorderTrail } from '@/components/ui/border-trail'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { OAuthProviders } from '@/components/auth/OAuthProviders'
-import { createClient } from '@/lib/supabase/client'
+import { signIn } from 'next-auth/react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -46,33 +46,32 @@ export default function LoginPage() {
     try {
       console.log('🔐 Starting login process...')
 
-      const supabase = createClient()
-
-      // Use Supabase Auth for login
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Use NextAuth for login (creates proper session for middleware)
+      const result = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
+        redirect: false, // Handle redirect manually
       })
 
-      console.log('📡 Login result:', { data, error })
+      console.log('📡 Login result:', result)
 
-      if (error) {
-        console.error('❌ Login error:', error.message)
-        throw new Error(error.message)
+      if (result?.error) {
+        console.error('❌ Login error:', result.error)
+        throw new Error(result.error === 'CredentialsSignin' ? 'Invalid email or password' : result.error)
       }
 
-      if (!data.user) {
-        console.error('❌ Login failed: no user returned')
+      if (!result?.ok) {
+        console.error('❌ Login failed')
         throw new Error('Invalid email or password')
       }
 
-      // Success! Session is now established
+      // Success! NextAuth session is now established
       console.log('✅ Login successful, redirecting to dashboard...')
       toast.success('Login successful!')
 
-      // Use window.location for hard navigation (ensures middleware sees session)
+      // Redirect to dashboard
       setTimeout(() => {
-        window.location.href = '/dashboard'
+        router.push('/dashboard')
       }, 500)
 
     } catch (error: any) {

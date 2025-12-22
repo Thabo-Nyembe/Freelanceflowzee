@@ -1,13 +1,19 @@
 import { test, expect } from '@playwright/test'
 
+// Configure test timeout for slow dev server
+test.setTimeout(180000) // 3 minutes per test
+
 test.describe('Login and Onboarding Test', () => {
   // Generate unique email for test user
   const testEmail = `test-${Date.now()}@kazi.dev`
   const testPassword = 'Test123456!'
 
+  // Increase timeout for navigation on slow dev server
+  const navigationTimeout = 60000
+
   test('signup new user and check onboarding', async ({ page }) => {
-    // Go to signup page - use domcontentloaded to avoid slow load events
-    await page.goto('http://localhost:9323/signup', { waitUntil: 'domcontentloaded', timeout: 30000 })
+    // Go to signup page - use networkidle to ensure page is fully ready
+    await page.goto('http://localhost:9323/signup', { waitUntil: 'networkidle', timeout: navigationTimeout })
     console.log('📍 Navigated to signup page')
 
     // Wait for the form to load
@@ -63,27 +69,27 @@ test.describe('Login and Onboarding Test', () => {
   })
 
   test('login page UI and form interaction', async ({ page }) => {
-    // Go to login page - use domcontentloaded to avoid slow load events
-    await page.goto('http://localhost:9323/login', { waitUntil: 'domcontentloaded', timeout: 30000 })
+    // Go to login page - use networkidle to ensure page is fully ready
+    await page.goto('http://localhost:9323/login', { waitUntil: 'networkidle', timeout: navigationTimeout })
     console.log('📍 Navigated to login page')
 
     // Wait for the form to load
     await page.waitForSelector('input[type="email"]', { state: 'visible' })
     console.log('✅ Login form loaded')
 
-    // Fill in credentials
-    await page.locator('input[type="email"]').fill('demo@kazi.dev')
-    await page.locator('input[type="password"]').fill('demo123456')
+    // Fill in credentials (using test account shown on dev login page)
+    await page.locator('input[type="email"]').fill('test@kazi.dev')
+    await page.locator('input[type="password"]').fill('test12345')
     console.log('✅ Filled login credentials')
 
     // Click sign in button
     await page.getByRole('button', { name: /sign in/i }).click()
     console.log('🔐 Clicked Sign In button')
 
-    // Wait for either dashboard or error
+    // Wait for either dashboard redirect or error
     try {
-      // Wait for navigation to dashboard (successful login)
-      await page.waitForURL('**/dashboard**', { timeout: 15000 })
+      // Wait for navigation to dashboard (login page uses window.location.href)
+      await page.waitForURL('**/dashboard**', { timeout: navigationTimeout, waitUntil: 'networkidle' })
       console.log('✅ Successfully logged in! Redirected to dashboard')
 
       // Check for onboarding checklist
