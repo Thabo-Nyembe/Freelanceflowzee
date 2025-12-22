@@ -29,13 +29,7 @@ import { Progress } from '@/components/ui/progress'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+// Note: Radix Select removed due to infinite loop bug - using native HTML select instead
 import {
   Dialog,
   DialogContent,
@@ -1150,54 +1144,42 @@ export default function AIVideoGenerationPage() {
                     </div>
 
                     {/* Status Filter */}
-                    <Select
+                    <select
                       value={state.filterStatus}
-                      onValueChange={(value) => dispatch({ type: 'SET_FILTER_STATUS', filterStatus: value as any })}
+                      onChange={(e) => dispatch({ type: 'SET_FILTER_STATUS', filterStatus: e.target.value as any })}
+                      className="w-full px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
-                      <SelectTrigger className="bg-slate-900/50 border-gray-700">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="generating">Generating</SelectItem>
-                        <SelectItem value="failed">Failed</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <option value="all">All Status</option>
+                      <option value="completed">Completed</option>
+                      <option value="generating">Generating</option>
+                      <option value="failed">Failed</option>
+                    </select>
 
                     {/* Quality Filter */}
-                    <Select
+                    <select
                       value={state.filterQuality}
-                      onValueChange={(value) => dispatch({ type: 'SET_FILTER_QUALITY', filterQuality: value as any })}
+                      onChange={(e) => dispatch({ type: 'SET_FILTER_QUALITY', filterQuality: e.target.value as any })}
+                      className="w-full px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
-                      <SelectTrigger className="bg-slate-900/50 border-gray-700">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Quality</SelectItem>
-                        <SelectItem value="sd">SD</SelectItem>
-                        <SelectItem value="hd">HD</SelectItem>
-                        <SelectItem value="full-hd">Full HD</SelectItem>
-                        <SelectItem value="4k">4K</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <option value="all">All Quality</option>
+                      <option value="sd">SD</option>
+                      <option value="hd">HD</option>
+                      <option value="full-hd">Full HD</option>
+                      <option value="4k">4K</option>
+                    </select>
 
                     {/* Sort */}
-                    <Select
+                    <select
                       value={state.sortBy}
-                      onValueChange={(value) => dispatch({ type: 'SET_SORT', sortBy: value as any })}
+                      onChange={(e) => dispatch({ type: 'SET_SORT', sortBy: e.target.value as any })}
+                      className="w-full px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                     >
-                      <SelectTrigger className="bg-slate-900/50 border-gray-700">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="date">Newest First</SelectItem>
-                        <SelectItem value="title">Title A-Z</SelectItem>
-                        <SelectItem value="duration">Duration</SelectItem>
-                        <SelectItem value="views">Most Viewed</SelectItem>
-                        <SelectItem value="downloads">Most Downloaded</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <option value="date">Newest First</option>
+                      <option value="title">Title A-Z</option>
+                      <option value="duration">Duration</option>
+                      <option value="views">Most Viewed</option>
+                      <option value="downloads">Most Downloaded</option>
+                    </select>
                   </div>
                 </LiquidGlassCard>
               </ScrollReveal>
@@ -1522,17 +1504,16 @@ export default function AIVideoGenerationPage() {
                 {/* AI Model */}
                 <div>
                   <Label className="text-white mb-2">AI Model</Label>
-                  <Select value={genModel} onValueChange={(value) => setGenModel(value as AIModel)}>
-                    <SelectTrigger className="bg-slate-900/50 border-gray-700">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="kazi-ai">KAZI AI (Fastest)</SelectItem>
-                      <SelectItem value="runway-gen3">Runway Gen-3</SelectItem>
-                      <SelectItem value="pika-labs">Pika Labs</SelectItem>
-                      <SelectItem value="stable-video">Stable Video</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select
+                    value={genModel}
+                    onChange={(e) => setGenModel(e.target.value as AIModel)}
+                    className="w-full px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="kazi-ai">KAZI AI (Fastest)</option>
+                    <option value="runway-gen3">Runway Gen-3</option>
+                    <option value="pika-labs">Pika Labs</option>
+                    <option value="stable-video">Stable Video</option>
+                  </select>
                 </div>
 
                 {/* Generate Button */}
