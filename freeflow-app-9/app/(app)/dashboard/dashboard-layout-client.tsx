@@ -29,7 +29,7 @@ export default function DashboardLayoutClient({
         enabled: true,
       }}
     >
-      <div className="flex h-screen overflow-hidden bg-white">
+      <div className="flex h-screen overflow-hidden bg-white dark:bg-gray-950">
         {/* Mobile Navigation */}
         <MobileAdminNav />
 
@@ -41,9 +41,9 @@ export default function DashboardLayoutClient({
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto pt-16 lg:pt-0 pb-16 lg:pb-0 scroll-smooth">
         {/* Mobile Header with Sidebar Toggle */}
-        <div className="lg:hidden sticky top-0 z-40 bg-white border-b px-4 py-3">
+        <div className="lg:hidden sticky top-0 z-40 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 px-4 py-3">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-black kazi-headline">KAZI</h1>
+            <h1 className="text-xl font-semibold text-black dark:text-white kazi-headline">KAZI</h1>
             {/* Mobile menu will be handled by MobileNav in global header */}
           </div>
         </div>

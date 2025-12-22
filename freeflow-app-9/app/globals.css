@@ -181,13 +181,88 @@ html.dark [class*="Card"] p {
   color: inherit !important;
 }
 
+/* ============================================
+   DARK MODE BACKGROUND FIXES
+   Main content area and cards should be dark
+   ============================================ */
+
+/* Fix main content area background */
+html.dark main,
+html.dark [class*="main"],
+html.dark .bg-white,
+html.dark .bg-gray-50,
+html.dark .bg-gray-100,
+html.dark .bg-slate-50,
+html.dark .bg-slate-100 {
+  background-color: rgb(17 24 39) !important; /* gray-900 */
+}
+
+/* Fix card backgrounds */
+html.dark [class*="Card"],
+html.dark .bg-card,
+html.dark .rounded-lg.border,
+html.dark .rounded-xl.border {
+  background-color: rgb(31 41 55) !important; /* gray-800 */
+  border-color: rgb(55 65 81) !important; /* gray-700 */
+}
+
+/* Fix nested card backgrounds */
+html.dark [class*="CardContent"],
+html.dark [class*="card-content"] {
+  background-color: transparent !important;
+}
+
+/* Fix container backgrounds */
+html.dark .bg-background {
+  background-color: rgb(17 24 39) !important;
+}
+
+/* Fix stat cards */
+html.dark .bg-gradient-to-br,
+html.dark [class*="gradient"] {
+  /* Keep gradients but ensure they're visible */
+}
+
+/* Fix tab panels */
+html.dark [role="tabpanel"] {
+  background-color: rgb(17 24 39) !important;
+}
+
+/* Fix input backgrounds */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: rgb(31 41 55) !important;
+  border-color: rgb(55 65 81) !important;
+  color: #ffffff !important;
+}
+
+/* Fix button backgrounds */
+html.dark .bg-gray-100,
+html.dark .bg-slate-100,
+html.dark .bg-neutral-100 {
+  background-color: rgb(55 65 81) !important;
+}
+
+/* Make sure page wrapper is dark */
+html.dark body {
+  background-color: rgb(17 24 39) !important;
+}
+
+/* Fix the LiquidGlassCard and similar components */
+html.dark [class*="glass"],
+html.dark [class*="Glass"] {
+  background-color: rgba(31, 41, 55, 0.8) !important;
+  backdrop-filter: blur(10px);
+}
+
 @layer base {
   * {
-    @apply border-neutral-200;
+    @apply border-neutral-200 dark:border-gray-800;
   }
 
   html {
-    @apply bg-white;
+    background-color: hsl(var(--background));
   }
 
   body {
@@ -195,6 +270,15 @@ html.dark [class*="Card"] p {
     color: hsl(var(--foreground));
     font-feature-settings: "rlig" 1, "calt" 1;
     min-height: 100vh;
+  }
+
+  /* Ensure dark mode backgrounds work */
+  html.dark {
+    background-color: rgb(3 7 18); /* gray-950 */
+  }
+
+  html.dark body {
+    background-color: rgb(3 7 18); /* gray-950 */
   }
 
   /* Ensure proper font rendering across all devices */
