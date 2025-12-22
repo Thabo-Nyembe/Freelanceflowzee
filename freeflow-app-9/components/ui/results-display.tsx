@@ -204,20 +204,22 @@ export function StatGrid({
  */
 export function ProgressCard({
   title,
-  current,
-  goal,
+  current = 0,
+  goal = 100,
   unit = "",
   icon,
   className,
 }: {
   title: string
-  current: number
-  goal: number
+  current?: number
+  goal?: number
   unit?: string
   icon?: ReactNode
   className?: string
 }) {
-  const percentage = Math.min((current / goal) * 100, 100)
+  const safeCurrentValue = current ?? 0
+  const safeGoalValue = goal ?? 100
+  const percentage = Math.min((safeCurrentValue / safeGoalValue) * 100, 100)
 
   return (
     <motion.div
@@ -237,11 +239,11 @@ export function ProgressCard({
       <div className="space-y-4">
         <div className="flex items-baseline gap-2">
           <div className="text-3xl font-bold">
-            {current.toLocaleString()}
+            {safeCurrentValue.toLocaleString()}
             {unit}
           </div>
           <div className="text-sm text-muted-foreground">
-            / {goal.toLocaleString()}
+            / {safeGoalValue.toLocaleString()}
             {unit}
           </div>
         </div>
