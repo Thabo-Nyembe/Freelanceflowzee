@@ -131,11 +131,17 @@ export default function UpcomingBookingsPage() {
 
   // Load bookings data from Supabase
   useEffect(() => {
-    const loadBookingsData = async () => {
-      if (!userId) return
+    // Wait for auth to complete before loading data
+    if (userLoading) return
 
+    // No user logged in - stop loading
+    if (!userId) {
+      setIsLoading(false)
+      return
+    }
+
+    const loadBookingsData = async () => {
       try {
-        setIsLoading(true)
         setError(null)
 
         logger.info('Loading bookings from Supabase', { userId })
@@ -192,7 +198,14 @@ export default function UpcomingBookingsPage() {
     }
 
     loadBookingsData()
-  }, [userId, announce])
+
+    // Failsafe timeout
+    const timeout = setTimeout(() => {
+      setIsLoading(false)
+    }, 10000)
+
+    return () => clearTimeout(timeout)
+  }, [userId, userLoading, announce])
 
   // Handler Functions
   const handleNewBooking = async () => {
