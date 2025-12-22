@@ -40,13 +40,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+// Native HTML select used instead of Radix Select to avoid infinite loop bug
 import {
   Dialog,
   DialogContent,
@@ -1054,27 +1048,23 @@ export default function VoiceCollaborationPage() {
                   ))}
 
                   <span className="text-sm text-gray-400 ml-4">Sort:</span>
-                  <Select
+                  <select
                     value={state.sortBy}
-                    onValueChange={(value) => {
+                    onChange={(e) => {
                       logger.debug('Sort order changed', {
                         previousSort: state.sortBy,
-                        newSort: value
+                        newSort: e.target.value
                       })
-                      dispatch({ type: 'SET_SORT', sortBy: value as any })
+                      dispatch({ type: 'SET_SORT', sortBy: e.target.value as any })
                     }}
+                    className="w-[180px] h-10 rounded-md border border-gray-700 bg-slate-900/50 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                   >
-                    <SelectTrigger className="w-[180px] bg-slate-900/50 border-gray-700">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="recent">Recent</SelectItem>
-                      <SelectItem value="name">Name</SelectItem>
-                      <SelectItem value="participants">Participants</SelectItem>
-                      <SelectItem value="capacity">Capacity</SelectItem>
-                      <SelectItem value="duration">Duration</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <option value="recent">Recent</option>
+                    <option value="name">Name</option>
+                    <option value="participants">Participants</option>
+                    <option value="capacity">Capacity</option>
+                    <option value="duration">Duration</option>
+                  </select>
                 </div>
               </LiquidGlassCard>
 
@@ -1468,35 +1458,33 @@ export default function VoiceCollaborationPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label className="text-gray-300">Room Type</Label>
-                    <Select value={roomType} onValueChange={(value) => setRoomType(value as RoomType)}>
-                      <SelectTrigger className="bg-slate-800 border-gray-700">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="team">Team</SelectItem>
-                        <SelectItem value="client">Client</SelectItem>
-                        <SelectItem value="public">Public</SelectItem>
-                        <SelectItem value="private">Private</SelectItem>
-                        <SelectItem value="project">Project</SelectItem>
-                        <SelectItem value="meeting">Meeting</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select
+                      value={roomType}
+                      onChange={(e) => setRoomType(e.target.value as RoomType)}
+                      className="w-full h-10 rounded-md border border-gray-700 bg-slate-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="team">Team</option>
+                      <option value="client">Client</option>
+                      <option value="public">Public</option>
+                      <option value="private">Private</option>
+                      <option value="project">Project</option>
+                      <option value="meeting">Meeting</option>
+                    </select>
                   </div>
 
                   <div>
                     <Label className="text-gray-300">Capacity</Label>
-                    <Select value={roomCapacity.toString()} onValueChange={(value) => setRoomCapacity(parseInt(value))}>
-                      <SelectTrigger className="bg-slate-800 border-gray-700">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="5">5 participants</SelectItem>
-                        <SelectItem value="10">10 participants</SelectItem>
-                        <SelectItem value="25">25 participants</SelectItem>
-                        <SelectItem value="50">50 participants</SelectItem>
-                        <SelectItem value="100">100 participants</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select
+                      value={roomCapacity.toString()}
+                      onChange={(e) => setRoomCapacity(parseInt(e.target.value))}
+                      className="w-full h-10 rounded-md border border-gray-700 bg-slate-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="5">5 participants</option>
+                      <option value="10">10 participants</option>
+                      <option value="25">25 participants</option>
+                      <option value="50">50 participants</option>
+                      <option value="100">100 participants</option>
+                    </select>
                   </div>
                 </div>
 
