@@ -1,24 +1,105 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { Music, Play, Pause, Download, RefreshCw, Sparkles, Mic, FileText, Clock, Zap, Settings2, Volume2, SkipBack, SkipForward, Loader2, Trash2, Heart, Share2 } from 'lucide-react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import {
+  Music, Play, Pause, Download, RefreshCw, Sparkles, Mic, FileText,
+  Clock, Zap, Settings2, Volume2, SkipBack, SkipForward, Loader2,
+  Trash2, Heart, Share2, Upload, Sliders, Wand2, ListMusic, Layers,
+  Save, FolderOpen, ChevronDown, Plus, X, Copy, Star, Crown,
+  Music2, Music3, Radio, Disc, Headphones, Speaker, Repeat, Shuffle,
+  MoreHorizontal, ExternalLink, FileAudio, Waves, BookmarkPlus, User
+} from 'lucide-react'
 import { useSunoMusic, type SunoModel, musicPresets, promptTemplates } from '@/lib/hooks/use-suno-music'
+
+const sunoModels: { value: SunoModel; label: string; badge?: string; description: string; quality: string }[] = [
+  { value: 'V5', label: 'Suno V5', badge: 'Latest', description: 'Best quality, studio sound', quality: 'Ultra' },
+  { value: 'V4_5PLUS', label: 'V4.5 Plus', badge: 'Premium', description: 'Enhanced vocal clarity', quality: 'High' },
+  { value: 'V4_5', label: 'V4.5', badge: 'Pro', description: 'Professional quality', quality: 'High' },
+  { value: 'V4', label: 'V4', badge: 'Fast', description: 'Quick & reliable', quality: 'Good' },
+  { value: 'V3_5', label: 'V3.5', badge: '', description: 'Classic sound', quality: 'Standard' }
+]
+
+const genres = [
+  { value: 'pop', label: 'Pop', emoji: '🎤', color: 'from-pink-500 to-rose-500' },
+  { value: 'electronic', label: 'Electronic', emoji: '🎧', color: 'from-cyan-500 to-blue-500' },
+  { value: 'hip-hop', label: 'Hip-Hop', emoji: '🎤', color: 'from-amber-500 to-orange-500' },
+  { value: 'rock', label: 'Rock', emoji: '🎸', color: 'from-red-500 to-rose-600' },
+  { value: 'jazz', label: 'Jazz', emoji: '🎷', color: 'from-indigo-500 to-purple-500' },
+  { value: 'classical', label: 'Classical', emoji: '🎻', color: 'from-yellow-500 to-amber-500' },
+  { value: 'lo-fi', label: 'Lo-Fi', emoji: '☕', color: 'from-violet-500 to-purple-600' },
+  { value: 'cinematic', label: 'Cinematic', emoji: '🎬', color: 'from-slate-600 to-gray-700' },
+  { value: 'ambient', label: 'Ambient', emoji: '🌌', color: 'from-teal-500 to-cyan-600' },
+  { value: 'r&b', label: 'R&B', emoji: '💫', color: 'from-fuchsia-500 to-pink-600' },
+  { value: 'country', label: 'Country', emoji: '🤠', color: 'from-orange-500 to-amber-600' },
+  { value: 'reggae', label: 'Reggae', emoji: '🏝️', color: 'from-green-500 to-emerald-600' }
+]
+
+const moods = [
+  { value: 'happy', label: 'Happy', emoji: '😊', description: 'Upbeat & joyful' },
+  { value: 'sad', label: 'Sad', emoji: '😢', description: 'Melancholic' },
+  { value: 'energetic', label: 'Energetic', emoji: '⚡', description: 'High energy' },
+  { value: 'calm', label: 'Calm', emoji: '🧘', description: 'Peaceful' },
+  { value: 'epic', label: 'Epic', emoji: '🏔️', description: 'Grand & dramatic' },
+  { value: 'romantic', label: 'Romantic', emoji: '💕', description: 'Love & passion' },
+  { value: 'dark', label: 'Dark', emoji: '🌙', description: 'Mysterious' },
+  { value: 'uplifting', label: 'Uplifting', emoji: '🌟', description: 'Inspiring' }
+]
+
+const durationOptions = [
+  { value: 30, label: '30s', description: 'Short clip' },
+  { value: 60, label: '1 min', description: 'Standard' },
+  { value: 120, label: '2 min', description: 'Full song' },
+  { value: 240, label: '4 min', description: 'Extended' },
+  { value: 480, label: '8 min', description: 'Maximum', premium: true }
+]
+
+const exportFormats = [
+  { value: 'mp3', label: 'MP3', description: 'Universal, smaller' },
+  { value: 'wav', label: 'WAV', description: 'Lossless, studio', premium: true },
+  { value: 'stems', label: 'Stems', description: '12 separate tracks', premium: true },
+  { value: 'midi', label: 'MIDI', description: 'For DAW editing', premium: true }
+]
+
+interface Persona {
+  id: string
+  name: string
+  genre: string
+  mood: string
+  style: string
+  description: string
+}
 
 export default function AIMusicStudio() {
   const [prompt, setPrompt] = useState('')
   const [title, setTitle] = useState('')
-  const [selectedModel, setSelectedModel] = useState<SunoModel>('V4')
+  const [selectedModel, setSelectedModel] = useState<SunoModel>('V5')
   const [selectedGenre, setSelectedGenre] = useState('')
   const [selectedMood, setSelectedMood] = useState('')
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([])
   const [isInstrumental, setIsInstrumental] = useState(false)
   const [customMode, setCustomMode] = useState(false)
   const [customLyrics, setCustomLyrics] = useState('')
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [showPersonas, setShowPersonas] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [volume, setVolume] = useState(1)
+  const [weirdness, setWeirdness] = useState(50)
+  const [targetDuration, setTargetDuration] = useState(120)
+  const [exportFormat, setExportFormat] = useState('mp3')
+  const [personas, setPersonas] = useState<Persona[]>([])
+  const [selectedPersona, setSelectedPersona] = useState<Persona | null>(null)
+  const [uploadedAudio, setUploadedAudio] = useState<string | null>(null)
+  const [showWaveform, setShowWaveform] = useState(true)
+  const [repeat, setRepeat] = useState(false)
+  const [shuffle, setShuffle] = useState(false)
+  const [activeTab, setActiveTab] = useState<'create' | 'extend' | 'remix' | 'vocals'>('create')
   const audioRef = useRef<HTMLAudioElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const analyserRef = useRef<AnalyserNode | null>(null)
+  const animationRef = useRef<number | null>(null)
 
   const {
     isGenerating,
@@ -35,6 +116,57 @@ export default function AIMusicStudio() {
     clearTracks
   } = useSunoMusic()
 
+  // Audio visualizer
+  useEffect(() => {
+    const audio = audioRef.current
+    const canvas = canvasRef.current
+    if (!audio || !canvas || !showWaveform) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)()
+      analyserRef.current = audioContextRef.current.createAnalyser()
+      const source = audioContextRef.current.createMediaElementSource(audio)
+      source.connect(analyserRef.current)
+      analyserRef.current.connect(audioContextRef.current.destination)
+      analyserRef.current.fftSize = 256
+    }
+
+    const analyser = analyserRef.current!
+    const bufferLength = analyser.frequencyBinCount
+    const dataArray = new Uint8Array(bufferLength)
+
+    const draw = () => {
+      animationRef.current = requestAnimationFrame(draw)
+      analyser.getByteFrequencyData(dataArray)
+
+      ctx.fillStyle = 'rgba(17, 24, 39, 0.2)'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      const barWidth = (canvas.width / bufferLength) * 2.5
+      let x = 0
+
+      for (let i = 0; i < bufferLength; i++) {
+        const barHeight = (dataArray[i] / 255) * canvas.height * 0.8
+
+        const gradient = ctx.createLinearGradient(0, canvas.height - barHeight, 0, canvas.height)
+        gradient.addColorStop(0, '#ec4899')
+        gradient.addColorStop(1, '#8b5cf6')
+        ctx.fillStyle = gradient
+
+        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight)
+        x += barWidth + 1
+      }
+    }
+
+    if (isPlaying) draw()
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current)
+    }
+  }, [isPlaying, showWaveform])
+
   // Audio player controls
   useEffect(() => {
     const audio = audioRef.current
@@ -42,7 +174,14 @@ export default function AIMusicStudio() {
 
     const updateTime = () => setCurrentTime(audio.currentTime)
     const updateDuration = () => setDuration(audio.duration)
-    const handleEnded = () => setIsPlaying(false)
+    const handleEnded = () => {
+      setIsPlaying(false)
+      if (repeat) {
+        audio.currentTime = 0
+        audio.play()
+        setIsPlaying(true)
+      }
+    }
 
     audio.addEventListener('timeupdate', updateTime)
     audio.addEventListener('loadedmetadata', updateDuration)
@@ -53,7 +192,7 @@ export default function AIMusicStudio() {
       audio.removeEventListener('loadedmetadata', updateDuration)
       audio.removeEventListener('ended', handleEnded)
     }
-  }, [currentTrack])
+  }, [currentTrack, repeat])
 
   const togglePlay = () => {
     const audio = audioRef.current
@@ -87,23 +226,39 @@ export default function AIMusicStudio() {
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  const toggleGenre = (genre: string) => {
+    setSelectedGenres(prev => {
+      if (prev.includes(genre)) return prev.filter(g => g !== genre)
+      if (prev.length >= 3) return prev
+      return [...prev, genre]
+    })
+  }
+
   const handleGenerate = async () => {
     if (!prompt.trim() && !customLyrics.trim()) return
 
     let finalPrompt = prompt
-    if (selectedGenre && selectedMood) {
-      finalPrompt = `${selectedMood} ${selectedGenre} song: ${prompt}`
-    } else if (selectedGenre) {
-      finalPrompt = `${selectedGenre} song: ${prompt}`
+    const genreStr = selectedGenres.length > 0 ? selectedGenres.join(' ') : selectedGenre
+    if (genreStr && selectedMood) {
+      finalPrompt = `${selectedMood} ${genreStr} song: ${prompt}`
+    } else if (genreStr) {
+      finalPrompt = `${genreStr} song: ${prompt}`
     } else if (selectedMood) {
       finalPrompt = `${selectedMood} song: ${prompt}`
+    }
+
+    // Add weirdness modifier
+    if (weirdness > 70) {
+      finalPrompt += ', experimental, unique, unconventional'
+    } else if (weirdness < 30) {
+      finalPrompt += ', traditional, familiar, classic structure'
     }
 
     await generateMusic({
       prompt: finalPrompt,
       model: selectedModel,
       customMode,
-      style: selectedGenre ? `${selectedMood} ${selectedGenre}`.trim() : undefined,
+      style: genreStr ? `${selectedMood} ${genreStr}`.trim() : undefined,
       title: title || undefined,
       instrumental: isInstrumental,
       lyrics: customMode ? customLyrics : undefined
@@ -111,7 +266,7 @@ export default function AIMusicStudio() {
   }
 
   const handleGenerateLyrics = async () => {
-    const lyricsPrompt = prompt || `Write lyrics for a ${selectedMood} ${selectedGenre} song`
+    const lyricsPrompt = prompt || `Write lyrics for a ${selectedMood} ${selectedGenres.join(' ')} song`
     const result = await generateLyrics({ prompt: lyricsPrompt })
     if (result) {
       setCustomLyrics(result.text)
@@ -125,115 +280,214 @@ export default function AIMusicStudio() {
     const downloadUrl = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = downloadUrl
-    a.download = `${filename}.mp3`
+    a.download = `${filename}.${exportFormat}`
     a.click()
     URL.revokeObjectURL(downloadUrl)
   }
 
-  const applyTemplate = (templateKey: keyof typeof promptTemplates) => {
-    let template = promptTemplates[templateKey]
-    if (selectedGenre) template = template.replace('{genre}', selectedGenre)
-    if (selectedMood) template = template.replace('{mood}', selectedMood)
-    setPrompt(template)
+  const savePersona = () => {
+    if (!currentTrack) return
+    const newPersona: Persona = {
+      id: Date.now().toString(),
+      name: title || `Persona ${personas.length + 1}`,
+      genre: selectedGenres.join(', ') || selectedGenre,
+      mood: selectedMood,
+      style: currentTrack.style || '',
+      description: prompt.slice(0, 100)
+    }
+    setPersonas(prev => [...prev, newPersona])
+  }
+
+  const applyPersona = (persona: Persona) => {
+    setSelectedPersona(persona)
+    if (persona.genre) {
+      const genreList = persona.genre.split(', ')
+      setSelectedGenres(genreList)
+    }
+    setSelectedMood(persona.mood)
+    setPrompt(persona.description)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-rose-600 via-pink-600 to-fuchsia-600 bg-clip-text text-transparent flex items-center gap-3">
-              <Music className="w-10 h-10 text-rose-600" />
-              AI Music Studio
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Powered by Suno - Create original music with AI
-            </p>
-          </div>
-          <div className="flex gap-2">
-            {musicPresets.models.map((model) => (
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900">
+      {/* Hero Header */}
+      <div className="bg-gradient-to-r from-rose-600 via-pink-600 to-fuchsia-600 text-white">
+        <div className="max-w-7xl mx-auto px-8 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                <Music className="w-8 h-8" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold flex items-center gap-2">
+                  AI Music Studio
+                  <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-medium">Pro</span>
+                </h1>
+                <p className="text-white/80 mt-1">Powered by Suno V5 - Create studio-quality music with AI</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
               <button
-                key={model.value}
-                onClick={() => setSelectedModel(model.value as SunoModel)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  selectedModel === model.value
-                    ? 'bg-rose-600 text-white shadow-lg'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
+                onClick={() => setShowPersonas(!showPersonas)}
+                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
               >
-                {model.label}
-                {model.badge && (
-                  <span className="ml-1 px-1.5 py-0.5 text-xs bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded">
-                    {model.badge}
-                  </span>
-                )}
+                <User className="w-5 h-5" />
+                Personas ({personas.length})
               </button>
+              <button className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl transition-colors">
+                <ListMusic className="w-5 h-5" />
+                Library ({tracks.length})
+              </button>
+            </div>
+          </div>
+
+          {/* Feature Pills */}
+          <div className="flex flex-wrap gap-2 mt-6">
+            {[
+              { icon: Waves, label: 'Studio 44.1kHz Audio' },
+              { icon: Layers, label: '12-Stem Export' },
+              { icon: Music2, label: 'MIDI Export' },
+              { icon: Radio, label: '1200+ Genres' },
+              { icon: User, label: 'Personas' },
+              { icon: Sliders, label: 'Weirdness Control' }
+            ].map((feature, i) => (
+              <div key={i} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 rounded-full text-sm">
+                <feature.icon className="w-4 h-4" />
+                {feature.label}
+              </div>
             ))}
           </div>
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-8 py-8">
+        {/* Tabs */}
+        <div className="flex items-center gap-2 mb-6">
+          {[
+            { id: 'create', label: 'Create', icon: Sparkles },
+            { id: 'extend', label: 'Extend', icon: Plus },
+            { id: 'remix', label: 'Remix', icon: RefreshCw },
+            { id: 'vocals', label: 'Vocal Separation', icon: Mic }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all ${
+                activeTab === tab.id
+                  ? 'bg-rose-600 text-white shadow-lg shadow-rose-500/25'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Input Panel */}
+          {/* Left Panel - Controls */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Genre & Mood Selection */}
+            {/* Model Selection */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Genre
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {musicPresets.genres.map((genre) => (
-                      <button
-                        key={genre.value}
-                        onClick={() => setSelectedGenre(selectedGenre === genre.value ? '' : genre.value)}
-                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                          selectedGenre === genre.value
-                            ? 'bg-rose-600 text-white shadow-md'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                        }`}
-                      >
-                        {genre.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Mood
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    {musicPresets.moods.map((mood) => (
-                      <button
-                        key={mood.value}
-                        onClick={() => setSelectedMood(selectedMood === mood.value ? '' : mood.value)}
-                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                          selectedMood === mood.value
-                            ? 'bg-pink-600 text-white shadow-md'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                        }`}
-                      >
-                        {mood.emoji} {mood.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+                <Zap className="w-4 h-4 text-rose-500" />
+                AI Model
+              </h3>
+              <div className="flex gap-2 flex-wrap">
+                {sunoModels.map((model) => (
+                  <button
+                    key={model.value}
+                    onClick={() => setSelectedModel(model.value)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all ${
+                      selectedModel === model.value
+                        ? 'bg-rose-600 text-white shadow-lg'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <span className="font-medium">{model.label}</span>
+                    {model.badge && (
+                      <span className={`px-1.5 py-0.5 text-xs rounded ${
+                        model.badge === 'Latest' ? 'bg-amber-400 text-amber-900' :
+                        model.badge === 'Premium' ? 'bg-violet-400 text-violet-900' :
+                        'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-300'
+                      }`}>
+                        {model.badge}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Genre Selection - Multi-select with Mashup */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <Music2 className="w-4 h-4 text-rose-500" />
+                  Genre
+                  {selectedGenres.length > 1 && (
+                    <span className="px-2 py-0.5 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 text-xs rounded-full">
+                      Mashup Mode
+                    </span>
+                  )}
+                </h3>
+                <span className="text-xs text-gray-400">Select up to 3 for mashup</span>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {genres.map((genre) => (
+                  <button
+                    key={genre.value}
+                    onClick={() => toggleGenre(genre.value)}
+                    className={`flex flex-col items-center gap-1 p-3 rounded-xl transition-all ${
+                      selectedGenres.includes(genre.value)
+                        ? `bg-gradient-to-br ${genre.color} text-white shadow-lg scale-105`
+                        : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <span className="text-xl">{genre.emoji}</span>
+                    <span className="text-xs font-medium">{genre.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Mood Selection */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
+              <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center gap-2">
+                <Heart className="w-4 h-4 text-rose-500" />
+                Mood
+              </h3>
+              <div className="grid grid-cols-4 gap-2">
+                {moods.map((mood) => (
+                  <button
+                    key={mood.value}
+                    onClick={() => setSelectedMood(selectedMood === mood.value ? '' : mood.value)}
+                    className={`flex flex-col items-center gap-1 p-3 rounded-xl transition-all ${
+                      selectedMood === mood.value
+                        ? 'bg-pink-600 text-white shadow-lg scale-105'
+                        : 'bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    <span className="text-xl">{mood.emoji}</span>
+                    <span className="text-xs font-medium">{mood.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
             {/* Prompt Input */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-              <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Describe your song
-                </label>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-rose-500" />
+                  Describe Your Song
+                </h3>
                 <div className="flex gap-2">
                   {Object.keys(promptTemplates).slice(0, 3).map((key) => (
                     <button
                       key={key}
-                      onClick={() => applyTemplate(key as keyof typeof promptTemplates)}
-                      className="text-xs px-2 py-1 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-full hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors capitalize"
+                      onClick={() => setPrompt(promptTemplates[key as keyof typeof promptTemplates].replace('{genre}', selectedGenres[0] || 'pop').replace('{mood}', selectedMood || 'upbeat'))}
+                      className="text-xs px-2 py-1 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full hover:bg-rose-100 dark:hover:bg-rose-900/50 transition-colors capitalize"
                     >
                       {key}
                     </button>
@@ -244,7 +498,7 @@ export default function AIMusicStudio() {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="An upbeat summer anthem with catchy hooks, perfect for driving with the windows down..."
-                className="w-full h-24 px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-xl resize-none focus:ring-2 focus:ring-rose-500 focus:border-transparent dark:text-white"
+                className="w-full h-24 px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-xl resize-none focus:ring-2 focus:ring-rose-500 focus:border-transparent dark:text-white text-sm"
               />
 
               <div className="flex items-center gap-4 mt-4">
@@ -253,7 +507,7 @@ export default function AIMusicStudio() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Song title (optional)"
-                  className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-xl dark:text-white"
+                  className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-xl dark:text-white text-sm"
                 />
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -267,17 +521,43 @@ export default function AIMusicStudio() {
               </div>
             </div>
 
+            {/* Weirdness Slider */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-rose-500" />
+                  Weirdness
+                </h3>
+                <span className="text-sm font-medium text-rose-600">{weirdness}%</span>
+              </div>
+              <div className="relative">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={weirdness}
+                  onChange={(e) => setWeirdness(Number(e.target.value))}
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer accent-rose-500"
+                />
+                <div className="flex justify-between mt-2 text-xs text-gray-500">
+                  <span>Traditional</span>
+                  <span>Balanced</span>
+                  <span>Experimental</span>
+                </div>
+              </div>
+            </div>
+
             {/* Custom Lyrics Mode */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
               <button
                 onClick={() => setCustomMode(!customMode)}
                 className="w-full px-6 py-4 flex items-center justify-between text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
               >
-                <span className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
+                <span className="flex items-center gap-2 font-medium">
+                  <Mic className="w-4 h-4 text-rose-500" />
                   Custom Lyrics Mode
                 </span>
-                <span className={`transform transition-transform ${customMode ? 'rotate-180' : ''}`}>▼</span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${customMode ? 'rotate-180' : ''}`} />
               </button>
               {customMode && (
                 <div className="px-6 pb-6 border-t border-gray-100 dark:border-gray-700">
@@ -295,9 +575,66 @@ export default function AIMusicStudio() {
                   <textarea
                     value={customLyrics}
                     onChange={(e) => setCustomLyrics(e.target.value)}
-                    placeholder="[Verse 1]&#10;Write your lyrics here...&#10;&#10;[Chorus]&#10;..."
+                    placeholder={`[Verse 1]\nWrite your lyrics here...\n\n[Chorus]\n...`}
                     className="w-full h-40 px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-xl resize-none focus:ring-2 focus:ring-rose-500 focus:border-transparent dark:text-white font-mono text-sm"
                   />
+                </div>
+              )}
+            </div>
+
+            {/* Advanced Settings */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
+              <button
+                onClick={() => setShowAdvanced(!showAdvanced)}
+                className="w-full px-6 py-4 flex items-center justify-between text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+              >
+                <span className="flex items-center gap-2 font-medium">
+                  <Settings2 className="w-4 h-4 text-rose-500" />
+                  Advanced Settings
+                </span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+              </button>
+              {showAdvanced && (
+                <div className="px-6 pb-6 space-y-4 border-t border-gray-100 dark:border-gray-700">
+                  <div className="pt-4">
+                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">Duration</label>
+                    <div className="flex gap-2">
+                      {durationOptions.map((opt) => (
+                        <button
+                          key={opt.value}
+                          onClick={() => setTargetDuration(opt.value)}
+                          className={`flex-1 p-2 rounded-lg text-xs text-center transition-all relative ${
+                            targetDuration === opt.value
+                              ? 'bg-rose-600 text-white'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          {opt.label}
+                          {opt.premium && <Crown className="w-3 h-3 absolute top-1 right-1 text-amber-400" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-gray-600 dark:text-gray-400 mb-2">Export Format</label>
+                    <div className="flex gap-2">
+                      {exportFormats.map((fmt) => (
+                        <button
+                          key={fmt.value}
+                          onClick={() => setExportFormat(fmt.value)}
+                          className={`flex-1 p-2 rounded-lg text-xs text-center transition-all relative ${
+                            exportFormat === fmt.value
+                              ? 'bg-rose-600 text-white'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          {fmt.label}
+                          {fmt.premium && <Crown className="w-3 h-3 absolute top-1 right-1 text-amber-400" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -306,7 +643,7 @@ export default function AIMusicStudio() {
             <button
               onClick={handleGenerate}
               disabled={isGenerating || (!prompt.trim() && !customLyrics.trim())}
-              className="w-full py-4 bg-gradient-to-r from-rose-600 via-pink-600 to-fuchsia-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
+              className="w-full py-4 bg-gradient-to-r from-rose-600 via-pink-600 to-fuchsia-600 text-white font-semibold rounded-2xl shadow-lg shadow-rose-500/25 hover:shadow-xl hover:shadow-rose-500/30 transform hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
             >
               {isGenerating ? (
                 <>
@@ -323,44 +660,54 @@ export default function AIMusicStudio() {
             </button>
 
             {error && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
                 {error.message}
               </div>
             )}
           </div>
 
-          {/* Player & Tracks Panel */}
+          {/* Right Panel - Player & Tracks */}
           <div className="space-y-6">
-            {/* Current Track Player */}
+            {/* Now Playing */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Now Playing</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-white">Now Playing</h3>
+                {currentTrack && (
+                  <button
+                    onClick={savePersona}
+                    className="text-xs px-2 py-1 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-md hover:bg-rose-100 transition-colors flex items-center gap-1"
+                  >
+                    <BookmarkPlus className="w-3 h-3" />
+                    Save as Persona
+                  </button>
+                )}
+              </div>
 
               {!currentTrack && !isGenerating && (
                 <div className="h-48 flex flex-col items-center justify-center text-gray-400">
-                  <Music className="w-16 h-16 mb-4 opacity-30" />
-                  <p>Your music will appear here</p>
+                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                    <Music className="w-8 h-8 opacity-40" />
+                  </div>
+                  <p className="text-sm">Your music will appear here</p>
                 </div>
               )}
 
               {isGenerating && (
                 <div className="h-48 flex flex-col items-center justify-center">
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 mb-4">
                     {[...Array(5)].map((_, i) => (
                       <div
                         key={i}
-                        className="w-2 bg-rose-500 rounded-full animate-pulse"
-                        style={{
-                          height: `${Math.random() * 40 + 20}px`,
-                          animationDelay: `${i * 0.1}s`
-                        }}
+                        className="w-2 bg-gradient-to-t from-rose-500 to-fuchsia-500 rounded-full animate-pulse"
+                        style={{ height: `${20 + Math.random() * 30}px`, animationDelay: `${i * 0.15}s` }}
                       />
                     ))}
                   </div>
-                  <p className="mt-6 text-gray-600 dark:text-gray-400">Creating your track...</p>
+                  <p className="text-gray-600 dark:text-gray-400 font-medium">Creating your track...</p>
                   {status?.progress && (
                     <div className="w-full mt-4 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                       <div
-                        className="bg-rose-600 h-2 rounded-full transition-all"
+                        className="bg-gradient-to-r from-rose-600 to-fuchsia-600 h-2 rounded-full transition-all"
                         style={{ width: `${status.progress}%` }}
                       />
                     </div>
@@ -370,25 +717,26 @@ export default function AIMusicStudio() {
 
               {currentTrack && (
                 <div className="space-y-4">
-                  {/* Track artwork */}
-                  {currentTrack.imageUrl && (
-                    <div className="relative aspect-square rounded-xl overflow-hidden">
-                      <img
-                        src={currentTrack.imageUrl}
-                        alt={currentTrack.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <h4 className="text-white font-bold text-lg truncate">{currentTrack.title}</h4>
-                        <p className="text-white/80 text-sm">{currentTrack.style}</p>
+                  {/* Album Art */}
+                  <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-rose-500 via-pink-500 to-fuchsia-500">
+                    {currentTrack.imageUrl ? (
+                      <img src={currentTrack.imageUrl} alt={currentTrack.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Music className="w-20 h-20 text-white/50" />
                       </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <h4 className="text-white font-bold text-xl truncate">{currentTrack.title}</h4>
+                      <p className="text-white/70 text-sm">{currentTrack.style || selectedGenres.join(', ')}</p>
                     </div>
-                  )}
+                  </div>
 
-                  {!currentTrack.imageUrl && (
-                    <div className="aspect-square rounded-xl bg-gradient-to-br from-rose-500 to-fuchsia-500 flex items-center justify-center">
-                      <Music className="w-20 h-20 text-white/80" />
+                  {/* Waveform */}
+                  {showWaveform && (
+                    <div className="h-16 bg-gray-900 rounded-lg overflow-hidden">
+                      <canvas ref={canvasRef} className="w-full h-full" width={300} height={64} />
                     </div>
                   )}
 
@@ -403,7 +751,7 @@ export default function AIMusicStudio() {
                       max={duration || 100}
                       value={currentTime}
                       onChange={handleSeek}
-                      className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer"
+                      className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer accent-rose-500"
                     />
                     <div className="flex justify-between text-xs text-gray-500">
                       <span>{formatTime(currentTime)}</span>
@@ -412,18 +760,30 @@ export default function AIMusicStudio() {
                   </div>
 
                   {/* Controls */}
-                  <div className="flex items-center justify-center gap-4">
+                  <div className="flex items-center justify-center gap-3">
+                    <button
+                      onClick={() => setShuffle(!shuffle)}
+                      className={`p-2 rounded-lg transition-colors ${shuffle ? 'text-rose-500' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                      <Shuffle className="w-4 h-4" />
+                    </button>
                     <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors">
                       <SkipBack className="w-5 h-5" />
                     </button>
                     <button
                       onClick={togglePlay}
-                      className="p-4 bg-rose-600 text-white rounded-full hover:bg-rose-700 transition-colors shadow-lg"
+                      className="p-4 bg-gradient-to-r from-rose-600 to-fuchsia-600 text-white rounded-full hover:shadow-lg hover:scale-105 transition-all"
                     >
                       {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
                     </button>
                     <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors">
                       <SkipForward className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => setRepeat(!repeat)}
+                      className={`p-2 rounded-lg transition-colors ${repeat ? 'text-rose-500' : 'text-gray-400 hover:text-gray-600'}`}
+                    >
+                      <Repeat className="w-4 h-4" />
                     </button>
                   </div>
 
@@ -437,33 +797,68 @@ export default function AIMusicStudio() {
                       step="0.1"
                       value={volume}
                       onChange={handleVolumeChange}
-                      className="flex-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer"
+                      className="flex-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer accent-rose-500"
                     />
                   </div>
 
                   {/* Actions */}
-                  <div className="flex justify-center gap-2 pt-2">
+                  <div className="grid grid-cols-4 gap-2">
                     <button
                       onClick={() => handleDownload(currentTrack.audioUrl, currentTrack.title)}
-                      className="flex items-center gap-1 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                      className="flex flex-col items-center gap-1 p-3 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                     >
-                      <Download className="w-4 h-4" />
-                      Download
+                      <Download className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Download</span>
                     </button>
-                    <button className="flex items-center gap-1 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                      <Heart className="w-4 h-4" />
-                      Save
+                    <button className="flex flex-col items-center gap-1 p-3 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                      <Heart className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Save</span>
                     </button>
-                    <button className="flex items-center gap-1 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                      <Share2 className="w-4 h-4" />
-                      Share
+                    <button className="flex flex-col items-center gap-1 p-3 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                      <Share2 className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Share</span>
+                    </button>
+                    <button
+                      onClick={() => extendMusic({ audioId: currentTrack.id })}
+                      className="flex flex-col items-center gap-1 p-3 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                    >
+                      <Plus className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                      <span className="text-xs text-gray-600 dark:text-gray-400">Extend</span>
                     </button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Track History */}
+            {/* Personas */}
+            {showPersonas && personas.length > 0 && (
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Your Personas</h3>
+                <div className="space-y-2">
+                  {personas.map((persona) => (
+                    <button
+                      key={persona.id}
+                      onClick={() => applyPersona(persona)}
+                      className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${
+                        selectedPersona?.id === persona.id
+                          ? 'bg-rose-50 dark:bg-rose-900/30 border-2 border-rose-500'
+                          : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500 to-fuchsia-500 flex items-center justify-center">
+                        <User className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <p className="font-medium dark:text-white">{persona.name}</p>
+                        <p className="text-xs text-gray-500">{persona.genre} • {persona.mood}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Track Library */}
             {tracks.length > 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-4">
@@ -489,19 +884,19 @@ export default function AIMusicStudio() {
                       }}
                       className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${
                         currentTrack?.id === track.id
-                          ? 'bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800'
+                          ? 'bg-rose-50 dark:bg-rose-900/30 border border-rose-200 dark:border-rose-800'
                           : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
                       }`}
                     >
                       {track.imageUrl ? (
-                        <img src={track.imageUrl} alt={track.title} className="w-10 h-10 rounded-lg object-cover" />
+                        <img src={track.imageUrl} alt={track.title} className="w-12 h-12 rounded-lg object-cover" />
                       ) : (
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-rose-500 to-fuchsia-500 flex items-center justify-center">
-                          <Music className="w-5 h-5 text-white" />
+                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-rose-500 to-fuchsia-500 flex items-center justify-center">
+                          <Music className="w-6 h-6 text-white" />
                         </div>
                       )}
                       <div className="flex-1 text-left">
-                        <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{track.title}</p>
+                        <p className="font-medium dark:text-white truncate">{track.title}</p>
                         <p className="text-xs text-gray-500">{track.style || track.model}</p>
                       </div>
                       <Play className="w-4 h-4 text-gray-400" />
