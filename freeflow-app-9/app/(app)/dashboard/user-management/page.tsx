@@ -55,7 +55,13 @@ export default function UserManagementPage() {
 
   // DATABASE STATE
   const [users, setUsers] = useState<User[]>([])
-  const [userStats, setUserStats] = useState<any>(null)
+  const [userStats, setUserStats] = useState<any>({
+    totalUsers: 0,
+    activeUsers: 0,
+    newUsersThisWeek: 0,
+    newUsersThisMonth: 0,
+    byRole: { owner: 0, admin: 0, manager: 0, member: 0 }
+  })
   const [invitations, setInvitations] = useState<any[]>([])
   const [activities, setActivities] = useState<any[]>([])
   const [departments, setDepartments] = useState<any[]>([])
