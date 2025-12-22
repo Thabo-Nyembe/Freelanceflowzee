@@ -20,13 +20,14 @@ export function LiquidGlassCard({
   hoverEffect = true
 }: LiquidGlassCardProps) {
   const getVariantClasses = () => {
+    // In dark mode, we use solid backgrounds instead of gradients
     switch (variant) {
       case 'gradient':
-        return 'bg-gradient-to-br from-white/40 via-white/30 to-white/20 dark:from-gray-800 dark:via-gray-800 dark:to-gray-900 dark:bg-gray-800'
+        return 'bg-white/40 dark:!bg-slate-800/90'
       case 'tinted':
-        return 'bg-gradient-to-br from-blue-50/60 via-purple-50/40 to-pink-50/30 dark:from-gray-800 dark:via-gray-800 dark:to-gray-900 dark:bg-gray-800'
+        return 'bg-blue-50/60 dark:!bg-slate-800/90'
       default:
-        return 'bg-white/30 dark:bg-gray-800'
+        return 'bg-white/30 dark:!bg-slate-800/90'
     }
   }
 
