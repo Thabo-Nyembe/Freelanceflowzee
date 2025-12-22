@@ -239,7 +239,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-500">
+                  <span className="text-sm text-gray-500" suppressHydrationWarning>
                     Updated: {lastUpdated.toLocaleTimeString()}
                   </span>
 
