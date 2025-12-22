@@ -15,7 +15,6 @@ import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { TextShimmer } from '@/components/ui/text-shimmer'
-import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import {
   UserCheck,
   FolderOpen,
@@ -1153,19 +1152,15 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0 }}
           >
-            <LiquidGlassCard variant="gradient" hoverEffect={true} className="relative overflow-hidden">
-              <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                
-                
-              </div>
-              <div className="p-6 text-center relative z-10">
-                <div className="inline-flex p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 dark:from-blue-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm mb-4">
+            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border-blue-200 dark:border-blue-800 hover:shadow-lg transition-shadow">
+              <div className="p-6 text-center">
+                <div className="inline-flex p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 dark:from-blue-500/20 dark:to-indigo-500/20 rounded-xl mb-4">
                   <FolderOpen className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                 </div>
                 <NumberFlow value={dashboardData?.activeProjects || projects.filter(p => p.status === 'active').length || 0} className="text-2xl font-bold text-blue-600 dark:text-blue-400 block" />
                 <p className="text-gray-600 dark:text-gray-400">Active Projects</p>
               </div>
-            </LiquidGlassCard>
+            </Card>
           </motion.div>
 
           <motion.div
@@ -1173,19 +1168,15 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <LiquidGlassCard variant="tinted" hoverEffect={true} className="relative overflow-hidden">
-              <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                
-                
-              </div>
-              <div className="p-6 text-center relative z-10">
-                <div className="inline-flex p-3 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 dark:from-emerald-400/10 dark:to-teal-400/10 rounded-xl backdrop-blur-sm mb-4">
+            <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 border-emerald-200 dark:border-emerald-800 hover:shadow-lg transition-shadow">
+              <div className="p-6 text-center">
+                <div className="inline-flex p-3 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 dark:from-emerald-500/20 dark:to-teal-500/20 rounded-xl mb-4">
                   <CheckCircle className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <NumberFlow value={dashboardData?.completedProjects || projects.filter(p => p.status === 'completed').length || 0} className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 block" />
                 <p className="text-gray-600 dark:text-gray-400">Completed</p>
               </div>
-            </LiquidGlassCard>
+            </Card>
           </motion.div>
 
           <motion.div
@@ -1193,19 +1184,15 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <LiquidGlassCard variant="gradient" hoverEffect={true} className="relative overflow-hidden">
-              <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                
-                
-              </div>
-              <div className="p-6 text-center relative z-10">
-                <div className="inline-flex p-3 bg-gradient-to-br from-purple-400/20 to-indigo-400/20 dark:from-purple-400/10 dark:to-indigo-400/10 rounded-xl backdrop-blur-sm mb-4">
+            <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 border-purple-200 dark:border-purple-800 hover:shadow-lg transition-shadow">
+              <div className="p-6 text-center">
+                <div className="inline-flex p-3 bg-gradient-to-br from-purple-400/20 to-indigo-400/20 dark:from-purple-500/20 dark:to-indigo-500/20 rounded-xl mb-4">
                   <DollarSign className="h-8 w-8 text-purple-600 dark:text-purple-400" />
                 </div>
                 <NumberFlow value={dashboardData?.totalInvestment || 0} format="currency" className="text-2xl font-bold text-purple-600 dark:text-purple-400 block" />
                 <p className="text-gray-600 dark:text-gray-400">Total Investment</p>
               </div>
-            </LiquidGlassCard>
+            </Card>
           </motion.div>
 
           <motion.div
@@ -1213,19 +1200,15 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <LiquidGlassCard variant="tinted" hoverEffect={true} className="relative overflow-hidden">
-              <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                
-                
-              </div>
-              <div className="p-6 text-center relative z-10">
-                <div className="inline-flex p-3 bg-gradient-to-br from-amber-400/20 to-yellow-400/20 dark:from-amber-400/10 dark:to-yellow-400/10 rounded-xl backdrop-blur-sm mb-4">
+            <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30 border-amber-200 dark:border-amber-800 hover:shadow-lg transition-shadow">
+              <div className="p-6 text-center">
+                <div className="inline-flex p-3 bg-gradient-to-br from-amber-400/20 to-yellow-400/20 dark:from-amber-500/20 dark:to-yellow-500/20 rounded-xl mb-4">
                   <Star className="h-8 w-8 text-amber-600 dark:text-amber-400" />
                 </div>
                 <NumberFlow value={parseFloat(dashboardData?.satisfaction || '0')} decimals={1} className="text-2xl font-bold text-amber-600 dark:text-amber-400 block" />
                 <p className="text-gray-600 dark:text-gray-400">Satisfaction Rating</p>
               </div>
-            </LiquidGlassCard>
+            </Card>
           </motion.div>
         </div>
 

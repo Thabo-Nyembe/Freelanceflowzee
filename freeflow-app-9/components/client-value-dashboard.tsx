@@ -29,13 +29,6 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import {
   Tooltip,
@@ -248,18 +241,17 @@ Avg Response Time,${metrics.avgResponseTime} hours
         </div>
 
         <div className="flex items-center gap-3">
-          <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all-time">All Time</SelectItem>
-              <SelectItem value="this-year">This Year</SelectItem>
-              <SelectItem value="this-quarter">This Quarter</SelectItem>
-              <SelectItem value="this-month">This Month</SelectItem>
-              <SelectItem value="last-30-days">Last 30 Days</SelectItem>
-            </SelectContent>
-          </Select>
+          <select
+            value={dateRange}
+            onChange={(e) => setDateRange(e.target.value)}
+            className="w-[180px] h-10 px-3 py-2 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all-time">All Time</option>
+            <option value="this-year">This Year</option>
+            <option value="this-quarter">This Quarter</option>
+            <option value="this-month">This Month</option>
+            <option value="last-30-days">Last 30 Days</option>
+          </select>
 
           <Button variant="outline" onClick={exportReport}>
             <Download className="mr-2 h-4 w-4" />
