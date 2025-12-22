@@ -93,8 +93,14 @@ export default function AnalyticsOverviewPage() {
 
   useEffect(() => {
     const loadAnalyticsData = async () => {
-      if (!userId) {
+      if (userLoading) {
         logger.info('Waiting for user authentication')
+        return // Keep loading state while auth is loading
+      }
+
+      if (!userId) {
+        logger.info('No user found, stopping load')
+        setIsLoading(false)
         return
       }
 
@@ -172,7 +178,7 @@ export default function AnalyticsOverviewPage() {
     }
 
     loadAnalyticsData()
-  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, userLoading, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // FILTERED DATA
   const filteredCategories = useMemo(() => {
@@ -350,7 +356,7 @@ export default function AnalyticsOverviewPage() {
           <select
             value={dateRange}
             onChange={handleDateRangeChange}
-            className="px-3 py-2 border border-gray-300 rounded-md bg-white text-sm"
+            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100"
             data-testid="date-range-filter"
           >
             <option value="last-7-days">Last 7 Days</option>
@@ -459,18 +465,18 @@ export default function AnalyticsOverviewPage() {
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Total Revenue</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Revenue</p>
                   <NumberFlow
                     value={analyticsData.overview.monthlyRevenue}
                     format="currency"
-                    className="text-3xl font-bold text-gray-900"
+                    className="text-3xl font-bold text-gray-900 dark:text-gray-100"
                   />
-                  <p className="text-sm text-green-600 font-medium">
+                  <p className="text-sm text-green-600 dark:text-green-400 font-medium">
                     +<NumberFlow value={analyticsData.overview.revenueGrowth} decimals={1} className="inline-block" />% from last month
                   </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-green-400/20 to-emerald-400/20 rounded-xl backdrop-blur-sm">
-                  <DollarSign className="h-6 w-6 text-green-600" />
+                  <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
                 </div>
               </div>
             </div>
@@ -486,17 +492,17 @@ export default function AnalyticsOverviewPage() {
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Active Projects</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Active Projects</p>
                   <NumberFlow
                     value={analyticsData.overview.activeProjects}
-                    className="text-3xl font-bold text-gray-900"
+                    className="text-3xl font-bold text-gray-900 dark:text-gray-100"
                   />
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     <NumberFlow value={analyticsData.overview.totalProjects} className="inline-block" /> total projects
                   </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-xl backdrop-blur-sm">
-                  <FolderOpen className="h-6 w-6 text-blue-600" />
+                  <FolderOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
             </div>
@@ -512,17 +518,17 @@ export default function AnalyticsOverviewPage() {
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Total Clients</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Clients</p>
                   <NumberFlow
                     value={analyticsData.overview.totalClients}
-                    className="text-3xl font-bold text-gray-900"
+                    className="text-3xl font-bold text-gray-900 dark:text-gray-100"
                   />
-                  <p className="text-sm text-blue-600 font-medium">
+                  <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
                     <NumberFlow value={analyticsData.overview.newClients} className="inline-block" /> new this month
                   </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-xl backdrop-blur-sm">
-                  <Users className="h-6 w-6 text-purple-600" />
+                  <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
               </div>
             </div>
@@ -538,20 +544,20 @@ export default function AnalyticsOverviewPage() {
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-700">Efficiency</p>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Efficiency</p>
                   <div className="flex items-baseline">
                     <NumberFlow
                       value={analyticsData.overview.efficiency}
-                      className="text-3xl font-bold text-gray-900"
+                      className="text-3xl font-bold text-gray-900 dark:text-gray-100"
                     />
-                    <span className="text-3xl font-bold text-gray-900">%</span>
+                    <span className="text-3xl font-bold text-gray-900 dark:text-gray-100">%</span>
                   </div>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     <NumberFlow value={analyticsData.overview.billableHours} className="inline-block" />h billable
                   </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-orange-400/20 to-amber-400/20 rounded-xl backdrop-blur-sm">
-                  <TrendingUp className="h-6 w-6 text-orange-600" />
+                  <TrendingUp className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                 </div>
               </div>
             </div>
@@ -566,14 +572,14 @@ export default function AnalyticsOverviewPage() {
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
         >
-          <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+          <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-800">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="w-5 h-5 text-blue-600" />
+              <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+                <Brain className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 <TextShimmer>AI-Powered Insights</TextShimmer>
-                <Badge className="bg-blue-100 text-blue-700 border-blue-300">Live Analysis</Badge>
+                <Badge className="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700">Live Analysis</Badge>
               </CardTitle>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Real-time business intelligence powered by AI
               </p>
             </CardHeader>
@@ -590,7 +596,7 @@ export default function AnalyticsOverviewPage() {
                       className={`p-4 rounded-lg border-l-4 ${getKaziInsightColor(insight.impact)}`}
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <InsightIcon className="h-5 w-5 text-gray-600" />
+                        <InsightIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                         <div className="flex gap-2">
                           <Badge variant="outline" className="text-xs">
                             {insight.impact}
@@ -600,10 +606,10 @@ export default function AnalyticsOverviewPage() {
                           </Badge>
                         </div>
                       </div>
-                      <h4 className="font-semibold text-gray-900 mb-1">{insight.title}</h4>
-                      <p className="text-sm text-gray-600 mb-3">{insight.description}</p>
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">{insight.title}</h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{insight.description}</p>
                       {insight.potentialValue > 0 && (
-                        <p className="text-xs text-green-600 font-medium mb-2">
+                        <p className="text-xs text-green-600 dark:text-green-400 font-medium mb-2">
                           Potential value: {formatCurrency(insight.potentialValue)}
                         </p>
                       )}
@@ -631,13 +637,13 @@ export default function AnalyticsOverviewPage() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Revenue Trend */}
-        <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+        <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <TrendingUp className="h-5 w-5" />
               Revenue Trend
               {predictiveMode && (
-                <Badge className="bg-purple-100 text-purple-700 border-purple-300">Predictive</Badge>
+                <Badge className="bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-700">Predictive</Badge>
               )}
             </CardTitle>
           </CardHeader>
@@ -646,9 +652,9 @@ export default function AnalyticsOverviewPage() {
               {analyticsData.revenue.monthly.map((month) => (
                 <div key={month.month} className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1">
-                    <span className="text-sm font-medium w-8">{month.month}</span>
+                    <span className="text-sm font-medium w-8 text-gray-900 dark:text-gray-100">{month.month}</span>
                     <div className="flex-1">
-                      <div className="bg-gray-200 rounded-full h-2 w-full max-w-xs">
+                      <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-2 w-full max-w-xs">
                         <div
                           className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                           style={{ width: `${(month.revenue / 50000) * 100}%` }}
@@ -657,8 +663,8 @@ export default function AnalyticsOverviewPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium">{formatCurrency(month.revenue)}</p>
-                    <p className="text-xs text-gray-500">{month.projects} projects</p>
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{formatCurrency(month.revenue)}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{month.projects} projects</p>
                   </div>
                 </div>
               ))}
@@ -666,9 +672,9 @@ export default function AnalyticsOverviewPage() {
               {predictiveMode && KAZI_ANALYTICS_DATA.revenue.forecast.map((month) => (
                 <div key={month.month} className="flex items-center justify-between opacity-60">
                   <div className="flex items-center gap-3 flex-1">
-                    <span className="text-sm font-medium w-8">{month.month}</span>
+                    <span className="text-sm font-medium w-8 text-gray-900 dark:text-gray-100">{month.month}</span>
                     <div className="flex-1">
-                      <div className="bg-gray-200 rounded-full h-2 w-full max-w-xs border-2 border-dashed border-purple-300">
+                      <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-2 w-full max-w-xs border-2 border-dashed border-purple-300 dark:border-purple-600">
                         <div
                           className="bg-purple-600 h-2 rounded-full transition-all duration-300"
                           style={{ width: `${(month.revenue / 60000) * 100}%` }}
@@ -677,8 +683,8 @@ export default function AnalyticsOverviewPage() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium text-purple-600">{formatCurrency(month.revenue)}</p>
-                    <p className="text-xs text-gray-500">{month.confidence}% confidence</p>
+                    <p className="text-sm font-medium text-purple-600 dark:text-purple-400">{formatCurrency(month.revenue)}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{month.confidence}% confidence</p>
                   </div>
                 </div>
               ))}
@@ -687,9 +693,9 @@ export default function AnalyticsOverviewPage() {
         </Card>
 
         {/* Project Categories */}
-        <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+        <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <FolderOpen className="h-5 w-5" />
               Project Categories
             </CardTitle>
@@ -705,15 +711,15 @@ export default function AnalyticsOverviewPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className={`w-3 h-3 rounded-full ${category.color}`} />
-                        <span className="text-sm font-medium">{category.category}</span>
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{category.category}</span>
                         <div className={`flex items-center gap-1 ${indicator.color}`}>
                           <GrowthIcon className="h-3 w-3" />
                           <span className="text-xs font-medium">{Math.abs(category.growth)}%</span>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium">{formatCurrency(category.revenue)}</p>
-                        <p className="text-xs text-gray-500">{category.count} projects</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{formatCurrency(category.revenue)}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{category.count} projects</p>
                       </div>
                     </div>
                     <Progress
