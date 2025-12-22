@@ -7,7 +7,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
   const [statusFilter, setStatusFilter] = useState<BookingStatus | 'all'>('all')
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<PaymentStatus | 'all'>('all')
   const { bookings, loading, error } = useBookings({ bookingType: bookingTypeFilter, status: statusFilter, paymentStatus: paymentStatusFilter })
-  const displayBookings = bookings.length > 0 ? bookings : initialBookings
+  const displayBookings = (bookings && bookings.length > 0) ? bookings : (initialBookings || [])
 
   const stats = {
     total: displayBookings.length,
@@ -24,7 +24,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
   if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">Error: {error.message}</div></div>
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent">Bookings</h1>
 

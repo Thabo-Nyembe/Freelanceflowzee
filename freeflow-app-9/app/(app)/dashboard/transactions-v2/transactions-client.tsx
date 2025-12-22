@@ -6,7 +6,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
   const [typeFilter, setTypeFilter] = useState<TransactionType | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<TransactionStatus | 'all'>('all')
   const { transactions, loading, error } = useTransactions({ transactionType: typeFilter, status: statusFilter })
-  const displayTransactions = transactions.length > 0 ? transactions : initialTransactions
+  const displayTransactions = (transactions && transactions.length > 0) ? transactions : (initialTransactions || [])
 
   const stats = {
     totalIncome: displayTransactions.filter(t => t.transaction_type === 'payment' && t.status === 'completed').reduce((sum, t) => sum + t.amount, 0),
@@ -18,7 +18,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
   if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">Error: {error.message}</div></div>
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">Transactions</h1>
 

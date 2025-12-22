@@ -6,7 +6,7 @@ export default function AnalyticsClient({ initialAnalytics }: { initialAnalytics
   const [metricTypeFilter, setMetricTypeFilter] = useState<MetricType | 'all'>('all')
   const [periodTypeFilter, setPeriodTypeFilter] = useState<PeriodType | 'all'>('all')
   const { analytics, loading, error } = useAnalytics({ metricType: metricTypeFilter, periodType: periodTypeFilter })
-  const displayAnalytics = analytics.length > 0 ? analytics : initialAnalytics
+  const displayAnalytics = (analytics && analytics.length > 0) ? analytics : (initialAnalytics || [])
 
   const stats = {
     totalMetrics: displayAnalytics.length,
@@ -18,7 +18,7 @@ export default function AnalyticsClient({ initialAnalytics }: { initialAnalytics
   if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">Error: {error.message}</div></div>
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Analytics</h1>
 

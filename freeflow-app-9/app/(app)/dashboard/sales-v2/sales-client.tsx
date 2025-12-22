@@ -88,8 +88,8 @@ export default function SalesClient({ initialDeals, initialStages }: SalesClient
   } = useSalesDeals()
   const { stages, loading: stagesLoading } = usePipelineStages()
 
-  const displayDeals = deals.length > 0 ? deals : initialDeals
-  const displayStages = stages.length > 0 ? stages : initialStages
+  const displayDeals = (deals && deals.length > 0) ? deals : (initialDeals || [])
+  const displayStages = (stages && stages.length > 0) ? stages : (initialStages || [])
   const stats = getStats()
 
   const statCards = [
@@ -185,7 +185,7 @@ export default function SalesClient({ initialDeals, initialStages }: SalesClient
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>

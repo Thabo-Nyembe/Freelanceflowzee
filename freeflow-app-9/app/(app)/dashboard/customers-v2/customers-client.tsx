@@ -11,7 +11,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   const [segmentFilter, setSegmentFilter] = useState<CustomerSegment | 'all'>('all')
   const { customers, loading, error } = useCustomers({ segment: segmentFilter })
 
-  const displayCustomers = customers.length > 0 ? customers : initialCustomers
+  const displayCustomers = (customers && customers.length > 0) ? customers : (initialCustomers || [])
 
   const stats = [
     {
@@ -73,7 +73,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   }))
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>

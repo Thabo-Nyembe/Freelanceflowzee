@@ -11,7 +11,7 @@ export default function EmployeesClient({ initialEmployees }: { initialEmployees
   const [departmentFilter, setDepartmentFilter] = useState<string | 'all'>('all')
   const { employees, loading, error } = useEmployees({ department: departmentFilter })
 
-  const displayEmployees = employees.length > 0 ? employees : initialEmployees
+  const displayEmployees = (employees && employees.length > 0) ? employees : (initialEmployees || [])
 
   const stats = [
     {
@@ -87,7 +87,7 @@ export default function EmployeesClient({ initialEmployees }: { initialEmployees
   }))
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50/30 to-indigo-50/40 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>

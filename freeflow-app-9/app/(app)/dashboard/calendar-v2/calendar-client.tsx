@@ -6,7 +6,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   const [eventTypeFilter, setEventTypeFilter] = useState<EventType | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<EventStatus | 'all'>('all')
   const { events, loading, error } = useCalendarEvents({ eventType: eventTypeFilter, status: statusFilter })
-  const displayEvents = events.length > 0 ? events : initialEvents
+  const displayEvents = (events && events.length > 0) ? events : (initialEvents || [])
 
   const stats = {
     total: displayEvents.length,
@@ -23,7 +23,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">Error: {error.message}</div></div>
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-sky-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50 to-sky-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Calendar</h1>
 

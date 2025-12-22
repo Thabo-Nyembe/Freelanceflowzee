@@ -5,7 +5,7 @@ import { useInvoices, type Invoice, type InvoiceStatus } from '@/lib/hooks/use-i
 export default function InvoicesClient({ initialInvoices }: { initialInvoices: Invoice[] }) {
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all')
   const { invoices, loading, error } = useInvoices({ status: statusFilter, limit: 50 })
-  const displayInvoices = invoices.length > 0 ? invoices : initialInvoices
+  const displayInvoices = (invoices && invoices.length > 0) ? invoices : (initialInvoices || [])
   const stats = {
     total: displayInvoices.length,
     paid: displayInvoices.filter(i => i.status === 'paid').length,
@@ -17,7 +17,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">Error: {error.message}</div></div>
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div><h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">Invoices</h1>
