@@ -22,11 +22,11 @@ export function LiquidGlassCard({
   const getVariantClasses = () => {
     switch (variant) {
       case 'gradient':
-        return 'bg-gradient-to-br from-white/40 via-white/30 to-white/20 dark:from-white/10 dark:via-white/5 dark:to-white/3'
+        return 'bg-gradient-to-br from-white/40 via-white/30 to-white/20 dark:from-gray-800/80 dark:via-gray-800/60 dark:to-gray-900/50'
       case 'tinted':
-        return 'bg-gradient-to-br from-blue-50/60 via-purple-50/40 to-pink-50/30 dark:from-blue-950/40 dark:via-purple-950/30 dark:to-pink-950/20'
+        return 'bg-gradient-to-br from-blue-50/60 via-purple-50/40 to-pink-50/30 dark:from-gray-800/70 dark:via-gray-800/50 dark:to-gray-900/40'
       default:
-        return 'bg-white/30 dark:bg-white/5'
+        return 'bg-white/30 dark:bg-gray-800/50'
     }
   }
 

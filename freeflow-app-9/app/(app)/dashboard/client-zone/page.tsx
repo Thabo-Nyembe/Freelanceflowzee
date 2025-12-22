@@ -1399,7 +1399,7 @@ export default function ClientZonePage() {
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto">
-            <TabsList className="inline-flex w-max min-w-full bg-white/60 backdrop-blur-xl border border-white/30">
+            <TabsList className="inline-flex w-max min-w-full bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-white/30 dark:border-gray-700/50">
               <TabsTrigger value="projects" className="flex items-center gap-2 whitespace-nowrap">
                 <FolderOpen className="h-4 w-4" />
                 My Projects
@@ -1459,7 +1459,7 @@ export default function ClientZonePage() {
           <TabsContent value="projects" className="space-y-6">
             <div className="grid grid-cols-1 gap-6">
               {projects.map((project) => (
-                <Card key={project.id} className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+                <Card key={project.id} className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/50 shadow-lg">
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -1501,7 +1501,7 @@ export default function ClientZonePage() {
                       <h4 className="font-semibold mb-3">Deliverables</h4>
                       <div className="space-y-2">
                         {project.deliverables.map((deliverable, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                          <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                             <div className="flex items-center gap-3">
                               {getStatusIcon(deliverable.status)}
                               <div>
@@ -1552,7 +1552,7 @@ export default function ClientZonePage() {
 
           {/* Calendar/Schedule Tab */}
           <TabsContent value="calendar" className="space-y-6">
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+            <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/50 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
@@ -1614,7 +1614,7 @@ export default function ClientZonePage() {
 
           {/* Invoices Tab */}
           <TabsContent value="invoices" className="space-y-6">
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+            <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/50 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Receipt className="h-5 w-5" />
@@ -1686,7 +1686,7 @@ export default function ClientZonePage() {
 
           {/* Payments/Escrow Tab */}
           <TabsContent value="payments" className="space-y-6">
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+            <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/50 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Shield className="h-5 w-5" />
@@ -1739,14 +1739,14 @@ export default function ClientZonePage() {
 
           {/* Messages Tab */}
           <TabsContent value="messages" className="space-y-6">
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+            <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/50 shadow-lg">
               <CardHeader>
                 <CardTitle>Recent Messages</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="max-h-96 overflow-y-auto space-y-4">
                   {messages.map((message) => (
-                    <div key={message.id} className="flex space-x-4 p-4 rounded-lg bg-gray-50">
+                    <div key={message.id} className="flex space-x-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={message.avatar} alt={message.sender} />
                         <AvatarFallback>{message.sender.split(' ').map(n => n[0]).join('')}</AvatarFallback>
@@ -1795,14 +1795,14 @@ export default function ClientZonePage() {
 
           {/* Files Tab */}
           <TabsContent value="files" className="space-y-6">
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+            <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/50 shadow-lg">
               <CardHeader>
                 <CardTitle>Project Files</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {files.map((file) => (
-                    <div key={file.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50">
+                    <div key={file.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                       <div className="flex items-center space-x-4">
                         <div className="p-2 bg-blue-100 rounded-lg">
                           <FileText className="h-6 w-6 text-blue-600" />
@@ -1830,7 +1830,7 @@ export default function ClientZonePage() {
 
           {/* AI Collaborate Tab */}
           <TabsContent value="ai-collaborate" className="space-y-6">
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+            <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/50 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Brain className="h-5 w-5" />
@@ -1868,7 +1868,7 @@ export default function ClientZonePage() {
                   </div>
                   <div className="space-y-4">
                     <h3 className="font-semibold text-lg">Your Preferences</h3>
-                    <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                    <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
                       <p className="font-medium mb-3">Style Preferences</p>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
@@ -1897,7 +1897,7 @@ export default function ClientZonePage() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+            <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/50 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5" />
@@ -1934,7 +1934,7 @@ export default function ClientZonePage() {
                     <h3 className="font-semibold text-lg">Project Timeline</h3>
                     <div className="space-y-3">
                       {projects.map((project) => (
-                        <div key={project.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                        <div key={project.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                           <span className="text-sm">{project.name}</span>
                           <div className="flex items-center gap-2">
                             <Progress value={project.progress} className="w-20 h-2" />
@@ -1947,15 +1947,15 @@ export default function ClientZonePage() {
                   <div className="space-y-4">
                     <h3 className="font-semibold text-lg">Communication Stats</h3>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                         <span className="text-sm">Messages Exchanged</span>
                         <span className="font-semibold">{dashboardData?.analytics?.messagesExchanged || messages.length}</span>
                       </div>
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                         <span className="text-sm">Meetings Held</span>
                         <span className="font-semibold">{dashboardData?.analytics?.meetingsHeld || 0}</span>
                       </div>
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                         <span className="text-sm">Files Shared</span>
                         <span className="font-semibold">{dashboardData?.analytics?.filesShared || files.length}</span>
                       </div>
@@ -1968,7 +1968,7 @@ export default function ClientZonePage() {
 
           {/* Feedback Tab */}
           <TabsContent value="feedback" className="space-y-6">
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+            <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/50 shadow-lg">
               <CardHeader>
                 <CardTitle>Project Feedback</CardTitle>
               </CardHeader>
@@ -2025,7 +2025,7 @@ export default function ClientZonePage() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+            <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/50 shadow-lg">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Settings className="h-5 w-5" />
@@ -2037,21 +2037,21 @@ export default function ClientZonePage() {
                   <div className="space-y-4">
                     <h3 className="font-semibold text-lg">Notification Preferences</h3>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                         <div>
                           <p className="font-medium">Project Updates</p>
                           <p className="text-sm text-gray-600">Get notified about project progress</p>
                         </div>
                         <Badge className="bg-green-100 text-green-800">Enabled</Badge>
                       </div>
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                         <div>
                           <p className="font-medium">Meeting Reminders</p>
                           <p className="text-sm text-gray-600">Reminders for scheduled meetings</p>
                         </div>
                         <Badge className="bg-green-100 text-green-800">Enabled</Badge>
                       </div>
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                         <div>
                           <p className="font-medium">Invoice Notifications</p>
                           <p className="text-sm text-gray-600">New invoices and payment reminders</p>
@@ -2063,7 +2063,7 @@ export default function ClientZonePage() {
                   <div className="space-y-4">
                     <h3 className="font-semibold text-lg">Account Settings</h3>
                     <div className="space-y-3">
-                      <div className="p-3 rounded-lg bg-gray-50">
+                      <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                         <p className="font-medium mb-2">Contact Information</p>
                         <p className="text-sm text-gray-600 mb-2">Email: {dashboardData?.email || 'N/A'}</p>
                         <Button size="sm" variant="outline">
@@ -2071,7 +2071,7 @@ export default function ClientZonePage() {
                           Update Contact Info
                         </Button>
                       </div>
-                      <div className="p-3 rounded-lg bg-gray-50">
+                      <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                         <p className="font-medium mb-2">Password & Security</p>
                         <p className="text-sm text-gray-600 mb-2">Last updated: 30 days ago</p>
                         <Button size="sm" variant="outline">
@@ -2079,7 +2079,7 @@ export default function ClientZonePage() {
                           Change Password
                         </Button>
                       </div>
-                      <div className="p-3 rounded-lg bg-gray-50">
+                      <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                         <p className="font-medium mb-2">Download Data</p>
                         <p className="text-sm text-gray-600 mb-2">Export your project data and communications</p>
                         <Button size="sm" variant="outline">
