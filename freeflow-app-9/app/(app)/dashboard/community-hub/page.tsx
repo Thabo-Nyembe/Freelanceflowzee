@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { TextShimmer } from '@/components/ui/text-shimmer'
@@ -2461,21 +2460,20 @@ export default function CommunityHubPage() {
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="postType">Post Type</Label>
-                    <Select value={state.postType} defaultValue="text" onValueChange={(value) => dispatch({ type: 'SET_POST_TYPE', payload: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select post type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="text">Text Post</SelectItem>
-                        <SelectItem value="image">Image Post</SelectItem>
-                        <SelectItem value="video">Video Post</SelectItem>
-                        <SelectItem value="link">Link Post</SelectItem>
-                        <SelectItem value="poll">Poll</SelectItem>
-                        <SelectItem value="job">Job Posting</SelectItem>
-                        <SelectItem value="event">Event</SelectItem>
-                        <SelectItem value="showcase">Project Showcase</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select
+                      value={state.postType}
+                      onChange={(e) => dispatch({ type: 'SET_POST_TYPE', payload: e.target.value })}
+                      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="text">Text Post</option>
+                      <option value="image">Image Post</option>
+                      <option value="video">Video Post</option>
+                      <option value="link">Link Post</option>
+                      <option value="poll">Poll</option>
+                      <option value="job">Job Posting</option>
+                      <option value="event">Event</option>
+                      <option value="showcase">Project Showcase</option>
+                    </select>
                   </div>
                   
                   <div>
@@ -2537,31 +2535,29 @@ export default function CommunityHubPage() {
               </div>
               
               <div className="flex gap-2">
-                <Select value={state.feedFilter} defaultValue="all" onValueChange={(value) => dispatch({ type: 'SET_FEED_FILTER', payload: value })}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Filter" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Posts</SelectItem>
-                    <SelectItem value="connections">Connections</SelectItem>
-                    <SelectItem value="groups">Groups</SelectItem>
-                    <SelectItem value="jobs">Jobs</SelectItem>
-                    <SelectItem value="events">Events</SelectItem>
-                    <SelectItem value="showcase">Showcase</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Select value={state.sortBy} defaultValue="relevance" onValueChange={(value) => dispatch({ type: 'SET_SORT_BY', payload: value })}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="newest">Newest</SelectItem>
-                    <SelectItem value="oldest">Oldest</SelectItem>
-                    <SelectItem value="popular">Popular</SelectItem>
-                    <SelectItem value="relevance">Relevance</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select
+                  value={state.feedFilter}
+                  onChange={(e) => dispatch({ type: 'SET_FEED_FILTER', payload: e.target.value })}
+                  className="w-32 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="all">All Posts</option>
+                  <option value="connections">Connections</option>
+                  <option value="groups">Groups</option>
+                  <option value="jobs">Jobs</option>
+                  <option value="events">Events</option>
+                  <option value="showcase">Showcase</option>
+                </select>
+
+                <select
+                  value={state.sortBy}
+                  onChange={(e) => dispatch({ type: 'SET_SORT_BY', payload: e.target.value })}
+                  className="w-32 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="newest">Newest</option>
+                  <option value="oldest">Oldest</option>
+                  <option value="popular">Popular</option>
+                  <option value="relevance">Relevance</option>
+                </select>
               </div>
             </div>
 
@@ -2601,30 +2597,28 @@ export default function CommunityHubPage() {
               </div>
               
               <div className="flex gap-2">
-                <Select value={state.filterBy} defaultValue="all" onValueChange={(value) => dispatch({ type: 'SET_FILTER_BY', payload: value })}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Filter" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Members</SelectItem>
-                    <SelectItem value="freelancers">Freelancers</SelectItem>
-                    <SelectItem value="clients">Clients</SelectItem>
-                    <SelectItem value="agencies">Agencies</SelectItem>
-                    <SelectItem value="students">Students</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select
+                  value={state.filterBy}
+                  onChange={(e) => dispatch({ type: 'SET_FILTER_BY', payload: e.target.value })}
+                  className="w-32 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="all">All Members</option>
+                  <option value="freelancers">Freelancers</option>
+                  <option value="clients">Clients</option>
+                  <option value="agencies">Agencies</option>
+                  <option value="students">Students</option>
+                </select>
 
-                <Select value={state.sortBy} defaultValue="relevance" onValueChange={(value) => dispatch({ type: 'SET_SORT_BY', payload: value })}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="relevance">Relevance</SelectItem>
-                    <SelectItem value="rating">Rating</SelectItem>
-                    <SelectItem value="newest">Newest</SelectItem>
-                    <SelectItem value="popular">Popular</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select
+                  value={state.sortBy}
+                  onChange={(e) => dispatch({ type: 'SET_SORT_BY', payload: e.target.value })}
+                  className="w-32 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="relevance">Relevance</option>
+                  <option value="rating">Rating</option>
+                  <option value="newest">Newest</option>
+                  <option value="popular">Popular</option>
+                </select>
                 
                 <Button
                   variant="outline"
@@ -2664,17 +2658,16 @@ export default function CommunityHubPage() {
                     <Label>Premium Only</Label>
                   </div>
                   
-                  <Select value={state.availabilityFilter} defaultValue="all" onValueChange={(value) => dispatch({ type: 'SET_AVAILABILITY_FILTER', payload: value })}>
-                    <SelectTrigger className="w-32">
-                      <SelectValue placeholder="Availability" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Availability</SelectItem>
-                      <SelectItem value="available">Available</SelectItem>
-                      <SelectItem value="busy">Busy</SelectItem>
-                      <SelectItem value="away">Away</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select
+                    value={state.availabilityFilter}
+                    onChange={(e) => dispatch({ type: 'SET_AVAILABILITY_FILTER', payload: e.target.value })}
+                    className="w-32 h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="all">All Availability</option>
+                    <option value="available">Available</option>
+                    <option value="busy">Busy</option>
+                    <option value="away">Away</option>
+                  </select>
                 </div>
               </CardContent>
             </Card>
