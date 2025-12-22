@@ -643,7 +643,7 @@ export default function CRMPage() {
 
             {/* Pipeline Stats */}
             <div className="grid grid-cols-4 gap-4">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-100">
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-4 border border-blue-100 dark:border-blue-800">
                 <div className="text-sm text-blue-600 mb-1">Pipeline Value</div>
                 <div className="text-2xl font-bold text-blue-700">
                   <NumberFlow
@@ -654,7 +654,7 @@ export default function CRMPage() {
                 <div className="text-xs text-gray-600">{pipelineStats.dealCount} deals</div>
               </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-100">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-4 border border-green-100 dark:border-green-800">
                 <div className="text-sm text-green-600 mb-1">Win Rate</div>
                 <div className="text-2xl font-bold text-green-700">
                   <NumberFlow value={pipelineStats.winRate} suffix="%" />
@@ -662,7 +662,7 @@ export default function CRMPage() {
                 <div className="text-xs text-gray-600">Above average</div>
               </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-100">
+              <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg p-4 border border-purple-100 dark:border-purple-800">
                 <div className="text-sm text-purple-600 mb-1">Avg Deal Size</div>
                 <div className="text-2xl font-bold text-purple-700">
                   <NumberFlow

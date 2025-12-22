@@ -430,7 +430,7 @@ export default function AdminOverviewPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-3 border border-blue-100 dark:border-blue-800">
                   <div className="text-xs text-blue-600 mb-1">Revenue</div>
                   <div className="text-lg font-bold text-blue-700">
                     <NumberFlow
@@ -444,7 +444,7 @@ export default function AdminOverviewPage() {
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-3 border border-purple-100">
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg p-3 border border-purple-100 dark:border-purple-800">
                   <div className="text-xs text-purple-600 mb-1">Conversion</div>
                   <div className="text-lg font-bold text-purple-700">3.8%</div>
                   <div className="text-xs text-green-600 flex items-center gap-1">
@@ -493,7 +493,7 @@ export default function AdminOverviewPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3 border border-green-100">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-3 border border-green-100 dark:border-green-800">
                   <div className="text-xs text-green-600 mb-1">Pipeline</div>
                   <div className="text-lg font-bold text-green-700">
                     <NumberFlow
@@ -504,7 +504,7 @@ export default function AdminOverviewPage() {
                   <div className="text-xs text-gray-600">{dashboardStats?.activeDeals || 0} deals</div>
                 </div>
 
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-3 border border-blue-100 dark:border-blue-800">
                   <div className="text-xs text-blue-600 mb-1">Win Rate</div>
                   <div className="text-lg font-bold text-blue-700">
                     {formatPercentage(dashboardStats?.dealWinRate || 0)}
@@ -557,7 +557,7 @@ export default function AdminOverviewPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3 border border-green-100">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-3 border border-green-100 dark:border-green-800">
                   <div className="text-xs text-green-600 mb-1">Paid</div>
                   <div className="text-lg font-bold text-green-700">
                     <NumberFlow
@@ -568,7 +568,7 @@ export default function AdminOverviewPage() {
                   <div className="text-xs text-gray-600">On time</div>
                 </div>
 
-                <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg p-3 border border-red-100">
+                <div className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/30 dark:to-orange-900/30 rounded-lg p-3 border border-red-100 dark:border-red-800">
                   <div className="text-xs text-red-600 mb-1">Outstanding</div>
                   <div className="text-lg font-bold text-red-700">
                     <NumberFlow
@@ -619,7 +619,7 @@ export default function AdminOverviewPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg p-3 border border-red-100">
+                <div className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/30 dark:to-orange-900/30 rounded-lg p-3 border border-red-100 dark:border-red-800">
                   <div className="text-xs text-red-600 mb-1">Hot Leads</div>
                   <div className="text-lg font-bold text-red-700">
                     <NumberFlow value={hotLeads.length} />
@@ -627,7 +627,7 @@ export default function AdminOverviewPage() {
                   <div className="text-xs text-gray-600">Ready to convert</div>
                 </div>
 
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-3 border border-purple-100">
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg p-3 border border-purple-100 dark:border-purple-800">
                   <div className="text-xs text-purple-600 mb-1">ROI</div>
                   <div className="text-lg font-bold text-purple-700">
                     {formatPercentage(dashboardStats?.emailOpenRate || 0, 0)}
@@ -680,7 +680,7 @@ export default function AdminOverviewPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-3 border border-blue-100 dark:border-blue-800">
                   <div className="text-xs text-blue-600 mb-1">Team</div>
                   <div className="text-lg font-bold text-blue-700">
                     <NumberFlow value={dashboardStats?.totalTeamMembers || 0} />
@@ -688,7 +688,7 @@ export default function AdminOverviewPage() {
                   <div className="text-xs text-gray-600">{dashboardStats?.activeTeamMembers || 0} active</div>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3 border border-green-100">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-3 border border-green-100 dark:border-green-800">
                   <div className="text-xs text-green-600 mb-1">Productivity</div>
                   <div className="text-lg font-bold text-green-700">{formatPercentage(dashboardStats?.teamProductivity || 0)}</div>
                   <div className="text-xs text-green-600 flex items-center gap-1">
@@ -737,7 +737,7 @@ export default function AdminOverviewPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-lg p-3 border border-purple-100">
+                <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/30 dark:to-violet-900/30 rounded-lg p-3 border border-purple-100 dark:border-purple-800">
                   <div className="text-xs text-purple-600 mb-1">Workflows</div>
                   <div className="text-lg font-bold text-purple-700">
                     <NumberFlow value={activeWorkflows.length} />
@@ -747,7 +747,7 @@ export default function AdminOverviewPage() {
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3 border border-green-100">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-3 border border-green-100 dark:border-green-800">
                   <div className="text-xs text-green-600 mb-1">Time Saved</div>
                   <div className="text-lg font-bold text-green-700">94h</div>
                   <div className="text-xs text-green-600 flex items-center gap-1">
