@@ -142,7 +142,7 @@ export default function HomePage() {
   const router = useRouter()
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 relative overflow-hidden">
       {/* Animated Background Blobs */}
       <motion.div
         className="absolute top-0 -left-40 w-96 h-96 bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 rounded-full blur-3xl pointer-events-none"
@@ -174,7 +174,7 @@ export default function HomePage() {
 
       {/* Navigation */}
       <motion.nav
-        className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200"
+        className="sticky top-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6 }}
@@ -196,7 +196,7 @@ export default function HomePage() {
             <div className="hidden md:flex items-center gap-8" role="menubar">
               <Link
                 href="/features"
-                className="text-gray-600 hover:text-gray-900 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
                 role="menuitem"
                 aria-label="View all features"
               >
@@ -204,7 +204,7 @@ export default function HomePage() {
               </Link>
               <Link
                 href="/pricing"
-                className="text-gray-600 hover:text-gray-900 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
                 role="menuitem"
                 aria-label="View pricing plans"
               >
@@ -212,7 +212,7 @@ export default function HomePage() {
               </Link>
               <Link
                 href="/blog"
-                className="text-gray-600 hover:text-gray-900 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
                 role="menuitem"
                 aria-label="Read our blog"
               >
@@ -220,7 +220,7 @@ export default function HomePage() {
               </Link>
               <Link
                 href="/contact"
-                className="text-gray-600 hover:text-gray-900 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded px-2 py-1"
                 role="menuitem"
                 aria-label="Contact us"
               >
@@ -261,7 +261,7 @@ export default function HomePage() {
             >
               <Badge
                 variant="secondary"
-                className="mb-6 bg-purple-50 text-purple-700 text-sm px-4 py-2"
+                className="mb-6 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-sm px-4 py-2"
                 role="status"
                 aria-label="Trusted by over 25,000 professionals"
               >
@@ -284,7 +284,7 @@ export default function HomePage() {
             </motion.h1>
 
             <motion.p
-              className="text-xl text-gray-600 max-w-3xl mx-auto mb-12"
+              className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-12"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
@@ -325,7 +325,7 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div
-              className="flex flex-wrap justify-center gap-6 mt-8 text-sm text-gray-600"
+              className="flex flex-wrap justify-center gap-6 mt-8 text-sm text-gray-600 dark:text-gray-400"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.8 }}
@@ -350,7 +350,7 @@ export default function HomePage() {
 
       {/* Stats Section */}
       <section
-        className="py-12 bg-white/60 backdrop-blur-sm"
+        className="py-12 bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm"
         aria-labelledby="stats-heading"
         role="region"
       >
@@ -372,8 +372,8 @@ export default function HomePage() {
                 >
                   <CardContent className="p-6">
                     <stat.icon className="w-8 h-8 mx-auto mb-3 text-blue-600" aria-hidden="true" />
-                    <div className="text-3xl font-bold text-gray-900 mb-1" role="status">{stat.value}</div>
-                    <div className="text-sm text-gray-600">{stat.label}</div>
+                    <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1" role="status">{stat.value}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</div>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -390,10 +390,10 @@ export default function HomePage() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 id="problem-heading" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+            <h2 id="problem-heading" className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
               Tired of Context Switching Between 6+ Apps?
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
               Freelancers and agencies waste hours every day switching between project management, file storage,
               invoicing, communication, and payment platforms.
             </p>
@@ -424,7 +424,7 @@ export default function HomePage() {
                     <LiquidGlassCardTitle>{benefit.title}</LiquidGlassCardTitle>
                   </LiquidGlassCardHeader>
                   <LiquidGlassCardContent>
-                    <p className="text-gray-700">{benefit.description}</p>
+                    <p className="text-gray-700 dark:text-gray-300">{benefit.description}</p>
                   </LiquidGlassCardContent>
                 </LiquidGlassCard>
               </motion.div>
@@ -435,7 +435,7 @@ export default function HomePage() {
 
       {/* Features Grid */}
       <section
-        className="py-20 bg-gradient-to-b from-gray-50 to-white"
+        className="py-20 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950"
         aria-labelledby="features-heading"
         role="region"
       >
@@ -443,16 +443,16 @@ export default function HomePage() {
           <div className="text-center mb-16">
             <Badge
               variant="secondary"
-              className="mb-4 bg-blue-50 text-blue-700"
+              className="mb-4 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
               role="status"
               aria-label="Powerful Features section"
             >
               Powerful Features
             </Badge>
-            <h2 id="features-heading" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+            <h2 id="features-heading" className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
               Everything You Need to Scale
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
               From AI-powered content creation to secure payments, KAZI has every tool you need to run a successful creative business.
             </p>
           </div>
@@ -511,13 +511,13 @@ export default function HomePage() {
           <div className="text-center mb-16">
             <Badge
               variant="secondary"
-              className="mb-4 bg-purple-50 text-purple-700"
+              className="mb-4 bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300"
               role="status"
               aria-label="Success Stories section"
             >
               Success Stories
             </Badge>
-            <h2 id="testimonials-heading" className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6">
+            <h2 id="testimonials-heading" className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-6">
               Loved by 25,000+ Professionals
             </h2>
           </div>
@@ -557,7 +557,7 @@ export default function HomePage() {
                     </Badge>
                   </LiquidGlassCardHeader>
                   <LiquidGlassCardContent>
-                    <p className="text-gray-700 mb-6 leading-relaxed">{testimonial.quote}</p>
+                    <p className="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">{testimonial.quote}</p>
                     <div className="flex items-center gap-3">
                       <div
                         className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold"
@@ -566,9 +566,9 @@ export default function HomePage() {
                         {testimonial.author.split(' ').map(n => n[0]).join('')}
                       </div>
                       <div>
-                        <div className="font-semibold text-gray-900">{testimonial.author}</div>
-                        <div className="text-sm text-gray-600">{testimonial.role}</div>
-                        <div className="text-xs text-gray-500">{testimonial.company}</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{testimonial.author}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">{testimonial.role}</div>
+                        <div className="text-xs text-gray-500 dark:text-gray-500">{testimonial.company}</div>
                       </div>
                     </div>
                   </LiquidGlassCardContent>
