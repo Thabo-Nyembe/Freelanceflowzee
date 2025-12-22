@@ -242,7 +242,18 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'escrow', name: 'Escrow', href: '/dashboard/escrow', icon: Shield, description: 'Secure payments' },
           { id: 'expenses', name: 'Expenses', href: '/dashboard/expenses-v2', icon: Receipt, description: 'Expense tracking', badge: 'New' },
           { id: 'contracts', name: 'Contracts', href: '/dashboard/contracts-v2', icon: FileText, description: 'Contract management', badge: 'New' },
-          { id: 'crypto-payments', name: 'Crypto Payments', href: '/dashboard/crypto-payments', icon: DollarSign, description: 'Crypto support', badge: 'New' }
+          { id: 'crypto-payments', name: 'Crypto Payments', href: '/dashboard/crypto-payments', icon: DollarSign, description: 'Crypto support', badge: 'New' },
+          { id: 'transactions', name: 'Transactions', href: '/dashboard/transactions-v2', icon: DollarSign, description: 'Transaction history', badge: 'New' }
+        ]
+      },
+      {
+        id: 'commerce',
+        name: 'Commerce',
+        visible: true,
+        items: [
+          { id: 'orders', name: 'Orders', href: '/dashboard/orders-v2', icon: Package, description: 'Order management', badge: 'New' },
+          { id: 'products', name: 'Products', href: '/dashboard/products-v2', icon: Package, description: 'Product catalog', badge: 'New' },
+          { id: 'inventory', name: 'Inventory', href: '/dashboard/inventory-v2', icon: Package, description: 'Stock management', badge: 'New' }
         ]
       },
       {
@@ -254,7 +265,17 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'team-management', name: 'Team Management', href: '/dashboard/team-management', icon: Users, description: 'Manage team', badge: 'New' },
           { id: 'clients', name: 'Clients', href: '/dashboard/clients', icon: Users, description: 'Client directory', badge: 'New' },
           { id: 'client-portal', name: 'Client Portal', href: '/dashboard/client-portal', icon: Users, description: 'Client management', badge: 'New' },
-          { id: 'client-zone', name: 'Client Zone', href: '/dashboard/client-zone', icon: Users, description: 'Client portal' }
+          { id: 'client-zone', name: 'Client Zone', href: '/dashboard/client-zone', icon: Users, description: 'Client portal' },
+          { id: 'customers', name: 'Customers', href: '/dashboard/customers-v2', icon: Users, description: 'Customer database', badge: 'New' },
+          { id: 'employees', name: 'Employees', href: '/dashboard/employees-v2', icon: Users, description: 'Employee directory', badge: 'New' }
+        ]
+      },
+      {
+        id: 'sales',
+        name: 'Sales',
+        visible: true,
+        items: [
+          { id: 'sales-pipeline', name: 'Sales Pipeline', href: '/dashboard/sales-v2', icon: TrendingUp, description: 'Sales management', badge: 'New' }
         ]
       },
       {
@@ -263,7 +284,8 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         visible: true,
         items: [
           { id: 'messages', name: 'Messages', href: '/dashboard/messages', icon: MessageSquare, description: 'Communication' },
-          { id: 'community-hub', name: 'Community Hub', href: '/dashboard/community-hub', icon: Users, description: 'Creator network' }
+          { id: 'community-hub', name: 'Community Hub', href: '/dashboard/community-hub', icon: Users, description: 'Creator network' },
+          { id: 'support-tickets', name: 'Support Tickets', href: '/dashboard/support-tickets-v2', icon: MessageSquare, description: 'Support management', badge: 'New' }
         ]
       },
       {
@@ -316,7 +338,9 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         name: 'Operations',
         visible: true,
         items: [
-          { id: 'user-management', name: 'User Management', href: '/dashboard/user-management', icon: UserPlus, description: 'Team & permissions', badge: 'New' }
+          { id: 'user-management', name: 'User Management', href: '/dashboard/user-management', icon: UserPlus, description: 'Team & permissions', badge: 'New' },
+          { id: 'system-insights', name: 'System Insights', href: '/dashboard/system-insights', icon: Gauge, description: 'System analytics', badge: 'New' },
+          { id: 'investor-metrics', name: 'Investor Metrics', href: '/dashboard/investor-metrics', icon: TrendingUp, description: 'Investor dashboard', badge: 'New' }
         ]
       },
       {
@@ -394,6 +418,26 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'browser-extension', name: 'Browser Extension', href: '/dashboard/browser-extension', icon: Monitor, description: 'Browser extension', badge: 'New' },
           { id: 'desktop-app', name: 'Desktop App', href: '/dashboard/desktop-app', icon: Monitor, description: 'Desktop version', badge: 'New' },
           { id: 'mobile-app', name: 'Mobile App', href: '/dashboard/mobile-app', icon: Smartphone, description: 'Mobile version', badge: 'New' }
+        ]
+      },
+      {
+        id: 'developer',
+        name: 'Developer',
+        visible: true,
+        items: [
+          { id: 'api-keys', name: 'API Keys', href: '/dashboard/api-keys-v2', icon: Code, description: 'API management', badge: 'New' },
+          { id: 'webhooks', name: 'Webhooks', href: '/dashboard/webhooks-v2', icon: Zap, description: 'Webhook configuration', badge: 'New' },
+          { id: 'automation', name: 'Automation', href: '/dashboard/automation-v2', icon: Zap, description: 'Workflow automation', badge: 'New' }
+        ]
+      },
+      {
+        id: 'security-audit',
+        name: 'Security & Audit',
+        visible: true,
+        items: [
+          { id: 'audit-logs', name: 'Audit Logs', href: '/dashboard/audit-logs-v2', icon: FileText, description: 'Activity audit trail', badge: 'New' },
+          { id: 'security-audit', name: 'Security Audit', href: '/dashboard/security-audit-v2', icon: Shield, description: 'Security analysis', badge: 'New' },
+          { id: 'access-logs', name: 'Access Logs', href: '/dashboard/access-logs-v2', icon: FileText, description: 'Access history', badge: 'New' }
         ]
       }
     ]
