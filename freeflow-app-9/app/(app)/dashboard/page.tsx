@@ -235,14 +235,14 @@ export default function DashboardPage() {
     // Wait for auth to complete before loading data
     if (userLoading) return
 
-    const loadDashboardData = async () => {
-      if (!userId) {
-        setIsLoading(false)
-        return
-      }
+    // No user logged in - show dashboard immediately (will show empty state or redirect)
+    if (!userId) {
+      setIsLoading(false)
+      return
+    }
 
+    const loadDashboardData = async () => {
       try {
-        setIsLoading(true)
         setError(null)
 
         // Import dashboard stats utility
@@ -331,7 +331,16 @@ export default function DashboardPage() {
       }
     }
 
+    // Start loading with a timeout failsafe
     loadDashboardData()
+
+    // Failsafe: ensure loading state is cleared after 10 seconds max
+    const loadingTimeout = setTimeout(() => {
+      setIsLoading(false)
+      logger.warn('Dashboard loading timeout - forced completion')
+    }, 10000)
+
+    return () => clearTimeout(loadingTimeout)
   }, [userId, userLoading, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const getStatusColor = (status: string) => {
@@ -2043,7 +2052,7 @@ export default function DashboardPage() {
   // A+++ Loading State
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <DashboardSkeleton />
       </div>
     )
@@ -2052,7 +2061,7 @@ export default function DashboardPage() {
   // A+++ Error State
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <ErrorEmptyState
           error={error}
           action={{
@@ -2067,7 +2076,7 @@ export default function DashboardPage() {
   // A+++ Empty State (when no projects exist)
   if (projects.length === 0 && !isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <NoDataEmptyState
           entityName="projects"
           action={{
@@ -2080,7 +2089,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900">
       {/* Floating decorative elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-blue-400/10 to-purple-400/10 dark:from-blue-400/5 dark:to-purple-400/5 rounded-full mix-blend-multiply filter blur-3xl animate-pulse"></div>
