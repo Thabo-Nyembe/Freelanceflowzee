@@ -22,7 +22,7 @@ export default function IntegrationSetupPage() {
   const { announce } = useAnnouncer()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-[1400px] mx-auto">
         {/* Back Button */}
         <Button

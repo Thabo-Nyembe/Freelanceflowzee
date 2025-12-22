@@ -103,7 +103,7 @@ export default function GuestDownloadPage({ params }: { params: { uploadLink: st
   if (loading) {
     return (
       <main
-        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900 dark:to-purple-900 p-6"
+        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:bg-none dark:bg-gray-900 p-6"
         role="main"
         aria-live="polite"
         aria-busy="true"
@@ -123,7 +123,7 @@ export default function GuestDownloadPage({ params }: { params: { uploadLink: st
   if (error || !fileInfo) {
     return (
       <main
-        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900 dark:to-purple-900 p-6"
+        className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:bg-none dark:bg-gray-900 p-6"
         role="main"
         aria-live="assertive"
       >
@@ -170,7 +170,7 @@ export default function GuestDownloadPage({ params }: { params: { uploadLink: st
 
   return (
     <main
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900 dark:to-purple-900 p-6"
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:bg-none dark:bg-gray-900 p-6"
       role="main"
     >
       <motion.div

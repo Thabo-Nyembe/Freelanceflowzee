@@ -42,7 +42,7 @@ export default function GuestUploadPage() {
       {/* Premium Scroll Progress */}
       <ScrollProgress position="top" height={3} showPercentage={false} />
 
-      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900 dark:to-purple-900 pt-24 pb-12">
+      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:bg-none dark:bg-gray-900 pt-24 pb-12">
         {/* Hero Section with Enhanced Copy */}
         <section className="max-w-4xl mx-auto px-6 mb-8 text-center" aria-labelledby="guest-upload-heading">
           <div

@@ -1098,7 +1098,7 @@ export function EasyOnboardingWizard({ onComplete, userId }: EasyOnboardingWizar
   // ============================================================================
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Progress Bar */}
         {currentStep !== 'welcome' && currentStep !== 'complete' && (

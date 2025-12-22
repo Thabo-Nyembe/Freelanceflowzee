@@ -322,7 +322,7 @@ export default function AdvancedMicroFeaturesPage() {
   // A+++ LOADING STATE
   if (isLoading) {
     return (
-      <div className="container py-8 min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-blue-50/40 dark:from-slate-900 dark:via-purple-900/20 dark:to-blue-900/30">
+      <div className="container py-8 min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900">
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 -left-4 w-72 h-72 bg-gradient-to-r from-purple-400/20 to-blue-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse"></div>
           <div className="absolute bottom-1/4 -right-4 w-72 h-72 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full mix-blend-multiply filter blur-xl animate-pulse delay-700"></div>
@@ -338,7 +338,7 @@ export default function AdvancedMicroFeaturesPage() {
   // A+++ ERROR STATE
   if (error) {
     return (
-      <div className="container py-8 min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-blue-50/40 dark:from-slate-900 dark:via-purple-900/20 dark:to-blue-900/30">
+      <div className="container py-8 min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900">
         <div className="max-w-2xl mx-auto mt-20">
           <ErrorEmptyState
             error={error}
@@ -350,7 +350,7 @@ export default function AdvancedMicroFeaturesPage() {
   }
 
   return (
-    <div className="container py-8 min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-blue-50/40 dark:from-slate-900 dark:via-purple-900/20 dark:to-blue-900/30">
+    <div className="container py-8 min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900">
       <div className="max-w-7xl mx-auto">
         {/* Enhanced Breadcrumb */}
         <AnimatedElement animation="slideInDown">

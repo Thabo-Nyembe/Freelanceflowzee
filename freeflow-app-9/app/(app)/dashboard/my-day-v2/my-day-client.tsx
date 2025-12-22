@@ -181,7 +181,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
   })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50/30 to-yellow-50/40 dark:from-orange-950 dark:via-amber-950/30 dark:to-yellow-950/40 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50/30 to-yellow-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">

@@ -152,7 +152,7 @@ export default function EscrowClient({ initialDeposits, initialStats }: EscrowCl
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:from-emerald-950 dark:via-teal-950/30 dark:to-cyan-950/40 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>

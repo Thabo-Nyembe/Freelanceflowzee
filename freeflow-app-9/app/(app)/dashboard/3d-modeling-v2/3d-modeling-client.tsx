@@ -47,7 +47,7 @@ export default function ThreeDModelingClient({ initialModels }: ThreeDModelingCl
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-zinc-50 dark:from-slate-950 dark:via-slate-900 dark:to-zinc-950/20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-zinc-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1600px] mx-auto p-6 space-y-6">
 
         {/* Header */}

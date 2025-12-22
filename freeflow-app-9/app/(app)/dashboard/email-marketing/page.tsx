@@ -1049,7 +1049,7 @@ export default function EmailMarketingPage() {
   // A+++ LOADING STATE
   if (isLoading) {
     return (
-      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 dark:bg-none dark:bg-gray-900">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="space-y-8">
             <CardSkeleton />
@@ -1074,7 +1074,7 @@ export default function EmailMarketingPage() {
   // A+++ ERROR STATE
   if (error) {
     return (
-      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 dark:bg-none dark:bg-gray-900">
         <div className="max-w-7xl mx-auto">
           <ErrorEmptyState
             error={error}
@@ -1086,7 +1086,7 @@ export default function EmailMarketingPage() {
   }
 
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-7xl mx-auto space-y-8">
         <ScrollReveal>
           <div className="flex items-center justify-between">

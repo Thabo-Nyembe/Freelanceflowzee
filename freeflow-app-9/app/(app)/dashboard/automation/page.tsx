@@ -415,7 +415,7 @@ export default function AutomationPage() {
   // A+++ LOADING STATE
   if (isLoading) {
     return (
-      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900">
         <div className="max-w-[1800px] mx-auto space-y-8">
           <div className="space-y-8">
             <CardSkeleton />
@@ -440,7 +440,7 @@ export default function AutomationPage() {
   // A+++ ERROR STATE
   if (error) {
     return (
-      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900">
         <div className="max-w-[1800px] mx-auto">
           <ErrorEmptyState
             error={error}
@@ -452,7 +452,7 @@ export default function AutomationPage() {
   }
 
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Header */}
         <ScrollReveal>
@@ -839,7 +839,7 @@ export default function AutomationPage() {
                     </div>
 
                     {/* Visual Flow */}
-                    <div className="border-2 border-dashed border-muted rounded-lg p-8 min-h-[500px] bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-900 dark:to-gray-800">
+                    <div className="border-2 border-dashed border-muted rounded-lg p-8 min-h-[500px] bg-gradient-to-br from-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900">
                       <div className="space-y-6">
                         {/* Trigger Node */}
                         <div className="flex items-center gap-4">

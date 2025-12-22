@@ -54,7 +54,7 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center p-8 bg-gradient-to-br from-slate-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+        <div className="min-h-screen flex items-center justify-center p-8 bg-gradient-to-br from-slate-50 to-gray-100 dark:bg-none dark:bg-gray-900">
           <LiquidGlassCard>
             <div className="p-8 max-w-md text-center space-y-6">
               <div className="text-6xl">⚠️</div>

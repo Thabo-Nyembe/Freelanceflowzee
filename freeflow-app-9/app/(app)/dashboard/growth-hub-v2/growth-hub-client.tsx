@@ -132,7 +132,7 @@ export default function GrowthHubClient({ initialMetrics, initialStats }: Growth
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:from-green-950 dark:via-emerald-950/30 dark:to-teal-950/40 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>

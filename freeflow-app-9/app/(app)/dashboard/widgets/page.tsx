@@ -764,7 +764,7 @@ export default function WidgetsPage() {
   const visibleWidgets = state.viewMode === 'dashboard' ? state.widgets.filter(w => w.isVisible) : filteredAndSortedWidgets
 
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto space-y-8">
         {/* Header */}
         <ScrollReveal>

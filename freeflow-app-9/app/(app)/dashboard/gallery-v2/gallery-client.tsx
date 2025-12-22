@@ -160,7 +160,7 @@ export default function GalleryClient({ initialItems, initialCollections, initia
   }))
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50/30 to-rose-50/40 dark:from-amber-950 dark:via-orange-950/30 dark:to-rose-950/40 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50/30 to-rose-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>

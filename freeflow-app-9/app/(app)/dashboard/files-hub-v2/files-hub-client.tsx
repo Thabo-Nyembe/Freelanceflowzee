@@ -173,7 +173,7 @@ export default function FilesHubClient({ initialFiles, initialFolders, initialSt
   }))
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50/30 to-indigo-50/40 dark:from-cyan-950 dark:via-blue-950/30 dark:to-indigo-950/40 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>

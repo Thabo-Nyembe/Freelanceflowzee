@@ -296,7 +296,7 @@ export default function ChatPage() {
   // A+++ LOADING STATE
   if (isLoading) {
     return (
-      <div className="h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+      <div className="h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <DashboardSkeleton />
       </div>
     )
@@ -305,7 +305,7 @@ export default function ChatPage() {
   // A+++ ERROR STATE
   if (error) {
     return (
-      <div className="h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+      <div className="h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <div className="max-w-2xl mx-auto mt-20">
           <ErrorEmptyState
             error={error}
@@ -317,7 +317,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30">
+    <div className="h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900">
       <div className="h-full flex">
         {/* Chat List - Desktop always visible, Mobile toggleable */}
         <div className={cn(

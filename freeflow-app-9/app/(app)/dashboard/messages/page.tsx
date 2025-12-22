@@ -1494,7 +1494,7 @@ export default function MessagesPage() {
   if (isLoading) {
     logger.debug('Rendering loading state')
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <div className="max-w-7xl mx-auto space-y-6">
           <CardSkeleton />
           <div className="grid grid-cols-3 gap-6">
@@ -1515,7 +1515,7 @@ export default function MessagesPage() {
   if (error) {
     logger.error('Rendering error state', { error })
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <div className="max-w-7xl mx-auto">
           <ErrorEmptyState
             error={error}
@@ -1539,7 +1539,7 @@ export default function MessagesPage() {
   if (state.chats.length === 0 && !isLoading) {
     logger.debug('Rendering empty state - no chats')
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <div className="max-w-7xl mx-auto">
           <NoDataEmptyState
             entityName="messages"
@@ -1567,7 +1567,7 @@ export default function MessagesPage() {
   // ============================================================================
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-slate-900 dark:via-blue-900/20 dark:to-indigo-900/30 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Stats Overview */}

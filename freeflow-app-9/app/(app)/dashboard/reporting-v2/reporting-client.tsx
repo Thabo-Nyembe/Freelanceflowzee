@@ -120,7 +120,7 @@ export default function ReportingClient({ initialReports, initialStats }: Report
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-violet-50/30 to-fuchsia-50/40 dark:from-purple-950 dark:via-violet-950/30 dark:to-fuchsia-950/40 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-violet-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>

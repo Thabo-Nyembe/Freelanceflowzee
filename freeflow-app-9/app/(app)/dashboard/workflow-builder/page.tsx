@@ -413,7 +413,7 @@ export default function WorkflowBuilderPage() {
   // A+++ LOADING STATE
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:bg-none dark:bg-gray-900">
         <div className="container mx-auto p-6 space-y-6">
           <CardSkeleton />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -430,7 +430,7 @@ export default function WorkflowBuilderPage() {
   // A+++ ERROR STATE
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:bg-none dark:bg-gray-900">
         <div className="container mx-auto p-6">
           <ErrorEmptyState
             error={error}
@@ -444,7 +444,7 @@ export default function WorkflowBuilderPage() {
   // A+++ EMPTY STATE
   if (workflows.length === 0 && !isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:bg-none dark:bg-gray-900">
         <div className="container mx-auto p-6">
           <NoDataEmptyState
             entityName="workflows"
@@ -472,7 +472,7 @@ export default function WorkflowBuilderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 dark:bg-none dark:bg-gray-900">
       <div className="container mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -844,7 +844,7 @@ export default function WorkflowBuilderPage() {
                     }}
                   >
                     {/* Grid background */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-blue-50/30 dark:from-gray-900 dark:to-gray-800" style={{
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-blue-50/30 dark:bg-none dark:bg-gray-900" style={{
                       backgroundImage: 'radial-gradient(circle, var(--grid-color, #ddd) 1px, transparent 1px)',
                       backgroundSize: '20px 20px'
                     }} />

@@ -52,7 +52,7 @@ export default function TemplatesClient({ initialTemplates }: TemplatesClientPro
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950/20">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1600px] mx-auto p-6 space-y-6">
 
         {/* Header */}

@@ -461,7 +461,7 @@ export default function LeadGenerationPage() {
   // A+++ LOADING STATE
   if (isLoading) {
     return (
-      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-orange-50 to-red-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-orange-50 to-red-50 dark:bg-none dark:bg-gray-900">
         <div className="max-w-7xl mx-auto space-y-8">
           <CardSkeleton />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -479,7 +479,7 @@ export default function LeadGenerationPage() {
   // A+++ ERROR STATE
   if (error) {
     return (
-      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-orange-50 to-red-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-orange-50 to-red-50 dark:bg-none dark:bg-gray-900">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-2xl mx-auto mt-20">
             <ErrorEmptyState
@@ -493,7 +493,7 @@ export default function LeadGenerationPage() {
   }
 
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-orange-50 to-red-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen p-8 bg-gradient-to-br from-slate-50 via-orange-50 to-red-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-7xl mx-auto space-y-8">
         <ScrollReveal>
           <div className="flex items-center justify-between">
