@@ -154,6 +154,25 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
     ]
   },
   {
+    id: 'collaboration',
+    name: 'Collaboration',
+    icon: Users,
+    visible: true,
+    subcategories: [
+      {
+        id: 'collaboration-tools',
+        name: 'Collaboration Tools',
+        visible: true,
+        items: [
+          { id: 'collaboration-hub', name: 'Collaboration Hub', href: '/dashboard/collaboration', icon: Users, description: 'Real-time collaboration', badge: 'New' },
+          { id: 'canvas-collaboration', name: 'Canvas Collaboration', href: '/dashboard/canvas-collaboration', icon: Palette, description: 'Collaborative design', badge: 'New' },
+          { id: 'ar-collaboration', name: 'AR Collaboration', href: '/dashboard/ar-collaboration', icon: Box, description: 'AR experiences', badge: 'New' },
+          { id: 'voice-collaboration', name: 'Voice Collaboration', href: '/dashboard/voice-collaboration', icon: Mic, description: 'Voice calls & meetings', badge: 'New' }
+        ]
+      }
+    ]
+  },
+  {
     id: 'storage',
     name: 'Storage',
     icon: Cloud,
@@ -171,25 +190,6 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'resource-library', name: 'Resource Library', href: '/dashboard/resource-library', icon: BookOpen, description: 'Asset library', badge: 'New' },
           { id: 'widgets', name: 'Widgets', href: '/dashboard/widgets', icon: Layers, description: 'Dashboard widgets', badge: 'New' },
           { id: 'knowledge-base', name: 'Knowledge Base', href: '/dashboard/client-zone/knowledge-base', icon: BookOpen, description: 'Help center & docs', badge: 'New' }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'collaboration',
-    name: 'Collaboration',
-    icon: Users,
-    visible: true,
-    subcategories: [
-      {
-        id: 'collaboration-tools',
-        name: 'Collaboration Tools',
-        visible: true,
-        items: [
-          { id: 'collaboration-hub', name: 'Collaboration Hub', href: '/dashboard/collaboration', icon: Users, description: 'Real-time collaboration', badge: 'New' },
-          { id: 'canvas-collaboration', name: 'Canvas Collaboration', href: '/dashboard/canvas-collaboration', icon: Palette, description: 'Collaborative design', badge: 'New' },
-          { id: 'ar-collaboration', name: 'AR Collaboration', href: '/dashboard/ar-collaboration', icon: Box, description: 'AR experiences', badge: 'New' },
-          { id: 'voice-collaboration', name: 'Voice Collaboration', href: '/dashboard/voice-collaboration', icon: Mic, description: 'Voice calls & meetings', badge: 'New' }
         ]
       }
     ]
@@ -530,8 +530,8 @@ export function SidebarEnhanced() {
   const [categories, setCategories] = useState<SidebarCategory[]>(DEFAULT_CATEGORIES)
   const [expandedCategories, setExpandedCategories] = useState<string[]>([
     'ai-creative-suite',
-    'storage',
     'collaboration',
+    'storage',
     'business-intelligence',
     'admin-overview',
     'creative-studio',
