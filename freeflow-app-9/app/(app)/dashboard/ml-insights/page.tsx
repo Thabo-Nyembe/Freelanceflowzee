@@ -26,13 +26,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+// Note: Radix Select removed due to infinite loop bug - using native HTML select instead
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -1084,48 +1078,45 @@ export default function MLInsightsPage() {
             </div>
 
             {/* Filters */}
-            <Select value={state.filterType} onValueChange={(value: any) => dispatch({ type: 'SET_FILTER_TYPE', filterType: value })}>
-              <SelectTrigger className="w-[180px] bg-slate-900/50 border-gray-700">
-                <SelectValue placeholder="Filter by type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="trend">Trend</SelectItem>
-                <SelectItem value="anomaly">Anomaly</SelectItem>
-                <SelectItem value="forecast">Forecast</SelectItem>
-                <SelectItem value="pattern">Pattern</SelectItem>
-                <SelectItem value="recommendation">Recommendation</SelectItem>
-                <SelectItem value="alert">Alert</SelectItem>
-              </SelectContent>
-            </Select>
+            <select
+              value={state.filterType}
+              onChange={(e) => dispatch({ type: 'SET_FILTER_TYPE', filterType: e.target.value as any })}
+              className="w-[180px] px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="all">All Types</option>
+              <option value="trend">Trend</option>
+              <option value="anomaly">Anomaly</option>
+              <option value="forecast">Forecast</option>
+              <option value="pattern">Pattern</option>
+              <option value="recommendation">Recommendation</option>
+              <option value="alert">Alert</option>
+            </select>
 
-            <Select value={state.filterCategory} onValueChange={(value: any) => dispatch({ type: 'SET_FILTER_CATEGORY', filterCategory: value })}>
-              <SelectTrigger className="w-[180px] bg-slate-900/50 border-gray-700">
-                <SelectValue placeholder="Filter by category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="revenue">Revenue</SelectItem>
-                <SelectItem value="engagement">Engagement</SelectItem>
-                <SelectItem value="performance">Performance</SelectItem>
-                <SelectItem value="retention">Retention</SelectItem>
-                <SelectItem value="quality">Quality</SelectItem>
-                <SelectItem value="growth">Growth</SelectItem>
-              </SelectContent>
-            </Select>
+            <select
+              value={state.filterCategory}
+              onChange={(e) => dispatch({ type: 'SET_FILTER_CATEGORY', filterCategory: e.target.value as any })}
+              className="w-[180px] px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="all">All Categories</option>
+              <option value="revenue">Revenue</option>
+              <option value="engagement">Engagement</option>
+              <option value="performance">Performance</option>
+              <option value="retention">Retention</option>
+              <option value="quality">Quality</option>
+              <option value="growth">Growth</option>
+            </select>
 
-            <Select value={state.sortBy} onValueChange={(value: any) => dispatch({ type: 'SET_SORT', sortBy: value })}>
-              <SelectTrigger className="w-[180px] bg-slate-900/50 border-gray-700">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="priority">Priority</SelectItem>
-                <SelectItem value="confidence">Confidence</SelectItem>
-                <SelectItem value="impact">Impact</SelectItem>
-                <SelectItem value="date">Date</SelectItem>
-                <SelectItem value="type">Type</SelectItem>
-              </SelectContent>
-            </Select>
+            <select
+              value={state.sortBy}
+              onChange={(e) => dispatch({ type: 'SET_SORT', sortBy: e.target.value as any })}
+              className="w-[180px] px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="priority">Priority</option>
+              <option value="confidence">Confidence</option>
+              <option value="impact">Impact</option>
+              <option value="date">Date</option>
+              <option value="type">Type</option>
+            </select>
 
             {/* Actions */}
             <Button onClick={() => setShowCreateModal(true)} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
@@ -1348,36 +1339,34 @@ export default function MLInsightsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="type" className="text-white">Type *</Label>
-                    <Select value={insightType} onValueChange={(value: InsightType) => setInsightType(value)}>
-                      <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="trend">Trend</SelectItem>
-                        <SelectItem value="anomaly">Anomaly</SelectItem>
-                        <SelectItem value="forecast">Forecast</SelectItem>
-                        <SelectItem value="pattern">Pattern</SelectItem>
-                        <SelectItem value="recommendation">Recommendation</SelectItem>
-                        <SelectItem value="alert">Alert</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select
+                      value={insightType}
+                      onChange={(e) => setInsightType(e.target.value as InsightType)}
+                      className="w-full px-3 py-2 bg-slate-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="trend">Trend</option>
+                      <option value="anomaly">Anomaly</option>
+                      <option value="forecast">Forecast</option>
+                      <option value="pattern">Pattern</option>
+                      <option value="recommendation">Recommendation</option>
+                      <option value="alert">Alert</option>
+                    </select>
                   </div>
 
                   <div>
                     <Label htmlFor="category" className="text-white">Category *</Label>
-                    <Select value={insightCategory} onValueChange={(value: InsightCategory) => setInsightCategory(value)}>
-                      <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="revenue">Revenue</SelectItem>
-                        <SelectItem value="engagement">Engagement</SelectItem>
-                        <SelectItem value="performance">Performance</SelectItem>
-                        <SelectItem value="retention">Retention</SelectItem>
-                        <SelectItem value="quality">Quality</SelectItem>
-                        <SelectItem value="growth">Growth</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select
+                      value={insightCategory}
+                      onChange={(e) => setInsightCategory(e.target.value as InsightCategory)}
+                      className="w-full px-3 py-2 bg-slate-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="revenue">Revenue</option>
+                      <option value="engagement">Engagement</option>
+                      <option value="performance">Performance</option>
+                      <option value="retention">Retention</option>
+                      <option value="quality">Quality</option>
+                      <option value="growth">Growth</option>
+                    </select>
                   </div>
                 </div>
 
@@ -1396,32 +1385,30 @@ export default function MLInsightsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="confidence" className="text-white">Confidence Level</Label>
-                    <Select value={insightConfidence} onValueChange={(value: ConfidenceLevel) => setInsightConfidence(value)}>
-                      <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Low (60%)</SelectItem>
-                        <SelectItem value="medium">Medium (75%)</SelectItem>
-                        <SelectItem value="high">High (90%)</SelectItem>
-                        <SelectItem value="very-high">Very High (98%)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select
+                      value={insightConfidence}
+                      onChange={(e) => setInsightConfidence(e.target.value as ConfidenceLevel)}
+                      className="w-full px-3 py-2 bg-slate-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="low">Low (60%)</option>
+                      <option value="medium">Medium (75%)</option>
+                      <option value="high">High (90%)</option>
+                      <option value="very-high">Very High (98%)</option>
+                    </select>
                   </div>
 
                   <div>
                     <Label htmlFor="impact" className="text-white">Impact Level</Label>
-                    <Select value={insightImpact} onValueChange={(value: ImpactLevel) => setInsightImpact(value)}>
-                      <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="low">Low</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="high">High</SelectItem>
-                        <SelectItem value="critical">Critical</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select
+                      value={insightImpact}
+                      onChange={(e) => setInsightImpact(e.target.value as ImpactLevel)}
+                      className="w-full px-3 py-2 bg-slate-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                      <option value="critical">Critical</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -1654,16 +1641,15 @@ export default function MLInsightsPage() {
               <div className="space-y-4 py-4">
                 <div>
                   <Label htmlFor="format" className="text-white">Export Format</Label>
-                  <Select value={exportFormat} onValueChange={(value: any) => setExportFormat(value)}>
-                    <SelectTrigger className="bg-slate-800 border-gray-700 text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="json">JSON</SelectItem>
-                      <SelectItem value="csv">CSV</SelectItem>
-                      <SelectItem value="pdf">PDF</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select
+                    value={exportFormat}
+                    onChange={(e) => setExportFormat(e.target.value as any)}
+                    className="w-full px-3 py-2 bg-slate-800 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="json">JSON</option>
+                    <option value="csv">CSV</option>
+                    <option value="pdf">PDF</option>
+                  </select>
                 </div>
 
                 <div className="p-4 bg-slate-800 rounded-lg">

@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Slider } from '@/components/ui/slider'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+// Note: Radix Select removed due to infinite loop bug - using native HTML select instead
 import {
   Mic, Play, Download, Share2, Settings, Sparkles,
   User, Clock, DollarSign, Star,
@@ -482,32 +482,30 @@ export default function AIVoiceSynthesisPage() {
 
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Format</label>
-                      <Select value={audioFormat} onValueChange={setAudioFormat}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="mp3">MP3 (Compressed)</SelectItem>
-                          <SelectItem value="wav">WAV (Uncompressed)</SelectItem>
-                          <SelectItem value="ogg">OGG (Open Format)</SelectItem>
-                          <SelectItem value="flac">FLAC (Lossless)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <select
+                        value={audioFormat}
+                        onChange={(e) => setAudioFormat(e.target.value)}
+                        className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                      >
+                        <option value="mp3">MP3 (Compressed)</option>
+                        <option value="wav">WAV (Uncompressed)</option>
+                        <option value="ogg">OGG (Open Format)</option>
+                        <option value="flac">FLAC (Lossless)</option>
+                      </select>
                     </div>
 
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Quality</label>
-                      <Select value={audioQuality} onValueChange={setAudioQuality}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="low">Low (64 kbps)</SelectItem>
-                          <SelectItem value="medium">Medium (128 kbps)</SelectItem>
-                          <SelectItem value="high">High (192 kbps)</SelectItem>
-                          <SelectItem value="ultra">Ultra (320 kbps)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <select
+                        value={audioQuality}
+                        onChange={(e) => setAudioQuality(e.target.value)}
+                        className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                      >
+                        <option value="low">Low (64 kbps)</option>
+                        <option value="medium">Medium (128 kbps)</option>
+                        <option value="high">High (192 kbps)</option>
+                        <option value="ultra">Ultra (320 kbps)</option>
+                      </select>
                     </div>
                   </div>
 
@@ -623,29 +621,27 @@ export default function AIVoiceSynthesisPage() {
                     </div>
                   </div>
 
-                  <Select value={voiceGender} onValueChange={setVoiceGender}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Genders</SelectItem>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="neutral">Neutral</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select
+                    value={voiceGender}
+                    onChange={(e) => setVoiceGender(e.target.value)}
+                    className="w-[180px] px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="all">All Genders</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="neutral">Neutral</option>
+                  </select>
 
-                  <Select value={voiceLanguage} onValueChange={setVoiceLanguage}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Languages</SelectItem>
-                      <SelectItem value="en-US">English (US)</SelectItem>
-                      <SelectItem value="en-GB">English (UK)</SelectItem>
-                      <SelectItem value="es-ES">Spanish</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select
+                    value={voiceLanguage}
+                    onChange={(e) => setVoiceLanguage(e.target.value)}
+                    className="w-[180px] px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="all">All Languages</option>
+                    <option value="en-US">English (US)</option>
+                    <option value="en-GB">English (UK)</option>
+                    <option value="es-ES">Spanish</option>
+                  </select>
 
                   <div className="flex gap-2">
                     <Button
@@ -818,16 +814,14 @@ export default function AIVoiceSynthesisPage() {
                 <h3 className="text-xl font-semibold">Usage Analytics</h3>
                 <p className="text-sm text-muted-foreground">Track your voice synthesis usage and performance</p>
               </div>
-              <Select defaultValue="30days">
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="7days">Last 7 days</SelectItem>
-                  <SelectItem value="30days">Last 30 days</SelectItem>
-                  <SelectItem value="90days">Last 90 days</SelectItem>
-                </SelectContent>
-              </Select>
+              <select
+                defaultValue="30days"
+                className="w-[140px] px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="7days">Last 7 days</option>
+                <option value="30days">Last 30 days</option>
+                <option value="90days">Last 90 days</option>
+              </select>
             </div>
 
             {/* Stats Cards */}

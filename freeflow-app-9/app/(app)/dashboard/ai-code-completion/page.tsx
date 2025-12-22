@@ -9,7 +9,7 @@ import {
   CheckCircle, AlertTriangle, Lightbulb, Terminal, Sparkles, Layers
 } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+// Note: Radix Select removed due to infinite loop bug - using native HTML select instead
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
@@ -842,21 +842,17 @@ export default function AICodeCompletionPage() {
                     Code Editor
                   </h2>
                   <div className="flex items-center gap-3">
-                    <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
-                      <SelectTrigger className="w-48">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {PROGRAMMING_LANGUAGES.map((lang) => (
-                          <SelectItem key={lang.id} value={lang.id}>
-                            <div className="flex items-center gap-2">
-                              <span>{lang.icon}</span>
-                              <span>{lang.name}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <select
+                      value={selectedLanguage}
+                      onChange={(e) => setSelectedLanguage(e.target.value)}
+                      className="w-48 px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      {PROGRAMMING_LANGUAGES.map((lang) => (
+                        <option key={lang.id} value={lang.id}>
+                          {lang.icon} {lang.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 

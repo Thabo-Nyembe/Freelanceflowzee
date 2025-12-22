@@ -26,7 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+// Note: Radix Select removed due to infinite loop bug - using native HTML select instead
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
 
@@ -1362,55 +1362,47 @@ export default function AISettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Text Generation Model</Label>
-                    <Select defaultValue="gpt-4-turbo">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="gpt-4-turbo">GPT-4 Turbo (Recommended)</SelectItem>
-                        <SelectItem value="claude-3-opus">Claude 3 Opus</SelectItem>
-                        <SelectItem value="gemini-pro">Gemini Pro</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select
+                      defaultValue="gpt-4-turbo"
+                      className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="gpt-4-turbo">GPT-4 Turbo (Recommended)</option>
+                      <option value="claude-3-opus">Claude 3 Opus</option>
+                      <option value="gemini-pro">Gemini Pro</option>
+                    </select>
                   </div>
                   <div className="space-y-2">
                     <Label>Image Generation Model</Label>
-                    <Select defaultValue="dall-e-3">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="dall-e-3">DALL-E 3</SelectItem>
-                        <SelectItem value="stable-diffusion">Stable Diffusion XL</SelectItem>
-                        <SelectItem value="midjourney">Midjourney</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select
+                      defaultValue="dall-e-3"
+                      className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="dall-e-3">DALL-E 3</option>
+                      <option value="stable-diffusion">Stable Diffusion XL</option>
+                      <option value="midjourney">Midjourney</option>
+                    </select>
                   </div>
                   <div className="space-y-2">
                     <Label>Response Temperature</Label>
-                    <Select defaultValue="0.7">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0.3">Conservative (0.3)</SelectItem>
-                        <SelectItem value="0.7">Balanced (0.7)</SelectItem>
-                        <SelectItem value="1.0">Creative (1.0)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select
+                      defaultValue="0.7"
+                      className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="0.3">Conservative (0.3)</option>
+                      <option value="0.7">Balanced (0.7)</option>
+                      <option value="1.0">Creative (1.0)</option>
+                    </select>
                   </div>
                   <div className="space-y-2">
                     <Label>Max Tokens</Label>
-                    <Select defaultValue="4096">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1024">1,024 tokens</SelectItem>
-                        <SelectItem value="4096">4,096 tokens</SelectItem>
-                        <SelectItem value="8192">8,192 tokens</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select
+                      defaultValue="4096"
+                      className="w-full px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="1024">1,024 tokens</option>
+                      <option value="4096">4,096 tokens</option>
+                      <option value="8192">8,192 tokens</option>
+                    </select>
                   </div>
                 </div>
               </Card>
