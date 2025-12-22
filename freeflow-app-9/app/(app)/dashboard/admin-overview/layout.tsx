@@ -217,7 +217,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto p-8 space-y-8">
         {/* Header Section */}
         <motion.div
@@ -233,7 +233,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                   <TextShimmer className="text-3xl font-bold mb-2">
                     Business Admin Intelligence
                   </TextShimmer>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 dark:text-gray-400">
                     Comprehensive business metrics and operational insights
                   </p>
                 </div>
@@ -246,7 +246,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                   <button
                     onClick={handleRefreshData}
                     disabled={isRefreshing}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
                     Refresh Data
@@ -254,7 +254,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
 
                   <button
                     onClick={handleExportReport}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
                     <Download className="w-4 h-4" />
                     Export Report
@@ -273,11 +273,11 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
               {/* Key Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 {/* Total Revenue */}
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl p-4 border border-green-100 dark:border-green-800">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <div className="text-sm text-green-600 font-medium mb-1">Total Revenue</div>
-                      <div className="text-2xl font-bold text-green-700">
+                      <div className="text-sm text-green-600 dark:text-green-400 font-medium mb-1">Total Revenue</div>
+                      <div className="text-2xl font-bold text-green-700 dark:text-green-300">
                         <NumberFlow
                           value={stats?.totalRevenue || 0}
                           format={{
@@ -303,11 +303,11 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                 </div>
 
                 {/* Active Clients */}
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-xl p-4 border border-blue-100 dark:border-blue-800">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <div className="text-sm text-blue-600 font-medium mb-1">Active Clients</div>
-                      <div className="text-2xl font-bold text-blue-700">
+                      <div className="text-sm text-blue-600 dark:text-blue-400 font-medium mb-1">Active Clients</div>
+                      <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
                         <NumberFlow value={stats?.activeClients || 0} />
                       </div>
                     </div>
@@ -325,11 +325,11 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                 </div>
 
                 {/* Hot Leads */}
-                <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-4 border border-red-100">
+                <div className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/30 dark:to-orange-900/30 rounded-xl p-4 border border-red-100 dark:border-red-800">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <div className="text-sm text-red-600 font-medium mb-1">Hot Leads</div>
-                      <div className="text-2xl font-bold text-red-700">
+                      <div className="text-sm text-red-600 dark:text-red-400 font-medium mb-1">Hot Leads</div>
+                      <div className="text-2xl font-bold text-red-700 dark:text-red-300">
                         <NumberFlow value={stats?.hotLeads || 0} />
                       </div>
                     </div>
@@ -347,11 +347,11 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                 </div>
 
                 {/* Email Open Rate */}
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-100">
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 rounded-xl p-4 border border-purple-100 dark:border-purple-800">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <div className="text-sm text-purple-600 font-medium mb-1">Email Open Rate</div>
-                      <div className="text-2xl font-bold text-purple-700">
+                      <div className="text-sm text-purple-600 dark:text-purple-400 font-medium mb-1">Email Open Rate</div>
+                      <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
                         <NumberFlow value={stats?.emailOpenRate || 0} suffix="%" />
                       </div>
                     </div>
@@ -383,7 +383,7 @@ export default function AdminOverviewLayout({ children }: AdminOverviewLayoutPro
                         flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap
                         ${isActive
                           ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/30'
-                          : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+                          : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
                         }
                       `}
                     >
