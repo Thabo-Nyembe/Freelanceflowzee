@@ -58,6 +58,129 @@
   --ring: 240 4.9% 83.9%;
 }
 
+/* ============================================
+   DARK MODE TEXT VISIBILITY FIXES
+   Using @layer utilities for proper Tailwind integration
+   ============================================ */
+
+@layer utilities {
+  /* Force dark mode text visibility with high specificity */
+  .dark .text-gray-900,
+  .dark .text-gray-800,
+  .dark .text-gray-700,
+  html.dark .text-gray-900,
+  html.dark .text-gray-800,
+  html.dark .text-gray-700,
+  :root.dark .text-gray-900,
+  :root.dark .text-gray-800,
+  :root.dark .text-gray-700 {
+    --tw-text-opacity: 1 !important;
+    color: rgb(255 255 255 / var(--tw-text-opacity)) !important;
+  }
+
+  .dark .text-gray-600,
+  .dark .text-gray-500,
+  html.dark .text-gray-600,
+  html.dark .text-gray-500 {
+    --tw-text-opacity: 1 !important;
+    color: rgb(209 213 219 / var(--tw-text-opacity)) !important;
+  }
+
+  .dark .text-slate-900,
+  .dark .text-slate-800,
+  .dark .text-slate-700,
+  html.dark .text-slate-900,
+  html.dark .text-slate-800,
+  html.dark .text-slate-700 {
+    --tw-text-opacity: 1 !important;
+    color: rgb(255 255 255 / var(--tw-text-opacity)) !important;
+  }
+
+  .dark .text-slate-600,
+  .dark .text-slate-500,
+  html.dark .text-slate-600,
+  html.dark .text-slate-500 {
+    --tw-text-opacity: 1 !important;
+    color: rgb(203 213 225 / var(--tw-text-opacity)) !important;
+  }
+}
+
+/* High-specificity overrides outside of layer for maximum effect */
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700,
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700,
+html.dark .text-neutral-900,
+html.dark .text-neutral-800,
+html.dark .text-neutral-700,
+html.dark .text-zinc-900,
+html.dark .text-zinc-800,
+html.dark .text-zinc-700 {
+  color: #ffffff !important;
+}
+
+html.dark .text-gray-600,
+html.dark .text-gray-500,
+html.dark .text-gray-400,
+html.dark .text-slate-600,
+html.dark .text-slate-500,
+html.dark .text-neutral-600,
+html.dark .text-neutral-500,
+html.dark .text-zinc-600,
+html.dark .text-zinc-500 {
+  color: #d1d5db !important;
+}
+
+/* Fix ALL headings in dark mode */
+html.dark h1, html.dark h2, html.dark h3,
+html.dark h4, html.dark h5, html.dark h6 {
+  color: #ffffff !important;
+}
+
+/* Fix paragraph text */
+html.dark p {
+  color: #e5e7eb !important;
+}
+
+/* Fix font weights */
+html.dark .font-semibold,
+html.dark .font-bold,
+html.dark .font-medium {
+  color: #ffffff !important;
+}
+
+/* Fix text sizes */
+html.dark .text-sm {
+  color: #d1d5db !important;
+}
+
+html.dark .text-xs {
+  color: #9ca3af !important;
+}
+
+/* Fix tabs */
+html.dark [role="tab"] {
+  color: #d1d5db !important;
+}
+
+html.dark [role="tab"][data-state="active"] {
+  color: #ffffff !important;
+}
+
+/* Fix labels */
+html.dark label {
+  color: #e5e7eb !important;
+}
+
+/* Fix card content */
+html.dark [class*="Card"] h3,
+html.dark [class*="Card"] h4,
+html.dark [class*="Card"] p {
+  color: inherit !important;
+}
+
 @layer base {
   * {
     @apply border-neutral-200;
