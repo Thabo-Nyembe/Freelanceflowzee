@@ -142,8 +142,16 @@ export default function GalleryPage() {
 
   // A+++ LOAD GALLERY DATA FROM SUPABASE
   useEffect(() => {
+    // Wait for auth to complete before loading data
+    if (userLoading) return
+
+    // No user logged in - stop loading
+    if (!userId) {
+      setIsPageLoading(false)
+      return
+    }
+
     const loadGalleryData = async () => {
-      if (!userId) return
 
       try {
         setIsPageLoading(true)
@@ -223,7 +231,14 @@ export default function GalleryPage() {
     }
 
     loadGalleryData()
-  }, [userId, announce])
+
+    // Failsafe timeout
+    const timeout = setTimeout(() => {
+      setIsPageLoading(false)
+    }, 10000)
+
+    return () => clearTimeout(timeout)
+  }, [userId, userLoading, announce])
 
 
   // REAL HANDLERS
