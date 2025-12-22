@@ -1138,7 +1138,7 @@ export default function TimeTrackingPage() {
   }
 
   return (
-    <div className="min-h-screen relative p-6 bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50/40 dark:bg-transparent">
+    <div className="min-h-screen relative p-6 bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900">
       {/* Pattern Craft Background */}
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
       <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>

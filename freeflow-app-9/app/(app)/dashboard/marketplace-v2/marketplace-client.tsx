@@ -89,7 +89,7 @@ export default function MarketplaceClient({ initialApps, initialFeaturedApps }: 
   const maxDownloads = Math.max(...displayApps.map(a => a.total_downloads || 0), 1)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>

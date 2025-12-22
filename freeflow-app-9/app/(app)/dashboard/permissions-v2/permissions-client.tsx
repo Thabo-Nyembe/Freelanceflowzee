@@ -80,7 +80,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const maxUsers = Math.max(...displayRoles.map(r => r.current_users), 1)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50/30 to-blue-50/40 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>

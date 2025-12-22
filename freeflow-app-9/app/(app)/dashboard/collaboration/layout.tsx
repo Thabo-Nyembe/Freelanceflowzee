@@ -180,7 +180,7 @@ export default function CollaborationLayout({ children }: CollaborationLayoutPro
   const filesShared = KAZI_COLLABORATION_DATA.mediaFiles.filter((f) => f.isShared).length
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900">
       <div className="container mx-auto p-6 space-y-8">
         {/* ============================================================================
             HEADER SECTION
