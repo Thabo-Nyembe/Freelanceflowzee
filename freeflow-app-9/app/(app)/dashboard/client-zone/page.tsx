@@ -1152,7 +1152,7 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0 }}
           >
-            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:!bg-slate-800 border-blue-200 dark:border-slate-700 hover:shadow-lg transition-shadow">
+            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:bg-none dark:!bg-slate-800 border-blue-200 dark:border-slate-700 hover:shadow-lg transition-shadow">
               <div className="p-6 text-center">
                 <div className="inline-flex p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 rounded-xl mb-4">
                   <FolderOpen className="h-8 w-8 text-blue-600 dark:text-blue-400" />
@@ -1168,7 +1168,7 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:!bg-slate-800 border-emerald-200 dark:border-slate-700 hover:shadow-lg transition-shadow">
+            <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:bg-none dark:!bg-slate-800 border-emerald-200 dark:border-slate-700 hover:shadow-lg transition-shadow">
               <div className="p-6 text-center">
                 <div className="inline-flex p-3 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 rounded-xl mb-4">
                   <CheckCircle className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
@@ -1184,7 +1184,7 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:!bg-slate-800 border-purple-200 dark:border-slate-700 hover:shadow-lg transition-shadow">
+            <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:bg-none dark:!bg-slate-800 border-purple-200 dark:border-slate-700 hover:shadow-lg transition-shadow">
               <div className="p-6 text-center">
                 <div className="inline-flex p-3 bg-gradient-to-br from-purple-400/20 to-indigo-400/20 rounded-xl mb-4">
                   <DollarSign className="h-8 w-8 text-purple-600 dark:text-purple-400" />
@@ -1200,7 +1200,7 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:!bg-slate-800 border-amber-200 dark:border-slate-700 hover:shadow-lg transition-shadow">
+            <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:bg-none dark:!bg-slate-800 border-amber-200 dark:border-slate-700 hover:shadow-lg transition-shadow">
               <div className="p-6 text-center">
                 <div className="inline-flex p-3 bg-gradient-to-br from-amber-400/20 to-yellow-400/20 rounded-xl mb-4">
                   <Star className="h-8 w-8 text-amber-600 dark:text-amber-400" />
