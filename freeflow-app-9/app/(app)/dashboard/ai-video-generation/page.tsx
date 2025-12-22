@@ -1380,32 +1380,28 @@ export default function AIVideoGenerationPage() {
               <div className="space-y-6">
                 <div>
                   <Label className="text-white mb-2">Default AI Model</Label>
-                  <Select defaultValue="kazi-ai">
-                    <SelectTrigger className="bg-slate-900/50 border-gray-700">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="kazi-ai">KAZI AI (Fastest)</SelectItem>
-                      <SelectItem value="runway-gen3">Runway Gen-3</SelectItem>
-                      <SelectItem value="pika-labs">Pika Labs</SelectItem>
-                      <SelectItem value="stable-video">Stable Video</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select
+                    defaultValue="kazi-ai"
+                    className="w-full px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="kazi-ai">KAZI AI (Fastest)</option>
+                    <option value="runway-gen3">Runway Gen-3</option>
+                    <option value="pika-labs">Pika Labs</option>
+                    <option value="stable-video">Stable Video</option>
+                  </select>
                 </div>
 
                 <div>
                   <Label className="text-white mb-2">Default Quality</Label>
-                  <Select defaultValue="hd">
-                    <SelectTrigger className="bg-slate-900/50 border-gray-700">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sd">SD (480p)</SelectItem>
-                      <SelectItem value="hd">HD (720p)</SelectItem>
-                      <SelectItem value="full-hd">Full HD (1080p)</SelectItem>
-                      <SelectItem value="4k">4K (2160p)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select
+                    defaultValue="hd"
+                    className="w-full px-3 py-2 bg-slate-900/50 border border-gray-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  >
+                    <option value="sd">SD (480p)</option>
+                    <option value="hd">HD (720p)</option>
+                    <option value="full-hd">Full HD (1080p)</option>
+                    <option value="4k">4K (2160p)</option>
+                  </select>
                 </div>
 
                 <div className="flex items-center justify-between p-4 bg-slate-900/50 rounded-lg">
