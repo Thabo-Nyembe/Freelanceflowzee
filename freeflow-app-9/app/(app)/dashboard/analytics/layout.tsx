@@ -30,35 +30,35 @@ export default function AnalyticsLayout({
       label: 'Overview',
       icon: BarChart3,
       badge: 'Live',
-      badgeColor: 'bg-green-100 text-green-700 border-green-300'
+      badgeColor: 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700'
     },
     {
       value: '/dashboard/analytics/revenue',
       label: 'Revenue',
       icon: DollarSign,
       badge: formatCurrency(KAZI_ANALYTICS_DATA.overview.monthlyRevenue),
-      badgeColor: 'bg-gray-100 text-gray-700 border-gray-300'
+      badgeColor: 'bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600'
     },
     {
       value: '/dashboard/analytics/projects',
       label: 'Projects',
       icon: FolderOpen,
       badge: KAZI_ANALYTICS_DATA.overview.totalProjects.toString(),
-      badgeColor: 'bg-gray-100 text-gray-700 border-gray-300'
+      badgeColor: 'bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600'
     },
     {
       value: '/dashboard/analytics/clients',
       label: 'Clients',
       icon: Users,
       badge: `${KAZI_ANALYTICS_DATA.overview.totalClients} active`,
-      badgeColor: 'bg-gray-100 text-gray-700 border-gray-300'
+      badgeColor: 'bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600'
     },
     {
       value: '/dashboard/analytics/intelligence',
       label: 'Intelligence',
       icon: Brain,
       badge: 'AI',
-      badgeColor: 'bg-blue-100 text-blue-700 border-blue-300'
+      badgeColor: 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700'
     },
     {
       value: '/dashboard/analytics/performance',
@@ -78,7 +78,7 @@ export default function AnalyticsLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-950 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -88,11 +88,11 @@ export default function AnalyticsLayout({
                 <div className="p-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg">
                   <TrendingUp className="h-6 w-6 text-white" />
                 </div>
-                <TextShimmer className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+                <TextShimmer className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 dark:from-gray-100 dark:via-blue-200 dark:to-indigo-200 bg-clip-text text-transparent">
                   Analytics Dashboard
                 </TextShimmer>
               </div>
-              <p className="text-lg text-gray-600 font-light">
+              <p className="text-lg text-gray-600 dark:text-gray-300 font-light">
                 Comprehensive business intelligence and performance metrics
               </p>
             </div>
@@ -112,7 +112,7 @@ export default function AnalyticsLayout({
           </div>
 
           {/* Tab Navigation */}
-          <div className="bg-white/60 backdrop-blur-xl border border-white/30 rounded-3xl p-2 shadow-xl">
+          <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-white/30 dark:border-gray-700/30 rounded-3xl p-2 shadow-xl">
             <div className="grid grid-cols-6 gap-2">
               {tabs.map((tab) => {
                 const Icon = tab.icon
@@ -125,8 +125,8 @@ export default function AnalyticsLayout({
                     className={`
                       flex items-center justify-center gap-2 rounded-2xl px-4 py-3 transition-all
                       ${isActive
-                        ? 'bg-white shadow-md text-gray-900'
-                        : 'bg-transparent text-gray-600 hover:bg-white/50'
+                        ? 'bg-white dark:bg-gray-700 shadow-md text-gray-900 dark:text-gray-100'
+                        : 'bg-transparent text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-700/50'
                       }
                     `}
                     data-testid={`tab-${tab.value.split('/').pop()}`}

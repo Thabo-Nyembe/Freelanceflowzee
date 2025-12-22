@@ -618,10 +618,10 @@ export const formatCurrency = (amount: number) => {
 
 export const getKaziInsightColor = (impact: string) => {
   switch (impact) {
-    case 'high': return 'border-red-300 bg-red-50'
-    case 'medium': return 'border-yellow-300 bg-yellow-50'
-    case 'low': return 'border-green-300 bg-green-50'
-    default: return 'border-gray-300 bg-gray-50'
+    case 'high': return 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-950/30'
+    case 'medium': return 'border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-950/30'
+    case 'low': return 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/30'
+    default: return 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50'
   }
 }
 
