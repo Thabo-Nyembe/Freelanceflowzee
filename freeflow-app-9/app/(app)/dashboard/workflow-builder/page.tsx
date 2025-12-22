@@ -59,8 +59,13 @@ export default function WorkflowBuilderPage() {
 
   // A+++ LOAD WORKFLOW DATA
   const loadWorkflowData = async () => {
-    if (!userId) {
+    if (userLoading) {
       logger.info('Waiting for user authentication')
+      return // Keep loading state while auth is loading
+    }
+
+    if (!userId) {
+      logger.info('No user found, stopping load')
       setIsLoading(false)
       return
     }
@@ -93,7 +98,7 @@ export default function WorkflowBuilderPage() {
 
   useEffect(() => {
     loadWorkflowData()
-  }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, userLoading, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // A+++ CRUD HANDLERS
   const handleCreateWorkflow = () => {
