@@ -44,7 +44,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+// Select components removed due to Radix UI infinite loop bug
 
 // PRODUCTION LOGGER
 import { createFeatureLogger } from '@/lib/logger'
@@ -1905,18 +1905,18 @@ export default function GalleryPage() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="select-album">Album</Label>
-              <Select value={selectedAlbumIdForAdd} onValueChange={setSelectedAlbumIdForAdd}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an album" />
-                </SelectTrigger>
-                <SelectContent>
-                  {albums.map(album => (
-                    <SelectItem key={album.id} value={album.id}>
-                      {album.name} ({album.imageCount} images)
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <select
+                value={selectedAlbumIdForAdd}
+                onChange={(e) => setSelectedAlbumIdForAdd(e.target.value)}
+                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">Select an album</option>
+                {albums.map(album => (
+                  <option key={album.id} value={album.id}>
+                    {album.name} ({album.imageCount} images)
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <DialogFooter>
@@ -1945,18 +1945,18 @@ export default function GalleryPage() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="move-album">Album</Label>
-              <Select value={moveToAlbumId} onValueChange={setMoveToAlbumId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an album" />
-                </SelectTrigger>
-                <SelectContent>
-                  {albums.map(album => (
-                    <SelectItem key={album.id} value={album.id}>
-                      {album.name} ({album.imageCount} images)
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <select
+                value={moveToAlbumId}
+                onChange={(e) => setMoveToAlbumId(e.target.value)}
+                className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">Select an album</option>
+                {albums.map(album => (
+                  <option key={album.id} value={album.id}>
+                    {album.name} ({album.imageCount} images)
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <DialogFooter>
