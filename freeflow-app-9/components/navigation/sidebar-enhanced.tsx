@@ -176,6 +176,25 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
     ]
   },
   {
+    id: 'collaboration',
+    name: 'Collaboration',
+    icon: Users,
+    visible: true,
+    subcategories: [
+      {
+        id: 'collaboration-tools',
+        name: 'Collaboration Tools',
+        visible: true,
+        items: [
+          { id: 'collaboration-hub', name: 'Collaboration Hub', href: '/dashboard/collaboration', icon: Users, description: 'Real-time collaboration', badge: 'New' },
+          { id: 'canvas-collaboration', name: 'Canvas Collaboration', href: '/dashboard/canvas-collaboration', icon: Palette, description: 'Collaborative design', badge: 'New' },
+          { id: 'ar-collaboration', name: 'AR Collaboration', href: '/dashboard/ar-collaboration', icon: Box, description: 'AR experiences', badge: 'New' },
+          { id: 'voice-collaboration', name: 'Voice Collaboration', href: '/dashboard/voice-collaboration', icon: Mic, description: 'Voice calls & meetings', badge: 'New' }
+        ]
+      }
+    ]
+  },
+  {
     id: 'business-intelligence',
     name: 'Business Intelligence',
     icon: TrendingUp,
@@ -346,16 +365,6 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         ]
       },
       {
-        id: 'collaboration',
-        name: 'Collaboration',
-        visible: true,
-        items: [
-          { id: 'collaboration', name: 'Collaboration Hub', href: '/dashboard/collaboration', icon: Users, description: 'Real-time collaboration', badge: 'New' },
-          { id: 'canvas-collaboration', name: 'Canvas Collaboration', href: '/dashboard/canvas-collaboration', icon: Palette, description: 'Collaborative design', badge: 'New' },
-          { id: 'ar-collaboration', name: 'AR Collaboration', href: '/dashboard/ar-collaboration', icon: Box, description: 'AR experiences', badge: 'New' }
-        ]
-      },
-      {
         id: 'portfolio',
         name: 'Portfolio',
         visible: true,
@@ -522,6 +531,7 @@ export function SidebarEnhanced() {
   const [expandedCategories, setExpandedCategories] = useState<string[]>([
     'ai-creative-suite',
     'storage',
+    'collaboration',
     'business-intelligence',
     'admin-overview',
     'creative-studio',
