@@ -165,9 +165,11 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         visible: true,
         items: [
           { id: 'files-hub', name: 'Files Hub', href: '/dashboard/files-hub', icon: FolderOpen, description: 'File management', badge: 'NewTab' },
+          { id: 'documents', name: 'Documents', href: '/dashboard/documents-v2', icon: FileText, description: 'Document management', badge: 'New' },
           { id: 'storage', name: 'Storage', href: '/dashboard/storage', icon: Cloud, description: 'Multi-cloud storage', badge: 'New' },
           { id: 'cloud-storage', name: 'Cloud Storage', href: '/dashboard/cloud-storage', icon: Cloud, description: 'Cloud files', badge: 'New' },
           { id: 'resource-library', name: 'Resource Library', href: '/dashboard/resource-library', icon: BookOpen, description: 'Asset library', badge: 'New' },
+          { id: 'widgets', name: 'Widgets', href: '/dashboard/widgets', icon: Layers, description: 'Dashboard widgets', badge: 'New' },
           { id: 'knowledge-base', name: 'Knowledge Base', href: '/dashboard/client-zone/knowledge-base', icon: BookOpen, description: 'Help center & docs', badge: 'New' }
         ]
       }
@@ -185,7 +187,8 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         visible: true,
         items: [
           { id: 'dashboard', name: 'Dashboard', href: '/dashboard', icon: BarChart3, description: 'Business overview' },
-          { id: 'my-day', name: 'My Day', href: '/dashboard/my-day', icon: Calendar, description: 'Daily planner' }
+          { id: 'my-day', name: 'My Day', href: '/dashboard/my-day', icon: Calendar, description: 'Daily planner' },
+          { id: 'growth-hub', name: 'Growth Hub', href: '/dashboard/growth-hub', icon: Rocket, description: 'Business growth & monetization', badge: 'New' }
         ]
       },
       {
@@ -218,6 +221,8 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'financial-hub', name: 'Financial Hub', href: '/dashboard/financial', icon: DollarSign, description: 'Finance management' },
           { id: 'invoices', name: 'Invoices', href: '/dashboard/invoices', icon: Receipt, description: 'Invoice system', badge: 'New' },
           { id: 'escrow', name: 'Escrow', href: '/dashboard/escrow', icon: Shield, description: 'Secure payments' },
+          { id: 'expenses', name: 'Expenses', href: '/dashboard/expenses-v2', icon: Receipt, description: 'Expense tracking', badge: 'New' },
+          { id: 'contracts', name: 'Contracts', href: '/dashboard/contracts-v2', icon: FileText, description: 'Contract management', badge: 'New' },
           { id: 'crypto-payments', name: 'Crypto Payments', href: '/dashboard/crypto-payments', icon: DollarSign, description: 'Crypto support', badge: 'New' }
         ]
       },
@@ -341,6 +346,16 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         ]
       },
       {
+        id: 'collaboration',
+        name: 'Collaboration',
+        visible: true,
+        items: [
+          { id: 'collaboration', name: 'Collaboration Hub', href: '/dashboard/collaboration', icon: Users, description: 'Real-time collaboration', badge: 'New' },
+          { id: 'canvas-collaboration', name: 'Canvas Collaboration', href: '/dashboard/canvas-collaboration', icon: Palette, description: 'Collaborative design', badge: 'New' },
+          { id: 'ar-collaboration', name: 'AR Collaboration', href: '/dashboard/ar-collaboration', icon: Box, description: 'AR experiences', badge: 'New' }
+        ]
+      },
+      {
         id: 'portfolio',
         name: 'Portfolio',
         visible: true,
@@ -366,6 +381,8 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'notifications', name: 'Notifications', href: '/dashboard/notifications', icon: Bell, description: 'Alerts', badge: 'NewTab' },
           { id: 'white-label', name: 'White Label', href: '/dashboard/white-label', icon: Crown, description: 'Rebrand platform', badge: 'Pro' },
           { id: 'plugins', name: 'Plugins', href: '/dashboard/plugin-marketplace', icon: Package, description: 'App integrations', badge: 'New' },
+          { id: 'integrations-marketplace', name: 'Integrations', href: '/dashboard/integrations', icon: Layers, description: 'Third-party integrations', badge: 'New' },
+          { id: 'browser-extension', name: 'Browser Extension', href: '/dashboard/browser-extension', icon: Monitor, description: 'Browser extension', badge: 'New' },
           { id: 'desktop-app', name: 'Desktop App', href: '/dashboard/desktop-app', icon: Monitor, description: 'Desktop version', badge: 'New' },
           { id: 'mobile-app', name: 'Mobile App', href: '/dashboard/mobile-app', icon: Smartphone, description: 'Mobile version', badge: 'New' }
         ]
