@@ -1219,7 +1219,7 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            <Card className="bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:from-purple-950/30 dark:via-indigo-950/30 dark:to-blue-950/30 border-purple-200 dark:border-purple-800">
+            <Card className="bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-slate-800 dark:from-transparent/30 dark:via-indigo-950/30 dark:to-blue-950/30 border-purple-200 dark:border-purple-800">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Briefcase className="w-6 h-6 text-purple-600" />
@@ -1350,7 +1350,7 @@ export default function ClientZonePage() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+                <div className="bg-gradient-to-r from-purple-100 to-blue-100 dark:bg-slate-800 dark:from-transparent dark:to-transparent rounded-lg p-4 border border-purple-200 dark:border-purple-800">
                   <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
                     <Zap className="w-4 h-4" />
                     Quick Actions

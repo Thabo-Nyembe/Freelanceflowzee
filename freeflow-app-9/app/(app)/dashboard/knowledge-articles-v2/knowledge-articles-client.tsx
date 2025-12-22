@@ -478,7 +478,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   setEditingArticle(null)
                   resetForm()
                 }}
-                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50"
+                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50 dark:bg-slate-800"
               >
                 Cancel
               </button>

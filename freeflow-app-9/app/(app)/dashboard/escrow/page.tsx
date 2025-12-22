@@ -1175,7 +1175,7 @@ export default function EscrowPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-800">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 p-6">
         <div className="flex items-center justify-between">
@@ -1393,7 +1393,7 @@ export default function EscrowPage() {
 
       {/* EDUCATIONAL SECTION - USER MANUAL SPEC */}
       <div className="p-6">
-        <Card className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-indigo-900/30 border-purple-200 dark:border-purple-700 mb-6">
+        <Card className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:bg-slate-800 dark:from-transparent dark:via-transparent dark:to-transparent border-purple-200 dark:border-purple-700 mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl">
               <Shield className="w-6 h-6 text-purple-600" />
@@ -1554,17 +1554,17 @@ export default function EscrowPage() {
 
             {/* Trust Indicators */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-4 text-center border border-green-200 dark:border-green-700">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:bg-slate-800 dark:from-transparent dark:to-transparent rounded-lg p-4 text-center border border-green-200 dark:border-green-700">
                 <Shield className="w-8 h-8 text-green-600 dark:text-green-400 mx-auto mb-2" />
                 <p className="font-semibold text-green-900 dark:text-green-300">100% Money-Back Guarantee</p>
                 <p className="text-xs text-green-700 dark:text-green-400 mt-1">If work doesn't meet standards</p>
               </div>
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-4 text-center border border-blue-200 dark:border-blue-700">
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:bg-slate-800 dark:from-transparent dark:to-transparent rounded-lg p-4 text-center border border-blue-200 dark:border-blue-700">
                 <Lock className="w-8 h-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
                 <p className="font-semibold text-blue-900 dark:text-blue-300">Funds Protected by Escrow</p>
                 <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">Bank-level security</p>
               </div>
-              <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/30 dark:to-violet-900/30 rounded-lg p-4 text-center border border-purple-200 dark:border-purple-700">
+              <div className="bg-gradient-to-br from-purple-50 to-violet-50 dark:bg-slate-800 dark:from-transparent dark:to-transparent rounded-lg p-4 text-center border border-purple-200 dark:border-purple-700">
                 <TrendingUp className="w-8 h-8 text-purple-600 dark:text-purple-400 mx-auto mb-2" />
                 <p className="font-semibold text-purple-900 dark:text-purple-300">
                   <NumberFlow value={1247} className="inline" /> Successful Releases
@@ -2415,7 +2415,7 @@ export default function EscrowPage() {
                     <span className="text-sm font-medium">${ms.amount.toLocaleString()}</span>
                   </div>
                 ))}
-                <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
+                <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 dark:bg-slate-800">
                   <div>
                     <p className="text-sm font-medium">Platform Fee</p>
                   </div>

@@ -1180,7 +1180,7 @@ export default function ReportsPage() {
           <>
             {/* Revenue Overview Section */}
             <ScrollReveal>
-              <LiquidGlassCard className="p-6 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-900/30 dark:via-emerald-900/30 dark:to-teal-900/30 border-green-200 dark:border-green-800">
+              <LiquidGlassCard className="p-6 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:bg-slate-800 dark:from-transparent dark:via-transparent dark:to-transparent border-green-200 dark:border-green-800">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -1295,25 +1295,25 @@ export default function ReportsPage() {
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-4 border border-green-200 dark:border-green-800">
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:bg-slate-800 dark:from-transparent dark:to-transparent rounded-lg p-4 border border-green-200 dark:border-green-800">
                     <p className="text-xs text-green-700 dark:text-green-400 mb-1">Total Revenue</p>
                     <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                       $<NumberFlow value={financialData.profitability.totalRevenue} />
                     </p>
                   </div>
-                  <div className="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/30 dark:to-orange-900/30 rounded-lg p-4 border border-red-200 dark:border-red-800">
+                  <div className="bg-gradient-to-br from-red-50 to-orange-50 dark:bg-slate-800 dark:from-transparent dark:to-transparent rounded-lg p-4 border border-red-200 dark:border-red-800">
                     <p className="text-xs text-red-700 dark:text-red-400 mb-1">Total Expenses</p>
                     <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                       $<NumberFlow value={financialData.profitability.totalExpenses} />
                     </p>
                   </div>
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:bg-slate-800 dark:from-transparent dark:to-transparent rounded-lg p-4 border border-blue-200 dark:border-blue-800">
                     <p className="text-xs text-blue-700 dark:text-blue-400 mb-1">Net Profit</p>
                     <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                       $<NumberFlow value={financialData.profitability.totalProfit} />
                     </p>
                   </div>
-                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:bg-slate-800 dark:from-transparent dark:to-transparent rounded-lg p-4 border border-purple-200 dark:border-purple-800">
                     <p className="text-xs text-purple-700 dark:text-purple-400 mb-1">Avg Margin</p>
                     <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                       <NumberFlow value={financialData.profitability.averageMargin} />%
@@ -1370,7 +1370,7 @@ export default function ReportsPage() {
 
             {/* Cash Flow Projections */}
             <ScrollReveal delay={0.2}>
-              <LiquidGlassCard className="p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900/30 dark:via-indigo-900/30 dark:to-purple-900/30 border-blue-200 dark:border-blue-800">
+              <LiquidGlassCard className="p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-slate-800 dark:from-transparent dark:via-transparent dark:to-transparent border-blue-200 dark:border-blue-800">
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -1456,7 +1456,7 @@ export default function ReportsPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Top Services */}
-                  <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/30 dark:to-amber-900/30 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
+                  <div className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:bg-slate-800 dark:from-transparent dark:to-transparent rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                       <Zap className="w-4 h-4 text-yellow-600 dark:text-yellow-400" />
                       Top Performing Services
@@ -1489,7 +1489,7 @@ export default function ReportsPage() {
                   </div>
 
                   {/* Seasonal Trends */}
-                  <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg p-4 border border-indigo-200 dark:border-indigo-800">
+                  <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:bg-slate-800 dark:from-transparent dark:to-transparent rounded-lg p-4 border border-indigo-200 dark:border-indigo-800">
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                       <TrendingUp className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                       Quarterly Performance Trends

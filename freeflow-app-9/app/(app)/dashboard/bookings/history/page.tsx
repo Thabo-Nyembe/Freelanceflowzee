@@ -152,9 +152,9 @@ export default function HistoryPage() {
       </div>
 
       {pastBookings.length > 0 ? (
-        <div className="rounded-md border bg-white">
+        <div className="rounded-md border bg-white dark:bg-slate-800">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-gray-50 dark:bg-slate-800">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   Date
@@ -178,7 +178,7 @@ export default function HistoryPage() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {pastBookings.map(booking => (
-                <tr key={booking.id} className="hover:bg-gray-50">
+                <tr key={booking.id} className="hover:bg-gray-50 dark:bg-slate-800">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
                       {formatDate(booking.date)}

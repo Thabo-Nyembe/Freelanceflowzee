@@ -261,7 +261,7 @@ export default function AppStoreClient({ initialApps, initialStats }: AppStoreCl
                           </button>
                           <button
                             onClick={() => handleUninstall(app.id)}
-                            className="flex-1 px-3 py-1.5 bg-gray-50 text-gray-700 rounded text-xs font-medium hover:bg-gray-100"
+                            className="flex-1 px-3 py-1.5 bg-gray-50 text-gray-700 rounded text-xs font-medium hover:bg-gray-100 dark:bg-slate-700"
                           >
                             Uninstall
                           </button>
@@ -271,7 +271,7 @@ export default function AppStoreClient({ initialApps, initialStats }: AppStoreCl
                           <button className="flex-1 px-3 py-1.5 bg-purple-50 text-purple-700 rounded text-xs font-medium hover:bg-purple-100">
                             Purchase
                           </button>
-                          <button className="flex-1 px-3 py-1.5 bg-gray-50 text-gray-700 rounded text-xs font-medium hover:bg-gray-100">
+                          <button className="flex-1 px-3 py-1.5 bg-gray-50 text-gray-700 rounded text-xs font-medium hover:bg-gray-100 dark:bg-slate-700">
                             Details
                           </button>
                         </>
@@ -295,7 +295,7 @@ export default function AppStoreClient({ initialApps, initialStats }: AppStoreCl
                               Start Trial
                             </button>
                           )}
-                          <button className="flex-1 px-3 py-1.5 bg-gray-50 text-gray-700 rounded text-xs font-medium hover:bg-gray-100">
+                          <button className="flex-1 px-3 py-1.5 bg-gray-50 text-gray-700 rounded text-xs font-medium hover:bg-gray-100 dark:bg-slate-700">
                             Details
                           </button>
                         </>

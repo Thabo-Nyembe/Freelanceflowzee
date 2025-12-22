@@ -212,7 +212,7 @@ export default function ThirdPartyIntegrationsClient({ initialIntegrations, init
                     <div className="flex gap-2 pt-3 border-t">
                       <button onClick={() => handleSync(integration.id)} className="flex-1 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded text-xs font-medium hover:bg-emerald-100">Sync</button>
                       {integration.status === 'active' ? (
-                        <button onClick={() => handleDeactivate(integration.id)} className="flex-1 px-3 py-1.5 bg-gray-50 text-gray-700 rounded text-xs font-medium hover:bg-gray-100">Deactivate</button>
+                        <button onClick={() => handleDeactivate(integration.id)} className="flex-1 px-3 py-1.5 bg-gray-50 text-gray-700 rounded text-xs font-medium hover:bg-gray-100 dark:bg-slate-700">Deactivate</button>
                       ) : (
                         <button onClick={() => handleActivate(integration.id)} className="flex-1 px-3 py-1.5 bg-green-50 text-green-700 rounded text-xs font-medium hover:bg-green-100">Activate</button>
                       )}

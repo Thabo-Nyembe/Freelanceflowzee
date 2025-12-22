@@ -59,7 +59,7 @@ const SlideFillButton = dynamic(
 
 const GlassmorphismCard = dynamic(
   () => import('@/components/ui/motion-enhanced').then(mod => mod.GlassmorphismCard),
-  { loading: () => <Card><CardContent className="h-32 animate-pulse bg-gray-100" /></Card>, ssr: false }
+  { loading: () => <Card><CardContent className="h-32 animate-pulse bg-gray-100 dark:bg-slate-700" /></Card>, ssr: false }
 )
 const FloatingActionButton = dynamic(
   () => import('@/components/ui/motion-enhanced').then(mod => mod.FloatingActionButton),

@@ -796,7 +796,7 @@ export default function ReferralsPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <Button
                 variant="outline"
-                className="flex-col h-auto py-4 bg-white"
+                className="flex-col h-auto py-4 bg-white dark:bg-slate-800"
                 onClick={() => handleRedeemPoints(500)}
                 disabled={loyaltyPoints < 500}
               >
@@ -805,7 +805,7 @@ export default function ReferralsPage() {
               </Button>
               <Button
                 variant="outline"
-                className="flex-col h-auto py-4 bg-white"
+                className="flex-col h-auto py-4 bg-white dark:bg-slate-800"
                 onClick={() => handleRedeemPoints(1000)}
                 disabled={loyaltyPoints < 1000}
               >
@@ -814,7 +814,7 @@ export default function ReferralsPage() {
               </Button>
               <Button
                 variant="outline"
-                className="flex-col h-auto py-4 bg-white"
+                className="flex-col h-auto py-4 bg-white dark:bg-slate-800"
                 onClick={() => handleRedeemPoints(2000)}
                 disabled={loyaltyPoints < 2000}
               >

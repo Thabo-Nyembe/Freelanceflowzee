@@ -160,7 +160,7 @@ export default function MotionGraphicsClient({ initialAnimations, initialStats }
                     <span>0:00 / 0:05</span>
                   </div>
                   <div className="h-1 bg-white/30 rounded-full overflow-hidden">
-                    <div className="h-full bg-white" style={{ width: '0%' }} />
+                    <div className="h-full bg-white dark:bg-slate-800" style={{ width: '0%' }} />
                   </div>
                 </div>
               </div>

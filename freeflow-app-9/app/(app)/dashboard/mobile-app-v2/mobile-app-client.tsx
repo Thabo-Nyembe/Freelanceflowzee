@@ -84,7 +84,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
             <p className="text-gray-600">Manage your mobile presence and engagement</p>
           </div>
           <div className="flex gap-3">
-            <button onClick={() => setShowVersionModal(true)} className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
+            <button onClick={() => setShowVersionModal(true)} className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-slate-800">
               New Version
             </button>
             <button onClick={() => setShowFeatureModal(true)} className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg">
@@ -179,7 +179,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                     {version.features && version.features.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-3">
                         {version.features.map((f, i) => (
-                          <span key={i} className="text-xs px-2 py-1 rounded-md bg-gray-100">{f}</span>
+                          <span key={i} className="text-xs px-2 py-1 rounded-md bg-gray-100 dark:bg-slate-700">{f}</span>
                         ))}
                       </div>
                     )}

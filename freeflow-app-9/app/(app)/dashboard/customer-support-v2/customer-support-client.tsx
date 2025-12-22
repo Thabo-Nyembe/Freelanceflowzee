@@ -67,7 +67,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <p className="text-gray-600 mt-1">Monitor support team performance and customer interactions</p>
           </div>
           <div className="flex gap-3">
-            <button onClick={() => setShowConversationModal(true)} className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">New Conversation</button>
+            <button onClick={() => setShowConversationModal(true)} className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-slate-800">New Conversation</button>
             <button onClick={() => setShowAgentModal(true)} className="px-6 py-2.5 bg-gradient-to-r from-emerald-600 via-green-600 to-lime-600 text-white rounded-lg">Add Agent</button>
           </div>
         </div>

@@ -467,14 +467,14 @@ export default function ValueDashboardPage() {
               <div className="space-y-4">
                 <h4 className="font-semibold text-gray-900">Investment Analysis</h4>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                     <div className="flex items-center gap-2">
                       <DollarSign className="h-5 w-5 text-purple-600" />
                       <span className="text-sm text-gray-600">Total Invested</span>
                     </div>
                     <span className="font-semibold">{formatCurrency(45000)}</span>
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                     <div className="flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-green-600" />
                       <span className="text-sm text-gray-600">Completed Value</span>
@@ -495,14 +495,14 @@ export default function ValueDashboardPage() {
               <div className="space-y-4">
                 <h4 className="font-semibold text-gray-900">Return Metrics</h4>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                     <div className="flex items-center gap-2">
                       <TrendingUp className="h-5 w-5 text-blue-600" />
                       <span className="text-sm text-gray-600">Overall ROI</span>
                     </div>
                     <span className="font-semibold">156%</span>
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-5 w-5 text-orange-600" />
                       <span className="text-sm text-gray-600">Avg Time to ROI</span>
@@ -583,7 +583,7 @@ export default function ValueDashboardPage() {
                 { name: 'Content Strategy', budget: 3500, spent: 3100, value: 5500 },
                 { name: 'Brand Guidelines', budget: 2500, spent: 2000, value: 3500 }
               ].map((project, idx) => (
-                <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900">{project.name}</p>
                     <p className="text-xs text-gray-600">Budget: {formatCurrency(project.budget)} | Spent: {formatCurrency(project.spent)}</p>

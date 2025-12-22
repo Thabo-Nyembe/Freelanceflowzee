@@ -758,7 +758,7 @@ export default function SettingsPage() {
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-lg border border-gray-200 bg-gray-50">
+                <div className="p-4 rounded-lg border border-gray-200 bg-gray-50 dark:bg-slate-800">
                   <h4 className="font-medium text-gray-900 mb-2">JSON Format</h4>
                   <p className="text-sm text-gray-600 mb-3">Structured data format, easy to import to other systems</p>
                   <Button
@@ -772,7 +772,7 @@ export default function SettingsPage() {
                   </Button>
                 </div>
 
-                <div className="p-4 rounded-lg border border-gray-200 bg-gray-50">
+                <div className="p-4 rounded-lg border border-gray-200 bg-gray-50 dark:bg-slate-800">
                   <h4 className="font-medium text-gray-900 mb-2">CSV Format</h4>
                   <p className="text-sm text-gray-600 mb-3">Spreadsheet format, compatible with Excel and Google Sheets</p>
                   <Button
@@ -798,19 +798,19 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                   <span className="text-sm text-gray-600">Projects</span>
                   <Badge>12 items</Badge>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                   <span className="text-sm text-gray-600">Messages</span>
                   <Badge>127 items</Badge>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                   <span className="text-sm text-gray-600">Files</span>
                   <Badge>23 items</Badge>
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                   <span className="text-sm text-gray-600">Feedback</span>
                   <Badge>3 submissions</Badge>
                 </div>

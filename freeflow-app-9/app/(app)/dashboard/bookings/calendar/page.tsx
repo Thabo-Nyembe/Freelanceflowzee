@@ -372,7 +372,7 @@ export default function CalendarPage() {
       </div>
 
       {/* Calendar Grid */}
-      <div className="border rounded-lg p-4 bg-white">
+      <div className="border rounded-lg p-4 bg-white dark:bg-slate-800">
         <div className="flex items-center justify-between mb-4">
           <h4 className="font-semibold text-lg">
             {getMonthYearString(currentDate)}
@@ -479,7 +479,7 @@ export default function CalendarPage() {
                 {todayBookings.map(booking => (
                   <div
                     key={booking.id}
-                    className="flex items-center justify-between p-3 border rounded hover:bg-gray-50"
+                    className="flex items-center justify-between p-3 border rounded hover:bg-gray-50 dark:bg-slate-800"
                   >
                     <div className="flex-1">
                       <p className="font-medium">

@@ -631,7 +631,7 @@ export default function CollaborationPage() {
                 </div>
 
                 {/* Chat messages */}
-                <div className="space-y-4 max-h-[500px] overflow-y-auto p-4 border rounded-lg bg-gray-50">
+                <div className="space-y-4 max-h-[500px] overflow-y-auto p-4 border rounded-lg bg-gray-50 dark:bg-slate-800">
                   {/* Message 1 */}
                   <div className="flex gap-3">
                     <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
@@ -949,7 +949,7 @@ export default function CollaborationPage() {
                   <h3 className="font-semibold">Team Members</h3>
 
                   {/* Member 1 */}
-                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50">
+                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 dark:bg-slate-800">
                     <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
                       SA
                     </div>
@@ -983,7 +983,7 @@ export default function CollaborationPage() {
                   </div>
 
                   {/* Member 2 */}
-                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50">
+                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 dark:bg-slate-800">
                     <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-semibold">
                       MC
                     </div>
@@ -1017,7 +1017,7 @@ export default function CollaborationPage() {
                   </div>
 
                   {/* Member 3 */}
-                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50">
+                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 dark:bg-slate-800">
                     <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
                       JD
                     </div>
@@ -1051,7 +1051,7 @@ export default function CollaborationPage() {
                   </div>
 
                   {/* Member 4 */}
-                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50">
+                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 dark:bg-slate-800">
                     <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white font-semibold">
                       RK
                     </div>
@@ -1085,7 +1085,7 @@ export default function CollaborationPage() {
                   </div>
 
                   {/* Member 5 */}
-                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50">
+                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 dark:bg-slate-800">
                     <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center text-white font-semibold">
                       EM
                     </div>
@@ -1119,7 +1119,7 @@ export default function CollaborationPage() {
                   </div>
 
                   {/* Member 6 */}
-                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50">
+                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 dark:bg-slate-800">
                     <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-semibold">
                       DL
                     </div>
@@ -1153,7 +1153,7 @@ export default function CollaborationPage() {
                   </div>
 
                   {/* Member 7 */}
-                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50">
+                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 dark:bg-slate-800">
                     <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-full flex items-center justify-center text-white font-semibold">
                       LW
                     </div>
@@ -1187,7 +1187,7 @@ export default function CollaborationPage() {
                   </div>
 
                   {/* Member 8 */}
-                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50">
+                  <div className="flex items-center gap-4 p-4 border rounded-lg hover:bg-gray-50 dark:bg-slate-800">
                     <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-full flex items-center justify-center text-white font-semibold">
                       TH
                     </div>
@@ -1857,17 +1857,17 @@ export default function CollaborationPage() {
                 <div className="space-y-3">
                   <h3 className="font-semibold">Example Use Cases</h3>
                   <div className="grid grid-cols-3 gap-3">
-                    <div className="p-4 border rounded-lg hover:bg-gray-50">
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:bg-slate-800">
                       <Image className="h-6 w-6 mb-2 text-blue-600" />
                       <p className="font-medium text-sm">Design Review</p>
                       <p className="text-xs text-gray-500">Annotate UI mockups</p>
                     </div>
-                    <div className="p-4 border rounded-lg hover:bg-gray-50">
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:bg-slate-800">
                       <Play className="h-6 w-6 mb-2 text-green-600" />
                       <p className="font-medium text-sm">Video Feedback</p>
                       <p className="text-xs text-gray-500">Comment at timestamps</p>
                     </div>
-                    <div className="p-4 border rounded-lg hover:bg-gray-50">
+                    <div className="p-4 border rounded-lg hover:bg-gray-50 dark:bg-slate-800">
                       <FileText className="h-6 w-6 mb-2 text-purple-600" />
                       <p className="font-medium text-sm">Document Review</p>
                       <p className="text-xs text-gray-500">Mark specific sections</p>

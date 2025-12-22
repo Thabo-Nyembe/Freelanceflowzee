@@ -1140,7 +1140,7 @@ export default function CanvasCollaboration() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-800">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 p-4">
         <div className="flex items-center justify-between">
@@ -1319,7 +1319,7 @@ export default function CanvasCollaboration() {
           </div>
 
           {/* Canvas Container */}
-          <div className="flex-1 relative overflow-auto bg-gray-100">
+          <div className="flex-1 relative overflow-auto bg-gray-100 dark:bg-slate-700">
             <div className="flex items-center justify-center min-h-full p-8">
               <div 
                 className="bg-white shadow-lg relative"

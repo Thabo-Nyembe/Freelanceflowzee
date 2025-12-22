@@ -761,7 +761,7 @@ export default function PaymentsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b bg-gray-50">
+                      <tr className="border-b bg-gray-50 dark:bg-slate-800">
                         <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                           Date
                         </th>

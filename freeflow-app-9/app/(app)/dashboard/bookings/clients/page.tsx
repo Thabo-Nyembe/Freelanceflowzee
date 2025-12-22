@@ -181,7 +181,7 @@ export default function ClientsPage() {
 
       <div className="rounded-md border">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 dark:bg-slate-800">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Client
@@ -208,7 +208,7 @@ export default function ClientsPage() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {clients.map((booking, idx) => (
-              <tr key={booking.id} className="hover:bg-gray-50">
+              <tr key={booking.id} className="hover:bg-gray-50 dark:bg-slate-800">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="h-10 w-10 rounded-full bg-gradient-to-br from-violet-bolt to-electric-cyan flex items-center justify-center text-white font-semibold">

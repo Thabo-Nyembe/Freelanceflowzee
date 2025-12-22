@@ -385,7 +385,7 @@ export default function CommunityProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-800">
       {/* Cover Image */}
       <div className="relative h-64 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="absolute inset-0 bg-black/20" />

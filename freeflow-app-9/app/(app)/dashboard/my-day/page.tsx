@@ -722,7 +722,7 @@ export default function MyDayTodayPage() {
           </Card>
 
           {/* AI Productivity Tips */}
-          <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 border-purple-200 dark:border-purple-800">
+          <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:bg-slate-800 dark:from-transparent dark:to-transparent border-purple-200 dark:border-purple-800">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
                 <Lightbulb className="h-5 w-5" />

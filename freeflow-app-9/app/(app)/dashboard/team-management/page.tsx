@@ -722,7 +722,7 @@ export default function TeamManagementPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {teamMembers.slice(0, 4).map((member) => (
-                    <div key={member.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                    <div key={member.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                       <div className="flex items-center space-x-3">
                         <div className="relative">
                           <Avatar className="h-10 w-10">
@@ -756,7 +756,7 @@ export default function TeamManagementPage() {
                     .sort((a, b) => b.rating - a.rating)
                     .slice(0, 4)
                     .map((member, index) => (
-                      <div key={member.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                      <div key={member.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
                         <div className="flex items-center space-x-3">
                           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-bold text-sm">
                             {index + 1}

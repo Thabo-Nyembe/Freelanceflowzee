@@ -1027,7 +1027,7 @@ export default function UpcomingBookingsPage() {
         <CardContent>
           <div className="rounded-md border">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-slate-800">
                 <tr>
                   <th
                     scope="col"
@@ -1069,7 +1069,7 @@ export default function UpcomingBookingsPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredBookings.map(booking => (
-                  <tr key={booking.id} className="hover:bg-gray-50">
+                  <tr key={booking.id} className="hover:bg-gray-50 dark:bg-slate-800">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-blue-100">
