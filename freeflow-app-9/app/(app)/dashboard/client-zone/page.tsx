@@ -1152,13 +1152,13 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0 }}
           >
-            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border-blue-200 dark:border-blue-800 hover:shadow-lg transition-shadow">
+            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 border-blue-200 dark:border-blue-700 hover:shadow-lg transition-shadow">
               <div className="p-6 text-center">
-                <div className="inline-flex p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 dark:from-blue-500/20 dark:to-indigo-500/20 rounded-xl mb-4">
-                  <FolderOpen className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                <div className="inline-flex p-3 bg-gradient-to-br from-blue-400/20 to-indigo-400/20 dark:from-blue-500/30 dark:to-indigo-500/30 rounded-xl mb-4">
+                  <FolderOpen className="h-8 w-8 text-blue-600 dark:text-blue-300" />
                 </div>
-                <NumberFlow value={dashboardData?.activeProjects || projects.filter(p => p.status === 'active').length || 0} className="text-2xl font-bold text-blue-600 dark:text-blue-400 block" />
-                <p className="text-gray-600 dark:text-gray-400">Active Projects</p>
+                <NumberFlow value={dashboardData?.activeProjects || projects.filter(p => p.status === 'active').length || 0} className="text-2xl font-bold text-blue-600 dark:text-blue-300 block" />
+                <p className="text-gray-600 dark:text-gray-300">Active Projects</p>
               </div>
             </Card>
           </motion.div>
@@ -1168,13 +1168,13 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 border-emerald-200 dark:border-emerald-800 hover:shadow-lg transition-shadow">
+            <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900 dark:to-teal-900 border-emerald-200 dark:border-emerald-700 hover:shadow-lg transition-shadow">
               <div className="p-6 text-center">
-                <div className="inline-flex p-3 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 dark:from-emerald-500/20 dark:to-teal-500/20 rounded-xl mb-4">
-                  <CheckCircle className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+                <div className="inline-flex p-3 bg-gradient-to-br from-emerald-400/20 to-teal-400/20 dark:from-emerald-500/30 dark:to-teal-500/30 rounded-xl mb-4">
+                  <CheckCircle className="h-8 w-8 text-emerald-600 dark:text-emerald-300" />
                 </div>
-                <NumberFlow value={dashboardData?.completedProjects || projects.filter(p => p.status === 'completed').length || 0} className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 block" />
-                <p className="text-gray-600 dark:text-gray-400">Completed</p>
+                <NumberFlow value={dashboardData?.completedProjects || projects.filter(p => p.status === 'completed').length || 0} className="text-2xl font-bold text-emerald-600 dark:text-emerald-300 block" />
+                <p className="text-gray-600 dark:text-gray-300">Completed</p>
               </div>
             </Card>
           </motion.div>
@@ -1184,13 +1184,13 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 border-purple-200 dark:border-purple-800 hover:shadow-lg transition-shadow">
+            <Card className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900 dark:to-indigo-900 border-purple-200 dark:border-purple-700 hover:shadow-lg transition-shadow">
               <div className="p-6 text-center">
-                <div className="inline-flex p-3 bg-gradient-to-br from-purple-400/20 to-indigo-400/20 dark:from-purple-500/20 dark:to-indigo-500/20 rounded-xl mb-4">
-                  <DollarSign className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                <div className="inline-flex p-3 bg-gradient-to-br from-purple-400/20 to-indigo-400/20 dark:from-purple-500/30 dark:to-indigo-500/30 rounded-xl mb-4">
+                  <DollarSign className="h-8 w-8 text-purple-600 dark:text-purple-300" />
                 </div>
-                <NumberFlow value={dashboardData?.totalInvestment || 0} format="currency" className="text-2xl font-bold text-purple-600 dark:text-purple-400 block" />
-                <p className="text-gray-600 dark:text-gray-400">Total Investment</p>
+                <NumberFlow value={dashboardData?.totalInvestment || 0} format="currency" className="text-2xl font-bold text-purple-600 dark:text-purple-300 block" />
+                <p className="text-gray-600 dark:text-gray-300">Total Investment</p>
               </div>
             </Card>
           </motion.div>
@@ -1200,13 +1200,13 @@ export default function ClientZonePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30 border-amber-200 dark:border-amber-800 hover:shadow-lg transition-shadow">
+            <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900 dark:to-yellow-900 border-amber-200 dark:border-amber-700 hover:shadow-lg transition-shadow">
               <div className="p-6 text-center">
-                <div className="inline-flex p-3 bg-gradient-to-br from-amber-400/20 to-yellow-400/20 dark:from-amber-500/20 dark:to-yellow-500/20 rounded-xl mb-4">
-                  <Star className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+                <div className="inline-flex p-3 bg-gradient-to-br from-amber-400/20 to-yellow-400/20 dark:from-amber-500/30 dark:to-yellow-500/30 rounded-xl mb-4">
+                  <Star className="h-8 w-8 text-amber-600 dark:text-amber-300" />
                 </div>
-                <NumberFlow value={parseFloat(dashboardData?.satisfaction || '0')} decimals={1} className="text-2xl font-bold text-amber-600 dark:text-amber-400 block" />
-                <p className="text-gray-600 dark:text-gray-400">Satisfaction Rating</p>
+                <NumberFlow value={parseFloat(dashboardData?.satisfaction || '0')} decimals={1} className="text-2xl font-bold text-amber-600 dark:text-amber-300 block" />
+                <p className="text-gray-600 dark:text-gray-300">Satisfaction Rating</p>
               </div>
             </Card>
           </motion.div>
