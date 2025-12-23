@@ -1,20 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { useFAQs, FAQ, FAQStats } from '@/lib/hooks/use-faqs'
-import {
-  BentoCard,
-  BentoQuickAction
-} from '@/components/ui/bento-grid-advanced'
-import {
-  StatGrid,
-  MiniKPI
-} from '@/components/ui/results-display'
-import {
-  ModernButton,
-  GradientButton,
-  PillButton
-} from '@/components/ui/modern-buttons'
+import { useState, useMemo } from 'react'
 import {
   HelpCircle,
   Plus,
@@ -29,256 +15,1187 @@ import {
   X,
   Loader2,
   Trash2,
-  Edit
+  Edit,
+  ChevronRight,
+  ChevronDown,
+  Book,
+  FolderOpen,
+  Globe,
+  Lock,
+  Star,
+  Clock,
+  Users,
+  MessageSquare,
+  Sparkles,
+  TrendingUp,
+  ArrowRight,
+  ExternalLink,
+  Copy,
+  MoreVertical,
+  Filter,
+  Grid3X3,
+  List,
+  Bookmark,
+  Share2,
+  Send,
+  Languages,
+  Palette,
+  Layout,
+  Zap,
+  Bot,
+  CheckCircle2,
+  AlertCircle,
+  Archive,
+  RefreshCw,
+  Download,
+  Upload,
+  History,
+  PieChart,
+  Target,
+  Award,
+  Heart,
+  MessageCircle,
+  Headphones,
+  Mail,
+  Link,
+  Image
 } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
-interface FAQClientProps {
-  initialFAQs: FAQ[]
-  initialStats: FAQStats
+// ============================================================================
+// TYPE DEFINITIONS - Intercom/Zendesk Level
+// ============================================================================
+
+interface Author {
+  id: string
+  name: string
+  avatar: string
+  role: string
 }
 
-export default function FAQClient({ initialFAQs, initialStats }: FAQClientProps) {
-  const {
-    faqs,
-    stats,
-    loading,
-    createFAQ,
-    updateFAQ,
-    deleteFAQ,
-    markHelpful
-  } = useFAQs(initialFAQs, initialStats)
+interface ArticleVersion {
+  id: string
+  version: number
+  content: string
+  author: Author
+  createdAt: string
+  changes: string
+}
 
-  const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft' | 'review'>('all')
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [newFAQ, setNewFAQ] = useState({
-    question: '',
-    answer: '',
-    category: '',
-    priority: 'medium' as const
-  })
+interface Article {
+  id: string
+  title: string
+  slug: string
+  content: string
+  excerpt: string
+  status: 'draft' | 'published' | 'review' | 'archived'
+  collectionId: string
+  author: Author
+  tags: string[]
+  viewCount: number
+  helpfulCount: number
+  notHelpfulCount: number
+  commentCount: number
+  shareCount: number
+  searchCount: number
+  avgReadTime: number
+  createdAt: string
+  updatedAt: string
+  publishedAt: string | null
+  featured: boolean
+  pinned: boolean
+  language: string
+  translations: { language: string; articleId: string }[]
+  relatedArticles: string[]
+  versions: ArticleVersion[]
+}
 
-  const filteredFAQs = faqs.filter(faq => {
-    const matchesSearch = faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      faq.answer.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'all' || faq.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+interface Collection {
+  id: string
+  name: string
+  description: string
+  icon: string
+  color: string
+  articleCount: number
+  order: number
+  parentId: string | null
+  isPublic: boolean
+  createdAt: string
+  updatedAt: string
+}
 
-  const handleCreateFAQ = async () => {
-    if (!newFAQ.question.trim() || !newFAQ.answer.trim()) return
-    await createFAQ(newFAQ)
-    setShowCreateModal(false)
-    setNewFAQ({ question: '', answer: '', category: '', priority: 'medium' })
+interface SearchQuery {
+  id: string
+  query: string
+  count: number
+  resultsFound: number
+  avgClickPosition: number
+  lastSearched: string
+}
+
+interface HelpCenterSettings {
+  title: string
+  subtitle: string
+  logoUrl: string
+  primaryColor: string
+  customDomain: string | null
+  showSearch: boolean
+  showCategories: boolean
+  showPopularArticles: boolean
+  showContactButton: boolean
+  contactEmail: string
+  languages: string[]
+  defaultLanguage: string
+}
+
+interface KnowledgeBaseStats {
+  totalArticles: number
+  publishedArticles: number
+  draftArticles: number
+  totalViews: number
+  totalSearches: number
+  avgHelpfulRating: number
+  articlesNeedingReview: number
+  unansweredQuestions: number
+  totalCollections: number
+  totalAuthors: number
+}
+
+// ============================================================================
+// MOCK DATA
+// ============================================================================
+
+const mockAuthors: Author[] = [
+  { id: 'auth-1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', role: 'Content Lead' },
+  { id: 'auth-2', name: 'John Smith', avatar: '/avatars/john.jpg', role: 'Support Manager' },
+  { id: 'auth-3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', role: 'Technical Writer' }
+]
+
+const mockCollections: Collection[] = [
+  { id: 'col-1', name: 'Getting Started', description: 'Everything you need to begin using our platform', icon: '🚀', color: 'bg-blue-500', articleCount: 12, order: 1, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-20' },
+  { id: 'col-2', name: 'Account & Billing', description: 'Manage your account settings and billing information', icon: '💳', color: 'bg-green-500', articleCount: 8, order: 2, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-18' },
+  { id: 'col-3', name: 'Features & How-to', description: 'Learn how to use all features effectively', icon: '✨', color: 'bg-purple-500', articleCount: 24, order: 3, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-22' },
+  { id: 'col-4', name: 'Troubleshooting', description: 'Solutions to common problems and errors', icon: '🔧', color: 'bg-orange-500', articleCount: 15, order: 4, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-21' },
+  { id: 'col-5', name: 'API & Integrations', description: 'Developer documentation and API guides', icon: '🔗', color: 'bg-indigo-500', articleCount: 18, order: 5, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-19' },
+  { id: 'col-6', name: 'Security & Privacy', description: 'Security best practices and privacy settings', icon: '🔒', color: 'bg-red-500', articleCount: 6, order: 6, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-15' }
+]
+
+const mockArticles: Article[] = [
+  {
+    id: 'art-1',
+    title: 'How to create your first project',
+    slug: 'how-to-create-first-project',
+    content: 'Creating your first project is easy. Follow these steps...',
+    excerpt: 'Learn how to create and set up your first project in minutes.',
+    status: 'published',
+    collectionId: 'col-1',
+    author: mockAuthors[0],
+    tags: ['projects', 'getting-started', 'tutorial'],
+    viewCount: 15420,
+    helpfulCount: 892,
+    notHelpfulCount: 23,
+    commentCount: 45,
+    shareCount: 234,
+    searchCount: 3420,
+    avgReadTime: 5,
+    createdAt: '2024-06-15',
+    updatedAt: '2024-12-20',
+    publishedAt: '2024-06-20',
+    featured: true,
+    pinned: true,
+    language: 'en',
+    translations: [{ language: 'es', articleId: 'art-1-es' }, { language: 'fr', articleId: 'art-1-fr' }],
+    relatedArticles: ['art-2', 'art-3'],
+    versions: []
+  },
+  {
+    id: 'art-2',
+    title: 'Understanding your dashboard',
+    slug: 'understanding-dashboard',
+    content: 'Your dashboard provides an overview of all your activities...',
+    excerpt: 'A complete guide to navigating and using your dashboard.',
+    status: 'published',
+    collectionId: 'col-1',
+    author: mockAuthors[1],
+    tags: ['dashboard', 'overview', 'analytics'],
+    viewCount: 12350,
+    helpfulCount: 756,
+    notHelpfulCount: 18,
+    commentCount: 32,
+    shareCount: 189,
+    searchCount: 2890,
+    avgReadTime: 7,
+    createdAt: '2024-07-01',
+    updatedAt: '2024-12-18',
+    publishedAt: '2024-07-05',
+    featured: true,
+    pinned: false,
+    language: 'en',
+    translations: [],
+    relatedArticles: ['art-1'],
+    versions: []
+  },
+  {
+    id: 'art-3',
+    title: 'How to invite team members',
+    slug: 'invite-team-members',
+    content: 'Collaboration is key. Here is how to invite your team...',
+    excerpt: 'Step-by-step guide to adding team members to your workspace.',
+    status: 'published',
+    collectionId: 'col-2',
+    author: mockAuthors[2],
+    tags: ['team', 'collaboration', 'users'],
+    viewCount: 8920,
+    helpfulCount: 523,
+    notHelpfulCount: 12,
+    commentCount: 28,
+    shareCount: 145,
+    searchCount: 1890,
+    avgReadTime: 4,
+    createdAt: '2024-08-10',
+    updatedAt: '2024-12-15',
+    publishedAt: '2024-08-12',
+    featured: false,
+    pinned: false,
+    language: 'en',
+    translations: [{ language: 'de', articleId: 'art-3-de' }],
+    relatedArticles: ['art-2'],
+    versions: []
+  },
+  {
+    id: 'art-4',
+    title: 'Troubleshooting login issues',
+    slug: 'troubleshooting-login-issues',
+    content: 'Having trouble logging in? Try these solutions...',
+    excerpt: 'Common login problems and how to fix them quickly.',
+    status: 'published',
+    collectionId: 'col-4',
+    author: mockAuthors[0],
+    tags: ['login', 'troubleshooting', 'authentication'],
+    viewCount: 25680,
+    helpfulCount: 1245,
+    notHelpfulCount: 89,
+    commentCount: 156,
+    shareCount: 423,
+    searchCount: 8920,
+    avgReadTime: 6,
+    createdAt: '2024-05-01',
+    updatedAt: '2024-12-22',
+    publishedAt: '2024-05-03',
+    featured: false,
+    pinned: true,
+    language: 'en',
+    translations: [{ language: 'es', articleId: 'art-4-es' }, { language: 'fr', articleId: 'art-4-fr' }, { language: 'de', articleId: 'art-4-de' }],
+    relatedArticles: [],
+    versions: []
+  },
+  {
+    id: 'art-5',
+    title: 'API authentication guide',
+    slug: 'api-authentication-guide',
+    content: 'Learn how to authenticate your API requests...',
+    excerpt: 'Complete guide to API authentication methods and best practices.',
+    status: 'published',
+    collectionId: 'col-5',
+    author: mockAuthors[2],
+    tags: ['api', 'authentication', 'developer'],
+    viewCount: 6780,
+    helpfulCount: 445,
+    notHelpfulCount: 15,
+    commentCount: 67,
+    shareCount: 234,
+    searchCount: 2340,
+    avgReadTime: 12,
+    createdAt: '2024-09-15',
+    updatedAt: '2024-12-19',
+    publishedAt: '2024-09-20',
+    featured: false,
+    pinned: false,
+    language: 'en',
+    translations: [],
+    relatedArticles: [],
+    versions: []
+  },
+  {
+    id: 'art-6',
+    title: 'Setting up two-factor authentication',
+    slug: 'setup-two-factor-authentication',
+    content: 'Protect your account with 2FA...',
+    excerpt: 'How to enable and use two-factor authentication for enhanced security.',
+    status: 'draft',
+    collectionId: 'col-6',
+    author: mockAuthors[1],
+    tags: ['security', '2fa', 'authentication'],
+    viewCount: 0,
+    helpfulCount: 0,
+    notHelpfulCount: 0,
+    commentCount: 0,
+    shareCount: 0,
+    searchCount: 0,
+    avgReadTime: 5,
+    createdAt: '2024-12-20',
+    updatedAt: '2024-12-23',
+    publishedAt: null,
+    featured: false,
+    pinned: false,
+    language: 'en',
+    translations: [],
+    relatedArticles: [],
+    versions: []
   }
+]
 
-  const displayStats = [
-    { label: 'Total FAQs', value: stats.total.toString(), change: 12.5, icon: <HelpCircle className="w-5 h-5" /> },
-    { label: 'Published', value: stats.published.toString(), change: 8.3, icon: <FileText className="w-5 h-5" /> },
-    { label: 'Total Views', value: stats.totalViews.toLocaleString(), change: 25.3, icon: <Eye className="w-5 h-5" /> },
-    { label: 'Helpfulness', value: `${stats.avgHelpfulness}%`, change: 5.2, icon: <ThumbsUp className="w-5 h-5" /> }
-  ]
+const mockSearchQueries: SearchQuery[] = [
+  { id: 'sq-1', query: 'login problems', count: 1250, resultsFound: 8, avgClickPosition: 1.2, lastSearched: '2024-12-23' },
+  { id: 'sq-2', query: 'create project', count: 890, resultsFound: 5, avgClickPosition: 1.5, lastSearched: '2024-12-23' },
+  { id: 'sq-3', query: 'api key', count: 720, resultsFound: 12, avgClickPosition: 2.1, lastSearched: '2024-12-23' },
+  { id: 'sq-4', query: 'billing', count: 650, resultsFound: 6, avgClickPosition: 1.8, lastSearched: '2024-12-22' },
+  { id: 'sq-5', query: 'invite team', count: 480, resultsFound: 4, avgClickPosition: 1.3, lastSearched: '2024-12-23' }
+]
+
+const mockStats: KnowledgeBaseStats = {
+  totalArticles: 83,
+  publishedArticles: 76,
+  draftArticles: 7,
+  totalViews: 245890,
+  totalSearches: 89420,
+  avgHelpfulRating: 94.2,
+  articlesNeedingReview: 3,
+  unansweredQuestions: 12,
+  totalCollections: 6,
+  totalAuthors: 8
+}
+
+const mockHelpCenterSettings: HelpCenterSettings = {
+  title: 'FreeFlow Help Center',
+  subtitle: 'Find answers to your questions',
+  logoUrl: '/logo.png',
+  primaryColor: '#3b82f6',
+  customDomain: 'help.freeflow.com',
+  showSearch: true,
+  showCategories: true,
+  showPopularArticles: true,
+  showContactButton: true,
+  contactEmail: 'support@freeflow.com',
+  languages: ['en', 'es', 'fr', 'de'],
+  defaultLanguage: 'en'
+}
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
+export default function FAQClient() {
+  const [activeTab, setActiveTab] = useState('articles')
+  const [articles, setArticles] = useState<Article[]>(mockArticles)
+  const [collections] = useState<Collection[]>(mockCollections)
+  const [searchQueries] = useState<SearchQuery[]>(mockSearchQueries)
+  const [stats] = useState<KnowledgeBaseStats>(mockStats)
+  const [helpCenterSettings] = useState<HelpCenterSettings>(mockHelpCenterSettings)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [collectionFilter, setCollectionFilter] = useState<string>('all')
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+
+  const filteredArticles = useMemo(() => {
+    return articles.filter(article => {
+      const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      const matchesStatus = statusFilter === 'all' || article.status === statusFilter
+      const matchesCollection = collectionFilter === 'all' || article.collectionId === collectionFilter
+      return matchesSearch && matchesStatus && matchesCollection
+    })
+  }, [articles, searchQuery, statusFilter, collectionFilter])
+
+  const featuredArticles = useMemo(() => {
+    return articles.filter(a => a.featured && a.status === 'published').slice(0, 4)
+  }, [articles])
+
+  const popularArticles = useMemo(() => {
+    return articles.filter(a => a.status === 'published').sort((a, b) => b.viewCount - a.viewCount).slice(0, 5)
+  }, [articles])
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'published': return 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300'
-      case 'draft': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
-      case 'review': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300'
-      case 'archived': return 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300'
+      case 'published': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+      case 'draft': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+      case 'review': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+      case 'archived': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
       default: return 'bg-gray-100 text-gray-700'
     }
   }
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'critical': return 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300'
-      case 'high': return 'bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-300'
-      case 'medium': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-300'
-      case 'low': return 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300'
-      default: return 'bg-gray-100 text-gray-700'
-    }
+  const getHelpfulPercentage = (helpful: number, notHelpful: number) => {
+    const total = helpful + notHelpful
+    if (total === 0) return 0
+    return Math.round((helpful / total) * 100)
+  }
+
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
+    return num.toString()
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-              <HelpCircle className="w-10 h-10 text-blue-600" />
-              FAQ Management
-            </h1>
-            <p className="text-muted-foreground">Manage frequently asked questions</p>
-          </div>
-          <GradientButton from="blue" to="purple" onClick={() => setShowCreateModal(true)}>
-            <Plus className="w-5 h-5 mr-2" />
-            Create FAQ
-          </GradientButton>
-        </div>
-
-        <StatGrid columns={4} stats={displayStats} />
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <BentoQuickAction icon={<Plus />} title="New FAQ" description="Create" onClick={() => setShowCreateModal(true)} />
-          <BentoQuickAction icon={<Tag />} title="Categories" description="Manage" onClick={() => console.log('Categories')} />
-          <BentoQuickAction icon={<BarChart3 />} title="Analytics" description="View" onClick={() => console.log('Analytics')} />
-          <BentoQuickAction icon={<Settings />} title="Settings" description="Configure" onClick={() => console.log('Settings')} />
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search FAQs..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <PillButton variant={statusFilter === 'all' ? 'primary' : 'ghost'} onClick={() => setStatusFilter('all')}>All</PillButton>
-            <PillButton variant={statusFilter === 'published' ? 'primary' : 'ghost'} onClick={() => setStatusFilter('published')}>Published</PillButton>
-            <PillButton variant={statusFilter === 'draft' ? 'primary' : 'ghost'} onClick={() => setStatusFilter('draft')}>Draft</PillButton>
-            <PillButton variant={statusFilter === 'review' ? 'primary' : 'ghost'} onClick={() => setStatusFilter('review')}>Review</PillButton>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            {loading && faqs.length === 0 ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900">
+      {/* Premium Header */}
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white">
+        <div className="max-w-[1800px] mx-auto px-6 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                  <Book className="w-8 h-8" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold">Knowledge Base</h1>
+                  <div className="flex items-center gap-2 text-blue-100 text-sm">
+                    <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-medium">Intercom/Zendesk Level</span>
+                    <span>•</span>
+                    <span>Self-service support at scale</span>
+                  </div>
+                </div>
               </div>
-            ) : filteredFAQs.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <HelpCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>No FAQs found</p>
-                <ModernButton variant="outline" size="sm" className="mt-4" onClick={() => setShowCreateModal(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create First FAQ
-                </ModernButton>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredFAQs.map((faq) => (
-                  <BentoCard key={faq.id} className="p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className={`text-xs px-2 py-1 rounded-md ${getStatusColor(faq.status)}`}>{faq.status}</span>
-                            <span className={`text-xs px-2 py-1 rounded-md ${getPriorityColor(faq.priority)}`}>{faq.priority}</span>
-                            {faq.category && <span className="text-xs px-2 py-1 rounded-md bg-muted">{faq.category}</span>}
-                          </div>
-                          <h3 className="font-semibold text-lg">{faq.question}</h3>
-                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{faq.answer}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-1"><Eye className="w-3 h-3" />{faq.views_count} views</div>
-                        <div className="flex items-center gap-1"><ThumbsUp className="w-3 h-3" />{faq.helpful_count}</div>
-                        <div className="flex items-center gap-1"><ThumbsDown className="w-3 h-3" />{faq.not_helpful_count}</div>
-                      </div>
-
-                      <div className="flex items-center gap-2 pt-3 border-t">
-                        <ModernButton variant="outline" size="sm" onClick={() => console.log('Edit', faq.id)}>
-                          <Edit className="w-3 h-3 mr-1" />Edit
-                        </ModernButton>
-                        {faq.status === 'draft' && (
-                          <ModernButton variant="primary" size="sm" onClick={() => updateFAQ(faq.id, { status: 'published' })}>
-                            Publish
-                          </ModernButton>
-                        )}
-                        <ModernButton variant="outline" size="sm" onClick={() => deleteFAQ(faq.id)}>
-                          <Trash2 className="w-3 h-3" />
-                        </ModernButton>
-                      </div>
-                    </div>
-                  </BentoCard>
-                ))}
-              </div>
-            )}
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowPreview(true)}
+                className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium backdrop-blur-sm transition-colors flex items-center gap-2"
+              >
+                <Eye className="w-4 h-4" />
+                Preview Help Center
+              </button>
+              <button
+                onClick={() => setShowCreateDialog(true)}
+                className="px-4 py-2 bg-white hover:bg-gray-50 text-blue-600 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                New Article
+              </button>
+            </div>
           </div>
 
-          <div className="space-y-6">
-            <BentoCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Quick Stats</h3>
-              <div className="space-y-3">
-                <MiniKPI label="Published" value={stats.published.toString()} change={8.3} />
-                <MiniKPI label="In Review" value={stats.review.toString()} change={12.5} />
-                <MiniKPI label="Drafts" value={stats.draft.toString()} change={-5.2} />
-                <MiniKPI label="Helpfulness" value={`${stats.avgHelpfulness}%`} change={2.1} />
+          {/* Quick Stats */}
+          <div className="grid grid-cols-6 gap-4">
+            {[
+              { label: 'Total Articles', value: stats.totalArticles, icon: FileText, change: '+5 this week' },
+              { label: 'Total Views', value: formatNumber(stats.totalViews), icon: Eye, change: '+12.3%' },
+              { label: 'Searches', value: formatNumber(stats.totalSearches), icon: Search, change: '+8.7%' },
+              { label: 'Helpful Rate', value: `${stats.avgHelpfulRating}%`, icon: ThumbsUp, change: '+2.1%' },
+              { label: 'Need Review', value: stats.articlesNeedingReview, icon: AlertCircle, change: '3 pending' },
+              { label: 'Collections', value: stats.totalCollections, icon: FolderOpen, change: `${stats.totalAuthors} authors` }
+            ].map((stat, i) => (
+              <div key={i} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <stat.icon className="w-4 h-4 text-blue-200" />
+                  <span className="text-sm text-blue-100">{stat.label}</span>
+                </div>
+                <div className="text-2xl font-bold">{stat.value}</div>
+                <div className="text-xs text-blue-200 mt-1">{stat.change}</div>
               </div>
-            </BentoCard>
+            ))}
           </div>
         </div>
       </div>
 
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-background rounded-xl p-6 w-full max-w-lg mx-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">Create FAQ</h2>
-              <button onClick={() => setShowCreateModal(false)}><X className="w-5 h-5" /></button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Question *</label>
+      {/* Main Content */}
+      <div className="max-w-[1800px] mx-auto px-6 py-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between mb-6">
+            <TabsList className="bg-white dark:bg-gray-800 shadow-sm">
+              <TabsTrigger value="articles" className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Articles
+              </TabsTrigger>
+              <TabsTrigger value="collections" className="flex items-center gap-2">
+                <FolderOpen className="w-4 h-4" />
+                Collections
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4" />
+                Analytics
+              </TabsTrigger>
+              <TabsTrigger value="search-insights" className="flex items-center gap-2">
+                <Search className="w-4 h-4" />
+                Search Insights
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
-                  value={newFAQ.question}
-                  onChange={(e) => setNewFAQ({ ...newFAQ, question: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter question"
+                  placeholder="Search articles..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Answer *</label>
-                <textarea
-                  value={newFAQ.answer}
-                  onChange={(e) => setNewFAQ({ ...newFAQ, answer: e.target.value })}
-                  rows={4}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter answer"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Category</label>
-                  <input
-                    type="text"
-                    value={newFAQ.category}
-                    onChange={(e) => setNewFAQ({ ...newFAQ, category: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., Account"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Priority</label>
-                  <select
-                    value={newFAQ.priority}
-                    onChange={(e) => setNewFAQ({ ...newFAQ, priority: e.target.value as any })}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="critical">Critical</option>
-                  </select>
-                </div>
-              </div>
-              <div className="flex gap-3 pt-4">
-                <ModernButton variant="outline" className="flex-1" onClick={() => setShowCreateModal(false)}>Cancel</ModernButton>
-                <GradientButton from="blue" to="purple" className="flex-1" onClick={handleCreateFAQ} disabled={loading || !newFAQ.question.trim() || !newFAQ.answer.trim()}>
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create FAQ'}
-                </GradientButton>
               </div>
             </div>
           </div>
-        </div>
-      )}
+
+          {/* Articles Tab */}
+          <TabsContent value="articles" className="space-y-6">
+            {/* Filters */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm"
+                >
+                  <option value="all">All Status</option>
+                  <option value="published">Published</option>
+                  <option value="draft">Draft</option>
+                  <option value="review">In Review</option>
+                  <option value="archived">Archived</option>
+                </select>
+                <select
+                  value={collectionFilter}
+                  onChange={(e) => setCollectionFilter(e.target.value)}
+                  className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm"
+                >
+                  <option value="all">All Collections</option>
+                  {collections.map(col => (
+                    <option key={col.id} value={col.id}>{col.icon} {col.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">{filteredArticles.length} articles</span>
+                <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`p-2 rounded ${viewMode === 'list' ? 'bg-white dark:bg-gray-700 shadow-sm' : ''}`}
+                  >
+                    <List className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`p-2 rounded ${viewMode === 'grid' ? 'bg-white dark:bg-gray-700 shadow-sm' : ''}`}
+                  >
+                    <Grid3X3 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Articles List */}
+            <div className={viewMode === 'grid'
+              ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
+              : 'space-y-3'
+            }>
+              {filteredArticles.map(article => {
+                const collection = collections.find(c => c.id === article.collectionId)
+                const helpfulPct = getHelpfulPercentage(article.helpfulCount, article.notHelpfulCount)
+
+                return viewMode === 'list' ? (
+                  <div
+                    key={article.id}
+                    className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`w-12 h-12 ${collection?.color || 'bg-gray-500'} rounded-xl flex items-center justify-center text-2xl`}>
+                        {collection?.icon || '📄'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(article.status)}`}>
+                                {article.status}
+                              </span>
+                              {article.featured && (
+                                <span className="px-2 py-0.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded text-xs font-medium flex items-center gap-1">
+                                  <Star className="w-3 h-3" /> Featured
+                                </span>
+                              )}
+                              {article.pinned && (
+                                <span className="px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded text-xs font-medium">
+                                  Pinned
+                                </span>
+                              )}
+                            </div>
+                            <h3 className="font-semibold text-lg hover:text-blue-600 cursor-pointer" onClick={() => setSelectedArticle(article)}>
+                              {article.title}
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1 mt-1">{article.excerpt}</p>
+                          </div>
+                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                            <MoreVertical className="w-4 h-4 text-gray-400" />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-6 text-sm">
+                          <div className="flex items-center gap-4 text-gray-500">
+                            <span className="flex items-center gap-1"><Eye className="w-4 h-4" />{formatNumber(article.viewCount)}</span>
+                            <span className="flex items-center gap-1">
+                              <ThumbsUp className="w-4 h-4" />
+                              {helpfulPct}% helpful
+                            </span>
+                            <span className="flex items-center gap-1"><Clock className="w-4 h-4" />{article.avgReadTime} min</span>
+                            <span className="flex items-center gap-1"><MessageSquare className="w-4 h-4" />{article.commentCount}</span>
+                          </div>
+                          <div className="flex items-center gap-2 ml-auto">
+                            <div className="flex items-center gap-1">
+                              <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xs">
+                                {article.author.name.charAt(0)}
+                              </div>
+                              <span className="text-sm text-gray-500">{article.author.name}</span>
+                            </div>
+                            <span className="text-gray-300">•</span>
+                            <span className="text-sm text-gray-500">{new Date(article.updatedAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                        {article.tags.length > 0 && (
+                          <div className="flex items-center gap-2 mt-3">
+                            {article.tags.slice(0, 3).map((tag, i) => (
+                              <span key={i} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-xs">
+                                {tag}
+                              </span>
+                            ))}
+                            {article.tags.length > 3 && (
+                              <span className="text-xs text-gray-500">+{article.tags.length - 3}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    key={article.id}
+                    className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all"
+                  >
+                    <div className={`h-2 ${collection?.color || 'bg-gray-500'}`} />
+                    <div className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(article.status)}`}>
+                          {article.status}
+                        </span>
+                        {article.featured && <Star className="w-4 h-4 text-amber-500" />}
+                      </div>
+                      <h3 className="font-semibold line-clamp-2 hover:text-blue-600 cursor-pointer" onClick={() => setSelectedArticle(article)}>
+                        {article.title}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-2">{article.excerpt}</p>
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                        <div className="flex items-center gap-3 text-sm text-gray-500">
+                          <span className="flex items-center gap-1"><Eye className="w-4 h-4" />{formatNumber(article.viewCount)}</span>
+                          <span className="flex items-center gap-1"><ThumbsUp className="w-4 h-4" />{helpfulPct}%</span>
+                        </div>
+                        <span className="text-xs text-gray-400">{article.avgReadTime} min read</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {filteredArticles.length === 0 && (
+              <div className="text-center py-12">
+                <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No articles found</h3>
+                <p className="text-gray-500">Try adjusting your filters or create a new article</p>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Collections Tab */}
+          <TabsContent value="collections" className="space-y-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-semibold">Collections</h2>
+              <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                <Plus className="w-4 h-4" />
+                New Collection
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {collections.map(collection => (
+                <div
+                  key={collection.id}
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 hover:shadow-md transition-all cursor-pointer"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`w-14 h-14 ${collection.color} rounded-xl flex items-center justify-center text-3xl`}>
+                      {collection.icon}
+                    </div>
+                    <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                      <MoreVertical className="w-4 h-4 text-gray-400" />
+                    </button>
+                  </div>
+                  <h3 className="font-semibold text-lg mb-1">{collection.name}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">{collection.description}</p>
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <span className="text-sm text-gray-500">{collection.articleCount} articles</span>
+                    <div className="flex items-center gap-1">
+                      {collection.isPublic ? (
+                        <Globe className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <Lock className="w-4 h-4 text-gray-400" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-blue-600" />
+                  Views Over Time
+                </h3>
+                <div className="h-48 flex items-end justify-between gap-2">
+                  {[45, 62, 55, 78, 82, 95, 88].map((value, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                      <div
+                        className="w-full bg-gradient-to-t from-blue-500 to-indigo-400 rounded-t transition-all"
+                        style={{ height: `${value}%` }}
+                      />
+                      <span className="text-xs text-gray-500">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i]}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <Award className="w-5 h-5 text-amber-500" />
+                  Top Performing Articles
+                </h3>
+                <div className="space-y-3">
+                  {popularArticles.slice(0, 4).map((article, i) => (
+                    <div key={article.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <span className="w-6 h-6 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-full flex items-center justify-center text-sm font-medium">
+                        {i + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{article.title}</p>
+                        <p className="text-xs text-gray-500">{formatNumber(article.viewCount)} views</p>
+                      </div>
+                      <span className="text-sm font-bold text-green-600">
+                        {getHelpfulPercentage(article.helpfulCount, article.notHelpfulCount)}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <Target className="w-5 h-5 text-purple-600" />
+                  Feedback Summary
+                </h3>
+                <div className="flex items-center justify-center gap-8">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-green-600">{stats.avgHelpfulRating}%</div>
+                    <p className="text-sm text-gray-500 mt-1">Helpful Rating</p>
+                  </div>
+                  <div className="h-20 w-px bg-gray-200 dark:bg-gray-700" />
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <ThumbsUp className="w-5 h-5 text-green-500" />
+                      <span className="text-sm">{formatNumber(articles.reduce((sum, a) => sum + a.helpfulCount, 0))} helpful</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <ThumbsDown className="w-5 h-5 text-red-500" />
+                      <span className="text-sm">{formatNumber(articles.reduce((sum, a) => sum + a.notHelpfulCount, 0))} not helpful</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <PieChart className="w-5 h-5 text-indigo-600" />
+                  Content by Collection
+                </h3>
+                <div className="space-y-3">
+                  {collections.slice(0, 5).map(col => (
+                    <div key={col.id}>
+                      <div className="flex items-center justify-between text-sm mb-1">
+                        <span className="flex items-center gap-2">
+                          <span>{col.icon}</span>
+                          <span>{col.name}</span>
+                        </span>
+                        <span className="font-medium">{col.articleCount}</span>
+                      </div>
+                      <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${col.color}`}
+                          style={{ width: `${(col.articleCount / stats.totalArticles) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Search Insights Tab */}
+          <TabsContent value="search-insights" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <Search className="w-5 h-5 text-blue-600" />
+                  Top Search Queries
+                </h3>
+                <div className="space-y-3">
+                  {searchQueries.map((query, i) => (
+                    <div key={query.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <span className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-full flex items-center justify-center font-medium">
+                        {i + 1}
+                      </span>
+                      <div className="flex-1">
+                        <p className="font-medium">{query.query}</p>
+                        <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
+                          <span>{query.count} searches</span>
+                          <span>{query.resultsFound} results found</span>
+                          <span>Avg click: #{query.avgClickPosition.toFixed(1)}</span>
+                        </div>
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        query.resultsFound > 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                      }`}>
+                        {query.resultsFound > 0 ? 'Results Found' : 'No Results'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                  <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                    AI Suggestions
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-100 dark:border-purple-800">
+                      <p className="text-sm font-medium text-purple-900 dark:text-purple-100">Create article about "password reset"</p>
+                      <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">245 searches with no good match</p>
+                    </div>
+                    <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-100 dark:border-purple-800">
+                      <p className="text-sm font-medium text-purple-900 dark:text-purple-100">Update "API authentication" article</p>
+                      <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">Low helpful rating (72%)</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-6 text-white">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <Bot className="w-5 h-5" />
+                    AI-Powered Insights
+                  </h3>
+                  <p className="text-sm text-blue-100 mb-4">
+                    Let AI analyze your knowledge base and suggest improvements
+                  </p>
+                  <button className="w-full py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors">
+                    Generate Insights
+                  </button>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <Palette className="w-5 h-5 text-pink-600" />
+                  Help Center Branding
+                </h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+                    <input
+                      type="text"
+                      value={helpCenterSettings.title}
+                      className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                      readOnly
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Subtitle</label>
+                    <input
+                      type="text"
+                      value={helpCenterSettings.subtitle}
+                      className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                      readOnly
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Primary Color</label>
+                    <div className="mt-1 flex items-center gap-2">
+                      <div
+                        className="w-10 h-10 rounded-lg border border-gray-200"
+                        style={{ backgroundColor: helpCenterSettings.primaryColor }}
+                      />
+                      <input
+                        type="text"
+                        value={helpCenterSettings.primaryColor}
+                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                        readOnly
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <Languages className="w-5 h-5 text-green-600" />
+                  Languages
+                </h3>
+                <div className="space-y-3">
+                  {helpCenterSettings.languages.map(lang => (
+                    <div key={lang} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">
+                          {lang === 'en' ? '🇺🇸' : lang === 'es' ? '🇪🇸' : lang === 'fr' ? '🇫🇷' : lang === 'de' ? '🇩🇪' : '🌐'}
+                        </span>
+                        <span className="font-medium">{lang === 'en' ? 'English' : lang === 'es' ? 'Spanish' : lang === 'fr' ? 'French' : 'German'}</span>
+                      </div>
+                      {lang === helpCenterSettings.defaultLanguage && (
+                        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-medium rounded">
+                          Default
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                  <button className="w-full py-2 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-500 hover:border-blue-500 hover:text-blue-500 transition-colors">
+                    + Add Language
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-blue-600" />
+                  Custom Domain
+                </h3>
+                <div className="space-y-4">
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle2 className="w-5 h-5 text-green-600" />
+                      <span className="font-medium text-green-900 dark:text-green-100">Domain Connected</span>
+                    </div>
+                    <p className="text-sm text-green-700 dark:text-green-300">{helpCenterSettings.customDomain}</p>
+                  </div>
+                  <button className="w-full py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                    Change Domain
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-amber-500" />
+                  Integrations
+                </h3>
+                <div className="space-y-3">
+                  {[
+                    { name: 'Live Chat', icon: MessageCircle, connected: true },
+                    { name: 'Email Support', icon: Mail, connected: true },
+                    { name: 'Slack', icon: MessageSquare, connected: false },
+                    { name: 'Webhooks', icon: Link, connected: true }
+                  ].map((integration, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <integration.icon className="w-5 h-5 text-gray-500" />
+                        <span>{integration.name}</span>
+                      </div>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        integration.connected
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                      }`}>
+                        {integration.connected ? 'Connected' : 'Connect'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Create Article Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Create New Article</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="max-h-[calc(90vh-120px)]">
+            <div className="space-y-6 p-1">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+                  <input
+                    type="text"
+                    placeholder="Enter article title..."
+                    className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-lg"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Collection</label>
+                  <select className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                    {collections.map(col => (
+                      <option key={col.id} value={col.id}>{col.icon} {col.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                  <select className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                    <option value="draft">Draft</option>
+                    <option value="review">In Review</option>
+                    <option value="published">Published</option>
+                  </select>
+                </div>
+                <div className="col-span-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Excerpt</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Brief description of the article..."
+                    className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Content</label>
+                  <div className="mt-1 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+                    <div className="flex items-center gap-1 p-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                      <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded"><Edit className="w-4 h-4" /></button>
+                      <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded"><Image className="w-4 h-4" /></button>
+                      <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded"><Link className="w-4 h-4" /></button>
+                    </div>
+                    <textarea
+                      rows={10}
+                      placeholder="Write your article content here..."
+                      className="w-full px-4 py-3 bg-white dark:bg-gray-800 focus:outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="col-span-2">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tags</label>
+                  <input
+                    type="text"
+                    placeholder="Add tags separated by commas..."
+                    className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => setShowCreateDialog(false)}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium">
+                  Save as Draft
+                </button>
+                <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
+                  Publish
+                </button>
+              </div>
+            </div>
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Article Detail Dialog */}
+      <Dialog open={!!selectedArticle} onOpenChange={() => setSelectedArticle(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              {selectedArticle?.title}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedArticle && (
+            <ScrollArea className="max-h-[calc(90vh-120px)]">
+              <div className="space-y-6 pr-4">
+                <div className="flex items-center gap-4">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedArticle.status)}`}>
+                    {selectedArticle.status}
+                  </span>
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Eye className="w-4 h-4" />
+                    {formatNumber(selectedArticle.viewCount)} views
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <ThumbsUp className="w-4 h-4" />
+                    {getHelpfulPercentage(selectedArticle.helpfulCount, selectedArticle.notHelpfulCount)}% helpful
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <Clock className="w-4 h-4" />
+                    {selectedArticle.avgReadTime} min read
+                  </div>
+                </div>
+
+                <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <p className="text-lg text-gray-600 dark:text-gray-300">{selectedArticle.excerpt}</p>
+                  <hr />
+                  <p>{selectedArticle.content}</p>
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  {selectedArticle.tags.map((tag, i) => (
+                    <span key={i} className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-sm">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-medium">
+                      {selectedArticle.author.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-medium">{selectedArticle.author.name}</p>
+                      <p className="text-sm text-gray-500">{selectedArticle.author.role}</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Last updated: {new Date(selectedArticle.updatedAt).toLocaleDateString()}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-center gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Was this article helpful?</p>
+                  <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-green-500 hover:text-green-600 transition-colors">
+                    <ThumbsUp className="w-4 h-4" />
+                    Yes
+                  </button>
+                  <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-red-500 hover:text-red-600 transition-colors">
+                    <ThumbsDown className="w-4 h-4" />
+                    No
+                  </button>
+                </div>
+              </div>
+            </ScrollArea>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
