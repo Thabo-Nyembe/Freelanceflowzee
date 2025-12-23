@@ -86,6 +86,37 @@ interface ServiceHealth {
   dependencies: { name: string; status: 'healthy' | 'degraded' | 'down' }[]
 }
 
+// Additional Grafana features
+interface Trace {
+  id: string
+  traceId: string
+  name: string
+  service: string
+  duration: number
+  status: 'ok' | 'error'
+  timestamp: string
+  spans: Span[]
+}
+
+interface Span {
+  id: string
+  name: string
+  service: string
+  duration: number
+  startTime: number
+  status: 'ok' | 'error'
+  tags: Record<string, string>
+}
+
+interface SavedQuery {
+  id: string
+  name: string
+  query: string
+  description: string
+  lastRun: string
+  starred: boolean
+}
+
 // Mock data for Grafana level features
 const mockMetrics: Metric[] = [
   { id: 'm1', name: 'CPU Usage', value: 67.5, unit: '%', change: 5.2, changePercent: 8.3, trend: 'up', sparkline: [55, 58, 62, 65, 68, 70, 65, 67.5], thresholds: { warning: 75, critical: 90 }, status: 'normal' },
@@ -126,6 +157,51 @@ const mockServices: ServiceHealth[] = [
   { id: 's6', name: 'Worker Service', status: 'down', uptime: 98.5, latency: 0, errorRate: 100, requestsPerSecond: 0, lastChecked: '2024-12-20T15:58:00Z', dependencies: [{ name: 'Queue', status: 'healthy' }] }
 ]
 
+const mockTraces: Trace[] = [
+  {
+    id: 't1', traceId: 'trace-abc123', name: 'POST /api/orders', service: 'api-gateway', duration: 342, status: 'ok', timestamp: '2024-12-20T15:59:45Z',
+    spans: [
+      { id: 'sp1', name: 'HTTP Request', service: 'api-gateway', duration: 342, startTime: 0, status: 'ok', tags: { method: 'POST', path: '/api/orders' } },
+      { id: 'sp2', name: 'Auth Check', service: 'auth-service', duration: 12, startTime: 5, status: 'ok', tags: { userId: 'user-123' } },
+      { id: 'sp3', name: 'DB Query', service: 'order-service', duration: 156, startTime: 20, status: 'ok', tags: { query: 'INSERT orders' } },
+      { id: 'sp4', name: 'Payment Process', service: 'payment-service', duration: 230, startTime: 180, status: 'ok', tags: { provider: 'stripe' } },
+      { id: 'sp5', name: 'Send Notification', service: 'notification-service', duration: 45, startTime: 290, status: 'ok', tags: { type: 'email' } }
+    ]
+  },
+  {
+    id: 't2', traceId: 'trace-def456', name: 'GET /api/users/:id', service: 'api-gateway', duration: 89, status: 'ok', timestamp: '2024-12-20T15:59:30Z',
+    spans: [
+      { id: 'sp6', name: 'HTTP Request', service: 'api-gateway', duration: 89, startTime: 0, status: 'ok', tags: { method: 'GET' } },
+      { id: 'sp7', name: 'Cache Lookup', service: 'cache-service', duration: 3, startTime: 5, status: 'ok', tags: { hit: 'true' } },
+      { id: 'sp8', name: 'Response', service: 'api-gateway', duration: 2, startTime: 85, status: 'ok', tags: {} }
+    ]
+  },
+  {
+    id: 't3', traceId: 'trace-ghi789', name: 'POST /api/payments', service: 'api-gateway', duration: 1250, status: 'error', timestamp: '2024-12-20T15:58:15Z',
+    spans: [
+      { id: 'sp9', name: 'HTTP Request', service: 'api-gateway', duration: 1250, startTime: 0, status: 'error', tags: { method: 'POST' } },
+      { id: 'sp10', name: 'Validate Request', service: 'payment-service', duration: 15, startTime: 10, status: 'ok', tags: {} },
+      { id: 'sp11', name: 'Process Payment', service: 'payment-service', duration: 1200, startTime: 30, status: 'error', tags: { error: 'timeout' } }
+    ]
+  },
+  {
+    id: 't4', traceId: 'trace-jkl012', name: 'GET /api/products', service: 'api-gateway', duration: 156, status: 'ok', timestamp: '2024-12-20T15:57:00Z',
+    spans: [
+      { id: 'sp12', name: 'HTTP Request', service: 'api-gateway', duration: 156, startTime: 0, status: 'ok', tags: { method: 'GET' } },
+      { id: 'sp13', name: 'DB Query', service: 'product-service', duration: 120, startTime: 15, status: 'ok', tags: { query: 'SELECT products' } },
+      { id: 'sp14', name: 'Transform Response', service: 'api-gateway', duration: 8, startTime: 140, status: 'ok', tags: {} }
+    ]
+  }
+]
+
+const mockSavedQueries: SavedQuery[] = [
+  { id: 'q1', name: 'High Latency Requests', query: 'histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))', description: 'P99 latency for all HTTP requests', lastRun: '2024-12-20T15:30:00Z', starred: true },
+  { id: 'q2', name: 'Error Rate by Service', query: 'sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)', description: 'HTTP 5xx errors grouped by service', lastRun: '2024-12-20T14:45:00Z', starred: true },
+  { id: 'q3', name: 'Memory Usage', query: 'container_memory_usage_bytes / container_spec_memory_limit_bytes * 100', description: 'Memory utilization percentage', lastRun: '2024-12-20T15:00:00Z', starred: false },
+  { id: 'q4', name: 'Active Connections', query: 'sum(pg_stat_activity_count) by (datname)', description: 'Database connections by database', lastRun: '2024-12-20T13:20:00Z', starred: false },
+  { id: 'q5', name: 'Request Rate', query: 'sum(rate(http_requests_total[1m])) by (service)', description: 'Requests per second by service', lastRun: '2024-12-20T15:55:00Z', starred: true }
+]
+
 export default function SystemInsightsClient({ initialInsights }: { initialInsights: SystemInsight[] }) {
   const [activeTab, setActiveTab] = useState('overview')
   const [typeFilter, setTypeFilter] = useState<InsightType | 'all'>('all')
@@ -134,6 +210,8 @@ export default function SystemInsightsClient({ initialInsights }: { initialInsig
   const [timeRange, setTimeRange] = useState('1h')
   const [logLevel, setLogLevel] = useState<string>('all')
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null)
+  const [exploreQuery, setExploreQuery] = useState('')
+  const [selectedTrace, setSelectedTrace] = useState<Trace | null>(null)
   const { insights, loading, error } = useSystemInsights({ insightType: typeFilter, severity: severityFilter, status: statusFilter })
   const displayInsights = insights.length > 0 ? insights : initialInsights
 
@@ -264,6 +342,8 @@ export default function SystemInsightsClient({ initialInsights }: { initialInsig
             <TabsTrigger value="metrics" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-slate-300">Metrics</TabsTrigger>
             <TabsTrigger value="alerts" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-slate-300">Alerts</TabsTrigger>
             <TabsTrigger value="logs" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-slate-300">Logs</TabsTrigger>
+            <TabsTrigger value="traces" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-slate-300">Traces</TabsTrigger>
+            <TabsTrigger value="explore" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-slate-300">Explore</TabsTrigger>
             <TabsTrigger value="services" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-slate-300">Services</TabsTrigger>
           </TabsList>
 
@@ -545,6 +625,227 @@ export default function SystemInsightsClient({ initialInsights }: { initialInsig
                   ))}
                 </div>
               </ScrollArea>
+            </div>
+          </TabsContent>
+
+          {/* Traces Tab */}
+          <TabsContent value="traces" className="space-y-6">
+            <div className="flex items-center gap-4 mb-4">
+              <input
+                type="text"
+                placeholder="Search traces by ID, name, or service..."
+                className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+              />
+              <select className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm">
+                <option value="all">All Services</option>
+                <option value="api-gateway">API Gateway</option>
+                <option value="auth-service">Auth Service</option>
+                <option value="payment-service">Payment Service</option>
+              </select>
+              <select className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm">
+                <option value="all">All Status</option>
+                <option value="ok">OK</option>
+                <option value="error">Error</option>
+              </select>
+            </div>
+
+            <div className="space-y-4">
+              {mockTraces.map(trace => (
+                <Dialog key={trace.id}>
+                  <DialogTrigger asChild>
+                    <div className={`bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border cursor-pointer hover:shadow-md transition-all ${trace.status === 'error' ? 'border-red-200 dark:border-red-800' : 'border-gray-100 dark:border-gray-700'}`}>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-4">
+                          <span className={`w-3 h-3 rounded-full ${trace.status === 'ok' ? 'bg-green-500' : 'bg-red-500'}`} />
+                          <div>
+                            <h3 className="font-semibold text-gray-900 dark:text-white">{trace.name}</h3>
+                            <div className="text-sm text-gray-500 dark:text-gray-400 font-mono">{trace.traceId}</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-semibold text-gray-900 dark:text-white">{trace.duration}ms</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{new Date(trace.timestamp).toLocaleTimeString()}</div>
+                        </div>
+                      </div>
+                      <div className="relative h-8 bg-gray-100 dark:bg-gray-700 rounded overflow-hidden">
+                        {trace.spans.map((span, idx) => (
+                          <div
+                            key={span.id}
+                            className={`absolute h-6 top-1 rounded ${span.status === 'ok' ? 'bg-blue-500' : 'bg-red-500'}`}
+                            style={{
+                              left: `${(span.startTime / trace.duration) * 100}%`,
+                              width: `${Math.max((span.duration / trace.duration) * 100, 2)}%`
+                            }}
+                            title={`${span.name} - ${span.duration}ms`}
+                          />
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        <span>{trace.spans.length} spans</span>
+                        <span>{trace.service}</span>
+                      </div>
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl max-h-[90vh]">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-3">
+                        <span className={`w-3 h-3 rounded-full ${trace.status === 'ok' ? 'bg-green-500' : 'bg-red-500'}`} />
+                        {trace.name}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <ScrollArea className="max-h-[70vh]">
+                      <div className="space-y-4 p-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Trace ID</div>
+                            <div className="font-mono text-gray-900 dark:text-white">{trace.traceId}</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Duration</div>
+                            <div className="text-2xl font-bold text-gray-900 dark:text-white">{trace.duration}ms</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Spans</div>
+                            <div className="text-2xl font-bold text-gray-900 dark:text-white">{trace.spans.length}</div>
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-900 dark:text-white mb-3">Spans</h4>
+                          <div className="space-y-2">
+                            {trace.spans.map((span, idx) => (
+                              <div key={span.id} className="relative">
+                                <div className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg" style={{ marginLeft: `${idx * 20}px` }}>
+                                  <span className={`w-2 h-2 rounded-full ${span.status === 'ok' ? 'bg-green-500' : 'bg-red-500'}`} />
+                                  <div className="flex-1">
+                                    <div className="font-medium text-gray-900 dark:text-white">{span.name}</div>
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">{span.service}</div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="font-mono text-gray-900 dark:text-white">{span.duration}ms</div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400">+{span.startTime}ms</div>
+                                  </div>
+                                </div>
+                                {Object.keys(span.tags).length > 0 && (
+                                  <div className="flex flex-wrap gap-1 mt-1" style={{ marginLeft: `${idx * 20 + 12}px` }}>
+                                    {Object.entries(span.tags).map(([key, value]) => (
+                                      <span key={key} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-600 rounded text-xs">
+                                        {key}={value}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </ScrollArea>
+                  </DialogContent>
+                </Dialog>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Explore Tab */}
+          <TabsContent value="explore" className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Query Explorer</h3>
+              <div className="space-y-4">
+                <div className="flex gap-3">
+                  <select className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm">
+                    <option value="prometheus">Prometheus</option>
+                    <option value="loki">Loki</option>
+                    <option value="tempo">Tempo</option>
+                  </select>
+                  <input
+                    type="text"
+                    value={exploreQuery}
+                    onChange={(e) => setExploreQuery(e.target.value)}
+                    placeholder="Enter PromQL query..."
+                    className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono"
+                  />
+                  <button className="px-6 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors">
+                    Run Query
+                  </button>
+                </div>
+                <div className="h-64 bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-300">
+                  <div className="text-gray-500 mb-2"># Query results will appear here</div>
+                  {exploreQuery ? (
+                    <div>
+                      <div className="text-green-400">Query: {exploreQuery}</div>
+                      <div className="mt-2 text-gray-400">Execute query to see results...</div>
+                    </div>
+                  ) : (
+                    <div className="text-gray-500">Enter a query above to explore your metrics</div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Saved Queries</h3>
+                <button className="px-4 py-2 bg-slate-600 text-white rounded-lg text-sm hover:bg-slate-700 transition-colors">
+                  + Save Current Query
+                </button>
+              </div>
+              <div className="space-y-3">
+                {mockSavedQueries.map(query => (
+                  <div key={query.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        {query.starred && <span className="text-amber-500">★</span>}
+                        <span className="font-medium text-gray-900 dark:text-white">{query.name}</span>
+                      </div>
+                      <button
+                        onClick={() => setExploreQuery(query.query)}
+                        className="px-3 py-1 text-sm text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                      >
+                        Run →
+                      </button>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{query.description}</p>
+                    <code className="block text-xs bg-gray-100 dark:bg-gray-600 p-2 rounded font-mono text-gray-700 dark:text-gray-300 overflow-x-auto">
+                      {query.query}
+                    </code>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      Last run: {new Date(query.lastRun).toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Query History</h3>
+                <div className="space-y-2">
+                  {['rate(http_requests_total[5m])', 'up{job="prometheus"}', 'node_memory_Active_bytes'].map((q, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded">
+                      <code className="text-sm font-mono text-gray-700 dark:text-gray-300">{q}</code>
+                      <button
+                        onClick={() => setExploreQuery(q)}
+                        className="text-sm text-slate-600 hover:text-slate-800 dark:text-slate-400"
+                      >
+                        Use
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Metrics</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {['CPU Usage', 'Memory', 'Disk I/O', 'Network', 'Requests/s', 'Error Rate'].map(metric => (
+                    <button
+                      key={metric}
+                      className="p-3 text-left bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">{metric}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </TabsContent>
 
