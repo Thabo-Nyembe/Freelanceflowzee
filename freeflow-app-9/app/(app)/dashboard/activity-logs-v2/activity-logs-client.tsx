@@ -1,377 +1,1040 @@
 'use client'
 
-import { useState } from 'react'
-import StatGrid from '@/components/dashboard-results/StatGrid'
-import BentoQuickAction from '@/components/dashboard-results/BentoQuickAction'
-import PillButton from '@/components/modern-button-suite/PillButton'
-import MiniKPI from '@/components/dashboard-results/MiniKPI'
-import ActivityFeed from '@/components/dashboard-results/ActivityFeed'
-import RankingList from '@/components/dashboard-results/RankingList'
-import ProgressCard from '@/components/dashboard-results/ProgressCard'
+import { useState, useMemo } from 'react'
 import {
   useActivityLogs,
-  getActivityStatusColor,
-  getActivityTypeColor,
-  getCategoryColor,
-  formatActivityTimestamp,
   type ActivityLog
 } from '@/lib/hooks/use-activity-logs'
+import {
+  Activity,
+  Search,
+  Filter,
+  Download,
+  Upload,
+  RefreshCw,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  AlertTriangle,
+  XCircle,
+  Info,
+  Eye,
+  MoreHorizontal,
+  ChevronRight,
+  ChevronDown,
+  Calendar,
+  User,
+  Globe,
+  Laptop,
+  Smartphone,
+  Server,
+  Database,
+  Code,
+  Terminal,
+  FileJson,
+  Bookmark,
+  BookmarkCheck,
+  Bell,
+  BellOff,
+  Settings,
+  Zap,
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  PieChart,
+  LineChart,
+  ArrowUpRight,
+  ArrowDownRight,
+  Play,
+  Pause,
+  Copy,
+  ExternalLink,
+  Hash,
+  Tag,
+  Layers,
+  GitCommit,
+  Shield,
+  Lock,
+  Unlock,
+  Plus,
+  Minus,
+  X
+} from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
-type ViewMode = 'all' | 'success' | 'failed' | 'pending'
-type TypeFilter = 'all' | 'create' | 'update' | 'delete' | 'view'
+// Type definitions for Datadog-level logging
+type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'critical'
+type LogSource = 'api' | 'web' | 'mobile' | 'worker' | 'cron' | 'webhook'
+type LogStatus = 'ok' | 'info' | 'warn' | 'error'
+
+interface LogEntry {
+  id: string
+  timestamp: string
+  level: LogLevel
+  source: LogSource
+  service: string
+  host: string
+  message: string
+  traceId: string | null
+  spanId: string | null
+  userId: string | null
+  userName: string | null
+  userEmail: string | null
+  sessionId: string | null
+  requestId: string | null
+  method: string | null
+  path: string | null
+  statusCode: number | null
+  duration: number | null
+  ip: string | null
+  userAgent: string | null
+  country: string | null
+  tags: string[]
+  attributes: Record<string, unknown>
+  stackTrace: string | null
+}
+
+interface LogPattern {
+  id: string
+  pattern: string
+  count: number
+  level: LogLevel
+  firstSeen: string
+  lastSeen: string
+  trend: 'up' | 'down' | 'stable'
+  services: string[]
+}
+
+interface SavedQuery {
+  id: string
+  name: string
+  query: string
+  filters: Record<string, string[]>
+  createdAt: string
+  isDefault: boolean
+}
+
+interface LogMetric {
+  name: string
+  value: number
+  change: number
+  unit: string
+}
+
+interface LogStats {
+  totalLogs: number
+  logsPerMinute: number
+  errorRate: number
+  avgLatency: number
+  uniqueUsers: number
+  uniqueSessions: number
+  byLevel: Record<LogLevel, number>
+  bySource: Record<LogSource, number>
+  byService: Record<string, number>
+  topErrors: { message: string; count: number }[]
+  timeline: { time: string; count: number; errors: number }[]
+}
+
+// Mock data
+const mockLogs: LogEntry[] = [
+  {
+    id: 'log1',
+    timestamp: '2024-12-23T08:45:23.456Z',
+    level: 'info',
+    source: 'api',
+    service: 'auth-service',
+    host: 'prod-api-01',
+    message: 'User login successful',
+    traceId: 'trace-abc123',
+    spanId: 'span-def456',
+    userId: 'usr_123',
+    userName: 'John Doe',
+    userEmail: 'john@example.com',
+    sessionId: 'sess_xyz789',
+    requestId: 'req_001',
+    method: 'POST',
+    path: '/api/auth/login',
+    statusCode: 200,
+    duration: 145,
+    ip: '192.168.1.100',
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+    country: 'US',
+    tags: ['auth', 'login', 'production'],
+    attributes: { provider: 'email', mfa: false },
+    stackTrace: null
+  },
+  {
+    id: 'log2',
+    timestamp: '2024-12-23T08:44:15.789Z',
+    level: 'error',
+    source: 'api',
+    service: 'payment-service',
+    host: 'prod-api-02',
+    message: 'Payment processing failed: Card declined',
+    traceId: 'trace-ghi789',
+    spanId: 'span-jkl012',
+    userId: 'usr_456',
+    userName: 'Jane Smith',
+    userEmail: 'jane@example.com',
+    sessionId: 'sess_abc123',
+    requestId: 'req_002',
+    method: 'POST',
+    path: '/api/payments/charge',
+    statusCode: 402,
+    duration: 2340,
+    ip: '192.168.1.101',
+    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0)',
+    country: 'UK',
+    tags: ['payment', 'error', 'production'],
+    attributes: { amount: 99.99, currency: 'USD', error_code: 'card_declined' },
+    stackTrace: 'Error: Card declined\n  at PaymentService.charge (payment.ts:45)\n  at processPayment (checkout.ts:123)'
+  },
+  {
+    id: 'log3',
+    timestamp: '2024-12-23T08:43:45.123Z',
+    level: 'warn',
+    source: 'worker',
+    service: 'email-worker',
+    host: 'prod-worker-01',
+    message: 'Email delivery delayed: Rate limit reached',
+    traceId: 'trace-mno345',
+    spanId: null,
+    userId: null,
+    userName: null,
+    userEmail: null,
+    sessionId: null,
+    requestId: 'req_003',
+    method: null,
+    path: null,
+    statusCode: null,
+    duration: 50,
+    ip: null,
+    userAgent: null,
+    country: null,
+    tags: ['email', 'rate-limit', 'production'],
+    attributes: { queue_size: 1500, retry_after: 60 },
+    stackTrace: null
+  },
+  {
+    id: 'log4',
+    timestamp: '2024-12-23T08:42:30.567Z',
+    level: 'info',
+    source: 'web',
+    service: 'frontend',
+    host: 'cdn-edge-us-east',
+    message: 'Page view: Dashboard',
+    traceId: null,
+    spanId: null,
+    userId: 'usr_789',
+    userName: 'Bob Wilson',
+    userEmail: 'bob@example.com',
+    sessionId: 'sess_def456',
+    requestId: null,
+    method: 'GET',
+    path: '/dashboard',
+    statusCode: 200,
+    duration: 890,
+    ip: '10.0.0.50',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    country: 'CA',
+    tags: ['pageview', 'dashboard', 'production'],
+    attributes: { referrer: '/login', load_time: 1.2 },
+    stackTrace: null
+  },
+  {
+    id: 'log5',
+    timestamp: '2024-12-23T08:41:12.890Z',
+    level: 'critical',
+    source: 'api',
+    service: 'database-service',
+    host: 'prod-db-01',
+    message: 'Database connection pool exhausted',
+    traceId: 'trace-pqr678',
+    spanId: 'span-stu901',
+    userId: null,
+    userName: null,
+    userEmail: null,
+    sessionId: null,
+    requestId: 'req_004',
+    method: null,
+    path: null,
+    statusCode: 503,
+    duration: 30000,
+    ip: null,
+    userAgent: null,
+    country: null,
+    tags: ['database', 'critical', 'production', 'incident'],
+    attributes: { pool_size: 100, active_connections: 100, waiting_requests: 250 },
+    stackTrace: 'Error: Connection pool exhausted\n  at DatabasePool.acquire (pool.ts:89)\n  at QueryExecutor.execute (executor.ts:34)'
+  },
+  {
+    id: 'log6',
+    timestamp: '2024-12-23T08:40:00.000Z',
+    level: 'debug',
+    source: 'api',
+    service: 'cache-service',
+    host: 'prod-cache-01',
+    message: 'Cache miss for key: user_profile_123',
+    traceId: 'trace-vwx234',
+    spanId: 'span-yza567',
+    userId: 'usr_123',
+    userName: 'John Doe',
+    userEmail: 'john@example.com',
+    sessionId: 'sess_xyz789',
+    requestId: 'req_005',
+    method: null,
+    path: null,
+    statusCode: null,
+    duration: 2,
+    ip: null,
+    userAgent: null,
+    country: null,
+    tags: ['cache', 'miss', 'production'],
+    attributes: { key: 'user_profile_123', ttl: 3600 },
+    stackTrace: null
+  }
+]
+
+const mockPatterns: LogPattern[] = [
+  { id: 'pat1', pattern: 'User login successful', count: 15420, level: 'info', firstSeen: '2024-12-01', lastSeen: '2024-12-23', trend: 'up', services: ['auth-service'] },
+  { id: 'pat2', pattern: 'Payment processing failed: *', count: 342, level: 'error', firstSeen: '2024-12-15', lastSeen: '2024-12-23', trend: 'up', services: ['payment-service'] },
+  { id: 'pat3', pattern: 'Database connection * exhausted', count: 12, level: 'critical', firstSeen: '2024-12-20', lastSeen: '2024-12-23', trend: 'stable', services: ['database-service'] },
+  { id: 'pat4', pattern: 'Email delivery delayed: *', count: 890, level: 'warn', firstSeen: '2024-12-10', lastSeen: '2024-12-23', trend: 'down', services: ['email-worker'] },
+  { id: 'pat5', pattern: 'Cache miss for key: *', count: 45000, level: 'debug', firstSeen: '2024-12-01', lastSeen: '2024-12-23', trend: 'stable', services: ['cache-service'] }
+]
+
+const mockSavedQueries: SavedQuery[] = [
+  { id: 'sq1', name: 'Production Errors', query: 'level:error OR level:critical', filters: { source: ['api', 'worker'], tags: ['production'] }, createdAt: '2024-12-01', isDefault: true },
+  { id: 'sq2', name: 'Auth Events', query: 'service:auth-service', filters: { tags: ['auth'] }, createdAt: '2024-12-10', isDefault: false },
+  { id: 'sq3', name: 'Slow Requests', query: 'duration:>1000', filters: { source: ['api'] }, createdAt: '2024-12-15', isDefault: false },
+  { id: 'sq4', name: 'Payment Failures', query: 'service:payment-service level:error', filters: {}, createdAt: '2024-12-18', isDefault: false }
+]
+
+const mockStats: LogStats = {
+  totalLogs: 1250000,
+  logsPerMinute: 8500,
+  errorRate: 2.3,
+  avgLatency: 245,
+  uniqueUsers: 12500,
+  uniqueSessions: 45000,
+  byLevel: { debug: 450000, info: 650000, warn: 85000, error: 62000, critical: 3000 },
+  bySource: { api: 780000, web: 320000, mobile: 95000, worker: 45000, cron: 8000, webhook: 2000 },
+  byService: { 'auth-service': 180000, 'payment-service': 95000, 'user-service': 320000, 'email-worker': 45000, 'frontend': 420000, 'database-service': 85000, 'cache-service': 105000 },
+  topErrors: [
+    { message: 'Payment processing failed', count: 342 },
+    { message: 'Rate limit exceeded', count: 256 },
+    { message: 'Validation error', count: 189 },
+    { message: 'Authentication failed', count: 145 },
+    { message: 'Database timeout', count: 98 }
+  ],
+  timeline: [
+    { time: '08:00', count: 42000, errors: 890 },
+    { time: '08:10', count: 45000, errors: 920 },
+    { time: '08:20', count: 48000, errors: 1050 },
+    { time: '08:30', count: 52000, errors: 1100 },
+    { time: '08:40', count: 47000, errors: 980 },
+    { time: '08:45', count: 44000, errors: 870 }
+  ]
+}
 
 interface ActivityLogsClientProps {
   initialLogs: ActivityLog[]
 }
 
 export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('all')
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all')
+  const [activeTab, setActiveTab] = useState('logs')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [levelFilter, setLevelFilter] = useState<LogLevel | 'all'>('all')
+  const [sourceFilter, setSourceFilter] = useState<LogSource | 'all'>('all')
+  const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null)
+  const [showLogDialog, setShowLogDialog] = useState(false)
+  const [showQueryDialog, setShowQueryDialog] = useState(false)
+  const [isLiveMode, setIsLiveMode] = useState(true)
+  const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set())
+  const [timeRange, setTimeRange] = useState('1h')
 
-  const { logs, stats, isLoading } = useActivityLogs(initialLogs, {
-    status: viewMode === 'all' ? undefined : viewMode,
-    activityType: typeFilter === 'all' ? undefined : typeFilter
-  })
+  const filteredLogs = useMemo(() => {
+    return mockLogs.filter(log => {
+      const matchesSearch = log.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        log.service.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (log.traceId && log.traceId.toLowerCase().includes(searchQuery.toLowerCase()))
+      const matchesLevel = levelFilter === 'all' || log.level === levelFilter
+      const matchesSource = sourceFilter === 'all' || log.source === sourceFilter
+      return matchesSearch && matchesLevel && matchesSource
+    })
+  }, [searchQuery, levelFilter, sourceFilter])
 
-  const filteredLogs = logs.filter(log => {
-    if (viewMode !== 'all' && log.status !== viewMode) return false
-    if (typeFilter !== 'all' && log.activity_type !== typeFilter) return false
-    return true
-  })
+  const getLevelColor = (level: LogLevel) => {
+    switch (level) {
+      case 'debug': return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+      case 'info': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+      case 'warn': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+      case 'error': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+      case 'critical': return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+    }
+  }
+
+  const getLevelIcon = (level: LogLevel) => {
+    switch (level) {
+      case 'debug': return <Code className="w-3 h-3" />
+      case 'info': return <Info className="w-3 h-3" />
+      case 'warn': return <AlertTriangle className="w-3 h-3" />
+      case 'error': return <AlertCircle className="w-3 h-3" />
+      case 'critical': return <XCircle className="w-3 h-3" />
+    }
+  }
+
+  const getSourceIcon = (source: LogSource) => {
+    switch (source) {
+      case 'api': return <Server className="w-4 h-4" />
+      case 'web': return <Globe className="w-4 h-4" />
+      case 'mobile': return <Smartphone className="w-4 h-4" />
+      case 'worker': return <Zap className="w-4 h-4" />
+      case 'cron': return <Clock className="w-4 h-4" />
+      case 'webhook': return <GitCommit className="w-4 h-4" />
+    }
+  }
+
+  const toggleLogExpanded = (logId: string) => {
+    const newExpanded = new Set(expandedLogs)
+    if (newExpanded.has(logId)) {
+      newExpanded.delete(logId)
+    } else {
+      newExpanded.add(logId)
+    }
+    setExpandedLogs(newExpanded)
+  }
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp)
+    return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 })
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900">
-      <div className="max-w-[1600px] mx-auto p-6 space-y-6">
-
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Activity Logs
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-1">
-              Track user actions, changes, and system events
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 dark:bg-none dark:bg-gray-900">
+      {/* Premium Header */}
+      <div className="bg-gradient-to-r from-slate-800 via-purple-900 to-slate-900 text-white">
+        <div className="max-w-[1800px] mx-auto px-6 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
+                <Activity className="w-8 h-8" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">Log Explorer</h1>
+                <p className="text-white/80">Datadog-level log aggregation and analysis</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 rounded-full bg-white/20 text-sm font-medium backdrop-blur">
+                Datadog Level
+              </span>
+              <button
+                onClick={() => setIsLiveMode(!isLiveMode)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
+                  isLiveMode ? 'bg-green-500 text-white' : 'bg-white/20 text-white'
+                }`}
+              >
+                {isLiveMode ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+                {isLiveMode ? 'Live' : 'Paused'}
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300">
-              Export Logs
-            </button>
-          </div>
-        </div>
 
-        {/* Stats Grid */}
-        <StatGrid
-          stats={[
-            {
-              label: 'Total Activities',
-              value: stats.total.toString(),
-              change: '+15%',
-              trend: 'up' as const,
-              subtitle: 'last 24 hours'
-            },
-            {
-              label: 'Successful',
-              value: stats.success.toString(),
-              change: '+12%',
-              trend: 'up' as const,
-              subtitle: 'completed actions'
-            },
-            {
-              label: 'Failed',
-              value: stats.failed.toString(),
-              change: '-3%',
-              trend: 'up' as const,
-              subtitle: 'failed actions'
-            },
-            {
-              label: 'Avg Duration',
-              value: `${stats.avgDuration.toFixed(0)}ms`,
-              change: '+8%',
-              trend: 'up' as const,
-              subtitle: 'response time'
-            }
-          ]}
-        />
-
-        {/* Quick Actions */}
-        <BentoQuickAction
-          actions={[
-            { label: 'Search Logs', icon: '🔍', onClick: () => {} },
-            { label: 'Export Data', icon: '📥', onClick: () => {} },
-            { label: 'User Activity', icon: '👤', onClick: () => {} },
-            { label: 'Analytics', icon: '📊', onClick: () => {} },
-            { label: 'Audit Trail', icon: '📋', onClick: () => {} },
-            { label: 'Alerts', icon: '🔔', onClick: () => {} },
-            { label: 'Settings', icon: '⚙️', onClick: () => {} },
-            { label: 'Refresh', icon: '🔄', onClick: () => {} }
-          ]}
-        />
-
-        {/* Filter Pills */}
-        <div className="flex flex-wrap gap-3">
-          <div className="flex items-center gap-2">
-            <PillButton
-              label="All Activities"
-              isActive={viewMode === 'all'}
-              onClick={() => setViewMode('all')}
-            />
-            <PillButton
-              label="Success"
-              isActive={viewMode === 'success'}
-              onClick={() => setViewMode('success')}
-            />
-            <PillButton
-              label="Failed"
-              isActive={viewMode === 'failed'}
-              onClick={() => setViewMode('failed')}
-            />
-            <PillButton
-              label="Pending"
-              isActive={viewMode === 'pending'}
-              onClick={() => setViewMode('pending')}
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <PillButton
-              label="All Types"
-              isActive={typeFilter === 'all'}
-              onClick={() => setTypeFilter('all')}
-            />
-            <PillButton
-              label="Create"
-              isActive={typeFilter === 'create'}
-              onClick={() => setTypeFilter('create')}
-            />
-            <PillButton
-              label="Update"
-              isActive={typeFilter === 'update'}
-              onClick={() => setTypeFilter('update')}
-            />
-            <PillButton
-              label="Delete"
-              isActive={typeFilter === 'delete'}
-              onClick={() => setTypeFilter('delete')}
-            />
+          {/* Stats Row */}
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+              <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
+                <BarChart3 className="w-4 h-4" />
+                Total Logs
+              </div>
+              <div className="text-2xl font-bold">{(mockStats.totalLogs / 1000000).toFixed(2)}M</div>
+              <div className="text-xs text-white/60">{timeRange} window</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+              <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
+                <TrendingUp className="w-4 h-4" />
+                Logs/Min
+              </div>
+              <div className="text-2xl font-bold">{(mockStats.logsPerMinute / 1000).toFixed(1)}K</div>
+              <div className="text-xs text-white/60">Current rate</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+              <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
+                <AlertCircle className="w-4 h-4" />
+                Error Rate
+              </div>
+              <div className="text-2xl font-bold text-red-300">{mockStats.errorRate}%</div>
+              <div className="text-xs text-white/60">{mockStats.byLevel.error + mockStats.byLevel.critical} errors</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+              <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
+                <Clock className="w-4 h-4" />
+                Avg Latency
+              </div>
+              <div className="text-2xl font-bold">{mockStats.avgLatency}ms</div>
+              <div className="text-xs text-white/60">p50 response</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+              <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
+                <User className="w-4 h-4" />
+                Users
+              </div>
+              <div className="text-2xl font-bold">{(mockStats.uniqueUsers / 1000).toFixed(1)}K</div>
+              <div className="text-xs text-white/60">Unique users</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4">
+              <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
+                <Layers className="w-4 h-4" />
+                Sessions
+              </div>
+              <div className="text-2xl font-bold">{(mockStats.uniqueSessions / 1000).toFixed(1)}K</div>
+              <div className="text-xs text-white/60">Active sessions</div>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="max-w-[1800px] mx-auto px-6 py-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between mb-6">
+            <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm border dark:border-gray-700">
+              <TabsTrigger value="logs" className="rounded-lg data-[state=active]:bg-purple-50 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30">
+                <Terminal className="w-4 h-4 mr-2" />
+                Logs
+              </TabsTrigger>
+              <TabsTrigger value="patterns" className="rounded-lg data-[state=active]:bg-purple-50 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30">
+                <Layers className="w-4 h-4 mr-2" />
+                Patterns
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="rounded-lg data-[state=active]:bg-purple-50 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Analytics
+              </TabsTrigger>
+              <TabsTrigger value="saved" className="rounded-lg data-[state=active]:bg-purple-50 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30">
+                <Bookmark className="w-4 h-4 mr-2" />
+                Saved Views
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Activity Logs List */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-              <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white">
-                Activity Logs ({filteredLogs.length})
-              </h2>
-              {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            <div className="flex items-center gap-3">
+              <select
+                value={timeRange}
+                onChange={(e) => setTimeRange(e.target.value)}
+                className="px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-sm dark:text-white"
+              >
+                <option value="15m">Last 15 minutes</option>
+                <option value="1h">Last 1 hour</option>
+                <option value="4h">Last 4 hours</option>
+                <option value="1d">Last 24 hours</option>
+                <option value="7d">Last 7 days</option>
+              </select>
+              <button className="px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                Export
+              </button>
+            </div>
+          </div>
+
+          {/* Logs Tab */}
+          <TabsContent value="logs" className="space-y-4">
+            {/* Search and Filters */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
+              <div className="flex items-center gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search logs by message, service, trace ID..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg focus:ring-2 focus:ring-purple-500 dark:text-white font-mono text-sm"
+                  />
                 </div>
-              ) : filteredLogs.length === 0 ? (
-                <div className="text-center py-12 text-slate-500 dark:text-slate-400">
-                  No activity logs found matching your filters.
+                <div className="flex items-center gap-2">
+                  <select
+                    value={levelFilter}
+                    onChange={(e) => setLevelFilter(e.target.value as LogLevel | 'all')}
+                    className="px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg text-sm dark:text-white"
+                  >
+                    <option value="all">All Levels</option>
+                    <option value="debug">Debug</option>
+                    <option value="info">Info</option>
+                    <option value="warn">Warning</option>
+                    <option value="error">Error</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                  <select
+                    value={sourceFilter}
+                    onChange={(e) => setSourceFilter(e.target.value as LogSource | 'all')}
+                    className="px-3 py-2 bg-gray-50 dark:bg-gray-700 border-0 rounded-lg text-sm dark:text-white"
+                  >
+                    <option value="all">All Sources</option>
+                    <option value="api">API</option>
+                    <option value="web">Web</option>
+                    <option value="mobile">Mobile</option>
+                    <option value="worker">Worker</option>
+                    <option value="cron">Cron</option>
+                    <option value="webhook">Webhook</option>
+                  </select>
+                  <button
+                    onClick={() => setShowQueryDialog(true)}
+                    className="px-3 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-lg text-sm font-medium hover:bg-purple-200 dark:hover:bg-purple-900/50 flex items-center gap-2"
+                  >
+                    <BookmarkCheck className="w-4 h-4" />
+                    Save Query
+                  </button>
                 </div>
-              ) : (
-                <div className="space-y-3">
+              </div>
+
+              {/* Quick Filters */}
+              <div className="flex items-center gap-2 mt-3 pt-3 border-t dark:border-gray-700">
+                <span className="text-xs text-gray-500 dark:text-gray-400">Quick filters:</span>
+                {Object.entries(mockStats.byLevel).map(([level, count]) => (
+                  <button
+                    key={level}
+                    onClick={() => setLevelFilter(level as LogLevel)}
+                    className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                      levelFilter === level ? getLevelColor(level as LogLevel) : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    {level}: {(count / 1000).toFixed(0)}K
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Log Entries */}
+            <div className="bg-gray-900 rounded-xl overflow-hidden font-mono text-sm">
+              <div className="p-2 border-b border-gray-800 flex items-center justify-between">
+                <div className="flex items-center gap-4 text-gray-400 text-xs">
+                  <span>Showing {filteredLogs.length} logs</span>
+                  {isLiveMode && (
+                    <span className="flex items-center gap-1 text-green-400">
+                      <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                      Live
+                    </span>
+                  )}
+                </div>
+                <button className="text-gray-400 hover:text-white">
+                  <RefreshCw className="w-4 h-4" />
+                </button>
+              </div>
+              <ScrollArea className="h-[500px]">
+                <div className="divide-y divide-gray-800">
                   {filteredLogs.map((log) => (
-                    <div
-                      key={log.id}
-                      className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-purple-500/50 dark:hover:border-purple-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10 bg-white dark:bg-slate-800/50"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold text-slate-900 dark:text-white">
-                              {log.action}
-                            </h3>
-                            <span className={`px-2 py-1 rounded-full text-xs border ${getActivityStatusColor(log.status)}`}>
-                              {log.status}
-                            </span>
-                            <span className={`px-2 py-1 rounded-full text-xs border ${getActivityTypeColor(log.activity_type)}`}>
-                              {log.activity_type}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 mb-1">
-                            <span>{log.user_name || 'Unknown'}</span>
-                            <span className="text-slate-400">•</span>
-                            <span className="text-xs">{log.user_email}</span>
-                          </div>
-                          <div className="text-xs text-slate-500">
-                            {log.activity_code}
-                          </div>
-                        </div>
-                        <span className={`px-2 py-1 rounded-full text-xs ${getCategoryColor(log.category)}`}>
-                          {log.category}
-                        </span>
-                      </div>
-
-                      {log.resource_type && (
-                        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200 dark:border-slate-700 mb-3">
-                          <div>
-                            <div className="text-xs text-slate-600 dark:text-slate-400">Resource</div>
-                            <div className="text-sm font-medium text-slate-900 dark:text-white">
-                              {log.resource_name || log.resource_type}
-                            </div>
-                            <div className="text-xs text-slate-500">ID: {log.resource_id}</div>
-                          </div>
-                          <div>
-                            <div className="text-xs text-slate-600 dark:text-slate-400">Category</div>
-                            <div className="text-sm font-medium text-slate-900 dark:text-white capitalize">
-                              {log.category}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {log.changes && log.changes.length > 0 && (
-                        <div className="mb-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg">
-                          <div className="text-xs text-slate-600 dark:text-slate-400 mb-2">Changes</div>
-                          <div className="space-y-1">
-                            {log.changes.map((change, idx) => (
-                              <div key={idx} className="text-sm">
-                                <span className="font-medium text-slate-700 dark:text-slate-300">{change.field}:</span>{' '}
-                                {change.oldValue && (
-                                  <>
-                                    <span className="text-red-600 dark:text-red-400 line-through">{change.oldValue}</span>
-                                    <span className="text-slate-400 mx-1">→</span>
-                                  </>
-                                )}
-                                <span className="text-green-600 dark:text-green-400">{change.newValue}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-3 gap-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                        <div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">Time</div>
-                          <div className="text-sm text-slate-900 dark:text-white">
-                            {formatActivityTimestamp(log.created_at)}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">IP Address</div>
-                          <div className="text-sm font-mono text-slate-900 dark:text-white">
-                            {log.ip_address || 'N/A'}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">Duration</div>
-                          <div className="text-sm font-medium text-slate-900 dark:text-white">
-                            {log.duration}ms
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                        <div className="flex items-center justify-end gap-2">
-                          <button className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg text-xs font-medium hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-all">
-                            View Details
-                          </button>
-                          {log.activity_type === 'update' && (
-                            <button className="px-3 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-lg text-xs font-medium hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-all">
-                              Revert
-                            </button>
+                    <div key={log.id} className="hover:bg-gray-800/50">
+                      <div
+                        className="p-3 flex items-start gap-3 cursor-pointer"
+                        onClick={() => toggleLogExpanded(log.id)}
+                      >
+                        <button className="mt-0.5 text-gray-500">
+                          {expandedLogs.has(log.id) ? (
+                            <ChevronDown className="w-4 h-4" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4" />
                           )}
-                          <button className="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-all">
-                            Export
-                          </button>
-                        </div>
+                        </button>
+                        <span className="text-gray-500 whitespace-nowrap">{formatTimestamp(log.timestamp)}</span>
+                        <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${getLevelColor(log.level)}`}>
+                          {log.level.toUpperCase()}
+                        </span>
+                        <span className="text-cyan-400">[{log.service}]</span>
+                        <span className="text-gray-300 flex-1">{log.message}</span>
+                        {log.duration && (
+                          <span className="text-yellow-400">{log.duration}ms</span>
+                        )}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setSelectedLog(log); setShowLogDialog(true); }}
+                          className="text-gray-500 hover:text-white"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
                       </div>
+                      {expandedLogs.has(log.id) && (
+                        <div className="px-12 pb-3 space-y-2 text-xs">
+                          <div className="grid grid-cols-2 gap-4">
+                            {log.traceId && (
+                              <div>
+                                <span className="text-gray-500">trace_id: </span>
+                                <span className="text-purple-400">{log.traceId}</span>
+                              </div>
+                            )}
+                            {log.requestId && (
+                              <div>
+                                <span className="text-gray-500">request_id: </span>
+                                <span className="text-purple-400">{log.requestId}</span>
+                              </div>
+                            )}
+                            {log.userId && (
+                              <div>
+                                <span className="text-gray-500">user: </span>
+                                <span className="text-green-400">{log.userName} ({log.userEmail})</span>
+                              </div>
+                            )}
+                            {log.method && log.path && (
+                              <div>
+                                <span className="text-gray-500">endpoint: </span>
+                                <span className="text-blue-400">{log.method} {log.path}</span>
+                              </div>
+                            )}
+                            {log.statusCode && (
+                              <div>
+                                <span className="text-gray-500">status: </span>
+                                <span className={log.statusCode < 400 ? 'text-green-400' : 'text-red-400'}>{log.statusCode}</span>
+                              </div>
+                            )}
+                            {log.ip && (
+                              <div>
+                                <span className="text-gray-500">ip: </span>
+                                <span className="text-gray-300">{log.ip}</span>
+                              </div>
+                            )}
+                          </div>
+                          {log.tags.length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-gray-500">tags:</span>
+                              {log.tags.map(tag => (
+                                <span key={tag} className="px-1.5 py-0.5 bg-gray-800 text-gray-400 rounded">{tag}</span>
+                              ))}
+                            </div>
+                          )}
+                          {log.stackTrace && (
+                            <pre className="mt-2 p-2 bg-gray-950 rounded text-red-400 overflow-x-auto">
+                              {log.stackTrace}
+                            </pre>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
-              )}
+              </ScrollArea>
             </div>
-          </div>
+          </TabsContent>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-
-            {/* Success Rate */}
-            <MiniKPI
-              label="Success Rate"
-              value={`${stats.successRate.toFixed(0)}%`}
-              trend="up"
-              change="+12%"
-            />
-
-            {/* Activity Types */}
-            <ProgressCard
-              title="Activity Types"
-              items={[
-                { label: 'Creates', value: stats.creates, total: stats.total, color: 'green' },
-                { label: 'Updates', value: stats.updates, total: stats.total, color: 'blue' },
-                { label: 'Deletes', value: stats.deletes, total: stats.total, color: 'red' },
-                { label: 'Other', value: stats.total - stats.creates - stats.updates - stats.deletes, total: stats.total, color: 'gray' }
-              ]}
-            />
-
-            {/* Top Activities */}
-            <RankingList
-              title="Top Activity Types"
-              items={[
-                { label: 'View', value: '35%', rank: 1, trend: 'up' },
-                { label: 'Update', value: '28%', rank: 2, trend: 'up' },
-                { label: 'Create', value: '18%', rank: 3, trend: 'same' },
-                { label: 'Export', value: '12%', rank: 4, trend: 'up' },
-                { label: 'Delete', value: '7%', rank: 5, trend: 'down' }
-              ]}
-            />
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <MiniKPI
-                label="Avg Duration"
-                value={`${stats.avgDuration.toFixed(0)}ms`}
-                trend="down"
-                change="-8%"
-              />
-              <MiniKPI
-                label="Pending"
-                value={stats.pending.toString()}
-                trend="down"
-                change="-2"
-              />
+          {/* Patterns Tab */}
+          <TabsContent value="patterns" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Log Patterns</h2>
+              <span className="text-sm text-gray-500 dark:text-gray-400">Auto-detected patterns from your logs</span>
             </div>
+            <div className="space-y-3">
+              {mockPatterns.map((pattern) => (
+                <div key={pattern.id} className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start gap-3">
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${getLevelColor(pattern.level)}`}>
+                        {pattern.level.toUpperCase()}
+                      </span>
+                      <div>
+                        <h3 className="font-mono text-sm font-medium text-gray-900 dark:text-white">{pattern.pattern}</h3>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                          <span>First seen: {pattern.firstSeen}</span>
+                          <span>•</span>
+                          <span>Last seen: {pattern.lastSeen}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">{pattern.count.toLocaleString()}</div>
+                      <div className={`flex items-center justify-end gap-1 text-sm ${
+                        pattern.trend === 'up' ? 'text-red-500' : pattern.trend === 'down' ? 'text-green-500' : 'text-gray-500'
+                      }`}>
+                        {pattern.trend === 'up' ? <TrendingUp className="w-4 h-4" /> : pattern.trend === 'down' ? <TrendingDown className="w-4 h-4" /> : <Minus className="w-4 h-4" />}
+                        {pattern.trend}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">Services:</span>
+                    {pattern.services.map(service => (
+                      <span key={service} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
+                        {service}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
 
-            {/* Recent Activity */}
-            <ActivityFeed
-              activities={[
-                {
-                  action: 'Blog post created',
-                  subject: 'By John Doe',
-                  time: '2 minutes ago',
-                  type: 'success'
-                },
-                {
-                  action: 'User profile updated',
-                  subject: 'By Jane Smith',
-                  time: '5 minutes ago',
-                  type: 'success'
-                },
-                {
-                  action: 'Settings update failed',
-                  subject: 'By Sarah Lee',
-                  time: '12 minutes ago',
-                  type: 'error'
-                },
-                {
-                  action: 'Data import pending',
-                  subject: 'By David Brown',
-                  time: '22 minutes ago',
-                  type: 'info'
-                }
-              ]}
-            />
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* By Level */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Logs by Level</h3>
+                <div className="space-y-3">
+                  {Object.entries(mockStats.byLevel).map(([level, count]) => {
+                    const percentage = (count / mockStats.totalLogs) * 100
+                    return (
+                      <div key={level} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="flex items-center gap-2">
+                            {getLevelIcon(level as LogLevel)}
+                            <span className="capitalize text-gray-700 dark:text-gray-300">{level}</span>
+                          </span>
+                          <span className="font-medium text-gray-900 dark:text-white">{(count / 1000).toFixed(0)}K</span>
+                        </div>
+                        <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${
+                              level === 'debug' ? 'bg-gray-400' :
+                              level === 'info' ? 'bg-blue-500' :
+                              level === 'warn' ? 'bg-yellow-500' :
+                              level === 'error' ? 'bg-red-500' : 'bg-purple-500'
+                            }`}
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
 
-          </div>
-        </div>
+              {/* By Source */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Logs by Source</h3>
+                <div className="space-y-3">
+                  {Object.entries(mockStats.bySource).map(([source, count]) => {
+                    const percentage = (count / mockStats.totalLogs) * 100
+                    return (
+                      <div key={source} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="flex items-center gap-2">
+                            {getSourceIcon(source as LogSource)}
+                            <span className="capitalize text-gray-700 dark:text-gray-300">{source}</span>
+                          </span>
+                          <span className="font-medium text-gray-900 dark:text-white">{(count / 1000).toFixed(0)}K</span>
+                        </div>
+                        <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full bg-purple-500" style={{ width: `${percentage}%` }} />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
 
+              {/* Top Errors */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Errors</h3>
+                <div className="space-y-3">
+                  {mockStats.topErrors.map((error, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                      <span className="text-sm text-red-700 dark:text-red-400">{error.message}</span>
+                      <span className="font-bold text-red-600 dark:text-red-400">{error.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* By Service */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Logs by Service</h3>
+                <div className="space-y-2">
+                  {Object.entries(mockStats.byService).slice(0, 5).map(([service, count]) => (
+                    <div key={service} className="flex items-center justify-between text-sm">
+                      <span className="text-gray-700 dark:text-gray-300">{service}</span>
+                      <span className="font-medium text-gray-900 dark:text-white">{(count / 1000).toFixed(0)}K</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Saved Views Tab */}
+          <TabsContent value="saved" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Saved Queries</h2>
+              <button
+                onClick={() => setShowQueryDialog(true)}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                New Query
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {mockSavedQueries.map((query) => (
+                <div key={query.id} className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-gray-900 dark:text-white">{query.name}</h3>
+                        {query.isDefault && (
+                          <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded text-xs">
+                            Default
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Created {query.createdAt}</p>
+                    </div>
+                    <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg font-mono text-sm text-gray-700 dark:text-gray-300 mb-3">
+                    {query.query}
+                  </div>
+                  <button
+                    onClick={() => setSearchQuery(query.query)}
+                    className="w-full px-4 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 rounded-lg text-sm font-medium hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                  >
+                    Run Query
+                  </button>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
+
+      {/* Log Detail Dialog */}
+      <Dialog open={showLogDialog} onOpenChange={setShowLogDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              {selectedLog && (
+                <>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${getLevelColor(selectedLog.level)}`}>
+                    {selectedLog.level.toUpperCase()}
+                  </span>
+                  <span className="font-mono text-sm">{selectedLog.service}</span>
+                </>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          {selectedLog && (
+            <ScrollArea className="flex-1 pr-4">
+              <div className="space-y-4 py-4">
+                <div className="p-4 bg-gray-900 rounded-lg">
+                  <p className="text-gray-100 font-mono">{selectedLog.message}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900 dark:text-white">Request Info</h4>
+                    <div className="space-y-2 text-sm">
+                      {selectedLog.method && <div><span className="text-gray-500">Method:</span> <span className="font-mono">{selectedLog.method}</span></div>}
+                      {selectedLog.path && <div><span className="text-gray-500">Path:</span> <span className="font-mono">{selectedLog.path}</span></div>}
+                      {selectedLog.statusCode && <div><span className="text-gray-500">Status:</span> <span className={selectedLog.statusCode < 400 ? 'text-green-600' : 'text-red-600'}>{selectedLog.statusCode}</span></div>}
+                      {selectedLog.duration && <div><span className="text-gray-500">Duration:</span> <span>{selectedLog.duration}ms</span></div>}
+                      {selectedLog.ip && <div><span className="text-gray-500">IP:</span> <span className="font-mono">{selectedLog.ip}</span></div>}
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <h4 className="font-semibold text-gray-900 dark:text-white">Context</h4>
+                    <div className="space-y-2 text-sm">
+                      {selectedLog.traceId && <div><span className="text-gray-500">Trace ID:</span> <span className="font-mono text-purple-600">{selectedLog.traceId}</span></div>}
+                      {selectedLog.requestId && <div><span className="text-gray-500">Request ID:</span> <span className="font-mono">{selectedLog.requestId}</span></div>}
+                      {selectedLog.sessionId && <div><span className="text-gray-500">Session:</span> <span className="font-mono">{selectedLog.sessionId}</span></div>}
+                      <div><span className="text-gray-500">Host:</span> <span>{selectedLog.host}</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                {selectedLog.userId && (
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">User</h4>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                        <User className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">{selectedLog.userName}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{selectedLog.userEmail}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {Object.keys(selectedLog.attributes).length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Attributes</h4>
+                    <pre className="p-4 bg-gray-900 rounded-lg text-gray-100 font-mono text-sm overflow-x-auto">
+                      {JSON.stringify(selectedLog.attributes, null, 2)}
+                    </pre>
+                  </div>
+                )}
+
+                {selectedLog.stackTrace && (
+                  <div>
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Stack Trace</h4>
+                    <pre className="p-4 bg-gray-900 rounded-lg text-red-400 font-mono text-sm overflow-x-auto">
+                      {selectedLog.stackTrace}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          )}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowLogDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Close
+            </button>
+            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 flex items-center gap-2">
+              <Copy className="w-4 h-4" />
+              Copy Log
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Save Query Dialog */}
+      <Dialog open={showQueryDialog} onOpenChange={setShowQueryDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Save Query</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Query Name</label>
+              <input
+                type="text"
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:text-white"
+                placeholder="My Saved Query"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Query</label>
+              <textarea
+                rows={3}
+                defaultValue={searchQuery}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 dark:text-white font-mono text-sm"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="isDefault" className="rounded border-gray-300 text-purple-600" />
+              <label htmlFor="isDefault" className="text-sm text-gray-700 dark:text-gray-300">Set as default view</label>
+            </div>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+            <button
+              onClick={() => setShowQueryDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+            >
+              Cancel
+            </button>
+            <button className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700">
+              Save Query
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
