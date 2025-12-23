@@ -57,6 +57,40 @@ interface Subscriber {
   preferences: string[]
 }
 
+interface Comment {
+  id: string
+  author: { name: string; avatar: string }
+  content: string
+  createdAt: string
+  likes: number
+  replies: Comment[]
+}
+
+interface AnalyticsData {
+  date: string
+  views: number
+  reactions: number
+  shares: number
+}
+
+const mockComments: Comment[] = [
+  { id: 'c1', author: { name: 'Alex Johnson', avatar: 'AJ' }, content: 'This AI workflow feature is exactly what we needed! Great work team.', createdAt: '2024-12-20T14:30:00Z', likes: 12, replies: [
+    { id: 'c1r1', author: { name: 'Sarah Chen', avatar: 'SC' }, content: 'Thanks Alex! Let us know if you have any feedback.', createdAt: '2024-12-20T15:00:00Z', likes: 3, replies: [] }
+  ]},
+  { id: 'c2', author: { name: 'Maria Garcia', avatar: 'MG' }, content: 'The security enhancements are much appreciated. FIDO2 support is a game changer for our enterprise team.', createdAt: '2024-12-15T16:45:00Z', likes: 8, replies: [] },
+  { id: 'c3', author: { name: 'James Wilson', avatar: 'JW' }, content: 'Looking forward to the reporting suite! When will the beta be available?', createdAt: '2024-12-22T09:15:00Z', likes: 5, replies: [] },
+]
+
+const mockAnalytics: AnalyticsData[] = [
+  { date: '2024-12-17', views: 1240, reactions: 45, shares: 12 },
+  { date: '2024-12-18', views: 1580, reactions: 62, shares: 18 },
+  { date: '2024-12-19', views: 2100, reactions: 78, shares: 24 },
+  { date: '2024-12-20', views: 3450, reactions: 125, shares: 45 },
+  { date: '2024-12-21', views: 2800, reactions: 95, shares: 32 },
+  { date: '2024-12-22', views: 2200, reactions: 72, shares: 28 },
+  { date: '2024-12-23', views: 1950, reactions: 58, shares: 22 },
+]
+
 // Mock data for Headway/Beamer level features
 const mockReleases: Release[] = [
   {
@@ -306,8 +340,10 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
           <div className="flex items-center justify-between">
             <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
               <TabsTrigger value="timeline" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Timeline</TabsTrigger>
-              <TabsTrigger value="releases" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">All Releases</TabsTrigger>
+              <TabsTrigger value="releases" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Releases</TabsTrigger>
               <TabsTrigger value="roadmap" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Roadmap</TabsTrigger>
+              <TabsTrigger value="comments" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Comments</TabsTrigger>
+              <TabsTrigger value="analytics" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Analytics</TabsTrigger>
               <TabsTrigger value="subscribe" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Subscribe</TabsTrigger>
             </TabsList>
             <div className="flex gap-2">
@@ -605,6 +641,139 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                 </p>
                 <button className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
                   Submit Feature Request
+                </button>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Comments Tab */}
+          <TabsContent value="comments" className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Community Feedback</h3>
+                <p className="text-sm text-gray-500 mt-1">See what others are saying about our updates</p>
+              </div>
+              <div className="p-6">
+                <div className="mb-6">
+                  <textarea
+                    placeholder="Share your thoughts on our latest updates..."
+                    className="w-full p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 resize-none h-24"
+                  />
+                  <div className="flex justify-end mt-2">
+                    <button className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700">
+                      Post Comment
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-6">
+                  {mockComments.map(comment => (
+                    <div key={comment.id} className="border-b border-gray-100 dark:border-gray-700 pb-6 last:border-0">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
+                          {comment.author.avatar}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-gray-900 dark:text-white">{comment.author.name}</span>
+                            <span className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                          </div>
+                          <p className="text-gray-700 dark:text-gray-300 mt-1">{comment.content}</p>
+                          <div className="flex items-center gap-4 mt-2">
+                            <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-violet-600">
+                              ❤️ {comment.likes}
+                            </button>
+                            <button className="text-sm text-gray-500 hover:text-violet-600">Reply</button>
+                          </div>
+                          {comment.replies.length > 0 && (
+                            <div className="mt-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700 space-y-4">
+                              {comment.replies.map(reply => (
+                                <div key={reply.id} className="flex items-start gap-3">
+                                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400 to-purple-400 flex items-center justify-center text-white text-xs font-medium">
+                                    {reply.author.avatar}
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-medium text-gray-900 dark:text-white text-sm">{reply.author.name}</span>
+                                      <span className="text-xs text-gray-500">{new Date(reply.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                    <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{reply.content}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="text-3xl font-bold text-violet-600">{mockAnalytics.reduce((sum, d) => sum + d.views, 0).toLocaleString()}</div>
+                <div className="text-sm text-gray-500">Total Views (7d)</div>
+                <div className="text-xs text-green-600 mt-1">↑ 24% vs last week</div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="text-3xl font-bold text-pink-600">{mockAnalytics.reduce((sum, d) => sum + d.reactions, 0)}</div>
+                <div className="text-sm text-gray-500">Reactions (7d)</div>
+                <div className="text-xs text-green-600 mt-1">↑ 18% vs last week</div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="text-3xl font-bold text-blue-600">{mockAnalytics.reduce((sum, d) => sum + d.shares, 0)}</div>
+                <div className="text-sm text-gray-500">Shares (7d)</div>
+                <div className="text-xs text-green-600 mt-1">↑ 32% vs last week</div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="text-3xl font-bold text-amber-600">4.2%</div>
+                <div className="text-sm text-gray-500">Engagement Rate</div>
+                <div className="text-xs text-green-600 mt-1">↑ 0.5% vs last week</div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Daily Performance</h3>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  {mockAnalytics.map((day, idx) => (
+                    <div key={day.date} className="flex items-center gap-4">
+                      <div className="w-24 text-sm text-gray-500">{new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+                      <div className="flex-1">
+                        <div className="h-6 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden flex">
+                          <div className="h-full bg-violet-500" style={{ width: `${(day.views / 3500) * 100}%` }} title={`${day.views} views`} />
+                        </div>
+                      </div>
+                      <div className="w-20 text-right text-sm font-medium text-gray-900 dark:text-white">{day.views.toLocaleString()}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Embed Widget</h3>
+                <p className="text-sm text-gray-500 mt-1">Add changelog widget to your product</p>
+              </div>
+              <div className="p-6">
+                <pre className="p-4 bg-gray-900 rounded-lg text-sm text-green-400 overflow-x-auto">
+{`<script src="https://app.freeflow.io/widget.js"></script>
+<script>
+  FreeflowChangelog.init({
+    selector: '#changelog-widget',
+    theme: 'auto'
+  });
+</script>`}
+                </pre>
+                <button className="mt-4 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
+                  Copy Code
                 </button>
               </div>
             </div>
