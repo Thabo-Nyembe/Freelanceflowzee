@@ -90,6 +90,40 @@ interface Alert {
   resolvedAt?: string
 }
 
+interface Host {
+  id: string
+  name: string
+  ip: string
+  status: 'running' | 'stopped' | 'warning'
+  cpu: number
+  memory: number
+  disk: number
+  network: { in: number; out: number }
+  containers: number
+  os: string
+  uptime: string
+}
+
+interface LogEntry {
+  id: string
+  timestamp: string
+  level: 'debug' | 'info' | 'warn' | 'error' | 'fatal'
+  service: string
+  message: string
+  host: string
+  traceId?: string
+}
+
+interface SLO {
+  id: string
+  name: string
+  target: number
+  current: number
+  timeWindow: '7d' | '30d' | '90d'
+  status: 'met' | 'at_risk' | 'breached'
+  errorBudget: { remaining: number; consumed: number }
+}
+
 // Mock Data
 const mockServices: ServiceHealth[] = [
   { name: 'API Gateway', status: 'healthy', latency: 45, errorRate: 0.02, throughput: 12500, uptime: 99.99, lastChecked: '2024-12-23T10:30:00Z' },
@@ -128,6 +162,45 @@ const mockAlerts: Alert[] = [
   { id: '3', name: 'Memory Usage Warning', severity: 'medium', status: 'resolved', metric: 'memory_usage', condition: '> 80%', value: 72, threshold: 80, triggeredAt: '2024-12-23T09:45:00Z', resolvedAt: '2024-12-23T10:00:00Z' },
   { id: '4', name: 'Database Connection Pool', severity: 'low', status: 'resolved', metric: 'db_connections', condition: '> 150', value: 156, threshold: 150, triggeredAt: '2024-12-23T08:30:00Z', resolvedAt: '2024-12-23T09:00:00Z' },
 ]
+
+const mockHosts: Host[] = [
+  { id: 'h1', name: 'prod-api-1', ip: '10.0.1.10', status: 'running', cpu: 45, memory: 68, disk: 42, network: { in: 125, out: 89 }, containers: 8, os: 'Ubuntu 22.04', uptime: '45d 12h' },
+  { id: 'h2', name: 'prod-api-2', ip: '10.0.1.11', status: 'running', cpu: 52, memory: 72, disk: 38, network: { in: 118, out: 95 }, containers: 8, os: 'Ubuntu 22.04', uptime: '45d 12h' },
+  { id: 'h3', name: 'prod-db-1', ip: '10.0.2.10', status: 'warning', cpu: 78, memory: 85, disk: 72, network: { in: 256, out: 312 }, containers: 2, os: 'Ubuntu 22.04', uptime: '120d 5h' },
+  { id: 'h4', name: 'prod-cache-1', ip: '10.0.3.10', status: 'running', cpu: 32, memory: 45, disk: 28, network: { in: 450, out: 420 }, containers: 3, os: 'Ubuntu 22.04', uptime: '30d 8h' },
+  { id: 'h5', name: 'prod-worker-1', ip: '10.0.4.10', status: 'running', cpu: 65, memory: 58, disk: 35, network: { in: 45, out: 38 }, containers: 12, os: 'Ubuntu 22.04', uptime: '15d 3h' },
+]
+
+const mockLogs: LogEntry[] = [
+  { id: 'l1', timestamp: '2024-12-23T10:30:15Z', level: 'error', service: 'Analytics Service', message: 'Connection timeout to downstream service after 500ms', host: 'prod-api-1', traceId: 'trace-mno345lmn' },
+  { id: 'l2', timestamp: '2024-12-23T10:30:12Z', level: 'warn', service: 'User Service', message: 'High latency detected: p99=156ms, threshold=100ms', host: 'prod-api-2' },
+  { id: 'l3', timestamp: '2024-12-23T10:30:10Z', level: 'info', service: 'API Gateway', message: 'Successfully processed 1000 requests in the last minute', host: 'prod-api-1' },
+  { id: 'l4', timestamp: '2024-12-23T10:30:08Z', level: 'error', service: 'Payment Service', message: 'Payment gateway returned 503: Service Unavailable', host: 'prod-api-1', traceId: 'trace-ghi789rst' },
+  { id: 'l5', timestamp: '2024-12-23T10:30:05Z', level: 'debug', service: 'Auth Service', message: 'JWT token validated successfully for user_id=12345', host: 'prod-api-2' },
+  { id: 'l6', timestamp: '2024-12-23T10:30:02Z', level: 'info', service: 'Notification Service', message: 'Sent 250 push notifications in batch', host: 'prod-worker-1' },
+  { id: 'l7', timestamp: '2024-12-23T10:30:00Z', level: 'fatal', service: 'Analytics Service', message: 'Out of memory error: heap size exceeded', host: 'prod-api-1' },
+]
+
+const mockSLOs: SLO[] = [
+  { id: 'slo1', name: 'API Availability', target: 99.9, current: 99.85, timeWindow: '30d', status: 'at_risk', errorBudget: { remaining: 15, consumed: 85 } },
+  { id: 'slo2', name: 'API Latency P99 < 200ms', target: 99.5, current: 99.72, timeWindow: '30d', status: 'met', errorBudget: { remaining: 56, consumed: 44 } },
+  { id: 'slo3', name: 'Payment Success Rate', target: 99.9, current: 99.95, timeWindow: '7d', status: 'met', errorBudget: { remaining: 78, consumed: 22 } },
+  { id: 'slo4', name: 'Authentication Uptime', target: 99.99, current: 99.98, timeWindow: '90d', status: 'met', errorBudget: { remaining: 42, consumed: 58 } },
+]
+
+const logLevelColors: Record<string, string> = {
+  debug: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+  info: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+  warn: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
+  error: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+  fatal: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+}
+
+const sloStatusColors: Record<string, string> = {
+  met: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+  at_risk: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
+  breached: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+}
 
 const statusColors: Record<string, string> = {
   healthy: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
@@ -308,24 +381,36 @@ export default function PerformanceAnalyticsClient({ initialPerformanceAnalytics
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-4 py-2">
+          <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex-wrap">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-3 py-2">
               <BarChart3 className="w-4 h-4 mr-2" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="services" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-4 py-2">
+            <TabsTrigger value="infrastructure" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-3 py-2">
+              <Cpu className="w-4 h-4 mr-2" />
+              Infrastructure
+            </TabsTrigger>
+            <TabsTrigger value="services" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-3 py-2">
               <Server className="w-4 h-4 mr-2" />
               Services
             </TabsTrigger>
-            <TabsTrigger value="metrics" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-4 py-2">
-              <Gauge className="w-4 h-4 mr-2" />
-              Metrics
+            <TabsTrigger value="logs" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-3 py-2">
+              <Terminal className="w-4 h-4 mr-2" />
+              Logs
             </TabsTrigger>
-            <TabsTrigger value="traces" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-4 py-2">
+            <TabsTrigger value="traces" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-3 py-2">
               <Layers className="w-4 h-4 mr-2" />
               Traces
             </TabsTrigger>
-            <TabsTrigger value="alerts" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-4 py-2">
+            <TabsTrigger value="slos" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-3 py-2">
+              <Target className="w-4 h-4 mr-2" />
+              SLOs
+            </TabsTrigger>
+            <TabsTrigger value="metrics" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-3 py-2">
+              <Gauge className="w-4 h-4 mr-2" />
+              Metrics
+            </TabsTrigger>
+            <TabsTrigger value="alerts" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-3 py-2">
               <Bell className="w-4 h-4 mr-2" />
               Alerts
             </TabsTrigger>
@@ -425,6 +510,145 @@ export default function PerformanceAnalyticsClient({ initialPerformanceAnalytics
                 </div>
               </div>
             )}
+          </TabsContent>
+
+          {/* Infrastructure Tab */}
+          <TabsContent value="infrastructure" className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Host Infrastructure</h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-700/50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Host</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">CPU</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Memory</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Disk</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Network</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Containers</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Uptime</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                    {mockHosts.map((host) => (
+                      <tr key={host.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td className="px-6 py-4">
+                          <p className="font-medium text-gray-900 dark:text-white">{host.name}</p>
+                          <p className="text-xs text-gray-500">{host.ip} • {host.os}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[host.status]}`}>{host.status}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                              <div className={`h-2 rounded-full ${host.cpu > 80 ? 'bg-red-500' : host.cpu > 60 ? 'bg-yellow-500' : 'bg-green-500'}`} style={{width: `${host.cpu}%`}} />
+                            </div>
+                            <span className="text-sm">{host.cpu}%</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                              <div className={`h-2 rounded-full ${host.memory > 80 ? 'bg-red-500' : host.memory > 60 ? 'bg-yellow-500' : 'bg-green-500'}`} style={{width: `${host.memory}%`}} />
+                            </div>
+                            <span className="text-sm">{host.memory}%</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                              <div className={`h-2 rounded-full ${host.disk > 80 ? 'bg-red-500' : host.disk > 60 ? 'bg-yellow-500' : 'bg-green-500'}`} style={{width: `${host.disk}%`}} />
+                            </div>
+                            <span className="text-sm">{host.disk}%</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                          <span className="text-green-600">↓{host.network.in}</span> / <span className="text-blue-600">↑{host.network.out}</span> MB/s
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{host.containers}</td>
+                        <td className="px-6 py-4 text-sm text-gray-500">{host.uptime}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Logs Tab */}
+          <TabsContent value="logs" className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Live Log Stream</h3>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input type="text" placeholder="Search logs..." className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm" />
+                    </div>
+                    <select className="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm">
+                      <option>All Levels</option>
+                      <option>Error</option>
+                      <option>Warn</option>
+                      <option>Info</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <ScrollArea className="h-[500px]">
+                <div className="font-mono text-sm">
+                  {mockLogs.map((log) => (
+                    <div key={log.id} className="px-6 py-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <div className="flex items-start gap-4">
+                        <span className="text-xs text-gray-400 whitespace-nowrap">{formatDate(log.timestamp)}</span>
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${logLevelColors[log.level]}`}>{log.level.toUpperCase()}</span>
+                        <span className="text-xs text-blue-600">[{log.service}]</span>
+                        <span className="text-xs text-gray-500">{log.host}</span>
+                        <span className="flex-1 text-gray-900 dark:text-white break-all">{log.message}</span>
+                        {log.traceId && <span className="text-xs text-purple-600 cursor-pointer hover:underline">{log.traceId}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          </TabsContent>
+
+          {/* SLOs Tab */}
+          <TabsContent value="slos" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {mockSLOs.map((slo) => (
+                <div key={slo.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{slo.name}</h3>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${sloStatusColors[slo.status]}`}>{slo.status.replace('_', ' ')}</span>
+                  </div>
+                  <div className="flex items-end gap-4 mb-4">
+                    <div>
+                      <p className="text-4xl font-bold text-gray-900 dark:text-white">{slo.current}%</p>
+                      <p className="text-sm text-gray-500">Current ({slo.timeWindow})</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-medium text-gray-600 dark:text-gray-400">{slo.target}%</p>
+                      <p className="text-sm text-gray-500">Target</p>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between text-sm mb-2">
+                      <span className="text-gray-500">Error Budget</span>
+                      <span className={`font-medium ${slo.errorBudget.remaining < 20 ? 'text-red-600' : 'text-green-600'}`}>{slo.errorBudget.remaining}% remaining</span>
+                    </div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div className={`h-full ${slo.errorBudget.remaining < 20 ? 'bg-red-500' : slo.errorBudget.remaining < 50 ? 'bg-yellow-500' : 'bg-green-500'}`} style={{width: `${slo.errorBudget.remaining}%`}} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </TabsContent>
 
           {/* Services Tab */}
