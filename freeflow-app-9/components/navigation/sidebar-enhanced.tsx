@@ -138,7 +138,8 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'ai-design', name: 'AI Design', href: '/dashboard/ai-design', icon: Zap, description: 'AI design generation' },
           { id: 'ai-create', name: 'AI Create', href: '/dashboard/ai-create', icon: Sparkles, description: 'AI content creation' },
           { id: 'ai-image-generator', name: 'AI Image Generator', href: '/dashboard/ai-image-generator', icon: Image, description: 'Nano Banana image generation', badge: 'Hot' },
-          { id: 'ai-music-studio', name: 'AI Music Studio', href: '/dashboard/ai-music-studio', icon: Music, description: 'Suno AI music creation', badge: 'Hot' }
+          { id: 'ai-music-studio', name: 'AI Music Studio', href: '/dashboard/ai-music-studio', icon: Music, description: 'Suno AI music creation', badge: 'Hot' },
+          { id: 'ai-video-studio', name: 'AI Video Studio', href: '/dashboard/ai-video-studio', icon: Film, description: 'Veo 3 video generation', badge: 'Hot' }
         ]
       },
       {
