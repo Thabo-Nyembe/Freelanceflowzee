@@ -5,37 +5,30 @@ import {
   DollarSign,
   CreditCard,
   ArrowUpRight,
-  ArrowDownRight,
   TrendingUp,
-  TrendingDown,
   Calendar,
   Search,
-  Filter,
   Download,
-  RefreshCw,
   MoreHorizontal,
   Eye,
   Copy,
-  ExternalLink,
   CheckCircle,
   XCircle,
   Clock,
   AlertTriangle,
-  ArrowRight,
-  ChevronDown,
-  ChevronRight,
   Receipt,
   Wallet,
   Building2,
-  Globe,
-  Shield,
-  Zap,
   BarChart3,
-  PieChart,
   ArrowLeftRight,
   Banknote,
   Plus,
-  Send
+  Send,
+  Users,
+  FileText,
+  Mail,
+  Edit,
+  Trash2
 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -103,6 +96,43 @@ interface Payout {
     last4: string
   }
   automatic: boolean
+}
+
+interface Invoice {
+  id: string
+  number: string
+  customer: { name: string; email: string }
+  amount: number
+  currency: string
+  status: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
+  dueDate: string
+  created: string
+  paidAt?: string
+  items: { description: string; quantity: number; unitPrice: number }[]
+}
+
+interface Customer {
+  id: string
+  name: string
+  email: string
+  created: string
+  totalSpent: number
+  paymentCount: number
+  lastPayment: string
+  defaultPaymentMethod?: { brand: string; last4: string }
+  subscriptions: number
+}
+
+interface BalanceTransaction {
+  id: string
+  type: 'charge' | 'refund' | 'payout' | 'adjustment' | 'fee'
+  amount: number
+  fee: number
+  net: number
+  currency: string
+  description: string
+  created: string
+  availableOn: string
 }
 
 // Mock Data
@@ -217,6 +247,30 @@ const mockPayouts: Payout[] = [
   { id: 'po_1122334455', amount: 156750, currency: 'USD', status: 'pending', arrivalDate: '2024-12-25', created: '2024-12-23T00:00:00Z', destination: { bank: 'Chase Bank', last4: '4521' }, automatic: true },
 ]
 
+const mockInvoices: Invoice[] = [
+  { id: 'in_1234567890', number: 'INV-0001', customer: { name: 'John Smith', email: 'john@company.com' }, amount: 15000, currency: 'USD', status: 'paid', dueDate: '2024-12-30', created: '2024-12-01T00:00:00Z', paidAt: '2024-12-15T00:00:00Z', items: [{ description: 'Professional Plan - Annual', quantity: 1, unitPrice: 15000 }] },
+  { id: 'in_0987654321', number: 'INV-0002', customer: { name: 'Sarah Johnson', email: 'sarah@enterprise.co' }, amount: 29900, currency: 'USD', status: 'open', dueDate: '2024-12-31', created: '2024-12-15T00:00:00Z', items: [{ description: 'Enterprise Plan - Annual', quantity: 1, unitPrice: 29900 }] },
+  { id: 'in_1122334455', number: 'INV-0003', customer: { name: 'Mike Chen', email: 'mike@startup.io' }, amount: 4900, currency: 'USD', status: 'draft', dueDate: '2025-01-15', created: '2024-12-20T00:00:00Z', items: [{ description: 'Starter Plan - Monthly', quantity: 1, unitPrice: 4900 }] },
+  { id: 'in_5566778899', number: 'INV-0004', customer: { name: 'Emily Davis', email: 'emily@design.studio' }, amount: 9900, currency: 'USD', status: 'void', dueDate: '2024-12-20', created: '2024-12-05T00:00:00Z', items: [{ description: 'Professional Plan - Monthly', quantity: 1, unitPrice: 9900 }] },
+]
+
+const mockCustomers: Customer[] = [
+  { id: 'cus_abc123', name: 'John Smith', email: 'john@company.com', created: '2024-01-15T00:00:00Z', totalSpent: 45000, paymentCount: 3, lastPayment: '2024-12-23T10:30:00Z', defaultPaymentMethod: { brand: 'visa', last4: '4242' }, subscriptions: 1 },
+  { id: 'cus_def456', name: 'Sarah Johnson', email: 'sarah@enterprise.co', created: '2024-03-20T00:00:00Z', totalSpent: 89700, paymentCount: 3, lastPayment: '2024-12-23T09:15:00Z', defaultPaymentMethod: { brand: 'mastercard', last4: '5555' }, subscriptions: 2 },
+  { id: 'cus_ghi789', name: 'Mike Chen', email: 'mike@startup.io', created: '2024-06-10T00:00:00Z', totalSpent: 14700, paymentCount: 3, lastPayment: '2024-12-23T08:45:00Z', defaultPaymentMethod: { brand: 'visa', last4: '6789' }, subscriptions: 1 },
+  { id: 'cus_jkl012', name: 'Emily Davis', email: 'emily@design.studio', created: '2024-08-05T00:00:00Z', totalSpent: 29700, paymentCount: 3, lastPayment: '2024-12-22T16:30:00Z', defaultPaymentMethod: { brand: 'amex', last4: '1234' }, subscriptions: 1 },
+  { id: 'cus_mno345', name: 'Alex Thompson', email: 'alex@agency.com', created: '2024-02-28T00:00:00Z', totalSpent: 60000, paymentCount: 4, lastPayment: '2024-12-22T14:00:00Z', defaultPaymentMethod: { brand: 'visa', last4: '0000' }, subscriptions: 1 },
+]
+
+const mockBalanceTransactions: BalanceTransaction[] = [
+  { id: 'txn_001', type: 'charge', amount: 15000, fee: 465, net: 14535, currency: 'USD', description: 'Payment from John Smith', created: '2024-12-23T10:30:00Z', availableOn: '2024-12-25' },
+  { id: 'txn_002', type: 'charge', amount: 29900, fee: 897, net: 29003, currency: 'USD', description: 'Payment from Sarah Johnson', created: '2024-12-23T09:15:00Z', availableOn: '2024-12-25' },
+  { id: 'txn_003', type: 'refund', amount: -15000, fee: 0, net: -15000, currency: 'USD', description: 'Refund to Alex Thompson', created: '2024-12-22T15:00:00Z', availableOn: '2024-12-22' },
+  { id: 'txn_004', type: 'payout', amount: -125000, fee: 0, net: -125000, currency: 'USD', description: 'Payout to Chase Bank ••••4521', created: '2024-12-21T00:00:00Z', availableOn: '2024-12-23' },
+  { id: 'txn_005', type: 'charge', amount: 4900, fee: 147, net: 4753, currency: 'USD', description: 'Payment from Mike Chen', created: '2024-12-23T08:45:00Z', availableOn: '2024-12-25' },
+  { id: 'txn_006', type: 'fee', amount: 0, fee: 2500, net: -2500, currency: 'USD', description: 'Stripe monthly fee', created: '2024-12-01T00:00:00Z', availableOn: '2024-12-01' },
+]
+
 const statusColors: Record<string, string> = {
   succeeded: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
   pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
@@ -229,6 +283,18 @@ const statusColors: Record<string, string> = {
   under_review: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
   won: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
   lost: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+  draft: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+  open: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+  void: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+  uncollectible: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+}
+
+const balanceTypeColors: Record<string, string> = {
+  charge: 'text-green-600',
+  refund: 'text-red-600',
+  payout: 'text-blue-600',
+  adjustment: 'text-purple-600',
+  fee: 'text-orange-600',
 }
 
 const cardBrandIcons: Record<string, string> = {
@@ -246,6 +312,9 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null)
   const [showRefundDialog, setShowRefundDialog] = useState(false)
+  const [showInvoiceDialog, setShowInvoiceDialog] = useState(false)
+  const [showCustomerDialog, setShowCustomerDialog] = useState(false)
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
 
   const { transactions } = useTransactions({})
   const displayTransactions = transactions.length > 0 ? transactions : initialTransactions
@@ -255,6 +324,12 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
   const totalFees = mockPayments.filter(p => p.status === 'succeeded').reduce((sum, p) => sum + p.fees, 0)
   const successRate = (mockPayments.filter(p => p.status === 'succeeded').length / mockPayments.length * 100).toFixed(1)
   const pendingPayouts = mockPayouts.filter(p => p.status === 'pending' || p.status === 'in_transit').reduce((sum, p) => sum + p.amount, 0)
+
+  // Balance calculations
+  const availableBalance = mockBalanceTransactions.filter(t => new Date(t.availableOn) <= new Date()).reduce((sum, t) => sum + t.net, 0)
+  const pendingBalance = mockBalanceTransactions.filter(t => new Date(t.availableOn) > new Date()).reduce((sum, t) => sum + t.net, 0)
+  const totalCustomers = mockCustomers.length
+  const totalInvoicesDue = mockInvoices.filter(i => i.status === 'open').reduce((sum, i) => sum + i.amount, 0)
 
   const filteredPayments = useMemo(() => {
     return mockPayments.filter(p => {
@@ -402,24 +477,36 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-emerald-900/30 dark:data-[state=active]:text-emerald-300 rounded-lg px-4 py-2">
+          <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 flex-wrap">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-emerald-900/30 dark:data-[state=active]:text-emerald-300 rounded-lg px-3 py-2">
               <BarChart3 className="w-4 h-4 mr-2" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="payments" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-emerald-900/30 dark:data-[state=active]:text-emerald-300 rounded-lg px-4 py-2">
+            <TabsTrigger value="balance" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-emerald-900/30 dark:data-[state=active]:text-emerald-300 rounded-lg px-3 py-2">
+              <Wallet className="w-4 h-4 mr-2" />
+              Balance
+            </TabsTrigger>
+            <TabsTrigger value="payments" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-emerald-900/30 dark:data-[state=active]:text-emerald-300 rounded-lg px-3 py-2">
               <CreditCard className="w-4 h-4 mr-2" />
               Payments
             </TabsTrigger>
-            <TabsTrigger value="refunds" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-emerald-900/30 dark:data-[state=active]:text-emerald-300 rounded-lg px-4 py-2">
+            <TabsTrigger value="invoices" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-emerald-900/30 dark:data-[state=active]:text-emerald-300 rounded-lg px-3 py-2">
+              <FileText className="w-4 h-4 mr-2" />
+              Invoices
+            </TabsTrigger>
+            <TabsTrigger value="customers" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-emerald-900/30 dark:data-[state=active]:text-emerald-300 rounded-lg px-3 py-2">
+              <Users className="w-4 h-4 mr-2" />
+              Customers
+            </TabsTrigger>
+            <TabsTrigger value="refunds" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-emerald-900/30 dark:data-[state=active]:text-emerald-300 rounded-lg px-3 py-2">
               <ArrowLeftRight className="w-4 h-4 mr-2" />
               Refunds
             </TabsTrigger>
-            <TabsTrigger value="disputes" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-emerald-900/30 dark:data-[state=active]:text-emerald-300 rounded-lg px-4 py-2">
+            <TabsTrigger value="disputes" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-emerald-900/30 dark:data-[state=active]:text-emerald-300 rounded-lg px-3 py-2">
               <AlertTriangle className="w-4 h-4 mr-2" />
               Disputes
             </TabsTrigger>
-            <TabsTrigger value="payouts" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-emerald-900/30 dark:data-[state=active]:text-emerald-300 rounded-lg px-4 py-2">
+            <TabsTrigger value="payouts" className="data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-700 dark:data-[state=active]:bg-emerald-900/30 dark:data-[state=active]:text-emerald-300 rounded-lg px-3 py-2">
               <Banknote className="w-4 h-4 mr-2" />
               Payouts
             </TabsTrigger>
@@ -524,6 +611,222 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                 </div>
               </div>
             )}
+          </TabsContent>
+
+          {/* Balance Tab */}
+          <TabsContent value="balance" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                  </div>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Available Balance</span>
+                </div>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{formatCurrency(Math.abs(availableBalance))}</p>
+                <p className="text-sm text-gray-500 mt-2">Ready for payout</p>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
+                    <Clock className="w-5 h-5 text-yellow-600" />
+                  </div>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Pending Balance</span>
+                </div>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{formatCurrency(pendingBalance)}</p>
+                <p className="text-sm text-gray-500 mt-2">Processing payments</p>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <Banknote className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Next Payout</span>
+                </div>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">{formatCurrency(pendingPayouts)}</p>
+                <p className="text-sm text-gray-500 mt-2">Arriving Dec 25</p>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Balance Transactions</h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-700/50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Amount</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Fee</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Net</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Available</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                    {mockBalanceTransactions.map((txn) => (
+                      <tr key={txn.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${balanceTypeColors[txn.type]} bg-opacity-20`}>
+                            {txn.type}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{txn.description}</td>
+                        <td className={`px-6 py-4 text-sm font-medium text-right ${txn.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {txn.amount >= 0 ? '+' : ''}{formatCurrency(txn.amount)}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-500 text-right">{formatCurrency(txn.fee)}</td>
+                        <td className={`px-6 py-4 text-sm font-semibold text-right ${txn.net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {txn.net >= 0 ? '+' : ''}{formatCurrency(txn.net)}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-500">{formatShortDate(txn.availableOn)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Invoices Tab */}
+          <TabsContent value="invoices" className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Invoices</h3>
+                    <p className="text-sm text-gray-500 mt-1">{formatCurrency(totalInvoicesDue)} outstanding</p>
+                  </div>
+                  <button
+                    onClick={() => setShowInvoiceDialog(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Create Invoice
+                  </button>
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-700/50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Number</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                    {mockInvoices.map((invoice) => (
+                      <tr key={invoice.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">{invoice.number}</p>
+                          <p className="text-xs text-gray-500 font-mono">{invoice.id}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">{invoice.customer.name}</p>
+                          <p className="text-xs text-gray-500">{invoice.customer.email}</p>
+                        </td>
+                        <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">{formatCurrency(invoice.amount)}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[invoice.status]}`}>
+                            {invoice.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-500">{formatShortDate(invoice.dueDate)}</td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                              <Eye className="w-4 h-4 text-gray-500" />
+                            </button>
+                            {invoice.status === 'open' && (
+                              <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                <Mail className="w-4 h-4 text-gray-500" />
+                              </button>
+                            )}
+                            {invoice.status === 'draft' && (
+                              <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                <Edit className="w-4 h-4 text-gray-500" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Customers Tab */}
+          <TabsContent value="customers" className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+              <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Customers</h3>
+                    <p className="text-sm text-gray-500 mt-1">{totalCustomers} total customers</p>
+                  </div>
+                  <button
+                    onClick={() => setShowCustomerDialog(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Customer
+                  </button>
+                </div>
+              </div>
+              <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                {mockCustomers.map((customer) => (
+                  <div key={customer.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center">
+                          <span className="text-lg font-semibold text-emerald-600">
+                            {customer.name.split(' ').map(n => n[0]).join('')}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">{customer.name}</p>
+                          <p className="text-sm text-gray-500">{customer.email}</p>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+                            <span className="font-mono">{customer.id}</span>
+                            <span>•</span>
+                            <span>Customer since {formatShortDate(customer.created)}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-6">
+                        <div className="text-right">
+                          <p className="text-lg font-semibold text-gray-900 dark:text-white">{formatCurrency(customer.totalSpent)}</p>
+                          <p className="text-xs text-gray-500">{customer.paymentCount} payments</p>
+                        </div>
+                        {customer.defaultPaymentMethod && (
+                          <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <CreditCard className="w-4 h-4 text-gray-500" />
+                            <span className="text-sm text-gray-700 dark:text-gray-300">
+                              {customer.defaultPaymentMethod.brand} ••••{customer.defaultPaymentMethod.last4}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1">
+                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                            <Eye className="w-4 h-4 text-gray-500" />
+                          </button>
+                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                            <MoreHorizontal className="w-4 h-4 text-gray-500" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </TabsContent>
 
           {/* Payments Tab */}
@@ -921,6 +1224,114 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
               </button>
               <button onClick={() => setShowRefundDialog(false)} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
                 Issue Refund
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Invoice Dialog */}
+        <Dialog open={showInvoiceDialog} onOpenChange={setShowInvoiceDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create Invoice</DialogTitle>
+              <DialogDescription>Create a new invoice for a customer</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Customer</label>
+                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                  {mockCustomers.map(c => (
+                    <option key={c.id} value={c.id}>{c.name} ({c.email})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <input
+                  type="text"
+                  placeholder="Professional Plan - Annual"
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
+                  <input
+                    type="text"
+                    placeholder="$150.00"
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Due Date</label>
+                  <input
+                    type="date"
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="send-email" className="rounded" defaultChecked />
+                <label htmlFor="send-email" className="text-sm text-gray-700 dark:text-gray-300">Email invoice to customer</label>
+              </div>
+            </div>
+            <DialogFooter>
+              <button onClick={() => setShowInvoiceDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Cancel
+              </button>
+              <button onClick={() => setShowInvoiceDialog(false)} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+                Create Invoice
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Customer Dialog */}
+        <Dialog open={showCustomerDialog} onOpenChange={setShowCustomerDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add Customer</DialogTitle>
+              <DialogDescription>Create a new customer record</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
+                <input
+                  type="text"
+                  placeholder="John Doe"
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                <input
+                  type="email"
+                  placeholder="john@example.com"
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Phone (optional)</label>
+                <input
+                  type="tel"
+                  placeholder="+1 (555) 123-4567"
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description (optional)</label>
+                <textarea
+                  placeholder="Notes about this customer..."
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 h-20 resize-none"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <button onClick={() => setShowCustomerDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Cancel
+              </button>
+              <button onClick={() => setShowCustomerDialog(false)} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+                Add Customer
               </button>
             </DialogFooter>
           </DialogContent>
