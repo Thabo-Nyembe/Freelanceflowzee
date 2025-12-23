@@ -79,6 +79,61 @@ interface Subscriber {
   segments: string[]
 }
 
+// Intercom Automation interfaces
+interface Automation {
+  id: string
+  name: string
+  description: string
+  trigger: AutomationTrigger
+  actions: AutomationAction[]
+  status: 'active' | 'paused' | 'draft'
+  stats: { triggered: number; completed: number; failed: number }
+  createdAt: string
+  lastTriggered: string
+}
+
+interface AutomationTrigger {
+  type: 'event' | 'segment_entry' | 'time_based' | 'api'
+  event?: string
+  segment?: string
+  schedule?: string
+  conditions: { field: string; operator: string; value: string }[]
+}
+
+interface AutomationAction {
+  type: 'send_email' | 'send_push' | 'add_tag' | 'remove_tag' | 'update_attribute' | 'wait' | 'split'
+  config: Record<string, unknown>
+  delay?: string
+}
+
+interface Series {
+  id: string
+  name: string
+  description: string
+  steps: SeriesStep[]
+  status: 'active' | 'paused' | 'draft'
+  enrolledCount: number
+  completedCount: number
+  exitRate: number
+  createdAt: string
+}
+
+interface SeriesStep {
+  id: string
+  type: 'email' | 'push' | 'wait' | 'condition' | 'exit'
+  name: string
+  delay?: string
+  content?: string
+  condition?: { field: string; operator: string; value: string }
+}
+
+interface EventTracking {
+  name: string
+  count: number
+  lastSeen: string
+  automations: number
+}
+
 // Mock data for Intercom level features
 const mockCampaigns: Campaign[] = [
   {
@@ -191,6 +246,116 @@ const mockTemplates: Template[] = [
   { id: 't4', name: 'Sale Announcement', category: 'Promotions', thumbnail: '🔥', usageCount: 23 },
   { id: 't5', name: 'Feature Release', category: 'Product', thumbnail: '✨', usageCount: 56 },
   { id: 't6', name: 'Re-engagement', category: 'Engagement', thumbnail: '💌', usageCount: 18 }
+]
+
+const mockAutomations: Automation[] = [
+  {
+    id: 'auto-1',
+    name: 'Welcome Series',
+    description: 'Automatically onboard new users with a multi-step email sequence',
+    trigger: { type: 'event', event: 'user.created', conditions: [] },
+    actions: [
+      { type: 'send_email', config: { template: 'welcome' } },
+      { type: 'wait', config: {}, delay: '2d' },
+      { type: 'send_email', config: { template: 'getting_started' } }
+    ],
+    status: 'active',
+    stats: { triggered: 4580, completed: 4123, failed: 45 },
+    createdAt: '2024-01-15T09:00:00Z',
+    lastTriggered: '2024-12-20T14:32:00Z'
+  },
+  {
+    id: 'auto-2',
+    name: 'Re-engagement Campaign',
+    description: 'Win back inactive users after 30 days of inactivity',
+    trigger: { type: 'segment_entry', segment: 'Inactive 30+ days', conditions: [{ field: 'last_activity', operator: 'older_than', value: '30d' }] },
+    actions: [
+      { type: 'send_email', config: { template: 're_engage' } },
+      { type: 'wait', config: {}, delay: '7d' },
+      { type: 'send_push', config: { message: 'We miss you!' } }
+    ],
+    status: 'active',
+    stats: { triggered: 2340, completed: 1890, failed: 12 },
+    createdAt: '2024-03-10T09:00:00Z',
+    lastTriggered: '2024-12-19T08:15:00Z'
+  },
+  {
+    id: 'auto-3',
+    name: 'Purchase Follow-up',
+    description: 'Send thank you and upsell after purchase',
+    trigger: { type: 'event', event: 'purchase.completed', conditions: [] },
+    actions: [
+      { type: 'send_email', config: { template: 'thank_you' } },
+      { type: 'add_tag', config: { tag: 'customer' } },
+      { type: 'wait', config: {}, delay: '5d' },
+      { type: 'send_email', config: { template: 'upsell' } }
+    ],
+    status: 'active',
+    stats: { triggered: 8920, completed: 8456, failed: 23 },
+    createdAt: '2024-02-20T09:00:00Z',
+    lastTriggered: '2024-12-20T16:45:00Z'
+  },
+  {
+    id: 'auto-4',
+    name: 'Trial Expiration Warning',
+    description: 'Notify users before trial ends',
+    trigger: { type: 'time_based', schedule: '3 days before trial_end', conditions: [] },
+    actions: [
+      { type: 'send_email', config: { template: 'trial_ending' } },
+      { type: 'send_push', config: { message: 'Your trial ends soon!' } }
+    ],
+    status: 'paused',
+    stats: { triggered: 1234, completed: 1189, failed: 8 },
+    createdAt: '2024-04-05T09:00:00Z',
+    lastTriggered: '2024-12-15T12:00:00Z'
+  }
+]
+
+const mockSeries: Series[] = [
+  {
+    id: 'series-1',
+    name: 'Onboarding Journey',
+    description: '7-day onboarding sequence for new users',
+    steps: [
+      { id: 's1-1', type: 'email', name: 'Welcome', content: 'Welcome to the platform!' },
+      { id: 's1-2', type: 'wait', name: 'Wait 1 day', delay: '1d' },
+      { id: 's1-3', type: 'email', name: 'Setup Guide', content: 'Complete your profile setup' },
+      { id: 's1-4', type: 'wait', name: 'Wait 2 days', delay: '2d' },
+      { id: 's1-5', type: 'condition', name: 'Check Profile', condition: { field: 'profile_complete', operator: 'equals', value: 'true' } },
+      { id: 's1-6', type: 'email', name: 'Pro Tips', content: 'Advanced features guide' }
+    ],
+    status: 'active',
+    enrolledCount: 3450,
+    completedCount: 2890,
+    exitRate: 16.2,
+    createdAt: '2024-01-01T09:00:00Z'
+  },
+  {
+    id: 'series-2',
+    name: 'Feature Education',
+    description: 'Educate users about key features',
+    steps: [
+      { id: 's2-1', type: 'email', name: 'Feature 1', content: 'Discover Project Management' },
+      { id: 's2-2', type: 'wait', name: 'Wait 3 days', delay: '3d' },
+      { id: 's2-3', type: 'email', name: 'Feature 2', content: 'Explore Analytics' },
+      { id: 's2-4', type: 'wait', name: 'Wait 3 days', delay: '3d' },
+      { id: 's2-5', type: 'email', name: 'Feature 3', content: 'Master Automation' }
+    ],
+    status: 'active',
+    enrolledCount: 2100,
+    completedCount: 1560,
+    exitRate: 25.7,
+    createdAt: '2024-02-15T09:00:00Z'
+  }
+]
+
+const mockEvents: EventTracking[] = [
+  { name: 'user.created', count: 4580, lastSeen: '2024-12-20T14:32:00Z', automations: 2 },
+  { name: 'purchase.completed', count: 8920, lastSeen: '2024-12-20T16:45:00Z', automations: 3 },
+  { name: 'subscription.upgraded', count: 1234, lastSeen: '2024-12-20T11:20:00Z', automations: 1 },
+  { name: 'feature.used', count: 45670, lastSeen: '2024-12-20T17:00:00Z', automations: 0 },
+  { name: 'support.ticket.created', count: 890, lastSeen: '2024-12-20T15:30:00Z', automations: 1 },
+  { name: 'profile.updated', count: 12340, lastSeen: '2024-12-20T16:55:00Z', automations: 0 }
 ]
 
 export default function BroadcastsClient({ initialBroadcasts }: { initialBroadcasts: Broadcast[] }) {
@@ -320,8 +485,11 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
           <div className="flex items-center justify-between">
             <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
               <TabsTrigger value="campaigns" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Campaigns</TabsTrigger>
+              <TabsTrigger value="automations" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Automations</TabsTrigger>
+              <TabsTrigger value="series" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Series</TabsTrigger>
               <TabsTrigger value="templates" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Templates</TabsTrigger>
               <TabsTrigger value="audience" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Audience</TabsTrigger>
+              <TabsTrigger value="events" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Events</TabsTrigger>
               <TabsTrigger value="analytics" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700 dark:data-[state=active]:bg-violet-900/40 dark:data-[state=active]:text-violet-300">Analytics</TabsTrigger>
             </TabsList>
             <div className="flex gap-2">
@@ -560,6 +728,141 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             ))}
           </TabsContent>
 
+          {/* Automations Tab */}
+          <TabsContent value="automations" className="space-y-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                {mockAutomations.length} automations • {mockAutomations.filter(a => a.status === 'active').length} active
+              </div>
+              <button className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
+                + Create Automation
+              </button>
+            </div>
+            <div className="space-y-4">
+              {mockAutomations.map(automation => (
+                <div key={automation.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl ${automation.status === 'active' ? 'bg-green-100 dark:bg-green-900/40' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                        ⚡
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-gray-900 dark:text-white">{automation.name}</h3>
+                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${automation.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
+                            {automation.status}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{automation.description}</p>
+                        <div className="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+                          <span>Trigger: {automation.trigger.type}</span>
+                          <span>{automation.actions.length} actions</span>
+                          <span>Last: {new Date(automation.lastTriggered).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <div className="text-lg font-semibold text-gray-900 dark:text-white">{automation.stats.triggered.toLocaleString()}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Triggered</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-semibold text-green-600">{automation.stats.completed.toLocaleString()}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Completed</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-semibold text-red-600">{automation.stats.failed}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Failed</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                      {automation.actions.map((action, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <span className="px-3 py-1.5 bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-lg text-xs whitespace-nowrap">
+                            {action.type.replace(/_/g, ' ')}
+                            {action.delay && ` (${action.delay})`}
+                          </span>
+                          {idx < automation.actions.length - 1 && <span className="text-gray-400">→</span>}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Series Tab */}
+          <TabsContent value="series" className="space-y-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                {mockSeries.length} series • {mockSeries.reduce((sum, s) => sum + s.enrolledCount, 0).toLocaleString()} enrolled
+              </div>
+              <button className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
+                + Create Series
+              </button>
+            </div>
+            {mockSeries.map(series => (
+              <div key={series.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{series.name}</h3>
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${series.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
+                        {series.status}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{series.description}</p>
+                  </div>
+                  <div className="grid grid-cols-3 gap-6 text-center">
+                    <div>
+                      <div className="text-lg font-semibold text-gray-900 dark:text-white">{series.enrolledCount.toLocaleString()}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Enrolled</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold text-green-600">{series.completedCount.toLocaleString()}</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Completed</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold text-amber-600">{series.exitRate}%</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Exit Rate</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="relative">
+                  <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
+                  <div className="space-y-4">
+                    {series.steps.map((step, idx) => (
+                      <div key={step.id} className="relative flex items-center gap-4 pl-4">
+                        <div className={`w-5 h-5 rounded-full z-10 flex items-center justify-center text-xs
+                          ${step.type === 'email' ? 'bg-blue-500 text-white' :
+                            step.type === 'push' ? 'bg-amber-500 text-white' :
+                            step.type === 'wait' ? 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300' :
+                            step.type === 'condition' ? 'bg-purple-500 text-white' : 'bg-red-500 text-white'}`}>
+                          {idx + 1}
+                        </div>
+                        <div className="flex-1 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-900 dark:text-white">{step.name}</span>
+                              <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-600 rounded text-xs text-gray-600 dark:text-gray-300 capitalize">{step.type}</span>
+                            </div>
+                            {step.delay && <span className="text-xs text-gray-500 dark:text-gray-400">⏱️ {step.delay}</span>}
+                          </div>
+                          {step.content && <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{step.content}</p>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </TabsContent>
+
           {/* Templates Tab */}
           <TabsContent value="templates" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -627,6 +930,80 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                 <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-center">
                   <div className="text-2xl font-bold text-red-600">485</div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">Bounced</div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Events Tab */}
+          <TabsContent value="events" className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Event Tracking</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Track user events and trigger automations</p>
+                </div>
+                <button className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
+                  + Define Event
+                </button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200 dark:border-gray-700">
+                      <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Event Name</th>
+                      <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Count</th>
+                      <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Last Seen</th>
+                      <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Automations</th>
+                      <th className="text-right py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mockEvents.map(event => (
+                      <tr key={event.name} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                        <td className="py-3 px-4">
+                          <code className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-sm font-mono text-gray-900 dark:text-white">{event.name}</code>
+                        </td>
+                        <td className="py-3 px-4 text-right text-gray-900 dark:text-white font-medium">{event.count.toLocaleString()}</td>
+                        <td className="py-3 px-4 text-right text-gray-600 dark:text-gray-400 text-sm">{new Date(event.lastSeen).toLocaleString()}</td>
+                        <td className="py-3 px-4 text-right">
+                          {event.automations > 0 ? (
+                            <span className="px-2 py-1 bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 rounded text-xs">{event.automations} active</span>
+                          ) : (
+                            <span className="text-gray-400 text-sm">None</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <button className="text-violet-600 hover:text-violet-700 text-sm">Create Automation</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Event Volume (Last 7 days)</h3>
+                <div className="h-48 flex items-center justify-center bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <span className="text-gray-500 dark:text-gray-400">Chart placeholder - Event volume over time</span>
+                </div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Event Sources</h3>
+                <div className="space-y-3">
+                  {['Web App', 'Mobile iOS', 'Mobile Android', 'API'].map((source, idx) => (
+                    <div key={source} className="flex items-center justify-between">
+                      <span className="text-gray-700 dark:text-gray-300">{source}</span>
+                      <div className="flex items-center gap-2">
+                        <div className="w-32 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div className="h-full bg-violet-500" style={{ width: `${[65, 20, 10, 5][idx]}%` }} />
+                        </div>
+                        <span className="text-sm text-gray-600 dark:text-gray-400 w-12 text-right">{[65, 20, 10, 5][idx]}%</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
