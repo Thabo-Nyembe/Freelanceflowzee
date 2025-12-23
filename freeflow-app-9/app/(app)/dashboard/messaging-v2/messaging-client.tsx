@@ -1,10 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { useConversations, useDirectMessages, useUnreadConversations, type Conversation, type DirectMessage } from '@/lib/hooks/use-messaging'
-import { BentoCard, BentoQuickAction } from '@/components/ui/bento-grid-advanced'
-import { StatGrid, MiniKPI, ActivityFeed, RankingList, ProgressCard } from '@/components/ui/results-display'
-import { ModernButton, GradientButton, PillButton } from '@/components/ui/modern-buttons'
+import { useState, useMemo, useRef } from 'react'
 import {
   MessageSquare,
   Send,
@@ -19,319 +15,1176 @@ import {
   Users,
   TrendingUp,
   Mail,
-  Reply
+  Reply,
+  Hash,
+  Lock,
+  Plus,
+  Settings,
+  ChevronDown,
+  ChevronRight,
+  AtSign,
+  Smile,
+  Image,
+  FileText,
+  Mic,
+  Video,
+  Phone,
+  Pin,
+  Bookmark,
+  Edit2,
+  Trash2,
+  Forward,
+  Copy,
+  Share2,
+  Bell,
+  BellOff,
+  UserPlus,
+  LogOut,
+  Eye,
+  EyeOff,
+  X,
+  Check,
+  AlertCircle,
+  Circle,
+  Loader2,
+  Filter,
+  Calendar,
+  Link,
+  Code,
+  Bold,
+  Italic,
+  List,
+  ListOrdered,
+  Quote,
+  MoreHorizontal,
+  Headphones,
+  Volume2,
+  VolumeX,
+  Globe,
+  Zap,
+  MessageCircle,
+  Heart,
+  ThumbsUp,
+  Laugh,
+  Angry,
+  Frown,
+  PartyPopper,
+  Sparkles,
+  ArrowRight,
+  Download,
+  ExternalLink,
+  PlayCircle
 } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
-interface MessagingClientProps {
-  initialConversations: Conversation[]
-  initialMessages: DirectMessage[]
+// ============================================================================
+// TYPE DEFINITIONS - Slack/Discord Level
+// ============================================================================
+
+interface User {
+  id: string
+  name: string
+  displayName: string
+  avatar: string
+  email: string
+  status: 'online' | 'away' | 'dnd' | 'offline'
+  statusMessage: string | null
+  role: 'admin' | 'member' | 'guest'
+  lastSeen: string
 }
 
-export default function MessagingClient({ initialConversations, initialMessages }: MessagingClientProps) {
-  const [selectedFolder, setSelectedFolder] = useState<'inbox' | 'sent' | 'archived' | 'starred'>('inbox')
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(initialConversations[0]?.id || null)
+interface Reaction {
+  emoji: string
+  count: number
+  users: string[]
+  reacted: boolean
+}
+
+interface Attachment {
+  id: string
+  type: 'image' | 'file' | 'video' | 'audio' | 'link'
+  name: string
+  url: string
+  size: number
+  mimeType: string
+  thumbnail?: string
+  preview?: {
+    title: string
+    description: string
+    image: string
+  }
+}
+
+interface Message {
+  id: string
+  channelId: string
+  threadId: string | null
+  parentId: string | null
+  author: User
+  content: string
+  timestamp: string
+  editedAt: string | null
+  reactions: Reaction[]
+  attachments: Attachment[]
+  mentions: string[]
+  isPinned: boolean
+  isBookmarked: boolean
+  replyCount: number
+  isEdited: boolean
+  isDeleted: boolean
+}
+
+interface Thread {
+  id: string
+  parentMessage: Message
+  messages: Message[]
+  participantCount: number
+  lastReplyAt: string
+  isFollowing: boolean
+}
+
+interface Channel {
+  id: string
+  name: string
+  description: string
+  type: 'public' | 'private' | 'dm' | 'group_dm'
+  categoryId: string | null
+  memberCount: number
+  unreadCount: number
+  mentionCount: number
+  lastMessageAt: string
+  lastMessage: string | null
+  isPinned: boolean
+  isMuted: boolean
+  isArchived: boolean
+  topic: string | null
+  createdBy: User
+  createdAt: string
+  members?: User[]
+}
+
+interface ChannelCategory {
+  id: string
+  name: string
+  channels: Channel[]
+  isCollapsed: boolean
+}
+
+interface DirectMessage {
+  id: string
+  participants: User[]
+  lastMessage: Message | null
+  unreadCount: number
+  isPinned: boolean
+  isMuted: boolean
+}
+
+interface SearchResult {
+  type: 'message' | 'file' | 'channel' | 'user'
+  message?: Message
+  file?: Attachment
+  channel?: Channel
+  user?: User
+  relevance: number
+}
+
+// ============================================================================
+// MOCK DATA
+// ============================================================================
+
+const mockUsers: User[] = [
+  { id: 'user-1', name: 'John Smith', displayName: 'john', avatar: '/avatars/john.jpg', email: 'john@company.com', status: 'online', statusMessage: 'Working on the new feature', role: 'admin', lastSeen: '2024-12-23T10:30:00Z' },
+  { id: 'user-2', name: 'Sarah Chen', displayName: 'sarah', avatar: '/avatars/sarah.jpg', email: 'sarah@company.com', status: 'online', statusMessage: null, role: 'member', lastSeen: '2024-12-23T10:28:00Z' },
+  { id: 'user-3', name: 'Mike Johnson', displayName: 'mike', avatar: '/avatars/mike.jpg', email: 'mike@company.com', status: 'away', statusMessage: 'In a meeting', role: 'member', lastSeen: '2024-12-23T09:45:00Z' },
+  { id: 'user-4', name: 'Emily Davis', displayName: 'emily', avatar: '/avatars/emily.jpg', email: 'emily@company.com', status: 'dnd', statusMessage: 'Deep work - no interruptions', role: 'member', lastSeen: '2024-12-23T08:00:00Z' },
+  { id: 'user-5', name: 'Alex Wilson', displayName: 'alex', avatar: '/avatars/alex.jpg', email: 'alex@company.com', status: 'offline', statusMessage: null, role: 'guest', lastSeen: '2024-12-22T18:30:00Z' }
+]
+
+const currentUser = mockUsers[0]
+
+const mockChannels: Channel[] = [
+  { id: 'ch-1', name: 'general', description: 'General discussion for the team', type: 'public', categoryId: 'cat-1', memberCount: 45, unreadCount: 3, mentionCount: 1, lastMessageAt: '2024-12-23T10:30:00Z', lastMessage: 'Hey team, quick update on the project...', isPinned: false, isMuted: false, isArchived: false, topic: 'Company-wide announcements and general discussion', createdBy: mockUsers[0], createdAt: '2024-01-01T00:00:00Z' },
+  { id: 'ch-2', name: 'engineering', description: 'Engineering team discussions', type: 'public', categoryId: 'cat-1', memberCount: 28, unreadCount: 12, mentionCount: 2, lastMessageAt: '2024-12-23T10:25:00Z', lastMessage: 'The PR is ready for review', isPinned: true, isMuted: false, isArchived: false, topic: 'Technical discussions, code reviews, and architecture decisions', createdBy: mockUsers[0], createdAt: '2024-01-15T00:00:00Z' },
+  { id: 'ch-3', name: 'design', description: 'Design team channel', type: 'public', categoryId: 'cat-1', memberCount: 15, unreadCount: 0, mentionCount: 0, lastMessageAt: '2024-12-23T09:00:00Z', lastMessage: 'New mockups are in Figma!', isPinned: false, isMuted: false, isArchived: false, topic: 'UI/UX design discussions and feedback', createdBy: mockUsers[1], createdAt: '2024-02-01T00:00:00Z' },
+  { id: 'ch-4', name: 'project-alpha', description: 'Project Alpha team', type: 'private', categoryId: 'cat-2', memberCount: 8, unreadCount: 5, mentionCount: 0, lastMessageAt: '2024-12-23T10:15:00Z', lastMessage: 'Sprint planning at 2pm', isPinned: false, isMuted: false, isArchived: false, topic: 'Project Alpha development and planning', createdBy: mockUsers[0], createdAt: '2024-06-01T00:00:00Z' },
+  { id: 'ch-5', name: 'random', description: 'Random fun stuff', type: 'public', categoryId: 'cat-3', memberCount: 40, unreadCount: 8, mentionCount: 0, lastMessageAt: '2024-12-23T10:20:00Z', lastMessage: 'Check out this meme 😂', isPinned: false, isMuted: true, isArchived: false, topic: 'Off-topic conversations and fun', createdBy: mockUsers[2], createdAt: '2024-01-01T00:00:00Z' },
+  { id: 'ch-6', name: 'announcements', description: 'Official announcements', type: 'public', categoryId: 'cat-1', memberCount: 50, unreadCount: 1, mentionCount: 1, lastMessageAt: '2024-12-22T15:00:00Z', lastMessage: 'Holiday schedule update', isPinned: true, isMuted: false, isArchived: false, topic: 'Company announcements - please keep discussions minimal', createdBy: mockUsers[0], createdAt: '2024-01-01T00:00:00Z' }
+]
+
+const mockCategories: ChannelCategory[] = [
+  { id: 'cat-1', name: 'Work', channels: mockChannels.filter(c => ['ch-1', 'ch-2', 'ch-3', 'ch-6'].includes(c.id)), isCollapsed: false },
+  { id: 'cat-2', name: 'Projects', channels: mockChannels.filter(c => c.id === 'ch-4'), isCollapsed: false },
+  { id: 'cat-3', name: 'Social', channels: mockChannels.filter(c => c.id === 'ch-5'), isCollapsed: true }
+]
+
+const mockMessages: Message[] = [
+  {
+    id: 'msg-1',
+    channelId: 'ch-1',
+    threadId: null,
+    parentId: null,
+    author: mockUsers[1],
+    content: 'Hey team! Just pushed the new feature to staging. Can someone take a look? 🚀',
+    timestamp: '2024-12-23T10:30:00Z',
+    editedAt: null,
+    reactions: [
+      { emoji: '👍', count: 3, users: ['user-1', 'user-3', 'user-4'], reacted: true },
+      { emoji: '🚀', count: 2, users: ['user-1', 'user-2'], reacted: true },
+      { emoji: '👀', count: 1, users: ['user-5'], reacted: false }
+    ],
+    attachments: [],
+    mentions: [],
+    isPinned: false,
+    isBookmarked: false,
+    replyCount: 5,
+    isEdited: false,
+    isDeleted: false
+  },
+  {
+    id: 'msg-2',
+    channelId: 'ch-1',
+    threadId: null,
+    parentId: null,
+    author: mockUsers[0],
+    content: 'Looking great! I\'ll review it after lunch. @sarah can you pair with me?',
+    timestamp: '2024-12-23T10:32:00Z',
+    editedAt: null,
+    reactions: [{ emoji: '✅', count: 1, users: ['user-2'], reacted: false }],
+    attachments: [],
+    mentions: ['user-2'],
+    isPinned: false,
+    isBookmarked: true,
+    replyCount: 0,
+    isEdited: false,
+    isDeleted: false
+  },
+  {
+    id: 'msg-3',
+    channelId: 'ch-1',
+    threadId: null,
+    parentId: null,
+    author: mockUsers[2],
+    content: 'Here\'s the design spec for the new dashboard:\n\n```typescript\ninterface Dashboard {\n  widgets: Widget[]\n  layout: GridLayout\n  theme: ThemeConfig\n}\n```\n\nLet me know if you have questions!',
+    timestamp: '2024-12-23T10:35:00Z',
+    editedAt: '2024-12-23T10:36:00Z',
+    reactions: [{ emoji: '🔥', count: 4, users: ['user-1', 'user-2', 'user-4', 'user-5'], reacted: true }],
+    attachments: [
+      { id: 'att-1', type: 'file', name: 'dashboard-spec.pdf', url: '/files/dashboard-spec.pdf', size: 2450000, mimeType: 'application/pdf' }
+    ],
+    mentions: [],
+    isPinned: true,
+    isBookmarked: false,
+    replyCount: 3,
+    isEdited: true,
+    isDeleted: false
+  },
+  {
+    id: 'msg-4',
+    channelId: 'ch-1',
+    threadId: null,
+    parentId: null,
+    author: mockUsers[3],
+    content: 'Quick reminder: Team standup in 15 minutes! Join here: https://meet.google.com/abc-defg-hij',
+    timestamp: '2024-12-23T10:40:00Z',
+    editedAt: null,
+    reactions: [{ emoji: '👋', count: 6, users: ['user-1', 'user-2', 'user-3', 'user-4', 'user-5', 'user-6'], reacted: true }],
+    attachments: [
+      { id: 'att-2', type: 'link', name: 'Google Meet', url: 'https://meet.google.com/abc-defg-hij', size: 0, mimeType: 'text/html', preview: { title: 'Google Meet', description: 'Video conferencing by Google', image: '/previews/meet.png' } }
+    ],
+    mentions: [],
+    isPinned: false,
+    isBookmarked: false,
+    replyCount: 0,
+    isEdited: false,
+    isDeleted: false
+  },
+  {
+    id: 'msg-5',
+    channelId: 'ch-1',
+    threadId: null,
+    parentId: null,
+    author: mockUsers[4],
+    content: 'Check out this progress on the new UI! 🎨',
+    timestamp: '2024-12-23T10:45:00Z',
+    editedAt: null,
+    reactions: [
+      { emoji: '😍', count: 5, users: ['user-1', 'user-2', 'user-3', 'user-4', 'user-5'], reacted: true },
+      { emoji: '🎉', count: 3, users: ['user-1', 'user-3', 'user-5'], reacted: true }
+    ],
+    attachments: [
+      { id: 'att-3', type: 'image', name: 'ui-progress.png', url: '/images/ui-progress.png', size: 1250000, mimeType: 'image/png', thumbnail: '/thumbnails/ui-progress.png' }
+    ],
+    mentions: [],
+    isPinned: false,
+    isBookmarked: false,
+    replyCount: 8,
+    isEdited: false,
+    isDeleted: false
+  }
+]
+
+const mockDirectMessages: DirectMessage[] = [
+  { id: 'dm-1', participants: [mockUsers[0], mockUsers[1]], lastMessage: mockMessages[0], unreadCount: 2, isPinned: true, isMuted: false },
+  { id: 'dm-2', participants: [mockUsers[0], mockUsers[2]], lastMessage: null, unreadCount: 0, isPinned: false, isMuted: false },
+  { id: 'dm-3', participants: [mockUsers[0], mockUsers[3], mockUsers[4]], lastMessage: mockMessages[1], unreadCount: 5, isPinned: false, isMuted: true }
+]
+
+// ============================================================================
+// EMOJI PICKER DATA
+// ============================================================================
+
+const quickReactions = ['👍', '❤️', '😂', '😮', '😢', '🔥', '🎉', '🚀', '👀', '✅']
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
+export default function MessagingClient() {
+  const [activeView, setActiveView] = useState<'channels' | 'dms' | 'threads' | 'search'>('channels')
+  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(mockChannels[0])
+  const [selectedDM, setSelectedDM] = useState<DirectMessage | null>(null)
+  const [messages, setMessages] = useState<Message[]>(mockMessages)
+  const [channels] = useState<Channel[]>(mockChannels)
+  const [categories, setCategories] = useState<ChannelCategory[]>(mockCategories)
+  const [directMessages] = useState<DirectMessage[]>(mockDirectMessages)
   const [messageInput, setMessageInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [showThread, setShowThread] = useState(false)
+  const [selectedThread, setSelectedThread] = useState<Message | null>(null)
+  const [showChannelSettings, setShowChannelSettings] = useState(false)
+  const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null)
+  const [editingMessage, setEditingMessage] = useState<string | null>(null)
+  const [editContent, setEditContent] = useState('')
+  const [typingUsers] = useState<User[]>([mockUsers[1]])
+  const [showNewChannel, setShowNewChannel] = useState(false)
+  const messageEndRef = useRef<HTMLDivElement>(null)
 
-  const { conversations, loading: conversationsLoading } = useConversations({
-    status: selectedFolder === 'archived' ? 'archived' : 'active',
-    starred: selectedFolder === 'starred' ? true : undefined
-  })
-  const { messages, loading: messagesLoading } = useDirectMessages({
-    conversationId: selectedConversation || undefined
-  })
-  const { totalUnread } = useUnreadConversations()
+  const currentChannelMessages = useMemo(() => {
+    if (!selectedChannel) return []
+    return messages.filter(m => m.channelId === selectedChannel.id && !m.parentId)
+  }, [messages, selectedChannel])
 
-  const displayConversations = conversations.length > 0 ? conversations : initialConversations
-  const displayMessages = messages.length > 0 ? messages : initialMessages
+  const threadMessages = useMemo(() => {
+    if (!selectedThread) return []
+    return messages.filter(m => m.parentId === selectedThread.id)
+  }, [messages, selectedThread])
 
-  const totalMessages = displayMessages.length
-  const activeThreads = displayConversations.filter(c => c.status === 'active').length
+  const totalUnread = useMemo(() => {
+    return channels.reduce((sum, c) => sum + c.unreadCount, 0) +
+           directMessages.reduce((sum, d) => sum + d.unreadCount, 0)
+  }, [channels, directMessages])
 
-  const stats = [
-    { label: 'Total Messages', value: totalMessages.toLocaleString(), change: 23.4, icon: <MessageSquare className="w-5 h-5" /> },
-    { label: 'Unread', value: totalUnread.toString(), change: -12.3, icon: <Mail className="w-5 h-5" /> },
-    { label: 'Avg Response', value: '12m', change: -18.7, icon: <Clock className="w-5 h-5" /> },
-    { label: 'Active Threads', value: activeThreads.toString(), change: 15.2, icon: <Users className="w-5 h-5" /> }
-  ]
+  const toggleCategory = (categoryId: string) => {
+    setCategories(cats => cats.map(c =>
+      c.id === categoryId ? { ...c, isCollapsed: !c.isCollapsed } : c
+    ))
+  }
 
-  const topContacts = displayConversations
-    .slice(0, 5)
-    .map((conv, index) => ({
-      rank: index + 1,
-      name: conv.conversation_name || conv.participant_emails?.[0] || 'Unknown',
-      avatar: conv.avatar_url || (conv.conversation_name?.substring(0, 2).toUpperCase() || 'UN'),
-      value: conv.unread_count?.toString() || '0',
-      change: 10 + Math.random() * 20
+  const handleSendMessage = () => {
+    if (!messageInput.trim() || !selectedChannel) return
+    const newMessage: Message = {
+      id: `msg-${Date.now()}`,
+      channelId: selectedChannel.id,
+      threadId: null,
+      parentId: null,
+      author: currentUser,
+      content: messageInput,
+      timestamp: new Date().toISOString(),
+      editedAt: null,
+      reactions: [],
+      attachments: [],
+      mentions: [],
+      isPinned: false,
+      isBookmarked: false,
+      replyCount: 0,
+      isEdited: false,
+      isDeleted: false
+    }
+    setMessages(prev => [...prev, newMessage])
+    setMessageInput('')
+  }
+
+  const handleReaction = (messageId: string, emoji: string) => {
+    setMessages(prev => prev.map(m => {
+      if (m.id !== messageId) return m
+      const existingReaction = m.reactions.find(r => r.emoji === emoji)
+      if (existingReaction) {
+        if (existingReaction.reacted) {
+          return {
+            ...m,
+            reactions: m.reactions.map(r =>
+              r.emoji === emoji
+                ? { ...r, count: r.count - 1, users: r.users.filter(u => u !== currentUser.id), reacted: false }
+                : r
+            ).filter(r => r.count > 0)
+          }
+        } else {
+          return {
+            ...m,
+            reactions: m.reactions.map(r =>
+              r.emoji === emoji
+                ? { ...r, count: r.count + 1, users: [...r.users, currentUser.id], reacted: true }
+                : r
+            )
+          }
+        }
+      } else {
+        return {
+          ...m,
+          reactions: [...m.reactions, { emoji, count: 1, users: [currentUser.id], reacted: true }]
+        }
+      }
     }))
+    setShowEmojiPicker(null)
+  }
 
-  const recentActivity = [
-    { icon: <Send className="w-4 h-4" />, title: 'Sent message', description: 'To conversation', time: '2m ago', status: 'info' as const },
-    { icon: <Mail className="w-4 h-4" />, title: 'New message', description: 'From contact', time: '15m ago', status: 'success' as const },
-    { icon: <Star className="w-4 h-4" />, title: 'Starred conversation', description: 'Important thread', time: '1h ago', status: 'warning' as const },
-    { icon: <Archive className="w-4 h-4" />, title: 'Archived threads', description: 'Cleanup complete', time: '3h ago', status: 'info' as const }
-  ]
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
+    if (!query.trim()) {
+      setSearchResults([])
+      return
+    }
+    setIsSearching(true)
+    // Simulate search
+    setTimeout(() => {
+      const results: SearchResult[] = messages
+        .filter(m => m.content.toLowerCase().includes(query.toLowerCase()))
+        .map(m => ({ type: 'message' as const, message: m, relevance: 1 }))
+      setSearchResults(results)
+      setIsSearching(false)
+    }, 300)
+  }
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: User['status']) => {
     switch (status) {
-      case 'active': return 'bg-green-500'
-      case 'archived': return 'bg-yellow-500'
-      case 'muted': return 'bg-gray-400'
+      case 'online': return 'bg-green-500'
+      case 'away': return 'bg-yellow-500'
+      case 'dnd': return 'bg-red-500'
       default: return 'bg-gray-400'
     }
   }
 
-  const selectedConv = displayConversations.find(c => c.id === selectedConversation)
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diff = now.getTime() - date.getTime()
+    const minutes = Math.floor(diff / 60000)
+    const hours = Math.floor(diff / 3600000)
+    if (minutes < 1) return 'Just now'
+    if (minutes < 60) return `${minutes}m ago`
+    if (hours < 24) return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' })
+  }
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50/30 to-teal-50/40 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-              <MessageSquare className="w-10 h-10 text-blue-600" />
-              Messaging
-            </h1>
-            <p className="text-muted-foreground">Manage conversations and team communication</p>
-          </div>
-          <GradientButton from="blue" to="cyan" onClick={() => console.log('New message')}>
-            <Send className="w-5 h-5 mr-2" />
-            New Message
-          </GradientButton>
+    <div className="h-screen flex bg-gray-50 dark:bg-gray-900 overflow-hidden">
+      {/* Sidebar */}
+      <div className="w-64 bg-gray-900 text-gray-100 flex flex-col">
+        {/* Workspace Header */}
+        <div className="p-4 border-b border-gray-800">
+          <button className="flex items-center justify-between w-full hover:bg-gray-800 rounded-lg p-2 -m-2">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center font-bold">
+                F
+              </div>
+              <div>
+                <h1 className="font-bold text-sm">FreeFlow</h1>
+                <div className="flex items-center gap-1 text-xs text-gray-400">
+                  <div className={`w-2 h-2 rounded-full ${getStatusColor(currentUser.status)}`} />
+                  {currentUser.name}
+                </div>
+              </div>
+            </div>
+            <ChevronDown className="w-4 h-4 text-gray-400" />
+          </button>
         </div>
 
-        <StatGrid columns={4} stats={stats} />
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <BentoQuickAction icon={<Inbox />} title="Inbox" description="View messages" onClick={() => setSelectedFolder('inbox')} />
-          <BentoQuickAction icon={<Send />} title="Sent" description="Sent items" onClick={() => setSelectedFolder('sent')} />
-          <BentoQuickAction icon={<Star />} title="Starred" description="Important" onClick={() => setSelectedFolder('starred')} />
-          <BentoQuickAction icon={<Archive />} title="Archive" description="Archived" onClick={() => setSelectedFolder('archived')} />
+        {/* Navigation */}
+        <div className="p-2 space-y-1">
+          <button
+            onClick={() => setActiveView('channels')}
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
+              activeView === 'channels' ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-gray-800'
+            }`}
+          >
+            <Hash className="w-4 h-4" />
+            Channels
+            {totalUnread > 0 && (
+              <span className="ml-auto px-1.5 py-0.5 bg-red-500 text-white text-xs rounded-full">
+                {totalUnread}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveView('dms')}
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
+              activeView === 'dms' ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-gray-800'
+            }`}
+          >
+            <MessageCircle className="w-4 h-4" />
+            Direct Messages
+          </button>
+          <button
+            onClick={() => setActiveView('threads')}
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
+              activeView === 'threads' ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-gray-800'
+            }`}
+          >
+            <MessageSquare className="w-4 h-4" />
+            Threads
+          </button>
+          <button
+            onClick={() => setActiveView('search')}
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
+              activeView === 'search' ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-gray-800'
+            }`}
+          >
+            <Search className="w-4 h-4" />
+            Search
+          </button>
         </div>
 
-        <div className="flex items-center gap-3">
-          <PillButton variant={selectedFolder === 'inbox' ? 'primary' : 'ghost'} onClick={() => setSelectedFolder('inbox')}>
-            <Inbox className="w-4 h-4 mr-2" />
-            Inbox
-          </PillButton>
-          <PillButton variant={selectedFolder === 'sent' ? 'primary' : 'ghost'} onClick={() => setSelectedFolder('sent')}>
-            <Send className="w-4 h-4 mr-2" />
-            Sent
-          </PillButton>
-          <PillButton variant={selectedFolder === 'starred' ? 'primary' : 'ghost'} onClick={() => setSelectedFolder('starred')}>
-            <Star className="w-4 h-4 mr-2" />
-            Starred
-          </PillButton>
-          <PillButton variant={selectedFolder === 'archived' ? 'primary' : 'ghost'} onClick={() => setSelectedFolder('archived')}>
-            <Archive className="w-4 h-4 mr-2" />
-            Archived
-          </PillButton>
-        </div>
+        {/* Channels List */}
+        <ScrollArea className="flex-1 px-2">
+          <div className="space-y-4 py-2">
+            {categories.map(category => (
+              <div key={category.id}>
+                <button
+                  onClick={() => toggleCategory(category.id)}
+                  className="flex items-center gap-1 px-2 py-1 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-200 w-full"
+                >
+                  {category.isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  {category.name}
+                </button>
+                {!category.isCollapsed && (
+                  <div className="mt-1 space-y-0.5">
+                    {category.channels.map(channel => (
+                      <button
+                        key={channel.id}
+                        onClick={() => { setSelectedChannel(channel); setSelectedDM(null) }}
+                        className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm ${
+                          selectedChannel?.id === channel.id
+                            ? 'bg-indigo-600 text-white'
+                            : channel.unreadCount > 0
+                            ? 'text-white hover:bg-gray-800'
+                            : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
+                        }`}
+                      >
+                        {channel.type === 'private' ? <Lock className="w-4 h-4" /> : <Hash className="w-4 h-4" />}
+                        <span className={`flex-1 text-left truncate ${channel.unreadCount > 0 ? 'font-semibold' : ''}`}>
+                          {channel.name}
+                        </span>
+                        {channel.unreadCount > 0 && (
+                          <span className={`px-1.5 py-0.5 rounded-full text-xs font-medium ${
+                            channel.mentionCount > 0 ? 'bg-red-500 text-white' : 'bg-gray-600 text-gray-200'
+                          }`}>
+                            {channel.mentionCount > 0 ? `@${channel.mentionCount}` : channel.unreadCount}
+                          </span>
+                        )}
+                        {channel.isMuted && <VolumeX className="w-3 h-3 text-gray-500" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-              <BentoCard className="p-4">
-                <h3 className="text-lg font-semibold mb-4">Conversations</h3>
-                <div className="space-y-2 max-h-[600px] overflow-y-auto">
-                  {displayConversations.map((conv) => (
+            {/* Direct Messages */}
+            <div>
+              <div className="flex items-center justify-between px-2 py-1">
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Direct Messages</span>
+                <button className="p-1 hover:bg-gray-800 rounded">
+                  <Plus className="w-3 h-3 text-gray-400" />
+                </button>
+              </div>
+              <div className="mt-1 space-y-0.5">
+                {directMessages.map(dm => {
+                  const otherUser = dm.participants.find(p => p.id !== currentUser.id) || dm.participants[1]
+                  return (
                     <button
-                      key={conv.id}
-                      onClick={() => setSelectedConversation(conv.id)}
-                      className={`w-full p-3 rounded-lg border transition-colors text-left ${
-                        selectedConversation === conv.id
-                          ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-200'
-                          : 'bg-background border-border hover:bg-muted/50'
+                      key={dm.id}
+                      onClick={() => { setSelectedDM(dm); setSelectedChannel(null) }}
+                      className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm ${
+                        selectedDM?.id === dm.id
+                          ? 'bg-indigo-600 text-white'
+                          : dm.unreadCount > 0
+                          ? 'text-white hover:bg-gray-800'
+                          : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
                       }`}
                     >
-                      <div className="flex items-start gap-3">
-                        <div className="relative">
-                          <div className={`w-10 h-10 rounded-full bg-gradient-to-r ${conv.color || 'from-blue-500 to-cyan-500'} flex items-center justify-center text-white font-semibold text-sm`}>
-                            {conv.conversation_name?.substring(0, 2).toUpperCase() || 'UN'}
-                          </div>
-                          <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background ${getStatusColor(conv.status)}`} />
+                      <div className="relative">
+                        <div className="w-5 h-5 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center text-white text-xs font-medium">
+                          {otherUser?.name.charAt(0)}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-semibold truncate">{conv.conversation_name || 'Conversation'}</h4>
-                              {conv.is_starred && <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />}
-                            </div>
-                            {conv.unread_count > 0 && (
-                              <div className="flex-shrink-0 px-2 py-0.5 rounded-full bg-blue-600 text-white text-xs font-semibold">
-                                {conv.unread_count}
-                              </div>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground truncate mb-1">{conv.last_message_preview || 'No messages yet'}</p>
-                          <p className="text-xs text-muted-foreground">{conv.last_message_at ? new Date(conv.last_message_at).toLocaleDateString() : 'Never'}</p>
-                        </div>
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-gray-900 ${getStatusColor(otherUser?.status || 'offline')}`} />
                       </div>
+                      <span className={`flex-1 text-left truncate ${dm.unreadCount > 0 ? 'font-semibold' : ''}`}>
+                        {dm.participants.length > 2
+                          ? dm.participants.map(p => p.name.split(' ')[0]).join(', ')
+                          : otherUser?.name}
+                      </span>
+                      {dm.unreadCount > 0 && (
+                        <span className="px-1.5 py-0.5 bg-red-500 text-white rounded-full text-xs font-medium">
+                          {dm.unreadCount}
+                        </span>
+                      )}
                     </button>
-                  ))}
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </ScrollArea>
 
-                  {displayConversations.length === 0 && (
-                    <div className="text-center py-8">
-                      <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                      <p className="text-muted-foreground">No conversations</p>
-                    </div>
-                  )}
-                </div>
-              </BentoCard>
+        {/* Add Channel Button */}
+        <div className="p-2 border-t border-gray-800">
+          <button
+            onClick={() => setShowNewChannel(true)}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm text-gray-300"
+          >
+            <Plus className="w-4 h-4" />
+            Add Channel
+          </button>
+        </div>
+      </div>
 
-              <div className="md:col-span-2">
-                <BentoCard className="p-6">
-                  {selectedConv ? (
-                    <>
-                      <div className="flex items-center justify-between mb-4 pb-4 border-b">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-full bg-gradient-to-r ${selectedConv.color || 'from-blue-500 to-cyan-500'} flex items-center justify-center text-white font-semibold`}>
-                            {selectedConv.conversation_name?.substring(0, 2).toUpperCase() || 'UN'}
-                          </div>
-                          <div>
-                            <h3 className="font-semibold">{selectedConv.conversation_name || 'Conversation'}</h3>
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
-                              <div className={`w-2 h-2 rounded-full ${getStatusColor(selectedConv.status)}`} />
-                              {selectedConv.status}
-                            </p>
-                          </div>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Channel Header */}
+        {selectedChannel && (
+          <div className="h-14 px-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                {selectedChannel.type === 'private' ? (
+                  <Lock className="w-5 h-5 text-gray-500" />
+                ) : (
+                  <Hash className="w-5 h-5 text-gray-500" />
+                )}
+                <h2 className="font-semibold text-lg">{selectedChannel.name}</h2>
+              </div>
+              {selectedChannel.topic && (
+                <>
+                  <span className="text-gray-300 dark:text-gray-600">|</span>
+                  <p className="text-sm text-gray-500 truncate max-w-md">{selectedChannel.topic}</p>
+                </>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                <Users className="w-5 h-5 text-gray-500" />
+              </button>
+              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                <Pin className="w-5 h-5 text-gray-500" />
+              </button>
+              <button
+                onClick={() => setShowChannelSettings(true)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+              >
+                <Settings className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Messages Area */}
+        <div className="flex-1 flex overflow-hidden">
+          <ScrollArea className="flex-1 p-4">
+            <div className="space-y-4 max-w-4xl mx-auto">
+              {currentChannelMessages.map((message, index) => {
+                const showAvatar = index === 0 ||
+                  currentChannelMessages[index - 1].author.id !== message.author.id ||
+                  new Date(message.timestamp).getTime() - new Date(currentChannelMessages[index - 1].timestamp).getTime() > 300000
+
+                return (
+                  <div
+                    key={message.id}
+                    className={`group relative ${showAvatar ? 'mt-4' : 'mt-1'}`}
+                  >
+                    <div className="flex gap-3">
+                      {showAvatar ? (
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-semibold flex-shrink-0">
+                          {message.author.name.charAt(0)}
                         </div>
-                        <ModernButton variant="ghost" size="sm">
-                          <MoreVertical className="w-4 h-4" />
-                        </ModernButton>
-                      </div>
-
-                      <div className="space-y-4 mb-4 max-h-[400px] overflow-y-auto">
-                        {displayMessages.filter(m => m.conversation_id === selectedConversation).map((message) => {
-                          const isOwn = message.sender_id === message.user_id
-
-                          return (
-                            <div
-                              key={message.id}
-                              className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}
-                            >
-                              <div className={`w-8 h-8 rounded-full bg-gradient-to-r ${isOwn ? 'from-violet-500 to-purple-500' : 'from-blue-500 to-cyan-500'} flex items-center justify-center text-white text-xs font-semibold flex-shrink-0`}>
-                                {message.sender_name?.substring(0, 2).toUpperCase() || 'UN'}
-                              </div>
-                              <div className={`max-w-[70%] ${isOwn ? 'items-end' : 'items-start'}`}>
-                                <div className={`p-3 rounded-lg ${
-                                  isOwn
-                                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
-                                    : 'bg-muted'
-                                }`}>
-                                  <p className="text-sm">{message.content}</p>
-                                </div>
-                                <div className="flex items-center gap-2 mt-1 px-1">
-                                  <p className="text-xs text-muted-foreground">{new Date(message.sent_at).toLocaleTimeString()}</p>
-                                  {isOwn && message.status === 'read' && (
-                                    <CheckCheck className="w-3 h-3 text-blue-600" />
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          )
-                        })}
-
-                        {displayMessages.filter(m => m.conversation_id === selectedConversation).length === 0 && (
-                          <div className="text-center py-8">
-                            <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                            <p className="text-muted-foreground">No messages yet</p>
+                      ) : (
+                        <div className="w-10 flex-shrink-0" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        {showAvatar && (
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold hover:underline cursor-pointer">{message.author.name}</span>
+                            <span className="text-xs text-gray-500">{formatTimestamp(message.timestamp)}</span>
+                            {message.isEdited && <span className="text-xs text-gray-400">(edited)</span>}
                           </div>
+                        )}
+                        {editingMessage === message.id ? (
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={editContent}
+                              onChange={(e) => setEditContent(e.target.value)}
+                              className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
+                              autoFocus
+                            />
+                            <button
+                              onClick={() => {
+                                setMessages(prev => prev.map(m =>
+                                  m.id === message.id ? { ...m, content: editContent, isEdited: true, editedAt: new Date().toISOString() } : m
+                                ))
+                                setEditingMessage(null)
+                              }}
+                              className="px-3 py-2 bg-green-500 text-white rounded-lg text-sm"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setEditingMessage(null)}
+                              className="px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="prose prose-sm dark:prose-invert max-w-none">
+                            <p className="text-gray-900 dark:text-gray-100 whitespace-pre-wrap">{message.content}</p>
+                          </div>
+                        )}
+
+                        {/* Attachments */}
+                        {message.attachments.length > 0 && (
+                          <div className="mt-2 space-y-2">
+                            {message.attachments.map(att => (
+                              <div key={att.id}>
+                                {att.type === 'image' && (
+                                  <div className="relative max-w-sm rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+                                    <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
+                                      <Image className="w-12 h-12 text-gray-400" />
+                                    </div>
+                                  </div>
+                                )}
+                                {att.type === 'file' && (
+                                  <div className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg max-w-sm">
+                                    <FileText className="w-10 h-10 text-red-500" />
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-medium text-sm truncate">{att.name}</p>
+                                      <p className="text-xs text-gray-500">{formatFileSize(att.size)}</p>
+                                    </div>
+                                    <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
+                                      <Download className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                )}
+                                {att.type === 'link' && att.preview && (
+                                  <div className="flex gap-3 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg max-w-sm border-l-4 border-indigo-500">
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-medium text-sm">{att.preview.title}</p>
+                                      <p className="text-xs text-gray-500 mt-1">{att.preview.description}</p>
+                                      <a href={att.url} className="text-xs text-indigo-500 hover:underline mt-1 flex items-center gap-1">
+                                        {att.url} <ExternalLink className="w-3 h-3" />
+                                      </a>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Reactions */}
+                        {message.reactions.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {message.reactions.map((reaction, i) => (
+                              <button
+                                key={i}
+                                onClick={() => handleReaction(message.id, reaction.emoji)}
+                                className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-sm border ${
+                                  reaction.reacted
+                                    ? 'bg-indigo-100 dark:bg-indigo-900/30 border-indigo-300 dark:border-indigo-700'
+                                    : 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700'
+                                }`}
+                              >
+                                <span>{reaction.emoji}</span>
+                                <span className="text-xs font-medium">{reaction.count}</span>
+                              </button>
+                            ))}
+                            <button
+                              onClick={() => setShowEmojiPicker(message.id)}
+                              className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                            >
+                              <Smile className="w-4 h-4 text-gray-400" />
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Thread indicator */}
+                        {message.replyCount > 0 && (
+                          <button
+                            onClick={() => { setSelectedThread(message); setShowThread(true) }}
+                            className="flex items-center gap-2 mt-2 text-sm text-indigo-600 hover:underline"
+                          >
+                            <MessageSquare className="w-4 h-4" />
+                            {message.replyCount} {message.replyCount === 1 ? 'reply' : 'replies'}
+                          </button>
                         )}
                       </div>
 
-                      <div className="pt-4 border-t">
-                        <div className="flex items-center gap-2">
-                          <ModernButton variant="ghost" size="sm">
-                            <Paperclip className="w-4 h-4" />
-                          </ModernButton>
-                          <input
-                            type="text"
-                            placeholder="Type your message..."
-                            value={messageInput}
-                            onChange={(e) => setMessageInput(e.target.value)}
-                            className="flex-1 px-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                          <ModernButton variant="primary" onClick={() => console.log('Send', messageInput)}>
-                            <Send className="w-4 h-4" />
-                          </ModernButton>
-                        </div>
+                      {/* Message Actions */}
+                      <div className="opacity-0 group-hover:opacity-100 absolute -top-4 right-0 flex items-center gap-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm px-1 py-0.5">
+                        <button
+                          onClick={() => setShowEmojiPicker(message.id)}
+                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                          title="Add reaction"
+                        >
+                          <Smile className="w-4 h-4 text-gray-500" />
+                        </button>
+                        <button
+                          onClick={() => { setSelectedThread(message); setShowThread(true) }}
+                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                          title="Reply in thread"
+                        >
+                          <MessageSquare className="w-4 h-4 text-gray-500" />
+                        </button>
+                        <button
+                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                          title="Bookmark"
+                        >
+                          <Bookmark className="w-4 h-4 text-gray-500" />
+                        </button>
+                        <button
+                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                          title="More"
+                        >
+                          <MoreHorizontal className="w-4 h-4 text-gray-500" />
+                        </button>
                       </div>
-                    </>
-                  ) : (
-                    <div className="text-center py-12">
-                      <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No Conversation Selected</h3>
-                      <p className="text-muted-foreground">Select a conversation to view messages</p>
+
+                      {/* Quick Emoji Picker */}
+                      {showEmojiPicker === message.id && (
+                        <div className="absolute top-8 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-2 z-10">
+                          <div className="flex gap-1">
+                            {quickReactions.map(emoji => (
+                              <button
+                                key={emoji}
+                                onClick={() => handleReaction(message.id, emoji)}
+                                className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-lg"
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </BentoCard>
+                  </div>
+                )
+              })}
+
+              {/* Typing Indicator */}
+              {typingUsers.length > 0 && (
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                  <span>{typingUsers.map(u => u.name.split(' ')[0]).join(', ')} {typingUsers.length === 1 ? 'is' : 'are'} typing...</span>
+                </div>
+              )}
+
+              <div ref={messageEndRef} />
+            </div>
+          </ScrollArea>
+
+          {/* Thread Panel */}
+          {showThread && selectedThread && (
+            <div className="w-96 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex flex-col">
+              <div className="h-14 px-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <h3 className="font-semibold">Thread</h3>
+                <button
+                  onClick={() => setShowThread(false)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <ScrollArea className="flex-1 p-4">
+                <div className="space-y-4">
+                  {/* Parent message */}
+                  <div className="pb-4 border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-semibold">
+                        {selectedThread.author.name.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-semibold">{selectedThread.author.name}</span>
+                          <span className="text-xs text-gray-500">{formatTimestamp(selectedThread.timestamp)}</span>
+                        </div>
+                        <p className="text-gray-900 dark:text-gray-100">{selectedThread.content}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Thread replies */}
+                  <div className="text-xs text-gray-500 mb-4">{selectedThread.replyCount} replies</div>
+                  {threadMessages.map(msg => (
+                    <div key={msg.id} className="flex gap-3">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center text-white text-sm font-semibold">
+                        {msg.author.name.charAt(0)}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium text-sm">{msg.author.name}</span>
+                          <span className="text-xs text-gray-500">{formatTimestamp(msg.timestamp)}</span>
+                        </div>
+                        <p className="text-sm text-gray-900 dark:text-gray-100">{msg.content}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                <input
+                  type="text"
+                  placeholder="Reply in thread..."
+                  className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
               </div>
             </div>
-
-            <BentoCard className="p-6">
-              <h3 className="text-xl font-semibold mb-4">Message Statistics</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 rounded-lg border border-border bg-background">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Send className="w-4 h-4 text-blue-600" />
-                    <p className="text-sm font-medium">Sent Today</p>
-                  </div>
-                  <p className="text-2xl font-bold">{displayMessages.filter(m => new Date(m.sent_at).toDateString() === new Date().toDateString()).length}</p>
-                  <p className="text-xs text-green-600 mt-1">Messages sent</p>
-                </div>
-                <div className="p-4 rounded-lg border border-border bg-background">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Inbox className="w-4 h-4 text-cyan-600" />
-                    <p className="text-sm font-medium">Received</p>
-                  </div>
-                  <p className="text-2xl font-bold">{totalMessages}</p>
-                  <p className="text-xs text-green-600 mt-1">Total messages</p>
-                </div>
-                <div className="p-4 rounded-lg border border-border bg-background">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Reply className="w-4 h-4 text-purple-600" />
-                    <p className="text-sm font-medium">Reply Rate</p>
-                  </div>
-                  <p className="text-2xl font-bold">94%</p>
-                  <p className="text-xs text-green-600 mt-1">Response rate</p>
-                </div>
-                <div className="p-4 rounded-lg border border-border bg-background">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clock className="w-4 h-4 text-orange-600" />
-                    <p className="text-sm font-medium">Avg Response</p>
-                  </div>
-                  <p className="text-2xl font-bold">12m</p>
-                  <p className="text-xs text-green-600 mt-1">Average time</p>
-                </div>
-              </div>
-            </BentoCard>
-          </div>
-
-          <div className="space-y-6">
-            <RankingList title="💬 Most Active" items={topContacts} />
-
-            <BentoCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Messaging Metrics</h3>
-              <div className="space-y-3">
-                <MiniKPI label="Total Messages" value={totalMessages.toLocaleString()} change={23.4} />
-                <MiniKPI label="Unread" value={totalUnread.toString()} change={-12.3} />
-                <MiniKPI label="Avg Response Time" value="12m" change={-18.7} />
-                <MiniKPI label="Active Conversations" value={activeThreads.toString()} change={15.2} />
-              </div>
-            </BentoCard>
-
-            <ActivityFeed title="Recent Activity" activities={recentActivity} />
-
-            <ProgressCard
-              title="Response Goal"
-              value={94}
-              target={95}
-              label="Response rate"
-              color="from-blue-500 to-cyan-500"
-            />
-          </div>
+          )}
         </div>
+
+        {/* Message Input */}
+        {selectedChannel && (
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-end gap-2 bg-gray-100 dark:bg-gray-900 rounded-xl p-2">
+                <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg">
+                  <Plus className="w-5 h-5 text-gray-500" />
+                </button>
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    placeholder={`Message #${selectedChannel.name}`}
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                    className="w-full px-2 py-2 bg-transparent text-sm focus:outline-none"
+                  />
+                </div>
+                <div className="flex items-center gap-1">
+                  <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg">
+                    <Bold className="w-4 h-4 text-gray-500" />
+                  </button>
+                  <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg">
+                    <Italic className="w-4 h-4 text-gray-500" />
+                  </button>
+                  <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg">
+                    <Link className="w-4 h-4 text-gray-500" />
+                  </button>
+                  <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg">
+                    <Code className="w-4 h-4 text-gray-500" />
+                  </button>
+                  <span className="w-px h-5 bg-gray-300 dark:bg-gray-700 mx-1" />
+                  <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg">
+                    <AtSign className="w-4 h-4 text-gray-500" />
+                  </button>
+                  <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg">
+                    <Smile className="w-4 h-4 text-gray-500" />
+                  </button>
+                  <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg">
+                    <Paperclip className="w-4 h-4 text-gray-500" />
+                  </button>
+                  <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg">
+                    <Mic className="w-4 h-4 text-gray-500" />
+                  </button>
+                </div>
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!messageInput.trim()}
+                  className="p-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+                >
+                  <Send className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Channel Settings Dialog */}
+      <Dialog open={showChannelSettings} onOpenChange={setShowChannelSettings}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Hash className="w-5 h-5" />
+              {selectedChannel?.name} Settings
+            </DialogTitle>
+          </DialogHeader>
+          <Tabs defaultValue="about">
+            <TabsList className="mb-4">
+              <TabsTrigger value="about">About</TabsTrigger>
+              <TabsTrigger value="members">Members</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
+            <TabsContent value="about" className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Channel name</label>
+                <input
+                  type="text"
+                  value={selectedChannel?.name || ''}
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                  readOnly
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Topic</label>
+                <input
+                  type="text"
+                  value={selectedChannel?.topic || ''}
+                  placeholder="Add a topic"
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <textarea
+                  value={selectedChannel?.description || ''}
+                  rows={3}
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                />
+              </div>
+            </TabsContent>
+            <TabsContent value="members">
+              <div className="space-y-2">
+                {mockUsers.map(user => (
+                  <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-semibold">
+                          {user.name.charAt(0)}
+                        </div>
+                        <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white dark:border-gray-900 ${getStatusColor(user.status)}`} />
+                      </div>
+                      <div>
+                        <p className="font-medium">{user.name}</p>
+                        <p className="text-sm text-gray-500">@{user.displayName}</p>
+                      </div>
+                    </div>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      user.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' :
+                      user.role === 'member' ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' :
+                      'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
+                    }`}>
+                      {user.role}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+            <TabsContent value="settings" className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <div>
+                  <p className="font-medium">Mute channel</p>
+                  <p className="text-sm text-gray-500">Mute notifications from this channel</p>
+                </div>
+                <button className={`w-12 h-6 rounded-full transition-colors ${
+                  selectedChannel?.isMuted ? 'bg-indigo-600' : 'bg-gray-300'
+                }`}>
+                  <div className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${
+                    selectedChannel?.isMuted ? 'translate-x-6' : 'translate-x-0.5'
+                  }`} />
+                </button>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <div>
+                  <p className="font-medium">Pin channel</p>
+                  <p className="text-sm text-gray-500">Keep this channel at the top</p>
+                </div>
+                <button className={`w-12 h-6 rounded-full transition-colors ${
+                  selectedChannel?.isPinned ? 'bg-indigo-600' : 'bg-gray-300'
+                }`}>
+                  <div className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${
+                    selectedChannel?.isPinned ? 'translate-x-6' : 'translate-x-0.5'
+                  }`} />
+                </button>
+              </div>
+              <button className="w-full p-4 text-left text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center gap-2">
+                <LogOut className="w-4 h-4" />
+                Leave channel
+              </button>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Channel Dialog */}
+      <Dialog open={showNewChannel} onOpenChange={setShowNewChannel}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create a channel</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div>
+              <label className="text-sm font-medium">Channel type</label>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <button className="p-4 border-2 border-indigo-500 rounded-lg text-left">
+                  <Hash className="w-6 h-6 mb-2 text-indigo-600" />
+                  <p className="font-medium">Public</p>
+                  <p className="text-sm text-gray-500">Anyone can join</p>
+                </button>
+                <button className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-left hover:border-gray-300">
+                  <Lock className="w-6 h-6 mb-2 text-gray-600" />
+                  <p className="font-medium">Private</p>
+                  <p className="text-sm text-gray-500">Invite only</p>
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Name</label>
+              <div className="mt-1 flex items-center">
+                <span className="px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-r-0 border-gray-300 dark:border-gray-600 rounded-l-lg text-gray-500">
+                  #
+                </span>
+                <input
+                  type="text"
+                  placeholder="e.g. marketing"
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-r-lg bg-white dark:bg-gray-800"
+                />
+              </div>
+              <p className="mt-1 text-xs text-gray-500">Names can't have spaces or periods</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Description (optional)</label>
+              <input
+                type="text"
+                placeholder="What's this channel about?"
+                className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <button
+                onClick={() => setShowNewChannel(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
+                Create Channel
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
