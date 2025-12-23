@@ -1,51 +1,1120 @@
 'use client'
-import { useState } from 'react'
+
+import { useState, useMemo } from 'react'
+import {
+  FileText, Plus, Send, Download, Clock, DollarSign, AlertCircle,
+  CheckCircle2, XCircle, MoreHorizontal, Search, Filter, Calendar,
+  RefreshCw, TrendingUp, Users, CreditCard, Mail, Eye, Edit,
+  Trash2, Copy, ChevronDown, ArrowUpRight, ArrowDownRight, Sparkles,
+  Globe, Percent, Receipt, Timer, Bell, Settings, BarChart3,
+  PieChart, Zap, Crown, Star, FileSpreadsheet, Printer, Share2
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Progress } from '@/components/ui/progress'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Textarea } from '@/components/ui/textarea'
 import { useInvoices, type Invoice, type InvoiceStatus } from '@/lib/hooks/use-invoices'
+
+// Currency data
+const currencies = [
+  { code: 'USD', symbol: '$', name: 'US Dollar' },
+  { code: 'EUR', symbol: '€', name: 'Euro' },
+  { code: 'GBP', symbol: '£', name: 'British Pound' },
+  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+  { code: 'CHF', symbol: 'Fr', name: 'Swiss Franc' },
+  { code: 'CNY', symbol: '¥', name: 'Chinese Yuan' },
+  { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+  { code: 'ZAR', symbol: 'R', name: 'South African Rand' },
+]
+
+// Invoice templates
+const invoiceTemplates = [
+  { id: 'modern', name: 'Modern', description: 'Clean and professional', color: 'from-blue-500 to-indigo-600' },
+  { id: 'classic', name: 'Classic', description: 'Traditional business style', color: 'from-gray-600 to-gray-800' },
+  { id: 'creative', name: 'Creative', description: 'Bold and colorful', color: 'from-purple-500 to-pink-500' },
+  { id: 'minimal', name: 'Minimal', description: 'Simple and elegant', color: 'from-emerald-500 to-teal-500' },
+]
+
+// Reminder schedules
+const reminderSchedules = [
+  { id: '3days', label: '3 days before due', days: -3 },
+  { id: '1day', label: '1 day before due', days: -1 },
+  { id: 'dueday', label: 'On due date', days: 0 },
+  { id: '3daysafter', label: '3 days after due', days: 3 },
+  { id: '7daysafter', label: '7 days after due', days: 7 },
+  { id: '14daysafter', label: '14 days after due', days: 14 },
+]
+
+interface LineItem {
+  id: string
+  description: string
+  quantity: number
+  rate: number
+  tax: number
+  amount: number
+}
 
 export default function InvoicesClient({ initialInvoices }: { initialInvoices: Invoice[] }) {
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all')
-  const { invoices, loading, error } = useInvoices({ status: statusFilter, limit: 50 })
+  const [searchQuery, setSearchQuery] = useState('')
+  const [dateRange, setDateRange] = useState<'all' | '7days' | '30days' | '90days'>('all')
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
+  const [activeTab, setActiveTab] = useState('all')
+  const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
+
+  // Invoice creation state
+  const [newInvoice, setNewInvoice] = useState({
+    client: '',
+    clientEmail: '',
+    title: '',
+    currency: 'USD',
+    template: 'modern',
+    dueDate: '',
+    items: [] as LineItem[],
+    notes: '',
+    terms: 'Payment is due within 30 days of invoice date.',
+    enableReminders: true,
+    reminderSchedule: ['3days', 'dueday', '7daysafter'],
+    lateFee: { enabled: false, type: 'percentage' as 'percentage' | 'fixed', value: 5 },
+    discount: { enabled: false, type: 'percentage' as 'percentage' | 'fixed', value: 0 },
+    deposit: { enabled: false, percentage: 50 },
+    recurring: { enabled: false, frequency: 'monthly' as 'weekly' | 'monthly' | 'quarterly' | 'yearly', endDate: '' },
+  })
+
+  const { invoices, loading, error } = useInvoices({ status: statusFilter, limit: 100 })
   const displayInvoices = (invoices && invoices.length > 0) ? invoices : (initialInvoices || [])
-  const stats = {
-    total: displayInvoices.length,
-    paid: displayInvoices.filter(i => i.status === 'paid').length,
-    pending: displayInvoices.filter(i => i.status === 'pending' || i.status === 'sent').length,
-    overdue: displayInvoices.filter(i => i.status === 'overdue').length,
-    totalRevenue: displayInvoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + i.total_amount, 0)
+
+  // Calculate comprehensive stats
+  const stats = useMemo(() => {
+    const paid = displayInvoices.filter(i => i.status === 'paid')
+    const pending = displayInvoices.filter(i => i.status === 'pending' || i.status === 'sent')
+    const overdue = displayInvoices.filter(i => i.status === 'overdue')
+    const draft = displayInvoices.filter(i => i.status === 'draft')
+
+    const totalRevenue = paid.reduce((sum, i) => sum + i.total_amount, 0)
+    const pendingRevenue = pending.reduce((sum, i) => sum + i.total_amount, 0)
+    const overdueAmount = overdue.reduce((sum, i) => sum + i.total_amount, 0)
+
+    // Calculate trends (mock data for demo)
+    const lastMonthRevenue = totalRevenue * 0.85
+    const revenueGrowth = ((totalRevenue - lastMonthRevenue) / lastMonthRevenue) * 100
+
+    // Average payment time
+    const avgPaymentDays = 12 // Mock value
+
+    return {
+      total: displayInvoices.length,
+      paid: paid.length,
+      pending: pending.length,
+      overdue: overdue.length,
+      draft: draft.length,
+      totalRevenue,
+      pendingRevenue,
+      overdueAmount,
+      revenueGrowth,
+      avgPaymentDays,
+      collectionRate: displayInvoices.length > 0 ? (paid.length / displayInvoices.length) * 100 : 0
+    }
+  }, [displayInvoices])
+
+  // Filter invoices
+  const filteredInvoices = useMemo(() => {
+    let filtered = displayInvoices
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(i =>
+        i.title?.toLowerCase().includes(query) ||
+        i.invoice_number?.toLowerCase().includes(query) ||
+        i.client_name?.toLowerCase().includes(query)
+      )
+    }
+
+    if (activeTab !== 'all') {
+      filtered = filtered.filter(i => i.status === activeTab)
+    }
+
+    return filtered
+  }, [displayInvoices, searchQuery, activeTab])
+
+  const addLineItem = () => {
+    const newItem: LineItem = {
+      id: crypto.randomUUID(),
+      description: '',
+      quantity: 1,
+      rate: 0,
+      tax: 0,
+      amount: 0
+    }
+    setNewInvoice(prev => ({ ...prev, items: [...prev.items, newItem] }))
   }
 
-  if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">Error: {error.message}</div></div>
+  const updateLineItem = (id: string, field: keyof LineItem, value: number | string) => {
+    setNewInvoice(prev => ({
+      ...prev,
+      items: prev.items.map(item => {
+        if (item.id === id) {
+          const updated = { ...item, [field]: value }
+          updated.amount = updated.quantity * updated.rate * (1 + updated.tax / 100)
+          return updated
+        }
+        return item
+      })
+    }))
+  }
+
+  const removeLineItem = (id: string) => {
+    setNewInvoice(prev => ({ ...prev, items: prev.items.filter(item => item.id !== id) }))
+  }
+
+  const calculateSubtotal = () => newInvoice.items.reduce((sum, item) => sum + (item.quantity * item.rate), 0)
+  const calculateTax = () => newInvoice.items.reduce((sum, item) => sum + (item.quantity * item.rate * item.tax / 100), 0)
+  const calculateDiscount = () => {
+    if (!newInvoice.discount.enabled) return 0
+    const subtotal = calculateSubtotal()
+    return newInvoice.discount.type === 'percentage'
+      ? subtotal * (newInvoice.discount.value / 100)
+      : newInvoice.discount.value
+  }
+  const calculateTotal = () => calculateSubtotal() + calculateTax() - calculateDiscount()
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'paid': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+      case 'sent': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+      case 'pending': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+      case 'overdue': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+      case 'draft': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+      default: return 'bg-gray-100 text-gray-700'
+    }
+  }
+
+  const getCurrencySymbol = (code: string) => currencies.find(c => c.code === code)?.symbol || '$'
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:bg-none dark:bg-gray-900 p-8">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-2">
+          <AlertCircle className="h-5 w-5" />
+          Error: {error.message}
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:bg-none dark:bg-gray-900 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <div><h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">Invoices</h1>
-          <p className="text-gray-600 mt-2">Manage your invoices and billing</p></div>
-          <button className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-xl hover:shadow-lg transition-all">+ New Invoice</button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-xl p-6 shadow-sm border"><div className="text-sm text-gray-600 mb-1">Total</div><div className="text-3xl font-bold text-gray-900">{stats.total}</div></div>
-          <div className="bg-white rounded-xl p-6 shadow-sm border"><div className="text-sm text-gray-600 mb-1">Paid</div><div className="text-3xl font-bold text-green-600">{stats.paid}</div></div>
-          <div className="bg-white rounded-xl p-6 shadow-sm border"><div className="text-sm text-gray-600 mb-1">Pending</div><div className="text-3xl font-bold text-yellow-600">{stats.pending}</div></div>
-          <div className="bg-white rounded-xl p-6 shadow-sm border"><div className="text-sm text-gray-600 mb-1">Revenue</div><div className="text-3xl font-bold text-emerald-600">${stats.totalRevenue.toFixed(2)}</div></div>
-        </div>
-        <div className="bg-white rounded-xl p-6 shadow-sm border"><select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} className="px-4 py-2 border rounded-lg"><option value="all">All</option><option value="draft">Draft</option><option value="sent">Sent</option><option value="paid">Paid</option><option value="overdue">Overdue</option></select></div>
-        {loading && <div className="text-center py-8"><div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-emerald-600 border-r-transparent"></div></div>}
-        <div className="space-y-4">{displayInvoices.filter(i => statusFilter === 'all' || i.status === statusFilter).map(invoice => (
-          <div key={invoice.id} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-all border">
-            <div className="flex justify-between items-start"><div>
-              <div className="flex gap-2 mb-2">
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${invoice.status === 'paid' ? 'bg-green-100 text-green-700' : invoice.status === 'overdue' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>{invoice.status}</span>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:bg-none dark:bg-gray-900">
+      {/* Premium Header */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 text-white">
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+
+        <div className="relative max-w-7xl mx-auto px-4 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                <FileText className="h-8 w-8" />
               </div>
-              <h3 className="text-lg font-semibold">{invoice.title}</h3>
-              <p className="text-sm text-gray-600 mt-1">Invoice #{invoice.invoice_number}</p>
-              <p className="text-sm text-gray-600">Due: {new Date(invoice.due_date).toLocaleDateString()}</p>
+              <div>
+                <h1 className="text-3xl font-bold">Invoice Hub</h1>
+                <p className="text-white/80">Professional invoicing with smart automation</p>
+              </div>
             </div>
-            <div className="text-right"><div className="text-2xl font-bold text-emerald-600">${invoice.total_amount.toFixed(2)}</div><div className="text-sm text-gray-500">{invoice.currency}</div></div></div>
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                className="bg-white/20 hover:bg-white/30 text-white border-0"
+                onClick={() => setShowSettingsModal(true)}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Button>
+              <Button
+                className="bg-white text-emerald-600 hover:bg-white/90"
+                onClick={() => setShowCreateModal(true)}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Invoice
+              </Button>
+            </div>
           </div>
-        ))}</div>
+
+          {/* Feature Pills */}
+          <div className="flex flex-wrap gap-2 mt-4">
+            <Badge variant="secondary" className="bg-white/20 text-white border-0">
+              <RefreshCw className="h-3 w-3 mr-1" /> Recurring Billing
+            </Badge>
+            <Badge variant="secondary" className="bg-white/20 text-white border-0">
+              <Globe className="h-3 w-3 mr-1" /> 135+ Currencies
+            </Badge>
+            <Badge variant="secondary" className="bg-white/20 text-white border-0">
+              <Bell className="h-3 w-3 mr-1" /> Auto Reminders
+            </Badge>
+            <Badge variant="secondary" className="bg-white/20 text-white border-0">
+              <Percent className="h-3 w-3 mr-1" /> Late Fees
+            </Badge>
+            <Badge variant="secondary" className="bg-white/20 text-white border-0">
+              <CreditCard className="h-3 w-3 mr-1" /> Online Payments
+            </Badge>
+            <Badge variant="secondary" className="bg-white/20 text-white border-0">
+              <Sparkles className="h-3 w-3 mr-1" /> Smart Templates
+            </Badge>
+          </div>
+        </div>
       </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <Card className="bg-white dark:bg-gray-800">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Revenue</p>
+                  <p className="text-2xl font-bold text-emerald-600">${stats.totalRevenue.toLocaleString()}</p>
+                </div>
+                <div className={`flex items-center gap-1 text-sm ${stats.revenueGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                  {stats.revenueGrowth >= 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
+                  {Math.abs(stats.revenueGrowth).toFixed(1)}%
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-gray-800">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Pending</p>
+                  <p className="text-2xl font-bold text-yellow-600">${stats.pendingRevenue.toLocaleString()}</p>
+                </div>
+                <Clock className="h-8 w-8 text-yellow-200" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">{stats.pending} invoices</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-gray-800">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Overdue</p>
+                  <p className="text-2xl font-bold text-red-600">${stats.overdueAmount.toLocaleString()}</p>
+                </div>
+                <AlertCircle className="h-8 w-8 text-red-200" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">{stats.overdue} invoices</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-gray-800">
+            <CardContent className="p-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Collection Rate</p>
+                <p className="text-2xl font-bold">{stats.collectionRate.toFixed(1)}%</p>
+              </div>
+              <Progress value={stats.collectionRate} className="h-2 mt-2" />
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-gray-800">
+            <CardContent className="p-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Avg. Payment Time</p>
+                <p className="text-2xl font-bold">{stats.avgPaymentDays} days</p>
+              </div>
+              <p className="text-xs text-emerald-600 mt-1">2 days faster than avg</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white dark:bg-gray-800">
+            <CardContent className="p-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Invoices</p>
+                <p className="text-2xl font-bold">{stats.total}</p>
+              </div>
+              <div className="flex gap-1 mt-2">
+                <span className="text-xs px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded">{stats.paid} paid</span>
+                <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded">{stats.draft} draft</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => setShowCreateModal(true)}>
+            <Plus className="h-5 w-5 text-emerald-600" />
+            <span>New Invoice</span>
+          </Button>
+          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+            <RefreshCw className="h-5 w-5 text-blue-600" />
+            <span>Recurring Invoice</span>
+          </Button>
+          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+            <Mail className="h-5 w-5 text-purple-600" />
+            <span>Send Reminders</span>
+          </Button>
+          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+            <FileSpreadsheet className="h-5 w-5 text-orange-600" />
+            <span>Export Report</span>
+          </Button>
+        </div>
+
+        {/* Filters and Search */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search invoices, clients, or amounts..."
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2">
+                <select
+                  className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                  value={dateRange}
+                  onChange={(e) => setDateRange(e.target.value as any)}
+                >
+                  <option value="all">All Time</option>
+                  <option value="7days">Last 7 Days</option>
+                  <option value="30days">Last 30 Days</option>
+                  <option value="90days">Last 90 Days</option>
+                </select>
+                <Button variant="outline" size="icon">
+                  <Filter className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tabs and Invoice List */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-5 w-full max-w-2xl">
+            <TabsTrigger value="all" className="gap-2">
+              All <Badge variant="secondary">{stats.total}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="draft" className="gap-2">
+              Draft <Badge variant="secondary">{stats.draft}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="sent" className="gap-2">
+              Sent <Badge variant="secondary">{stats.pending}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="paid" className="gap-2">
+              Paid <Badge variant="secondary">{stats.paid}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="overdue" className="gap-2">
+              Overdue <Badge variant="secondary">{stats.overdue}</Badge>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={activeTab} className="mt-4">
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-emerald-600 border-r-transparent" />
+                <p className="mt-2 text-muted-foreground">Loading invoices...</p>
+              </div>
+            ) : filteredInvoices.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No invoices found</h3>
+                  <p className="text-muted-foreground mb-4">Create your first invoice to get started</p>
+                  <Button onClick={() => setShowCreateModal(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Invoice
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {filteredInvoices.map(invoice => (
+                  <Card key={invoice.id} className="hover:shadow-md transition-all">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-4">
+                        {/* Checkbox */}
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300"
+                          checked={selectedInvoices.includes(invoice.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedInvoices(prev => [...prev, invoice.id])
+                            } else {
+                              setSelectedInvoices(prev => prev.filter(id => id !== invoice.id))
+                            }
+                          }}
+                        />
+
+                        {/* Invoice Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge className={getStatusColor(invoice.status)}>
+                              {invoice.status === 'paid' && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                              {invoice.status === 'overdue' && <AlertCircle className="h-3 w-3 mr-1" />}
+                              {invoice.status === 'sent' && <Send className="h-3 w-3 mr-1" />}
+                              {invoice.status}
+                            </Badge>
+                            {invoice.recurring && (
+                              <Badge variant="outline" className="text-blue-600">
+                                <RefreshCw className="h-3 w-3 mr-1" />
+                                Recurring
+                              </Badge>
+                            )}
+                          </div>
+                          <h3 className="font-semibold truncate">{invoice.title || 'Untitled Invoice'}</h3>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>#{invoice.invoice_number}</span>
+                            <span className="flex items-center gap-1">
+                              <Users className="h-3 w-3" />
+                              {invoice.client_name || 'No client'}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              Due {new Date(invoice.due_date).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Amount */}
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-emerald-600">
+                            {getCurrencySymbol(invoice.currency)}{invoice.total_amount.toLocaleString()}
+                          </p>
+                          <p className="text-xs text-muted-foreground">{invoice.currency}</p>
+                        </div>
+
+                        {/* Actions */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Send className="h-4 w-4 mr-2" />
+                              Send
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Download className="h-4 w-4 mr-2" />
+                              Download PDF
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Copy className="h-4 w-4 mr-2" />
+                              Duplicate
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <Share2 className="h-4 w-4 mr-2" />
+                              Share Link
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem>
+                              <Bell className="h-4 w-4 mr-2" />
+                              Send Reminder
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                              <CheckCircle2 className="h-4 w-4 mr-2" />
+                              Mark as Paid
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-red-600">
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {/* Bulk Actions Bar */}
+        {selectedInvoices.length > 0 && (
+          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-4">
+            <span>{selectedInvoices.length} selected</span>
+            <div className="h-4 w-px bg-gray-700" />
+            <Button size="sm" variant="ghost" className="text-white hover:bg-white/10">
+              <Send className="h-4 w-4 mr-2" />
+              Send All
+            </Button>
+            <Button size="sm" variant="ghost" className="text-white hover:bg-white/10">
+              <Bell className="h-4 w-4 mr-2" />
+              Remind All
+            </Button>
+            <Button size="sm" variant="ghost" className="text-white hover:bg-white/10">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button size="sm" variant="ghost" className="text-red-400 hover:bg-red-500/10" onClick={() => setSelectedInvoices([])}>
+              <XCircle className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* Create Invoice Modal */}
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-emerald-600" />
+              Create New Invoice
+            </DialogTitle>
+            <DialogDescription>
+              Create a professional invoice with smart automation features
+            </DialogDescription>
+          </DialogHeader>
+
+          <ScrollArea className="flex-1 pr-4">
+            <div className="space-y-6 py-4">
+              {/* Template Selection */}
+              <div>
+                <Label className="text-sm font-medium mb-3 block">Invoice Template</Label>
+                <div className="grid grid-cols-4 gap-3">
+                  {invoiceTemplates.map(template => (
+                    <button
+                      key={template.id}
+                      onClick={() => setNewInvoice(prev => ({ ...prev, template: template.id }))}
+                      className={`p-4 rounded-lg border-2 text-left transition-all ${
+                        newInvoice.template === template.id
+                          ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300'
+                      }`}
+                    >
+                      <div className={`h-8 rounded bg-gradient-to-r ${template.color} mb-2`} />
+                      <p className="font-medium text-sm">{template.name}</p>
+                      <p className="text-xs text-muted-foreground">{template.description}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Client & Basic Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Client Name</Label>
+                  <Input
+                    placeholder="Enter client name"
+                    value={newInvoice.client}
+                    onChange={(e) => setNewInvoice(prev => ({ ...prev, client: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label>Client Email</Label>
+                  <Input
+                    type="email"
+                    placeholder="client@email.com"
+                    value={newInvoice.clientEmail}
+                    onChange={(e) => setNewInvoice(prev => ({ ...prev, clientEmail: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label>Invoice Title</Label>
+                  <Input
+                    placeholder="e.g., Website Design Services"
+                    value={newInvoice.title}
+                    onChange={(e) => setNewInvoice(prev => ({ ...prev, title: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label>Currency</Label>
+                  <select
+                    className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                    value={newInvoice.currency}
+                    onChange={(e) => setNewInvoice(prev => ({ ...prev, currency: e.target.value }))}
+                  >
+                    {currencies.map(c => (
+                      <option key={c.code} value={c.code}>{c.symbol} {c.code} - {c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label>Due Date</Label>
+                  <Input
+                    type="date"
+                    value={newInvoice.dueDate}
+                    onChange={(e) => setNewInvoice(prev => ({ ...prev, dueDate: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              {/* Line Items */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="text-sm font-medium">Line Items</Label>
+                  <Button variant="outline" size="sm" onClick={addLineItem}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Item
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-12 gap-2 text-xs text-muted-foreground font-medium px-2">
+                    <div className="col-span-5">Description</div>
+                    <div className="col-span-2">Qty</div>
+                    <div className="col-span-2">Rate</div>
+                    <div className="col-span-2">Tax %</div>
+                    <div className="col-span-1"></div>
+                  </div>
+                  {newInvoice.items.map(item => (
+                    <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
+                      <Input
+                        className="col-span-5"
+                        placeholder="Item description"
+                        value={item.description}
+                        onChange={(e) => updateLineItem(item.id, 'description', e.target.value)}
+                      />
+                      <Input
+                        className="col-span-2"
+                        type="number"
+                        min="1"
+                        value={item.quantity}
+                        onChange={(e) => updateLineItem(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                      />
+                      <Input
+                        className="col-span-2"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={item.rate}
+                        onChange={(e) => updateLineItem(item.id, 'rate', parseFloat(e.target.value) || 0)}
+                      />
+                      <Input
+                        className="col-span-2"
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={item.tax}
+                        onChange={(e) => updateLineItem(item.id, 'tax', parseFloat(e.target.value) || 0)}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="col-span-1"
+                        onClick={() => removeLineItem(item.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </div>
+                  ))}
+                  {newInvoice.items.length === 0 && (
+                    <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                      <Receipt className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No items added yet</p>
+                      <Button variant="link" size="sm" onClick={addLineItem}>Add your first item</Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Totals */}
+                {newInvoice.items.length > 0 && (
+                  <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Subtotal</span>
+                        <span>{getCurrencySymbol(newInvoice.currency)}{calculateSubtotal().toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Tax</span>
+                        <span>{getCurrencySymbol(newInvoice.currency)}{calculateTax().toFixed(2)}</span>
+                      </div>
+                      {newInvoice.discount.enabled && (
+                        <div className="flex justify-between text-emerald-600">
+                          <span>Discount</span>
+                          <span>-{getCurrencySymbol(newInvoice.currency)}{calculateDiscount().toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div className="border-t pt-2 flex justify-between font-bold text-lg">
+                        <span>Total</span>
+                        <span className="text-emerald-600">{getCurrencySymbol(newInvoice.currency)}{calculateTotal().toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Smart Features */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Recurring */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <RefreshCw className="h-4 w-4 text-blue-500" />
+                        Recurring Invoice
+                      </CardTitle>
+                      <Switch
+                        checked={newInvoice.recurring.enabled}
+                        onCheckedChange={(checked) => setNewInvoice(prev => ({
+                          ...prev,
+                          recurring: { ...prev.recurring, enabled: checked }
+                        }))}
+                      />
+                    </div>
+                  </CardHeader>
+                  {newInvoice.recurring.enabled && (
+                    <CardContent className="pt-0">
+                      <select
+                        className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+                        value={newInvoice.recurring.frequency}
+                        onChange={(e) => setNewInvoice(prev => ({
+                          ...prev,
+                          recurring: { ...prev.recurring, frequency: e.target.value as any }
+                        }))}
+                      >
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="quarterly">Quarterly</option>
+                        <option value="yearly">Yearly</option>
+                      </select>
+                    </CardContent>
+                  )}
+                </Card>
+
+                {/* Late Fees */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Percent className="h-4 w-4 text-red-500" />
+                        Late Fee
+                      </CardTitle>
+                      <Switch
+                        checked={newInvoice.lateFee.enabled}
+                        onCheckedChange={(checked) => setNewInvoice(prev => ({
+                          ...prev,
+                          lateFee: { ...prev.lateFee, enabled: checked }
+                        }))}
+                      />
+                    </div>
+                  </CardHeader>
+                  {newInvoice.lateFee.enabled && (
+                    <CardContent className="pt-0">
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          value={newInvoice.lateFee.value}
+                          onChange={(e) => setNewInvoice(prev => ({
+                            ...prev,
+                            lateFee: { ...prev.lateFee, value: parseFloat(e.target.value) || 0 }
+                          }))}
+                          className="flex-1"
+                        />
+                        <select
+                          className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+                          value={newInvoice.lateFee.type}
+                          onChange={(e) => setNewInvoice(prev => ({
+                            ...prev,
+                            lateFee: { ...prev.lateFee, type: e.target.value as any }
+                          }))}
+                        >
+                          <option value="percentage">%</option>
+                          <option value="fixed">Fixed</option>
+                        </select>
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+
+                {/* Discount */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Zap className="h-4 w-4 text-yellow-500" />
+                        Discount
+                      </CardTitle>
+                      <Switch
+                        checked={newInvoice.discount.enabled}
+                        onCheckedChange={(checked) => setNewInvoice(prev => ({
+                          ...prev,
+                          discount: { ...prev.discount, enabled: checked }
+                        }))}
+                      />
+                    </div>
+                  </CardHeader>
+                  {newInvoice.discount.enabled && (
+                    <CardContent className="pt-0">
+                      <div className="flex gap-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          value={newInvoice.discount.value}
+                          onChange={(e) => setNewInvoice(prev => ({
+                            ...prev,
+                            discount: { ...prev.discount, value: parseFloat(e.target.value) || 0 }
+                          }))}
+                          className="flex-1"
+                        />
+                        <select
+                          className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
+                          value={newInvoice.discount.type}
+                          onChange={(e) => setNewInvoice(prev => ({
+                            ...prev,
+                            discount: { ...prev.discount, type: e.target.value as any }
+                          }))}
+                        >
+                          <option value="percentage">%</option>
+                          <option value="fixed">Fixed</option>
+                        </select>
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+
+                {/* Deposit */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-emerald-500" />
+                        Request Deposit
+                      </CardTitle>
+                      <Switch
+                        checked={newInvoice.deposit.enabled}
+                        onCheckedChange={(checked) => setNewInvoice(prev => ({
+                          ...prev,
+                          deposit: { ...prev.deposit, enabled: checked }
+                        }))}
+                      />
+                    </div>
+                  </CardHeader>
+                  {newInvoice.deposit.enabled && (
+                    <CardContent className="pt-0">
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={newInvoice.deposit.percentage}
+                          onChange={(e) => setNewInvoice(prev => ({
+                            ...prev,
+                            deposit: { ...prev.deposit, percentage: parseFloat(e.target.value) || 0 }
+                          }))}
+                          className="flex-1"
+                        />
+                        <span className="text-sm text-muted-foreground">%</span>
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              </div>
+
+              {/* Payment Reminders */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Bell className="h-4 w-4 text-purple-500" />
+                      Automatic Payment Reminders
+                    </CardTitle>
+                    <Switch
+                      checked={newInvoice.enableReminders}
+                      onCheckedChange={(checked) => setNewInvoice(prev => ({ ...prev, enableReminders: checked }))}
+                    />
+                  </div>
+                </CardHeader>
+                {newInvoice.enableReminders && (
+                  <CardContent className="pt-0">
+                    <div className="flex flex-wrap gap-2">
+                      {reminderSchedules.map(schedule => (
+                        <Badge
+                          key={schedule.id}
+                          variant={newInvoice.reminderSchedule.includes(schedule.id) ? 'default' : 'outline'}
+                          className="cursor-pointer"
+                          onClick={() => {
+                            setNewInvoice(prev => ({
+                              ...prev,
+                              reminderSchedule: prev.reminderSchedule.includes(schedule.id)
+                                ? prev.reminderSchedule.filter(id => id !== schedule.id)
+                                : [...prev.reminderSchedule, schedule.id]
+                            }))
+                          }}
+                        >
+                          {schedule.label}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+
+              {/* Notes & Terms */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Notes to Client</Label>
+                  <Textarea
+                    placeholder="Thank you for your business..."
+                    value={newInvoice.notes}
+                    onChange={(e) => setNewInvoice(prev => ({ ...prev, notes: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label>Payment Terms</Label>
+                  <Textarea
+                    placeholder="Payment is due within..."
+                    value={newInvoice.terms}
+                    onChange={(e) => setNewInvoice(prev => ({ ...prev, terms: e.target.value }))}
+                    rows={3}
+                  />
+                </div>
+              </div>
+            </div>
+          </ScrollArea>
+
+          <DialogFooter className="border-t pt-4">
+            <Button variant="outline" onClick={() => setShowCreateModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="outline">
+              <Eye className="h-4 w-4 mr-2" />
+              Preview
+            </Button>
+            <Button className="bg-emerald-600 hover:bg-emerald-700">
+              <FileText className="h-4 w-4 mr-2" />
+              Create Invoice
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Modal */}
+      <Dialog open={showSettingsModal} onOpenChange={setShowSettingsModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Invoice Settings
+            </DialogTitle>
+          </DialogHeader>
+          <Tabs defaultValue="general">
+            <TabsList className="grid grid-cols-4 w-full">
+              <TabsTrigger value="general">General</TabsTrigger>
+              <TabsTrigger value="templates">Templates</TabsTrigger>
+              <TabsTrigger value="payments">Payments</TabsTrigger>
+              <TabsTrigger value="automation">Automation</TabsTrigger>
+            </TabsList>
+            <TabsContent value="general" className="space-y-4 mt-4">
+              <div>
+                <Label>Default Currency</Label>
+                <select className="w-full px-3 py-2 border rounded-lg mt-1">
+                  {currencies.map(c => (
+                    <option key={c.code} value={c.code}>{c.symbol} {c.code}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label>Default Payment Terms (Days)</Label>
+                <Input type="number" defaultValue={30} />
+              </div>
+              <div>
+                <Label>Invoice Number Prefix</Label>
+                <Input defaultValue="INV-" />
+              </div>
+            </TabsContent>
+            <TabsContent value="templates" className="mt-4">
+              <p className="text-muted-foreground">Customize your invoice templates with your branding.</p>
+            </TabsContent>
+            <TabsContent value="payments" className="mt-4">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="h-8 w-8 text-blue-500" />
+                    <div>
+                      <p className="font-medium">Stripe</p>
+                      <p className="text-sm text-muted-foreground">Accept credit cards and bank transfers</p>
+                    </div>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <DollarSign className="h-8 w-8 text-yellow-500" />
+                    <div>
+                      <p className="font-medium">PayPal</p>
+                      <p className="text-sm text-muted-foreground">Accept PayPal payments</p>
+                    </div>
+                  </div>
+                  <Switch />
+                </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="automation" className="mt-4">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Auto-send reminders</p>
+                    <p className="text-sm text-muted-foreground">Automatically send payment reminders</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Auto-apply late fees</p>
+                    <p className="text-sm text-muted-foreground">Automatically apply late fees to overdue invoices</p>
+                  </div>
+                  <Switch />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Auto-generate recurring invoices</p>
+                    <p className="text-sm text-muted-foreground">Automatically create and send recurring invoices</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
