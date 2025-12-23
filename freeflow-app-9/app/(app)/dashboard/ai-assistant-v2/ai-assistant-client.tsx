@@ -1,411 +1,1864 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import StatGrid from '@/components/dashboard-results/StatGrid'
-import BentoQuickAction from '@/components/dashboard-results/BentoQuickAction'
-import PillButton from '@/components/modern-button-suite/PillButton'
-import MiniKPI from '@/components/dashboard-results/MiniKPI'
-import ActivityFeed from '@/components/dashboard-results/ActivityFeed'
-import RankingList from '@/components/dashboard-results/RankingList'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import {
-  useAIAssistant,
-  getConversationModeColor,
-  getMessageRoleColor,
-  formatTokens,
-  formatCost,
-  formatLatency,
-  getRelativeTime,
-  type AIConversation,
-  type AIMessage
-} from '@/lib/hooks/use-ai-assistant'
+  Bot,
+  Send,
+  Plus,
+  Settings,
+  MessageSquare,
+  FileText,
+  Sparkles,
+  Code,
+  Image as ImageIcon,
+  Mic,
+  Paperclip,
+  Copy,
+  Check,
+  RefreshCw,
+  Trash2,
+  Star,
+  StarOff,
+  MoreVertical,
+  ChevronDown,
+  Zap,
+  Brain,
+  History,
+  Users,
+  Folder,
+  BookOpen,
+  Search,
+  Filter,
+  Download,
+  Upload,
+  Play,
+  Pause,
+  Square,
+  Wand2,
+  Palette,
+  Calculator,
+  Globe,
+  Database,
+  Terminal,
+  FileCode,
+  PenTool,
+  Lightbulb,
+  Target,
+  BarChart3,
+  Clock,
+  Crown,
+  Shield,
+  Eye,
+  EyeOff,
+  Edit,
+  Save,
+  X,
+  AlertCircle,
+  CheckCircle,
+  Info,
+  ArrowUp,
+  ArrowDown,
+  Loader2,
+  ThumbsUp,
+  ThumbsDown,
+  Share,
+  Bookmark,
+  Hash,
+  AtSign
+} from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
-type ViewMode = 'chat' | 'conversations' | 'starred'
+// Types
+type MessageRole = 'user' | 'assistant' | 'system' | 'tool'
+type ModelType = 'gpt-4o' | 'gpt-4-turbo' | 'gpt-3.5-turbo' | 'claude-3-opus' | 'claude-3-sonnet' | 'claude-3-haiku'
+type ConversationMode = 'chat' | 'code' | 'analysis' | 'creative' | 'research'
+type AssistantType = 'general' | 'code' | 'writer' | 'analyst' | 'researcher' | 'custom'
+type FileType = 'document' | 'code' | 'image' | 'data' | 'audio'
 
-interface AIAssistantClientProps {
-  initialConversations: AIConversation[]
+interface Message {
+  id: string
+  role: MessageRole
+  content: string
+  model: ModelType
+  tokens: { input: number; output: number }
+  createdAt: Date
+  toolCalls?: ToolCall[]
+  attachments?: Attachment[]
+  feedback?: 'positive' | 'negative' | null
+  isStreaming?: boolean
 }
 
-export default function AIAssistantClient({ initialConversations }: AIAssistantClientProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('chat')
-  const [inputMessage, setInputMessage] = useState('')
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+interface ToolCall {
+  id: string
+  name: string
+  arguments: Record<string, unknown>
+  result?: string
+  status: 'pending' | 'running' | 'completed' | 'error'
+}
 
-  const {
-    conversations,
-    messages,
-    activeConversation,
-    stats,
-    isLoading,
-    isSending,
-    createConversation,
-    sendMessage,
-    fetchMessages,
-    toggleStar,
-    toggleArchive,
-    deleteConversation,
-    setActiveConversation
-  } = useAIAssistant(initialConversations)
+interface Attachment {
+  id: string
+  name: string
+  type: FileType
+  size: number
+  url: string
+}
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+interface Conversation {
+  id: string
+  title: string
+  mode: ConversationMode
+  model: ModelType
+  messages: number
+  tokens: number
+  starred: boolean
+  archived: boolean
+  createdAt: Date
+  updatedAt: Date
+  systemPrompt?: string
+}
+
+interface Assistant {
+  id: string
+  name: string
+  description: string
+  type: AssistantType
+  model: ModelType
+  systemPrompt: string
+  temperature: number
+  tools: string[]
+  files: string[]
+  icon: string
+  color: string
+  usageCount: number
+  createdAt: Date
+}
+
+interface PromptTemplate {
+  id: string
+  name: string
+  description: string
+  prompt: string
+  category: string
+  variables: string[]
+  usageCount: number
+  starred: boolean
+}
+
+interface KnowledgeFile {
+  id: string
+  name: string
+  type: FileType
+  size: number
+  chunks: number
+  status: 'processing' | 'ready' | 'error'
+  uploadedAt: Date
+  assistant?: string
+}
+
+interface UsageStats {
+  totalTokens: number
+  inputTokens: number
+  outputTokens: number
+  totalCost: number
+  conversations: number
+  messages: number
+  avgResponseTime: number
+  quotaUsed: number
+  quotaLimit: number
+}
+
+interface DailyUsage {
+  date: string
+  tokens: number
+  cost: number
+  messages: number
+}
+
+// Mock Data
+const mockConversations: Conversation[] = [
+  {
+    id: '1',
+    title: 'Building a React Dashboard',
+    mode: 'code',
+    model: 'gpt-4o',
+    messages: 24,
+    tokens: 15420,
+    starred: true,
+    archived: false,
+    createdAt: new Date('2024-12-20'),
+    updatedAt: new Date('2024-12-23'),
+    systemPrompt: 'You are a senior React developer...'
+  },
+  {
+    id: '2',
+    title: 'Market Analysis Q4 2024',
+    mode: 'analysis',
+    model: 'claude-3-opus',
+    messages: 18,
+    tokens: 12300,
+    starred: true,
+    archived: false,
+    createdAt: new Date('2024-12-19'),
+    updatedAt: new Date('2024-12-22')
+  },
+  {
+    id: '3',
+    title: 'Blog Post: AI Trends',
+    mode: 'creative',
+    model: 'gpt-4-turbo',
+    messages: 12,
+    tokens: 8500,
+    starred: false,
+    archived: false,
+    createdAt: new Date('2024-12-18'),
+    updatedAt: new Date('2024-12-21')
+  },
+  {
+    id: '4',
+    title: 'API Integration Help',
+    mode: 'code',
+    model: 'gpt-4o',
+    messages: 35,
+    tokens: 22100,
+    starred: false,
+    archived: false,
+    createdAt: new Date('2024-12-17'),
+    updatedAt: new Date('2024-12-20')
+  },
+  {
+    id: '5',
+    title: 'Research: Quantum Computing',
+    mode: 'research',
+    model: 'claude-3-sonnet',
+    messages: 28,
+    tokens: 19800,
+    starred: false,
+    archived: true,
+    createdAt: new Date('2024-12-15'),
+    updatedAt: new Date('2024-12-18')
   }
+]
 
+const mockMessages: Message[] = [
+  {
+    id: '1',
+    role: 'user',
+    content: 'Can you help me build a dashboard component with charts and stats?',
+    model: 'gpt-4o',
+    tokens: { input: 18, output: 0 },
+    createdAt: new Date('2024-12-23T10:00:00')
+  },
+  {
+    id: '2',
+    role: 'assistant',
+    content: `I'd be happy to help you build a dashboard component! Here's a comprehensive approach:
+
+## Dashboard Structure
+
+\`\`\`tsx
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+
+const data = [
+  { name: 'Jan', value: 400 },
+  { name: 'Feb', value: 300 },
+  { name: 'Mar', value: 600 },
+  { name: 'Apr', value: 800 },
+  { name: 'May', value: 500 }
+]
+
+export function DashboardStats() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <StatCard title="Total Revenue" value="$45,231" change="+20.1%" />
+      <StatCard title="Subscriptions" value="2,350" change="+180.1%" />
+      <StatCard title="Sales" value="12,234" change="+19%" />
+      <StatCard title="Active Now" value="573" change="+201" />
+    </div>
+  )
+}
+\`\`\`
+
+## Key Features to Include:
+
+1. **Stat Cards** - Display key metrics with trend indicators
+2. **Charts** - Area, line, and bar charts for data visualization
+3. **Data Tables** - For detailed information
+4. **Filters** - Date range and category filters
+
+Would you like me to expand on any specific part?`,
+    model: 'gpt-4o',
+    tokens: { input: 0, output: 342 },
+    createdAt: new Date('2024-12-23T10:00:15'),
+    toolCalls: [
+      {
+        id: 't1',
+        name: 'code_interpreter',
+        arguments: { language: 'typescript' },
+        status: 'completed'
+      }
+    ]
+  },
+  {
+    id: '3',
+    role: 'user',
+    content: 'Yes, please show me how to implement the stat cards with animations',
+    model: 'gpt-4o',
+    tokens: { input: 14, output: 0 },
+    createdAt: new Date('2024-12-23T10:02:00')
+  },
+  {
+    id: '4',
+    role: 'assistant',
+    content: `Here's an animated stat card component using Framer Motion:
+
+\`\`\`tsx
+import { motion } from 'framer-motion'
+import { ArrowUp, ArrowDown } from 'lucide-react'
+
+interface StatCardProps {
+  title: string
+  value: string
+  change: string
+  trend: 'up' | 'down'
+}
+
+export function AnimatedStatCard({ title, value, change, trend }: StatCardProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      whileHover={{ scale: 1.02 }}
+      className="rounded-xl border bg-card p-6 shadow-sm"
+    >
+      <div className="flex items-center justify-between">
+        <p className="text-sm font-medium text-muted-foreground">{title}</p>
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          {trend === 'up' ? (
+            <ArrowUp className="h-4 w-4 text-green-500" />
+          ) : (
+            <ArrowDown className="h-4 w-4 text-red-500" />
+          )}
+        </motion.div>
+      </div>
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="text-2xl font-bold"
+      >
+        {value}
+      </motion.p>
+      <p className={\`text-xs \${trend === 'up' ? 'text-green-500' : 'text-red-500'}\`}>
+        {change} from last month
+      </p>
+    </motion.div>
+  )
+}
+\`\`\`
+
+This includes:
+- Fade-in animation on mount
+- Scale animation on hover
+- Staggered animations for different elements
+- Trend indicator with icon`,
+    model: 'gpt-4o',
+    tokens: { input: 0, output: 428 },
+    createdAt: new Date('2024-12-23T10:02:20')
+  }
+]
+
+const mockAssistants: Assistant[] = [
+  {
+    id: '1',
+    name: 'Code Copilot',
+    description: 'Expert programming assistant for all languages',
+    type: 'code',
+    model: 'gpt-4o',
+    systemPrompt: 'You are an expert programmer...',
+    temperature: 0.3,
+    tools: ['code_interpreter', 'file_search'],
+    files: ['api-docs.pdf', 'codebase.zip'],
+    icon: '💻',
+    color: 'blue',
+    usageCount: 1245,
+    createdAt: new Date('2024-11-01')
+  },
+  {
+    id: '2',
+    name: 'Content Writer',
+    description: 'Creative writing and content generation',
+    type: 'writer',
+    model: 'gpt-4-turbo',
+    systemPrompt: 'You are a professional content writer...',
+    temperature: 0.8,
+    tools: ['web_search'],
+    files: ['brand-guide.pdf'],
+    icon: '✍️',
+    color: 'purple',
+    usageCount: 892,
+    createdAt: new Date('2024-11-05')
+  },
+  {
+    id: '3',
+    name: 'Data Analyst',
+    description: 'Analyze data and generate insights',
+    type: 'analyst',
+    model: 'claude-3-opus',
+    systemPrompt: 'You are a senior data analyst...',
+    temperature: 0.2,
+    tools: ['code_interpreter', 'file_search'],
+    files: ['sales-data.csv', 'metrics.xlsx'],
+    icon: '📊',
+    color: 'green',
+    usageCount: 567,
+    createdAt: new Date('2024-11-10')
+  },
+  {
+    id: '4',
+    name: 'Research Assistant',
+    description: 'Deep research and literature review',
+    type: 'researcher',
+    model: 'claude-3-sonnet',
+    systemPrompt: 'You are a research assistant...',
+    temperature: 0.4,
+    tools: ['web_search', 'file_search'],
+    files: ['papers.zip'],
+    icon: '🔬',
+    color: 'orange',
+    usageCount: 423,
+    createdAt: new Date('2024-11-15')
+  }
+]
+
+const mockPrompts: PromptTemplate[] = [
+  {
+    id: '1',
+    name: 'Code Review',
+    description: 'Comprehensive code review with suggestions',
+    prompt: 'Review the following code for:\n1. Code quality and best practices\n2. Potential bugs\n3. Performance issues\n4. Security vulnerabilities\n\nCode:\n{{code}}',
+    category: 'Development',
+    variables: ['code'],
+    usageCount: 234,
+    starred: true
+  },
+  {
+    id: '2',
+    name: 'Blog Post Outline',
+    description: 'Generate a structured blog post outline',
+    prompt: 'Create a detailed blog post outline for the topic: {{topic}}\n\nTarget audience: {{audience}}\nTone: {{tone}}\n\nInclude:\n- Hook/introduction\n- Main sections with key points\n- Conclusion with CTA',
+    category: 'Content',
+    variables: ['topic', 'audience', 'tone'],
+    usageCount: 189,
+    starred: true
+  },
+  {
+    id: '3',
+    name: 'SQL Query Generator',
+    description: 'Generate optimized SQL queries',
+    prompt: 'Generate an optimized SQL query for:\n\nDatabase schema:\n{{schema}}\n\nRequirement:\n{{requirement}}\n\nDatabase: {{database_type}}',
+    category: 'Development',
+    variables: ['schema', 'requirement', 'database_type'],
+    usageCount: 156,
+    starred: false
+  },
+  {
+    id: '4',
+    name: 'Meeting Summary',
+    description: 'Summarize meeting notes into action items',
+    prompt: 'Summarize the following meeting notes:\n\n{{notes}}\n\nExtract:\n1. Key decisions made\n2. Action items with owners\n3. Follow-up topics\n4. Timeline/deadlines',
+    category: 'Productivity',
+    variables: ['notes'],
+    usageCount: 298,
+    starred: true
+  },
+  {
+    id: '5',
+    name: 'Product Description',
+    description: 'Write compelling product descriptions',
+    prompt: 'Write a compelling product description for:\n\nProduct: {{product}}\nFeatures: {{features}}\nTarget customer: {{customer}}\n\nInclude benefits, use cases, and emotional appeal.',
+    category: 'Marketing',
+    variables: ['product', 'features', 'customer'],
+    usageCount: 167,
+    starred: false
+  }
+]
+
+const mockFiles: KnowledgeFile[] = [
+  {
+    id: '1',
+    name: 'API Documentation.pdf',
+    type: 'document',
+    size: 2450000,
+    chunks: 124,
+    status: 'ready',
+    uploadedAt: new Date('2024-12-20'),
+    assistant: 'Code Copilot'
+  },
+  {
+    id: '2',
+    name: 'sales-data-2024.csv',
+    type: 'data',
+    size: 5600000,
+    chunks: 89,
+    status: 'ready',
+    uploadedAt: new Date('2024-12-19'),
+    assistant: 'Data Analyst'
+  },
+  {
+    id: '3',
+    name: 'brand-guidelines.pdf',
+    type: 'document',
+    size: 8900000,
+    chunks: 256,
+    status: 'ready',
+    uploadedAt: new Date('2024-12-18'),
+    assistant: 'Content Writer'
+  },
+  {
+    id: '4',
+    name: 'codebase-v2.zip',
+    type: 'code',
+    size: 15400000,
+    chunks: 512,
+    status: 'processing',
+    uploadedAt: new Date('2024-12-23')
+  }
+]
+
+const mockUsageStats: UsageStats = {
+  totalTokens: 2450000,
+  inputTokens: 980000,
+  outputTokens: 1470000,
+  totalCost: 187.45,
+  conversations: 156,
+  messages: 2890,
+  avgResponseTime: 1.8,
+  quotaUsed: 2450000,
+  quotaLimit: 5000000
+}
+
+const mockDailyUsage: DailyUsage[] = [
+  { date: '2024-12-17', tokens: 125000, cost: 9.50, messages: 145 },
+  { date: '2024-12-18', tokens: 198000, cost: 15.20, messages: 234 },
+  { date: '2024-12-19', tokens: 167000, cost: 12.80, messages: 189 },
+  { date: '2024-12-20', tokens: 245000, cost: 18.90, messages: 287 },
+  { date: '2024-12-21', tokens: 312000, cost: 24.10, messages: 356 },
+  { date: '2024-12-22', tokens: 278000, cost: 21.40, messages: 312 },
+  { date: '2024-12-23', tokens: 156000, cost: 12.00, messages: 178 }
+]
+
+const models: { id: ModelType; name: string; provider: string; context: string; speed: string }[] = [
+  { id: 'gpt-4o', name: 'GPT-4o', provider: 'OpenAI', context: '128k', speed: 'Fast' },
+  { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', provider: 'OpenAI', context: '128k', speed: 'Medium' },
+  { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', provider: 'OpenAI', context: '16k', speed: 'Very Fast' },
+  { id: 'claude-3-opus', name: 'Claude 3 Opus', provider: 'Anthropic', context: '200k', speed: 'Medium' },
+  { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', provider: 'Anthropic', context: '200k', speed: 'Fast' },
+  { id: 'claude-3-haiku', name: 'Claude 3 Haiku', provider: 'Anthropic', context: '200k', speed: 'Very Fast' }
+]
+
+const modeConfig: Record<ConversationMode, { icon: React.ReactNode; label: string; color: string }> = {
+  chat: { icon: <MessageSquare className="h-4 w-4" />, label: 'Chat', color: 'blue' },
+  code: { icon: <Code className="h-4 w-4" />, label: 'Code', color: 'green' },
+  analysis: { icon: <BarChart3 className="h-4 w-4" />, label: 'Analysis', color: 'purple' },
+  creative: { icon: <Palette className="h-4 w-4" />, label: 'Creative', color: 'pink' },
+  research: { icon: <BookOpen className="h-4 w-4" />, label: 'Research', color: 'orange' }
+}
+
+// Helper Functions
+const formatTokens = (tokens: number): string => {
+  if (tokens >= 1000000) return `${(tokens / 1000000).toFixed(1)}M`
+  if (tokens >= 1000) return `${(tokens / 1000).toFixed(1)}K`
+  return tokens.toString()
+}
+
+const formatBytes = (bytes: number): string => {
+  if (bytes >= 1000000) return `${(bytes / 1000000).toFixed(1)} MB`
+  if (bytes >= 1000) return `${(bytes / 1000).toFixed(1)} KB`
+  return `${bytes} B`
+}
+
+const formatCost = (cost: number): string => `$${cost.toFixed(2)}`
+
+const formatDate = (date: Date): string => {
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(date)
+}
+
+const formatRelativeTime = (date: Date): string => {
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(diff / 3600000)
+  const days = Math.floor(diff / 86400000)
+
+  if (minutes < 1) return 'Just now'
+  if (minutes < 60) return `${minutes}m ago`
+  if (hours < 24) return `${hours}h ago`
+  return `${days}d ago`
+}
+
+const getModeColor = (mode: ConversationMode): string => {
+  const colors: Record<ConversationMode, string> = {
+    chat: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+    code: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+    analysis: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+    creative: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
+    research: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
+  }
+  return colors[mode]
+}
+
+const getModelColor = (model: ModelType): string => {
+  if (model.startsWith('gpt')) return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+  return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+}
+
+const getFileIcon = (type: FileType): React.ReactNode => {
+  const icons: Record<FileType, React.ReactNode> = {
+    document: <FileText className="h-4 w-4" />,
+    code: <FileCode className="h-4 w-4" />,
+    image: <ImageIcon className="h-4 w-4" />,
+    data: <Database className="h-4 w-4" />,
+    audio: <Mic className="h-4 w-4" />
+  }
+  return icons[type]
+}
+
+export default function AIAssistantClient() {
+  const [activeTab, setActiveTab] = useState('chat')
+  const [conversations, setConversations] = useState<Conversation[]>(mockConversations)
+  const [messages, setMessages] = useState<Message[]>(mockMessages)
+  const [assistants, setAssistants] = useState<Assistant[]>(mockAssistants)
+  const [prompts, setPrompts] = useState<PromptTemplate[]>(mockPrompts)
+  const [files, setFiles] = useState<KnowledgeFile[]>(mockFiles)
+  const [usageStats] = useState<UsageStats>(mockUsageStats)
+  const [dailyUsage] = useState<DailyUsage[]>(mockDailyUsage)
+
+  const [activeConversation, setActiveConversation] = useState<Conversation | null>(mockConversations[0])
+  const [selectedModel, setSelectedModel] = useState<ModelType>('gpt-4o')
+  const [selectedMode, setSelectedMode] = useState<ConversationMode>('chat')
+  const [inputMessage, setInputMessage] = useState('')
+  const [isTyping, setIsTyping] = useState(false)
+  const [showSidebar, setShowSidebar] = useState(true)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showModelSelector, setShowModelSelector] = useState(false)
+
+  const [showNewAssistant, setShowNewAssistant] = useState(false)
+  const [showPromptDetail, setShowPromptDetail] = useState(false)
+  const [selectedPrompt, setSelectedPrompt] = useState<PromptTemplate | null>(null)
+  const [showSettings, setShowSettings] = useState(false)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  // Filtered data
+  const filteredConversations = useMemo(() => {
+    return conversations.filter(c =>
+      !c.archived &&
+      (searchQuery === '' || c.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
+  }, [conversations, searchQuery])
+
+  const starredConversations = useMemo(() =>
+    conversations.filter(c => c.starred && !c.archived),
+    [conversations]
+  )
+
+  const filteredPrompts = useMemo(() => {
+    return prompts.filter(p =>
+      searchQuery === '' ||
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.category.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }, [prompts, searchQuery])
+
+  // Scroll to bottom on new messages
   useEffect(() => {
-    scrollToBottom()
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  // Handle send message
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return
 
-    if (!activeConversation) {
-      const newConversation = await createConversation('New Chat', 'chat')
-      if (newConversation) {
-        await sendMessage(inputMessage, 'user')
-      }
-    } else {
-      await sendMessage(inputMessage, 'user')
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: inputMessage,
+      model: selectedModel,
+      tokens: { input: Math.floor(inputMessage.length / 4), output: 0 },
+      createdAt: new Date()
     }
 
+    setMessages(prev => [...prev, newMessage])
     setInputMessage('')
+    setIsTyping(true)
+
+    // Simulate AI response
+    setTimeout(() => {
+      const response: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: 'I understand your request. Let me help you with that...\n\nHere\'s a comprehensive solution based on your requirements.',
+        model: selectedModel,
+        tokens: { input: 0, output: 45 },
+        createdAt: new Date()
+      }
+      setMessages(prev => [...prev, response])
+      setIsTyping(false)
+    }, 1500)
   }
 
-  const handleSelectConversation = async (conversation: AIConversation) => {
-    setActiveConversation(conversation)
-    await fetchMessages(conversation.id)
-    setViewMode('chat')
+  // Handle copy message
+  const handleCopy = (id: string, content: string) => {
+    navigator.clipboard.writeText(content)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 2000)
   }
 
-  const handleNewChat = async () => {
-    await createConversation('New Chat', 'chat')
-    setViewMode('chat')
+  // Handle new conversation
+  const handleNewConversation = () => {
+    const newConv: Conversation = {
+      id: Date.now().toString(),
+      title: 'New Chat',
+      mode: selectedMode,
+      model: selectedModel,
+      messages: 0,
+      tokens: 0,
+      starred: false,
+      archived: false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+    setConversations(prev => [newConv, ...prev])
+    setActiveConversation(newConv)
+    setMessages([])
   }
 
-  const suggestions = [
-    'Analyze project performance',
-    'Generate weekly report',
-    'Optimize team workflow',
-    'Suggest growth strategies',
-    'Review client feedback',
-    'Create task breakdown'
-  ]
+  // Toggle star
+  const toggleStar = (id: string) => {
+    setConversations(prev =>
+      prev.map(c => c.id === id ? { ...c, starred: !c.starred } : c)
+    )
+    if (activeConversation?.id === id) {
+      setActiveConversation(prev => prev ? { ...prev, starred: !prev.starred } : null)
+    }
+  }
+
+  // Handle prompt use
+  const handleUsePrompt = (prompt: PromptTemplate) => {
+    setInputMessage(prompt.prompt)
+    setActiveTab('chat')
+    inputRef.current?.focus()
+  }
+
+  // Quota percentage
+  const quotaPercentage = (usageStats.quotaUsed / usageStats.quotaLimit) * 100
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-violet-50 dark:bg-none dark:bg-gray-900">
-      <div className="max-w-[1600px] mx-auto p-6 space-y-6">
-
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-violet-600 bg-clip-text text-transparent flex items-center gap-3">
-              🤖 AI Assistant
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-1">
-              Your intelligent business companion
-            </p>
-          </div>
-          <button
-            onClick={handleNewChat}
-            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-lg hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300"
-          >
-            New Chat
-          </button>
-        </div>
-
-        {/* Stats Grid */}
-        <StatGrid
-          stats={[
-            {
-              label: 'Conversations',
-              value: stats.totalConversations.toString(),
-              change: '+15%',
-              trend: 'up' as const,
-              subtitle: 'total chats'
-            },
-            {
-              label: 'Messages',
-              value: stats.totalMessages.toString(),
-              change: '+32%',
-              trend: 'up' as const,
-              subtitle: 'exchanged'
-            },
-            {
-              label: 'Tokens Used',
-              value: formatTokens(stats.totalTokens),
-              change: '+18%',
-              trend: 'up' as const,
-              subtitle: 'this month'
-            },
-            {
-              label: 'Total Cost',
-              value: formatCost(stats.totalCost),
-              change: '+12%',
-              trend: 'up' as const,
-              subtitle: 'API usage'
-            }
-          ]}
-        />
-
-        {/* Quick Actions */}
-        <BentoQuickAction
-          actions={[
-            { label: 'Smart Insights', icon: '🧠', onClick: () => {} },
-            { label: 'Automate Tasks', icon: '⚡', onClick: () => {} },
-            { label: 'Get Suggestions', icon: '💡', onClick: () => {} },
-            { label: 'Templates', icon: '⭐', onClick: () => {} },
-            { label: 'History', icon: '📜', onClick: () => setViewMode('conversations') },
-            { label: 'Starred', icon: '⭐', onClick: () => setViewMode('starred') },
-            { label: 'Settings', icon: '⚙️', onClick: () => {} },
-            { label: 'Help', icon: '❓', onClick: () => {} }
-          ]}
-        />
-
-        {/* View Mode Pills */}
-        <div className="flex items-center gap-3">
-          <PillButton label="Chat" isActive={viewMode === 'chat'} onClick={() => setViewMode('chat')} />
-          <PillButton label="Conversations" isActive={viewMode === 'conversations'} onClick={() => setViewMode('conversations')} />
-          <PillButton label="Starred" isActive={viewMode === 'starred'} onClick={() => setViewMode('starred')} />
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          {/* Chat/Conversations Area */}
-          <div className="lg:col-span-2">
-            {viewMode === 'chat' ? (
-              <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-800 p-6 h-[600px] flex flex-col">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
-                    {activeConversation?.title || 'New Chat'}
-                  </h2>
-                  {activeConversation && (
-                    <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 rounded-full text-xs ${getConversationModeColor(activeConversation.mode)}`}>
-                        {activeConversation.mode}
-                      </span>
-                      <button
-                        onClick={() => toggleStar(activeConversation.id)}
-                        className={`p-1 rounded ${activeConversation.is_starred ? 'text-yellow-500' : 'text-slate-400'}`}
-                      >
-                        ★
-                      </button>
-                    </div>
-                  )}
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
+      {/* Premium Header */}
+      <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white">
+        <div className="max-w-[1800px] mx-auto px-6 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                <Bot className="h-8 w-8" />
+              </div>
+              <div>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-3xl font-bold">AI Assistant</h1>
+                  <span className="px-3 py-1 bg-white/20 rounded-full text-sm font-medium backdrop-blur-sm">
+                    ChatGPT Level
+                  </span>
                 </div>
+                <p className="text-violet-100 mt-1">
+                  Your intelligent AI companion with multi-model support
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowSettings(true)}
+                className="p-2.5 bg-white/20 rounded-xl hover:bg-white/30 transition-colors backdrop-blur-sm"
+              >
+                <Settings className="h-5 w-5" />
+              </button>
+            </div>
+          </div>
 
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto mb-4 space-y-4">
-                  {messages.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-slate-500 dark:text-slate-400">
-                      <div className="text-6xl mb-4">🤖</div>
-                      <p className="text-lg font-medium">Hello! How can I help you today?</p>
-                      <p className="text-sm mt-2">Start a conversation or try one of the suggestions below</p>
-                      <div className="flex flex-wrap gap-2 mt-4 max-w-md justify-center">
-                        {suggestions.slice(0, 3).map((suggestion, index) => (
+          {/* Stats Bar */}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-violet-200 text-sm mb-1">
+                <MessageSquare className="h-4 w-4" />
+                Conversations
+              </div>
+              <p className="text-2xl font-bold">{usageStats.conversations}</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-violet-200 text-sm mb-1">
+                <Zap className="h-4 w-4" />
+                Total Tokens
+              </div>
+              <p className="text-2xl font-bold">{formatTokens(usageStats.totalTokens)}</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-violet-200 text-sm mb-1">
+                <BarChart3 className="h-4 w-4" />
+                Total Cost
+              </div>
+              <p className="text-2xl font-bold">{formatCost(usageStats.totalCost)}</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-violet-200 text-sm mb-1">
+                <Clock className="h-4 w-4" />
+                Avg Response
+              </div>
+              <p className="text-2xl font-bold">{usageStats.avgResponseTime}s</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-violet-200 text-sm mb-1">
+                <Users className="h-4 w-4" />
+                Assistants
+              </div>
+              <p className="text-2xl font-bold">{assistants.length}</p>
+            </div>
+            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-violet-200 text-sm mb-1">
+                <Folder className="h-4 w-4" />
+                Knowledge Files
+              </div>
+              <p className="text-2xl font-bold">{files.length}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-[1800px] mx-auto p-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between mb-6">
+            <TabsList className="bg-white dark:bg-gray-800 shadow-sm">
+              <TabsTrigger value="chat" className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4" />
+                Chat
+              </TabsTrigger>
+              <TabsTrigger value="assistants" className="flex items-center gap-2">
+                <Bot className="h-4 w-4" />
+                Assistants
+              </TabsTrigger>
+              <TabsTrigger value="prompts" className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4" />
+                Prompts
+              </TabsTrigger>
+              <TabsTrigger value="files" className="flex items-center gap-2">
+                <Folder className="h-4 w-4" />
+                Files
+              </TabsTrigger>
+              <TabsTrigger value="usage" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Usage
+              </TabsTrigger>
+            </TabsList>
+
+            {activeTab === 'chat' && (
+              <div className="flex items-center gap-3">
+                {/* Model Selector */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowModelSelector(!showModelSelector)}
+                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-violet-500 transition-colors"
+                  >
+                    <Brain className="h-4 w-4 text-violet-600" />
+                    <span className="font-medium">{models.find(m => m.id === selectedModel)?.name}</span>
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
+                  </button>
+
+                  {showModelSelector && (
+                    <div className="absolute top-full right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-xl z-50">
+                      <div className="p-2">
+                        {models.map(model => (
                           <button
-                            key={index}
-                            onClick={() => setInputMessage(suggestion)}
-                            className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-all"
+                            key={model.id}
+                            onClick={() => {
+                              setSelectedModel(model.id)
+                              setShowModelSelector(false)
+                            }}
+                            className={`w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                              selectedModel === model.id ? 'bg-violet-50 dark:bg-violet-900/30' : ''
+                            }`}
                           >
-                            {suggestion}
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg ${model.provider === 'OpenAI' ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-amber-100 dark:bg-amber-900/30'}`}>
+                                <Brain className={`h-4 w-4 ${model.provider === 'OpenAI' ? 'text-emerald-600' : 'text-amber-600'}`} />
+                              </div>
+                              <div className="text-left">
+                                <p className="font-medium text-gray-900 dark:text-white">{model.name}</p>
+                                <p className="text-xs text-gray-500">{model.provider} • {model.context}</p>
+                              </div>
+                            </div>
+                            <span className="text-xs text-gray-400">{model.speed}</span>
                           </button>
                         ))}
                       </div>
                     </div>
-                  ) : (
-                    messages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className={`max-w-[80%] p-4 rounded-lg ${
-                            message.role === 'user'
-                              ? 'bg-purple-600 text-white'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white'
-                          }`}
-                        >
-                          {message.role === 'assistant' && (
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-xl">🤖</span>
-                              <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">AI Assistant</span>
-                            </div>
-                          )}
-                          <p className="text-sm whitespace-pre-line">{message.content}</p>
-                          <div className="text-xs mt-2 opacity-70">
-                            {getRelativeTime(message.created_at)}
-                            {message.total_tokens > 0 && ` • ${message.total_tokens} tokens`}
-                          </div>
-                        </div>
-                      </div>
-                    ))
                   )}
-                  <div ref={messagesEndRef} />
                 </div>
 
-                {/* Input */}
-                <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={inputMessage}
-                      onChange={(e) => setInputMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                      placeholder="Ask me anything..."
-                      className="flex-1 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      disabled={isSending}
-                    />
+                {/* Mode Selector */}
+                <div className="flex items-center gap-1 p-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                  {Object.entries(modeConfig).map(([mode, config]) => (
                     <button
-                      onClick={handleSendMessage}
-                      disabled={isSending || !inputMessage.trim()}
-                      className="px-4 py-2 bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      key={mode}
+                      onClick={() => setSelectedMode(mode as ConversationMode)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
+                        selectedMode === mode
+                          ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
                     >
-                      {isSending ? '...' : '✨ Send'}
+                      {config.icon}
+                      <span className="text-sm font-medium">{config.label}</span>
                     </button>
-                  </div>
+                  ))}
                 </div>
-              </div>
-            ) : (
-              <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-                <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white">
-                  {viewMode === 'starred' ? 'Starred Conversations' : 'All Conversations'}
-                </h2>
 
-                {isLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {conversations
-                      .filter(c => viewMode !== 'starred' || c.is_starred)
-                      .map((conversation) => (
-                        <div
-                          key={conversation.id}
-                          onClick={() => handleSelectConversation(conversation)}
-                          className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-purple-500/50 cursor-pointer transition-all hover:shadow-lg hover:shadow-purple-500/10"
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="font-semibold text-slate-900 dark:text-white">
-                              {conversation.title}
-                            </h3>
-                            <div className="flex items-center gap-2">
-                              <span className={`px-2 py-1 rounded-full text-xs ${getConversationModeColor(conversation.mode)}`}>
-                                {conversation.mode}
-                              </span>
-                              {conversation.is_starred && <span className="text-yellow-500">★</span>}
-                            </div>
-                          </div>
-                          <div className="text-sm text-slate-600 dark:text-slate-400 mb-2">
-                            {conversation.message_count} messages • {formatTokens(conversation.total_tokens)} tokens
-                          </div>
-                          <div className="text-xs text-slate-500">
-                            Last updated: {getRelativeTime(conversation.updated_at)}
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                )}
+                <button
+                  onClick={handleNewConversation}
+                  className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                  New Chat
+                </button>
               </div>
             )}
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
+          {/* Chat Tab */}
+          <TabsContent value="chat" className="mt-0">
+            <div className="flex gap-6 h-[calc(100vh-380px)] min-h-[600px]">
+              {/* Sidebar */}
+              {showSidebar && (
+                <div className="w-80 flex-shrink-0">
+                  <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 h-full flex flex-col">
+                    {/* Search */}
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <input
+                          type="text"
+                          placeholder="Search conversations..."
+                          value={searchQuery}
+                          onChange={e => setSearchQuery(e.target.value)}
+                          className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-xl border-0 focus:ring-2 focus:ring-violet-500 text-sm"
+                        />
+                      </div>
+                    </div>
 
-            {/* Suggestions */}
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-              <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white flex items-center gap-2">
-                💡 Suggestions
-              </h3>
-              <div className="space-y-2">
-                {suggestions.map((suggestion, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setInputMessage(suggestion)
-                      setViewMode('chat')
-                    }}
-                    className="w-full text-left p-3 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors text-sm text-slate-700 dark:text-slate-300"
+                    {/* Starred */}
+                    {starredConversations.length > 0 && (
+                      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                          Starred
+                        </h3>
+                        <div className="space-y-1">
+                          {starredConversations.slice(0, 3).map(conv => (
+                            <button
+                              key={conv.id}
+                              onClick={() => setActiveConversation(conv)}
+                              className={`w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors ${
+                                activeConversation?.id === conv.id
+                                  ? 'bg-violet-50 dark:bg-violet-900/30'
+                                  : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                              }`}
+                            >
+                              <Star className="h-4 w-4 text-yellow-500 flex-shrink-0" />
+                              <span className="text-sm font-medium truncate text-gray-900 dark:text-white">
+                                {conv.title}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Conversations List */}
+                    <ScrollArea className="flex-1">
+                      <div className="p-4 space-y-2">
+                        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                          Recent
+                        </h3>
+                        {filteredConversations.map(conv => (
+                          <button
+                            key={conv.id}
+                            onClick={() => setActiveConversation(conv)}
+                            className={`w-full p-3 rounded-xl text-left transition-all group ${
+                              activeConversation?.id === conv.id
+                                ? 'bg-violet-50 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-800'
+                                : 'hover:bg-gray-50 dark:hover:bg-gray-700 border border-transparent'
+                            }`}
+                          >
+                            <div className="flex items-start justify-between mb-1">
+                              <span className="font-medium text-gray-900 dark:text-white truncate flex-1">
+                                {conv.title}
+                              </span>
+                              <button
+                                onClick={e => {
+                                  e.stopPropagation()
+                                  toggleStar(conv.id)
+                                }}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                {conv.starred ? (
+                                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                                ) : (
+                                  <StarOff className="h-4 w-4 text-gray-400" />
+                                )}
+                              </button>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <span className={`px-2 py-0.5 rounded-full ${getModeColor(conv.mode)}`}>
+                                {conv.mode}
+                              </span>
+                              <span>{conv.messages} msgs</span>
+                              <span>•</span>
+                              <span>{formatRelativeTime(conv.updatedAt)}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                </div>
+              )}
+
+              {/* Main Chat Area */}
+              <div className="flex-1 flex flex-col bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
+                {/* Chat Header */}
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setShowSidebar(!showSidebar)}
+                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    >
+                      <History className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                    </button>
+                    <div>
+                      <h2 className="font-semibold text-gray-900 dark:text-white">
+                        {activeConversation?.title || 'New Conversation'}
+                      </h2>
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        {activeConversation && (
+                          <>
+                            <span className={`px-2 py-0.5 rounded-full ${getModeColor(activeConversation.mode)}`}>
+                              {activeConversation.mode}
+                            </span>
+                            <span className={`px-2 py-0.5 rounded-full ${getModelColor(activeConversation.model)}`}>
+                              {models.find(m => m.id === activeConversation.model)?.name}
+                            </span>
+                            <span>{activeConversation.messages} messages</span>
+                            <span>•</span>
+                            <span>{formatTokens(activeConversation.tokens)} tokens</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {activeConversation && (
+                      <>
+                        <button
+                          onClick={() => toggleStar(activeConversation.id)}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        >
+                          {activeConversation.starred ? (
+                            <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                          ) : (
+                            <StarOff className="h-5 w-5 text-gray-400" />
+                          )}
+                        </button>
+                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                          <Share className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        </button>
+                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                          <MoreVertical className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Messages */}
+                <ScrollArea className="flex-1 p-4">
+                  <div className="max-w-4xl mx-auto space-y-6">
+                    {messages.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-full py-20">
+                        <div className="p-6 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 rounded-3xl mb-6">
+                          <Bot className="h-16 w-16 text-violet-600 dark:text-violet-400" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                          How can I help you today?
+                        </h3>
+                        <p className="text-gray-500 dark:text-gray-400 text-center max-w-md mb-8">
+                          I'm your AI assistant powered by multiple models. Ask me anything or choose a suggestion below.
+                        </p>
+                        <div className="grid grid-cols-2 gap-3 max-w-lg">
+                          {[
+                            { icon: <Code className="h-5 w-5" />, label: 'Write code', prompt: 'Help me write a function that...' },
+                            { icon: <PenTool className="h-5 w-5" />, label: 'Create content', prompt: 'Write a blog post about...' },
+                            { icon: <BarChart3 className="h-5 w-5" />, label: 'Analyze data', prompt: 'Analyze this dataset and...' },
+                            { icon: <Lightbulb className="h-5 w-5" />, label: 'Brainstorm ideas', prompt: 'Help me brainstorm ideas for...' }
+                          ].map((item, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setInputMessage(item.prompt)}
+                              className="flex items-center gap-3 p-4 bg-white dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 hover:border-violet-500 hover:shadow-md transition-all text-left"
+                            >
+                              <div className="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-lg text-violet-600 dark:text-violet-400">
+                                {item.icon}
+                              </div>
+                              <span className="font-medium text-gray-900 dark:text-white">{item.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        {messages.map(message => (
+                          <div
+                            key={message.id}
+                            className={`flex gap-4 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
+                          >
+                            {/* Avatar */}
+                            <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${
+                              message.role === 'user'
+                                ? 'bg-violet-600 text-white'
+                                : 'bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30'
+                            }`}>
+                              {message.role === 'user' ? (
+                                <Users className="h-5 w-5" />
+                              ) : (
+                                <Bot className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                              )}
+                            </div>
+
+                            {/* Message Content */}
+                            <div className={`flex-1 max-w-[80%] ${message.role === 'user' ? 'text-right' : ''}`}>
+                              <div className={`inline-block p-4 rounded-2xl ${
+                                message.role === 'user'
+                                  ? 'bg-violet-600 text-white'
+                                  : 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white'
+                              }`}>
+                                <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
+                                  {message.content}
+                                </div>
+
+                                {/* Tool Calls */}
+                                {message.toolCalls && message.toolCalls.length > 0 && (
+                                  <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Tools used:</p>
+                                    <div className="flex flex-wrap gap-2">
+                                      {message.toolCalls.map(tool => (
+                                        <span
+                                          key={tool.id}
+                                          className="inline-flex items-center gap-1 px-2 py-1 bg-white/50 dark:bg-gray-600 rounded-lg text-xs"
+                                        >
+                                          <Terminal className="h-3 w-3" />
+                                          {tool.name}
+                                          <CheckCircle className="h-3 w-3 text-green-500" />
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Message Actions */}
+                              <div className={`flex items-center gap-2 mt-2 ${message.role === 'user' ? 'justify-end' : ''}`}>
+                                <span className="text-xs text-gray-400">
+                                  {formatDate(message.createdAt)}
+                                </span>
+                                {message.role === 'assistant' && (
+                                  <>
+                                    <button
+                                      onClick={() => handleCopy(message.id, message.content)}
+                                      className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                                    >
+                                      {copiedId === message.id ? (
+                                        <Check className="h-4 w-4 text-green-500" />
+                                      ) : (
+                                        <Copy className="h-4 w-4 text-gray-400" />
+                                      )}
+                                    </button>
+                                    <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                      <ThumbsUp className="h-4 w-4 text-gray-400" />
+                                    </button>
+                                    <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                      <ThumbsDown className="h-4 w-4 text-gray-400" />
+                                    </button>
+                                    <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                      <RefreshCw className="h-4 w-4 text-gray-400" />
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                        {/* Typing Indicator */}
+                        {isTyping && (
+                          <div className="flex gap-4">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 flex items-center justify-center">
+                              <Bot className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                            </div>
+                            <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-2xl">
+                              <div className="flex items-center gap-1">
+                                <div className="w-2 h-2 bg-violet-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                <div className="w-2 h-2 bg-violet-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                <div className="w-2 h-2 bg-violet-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        <div ref={messagesEndRef} />
+                      </>
+                    )}
+                  </div>
+                </ScrollArea>
+
+                {/* Input Area */}
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="max-w-4xl mx-auto">
+                    <div className="relative bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 focus-within:border-violet-500 focus-within:ring-2 focus-within:ring-violet-500/20 transition-all">
+                      {/* Attachments Bar */}
+                      <div className="flex items-center gap-2 p-3 border-b border-gray-200 dark:border-gray-700">
+                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                          <Paperclip className="h-5 w-5 text-gray-400" />
+                        </button>
+                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                          <ImageIcon className="h-5 w-5 text-gray-400" />
+                        </button>
+                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                          <Mic className="h-5 w-5 text-gray-400" />
+                        </button>
+                        <div className="flex-1" />
+                        <span className="text-xs text-gray-400">
+                          {selectedModel.startsWith('gpt') ? 'OpenAI' : 'Anthropic'} • {models.find(m => m.id === selectedModel)?.context} context
+                        </span>
+                      </div>
+
+                      {/* Text Area */}
+                      <textarea
+                        ref={inputRef}
+                        value={inputMessage}
+                        onChange={e => setInputMessage(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault()
+                            handleSendMessage()
+                          }
+                        }}
+                        placeholder="Type your message... (Shift+Enter for new line)"
+                        rows={3}
+                        className="w-full p-4 bg-transparent border-0 resize-none focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
+                      />
+
+                      {/* Send Button */}
+                      <div className="flex items-center justify-between p-3 border-t border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center gap-2">
+                          <button className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                            <Wand2 className="h-4 w-4" />
+                            Enhance
+                          </button>
+                          <button className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                            <Sparkles className="h-4 w-4" />
+                            Templates
+                          </button>
+                        </div>
+                        <button
+                          onClick={handleSendMessage}
+                          disabled={!inputMessage.trim() || isTyping}
+                          className="flex items-center gap-2 px-5 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {isTyping ? (
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                          ) : (
+                            <Send className="h-5 w-5" />
+                          )}
+                          Send
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Assistants Tab */}
+          <TabsContent value="assistants" className="mt-0">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">Custom Assistants</h2>
+                  <p className="text-gray-500 dark:text-gray-400">Create and manage specialized AI assistants</p>
+                </div>
+                <button
+                  onClick={() => setShowNewAssistant(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors"
+                >
+                  <Plus className="h-5 w-5" />
+                  Create Assistant
+                </button>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {assistants.map(assistant => (
+                  <div
+                    key={assistant.id}
+                    className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:border-violet-500 hover:shadow-lg transition-all cursor-pointer"
                   >
-                    {suggestion}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="text-4xl">{assistant.icon}</div>
+                      <span className={`px-2 py-1 rounded-full text-xs ${getModelColor(assistant.model)}`}>
+                        {models.find(m => m.id === assistant.model)?.name}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                      {assistant.name}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">
+                      {assistant.description}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Terminal className="h-3 w-3" />
+                        {assistant.tools.length} tools
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <FileText className="h-3 w-3" />
+                        {assistant.files.length} files
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MessageSquare className="h-3 w-3" />
+                        {assistant.usageCount}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Add New Card */}
+                <button
+                  onClick={() => setShowNewAssistant(true)}
+                  className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/10 transition-all min-h-[200px]"
+                >
+                  <Plus className="h-10 w-10 text-gray-400 mb-2" />
+                  <span className="font-medium text-gray-600 dark:text-gray-300">Create New</span>
+                </button>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Prompts Tab */}
+          <TabsContent value="prompts" className="mt-0">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">Prompt Library</h2>
+                  <p className="text-gray-500 dark:text-gray-400">Reusable prompts for common tasks</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search prompts..."
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-violet-500 text-sm"
+                    />
+                  </div>
+                  <button className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors">
+                    <Plus className="h-5 w-5" />
+                    New Prompt
                   </button>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredPrompts.map(prompt => (
+                  <div
+                    key={prompt.id}
+                    className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 hover:border-violet-500 hover:shadow-lg transition-all"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg text-xs text-gray-600 dark:text-gray-300">
+                        {prompt.category}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setPrompts(prev =>
+                            prev.map(p => p.id === prompt.id ? { ...p, starred: !p.starred } : p)
+                          )
+                        }}
+                      >
+                        {prompt.starred ? (
+                          <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                        ) : (
+                          <StarOff className="h-5 w-5 text-gray-300" />
+                        )}
+                      </button>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                      {prompt.name}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                      {prompt.description}
+                    </p>
+                    <div className="flex items-center gap-2 mb-4">
+                      {prompt.variables.map(v => (
+                        <span
+                          key={v}
+                          className="px-2 py-1 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded text-xs"
+                        >
+                          {`{{${v}}}`}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-400">
+                        Used {prompt.usageCount} times
+                      </span>
+                      <button
+                        onClick={() => handleUsePrompt(prompt)}
+                        className="px-3 py-1.5 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-lg text-sm font-medium hover:bg-violet-200 dark:hover:bg-violet-900/50 transition-colors"
+                      >
+                        Use Prompt
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
+          </TabsContent>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <MiniKPI label="Active" value={stats.activeConversations.toString()} trend="up" change="+5" />
-              <MiniKPI label="Starred" value={stats.starredConversations.toString()} trend="same" change="0" />
-              <MiniKPI label="Archived" value={stats.archivedConversations.toString()} trend="down" change="-2" />
-              <MiniKPI label="Avg Messages" value={stats.avgMessagesPerConversation.toFixed(0)} trend="up" change="+3" />
+          {/* Files Tab */}
+          <TabsContent value="files" className="mt-0">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">Knowledge Base</h2>
+                  <p className="text-gray-500 dark:text-gray-400">Upload files to enhance AI context</p>
+                </div>
+                <button className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors">
+                  <Upload className="h-5 w-5" />
+                  Upload Files
+                </button>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-gray-50 dark:bg-gray-900/50">
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">File</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Size</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Chunks</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Assistant</th>
+                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Uploaded</th>
+                      <th className="text-right px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {files.map(file => (
+                      <tr key={file.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                              {getFileIcon(file.type)}
+                            </div>
+                            <span className="font-medium text-gray-900 dark:text-white">{file.name}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs capitalize">
+                            {file.type}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                          {formatBytes(file.size)}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                          {file.chunks}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs ${
+                            file.status === 'ready'
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                              : file.status === 'processing'
+                              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                              : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
+                          }`}>
+                            {file.status === 'processing' && <Loader2 className="h-3 w-3 animate-spin" />}
+                            {file.status === 'ready' && <CheckCircle className="h-3 w-3" />}
+                            {file.status === 'error' && <AlertCircle className="h-3 w-3" />}
+                            {file.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                          {file.assistant || '-'}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                          {formatRelativeTime(file.uploadedAt)}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                              <Download className="h-4 w-4 text-gray-400" />
+                            </button>
+                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                              <Trash2 className="h-4 w-4 text-gray-400" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
+          </TabsContent>
 
-            {/* AI Capabilities */}
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-              <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
-                AI Capabilities
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
-                  <span className="text-xl">🧠</span>
-                  <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-white">Smart Analysis</p>
-                    <p className="text-xs text-slate-500">Data insights</p>
-                  </div>
+          {/* Usage Tab */}
+          <TabsContent value="usage" className="mt-0">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">Usage & Billing</h2>
+                  <p className="text-gray-500 dark:text-gray-400">Track your API usage and costs</p>
                 </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
-                  <span className="text-xl">⚡</span>
-                  <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-white">Automation</p>
-                    <p className="text-xs text-slate-500">Task handling</p>
-                  </div>
+                <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-violet-500 transition-colors">
+                  <Download className="h-5 w-5" />
+                  Export Report
+                </button>
+              </div>
+
+              {/* Quota Progress */}
+              <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Monthly Quota</h3>
+                  <span className="text-sm text-gray-500">
+                    {formatTokens(usageStats.quotaUsed)} / {formatTokens(usageStats.quotaLimit)} tokens
+                  </span>
                 </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
-                  <span className="text-xl">💬</span>
-                  <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-white">Conversation</p>
-                    <p className="text-xs text-slate-500">Natural chat</p>
-                  </div>
+                <div className="w-full h-4 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      quotaPercentage > 80 ? 'bg-red-500' : quotaPercentage > 50 ? 'bg-yellow-500' : 'bg-violet-600'
+                    }`}
+                    style={{ width: `${quotaPercentage}%` }}
+                  />
                 </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
-                  <span className="text-xl">📈</span>
-                  <div>
-                    <p className="text-sm font-medium text-slate-900 dark:text-white">Predictions</p>
-                    <p className="text-xs text-slate-500">Trends & forecasts</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  {quotaPercentage.toFixed(1)}% used • Resets on Jan 1, 2025
+                </p>
+              </div>
+
+              {/* Usage Stats Grid */}
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-lg">
+                      <Zap className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                    </div>
+                    <span className="text-sm text-gray-500">Input Tokens</span>
                   </div>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {formatTokens(usageStats.inputTokens)}
+                  </p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                      <Zap className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <span className="text-sm text-gray-500">Output Tokens</span>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {formatTokens(usageStats.outputTokens)}
+                  </p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                      <MessageSquare className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <span className="text-sm text-gray-500">Total Messages</span>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {usageStats.messages.toLocaleString()}
+                  </p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                      <BarChart3 className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <span className="text-sm text-gray-500">Total Cost</span>
+                  </div>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {formatCost(usageStats.totalCost)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Daily Usage Chart */}
+              <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-6">Daily Usage (Last 7 Days)</h3>
+                <div className="h-64 flex items-end justify-between gap-4">
+                  {dailyUsage.map((day, i) => {
+                    const maxTokens = Math.max(...dailyUsage.map(d => d.tokens))
+                    const height = (day.tokens / maxTokens) * 100
+                    return (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                        <div className="w-full relative" style={{ height: '200px' }}>
+                          <div
+                            className="absolute bottom-0 w-full bg-gradient-to-t from-violet-600 to-violet-400 rounded-t-lg transition-all hover:from-violet-500 hover:to-violet-300"
+                            style={{ height: `${height}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          {new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}
+                        </span>
+                        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                          {formatTokens(day.tokens)}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Model Usage Breakdown */}
+              <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Usage by Model</h3>
+                <div className="space-y-4">
+                  {[
+                    { model: 'GPT-4o', tokens: 980000, cost: 78.40, percentage: 40 },
+                    { model: 'Claude 3 Opus', tokens: 735000, cost: 58.80, percentage: 30 },
+                    { model: 'GPT-4 Turbo', tokens: 490000, cost: 39.20, percentage: 20 },
+                    { model: 'Claude 3 Sonnet', tokens: 245000, cost: 11.05, percentage: 10 }
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-4">
+                      <div className="w-32 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {item.model}
+                      </div>
+                      <div className="flex-1 h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-violet-600 rounded-full"
+                          style={{ width: `${item.percentage}%` }}
+                        />
+                      </div>
+                      <div className="w-24 text-right text-sm text-gray-500">
+                        {formatTokens(item.tokens)}
+                      </div>
+                      <div className="w-20 text-right text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {formatCost(item.cost)}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-
-            {/* Recent Activity */}
-            <ActivityFeed
-              activities={[
-                {
-                  action: 'Conversation started',
-                  subject: 'Project Analysis',
-                  time: '5 min ago',
-                  type: 'info'
-                },
-                {
-                  action: 'Report generated',
-                  subject: 'Weekly Summary',
-                  time: '1 hour ago',
-                  type: 'success'
-                },
-                {
-                  action: 'Task automated',
-                  subject: 'Email Responses',
-                  time: '3 hours ago',
-                  type: 'success'
-                }
-              ]}
-            />
-
-          </div>
-        </div>
-
+          </TabsContent>
+        </Tabs>
       </div>
+
+      {/* New Assistant Dialog */}
+      <Dialog open={showNewAssistant} onOpenChange={setShowNewAssistant}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bot className="h-5 w-5 text-violet-600" />
+              Create Custom Assistant
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="My Assistant"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-violet-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Model
+                </label>
+                <select className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-violet-500">
+                  {models.map(m => (
+                    <option key={m.id} value={m.id}>{m.name} ({m.provider})</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Description
+              </label>
+              <input
+                type="text"
+                placeholder="What does this assistant do?"
+                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-violet-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                System Prompt
+              </label>
+              <textarea
+                rows={4}
+                placeholder="You are a helpful assistant that..."
+                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 resize-none"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Temperature
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="2"
+                  step="0.1"
+                  defaultValue="0.7"
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>Precise</span>
+                  <span>Creative</span>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Tools
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {['code_interpreter', 'file_search', 'web_search'].map(tool => (
+                    <button
+                      key={tool}
+                      className="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/30 transition-colors"
+                    >
+                      {tool}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowNewAssistant(false)}
+                className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button className="px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors">
+                Create Assistant
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettings} onOpenChange={setShowSettings}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5 text-violet-600" />
+              AI Settings
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Default Model
+              </label>
+              <select className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-violet-500">
+                {models.map(m => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Default Temperature
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="2"
+                step="0.1"
+                defaultValue="0.7"
+                className="w-full"
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">Stream Responses</p>
+                <p className="text-sm text-gray-500">Show responses as they generate</p>
+              </div>
+              <button className="w-12 h-6 bg-violet-600 rounded-full relative">
+                <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full" />
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">Save History</p>
+                <p className="text-sm text-gray-500">Keep conversation history</p>
+              </div>
+              <button className="w-12 h-6 bg-violet-600 rounded-full relative">
+                <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full" />
+              </button>
+            </div>
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <h4 className="font-medium text-gray-900 dark:text-white mb-3">API Keys</h4>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-xl font-mono text-sm">
+                    sk-...********************************xyz
+                  </div>
+                  <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                    <Eye className="h-5 w-5 text-gray-400" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
