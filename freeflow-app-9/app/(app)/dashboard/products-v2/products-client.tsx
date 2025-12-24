@@ -1,24 +1,19 @@
-"use client"
+'use client'
 
-import { useState } from 'react'
-import {
-  BentoCard,
-  BentoQuickAction
-} from '@/components/ui/bento-grid-advanced'
-import {
-  StatGrid,
-  MiniKPI,
-  RankingList,
-  ComparisonCard
-} from '@/components/ui/results-display'
-import {
-  ModernButton,
-  GradientButton,
-  PillButton
-} from '@/components/ui/modern-buttons'
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Package,
   TrendingUp,
+  TrendingDown,
   Users,
   DollarSign,
   Star,
@@ -28,280 +23,1170 @@ import {
   Eye,
   ShoppingCart,
   Award,
-  Zap
+  Zap,
+  Search,
+  Filter,
+  Download,
+  Upload,
+  Edit,
+  Trash2,
+  Copy,
+  Archive,
+  RefreshCw,
+  Tag,
+  Percent,
+  Globe,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Layers,
+  Grid3X3,
+  List,
+  MoreHorizontal,
+  ExternalLink,
+  Link2,
+  Image,
+  FileText,
+  CreditCard,
+  Repeat,
+  Calendar,
+  Box,
+  Truck,
+  Scale,
+  Hash,
+  ToggleLeft,
+  ToggleRight,
+  ArrowUpRight,
+  ArrowDownRight,
+  Target,
+  PieChart,
+  Activity
 } from 'lucide-react'
 import { useProducts, useProductStats, type Product } from '@/lib/hooks/use-products'
-import { updateProductStatus } from '@/app/actions/products'
+
+// Stripe-level types
+type ProductStatus = 'active' | 'draft' | 'archived' | 'discontinued'
+type PricingType = 'one_time' | 'recurring' | 'metered' | 'tiered'
+type BillingInterval = 'day' | 'week' | 'month' | 'year'
+type TaxBehavior = 'inclusive' | 'exclusive' | 'unspecified'
+
+interface Price {
+  id: string
+  productId: string
+  nickname: string
+  unitAmount: number
+  currency: string
+  type: PricingType
+  billingInterval?: BillingInterval
+  intervalCount?: number
+  trialDays?: number
+  taxBehavior: TaxBehavior
+  active: boolean
+  metadata: Record<string, string>
+}
+
+interface StripeProduct {
+  id: string
+  name: string
+  description: string
+  images: string[]
+  status: ProductStatus
+  defaultPrice?: Price
+  prices: Price[]
+  category: string
+  metadata: Record<string, string>
+  features: string[]
+  taxCode?: string
+  shippable: boolean
+  unitLabel?: string
+  url?: string
+  createdAt: string
+  updatedAt: string
+  // Analytics
+  revenue: number
+  subscribers: number
+  mrr: number
+  churnRate: number
+  conversionRate: number
+  averageOrderValue: number
+}
+
+interface Coupon {
+  id: string
+  name: string
+  percentOff?: number
+  amountOff?: number
+  currency?: string
+  duration: 'once' | 'repeating' | 'forever'
+  durationMonths?: number
+  maxRedemptions?: number
+  timesRedeemed: number
+  valid: boolean
+  expiresAt?: string
+}
+
+interface TaxRate {
+  id: string
+  displayName: string
+  description: string
+  percentage: number
+  inclusive: boolean
+  country: string
+  state?: string
+  active: boolean
+}
+
+interface InventoryItem {
+  productId: string
+  productName: string
+  sku: string
+  quantity: number
+  reservedQuantity: number
+  reorderPoint: number
+  reorderQuantity: number
+  location: string
+  lastRestocked: string
+  status: 'in_stock' | 'low_stock' | 'out_of_stock' | 'discontinued'
+}
 
 interface ProductsClientProps {
   initialProducts: Product[]
 }
 
-export default function ProductsClient({ initialProducts }: ProductsClientProps) {
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'active' | 'draft' | 'archived'>('all')
-  const [searchQuery, setSearchQuery] = useState('')
+// Mock Stripe-level data
+const mockProducts: StripeProduct[] = [
+  {
+    id: 'prod_1',
+    name: 'Pro Plan',
+    description: 'Advanced features for growing teams',
+    images: ['/products/pro-plan.png'],
+    status: 'active',
+    prices: [
+      { id: 'price_1', productId: 'prod_1', nickname: 'Monthly', unitAmount: 4900, currency: 'usd', type: 'recurring', billingInterval: 'month', intervalCount: 1, trialDays: 14, taxBehavior: 'exclusive', active: true, metadata: {} },
+      { id: 'price_2', productId: 'prod_1', nickname: 'Yearly', unitAmount: 47900, currency: 'usd', type: 'recurring', billingInterval: 'year', intervalCount: 1, trialDays: 14, taxBehavior: 'exclusive', active: true, metadata: {} }
+    ],
+    category: 'subscription',
+    metadata: { tier: 'pro', popular: 'true' },
+    features: ['Unlimited projects', 'Team collaboration', 'Priority support', 'Advanced analytics', 'Custom integrations'],
+    taxCode: 'txcd_10000000',
+    shippable: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-01-15',
+    revenue: 245000,
+    subscribers: 512,
+    mrr: 24500,
+    churnRate: 2.3,
+    conversionRate: 8.5,
+    averageOrderValue: 478
+  },
+  {
+    id: 'prod_2',
+    name: 'Enterprise Plan',
+    description: 'Custom solutions for large organizations',
+    images: ['/products/enterprise.png'],
+    status: 'active',
+    prices: [
+      { id: 'price_3', productId: 'prod_2', nickname: 'Monthly', unitAmount: 19900, currency: 'usd', type: 'recurring', billingInterval: 'month', intervalCount: 1, taxBehavior: 'exclusive', active: true, metadata: {} },
+      { id: 'price_4', productId: 'prod_2', nickname: 'Yearly', unitAmount: 199000, currency: 'usd', type: 'recurring', billingInterval: 'year', intervalCount: 1, taxBehavior: 'exclusive', active: true, metadata: {} }
+    ],
+    category: 'subscription',
+    metadata: { tier: 'enterprise' },
+    features: ['Everything in Pro', 'SSO/SAML', 'Dedicated support', 'SLA guarantee', 'Custom contracts', 'Audit logs'],
+    taxCode: 'txcd_10000000',
+    shippable: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-01-15',
+    revenue: 598000,
+    subscribers: 45,
+    mrr: 89550,
+    churnRate: 0.8,
+    conversionRate: 15.2,
+    averageOrderValue: 13289
+  },
+  {
+    id: 'prod_3',
+    name: 'Starter Plan',
+    description: 'Perfect for individuals and small teams',
+    images: ['/products/starter.png'],
+    status: 'active',
+    prices: [
+      { id: 'price_5', productId: 'prod_3', nickname: 'Monthly', unitAmount: 1900, currency: 'usd', type: 'recurring', billingInterval: 'month', intervalCount: 1, trialDays: 7, taxBehavior: 'exclusive', active: true, metadata: {} }
+    ],
+    category: 'subscription',
+    metadata: { tier: 'starter' },
+    features: ['5 projects', 'Basic analytics', 'Email support'],
+    taxCode: 'txcd_10000000',
+    shippable: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-01-15',
+    revenue: 45200,
+    subscribers: 1250,
+    mrr: 23750,
+    churnRate: 5.2,
+    conversionRate: 12.3,
+    averageOrderValue: 36
+  },
+  {
+    id: 'prod_4',
+    name: 'API Credits Pack',
+    description: '10,000 API credits for metered usage',
+    images: ['/products/api-credits.png'],
+    status: 'active',
+    prices: [
+      { id: 'price_6', productId: 'prod_4', nickname: 'Credits Pack', unitAmount: 9900, currency: 'usd', type: 'one_time', taxBehavior: 'exclusive', active: true, metadata: {} }
+    ],
+    category: 'credits',
+    metadata: { credits: '10000' },
+    features: ['10,000 API calls', 'Never expires', 'Priority processing'],
+    taxCode: 'txcd_10000000',
+    shippable: false,
+    createdAt: '2024-02-01',
+    updatedAt: '2024-02-15',
+    revenue: 89100,
+    subscribers: 0,
+    mrr: 0,
+    churnRate: 0,
+    conversionRate: 25.4,
+    averageOrderValue: 99
+  },
+  {
+    id: 'prod_5',
+    name: 'Premium Support',
+    description: '24/7 dedicated support add-on',
+    images: ['/products/support.png'],
+    status: 'active',
+    prices: [
+      { id: 'price_7', productId: 'prod_5', nickname: 'Monthly', unitAmount: 29900, currency: 'usd', type: 'recurring', billingInterval: 'month', intervalCount: 1, taxBehavior: 'exclusive', active: true, metadata: {} }
+    ],
+    category: 'add-on',
+    metadata: { type: 'support' },
+    features: ['24/7 phone support', 'Dedicated account manager', '1-hour response SLA', 'Onboarding assistance'],
+    taxCode: 'txcd_10000000',
+    shippable: false,
+    createdAt: '2024-01-15',
+    updatedAt: '2024-02-01',
+    revenue: 35880,
+    subscribers: 12,
+    mrr: 3588,
+    churnRate: 1.5,
+    conversionRate: 4.8,
+    averageOrderValue: 299
+  }
+]
 
-  // Use hooks for real-time data
+const mockCoupons: Coupon[] = [
+  { id: 'coupon_1', name: 'LAUNCH20', percentOff: 20, duration: 'once', maxRedemptions: 1000, timesRedeemed: 342, valid: true, expiresAt: '2024-12-31' },
+  { id: 'coupon_2', name: 'ENTERPRISE50', percentOff: 50, duration: 'repeating', durationMonths: 3, maxRedemptions: 50, timesRedeemed: 12, valid: true },
+  { id: 'coupon_3', name: 'FRIEND10', amountOff: 1000, currency: 'usd', duration: 'forever', timesRedeemed: 856, valid: true },
+  { id: 'coupon_4', name: 'SUMMER25', percentOff: 25, duration: 'once', maxRedemptions: 500, timesRedeemed: 500, valid: false }
+]
+
+const mockTaxRates: TaxRate[] = [
+  { id: 'tax_1', displayName: 'US Sales Tax', description: 'Standard US sales tax', percentage: 8.25, inclusive: false, country: 'US', active: true },
+  { id: 'tax_2', displayName: 'EU VAT', description: 'European Union VAT', percentage: 20, inclusive: true, country: 'EU', active: true },
+  { id: 'tax_3', displayName: 'UK VAT', description: 'United Kingdom VAT', percentage: 20, inclusive: true, country: 'GB', active: true },
+  { id: 'tax_4', displayName: 'CA GST', description: 'Canadian GST', percentage: 5, inclusive: false, country: 'CA', active: true }
+]
+
+const mockInventory: InventoryItem[] = [
+  { productId: 'prod_4', productName: 'API Credits Pack', sku: 'SKU-API-10K', quantity: 9999, reservedQuantity: 0, reorderPoint: 0, reorderQuantity: 0, location: 'Digital', lastRestocked: '2024-01-01', status: 'in_stock' }
+]
+
+export default function ProductsClient({ initialProducts }: ProductsClientProps) {
+  const [activeTab, setActiveTab] = useState('catalog')
+  const [selectedCategory, setSelectedCategory] = useState<ProductStatus | 'all'>('all')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [selectedProduct, setSelectedProduct] = useState<StripeProduct | null>(null)
+  const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null)
+  const [showCreateProduct, setShowCreateProduct] = useState(false)
+  const [showCreateCoupon, setShowCreateCoupon] = useState(false)
+  const [showCreatePrice, setShowCreatePrice] = useState(false)
+
   const { data: products } = useProducts({
     status: selectedCategory === 'all' ? undefined : selectedCategory,
     searchQuery: searchQuery || undefined
   })
   const { stats } = useProductStats()
 
-  const displayProducts = products || initialProducts
+  // Calculate stats from mock data
+  const totalRevenue = mockProducts.reduce((sum, p) => sum + p.revenue, 0)
+  const totalMRR = mockProducts.reduce((sum, p) => sum + p.mrr, 0)
+  const totalSubscribers = mockProducts.reduce((sum, p) => sum + p.subscribers, 0)
+  const activeProducts = mockProducts.filter(p => p.status === 'active').length
+  const avgConversion = mockProducts.reduce((sum, p) => sum + p.conversionRate, 0) / mockProducts.length
+  const avgChurn = mockProducts.filter(p => p.mrr > 0).reduce((sum, p) => sum + p.churnRate, 0) / mockProducts.filter(p => p.mrr > 0).length
 
-  const filteredProducts = selectedCategory === 'all'
-    ? displayProducts
-    : displayProducts.filter(product => product.status === selectedCategory)
+  const filteredProducts = useMemo(() => {
+    return mockProducts.filter(product => {
+      const matchesStatus = selectedCategory === 'all' || product.status === selectedCategory
+      const matchesSearch = !searchQuery ||
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase())
+      return matchesStatus && matchesSearch
+    })
+  }, [selectedCategory, searchQuery])
 
-  const statItems = [
-    { label: 'Total Products', value: stats?.totalProducts?.toString() || displayProducts.length.toString(), change: 28.4, icon: <Package className="w-5 h-5" /> },
-    { label: 'Total Revenue', value: stats?.totalRevenue ? `$${(stats.totalRevenue / 1000000).toFixed(1)}M` : '$0', change: 42.1, icon: <DollarSign className="w-5 h-5" /> },
-    { label: 'Active Users', value: stats?.totalUsers ? `${(stats.totalUsers / 1000).toFixed(0)}K` : '0', change: 35.3, icon: <Users className="w-5 h-5" /> },
-    { label: 'Avg Rating', value: stats?.averageRating?.toFixed(1) || '0', change: 12.5, icon: <Star className="w-5 h-5" /> }
-  ]
+  const formatCurrency = (amount: number, currency = 'usd') => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency.toUpperCase(),
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount / 100)
+  }
 
-  const topProducts = displayProducts
-    .sort((a, b) => b.total_revenue - a.total_revenue)
-    .slice(0, 5)
-    .map((product, index) => ({
-      rank: index + 1,
-      name: product.product_name,
-      avatar: product.category === 'subscription' ? '📦' : product.category === 'bundle' ? '🎁' : '💎',
-      value: `$${(product.total_revenue / 1000).toFixed(0)}K`,
-      change: product.growth_rate
-    }))
+  const formatPrice = (amount: number, currency = 'usd') => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency.toUpperCase(),
+      minimumFractionDigits: 2
+    }).format(amount / 100)
+  }
 
-  const maxRevenue = Math.max(...displayProducts.map(p => p.total_revenue), 1)
-
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: ProductStatus) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-700'
-      case 'draft': return 'bg-yellow-100 text-yellow-700'
-      case 'archived': return 'bg-gray-100 text-gray-700'
-      default: return 'bg-gray-100 text-gray-700'
+      case 'active': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+      case 'draft': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+      case 'archived': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+      case 'discontinued': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
     }
   }
 
-  const getCategoryBadgeColor = (category: string) => {
+  const getPricingTypeColor = (type: PricingType) => {
+    switch (type) {
+      case 'recurring': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+      case 'one_time': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+      case 'metered': return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+      case 'tiered': return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+    }
+  }
+
+  const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'subscription': return 'bg-blue-100 text-blue-700'
-      case 'one_time': return 'bg-green-100 text-green-700'
-      case 'add_on': return 'bg-purple-100 text-purple-700'
-      case 'bundle': return 'bg-orange-100 text-orange-700'
-      default: return 'bg-gray-100 text-gray-700'
+      case 'subscription': return <Repeat className="w-4 h-4" />
+      case 'credits': return <Zap className="w-4 h-4" />
+      case 'add-on': return <Plus className="w-4 h-4" />
+      default: return <Package className="w-4 h-4" />
     }
-  }
-
-  const getGradientColor = (index: number) => {
-    const colors = [
-      'from-blue-500 to-cyan-500',
-      'from-purple-500 to-pink-500',
-      'from-green-500 to-emerald-500',
-      'from-orange-500 to-red-500',
-      'from-gray-500 to-slate-500'
-    ]
-    return colors[index % colors.length]
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-              <Package className="w-10 h-10 text-violet-600" />
-              Product Management
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl">
+                <Package className="w-8 h-8 text-white" />
+              </div>
+              Product Catalog
             </h1>
-            <p className="text-muted-foreground">Manage catalog, pricing, and product performance</p>
+            <p className="text-gray-600 dark:text-gray-400">Stripe-Level Product & Pricing Management</p>
           </div>
-          <GradientButton from="violet" to="purple" onClick={() => console.log('New product')}>
-            <Plus className="w-5 h-5 mr-2" />
-            New Product
-          </GradientButton>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" className="gap-2">
+              <Download className="w-4 h-4" />
+              Export
+            </Button>
+            <Button className="bg-violet-600 hover:bg-violet-700 gap-2" onClick={() => setShowCreateProduct(true)}>
+              <Plus className="w-4 h-4" />
+              Add Product
+            </Button>
+          </div>
         </div>
 
-        <StatGrid columns={4} stats={statItems} />
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <BentoQuickAction icon={<Package />} title="Catalog" description="All products" onClick={() => console.log('Catalog')} />
-          <BentoQuickAction icon={<BarChart3 />} title="Analytics" description="Performance" onClick={() => console.log('Analytics')} />
-          <BentoQuickAction icon={<DollarSign />} title="Pricing" description="Strategies" onClick={() => console.log('Pricing')} />
-          <BentoQuickAction icon={<Settings />} title="Settings" description="Configure" onClick={() => console.log('Settings')} />
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Package className="w-4 h-4 text-violet-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Products</span>
+              </div>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{activeProducts}</p>
+              <p className="text-xs text-green-600">+3 this month</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="w-4 h-4 text-green-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Total Revenue</span>
+              </div>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(totalRevenue * 100)}</p>
+              <p className="text-xs text-green-600">+18.3% growth</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Repeat className="w-4 h-4 text-blue-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">MRR</span>
+              </div>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(totalMRR * 100)}</p>
+              <p className="text-xs text-green-600">+12.5% growth</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="w-4 h-4 text-purple-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Subscribers</span>
+              </div>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalSubscribers.toLocaleString()}</p>
+              <p className="text-xs text-green-600">+156 this week</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Target className="w-4 h-4 text-orange-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Conversion</span>
+              </div>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{avgConversion.toFixed(1)}%</p>
+              <p className="text-xs text-green-600">+2.1% improvement</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingDown className="w-4 h-4 text-red-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Churn Rate</span>
+              </div>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">{avgChurn.toFixed(1)}%</p>
+              <p className="text-xs text-green-600">-0.5% decrease</p>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="flex items-center gap-3">
-          <PillButton variant={selectedCategory === 'all' ? 'primary' : 'ghost'} onClick={() => setSelectedCategory('all')}>
-            All Products
-          </PillButton>
-          <PillButton variant={selectedCategory === 'active' ? 'primary' : 'ghost'} onClick={() => setSelectedCategory('active')}>
-            <Zap className="w-4 h-4 mr-2" />
-            Active
-          </PillButton>
-          <PillButton variant={selectedCategory === 'draft' ? 'primary' : 'ghost'} onClick={() => setSelectedCategory('draft')}>
-            Draft
-          </PillButton>
-          <PillButton variant={selectedCategory === 'archived' ? 'primary' : 'ghost'} onClick={() => setSelectedCategory('archived')}>
-            Archived
-          </PillButton>
-        </div>
+        {/* Main Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="bg-white dark:bg-gray-800 border">
+            <TabsTrigger value="catalog" className="gap-2">
+              <Package className="w-4 h-4" />
+              Catalog
+            </TabsTrigger>
+            <TabsTrigger value="pricing" className="gap-2">
+              <DollarSign className="w-4 h-4" />
+              Pricing
+            </TabsTrigger>
+            <TabsTrigger value="coupons" className="gap-2">
+              <Tag className="w-4 h-4" />
+              Coupons
+            </TabsTrigger>
+            <TabsTrigger value="taxes" className="gap-2">
+              <Percent className="w-4 h-4" />
+              Tax Rates
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Analytics
+            </TabsTrigger>
+          </TabsList>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <BentoCard className="p-6 mb-6">
-              <h3 className="text-xl font-semibold mb-4">Product Performance</h3>
-              <div className="space-y-4">
-                {filteredProducts.map((product, index) => {
-                  const revenuePercent = (product.total_revenue / maxRevenue) * 100
+          {/* Catalog Tab */}
+          <TabsContent value="catalog" className="mt-6">
+            <div className="space-y-4">
+              {/* Filters */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="relative flex-1 min-w-[300px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search products..."
+                      className="pl-10"
+                    />
+                  </div>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value as ProductStatus | 'all')}
+                    className="px-4 py-2 border rounded-md bg-white dark:bg-gray-800"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="draft">Draft</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant={viewMode === 'grid' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setViewMode('grid')}
+                  >
+                    <Grid3X3 className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setViewMode('list')}
+                  >
+                    <List className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
 
-                  return (
-                    <div key={product.id} className="p-4 rounded-xl border border-border bg-background hover:bg-muted/50 transition-colors">
-                      <div className="space-y-3">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${getGradientColor(index)} flex items-center justify-center text-white`}>
-                                <Package className="w-6 h-6" />
+              {/* Products Grid/List */}
+              {viewMode === 'grid' ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredProducts.map((product) => (
+                    <Card
+                      key={product.id}
+                      className="hover:shadow-lg transition-shadow cursor-pointer"
+                      onClick={() => setSelectedProduct(product)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg flex items-center justify-center text-white">
+                              {getCategoryIcon(product.category)}
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-gray-900 dark:text-white">{product.name}</h3>
+                              <Badge className={getStatusColor(product.status)}>{product.status}</Badge>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">
+                          {product.description}
+                        </p>
+                        <div className="space-y-2 mb-4">
+                          {product.prices.slice(0, 2).map((price) => (
+                            <div key={price.id} className="flex items-center justify-between text-sm">
+                              <span className="text-gray-500 dark:text-gray-400">{price.nickname}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold">{formatPrice(price.unitAmount, price.currency)}</span>
+                                {price.billingInterval && (
+                                  <span className="text-xs text-gray-400">/{price.billingInterval}</span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="grid grid-cols-3 gap-2 text-center text-xs border-t pt-3">
+                          <div>
+                            <p className="text-gray-500 dark:text-gray-400">Revenue</p>
+                            <p className="font-semibold">{formatCurrency(product.revenue * 100)}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500 dark:text-gray-400">Subscribers</p>
+                            <p className="font-semibold">{product.subscribers.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500 dark:text-gray-400">Conversion</p>
+                            <p className="font-semibold">{product.conversionRate}%</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardContent className="p-0">
+                    <div className="divide-y">
+                      {filteredProducts.map((product) => (
+                        <div
+                          key={product.id}
+                          className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors flex items-center justify-between"
+                          onClick={() => setSelectedProduct(product)}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg flex items-center justify-center text-white">
+                              {getCategoryIcon(product.category)}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-semibold text-gray-900 dark:text-white">{product.name}</h3>
+                                <Badge className={getStatusColor(product.status)}>{product.status}</Badge>
+                              </div>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">{product.description}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-8">
+                            <div className="text-right">
+                              <p className="font-semibold">{formatCurrency(product.revenue * 100)}</p>
+                              <p className="text-xs text-gray-500">Revenue</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold">{product.subscribers.toLocaleString()}</p>
+                              <p className="text-xs text-gray-500">Subscribers</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold">{formatCurrency(product.mrr * 100)}</p>
+                              <p className="text-xs text-gray-500">MRR</p>
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Pricing Tab */}
+          <TabsContent value="pricing" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Price List</h3>
+                  <Button className="bg-violet-600 hover:bg-violet-700 gap-2" onClick={() => setShowCreatePrice(true)}>
+                    <Plus className="w-4 h-4" />
+                    Add Price
+                  </Button>
+                </div>
+                <Card>
+                  <CardContent className="p-0">
+                    <div className="divide-y">
+                      {mockProducts.flatMap(product =>
+                        product.prices.map(price => ({ ...price, productName: product.name }))
+                      ).map((price) => (
+                        <div key={price.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                                {price.type === 'recurring' ? <Repeat className="w-5 h-5 text-blue-500" /> : <CreditCard className="w-5 h-5 text-green-500" />}
                               </div>
                               <div>
-                                <h4 className="font-semibold">{product.product_name}</h4>
                                 <div className="flex items-center gap-2">
-                                  <span className={`text-xs px-2 py-1 rounded-md ${getCategoryBadgeColor(product.category)}`}>
-                                    {product.category.replace('_', ' ')}
-                                  </span>
-                                  <span className={`text-xs px-2 py-1 rounded-md ${getStatusColor(product.status)}`}>
-                                    {product.status}
-                                  </span>
+                                  <h4 className="font-semibold">{price.productName} - {price.nickname}</h4>
+                                  <Badge className={getPricingTypeColor(price.type)}>{price.type}</Badge>
+                                  {price.active ? (
+                                    <Badge className="bg-green-100 text-green-700">Active</Badge>
+                                  ) : (
+                                    <Badge className="bg-gray-100 text-gray-700">Inactive</Badge>
+                                  )}
                                 </div>
+                                <p className="text-sm text-gray-500">
+                                  {price.id} • {price.taxBehavior === 'inclusive' ? 'Tax inclusive' : 'Tax exclusive'}
+                                </p>
                               </div>
                             </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right">
+                                <p className="text-xl font-bold">{formatPrice(price.unitAmount, price.currency)}</p>
+                                {price.billingInterval && (
+                                  <p className="text-sm text-gray-500">per {price.billingInterval}</p>
+                                )}
+                              </div>
+                              <Button variant="ghost" size="sm">
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-violet-600">${product.price}</p>
-                            <div className="flex items-center gap-1 text-xs">
-                              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                              <span className="font-semibold">{product.average_rating}</span>
-                              <span className="text-muted-foreground">({product.total_reviews})</span>
+                          {price.trialDays && (
+                            <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
+                              <Clock className="w-4 h-4" />
+                              {price.trialDays}-day free trial
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Pricing Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">Total Prices</span>
+                        <span className="font-semibold">{mockProducts.flatMap(p => p.prices).length}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">Recurring</span>
+                        <span className="font-semibold">{mockProducts.flatMap(p => p.prices).filter(p => p.type === 'recurring').length}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">One-time</span>
+                        <span className="font-semibold">{mockProducts.flatMap(p => p.prices).filter(p => p.type === 'one_time').length}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">Active</span>
+                        <span className="font-semibold text-green-600">{mockProducts.flatMap(p => p.prices).filter(p => p.active).length}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Currencies</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {['USD', 'EUR', 'GBP', 'CAD'].map((currency) => (
+                        <div key={currency} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <span className="font-medium">{currency}</span>
+                          <Badge variant="outline">{currency === 'USD' ? 'Primary' : 'Secondary'}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Coupons Tab */}
+          <TabsContent value="coupons" className="mt-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Coupons & Discounts</h3>
+                <Button className="bg-violet-600 hover:bg-violet-700 gap-2" onClick={() => setShowCreateCoupon(true)}>
+                  <Plus className="w-4 h-4" />
+                  Create Coupon
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {mockCoupons.map((coupon) => (
+                  <Card key={coupon.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedCoupon(coupon)}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-lg">
+                          <Tag className="w-5 h-5 text-violet-600" />
+                        </div>
+                        {coupon.valid ? (
+                          <Badge className="bg-green-100 text-green-700">Active</Badge>
+                        ) : (
+                          <Badge className="bg-gray-100 text-gray-700">Expired</Badge>
+                        )}
+                      </div>
+                      <h4 className="font-bold text-lg mb-1">{coupon.name}</h4>
+                      <div className="text-2xl font-bold text-violet-600 mb-2">
+                        {coupon.percentOff ? `${coupon.percentOff}% OFF` : formatPrice(coupon.amountOff || 0, coupon.currency)}
+                      </div>
+                      <div className="space-y-1 text-sm text-gray-500">
+                        <div className="flex items-center justify-between">
+                          <span>Duration</span>
+                          <span className="font-medium capitalize">{coupon.duration}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Redeemed</span>
+                          <span className="font-medium">{coupon.timesRedeemed}{coupon.maxRedemptions ? `/${coupon.maxRedemptions}` : ''}</span>
+                        </div>
+                        {coupon.expiresAt && (
+                          <div className="flex items-center justify-between">
+                            <span>Expires</span>
+                            <span className="font-medium">{new Date(coupon.expiresAt).toLocaleDateString()}</span>
+                          </div>
+                        )}
+                      </div>
+                      {coupon.maxRedemptions && (
+                        <Progress
+                          value={(coupon.timesRedeemed / coupon.maxRedemptions) * 100}
+                          className="mt-3 h-1.5"
+                        />
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Tax Rates Tab */}
+          <TabsContent value="taxes" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">Tax Rates</h3>
+                  <Button className="bg-violet-600 hover:bg-violet-700 gap-2">
+                    <Plus className="w-4 h-4" />
+                    Add Tax Rate
+                  </Button>
+                </div>
+                <Card>
+                  <CardContent className="p-0">
+                    <div className="divide-y">
+                      {mockTaxRates.map((tax) => (
+                        <div key={tax.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                                <Globe className="w-5 h-5 text-gray-500" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-semibold">{tax.displayName}</h4>
+                                  {tax.active ? (
+                                    <Badge className="bg-green-100 text-green-700">Active</Badge>
+                                  ) : (
+                                    <Badge className="bg-gray-100 text-gray-700">Inactive</Badge>
+                                  )}
+                                </div>
+                                <p className="text-sm text-gray-500">{tax.description}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right">
+                                <p className="text-xl font-bold">{tax.percentage}%</p>
+                                <p className="text-sm text-gray-500">{tax.inclusive ? 'Inclusive' : 'Exclusive'}</p>
+                              </div>
+                              <Badge variant="outline">{tax.country}</Badge>
+                              <Button variant="ghost" size="sm">
+                                <Edit className="w-4 h-4" />
+                              </Button>
                             </div>
                           </div>
                         </div>
-
-                        <div className="grid grid-cols-3 gap-3 text-xs">
-                          <div>
-                            <p className="text-muted-foreground">Active Users</p>
-                            <p className="font-semibold">{product.active_users.toLocaleString()}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Revenue</p>
-                            <p className="font-semibold">${(product.total_revenue / 1000).toFixed(0)}K</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground">Growth</p>
-                            <p className={`font-semibold ${product.growth_rate > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {product.growth_rate > 0 ? '+' : ''}{product.growth_rate}%
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-muted-foreground">Revenue Share</span>
-                            <span className="font-semibold">{revenuePercent.toFixed(0)}%</span>
-                          </div>
-                          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                            <div
-                              className={`h-full bg-gradient-to-r ${getGradientColor(index)}`}
-                              style={{ width: `${revenuePercent}%` }}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 pt-2 border-t">
-                          <ModernButton variant="outline" size="sm" onClick={() => console.log('View', product.id)}>
-                            <Eye className="w-3 h-3 mr-1" />
-                            View
-                          </ModernButton>
-                          <ModernButton variant="outline" size="sm" onClick={() => console.log('Edit', product.id)}>
-                            Edit
-                          </ModernButton>
-                          <ModernButton variant="outline" size="sm" onClick={() => console.log('Analytics', product.id)}>
-                            <BarChart3 className="w-3 h-3 mr-1" />
-                            Analytics
-                          </ModernButton>
-                        </div>
-                      </div>
+                      ))}
                     </div>
-                  )
-                })}
+                  </CardContent>
+                </Card>
               </div>
-            </BentoCard>
 
-            <BentoCard className="p-6">
-              <h3 className="text-xl font-semibold mb-4">Product Categories</h3>
               <div className="space-y-4">
-                {stats?.byCategory && Object.entries(stats.byCategory).map(([category, count]) => (
-                  <div key={category} className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-violet-500 to-purple-500 flex items-center justify-center text-white">
-                          <Package className="w-5 h-5" />
-                        </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Tax Configuration</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div>
-                          <p className="font-semibold capitalize">{category.replace('_', ' ')}</p>
-                          <p className="text-xs text-muted-foreground">{count} products</p>
+                          <p className="font-medium">Auto Tax Calculation</p>
+                          <p className="text-xs text-gray-500">Stripe Tax enabled</p>
                         </div>
+                        <ToggleRight className="w-6 h-6 text-green-500" />
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Tax ID Collection</p>
+                          <p className="text-xs text-gray-500">Collect VAT/GST IDs</p>
+                        </div>
+                        <ToggleRight className="w-6 h-6 text-green-500" />
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div>
+                          <p className="font-medium">Tax Inclusive Pricing</p>
+                          <p className="text-xs text-gray-500">Include tax in displayed prices</p>
+                        </div>
+                        <ToggleLeft className="w-6 h-6 text-gray-400" />
                       </div>
                     </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-violet-500 to-purple-500 transition-all duration-300"
-                        style={{ width: `${(count / (stats.totalProducts || 1)) * 100}%` }}
-                      />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Revenue by Product</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {mockProducts.sort((a, b) => b.revenue - a.revenue).map((product, idx) => {
+                        const maxRevenue = Math.max(...mockProducts.map(p => p.revenue))
+                        const percent = (product.revenue / maxRevenue) * 100
+                        return (
+                          <div key={product.id} className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <span className="text-sm text-gray-500 w-6">{idx + 1}.</span>
+                                <span className="font-medium">{product.name}</span>
+                              </div>
+                              <div className="text-right">
+                                <span className="font-bold">{formatCurrency(product.revenue * 100)}</span>
+                                <span className="text-xs text-gray-500 ml-2">({((product.revenue / totalRevenue) * 100).toFixed(1)}%)</span>
+                              </div>
+                            </div>
+                            <Progress value={percent} className="h-2" />
+                          </div>
+                        )
+                      })}
                     </div>
+                  </CardContent>
+                </Card>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">MRR Breakdown</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {mockProducts.filter(p => p.mrr > 0).map((product) => (
+                          <div key={product.id} className="flex items-center justify-between">
+                            <span className="text-sm">{product.name}</span>
+                            <span className="font-semibold">{formatCurrency(product.mrr * 100)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">Churn by Product</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {mockProducts.filter(p => p.churnRate > 0).map((product) => (
+                          <div key={product.id} className="flex items-center justify-between">
+                            <span className="text-sm">{product.name}</span>
+                            <span className={`font-semibold ${product.churnRate > 3 ? 'text-red-500' : 'text-green-500'}`}>
+                              {product.churnRate}%
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Key Metrics</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm text-gray-500">ARPU</span>
+                          <ArrowUpRight className="w-4 h-4 text-green-500" />
+                        </div>
+                        <p className="text-2xl font-bold">{formatPrice((totalRevenue / totalSubscribers) * 100)}</p>
+                      </div>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm text-gray-500">LTV</span>
+                          <ArrowUpRight className="w-4 h-4 text-green-500" />
+                        </div>
+                        <p className="text-2xl font-bold">{formatCurrency(((totalRevenue / totalSubscribers) / (avgChurn / 100)) * 100)}</p>
+                      </div>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm text-gray-500">CAC Payback</span>
+                          <span className="text-sm text-green-500">3.2 months</span>
+                        </div>
+                        <Progress value={75} className="h-2" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Trial Conversion</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center mb-4">
+                      <p className="text-4xl font-bold text-violet-600">67%</p>
+                      <p className="text-sm text-gray-500">Trial to Paid</p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Active Trials</span>
+                        <span className="font-semibold">234</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Converted This Month</span>
+                        <span className="font-semibold">156</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Churned</span>
+                        <span className="font-semibold text-red-500">78</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Product Detail Dialog */}
+        <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg flex items-center justify-center text-white">
+                  {selectedProduct && getCategoryIcon(selectedProduct.category)}
+                </div>
+                {selectedProduct?.name}
+              </DialogTitle>
+              <DialogDescription>
+                Product ID: {selectedProduct?.id}
+              </DialogDescription>
+            </DialogHeader>
+            {selectedProduct && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <Badge className={getStatusColor(selectedProduct.status)}>{selectedProduct.status}</Badge>
+                  <Badge variant="outline">{selectedProduct.category}</Badge>
+                  {selectedProduct.metadata.popular === 'true' && (
+                    <Badge className="bg-orange-100 text-orange-700">Popular</Badge>
+                  )}
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">Description</h4>
+                  <p>{selectedProduct.description}</p>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">Features</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {selectedProduct.features.map((feature, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-sm">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        {feature}
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">Pricing</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {selectedProduct.prices.map((price) => (
+                      <Card key={price.id}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">{price.nickname}</span>
+                            <Badge className={getPricingTypeColor(price.type)}>{price.type}</Badge>
+                          </div>
+                          <p className="text-2xl font-bold">
+                            {formatPrice(price.unitAmount, price.currency)}
+                            {price.billingInterval && <span className="text-sm font-normal text-gray-500">/{price.billingInterval}</span>}
+                          </p>
+                          {price.trialDays && (
+                            <p className="text-sm text-gray-500 mt-1">{price.trialDays}-day free trial</p>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">{formatCurrency(selectedProduct.revenue * 100)}</p>
+                    <p className="text-xs text-gray-500">Total Revenue</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">{selectedProduct.subscribers.toLocaleString()}</p>
+                    <p className="text-xs text-gray-500">Subscribers</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">{formatCurrency(selectedProduct.mrr * 100)}</p>
+                    <p className="text-xs text-gray-500">MRR</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">{selectedProduct.conversionRate}%</p>
+                    <p className="text-xs text-gray-500">Conversion</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-4 border-t">
+                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700">
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Product
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <Copy className="w-4 h-4 mr-2" />
+                    Duplicate
+                  </Button>
+                  <Button variant="outline">
+                    <Archive className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-            </BentoCard>
-          </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
-          <div className="space-y-6">
-            <RankingList title="Top Products" items={topProducts} />
+        {/* Coupon Detail Dialog */}
+        <Dialog open={!!selectedCoupon} onOpenChange={() => setSelectedCoupon(null)}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Tag className="w-5 h-5 text-violet-600" />
+                Coupon Details
+              </DialogTitle>
+            </DialogHeader>
+            {selectedCoupon && (
+              <div className="space-y-4">
+                <div className="p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg text-center">
+                  <p className="text-sm text-gray-500 mb-1">Coupon Code</p>
+                  <p className="text-2xl font-bold text-violet-600">{selectedCoupon.name}</p>
+                </div>
 
-            <ComparisonCard
-              title="Revenue Comparison"
-              current={{ label: 'This Month', value: stats?.totalRevenue || 0 }}
-              previous={{ label: 'Last Month', value: (stats?.totalRevenue || 0) * 0.8 }}
-            />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500">Discount</p>
+                    <p className="font-semibold text-xl">
+                      {selectedCoupon.percentOff ? `${selectedCoupon.percentOff}%` : formatPrice(selectedCoupon.amountOff || 0, selectedCoupon.currency)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Duration</p>
+                    <p className="font-semibold text-xl capitalize">{selectedCoupon.duration}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Times Redeemed</p>
+                    <p className="font-semibold text-xl">{selectedCoupon.timesRedeemed}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Max Redemptions</p>
+                    <p className="font-semibold text-xl">{selectedCoupon.maxRedemptions || 'Unlimited'}</p>
+                  </div>
+                </div>
 
-            <BentoCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Product Metrics</h3>
-              <div className="space-y-3">
-                <MiniKPI label="Active Products" value={stats?.activeProducts?.toString() || '0'} change={22.7} />
-                <MiniKPI label="Avg Rating" value={stats?.averageRating?.toFixed(1) || '0'} change={12.5} />
-                <MiniKPI label="Total Users" value={`${((stats?.totalUsers || 0) / 1000).toFixed(0)}K`} change={35.3} />
-                <MiniKPI label="Total Revenue" value={`$${((stats?.totalRevenue || 0) / 1000000).toFixed(1)}M`} change={42.1} />
+                {selectedCoupon.maxRedemptions && (
+                  <div>
+                    <div className="flex items-center justify-between text-sm mb-1">
+                      <span>Usage</span>
+                      <span>{((selectedCoupon.timesRedeemed / selectedCoupon.maxRedemptions) * 100).toFixed(0)}%</span>
+                    </div>
+                    <Progress value={(selectedCoupon.timesRedeemed / selectedCoupon.maxRedemptions) * 100} />
+                  </div>
+                )}
+
+                <div className="flex items-center gap-2 pt-4">
+                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700">
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy Code
+                  </Button>
+                  <Button variant="destructive">
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
-            </BentoCard>
-
-            <BentoCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-              <div className="space-y-2">
-                <ModernButton variant="outline" className="w-full justify-start" onClick={() => console.log('Pricing')}>
-                  <DollarSign className="w-4 h-4 mr-2" />
-                  Update Pricing
-                </ModernButton>
-                <ModernButton variant="outline" className="w-full justify-start" onClick={() => console.log('Features')}>
-                  <Award className="w-4 h-4 mr-2" />
-                  Manage Features
-                </ModernButton>
-                <ModernButton variant="outline" className="w-full justify-start" onClick={() => console.log('Inventory')}>
-                  <Package className="w-4 h-4 mr-2" />
-                  Check Inventory
-                </ModernButton>
-              </div>
-            </BentoCard>
-          </div>
-        </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
