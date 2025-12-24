@@ -1,368 +1,1271 @@
 'use client'
 
-import { useState } from 'react'
-import StatGrid from '@/components/dashboard-results/StatGrid'
-import BentoQuickAction from '@/components/dashboard-results/BentoQuickAction'
-import PillButton from '@/components/modern-button-suite/PillButton'
-import MiniKPI from '@/components/dashboard-results/MiniKPI'
-import ActivityFeed from '@/components/dashboard-results/ActivityFeed'
-import RankingList from '@/components/dashboard-results/RankingList'
-import ProgressCard from '@/components/dashboard-results/ProgressCard'
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
-  useTemplates,
-  useTemplateMutations,
-  getTemplateStatusColor,
-  getCategoryColor,
-  getAccessLevelColor,
-  type Template
-} from '@/lib/hooks/use-templates'
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import {
+  Layout,
+  Grid3X3,
+  Presentation,
+  FileText,
+  Image,
+  Video,
+  Mail,
+  Users,
+  Star,
+  Heart,
+  Plus,
+  Search,
+  Download,
+  Upload,
+  Share2,
+  Copy,
+  Edit,
+  Trash2,
+  MoreHorizontal,
+  Eye,
+  Clock,
+  TrendingUp,
+  FolderPlus,
+  Folder,
+  Filter,
+  Settings,
+  BarChart3,
+  Palette,
+  Type,
+  Sparkles,
+  Wand2,
+  Lock,
+  Globe,
+  Crown,
+  Zap,
+  CheckCircle2,
+  Calendar,
+  Tag,
+  Bookmark,
+  BookmarkCheck,
+  ExternalLink,
+  RefreshCw,
+  Layers,
+  Instagram,
+  Facebook,
+  Twitter,
+  Linkedin,
+  Youtube,
+  Printer,
+  FileImage,
+  PenTool,
+  Maximize2,
+  ChevronRight,
+  Play,
+  ImagePlus,
+  LayoutGrid,
+  List,
+  SlidersHorizontal
+} from 'lucide-react'
 
-type ViewMode = 'all' | 'active' | 'draft' | 'archived'
+// Types
+type TemplateCategory = 'social_media' | 'presentation' | 'document' | 'video' | 'print' | 'email' | 'marketing' | 'infographic'
+type TemplateStatus = 'active' | 'draft' | 'archived'
+type AccessLevel = 'public' | 'team' | 'private'
+type TemplateSize = 'instagram_post' | 'instagram_story' | 'facebook_post' | 'twitter_post' | 'linkedin_post' | 'youtube_thumbnail' | 'presentation' | 'a4' | 'letter' | 'custom'
 
-interface TemplatesClientProps {
-  initialTemplates: Template[]
+interface Template {
+  id: string
+  name: string
+  description: string
+  category: TemplateCategory
+  status: TemplateStatus
+  accessLevel: AccessLevel
+  thumbnail: string
+  size: TemplateSize
+  dimensions: { width: number; height: number }
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+  usageCount: number
+  downloads: number
+  rating: number
+  reviewsCount: number
+  isFavorite: boolean
+  isPremium: boolean
+  tags: string[]
+  colors: string[]
+  fonts: string[]
 }
 
-export default function TemplatesClient({ initialTemplates }: TemplatesClientProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('all')
+interface Collection {
+  id: string
+  name: string
+  description: string
+  templateCount: number
+  thumbnail: string
+  createdAt: string
+  isPublic: boolean
+}
 
-  const { templates, stats, isLoading } = useTemplates(initialTemplates, {
-    status: viewMode === 'all' ? undefined : viewMode
-  })
+interface BrandAsset {
+  id: string
+  type: 'logo' | 'color' | 'font'
+  name: string
+  value: string
+  createdAt: string
+}
 
-  const {
-    createTemplate,
-    updateTemplate,
-    deleteTemplate,
-    isCreating
-  } = useTemplateMutations()
+interface TemplateStats {
+  totalTemplates: number
+  activeTemplates: number
+  totalUsage: number
+  totalDownloads: number
+  avgRating: number
+  favoritesCount: number
+  collectionsCount: number
+  teamTemplates: number
+}
 
-  const filteredTemplates = viewMode === 'all'
-    ? templates
-    : templates.filter(template => template.status === viewMode)
-
-  const handleCreateTemplate = () => {
-    createTemplate({
-      name: 'New Template',
-      description: 'A new template',
-      category: 'document',
-      access_level: 'private',
-      status: 'draft'
-    })
+// Mock Data
+const mockTemplates: Template[] = [
+  {
+    id: '1',
+    name: 'Modern Instagram Post',
+    description: 'Clean and minimal design for Instagram posts',
+    category: 'social_media',
+    status: 'active',
+    accessLevel: 'public',
+    thumbnail: '/templates/instagram-modern.jpg',
+    size: 'instagram_post',
+    dimensions: { width: 1080, height: 1080 },
+    createdBy: 'Sarah Chen',
+    createdAt: '2024-03-01',
+    updatedAt: '2024-03-10',
+    usageCount: 1245,
+    downloads: 892,
+    rating: 4.8,
+    reviewsCount: 156,
+    isFavorite: true,
+    isPremium: false,
+    tags: ['minimal', 'modern', 'instagram', 'social'],
+    colors: ['#FF6B6B', '#4ECDC4', '#2C3E50'],
+    fonts: ['Inter', 'Poppins']
+  },
+  {
+    id: '2',
+    name: 'Business Pitch Deck',
+    description: 'Professional presentation template for startups',
+    category: 'presentation',
+    status: 'active',
+    accessLevel: 'team',
+    thumbnail: '/templates/pitch-deck.jpg',
+    size: 'presentation',
+    dimensions: { width: 1920, height: 1080 },
+    createdBy: 'Mike Johnson',
+    createdAt: '2024-02-15',
+    updatedAt: '2024-03-08',
+    usageCount: 567,
+    downloads: 423,
+    rating: 4.9,
+    reviewsCount: 89,
+    isFavorite: true,
+    isPremium: true,
+    tags: ['business', 'pitch', 'startup', 'professional'],
+    colors: ['#1A1A2E', '#16213E', '#E94560'],
+    fonts: ['Montserrat', 'Open Sans']
+  },
+  {
+    id: '3',
+    name: 'Instagram Story Gradient',
+    description: 'Eye-catching gradient story template',
+    category: 'social_media',
+    status: 'active',
+    accessLevel: 'public',
+    thumbnail: '/templates/story-gradient.jpg',
+    size: 'instagram_story',
+    dimensions: { width: 1080, height: 1920 },
+    createdBy: 'Emily Davis',
+    createdAt: '2024-03-05',
+    updatedAt: '2024-03-12',
+    usageCount: 2134,
+    downloads: 1567,
+    rating: 4.7,
+    reviewsCount: 234,
+    isFavorite: false,
+    isPremium: false,
+    tags: ['gradient', 'story', 'colorful', 'trendy'],
+    colors: ['#667EEA', '#764BA2', '#F093FB'],
+    fonts: ['Playfair Display', 'Lato']
+  },
+  {
+    id: '4',
+    name: 'YouTube Thumbnail',
+    description: 'Bold and attention-grabbing thumbnail design',
+    category: 'social_media',
+    status: 'active',
+    accessLevel: 'public',
+    thumbnail: '/templates/yt-thumbnail.jpg',
+    size: 'youtube_thumbnail',
+    dimensions: { width: 1280, height: 720 },
+    createdBy: 'Alex Rivera',
+    createdAt: '2024-02-20',
+    updatedAt: '2024-03-05',
+    usageCount: 876,
+    downloads: 654,
+    rating: 4.6,
+    reviewsCount: 112,
+    isFavorite: false,
+    isPremium: false,
+    tags: ['youtube', 'thumbnail', 'bold', 'clickbait'],
+    colors: ['#FF0000', '#FFFFFF', '#000000'],
+    fonts: ['Anton', 'Roboto']
+  },
+  {
+    id: '5',
+    name: 'Marketing Flyer',
+    description: 'Print-ready marketing flyer template',
+    category: 'print',
+    status: 'active',
+    accessLevel: 'team',
+    thumbnail: '/templates/marketing-flyer.jpg',
+    size: 'a4',
+    dimensions: { width: 2480, height: 3508 },
+    createdBy: 'Sarah Chen',
+    createdAt: '2024-01-15',
+    updatedAt: '2024-03-01',
+    usageCount: 432,
+    downloads: 321,
+    rating: 4.5,
+    reviewsCount: 67,
+    isFavorite: true,
+    isPremium: true,
+    tags: ['print', 'flyer', 'marketing', 'promotional'],
+    colors: ['#6C5CE7', '#A29BFE', '#FFEAA7'],
+    fonts: ['Bebas Neue', 'Source Sans Pro']
+  },
+  {
+    id: '6',
+    name: 'Email Newsletter',
+    description: 'Clean email newsletter template',
+    category: 'email',
+    status: 'active',
+    accessLevel: 'team',
+    thumbnail: '/templates/email-newsletter.jpg',
+    size: 'custom',
+    dimensions: { width: 600, height: 800 },
+    createdBy: 'Lisa Brown',
+    createdAt: '2024-02-01',
+    updatedAt: '2024-03-10',
+    usageCount: 789,
+    downloads: 567,
+    rating: 4.4,
+    reviewsCount: 98,
+    isFavorite: false,
+    isPremium: false,
+    tags: ['email', 'newsletter', 'marketing', 'clean'],
+    colors: ['#00B894', '#00CEC9', '#0984E3'],
+    fonts: ['Georgia', 'Arial']
+  },
+  {
+    id: '7',
+    name: 'Data Infographic',
+    description: 'Visual data presentation infographic',
+    category: 'infographic',
+    status: 'draft',
+    accessLevel: 'private',
+    thumbnail: '/templates/data-infographic.jpg',
+    size: 'custom',
+    dimensions: { width: 800, height: 2000 },
+    createdBy: 'Mike Johnson',
+    createdAt: '2024-03-10',
+    updatedAt: '2024-03-12',
+    usageCount: 0,
+    downloads: 0,
+    rating: 0,
+    reviewsCount: 0,
+    isFavorite: false,
+    isPremium: false,
+    tags: ['infographic', 'data', 'visualization', 'stats'],
+    colors: ['#2D3436', '#636E72', '#B2BEC3'],
+    fonts: ['Roboto Mono', 'Roboto']
+  },
+  {
+    id: '8',
+    name: 'LinkedIn Banner',
+    description: 'Professional LinkedIn cover banner',
+    category: 'social_media',
+    status: 'active',
+    accessLevel: 'public',
+    thumbnail: '/templates/linkedin-banner.jpg',
+    size: 'linkedin_post',
+    dimensions: { width: 1584, height: 396 },
+    createdBy: 'James Wilson',
+    createdAt: '2024-02-28',
+    updatedAt: '2024-03-08',
+    usageCount: 543,
+    downloads: 412,
+    rating: 4.7,
+    reviewsCount: 76,
+    isFavorite: false,
+    isPremium: false,
+    tags: ['linkedin', 'banner', 'professional', 'business'],
+    colors: ['#0077B5', '#FFFFFF', '#313335'],
+    fonts: ['Helvetica', 'Arial']
   }
+]
+
+const mockCollections: Collection[] = [
+  { id: 'c1', name: 'Social Media Pack', description: 'All social media templates', templateCount: 24, thumbnail: '/collections/social.jpg', createdAt: '2024-02-01', isPublic: true },
+  { id: 'c2', name: 'Brand Assets', description: 'Company branded templates', templateCount: 12, thumbnail: '/collections/brand.jpg', createdAt: '2024-01-15', isPublic: false },
+  { id: 'c3', name: 'Marketing Materials', description: 'Print and digital marketing', templateCount: 18, thumbnail: '/collections/marketing.jpg', createdAt: '2024-02-20', isPublic: true },
+  { id: 'c4', name: 'Presentations', description: 'Pitch decks and slideshows', templateCount: 8, thumbnail: '/collections/presentations.jpg', createdAt: '2024-03-01', isPublic: false }
+]
+
+const mockBrandAssets: BrandAsset[] = [
+  { id: 'b1', type: 'logo', name: 'Primary Logo', value: '/brand/logo-primary.svg', createdAt: '2024-01-01' },
+  { id: 'b2', type: 'logo', name: 'Logo Dark', value: '/brand/logo-dark.svg', createdAt: '2024-01-01' },
+  { id: 'b3', type: 'color', name: 'Primary', value: '#6366F1', createdAt: '2024-01-01' },
+  { id: 'b4', type: 'color', name: 'Secondary', value: '#EC4899', createdAt: '2024-01-01' },
+  { id: 'b5', type: 'color', name: 'Accent', value: '#10B981', createdAt: '2024-01-01' },
+  { id: 'b6', type: 'font', name: 'Heading', value: 'Inter', createdAt: '2024-01-01' },
+  { id: 'b7', type: 'font', name: 'Body', value: 'Open Sans', createdAt: '2024-01-01' }
+]
+
+// Helper Functions
+const getCategoryIcon = (category: TemplateCategory) => {
+  switch (category) {
+    case 'social_media': return <Instagram className="w-4 h-4" />
+    case 'presentation': return <Presentation className="w-4 h-4" />
+    case 'document': return <FileText className="w-4 h-4" />
+    case 'video': return <Video className="w-4 h-4" />
+    case 'print': return <Printer className="w-4 h-4" />
+    case 'email': return <Mail className="w-4 h-4" />
+    case 'marketing': return <TrendingUp className="w-4 h-4" />
+    case 'infographic': return <BarChart3 className="w-4 h-4" />
+    default: return <Layout className="w-4 h-4" />
+  }
+}
+
+const getCategoryColor = (category: TemplateCategory) => {
+  switch (category) {
+    case 'social_media': return 'bg-pink-100 text-pink-800 border-pink-200'
+    case 'presentation': return 'bg-blue-100 text-blue-800 border-blue-200'
+    case 'document': return 'bg-gray-100 text-gray-800 border-gray-200'
+    case 'video': return 'bg-red-100 text-red-800 border-red-200'
+    case 'print': return 'bg-green-100 text-green-800 border-green-200'
+    case 'email': return 'bg-purple-100 text-purple-800 border-purple-200'
+    case 'marketing': return 'bg-orange-100 text-orange-800 border-orange-200'
+    case 'infographic': return 'bg-cyan-100 text-cyan-800 border-cyan-200'
+    default: return 'bg-gray-100 text-gray-800 border-gray-200'
+  }
+}
+
+const getAccessColor = (access: AccessLevel) => {
+  switch (access) {
+    case 'public': return 'bg-green-100 text-green-800 border-green-200'
+    case 'team': return 'bg-blue-100 text-blue-800 border-blue-200'
+    case 'private': return 'bg-gray-100 text-gray-800 border-gray-200'
+    default: return 'bg-gray-100 text-gray-800 border-gray-200'
+  }
+}
+
+const formatDimensions = (dimensions: { width: number; height: number }) => {
+  return `${dimensions.width} × ${dimensions.height}px`
+}
+
+export default function TemplatesClient() {
+  const [activeTab, setActiveTab] = useState('gallery')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState<TemplateCategory | 'all'>('all')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
+
+  // Calculate stats
+  const stats: TemplateStats = useMemo(() => ({
+    totalTemplates: mockTemplates.length,
+    activeTemplates: mockTemplates.filter(t => t.status === 'active').length,
+    totalUsage: mockTemplates.reduce((sum, t) => sum + t.usageCount, 0),
+    totalDownloads: mockTemplates.reduce((sum, t) => sum + t.downloads, 0),
+    avgRating: mockTemplates.filter(t => t.rating > 0).reduce((sum, t) => sum + t.rating, 0) / mockTemplates.filter(t => t.rating > 0).length || 0,
+    favoritesCount: mockTemplates.filter(t => t.isFavorite).length,
+    collectionsCount: mockCollections.length,
+    teamTemplates: mockTemplates.filter(t => t.accessLevel === 'team').length
+  }), [])
+
+  // Filter templates
+  const filteredTemplates = useMemo(() => {
+    return mockTemplates.filter(template => {
+      const matchesSearch = template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        template.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      const matchesCategory = categoryFilter === 'all' || template.category === categoryFilter
+      return matchesSearch && matchesCategory
+    })
+  }, [searchQuery, categoryFilter])
+
+  const favoriteTemplates = mockTemplates.filter(t => t.isFavorite)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
-      <div className="max-w-[1600px] mx-auto p-6 space-y-6">
-
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900 p-8">
+      <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-              Templates Library
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-1">
-              Reusable templates for documents, emails, and more
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+              <Layout className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Templates Hub
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Design stunning content with templates
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={handleCreateTemplate}
-              disabled={isCreating}
-              className="px-4 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg hover:shadow-lg hover:shadow-violet-500/50 transition-all duration-300 disabled:opacity-50"
-            >
-              {isCreating ? 'Creating...' : 'Create Template'}
-            </button>
+            <Button variant="outline" className="gap-2">
+              <Wand2 className="w-4 h-4" />
+              AI Generate
+            </Button>
+            <Button className="gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700">
+              <Plus className="w-4 h-4" />
+              Create Template
+            </Button>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <StatGrid
-          stats={[
-            {
-              label: 'Total Templates',
-              value: stats.total.toString(),
-              change: '+24',
-              trend: 'up' as const,
-              subtitle: 'across all categories'
-            },
-            {
-              label: 'Active Templates',
-              value: stats.active.toString(),
-              change: '+18',
-              trend: 'up' as const,
-              subtitle: 'ready to use'
-            },
-            {
-              label: 'Total Usage',
-              value: stats.totalUsage.toLocaleString(),
-              change: '+412',
-              trend: 'up' as const,
-              subtitle: 'this month'
-            },
-            {
-              label: 'Avg Rating',
-              value: stats.avgRating > 0 ? `${stats.avgRating.toFixed(1)}/5` : 'N/A',
-              change: '+0.2',
-              trend: 'up' as const,
-              subtitle: 'user satisfaction'
-            }
-          ]}
-        />
-
-        {/* Quick Actions */}
-        <BentoQuickAction
-          actions={[
-            { label: 'Create Template', icon: '➕', onClick: handleCreateTemplate },
-            { label: 'Browse All', icon: '📚', onClick: () => {} },
-            { label: 'My Templates', icon: '📁', onClick: () => {} },
-            { label: 'Popular', icon: '🔥', onClick: () => {} },
-            { label: 'Recent', icon: '⏰', onClick: () => {} },
-            { label: 'Search', icon: '🔍', onClick: () => {} },
-            { label: 'Analytics', icon: '📊', onClick: () => {} },
-            { label: 'Settings', icon: '⚙️', onClick: () => {} }
-          ]}
-        />
-
-        {/* Filter Pills */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <PillButton
-            label="All Templates"
-            isActive={viewMode === 'all'}
-            onClick={() => setViewMode('all')}
-          />
-          <PillButton
-            label="Active"
-            isActive={viewMode === 'active'}
-            onClick={() => setViewMode('active')}
-          />
-          <PillButton
-            label="Draft"
-            isActive={viewMode === 'draft'}
-            onClick={() => setViewMode('draft')}
-          />
-          <PillButton
-            label="Archived"
-            isActive={viewMode === 'archived'}
-            onClick={() => setViewMode('archived')}
-          />
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Layout className="w-4 h-4 text-violet-600" />
+                <span className="text-xs text-gray-500">Templates</span>
+              </div>
+              <p className="text-2xl font-bold">{stats.totalTemplates}</p>
+              <p className="text-xs text-violet-600">Total</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                <span className="text-xs text-gray-500">Active</span>
+              </div>
+              <p className="text-2xl font-bold">{stats.activeTemplates}</p>
+              <p className="text-xs text-green-600">Published</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Eye className="w-4 h-4 text-blue-600" />
+                <span className="text-xs text-gray-500">Usage</span>
+              </div>
+              <p className="text-2xl font-bold">{(stats.totalUsage / 1000).toFixed(1)}K</p>
+              <p className="text-xs text-blue-600">Times used</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Download className="w-4 h-4 text-purple-600" />
+                <span className="text-xs text-gray-500">Downloads</span>
+              </div>
+              <p className="text-2xl font-bold">{(stats.totalDownloads / 1000).toFixed(1)}K</p>
+              <p className="text-xs text-purple-600">Total</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Star className="w-4 h-4 text-yellow-600" />
+                <span className="text-xs text-gray-500">Rating</span>
+              </div>
+              <p className="text-2xl font-bold">{stats.avgRating.toFixed(1)}</p>
+              <p className="text-xs text-yellow-600">Average</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Heart className="w-4 h-4 text-pink-600" />
+                <span className="text-xs text-gray-500">Favorites</span>
+              </div>
+              <p className="text-2xl font-bold">{stats.favoritesCount}</p>
+              <p className="text-xs text-pink-600">Saved</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Folder className="w-4 h-4 text-orange-600" />
+                <span className="text-xs text-gray-500">Collections</span>
+              </div>
+              <p className="text-2xl font-bold">{stats.collectionsCount}</p>
+              <p className="text-xs text-orange-600">Created</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="w-4 h-4 text-cyan-600" />
+                <span className="text-xs text-gray-500">Team</span>
+              </div>
+              <p className="text-2xl font-bold">{stats.teamTemplates}</p>
+              <p className="text-xs text-cyan-600">Shared</p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="bg-white dark:bg-gray-800 p-1 shadow-sm">
+            <TabsTrigger value="gallery" className="gap-2">
+              <Grid3X3 className="w-4 h-4" />
+              Gallery
+            </TabsTrigger>
+            <TabsTrigger value="my-templates" className="gap-2">
+              <Layout className="w-4 h-4" />
+              My Templates
+            </TabsTrigger>
+            <TabsTrigger value="collections" className="gap-2">
+              <Folder className="w-4 h-4" />
+              Collections
+            </TabsTrigger>
+            <TabsTrigger value="brand-kit" className="gap-2">
+              <Palette className="w-4 h-4" />
+              Brand Kit
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Templates List */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-              <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white">
-                Templates ({filteredTemplates.length})
-              </h2>
-              {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
-                </div>
-              ) : filteredTemplates.length === 0 ? (
-                <div className="text-center py-12 text-slate-500 dark:text-slate-400">
-                  No templates found. Click "Create Template" to get started.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {filteredTemplates.map((template) => (
-                    <div
-                      key={template.id}
-                      className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-violet-500/50 dark:hover:border-violet-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/10 group cursor-pointer bg-white dark:bg-slate-800/50"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
-                              {template.name}
-                            </h3>
-                            <span className={`px-2 py-1 rounded-full text-xs border ${getTemplateStatusColor(template.status)}`}>
-                              {template.status}
-                            </span>
-                            <span className={`px-2 py-1 rounded-full text-xs border ${getCategoryColor(template.category)}`}>
-                              {template.category}
-                            </span>
-                            <span className={`px-2 py-1 rounded-full text-xs border ${getAccessLevelColor(template.access_level)}`}>
-                              {template.access_level}
-                            </span>
-                          </div>
-                          <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
-                            {template.description || 'No description'}
-                          </p>
-                          <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-                            <span className="flex items-center gap-1">
-                              <span className="text-violet-500">👤</span>
-                              {template.creator_name || 'Unknown'}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <span className="text-violet-500">🏢</span>
-                              {template.department || 'General'}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <span className="text-violet-500">📊</span>
-                              v{template.version}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="flex items-center gap-1 text-yellow-500 mb-1">
-                            <span>⭐</span>
-                            <span className="text-lg font-bold text-slate-900 dark:text-white">
-                              {Number(template.rating).toFixed(1)}
-                            </span>
-                          </div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">
-                            {template.reviews_count} reviews
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-4 gap-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-slate-900 dark:text-white">{template.usage_count}</div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">Uses</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-violet-600 dark:text-violet-400">{template.downloads}</div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">Downloads</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">Created</div>
-                          <div className="text-xs font-medium text-slate-900 dark:text-white">
-                            {new Date(template.created_at).toLocaleDateString()}
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">Last Used</div>
-                          <div className="text-xs font-medium text-slate-900 dark:text-white">
-                            {template.last_used ? new Date(template.last_used).toLocaleDateString() : 'Never'}
-                          </div>
-                        </div>
-                      </div>
-
-                      {template.tags && template.tags.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            {template.tags.map((tag) => (
-                              <span key={tag} className="px-2 py-1 rounded-full text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400">
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-
-            {/* Recent Usage */}
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-              <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">Recent Usage</h3>
-              <div className="space-y-3">
-                {templates.slice(0, 4).map((template) => (
-                  <div
-                    key={`usage-${template.id}`}
-                    className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-violet-500/50 transition-all duration-300 cursor-pointer group bg-white dark:bg-slate-800/50"
-                  >
-                    <div className="font-medium text-slate-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors text-sm mb-1">
-                      {template.name}
-                    </div>
-                    <div className="text-xs text-slate-600 dark:text-slate-400">
-                      <span className="font-medium">{template.creator_name || 'Unknown'}</span> • {template.department || 'General'}
-                    </div>
-                    <div className="text-xs text-slate-500 dark:text-slate-500 mt-1">
-                      {template.last_used ? new Date(template.last_used).toLocaleDateString() : 'Never used'}
-                    </div>
-                  </div>
-                ))}
-                {templates.length === 0 && (
-                  <div className="text-center py-4 text-slate-500 dark:text-slate-400 text-sm">
-                    No recent usage
-                  </div>
-                )}
+          {/* Gallery Tab */}
+          <TabsContent value="gallery" className="space-y-6">
+            {/* Filters */}
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search templates..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value as TemplateCategory | 'all')}
+                className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800"
+              >
+                <option value="all">All Categories</option>
+                <option value="social_media">Social Media</option>
+                <option value="presentation">Presentations</option>
+                <option value="document">Documents</option>
+                <option value="video">Video</option>
+                <option value="print">Print</option>
+                <option value="email">Email</option>
+                <option value="marketing">Marketing</option>
+                <option value="infographic">Infographics</option>
+              </select>
+              <div className="flex items-center gap-1 border rounded-lg p-1">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                >
+                  <List className="w-4 h-4" />
+                </Button>
               </div>
             </div>
 
-            {/* Templates by Category */}
-            <ProgressCard
-              title="Templates by Category"
-              items={[
-                { label: 'Emails', value: 84, total: 284, color: 'blue' },
-                { label: 'Documents', value: 72, total: 284, color: 'purple' },
-                { label: 'Presentations', value: 47, total: 284, color: 'green' },
-                { label: 'Forms', value: 42, total: 284, color: 'orange' },
-                { label: 'Contracts', value: 39, total: 284, color: 'red' }
-              ]}
-            />
-
-            {/* Most Popular Templates */}
-            <RankingList
-              title="Most Popular Templates"
-              items={templates.slice(0, 5).map((t, i) => ({
-                label: t.name,
-                value: `${t.usage_count} uses`,
-                rank: i + 1,
-                trend: i % 2 === 0 ? 'up' : 'same'
-              }))}
-            />
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <MiniKPI
-                label="Usage This Week"
-                value={stats.totalUsage.toString()}
-                trend="up"
-                change="+84"
-              />
-              <MiniKPI
-                label="New Templates"
-                value={stats.draft.toString()}
-                trend="up"
-                change="+6"
-              />
+            {/* Category Pills */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {['social_media', 'presentation', 'document', 'video', 'print', 'email', 'marketing', 'infographic'].map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setCategoryFilter(cat as TemplateCategory)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-all ${
+                    categoryFilter === cat
+                      ? 'bg-violet-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  {getCategoryIcon(cat as TemplateCategory)}
+                  <span className="capitalize">{cat.replace('_', ' ')}</span>
+                </button>
+              ))}
             </div>
 
-            {/* Activity Feed */}
-            <ActivityFeed
-              activities={[
-                {
-                  action: 'Template created',
-                  subject: 'Customer Feedback Form',
-                  time: '2 hours ago',
-                  type: 'success'
-                },
-                {
-                  action: 'Template used',
-                  subject: 'Sales Proposal - 142 times',
-                  time: '1 day ago',
-                  type: 'info'
-                },
-                {
-                  action: 'Template updated',
-                  subject: 'Employment Contract v3.1',
-                  time: '3 days ago',
-                  type: 'info'
-                },
-                {
-                  action: 'Template archived',
-                  subject: 'Monthly Performance Report',
-                  time: '1 week ago',
-                  type: 'warning'
-                }
-              ]}
-            />
+            {/* Template Grid */}
+            <div className={viewMode === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6' : 'space-y-4'}>
+              {filteredTemplates.map((template) => (
+                <Card
+                  key={template.id}
+                  className="group cursor-pointer hover:shadow-xl transition-all duration-300 overflow-hidden"
+                  onClick={() => setSelectedTemplate(template)}
+                >
+                  {/* Thumbnail */}
+                  <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      {getCategoryIcon(template.category)}
+                    </div>
+                    {/* Overlay on hover */}
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <Button size="sm" variant="secondary" className="gap-1">
+                        <Eye className="w-4 h-4" />
+                        Preview
+                      </Button>
+                      <Button size="sm" className="gap-1">
+                        <Edit className="w-4 h-4" />
+                        Use
+                      </Button>
+                    </div>
+                    {/* Badges */}
+                    <div className="absolute top-2 left-2 flex gap-1">
+                      {template.isPremium && (
+                        <Badge className="bg-yellow-500 text-white gap-1">
+                          <Crown className="w-3 h-3" />
+                          Pro
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="absolute top-2 right-2">
+                      <button
+                        className={`p-1.5 rounded-full ${
+                          template.isFavorite
+                            ? 'bg-pink-500 text-white'
+                            : 'bg-white/80 text-gray-600 hover:bg-white'
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          // Toggle favorite
+                        }}
+                      >
+                        <Heart className={`w-4 h-4 ${template.isFavorite ? 'fill-current' : ''}`} />
+                      </button>
+                    </div>
+                  </div>
 
-          </div>
-        </div>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold text-sm line-clamp-1">{template.name}</h3>
+                      <div className="flex items-center gap-1 text-yellow-500">
+                        <Star className="w-3 h-3 fill-current" />
+                        <span className="text-xs font-medium">{template.rating.toFixed(1)}</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 line-clamp-2 mb-3">{template.description}</p>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className={`text-xs ${getCategoryColor(template.category)}`}>
+                        {template.category.replace('_', ' ')}
+                      </Badge>
+                      <span className="text-xs text-gray-400">{template.usageCount} uses</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
 
+          {/* My Templates Tab */}
+          <TabsContent value="my-templates" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">My Templates</h3>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                Create New
+              </Button>
+            </div>
+
+            {/* Favorites Section */}
+            <div>
+              <h4 className="font-medium mb-4 flex items-center gap-2">
+                <Heart className="w-4 h-4 text-pink-500" />
+                Favorites ({favoriteTemplates.length})
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {favoriteTemplates.map((template) => (
+                  <Card key={template.id} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedTemplate(template)}>
+                    <div className="aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
+                      {getCategoryIcon(template.category)}
+                    </div>
+                    <CardContent className="p-3">
+                      <h3 className="font-medium text-sm">{template.name}</h3>
+                      <p className="text-xs text-gray-500">{template.usageCount} uses</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Recent Templates */}
+            <div>
+              <h4 className="font-medium mb-4 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-blue-500" />
+                Recent
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {mockTemplates.slice(0, 4).map((template) => (
+                  <Card key={template.id} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedTemplate(template)}>
+                    <div className="aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
+                      {getCategoryIcon(template.category)}
+                    </div>
+                    <CardContent className="p-3">
+                      <h3 className="font-medium text-sm">{template.name}</h3>
+                      <p className="text-xs text-gray-500">Edited {template.updatedAt}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Collections Tab */}
+          <TabsContent value="collections" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Collections</h3>
+              <Button className="gap-2">
+                <FolderPlus className="w-4 h-4" />
+                New Collection
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mockCollections.map((collection) => (
+                <Card key={collection.id} className="cursor-pointer hover:shadow-lg transition-shadow">
+                  <div className="aspect-video bg-gradient-to-br from-violet-100 to-purple-200 dark:from-violet-900 dark:to-purple-800 flex items-center justify-center">
+                    <Folder className="w-12 h-12 text-violet-600" />
+                  </div>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold">{collection.name}</h3>
+                      {collection.isPublic ? (
+                        <Badge variant="outline" className="gap-1">
+                          <Globe className="w-3 h-3" />
+                          Public
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="gap-1">
+                          <Lock className="w-3 h-3" />
+                          Private
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 mb-3">{collection.description}</p>
+                    <div className="flex items-center justify-between text-sm">
+                      <span>{collection.templateCount} templates</span>
+                      <span className="text-gray-400">{collection.createdAt}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Brand Kit Tab */}
+          <TabsContent value="brand-kit" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Brand Kit</h3>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                Add Asset
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Logos */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <ImagePlus className="w-5 h-5" />
+                    Logos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {mockBrandAssets.filter(a => a.type === 'logo').map((asset) => (
+                    <div key={asset.id} className="flex items-center justify-between p-3 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                          <Image className="w-6 h-6 text-gray-400" />
+                        </div>
+                        <span className="font-medium">{asset.name}</span>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <Download className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button variant="outline" className="w-full gap-2">
+                    <Upload className="w-4 h-4" />
+                    Upload Logo
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Colors */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Palette className="w-5 h-5" />
+                    Brand Colors
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {mockBrandAssets.filter(a => a.type === 'color').map((asset) => (
+                    <div key={asset.id} className="flex items-center justify-between p-3 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-10 h-10 rounded-lg border-2 border-gray-200"
+                          style={{ backgroundColor: asset.value }}
+                        />
+                        <div>
+                          <p className="font-medium">{asset.name}</p>
+                          <p className="text-xs text-gray-500 font-mono">{asset.value}</p>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button variant="outline" className="w-full gap-2">
+                    <Plus className="w-4 h-4" />
+                    Add Color
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Fonts */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Type className="w-5 h-5" />
+                    Brand Fonts
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {mockBrandAssets.filter(a => a.type === 'font').map((asset) => (
+                    <div key={asset.id} className="flex items-center justify-between p-3 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-lg font-bold">
+                          Aa
+                        </div>
+                        <div>
+                          <p className="font-medium">{asset.name}</p>
+                          <p className="text-xs text-gray-500">{asset.value}</p>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button variant="outline" className="w-full gap-2">
+                    <Plus className="w-4 h-4" />
+                    Add Font
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Usage Overview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Template Usage (Last 7 Days)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockTemplates.slice(0, 5).map((template) => (
+                      <div key={template.id} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">{template.name}</span>
+                          <span className="text-sm text-gray-500">{template.usageCount} uses</span>
+                        </div>
+                        <Progress value={(template.usageCount / 2500) * 100} className="h-2" />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Top Performing */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Top Performing Templates</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockTemplates.sort((a, b) => b.rating - a.rating).slice(0, 5).map((template, index) => (
+                      <div key={template.id} className="flex items-center gap-4">
+                        <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900 flex items-center justify-center font-bold text-sm text-violet-600">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{template.name}</p>
+                          <p className="text-xs text-gray-500">{template.downloads} downloads</p>
+                        </div>
+                        <div className="flex items-center gap-1 text-yellow-500">
+                          <Star className="w-4 h-4 fill-current" />
+                          <span className="font-medium">{template.rating.toFixed(1)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Category Distribution */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Templates by Category</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {['social_media', 'presentation', 'print', 'email', 'infographic'].map((cat) => {
+                      const count = mockTemplates.filter(t => t.category === cat).length
+                      const percentage = (count / mockTemplates.length) * 100
+                      return (
+                        <div key={cat} className="flex items-center gap-3">
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${getCategoryColor(cat as TemplateCategory)}`}>
+                            {getCategoryIcon(cat as TemplateCategory)}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm capitalize">{cat.replace('_', ' ')}</span>
+                              <span className="text-sm text-gray-500">{count}</span>
+                            </div>
+                            <Progress value={percentage} className="h-1.5" />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Download Trends */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Download Trends</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { day: 'Monday', downloads: 234 },
+                      { day: 'Tuesday', downloads: 312 },
+                      { day: 'Wednesday', downloads: 287 },
+                      { day: 'Thursday', downloads: 398 },
+                      { day: 'Friday', downloads: 456 },
+                      { day: 'Saturday', downloads: 189 },
+                      { day: 'Sunday', downloads: 145 }
+                    ].map((item) => (
+                      <div key={item.day} className="flex items-center gap-3">
+                        <span className="text-sm w-24">{item.day}</span>
+                        <div className="flex-1 h-4 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full"
+                            style={{ width: `${(item.downloads / 500) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-sm text-gray-500 w-12 text-right">{item.downloads}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* General Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Settings className="w-5 h-5" />
+                    General Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Default Access Level</p>
+                      <p className="text-xs text-gray-500">For new templates</p>
+                    </div>
+                    <select className="px-3 py-1 border rounded text-sm">
+                      <option>Private</option>
+                      <option>Team</option>
+                      <option>Public</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Auto-save Drafts</p>
+                      <p className="text-xs text-gray-500">Save changes automatically</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="w-5 h-5" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Show Usage Stats</p>
+                      <p className="text-xs text-gray-500">Display template analytics</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="w-5 h-5" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Export Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Download className="w-5 h-5" />
+                    Export Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Default Export Format</label>
+                    <select className="w-full px-3 py-2 border rounded-lg text-sm">
+                      <option>PNG (High Quality)</option>
+                      <option>JPG (Compressed)</option>
+                      <option>PDF (Print Ready)</option>
+                      <option>SVG (Vector)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Default Quality</label>
+                    <select className="w-full px-3 py-2 border rounded-lg text-sm">
+                      <option>Standard (72 DPI)</option>
+                      <option>High (150 DPI)</option>
+                      <option>Print (300 DPI)</option>
+                    </select>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Sharing Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Share2 className="w-5 h-5" />
+                    Sharing Preferences
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Allow Comments</p>
+                      <p className="text-xs text-gray-500">On shared templates</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="w-5 h-5" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Allow Duplication</p>
+                      <p className="text-xs text-gray-500">Let others copy your templates</p>
+                    </div>
+                    <input type="checkbox" className="w-5 h-5" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Watermark Free Templates</p>
+                      <p className="text-xs text-gray-500">Requires Pro subscription</p>
+                    </div>
+                    <Badge variant="outline" className="gap-1">
+                      <Crown className="w-3 h-3" />
+                      Pro
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Notifications */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Zap className="w-5 h-5" />
+                    Notifications
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Template Used</p>
+                      <p className="text-xs text-gray-500">When someone uses your template</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="w-5 h-5" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">New Review</p>
+                      <p className="text-xs text-gray-500">When someone reviews your template</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="w-5 h-5" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Weekly Summary</p>
+                      <p className="text-xs text-gray-500">Weekly usage report</p>
+                    </div>
+                    <input type="checkbox" className="w-5 h-5" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Template Detail Dialog */}
+        <Dialog open={!!selectedTemplate} onOpenChange={() => setSelectedTemplate(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Layout className="w-5 h-5 text-violet-600" />
+                {selectedTemplate?.name}
+              </DialogTitle>
+            </DialogHeader>
+
+            {selectedTemplate && (
+              <div className="space-y-6">
+                {/* Preview */}
+                <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-lg flex items-center justify-center">
+                  {getCategoryIcon(selectedTemplate.category)}
+                  <span className="ml-2 text-gray-500">Template Preview</span>
+                </div>
+
+                {/* Info Grid */}
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{selectedTemplate.usageCount.toLocaleString()}</p>
+                    <p className="text-sm text-gray-500">Uses</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{selectedTemplate.downloads.toLocaleString()}</p>
+                    <p className="text-sm text-gray-500">Downloads</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <div className="flex items-center justify-center gap-1 text-yellow-500">
+                      <Star className="w-5 h-5 fill-current" />
+                      <span className="text-2xl font-bold">{selectedTemplate.rating.toFixed(1)}</span>
+                    </div>
+                    <p className="text-sm text-gray-500">{selectedTemplate.reviewsCount} reviews</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-lg font-bold">{formatDimensions(selectedTemplate.dimensions)}</p>
+                    <p className="text-sm text-gray-500">Dimensions</p>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <p className="text-gray-600 dark:text-gray-400">{selectedTemplate.description}</p>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2">
+                  {selectedTemplate.tags.map((tag) => (
+                    <Badge key={tag} variant="outline" className="gap-1">
+                      <Tag className="w-3 h-3" />
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+
+                {/* Colors */}
+                <div>
+                  <p className="text-sm font-medium mb-2">Colors Used</p>
+                  <div className="flex gap-2">
+                    {selectedTemplate.colors.map((color) => (
+                      <div
+                        key={color}
+                        className="w-8 h-8 rounded-lg border-2 border-gray-200"
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Fonts */}
+                <div>
+                  <p className="text-sm font-medium mb-2">Fonts</p>
+                  <div className="flex gap-2">
+                    {selectedTemplate.fonts.map((font) => (
+                      <Badge key={font} variant="outline">{font}</Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Meta */}
+                <div className="flex items-center gap-6 text-sm text-gray-500">
+                  <span>Created by {selectedTemplate.createdBy}</span>
+                  <span>Updated {selectedTemplate.updatedAt}</span>
+                  <Badge className={getAccessColor(selectedTemplate.accessLevel)} variant="outline">
+                    {selectedTemplate.accessLevel === 'public' && <Globe className="w-3 h-3 mr-1" />}
+                    {selectedTemplate.accessLevel === 'team' && <Users className="w-3 h-3 mr-1" />}
+                    {selectedTemplate.accessLevel === 'private' && <Lock className="w-3 h-3 mr-1" />}
+                    {selectedTemplate.accessLevel}
+                  </Badge>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-3 pt-4">
+                  <Button className="gap-2 flex-1">
+                    <Edit className="w-4 h-4" />
+                    Use This Template
+                  </Button>
+                  <Button variant="outline" className="gap-2">
+                    <Copy className="w-4 h-4" />
+                    Duplicate
+                  </Button>
+                  <Button variant="outline" className="gap-2">
+                    <Download className="w-4 h-4" />
+                    Download
+                  </Button>
+                  <Button variant="outline" className="gap-2">
+                    <Share2 className="w-4 h-4" />
+                    Share
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className={selectedTemplate.isFavorite ? 'text-pink-600' : ''}
+                  >
+                    <Heart className={`w-4 h-4 ${selectedTemplate.isFavorite ? 'fill-current' : ''}`} />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
