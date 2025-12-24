@@ -1,508 +1,1341 @@
 'use client'
 
-import { useState } from 'react'
-import { useGrowthMetrics, GrowthMetric, GrowthStats } from '@/lib/hooks/use-growth-metrics'
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
-  BentoCard,
-  BentoQuickAction
-} from '@/components/ui/bento-grid-advanced'
-import {
-  StatGrid,
-  ComparisonCard,
-  MiniKPI,
-  ProgressCard
-} from '@/components/ui/results-display'
-import {
-  ModernButton,
-  GradientButton,
-  PillButton
-} from '@/components/ui/modern-buttons'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   TrendingUp,
+  TrendingDown,
   Users,
-  DollarSign,
   Target,
   BarChart3,
+  Activity,
+  Filter,
+  GitBranch,
+  FlaskConical,
+  Route,
+  LayoutDashboard,
+  Calendar,
+  Clock,
+  Play,
+  Pause,
+  CheckCircle2,
+  XCircle,
+  ArrowRight,
+  ChevronRight,
+  Percent,
+  UserPlus,
+  UserMinus,
+  Eye,
+  MousePointer,
+  ShoppingCart,
+  CreditCard,
+  Search,
+  Download,
+  Plus,
+  MoreHorizontal,
+  Settings,
+  Share2,
+  Copy,
+  Sparkles,
+  Zap,
+  RefreshCw,
+  AlertCircle,
   ArrowUpRight,
   ArrowDownRight,
-  Zap,
-  Award,
-  Calendar,
-  Plus,
-  X,
-  Loader2,
-  Trash2,
-  Edit3
+  Layers,
+  PieChart
 } from 'lucide-react'
 
-interface GrowthHubClientProps {
-  initialMetrics: GrowthMetric[]
-  initialStats: GrowthStats
+// ============================================================================
+// TYPES & INTERFACES
+// ============================================================================
+
+interface FunnelStep {
+  id: string
+  name: string
+  event: string
+  users: number
+  conversionRate: number
+  dropoffRate: number
+  avgTimeToNext: string
 }
 
-export default function GrowthHubClient({ initialMetrics, initialStats }: GrowthHubClientProps) {
-  const {
-    metrics,
-    stats,
-    loading,
-    createMetric,
-    updateMetric,
-    deleteMetric,
-    recordValue,
-    setAsGoal,
-    getGoalProgress
-  } = useGrowthMetrics(initialMetrics, initialStats)
+interface Funnel {
+  id: string
+  name: string
+  description: string
+  steps: FunnelStep[]
+  totalConversion: number
+  totalUsers: number
+  period: string
+  createdAt: string
+  updatedAt: string
+  owner: string
+  isShared: boolean
+}
 
-  const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'quarter'>('month')
-  const [typeFilter, setTypeFilter] = useState<'all' | 'revenue' | 'users' | 'conversion'>('all')
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [showRecordModal, setShowRecordModal] = useState(false)
-  const [selectedMetric, setSelectedMetric] = useState<GrowthMetric | null>(null)
-  const [newMetric, setNewMetric] = useState({
-    metric_name: '',
-    metric_type: 'custom' as const,
-    current_value: 0,
-    previous_value: 0,
-    target_value: 0,
-    period: 'monthly' as const,
-    unit: 'count',
-    is_goal: false
-  })
-  const [newValue, setNewValue] = useState(0)
+interface CohortMember {
+  id: string
+  name: string
+  email: string
+  avatar?: string
+  joinedAt: string
+  lastActive: string
+  properties: Record<string, any>
+}
 
-  const filteredMetrics = metrics.filter(metric => {
-    if (typeFilter === 'all') return true
-    return metric.metric_type === typeFilter
-  })
+interface Cohort {
+  id: string
+  name: string
+  description: string
+  type: 'behavioral' | 'property' | 'computed' | 'predictive'
+  size: number
+  growth: number
+  createdAt: string
+  updatedAt: string
+  definition: string
+  members: CohortMember[]
+  status: 'active' | 'paused' | 'archived'
+}
 
-  const goals = metrics.filter(m => m.is_goal)
+interface RetentionData {
+  cohortDate: string
+  cohortSize: number
+  retentionByDay: number[]
+}
 
-  const handleCreateMetric = async () => {
-    if (!newMetric.metric_name.trim()) return
-    await createMetric(newMetric)
-    setShowCreateModal(false)
-    setNewMetric({ metric_name: '', metric_type: 'custom', current_value: 0, previous_value: 0, target_value: 0, period: 'monthly', unit: 'count', is_goal: false })
+interface RetentionAnalysis {
+  id: string
+  name: string
+  event: string
+  period: 'day' | 'week' | 'month'
+  data: RetentionData[]
+  avgRetention: number
+  trend: number
+  createdAt: string
+}
+
+interface ExperimentVariant {
+  id: string
+  name: string
+  allocation: number
+  users: number
+  conversions: number
+  conversionRate: number
+  revenue: number
+  confidence: number
+}
+
+interface Experiment {
+  id: string
+  name: string
+  description: string
+  hypothesis: string
+  status: 'draft' | 'running' | 'paused' | 'completed' | 'archived'
+  type: 'a/b' | 'multivariate' | 'feature-flag'
+  startDate: string
+  endDate?: string
+  targetMetric: string
+  variants: ExperimentVariant[]
+  winner?: string
+  statisticalSignificance: number
+  totalUsers: number
+  owner: string
+}
+
+interface PathNode {
+  event: string
+  users: number
+  percentage: number
+}
+
+interface UserPath {
+  id: string
+  name: string
+  startEvent: string
+  endEvent?: string
+  nodes: PathNode[][]
+  totalUsers: number
+  avgPathLength: number
+  createdAt: string
+}
+
+interface DashboardWidget {
+  id: string
+  type: 'metric' | 'chart' | 'funnel' | 'cohort' | 'table'
+  title: string
+  config: Record<string, any>
+  position: { x: number; y: number; w: number; h: number }
+}
+
+interface Dashboard {
+  id: string
+  name: string
+  description: string
+  widgets: DashboardWidget[]
+  isDefault: boolean
+  createdAt: string
+  updatedAt: string
+  owner: string
+  isShared: boolean
+}
+
+// ============================================================================
+// MOCK DATA
+// ============================================================================
+
+const mockFunnels: Funnel[] = [
+  {
+    id: '1',
+    name: 'Signup to Purchase',
+    description: 'Track user journey from signup to first purchase',
+    steps: [
+      { id: 's1', name: 'Page View', event: 'page_view', users: 45000, conversionRate: 100, dropoffRate: 0, avgTimeToNext: '0s' },
+      { id: 's2', name: 'Sign Up', event: 'sign_up', users: 12500, conversionRate: 27.8, dropoffRate: 72.2, avgTimeToNext: '2m 34s' },
+      { id: 's3', name: 'Add to Cart', event: 'add_to_cart', users: 8200, conversionRate: 65.6, dropoffRate: 34.4, avgTimeToNext: '5m 12s' },
+      { id: 's4', name: 'Checkout', event: 'checkout', users: 5100, conversionRate: 62.2, dropoffRate: 37.8, avgTimeToNext: '1m 45s' },
+      { id: 's5', name: 'Purchase', event: 'purchase', users: 4200, conversionRate: 82.4, dropoffRate: 17.6, avgTimeToNext: '0s' },
+    ],
+    totalConversion: 9.3,
+    totalUsers: 45000,
+    period: 'Last 30 days',
+    createdAt: '2024-01-15',
+    updatedAt: '2024-12-20',
+    owner: 'Sarah Chen',
+    isShared: true
+  },
+  {
+    id: '2',
+    name: 'Onboarding Flow',
+    description: 'New user onboarding completion funnel',
+    steps: [
+      { id: 's1', name: 'Account Created', event: 'account_created', users: 8500, conversionRate: 100, dropoffRate: 0, avgTimeToNext: '0s' },
+      { id: 's2', name: 'Profile Setup', event: 'profile_completed', users: 7200, conversionRate: 84.7, dropoffRate: 15.3, avgTimeToNext: '3m 20s' },
+      { id: 's3', name: 'First Action', event: 'first_action', users: 5800, conversionRate: 80.6, dropoffRate: 19.4, avgTimeToNext: '8m 45s' },
+      { id: 's4', name: 'Feature Discovery', event: 'feature_discovered', users: 4100, conversionRate: 70.7, dropoffRate: 29.3, avgTimeToNext: '12m 10s' },
+    ],
+    totalConversion: 48.2,
+    totalUsers: 8500,
+    period: 'Last 7 days',
+    createdAt: '2024-02-10',
+    updatedAt: '2024-12-19',
+    owner: 'Mike Johnson',
+    isShared: false
+  },
+  {
+    id: '3',
+    name: 'Feature Adoption',
+    description: 'Track adoption of new AI features',
+    steps: [
+      { id: 's1', name: 'Feature Viewed', event: 'ai_feature_viewed', users: 15000, conversionRate: 100, dropoffRate: 0, avgTimeToNext: '0s' },
+      { id: 's2', name: 'Feature Tried', event: 'ai_feature_tried', users: 9200, conversionRate: 61.3, dropoffRate: 38.7, avgTimeToNext: '45s' },
+      { id: 's3', name: 'Feature Used', event: 'ai_feature_used', users: 6800, conversionRate: 73.9, dropoffRate: 26.1, avgTimeToNext: '2m 30s' },
+    ],
+    totalConversion: 45.3,
+    totalUsers: 15000,
+    period: 'Last 14 days',
+    createdAt: '2024-03-01',
+    updatedAt: '2024-12-18',
+    owner: 'Lisa Park',
+    isShared: true
   }
+]
 
-  const handleRecordValue = async () => {
-    if (!selectedMetric) return
-    await recordValue(selectedMetric.id, newValue)
-    setShowRecordModal(false)
-    setSelectedMetric(null)
-    setNewValue(0)
+const mockCohorts: Cohort[] = [
+  {
+    id: '1',
+    name: 'Power Users',
+    description: 'Users with 10+ sessions in the last 30 days',
+    type: 'behavioral',
+    size: 12500,
+    growth: 15.2,
+    createdAt: '2024-01-10',
+    updatedAt: '2024-12-20',
+    definition: 'session_count >= 10 AND last_30_days',
+    members: [],
+    status: 'active'
+  },
+  {
+    id: '2',
+    name: 'At-Risk Users',
+    description: 'Active users with declining engagement',
+    type: 'predictive',
+    size: 3200,
+    growth: -8.5,
+    createdAt: '2024-02-15',
+    updatedAt: '2024-12-19',
+    definition: 'churn_probability > 0.6',
+    members: [],
+    status: 'active'
+  },
+  {
+    id: '3',
+    name: 'Premium Subscribers',
+    description: 'Users on premium or enterprise plans',
+    type: 'property',
+    size: 8900,
+    growth: 22.3,
+    createdAt: '2024-01-20',
+    updatedAt: '2024-12-18',
+    definition: 'plan IN (premium, enterprise)',
+    members: [],
+    status: 'active'
+  },
+  {
+    id: '4',
+    name: 'Feature Champions',
+    description: 'Users who adopted 5+ features',
+    type: 'computed',
+    size: 5600,
+    growth: 18.7,
+    createdAt: '2024-03-01',
+    updatedAt: '2024-12-17',
+    definition: 'features_adopted >= 5',
+    members: [],
+    status: 'active'
+  },
+  {
+    id: '5',
+    name: 'Mobile-First Users',
+    description: 'Users primarily using mobile apps',
+    type: 'behavioral',
+    size: 15200,
+    growth: 28.4,
+    createdAt: '2024-02-28',
+    updatedAt: '2024-12-16',
+    definition: 'mobile_sessions / total_sessions > 0.7',
+    members: [],
+    status: 'active'
   }
+]
 
-  const displayStats = [
-    { label: 'Revenue Growth', value: `+${stats.avgGrowthRate.toFixed(1)}%`, change: 12.5, icon: <DollarSign className="w-5 h-5" /> },
-    { label: 'Active Metrics', value: stats.total.toString(), change: 25.3, icon: <BarChart3 className="w-5 h-5" /> },
-    { label: 'Goals Set', value: stats.goals.toString(), change: 15.2, icon: <Target className="w-5 h-5" /> },
-    { label: 'Total Value', value: `$${(stats.totalCurrentValue / 1000).toFixed(1)}K`, change: 18.7, icon: <TrendingUp className="w-5 h-5" /> }
-  ]
+const mockRetentionAnalyses: RetentionAnalysis[] = [
+  {
+    id: '1',
+    name: 'Weekly User Retention',
+    event: 'app_open',
+    period: 'week',
+    data: [
+      { cohortDate: '2024-12-01', cohortSize: 2500, retentionByDay: [100, 45, 32, 28, 25, 23, 21, 20] },
+      { cohortDate: '2024-12-08', cohortSize: 2800, retentionByDay: [100, 48, 35, 30, 27, 25, 23] },
+      { cohortDate: '2024-12-15', cohortSize: 3100, retentionByDay: [100, 52, 38, 33, 29, 26] },
+    ],
+    avgRetention: 24.5,
+    trend: 3.2,
+    createdAt: '2024-11-01'
+  },
+  {
+    id: '2',
+    name: 'Feature Usage Retention',
+    event: 'feature_used',
+    period: 'day',
+    data: [
+      { cohortDate: '2024-12-18', cohortSize: 1200, retentionByDay: [100, 62, 48, 41, 36, 32, 29, 27] },
+      { cohortDate: '2024-12-19', cohortSize: 1350, retentionByDay: [100, 65, 51, 44, 38, 34, 30] },
+      { cohortDate: '2024-12-20', cohortSize: 1100, retentionByDay: [100, 58, 45, 38, 33, 29] },
+    ],
+    avgRetention: 31.2,
+    trend: 5.8,
+    createdAt: '2024-12-01'
+  }
+]
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'revenue': return <DollarSign className="w-5 h-5" />
-      case 'users': return <Users className="w-5 h-5" />
-      case 'conversion': return <Target className="w-5 h-5" />
-      case 'engagement': return <Zap className="w-5 h-5" />
-      case 'retention': return <Award className="w-5 h-5" />
-      default: return <BarChart3 className="w-5 h-5" />
+const mockExperiments: Experiment[] = [
+  {
+    id: '1',
+    name: 'New Checkout Flow',
+    description: 'Testing simplified checkout with fewer steps',
+    hypothesis: 'Reducing checkout steps from 5 to 3 will increase conversion by 15%',
+    status: 'running',
+    type: 'a/b',
+    startDate: '2024-12-01',
+    targetMetric: 'checkout_completion',
+    variants: [
+      { id: 'control', name: 'Control', allocation: 50, users: 15200, conversions: 2280, conversionRate: 15.0, revenue: 228000, confidence: 0 },
+      { id: 'variant-a', name: 'Simplified Flow', allocation: 50, users: 15400, conversions: 2772, conversionRate: 18.0, revenue: 277200, confidence: 94.2 }
+    ],
+    statisticalSignificance: 94.2,
+    totalUsers: 30600,
+    owner: 'Product Team'
+  },
+  {
+    id: '2',
+    name: 'AI Recommendations',
+    description: 'Testing AI-powered product recommendations',
+    hypothesis: 'AI recommendations will increase add-to-cart rate by 20%',
+    status: 'completed',
+    type: 'a/b',
+    startDate: '2024-11-01',
+    endDate: '2024-11-30',
+    targetMetric: 'add_to_cart',
+    variants: [
+      { id: 'control', name: 'Manual Recs', allocation: 50, users: 45000, conversions: 9000, conversionRate: 20.0, revenue: 450000, confidence: 0 },
+      { id: 'variant-a', name: 'AI Recs', allocation: 50, users: 44800, conversions: 10752, conversionRate: 24.0, revenue: 537600, confidence: 99.1 }
+    ],
+    winner: 'variant-a',
+    statisticalSignificance: 99.1,
+    totalUsers: 89800,
+    owner: 'AI Team'
+  },
+  {
+    id: '3',
+    name: 'Pricing Page Layout',
+    description: 'Testing different pricing page layouts',
+    hypothesis: 'Horizontal pricing layout will increase plan upgrades by 10%',
+    status: 'running',
+    type: 'multivariate',
+    startDate: '2024-12-10',
+    targetMetric: 'plan_upgrade',
+    variants: [
+      { id: 'control', name: 'Vertical Cards', allocation: 33, users: 8200, conversions: 410, conversionRate: 5.0, revenue: 41000, confidence: 0 },
+      { id: 'variant-a', name: 'Horizontal Cards', allocation: 33, users: 8100, conversions: 486, conversionRate: 6.0, revenue: 48600, confidence: 78.5 },
+      { id: 'variant-b', name: 'Comparison Table', allocation: 34, users: 8400, conversions: 546, conversionRate: 6.5, revenue: 54600, confidence: 89.2 }
+    ],
+    statisticalSignificance: 89.2,
+    totalUsers: 24700,
+    owner: 'Growth Team'
+  },
+  {
+    id: '4',
+    name: 'Dark Mode Default',
+    description: 'Testing dark mode as default theme',
+    hypothesis: 'Dark mode default will improve session duration by 15%',
+    status: 'draft',
+    type: 'feature-flag',
+    startDate: '2024-12-25',
+    targetMetric: 'session_duration',
+    variants: [
+      { id: 'control', name: 'Light Mode', allocation: 50, users: 0, conversions: 0, conversionRate: 0, revenue: 0, confidence: 0 },
+      { id: 'variant-a', name: 'Dark Mode', allocation: 50, users: 0, conversions: 0, conversionRate: 0, revenue: 0, confidence: 0 }
+    ],
+    statisticalSignificance: 0,
+    totalUsers: 0,
+    owner: 'Design Team'
+  }
+]
+
+const mockUserPaths: UserPath[] = [
+  {
+    id: '1',
+    name: 'Homepage to Purchase',
+    startEvent: 'homepage_view',
+    endEvent: 'purchase',
+    nodes: [
+      [{ event: 'homepage_view', users: 50000, percentage: 100 }],
+      [
+        { event: 'product_list_view', users: 32000, percentage: 64 },
+        { event: 'search', users: 12000, percentage: 24 },
+        { event: 'exit', users: 6000, percentage: 12 }
+      ],
+      [
+        { event: 'product_view', users: 28000, percentage: 56 },
+        { event: 'exit', users: 16000, percentage: 32 }
+      ],
+      [
+        { event: 'add_to_cart', users: 18000, percentage: 36 },
+        { event: 'exit', users: 10000, percentage: 20 }
+      ],
+      [
+        { event: 'checkout', users: 12000, percentage: 24 },
+        { event: 'exit', users: 6000, percentage: 12 }
+      ],
+      [
+        { event: 'purchase', users: 9500, percentage: 19 },
+        { event: 'exit', users: 2500, percentage: 5 }
+      ]
+    ],
+    totalUsers: 50000,
+    avgPathLength: 4.2,
+    createdAt: '2024-12-01'
+  }
+]
+
+const mockDashboards: Dashboard[] = [
+  {
+    id: '1',
+    name: 'Growth Overview',
+    description: 'Key growth metrics and KPIs',
+    widgets: [],
+    isDefault: true,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-12-20',
+    owner: 'Growth Team',
+    isShared: true
+  },
+  {
+    id: '2',
+    name: 'Conversion Analytics',
+    description: 'Funnel and conversion tracking',
+    widgets: [],
+    isDefault: false,
+    createdAt: '2024-02-15',
+    updatedAt: '2024-12-19',
+    owner: 'Product Team',
+    isShared: true
+  },
+  {
+    id: '3',
+    name: 'User Engagement',
+    description: 'User behavior and engagement metrics',
+    widgets: [],
+    isDefault: false,
+    createdAt: '2024-03-01',
+    updatedAt: '2024-12-18',
+    owner: 'Analytics Team',
+    isShared: false
+  }
+]
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+const getCohortTypeColor = (type: Cohort['type']): string => {
+  const colors: Record<Cohort['type'], string> = {
+    behavioral: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+    property: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
+    computed: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+    predictive: 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300'
+  }
+  return colors[type]
+}
+
+const getExperimentStatusColor = (status: Experiment['status']): string => {
+  const colors: Record<Experiment['status'], string> = {
+    draft: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+    running: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+    paused: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+    completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
+    archived: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+  }
+  return colors[status]
+}
+
+const getRetentionCellColor = (value: number): string => {
+  if (value >= 50) return 'bg-green-500 text-white'
+  if (value >= 30) return 'bg-green-400 text-white'
+  if (value >= 20) return 'bg-yellow-400 text-gray-900'
+  if (value >= 10) return 'bg-orange-400 text-white'
+  return 'bg-red-400 text-white'
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+export default function GrowthHubClient() {
+  const [activeTab, setActiveTab] = useState('overview')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedFunnel, setSelectedFunnel] = useState<Funnel | null>(null)
+  const [selectedCohort, setSelectedCohort] = useState<Cohort | null>(null)
+  const [selectedExperiment, setSelectedExperiment] = useState<Experiment | null>(null)
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+
+  // Stats calculations
+  const stats = useMemo(() => {
+    const totalFunnels = mockFunnels.length
+    const avgConversion = mockFunnels.reduce((acc, f) => acc + f.totalConversion, 0) / totalFunnels
+    const totalCohortSize = mockCohorts.reduce((acc, c) => acc + c.size, 0)
+    const activeExperiments = mockExperiments.filter(e => e.status === 'running').length
+    const avgRetention = mockRetentionAnalyses.reduce((acc, r) => acc + r.avgRetention, 0) / mockRetentionAnalyses.length
+    const totalExperimentUsers = mockExperiments.reduce((acc, e) => acc + e.totalUsers, 0)
+    const completedExperiments = mockExperiments.filter(e => e.status === 'completed').length
+    const dashboardCount = mockDashboards.length
+
+    return {
+      totalFunnels,
+      avgConversion,
+      totalCohortSize,
+      activeExperiments,
+      avgRetention,
+      totalExperimentUsers,
+      completedExperiments,
+      dashboardCount
     }
-  }
+  }, [])
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'revenue': return 'from-green-500 to-emerald-500'
-      case 'users': return 'from-blue-500 to-cyan-500'
-      case 'conversion': return 'from-purple-500 to-pink-500'
-      case 'engagement': return 'from-orange-500 to-amber-500'
-      case 'retention': return 'from-indigo-500 to-purple-500'
-      default: return 'from-gray-500 to-gray-600'
-    }
-  }
-
-  const formatValue = (metric: GrowthMetric) => {
-    if (metric.unit === '$' || metric.metric_type === 'revenue') {
-      return `$${metric.current_value >= 1000 ? (metric.current_value / 1000).toFixed(1) + 'K' : metric.current_value}`
-    }
-    if (metric.unit === '%' || metric.metric_type === 'conversion') {
-      return `${metric.current_value}%`
-    }
-    return metric.current_value.toLocaleString()
-  }
+  // Filtered data
+  const filteredExperiments = useMemo(() => {
+    return mockExperiments.filter(exp => {
+      const matchesSearch = exp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        exp.description.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesStatus = statusFilter === 'all' || exp.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [searchQuery, statusFilter])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-              <TrendingUp className="w-10 h-10 text-green-600" />
-              Growth Hub
-            </h1>
-            <p className="text-muted-foreground">Track and optimize your growth metrics</p>
-          </div>
-          <GradientButton from="green" to="emerald" onClick={() => setShowCreateModal(true)}>
-            <Plus className="w-5 h-5 mr-2" />
-            Add Metric
-          </GradientButton>
-        </div>
-
-        <StatGrid columns={4} stats={displayStats} />
-
-        <div className="flex items-center gap-3">
-          <PillButton variant={selectedPeriod === 'week' ? 'primary' : 'ghost'} onClick={() => setSelectedPeriod('week')}>Week</PillButton>
-          <PillButton variant={selectedPeriod === 'month' ? 'primary' : 'ghost'} onClick={() => setSelectedPeriod('month')}>Month</PillButton>
-          <PillButton variant={selectedPeriod === 'quarter' ? 'primary' : 'ghost'} onClick={() => setSelectedPeriod('quarter')}>Quarter</PillButton>
-          <div className="w-px h-6 bg-border" />
-          <PillButton variant={typeFilter === 'all' ? 'primary' : 'ghost'} onClick={() => setTypeFilter('all')}>All</PillButton>
-          <PillButton variant={typeFilter === 'revenue' ? 'primary' : 'ghost'} onClick={() => setTypeFilter('revenue')}>Revenue</PillButton>
-          <PillButton variant={typeFilter === 'users' ? 'primary' : 'ghost'} onClick={() => setTypeFilter('users')}>Users</PillButton>
-          <PillButton variant={typeFilter === 'conversion' ? 'primary' : 'ghost'} onClick={() => setTypeFilter('conversion')}>Conversion</PillButton>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <BentoQuickAction icon={<Target />} title="Set Goals" description="Growth targets" onClick={() => setShowCreateModal(true)} />
-          <BentoQuickAction icon={<BarChart3 />} title="Analytics" description="Deep dive" onClick={() => console.log('Analytics')} />
-          <BentoQuickAction icon={<Zap />} title="Experiments" description="A/B tests" onClick={() => console.log('Experiments')} />
-          <BentoQuickAction icon={<Award />} title="Milestones" description="Achievements" onClick={() => console.log('Milestones')} />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <BentoCard className="p-6 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-950 dark:via-emerald-950 dark:to-teal-950 border-green-200 dark:border-green-800">
-              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                <TrendingUp className="w-6 h-6 text-green-600" />
-                Growth Metrics
-              </h2>
-              {loading && metrics.length === 0 ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-green-600" />
-                </div>
-              ) : filteredMetrics.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No metrics found</p>
-                  <ModernButton variant="outline" size="sm" className="mt-4" onClick={() => setShowCreateModal(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add First Metric
-                  </ModernButton>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {filteredMetrics.map((metric) => (
-                    <div key={metric.id} className="bg-white dark:bg-gray-900 rounded-lg p-4 shadow-sm">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${getTypeColor(metric.metric_type)} flex items-center justify-center text-white`}>
-                            {getTypeIcon(metric.metric_type)}
-                          </div>
-                          <div>
-                            <span className="font-semibold">{metric.metric_name}</span>
-                            <p className="text-xs text-muted-foreground capitalize">{metric.metric_type} • {metric.period}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`text-sm font-semibold flex items-center gap-1 ${metric.growth_rate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {metric.growth_rate >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                            {metric.growth_rate >= 0 ? '+' : ''}{metric.growth_rate.toFixed(1)}%
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <div>
-                          <p className="text-xs text-muted-foreground">Current</p>
-                          <p className="font-bold text-green-600">{formatValue(metric)}</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-xs text-muted-foreground">Previous</p>
-                          <p className="font-semibold text-muted-foreground">
-                            {metric.unit === '$' || metric.metric_type === 'revenue'
-                              ? `$${metric.previous_value >= 1000 ? (metric.previous_value / 1000).toFixed(1) + 'K' : metric.previous_value}`
-                              : metric.unit === '%' || metric.metric_type === 'conversion'
-                              ? `${metric.previous_value}%`
-                              : metric.previous_value.toLocaleString()}
-                          </p>
-                        </div>
-                        {metric.is_goal && metric.target_value && (
-                          <div className="text-right">
-                            <p className="text-xs text-muted-foreground">Target</p>
-                            <p className="font-semibold text-blue-600">
-                              {metric.unit === '$' || metric.metric_type === 'revenue'
-                                ? `$${metric.target_value >= 1000 ? (metric.target_value / 1000).toFixed(1) + 'K' : metric.target_value}`
-                                : metric.target_value.toLocaleString()}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                      {metric.is_goal && metric.target_value && (
-                        <div className="mt-3">
-                          <div className="flex justify-between text-xs mb-1">
-                            <span>Progress</span>
-                            <span>{getGoalProgress(metric).toFixed(0)}%</span>
-                          </div>
-                          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-gradient-to-r from-green-500 to-emerald-500 transition-all"
-                              style={{ width: `${getGoalProgress(metric)}%` }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2 mt-3 pt-3 border-t">
-                        <ModernButton variant="outline" size="sm" onClick={() => {
-                          setSelectedMetric(metric)
-                          setNewValue(metric.current_value)
-                          setShowRecordModal(true)
-                        }}>
-                          <Edit3 className="w-3 h-3 mr-1" />Record Value
-                        </ModernButton>
-                        {!metric.is_goal && (
-                          <ModernButton variant="outline" size="sm" onClick={() => setAsGoal(metric.id, metric.current_value * 2)}>
-                            <Target className="w-3 h-3 mr-1" />Set Goal
-                          </ModernButton>
-                        )}
-                        <ModernButton variant="outline" size="sm" onClick={() => deleteMetric(metric.id)}>
-                          <Trash2 className="w-3 h-3" />
-                        </ModernButton>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </BentoCard>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <ComparisonCard
-                title="Monthly Comparison"
-                current={{ label: 'This Month', value: stats.totalCurrentValue }}
-                previous={{ label: 'Last Month', value: stats.totalTargetValue || stats.totalCurrentValue * 0.8 }}
-              />
-              <ProgressCard
-                title="Annual Revenue Goal"
-                current={stats.totalCurrentValue}
-                goal={stats.totalTargetValue || 500000}
-                unit="$"
-                icon={<Target className="w-5 h-5" />}
-              />
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900">
+      {/* Header */}
+      <div className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="max-w-[1800px] mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Growth Hub</h1>
+                <p className="text-sm text-muted-foreground">Amplitude-level product analytics platform</p>
+              </div>
             </div>
-          </div>
-
-          <div className="space-y-6">
-            <BentoCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Active Goals</h3>
-              {goals.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">No goals set</p>
-              ) : (
-                <div className="space-y-3">
-                  {goals.slice(0, 5).map((goal) => (
-                    <div key={goal.id} className="p-3 rounded-lg bg-muted/50">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium text-sm">{goal.metric_name}</span>
-                        <span className="text-xs text-green-600">{getGoalProgress(goal).toFixed(0)}%</span>
-                      </div>
-                      <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-green-500 to-emerald-500"
-                          style={{ width: `${getGoalProgress(goal)}%` }}
-                        />
-                      </div>
-                      {goal.goal_deadline && (
-                        <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          Due: {new Date(goal.goal_deadline).toLocaleDateString()}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </BentoCard>
-
-            <BentoCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Performance Metrics</h3>
-              <div className="space-y-3">
-                <MiniKPI label="Revenue Metrics" value={stats.revenue.toString()} change={25.3} />
-                <MiniKPI label="User Metrics" value={stats.users.toString()} change={18.7} />
-                <MiniKPI label="Conversion Metrics" value={stats.conversion.toString()} change={12.5} />
-                <MiniKPI label="Avg Growth Rate" value={`${stats.avgGrowthRate.toFixed(1)}%`} change={15.2} />
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search analytics..."
+                  className="pl-10 w-64"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
-            </BentoCard>
-
-            <BentoCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Growth Initiatives</h3>
-              <div className="space-y-3">
-                <div className="p-3 rounded-lg bg-muted/50">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-sm">Content Marketing</span>
-                    <span className="text-xs bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300 px-2 py-1 rounded-md">Active</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Blog posts & SEO optimization</p>
-                </div>
-                <div className="p-3 rounded-lg bg-muted/50">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-sm">Referral Program</span>
-                    <span className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 px-2 py-1 rounded-md">Testing</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">User referral incentives</p>
-                </div>
-                <div className="p-3 rounded-lg bg-muted/50">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-sm">Email Campaigns</span>
-                    <span className="text-xs bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300 px-2 py-1 rounded-md">Active</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Automated nurture sequences</p>
-                </div>
-              </div>
-            </BentoCard>
+              <Button variant="outline" size="icon">
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+              <Button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+                <Plus className="w-4 h-4 mr-2" />
+                New Analysis
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-background rounded-xl p-6 w-full max-w-md mx-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">Add Growth Metric</h2>
-              <button onClick={() => setShowCreateModal(false)}><X className="w-5 h-5" /></button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Metric Name *</label>
-                <input
-                  type="text"
-                  value={newMetric.metric_name}
-                  onChange={(e) => setNewMetric({ ...newMetric, metric_name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="e.g., Monthly Revenue"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Type</label>
-                  <select
-                    value={newMetric.metric_type}
-                    onChange={(e) => setNewMetric({ ...newMetric, metric_type: e.target.value as any })}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-green-500"
-                  >
-                    <option value="revenue">Revenue</option>
-                    <option value="users">Users</option>
-                    <option value="conversion">Conversion</option>
-                    <option value="engagement">Engagement</option>
-                    <option value="retention">Retention</option>
-                    <option value="custom">Custom</option>
-                  </select>
+      <div className="max-w-[1800px] mx-auto p-6 space-y-6">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {[
+            { label: 'Active Funnels', value: stats.totalFunnels.toString(), change: 12.5, icon: Filter, color: 'from-blue-500 to-cyan-500' },
+            { label: 'Avg Conversion', value: `${stats.avgConversion.toFixed(1)}%`, change: 8.3, icon: Percent, color: 'from-green-500 to-emerald-500' },
+            { label: 'Cohort Users', value: `${(stats.totalCohortSize / 1000).toFixed(1)}K`, change: 15.2, icon: Users, color: 'from-purple-500 to-pink-500' },
+            { label: 'Active Experiments', value: stats.activeExperiments.toString(), change: 25.0, icon: FlaskConical, color: 'from-orange-500 to-amber-500' },
+            { label: 'Avg Retention', value: `${stats.avgRetention.toFixed(1)}%`, change: 5.8, icon: Activity, color: 'from-teal-500 to-cyan-500' },
+            { label: 'Test Users', value: `${(stats.totalExperimentUsers / 1000).toFixed(0)}K`, change: 32.1, icon: Target, color: 'from-indigo-500 to-purple-500' },
+            { label: 'Completed Tests', value: stats.completedExperiments.toString(), change: 10.0, icon: CheckCircle2, color: 'from-emerald-500 to-green-500' },
+            { label: 'Dashboards', value: stats.dashboardCount.toString(), change: 8.0, icon: LayoutDashboard, color: 'from-rose-500 to-pink-500' }
+          ].map((stat, index) => (
+            <Card key={index} className="relative overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                    <stat.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <div className={`flex items-center gap-1 text-xs ${stat.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {stat.change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                    {Math.abs(stat.change)}%
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Period</label>
-                  <select
-                    value={newMetric.period}
-                    onChange={(e) => setNewMetric({ ...newMetric, period: e.target.value as any })}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-green-500"
-                  >
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="quarterly">Quarterly</option>
-                    <option value="yearly">Yearly</option>
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Current Value</label>
-                  <input
-                    type="number"
-                    value={newMetric.current_value}
-                    onChange={(e) => setNewMetric({ ...newMetric, current_value: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Previous Value</label>
-                  <input
-                    type="number"
-                    value={newMetric.previous_value}
-                    onChange={(e) => setNewMetric({ ...newMetric, previous_value: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Unit</label>
-                  <select
-                    value={newMetric.unit}
-                    onChange={(e) => setNewMetric({ ...newMetric, unit: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-green-500"
-                  >
-                    <option value="count">Count</option>
-                    <option value="$">Dollar ($)</option>
-                    <option value="%">Percent (%)</option>
-                  </select>
-                </div>
-                <div className="flex items-end">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={newMetric.is_goal}
-                      onChange={(e) => setNewMetric({ ...newMetric, is_goal: e.target.checked })}
-                      className="rounded"
-                    />
-                    <span className="text-sm">Set as Goal</span>
-                  </label>
-                </div>
-              </div>
-              {newMetric.is_goal && (
-                <div>
-                  <label className="block text-sm font-medium mb-1">Target Value</label>
-                  <input
-                    type="number"
-                    value={newMetric.target_value}
-                    onChange={(e) => setNewMetric({ ...newMetric, target_value: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-              )}
-              <div className="flex gap-3 pt-4">
-                <ModernButton variant="outline" className="flex-1" onClick={() => setShowCreateModal(false)}>Cancel</ModernButton>
-                <GradientButton from="green" to="emerald" className="flex-1" onClick={handleCreateMetric} disabled={loading || !newMetric.metric_name.trim()}>
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Add Metric'}
-                </GradientButton>
-              </div>
-            </div>
-          </div>
+                <p className="text-2xl font-bold">{stat.value}</p>
+                <p className="text-xs text-muted-foreground">{stat.label}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      )}
 
-      {showRecordModal && selectedMetric && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-background rounded-xl p-6 w-full max-w-sm mx-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">Record New Value</h2>
-              <button onClick={() => { setShowRecordModal(false); setSelectedMetric(null) }}><X className="w-5 h-5" /></button>
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-lg">
+            <TabsTrigger value="overview" className="gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="funnels" className="gap-2">
+              <Filter className="w-4 h-4" />
+              Funnels
+            </TabsTrigger>
+            <TabsTrigger value="cohorts" className="gap-2">
+              <Users className="w-4 h-4" />
+              Cohorts
+            </TabsTrigger>
+            <TabsTrigger value="retention" className="gap-2">
+              <Activity className="w-4 h-4" />
+              Retention
+            </TabsTrigger>
+            <TabsTrigger value="experiments" className="gap-2">
+              <FlaskConical className="w-4 h-4" />
+              Experiments
+            </TabsTrigger>
+            <TabsTrigger value="paths" className="gap-2">
+              <Route className="w-4 h-4" />
+              User Paths
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Top Funnels */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Filter className="w-5 h-5 text-blue-500" />
+                    Top Funnels
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {mockFunnels.slice(0, 3).map((funnel) => (
+                    <div key={funnel.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer" onClick={() => setSelectedFunnel(funnel)}>
+                      <div>
+                        <p className="font-medium">{funnel.name}</p>
+                        <p className="text-xs text-muted-foreground">{funnel.steps.length} steps</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-green-600">{funnel.totalConversion.toFixed(1)}%</p>
+                        <p className="text-xs text-muted-foreground">{funnel.totalUsers.toLocaleString()} users</p>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Active Experiments */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FlaskConical className="w-5 h-5 text-orange-500" />
+                    Active Experiments
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {mockExperiments.filter(e => e.status === 'running').map((exp) => (
+                    <div key={exp.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer" onClick={() => setSelectedExperiment(exp)}>
+                      <div>
+                        <p className="font-medium">{exp.name}</p>
+                        <p className="text-xs text-muted-foreground">{exp.variants.length} variants</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold">{exp.statisticalSignificance.toFixed(1)}%</p>
+                        <p className="text-xs text-muted-foreground">confidence</p>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Top Cohorts */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-purple-500" />
+                    Top Cohorts
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {mockCohorts.slice(0, 3).map((cohort) => (
+                    <div key={cohort.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer" onClick={() => setSelectedCohort(cohort)}>
+                      <div className="flex items-center gap-3">
+                        <Badge className={getCohortTypeColor(cohort.type)}>{cohort.type}</Badge>
+                        <p className="font-medium">{cohort.name}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold">{cohort.size.toLocaleString()}</p>
+                        <p className={`text-xs ${cohort.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {cohort.growth >= 0 ? '+' : ''}{cohort.growth}%
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
             </div>
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">Recording value for: <strong>{selectedMetric.metric_name}</strong></p>
+
+            {/* Retention Overview */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-teal-500" />
+                  Retention Overview
+                </CardTitle>
+                <CardDescription>Weekly user retention trends</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr>
+                        <th className="text-left p-2">Cohort</th>
+                        <th className="text-center p-2">Size</th>
+                        <th className="text-center p-2">Week 0</th>
+                        <th className="text-center p-2">Week 1</th>
+                        <th className="text-center p-2">Week 2</th>
+                        <th className="text-center p-2">Week 3</th>
+                        <th className="text-center p-2">Week 4</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {mockRetentionAnalyses[0].data.map((row, idx) => (
+                        <tr key={idx}>
+                          <td className="p-2 font-medium">{row.cohortDate}</td>
+                          <td className="text-center p-2">{row.cohortSize.toLocaleString()}</td>
+                          {row.retentionByDay.slice(0, 5).map((val, i) => (
+                            <td key={i} className="p-2">
+                              <div className={`rounded px-2 py-1 text-center text-xs font-medium ${getRetentionCellColor(val)}`}>
+                                {val}%
+                              </div>
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Funnels Tab */}
+          <TabsContent value="funnels" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Filter className="w-4 h-4" />
+                  Filter
+                </Button>
+              </div>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                Create Funnel
+              </Button>
+            </div>
+
+            <div className="grid gap-6">
+              {mockFunnels.map((funnel) => (
+                <Card key={funnel.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedFunnel(funnel)}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          {funnel.name}
+                          {funnel.isShared && <Badge variant="outline">Shared</Badge>}
+                        </CardTitle>
+                        <CardDescription>{funnel.description}</CardDescription>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold text-green-600">{funnel.totalConversion.toFixed(1)}%</p>
+                        <p className="text-sm text-muted-foreground">Overall Conversion</p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-2 overflow-x-auto pb-4">
+                      {funnel.steps.map((step, idx) => (
+                        <div key={step.id} className="flex items-center">
+                          <div className="flex flex-col items-center min-w-[120px]">
+                            <div className="w-full h-16 bg-gradient-to-t from-green-500 to-emerald-400 rounded-t-lg relative" style={{ height: `${Math.max(20, step.conversionRate * 0.6)}px` }}>
+                              <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-sm font-bold">
+                                {step.users.toLocaleString()}
+                              </div>
+                            </div>
+                            <div className="bg-muted p-2 rounded-b-lg w-full text-center">
+                              <p className="text-xs font-medium truncate">{step.name}</p>
+                              <p className="text-xs text-green-600">{step.conversionRate.toFixed(1)}%</p>
+                            </div>
+                          </div>
+                          {idx < funnel.steps.length - 1 && (
+                            <div className="flex flex-col items-center mx-2 text-muted-foreground">
+                              <ArrowRight className="w-4 h-4" />
+                              <span className="text-xs text-red-500">-{step.dropoffRate.toFixed(1)}%</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground border-t pt-4 mt-4">
+                      <span>{funnel.period}</span>
+                      <span>Owner: {funnel.owner}</span>
+                      <span>Updated: {funnel.updatedAt}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Cohorts Tab */}
+          <TabsContent value="cohorts" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {['all', 'behavioral', 'property', 'computed', 'predictive'].map((type) => (
+                  <Button
+                    key={type}
+                    variant={statusFilter === type ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setStatusFilter(type)}
+                    className="capitalize"
+                  >
+                    {type}
+                  </Button>
+                ))}
+              </div>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                Create Cohort
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mockCohorts.filter(c => statusFilter === 'all' || c.type === statusFilter).map((cohort) => (
+                <Card key={cohort.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedCohort(cohort)}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <Badge className={getCohortTypeColor(cohort.type)}>{cohort.type}</Badge>
+                      <Badge variant="outline" className={cohort.status === 'active' ? 'text-green-600' : 'text-gray-500'}>
+                        {cohort.status}
+                      </Badge>
+                    </div>
+                    <CardTitle className="mt-2">{cohort.name}</CardTitle>
+                    <CardDescription>{cohort.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <p className="text-3xl font-bold">{cohort.size.toLocaleString()}</p>
+                        <p className="text-sm text-muted-foreground">Users</p>
+                      </div>
+                      <div className={`flex items-center gap-1 text-lg font-medium ${cohort.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {cohort.growth >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
+                        {cohort.growth >= 0 ? '+' : ''}{cohort.growth}%
+                      </div>
+                    </div>
+                    <div className="p-2 bg-muted rounded-lg font-mono text-xs">
+                      {cohort.definition}
+                    </div>
+                    <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
+                      <span>Created: {cohort.createdAt}</span>
+                      <span>Updated: {cohort.updatedAt}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Retention Tab */}
+          <TabsContent value="retention" className="space-y-6">
+            {mockRetentionAnalyses.map((analysis) => (
+              <Card key={analysis.id}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-teal-500" />
+                        {analysis.name}
+                      </CardTitle>
+                      <CardDescription>Event: {analysis.event} | Period: {analysis.period}</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-2xl font-bold">{analysis.avgRetention.toFixed(1)}%</p>
+                        <p className="text-sm text-muted-foreground">Avg Retention</p>
+                      </div>
+                      <div className={`flex items-center gap-1 ${analysis.trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {analysis.trend >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
+                        {analysis.trend >= 0 ? '+' : ''}{analysis.trend}%
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-3">Cohort Date</th>
+                          <th className="text-center p-3">Size</th>
+                          {Array.from({ length: 8 }, (_, i) => (
+                            <th key={i} className="text-center p-3">{analysis.period === 'day' ? `D${i}` : analysis.period === 'week' ? `W${i}` : `M${i}`}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analysis.data.map((row, idx) => (
+                          <tr key={idx} className="border-b">
+                            <td className="p-3 font-medium">{row.cohortDate}</td>
+                            <td className="text-center p-3">{row.cohortSize.toLocaleString()}</td>
+                            {row.retentionByDay.map((val, i) => (
+                              <td key={i} className="p-2">
+                                <div className={`rounded-lg px-2 py-1.5 text-center text-xs font-medium ${getRetentionCellColor(val)}`}>
+                                  {val}%
+                                </div>
+                              </td>
+                            ))}
+                            {Array.from({ length: 8 - row.retentionByDay.length }, (_, i) => (
+                              <td key={`empty-${i}`} className="p-2">
+                                <div className="rounded-lg px-2 py-1.5 text-center text-xs bg-gray-100 dark:bg-gray-800 text-gray-400">
+                                  -
+                                </div>
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+
+          {/* Experiments Tab */}
+          <TabsContent value="experiments" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {['all', 'draft', 'running', 'paused', 'completed'].map((status) => (
+                  <Button
+                    key={status}
+                    variant={statusFilter === status ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setStatusFilter(status)}
+                    className="capitalize"
+                  >
+                    {status}
+                  </Button>
+                ))}
+              </div>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                New Experiment
+              </Button>
+            </div>
+
+            <div className="grid gap-6">
+              {filteredExperiments.map((experiment) => (
+                <Card key={experiment.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedExperiment(experiment)}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Badge className={getExperimentStatusColor(experiment.status)}>{experiment.status}</Badge>
+                        <Badge variant="outline">{experiment.type}</Badge>
+                      </div>
+                      {experiment.winner && (
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                          Winner: {experiment.variants.find(v => v.id === experiment.winner)?.name}
+                        </Badge>
+                      )}
+                    </div>
+                    <CardTitle className="mt-2">{experiment.name}</CardTitle>
+                    <CardDescription>{experiment.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-4 p-3 bg-muted/50 rounded-lg">
+                      <p className="text-sm"><strong>Hypothesis:</strong> {experiment.hypothesis}</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                      {experiment.variants.map((variant) => (
+                        <div key={variant.id} className={`p-4 rounded-lg border ${variant.id === experiment.winner ? 'border-green-500 bg-green-50 dark:bg-green-950' : 'bg-muted/30'}`}>
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="font-medium text-sm">{variant.name}</p>
+                            {variant.id === experiment.winner && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                          </div>
+                          <p className="text-2xl font-bold">{variant.conversionRate.toFixed(1)}%</p>
+                          <p className="text-xs text-muted-foreground">{variant.users.toLocaleString()} users</p>
+                          {variant.confidence > 0 && (
+                            <div className="mt-2">
+                              <Progress value={variant.confidence} className="h-1" />
+                              <p className="text-xs text-muted-foreground mt-1">{variant.confidence.toFixed(1)}% confidence</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center justify-between text-sm text-muted-foreground border-t pt-4">
+                      <span>Target: {experiment.targetMetric}</span>
+                      <span>Started: {experiment.startDate}</span>
+                      <span>{experiment.totalUsers.toLocaleString()} total users</span>
+                      <span>Owner: {experiment.owner}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* User Paths Tab */}
+          <TabsContent value="paths" className="space-y-6">
+            <div className="flex items-center justify-between">
               <div>
-                <label className="block text-sm font-medium mb-1">New Value</label>
-                <input
-                  type="number"
-                  value={newValue}
-                  onChange={(e) => setNewValue(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
+                <h2 className="text-xl font-bold">User Journey Analysis</h2>
+                <p className="text-sm text-muted-foreground">Visualize how users navigate through your product</p>
               </div>
-              <div className="flex gap-3 pt-4">
-                <ModernButton variant="outline" className="flex-1" onClick={() => { setShowRecordModal(false); setSelectedMetric(null) }}>Cancel</ModernButton>
-                <GradientButton from="green" to="emerald" className="flex-1" onClick={handleRecordValue} disabled={loading}>
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Record'}
-                </GradientButton>
-              </div>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                Create Path Analysis
+              </Button>
             </div>
-          </div>
-        </div>
-      )}
+
+            {mockUserPaths.map((path) => (
+              <Card key={path.id}>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Route className="w-5 h-5 text-indigo-500" />
+                        {path.name}
+                      </CardTitle>
+                      <CardDescription>
+                        {path.startEvent} → {path.endEvent || 'Any'} | Avg path length: {path.avgPathLength.toFixed(1)} steps
+                      </CardDescription>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold">{path.totalUsers.toLocaleString()}</p>
+                      <p className="text-sm text-muted-foreground">Total Users</p>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-start gap-4 overflow-x-auto pb-4">
+                    {path.nodes.map((nodeGroup, stepIdx) => (
+                      <div key={stepIdx} className="flex flex-col gap-2 min-w-[160px]">
+                        <div className="text-xs font-medium text-muted-foreground text-center">Step {stepIdx + 1}</div>
+                        {nodeGroup.map((node, nodeIdx) => (
+                          <div key={nodeIdx} className={`p-3 rounded-lg border ${node.event === 'exit' ? 'bg-red-50 dark:bg-red-950 border-red-200' : 'bg-muted/50'}`}>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-medium">{node.event}</span>
+                              {node.event === 'exit' && <XCircle className="w-3 h-3 text-red-500" />}
+                            </div>
+                            <p className="text-lg font-bold">{node.users.toLocaleString()}</p>
+                            <p className="text-xs text-muted-foreground">{node.percentage}%</p>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Funnel Detail Dialog */}
+      <Dialog open={!!selectedFunnel} onOpenChange={() => setSelectedFunnel(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5 text-blue-500" />
+              {selectedFunnel?.name}
+            </DialogTitle>
+            <DialogDescription>{selectedFunnel?.description}</DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[70vh]">
+            {selectedFunnel && (
+              <div className="space-y-6 p-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-4 bg-muted/50 rounded-lg text-center">
+                    <p className="text-3xl font-bold text-green-600">{selectedFunnel.totalConversion.toFixed(1)}%</p>
+                    <p className="text-sm text-muted-foreground">Overall Conversion</p>
+                  </div>
+                  <div className="p-4 bg-muted/50 rounded-lg text-center">
+                    <p className="text-3xl font-bold">{selectedFunnel.totalUsers.toLocaleString()}</p>
+                    <p className="text-sm text-muted-foreground">Total Users</p>
+                  </div>
+                  <div className="p-4 bg-muted/50 rounded-lg text-center">
+                    <p className="text-3xl font-bold">{selectedFunnel.steps.length}</p>
+                    <p className="text-sm text-muted-foreground">Funnel Steps</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {selectedFunnel.steps.map((step, idx) => (
+                    <div key={step.id} className="flex items-center gap-4">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm">
+                        {idx + 1}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <p className="font-medium">{step.name}</p>
+                            <p className="text-xs text-muted-foreground">Event: {step.event}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold">{step.users.toLocaleString()} users</p>
+                            <p className="text-xs text-muted-foreground">Avg time: {step.avgTimeToNext}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <Progress value={step.conversionRate} className="h-2" />
+                          </div>
+                          <span className="text-sm font-medium text-green-600">{step.conversionRate.toFixed(1)}%</span>
+                        </div>
+                        {step.dropoffRate > 0 && (
+                          <p className="text-xs text-red-500 mt-1">Dropoff: {step.dropoffRate.toFixed(1)}%</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between text-sm text-muted-foreground pt-4 border-t">
+                  <span>Period: {selectedFunnel.period}</span>
+                  <span>Owner: {selectedFunnel.owner}</span>
+                  <span>Updated: {selectedFunnel.updatedAt}</span>
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cohort Detail Dialog */}
+      <Dialog open={!!selectedCohort} onOpenChange={() => setSelectedCohort(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-purple-500" />
+              {selectedCohort?.name}
+            </DialogTitle>
+            <DialogDescription>{selectedCohort?.description}</DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[70vh]">
+            {selectedCohort && (
+              <div className="space-y-6 p-4">
+                <div className="flex items-center gap-3">
+                  <Badge className={getCohortTypeColor(selectedCohort.type)}>{selectedCohort.type}</Badge>
+                  <Badge variant="outline">{selectedCohort.status}</Badge>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="text-3xl font-bold">{selectedCohort.size.toLocaleString()}</p>
+                    <p className="text-sm text-muted-foreground">Total Users</p>
+                  </div>
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className={`text-3xl font-bold ${selectedCohort.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {selectedCohort.growth >= 0 ? '+' : ''}{selectedCohort.growth}%
+                    </p>
+                    <p className="text-sm text-muted-foreground">Growth Rate</p>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-muted rounded-lg">
+                  <p className="text-sm font-medium mb-2">Cohort Definition</p>
+                  <code className="text-sm font-mono">{selectedCohort.definition}</code>
+                </div>
+
+                <div className="flex items-center justify-between text-sm text-muted-foreground pt-4 border-t">
+                  <span>Created: {selectedCohort.createdAt}</span>
+                  <span>Updated: {selectedCohort.updatedAt}</span>
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Experiment Detail Dialog */}
+      <Dialog open={!!selectedExperiment} onOpenChange={() => setSelectedExperiment(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FlaskConical className="w-5 h-5 text-orange-500" />
+              {selectedExperiment?.name}
+            </DialogTitle>
+            <DialogDescription>{selectedExperiment?.description}</DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[70vh]">
+            {selectedExperiment && (
+              <div className="space-y-6 p-4">
+                <div className="flex items-center gap-3">
+                  <Badge className={getExperimentStatusColor(selectedExperiment.status)}>{selectedExperiment.status}</Badge>
+                  <Badge variant="outline">{selectedExperiment.type}</Badge>
+                  {selectedExperiment.winner && (
+                    <Badge className="bg-green-100 text-green-800">
+                      Winner: {selectedExperiment.variants.find(v => v.id === selectedExperiment.winner)?.name}
+                    </Badge>
+                  )}
+                </div>
+
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <p className="text-sm font-medium mb-1">Hypothesis</p>
+                  <p className="text-sm">{selectedExperiment.hypothesis}</p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-4 bg-muted/50 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{selectedExperiment.statisticalSignificance.toFixed(1)}%</p>
+                    <p className="text-sm text-muted-foreground">Statistical Significance</p>
+                  </div>
+                  <div className="p-4 bg-muted/50 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{selectedExperiment.totalUsers.toLocaleString()}</p>
+                    <p className="text-sm text-muted-foreground">Total Users</p>
+                  </div>
+                  <div className="p-4 bg-muted/50 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{selectedExperiment.variants.length}</p>
+                    <p className="text-sm text-muted-foreground">Variants</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Variant Performance</h3>
+                  {selectedExperiment.variants.map((variant) => (
+                    <div key={variant.id} className={`p-4 rounded-lg border ${variant.id === selectedExperiment.winner ? 'border-green-500 bg-green-50 dark:bg-green-950' : 'bg-muted/30'}`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{variant.name}</p>
+                          {variant.id === selectedExperiment.winner && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                        </div>
+                        <Badge variant="outline">{variant.allocation}% allocation</Badge>
+                      </div>
+                      <div className="grid grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <p className="text-muted-foreground">Users</p>
+                          <p className="font-bold">{variant.users.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Conversions</p>
+                          <p className="font-bold">{variant.conversions.toLocaleString()}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Rate</p>
+                          <p className="font-bold text-green-600">{variant.conversionRate.toFixed(1)}%</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Revenue</p>
+                          <p className="font-bold">${variant.revenue.toLocaleString()}</p>
+                        </div>
+                      </div>
+                      {variant.confidence > 0 && (
+                        <div className="mt-3">
+                          <div className="flex items-center justify-between text-xs mb-1">
+                            <span>Confidence</span>
+                            <span>{variant.confidence.toFixed(1)}%</span>
+                          </div>
+                          <Progress value={variant.confidence} className="h-2" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between text-sm text-muted-foreground pt-4 border-t">
+                  <span>Target: {selectedExperiment.targetMetric}</span>
+                  <span>Started: {selectedExperiment.startDate}</span>
+                  {selectedExperiment.endDate && <span>Ended: {selectedExperiment.endDate}</span>}
+                  <span>Owner: {selectedExperiment.owner}</span>
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
