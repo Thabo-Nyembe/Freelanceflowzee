@@ -1,360 +1,1353 @@
 'use client'
 
-import { useState } from 'react'
-import StatGrid from '@/components/dashboard-results/StatGrid'
-import BentoQuickAction from '@/components/dashboard-results/BentoQuickAction'
-import PillButton from '@/components/modern-button-suite/PillButton'
-import MiniKPI from '@/components/dashboard-results/MiniKPI'
-import ActivityFeed from '@/components/dashboard-results/ActivityFeed'
-import RankingList from '@/components/dashboard-results/RankingList'
-import ProgressCard from '@/components/dashboard-results/ProgressCard'
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
-  useSurveys,
-  useSurveyMutations,
-  getSurveyStatusColor,
-  getSurveyTypeColor,
-  formatSurveyDate,
-  calculateResponseRate,
-  calculateSurveyProgress,
-  type Survey
-} from '@/lib/hooks/use-surveys'
+  ClipboardList,
+  Search,
+  Plus,
+  Filter,
+  BarChart3,
+  FileText,
+  Settings,
+  Eye,
+  Edit,
+  Trash2,
+  Copy,
+  Share2,
+  ExternalLink,
+  MoreHorizontal,
+  Clock,
+  CheckCircle,
+  Users,
+  TrendingUp,
+  MessageSquare,
+  Star,
+  ThumbsUp,
+  ThumbsDown,
+  ArrowRight,
+  ChevronRight,
+  Globe,
+  Mail,
+  Link,
+  QrCode,
+  Play,
+  Pause,
+  Archive,
+  Send,
+  Download,
+  Upload,
+  Layout,
+  Type,
+  Hash,
+  ToggleLeft,
+  List,
+  Calendar,
+  Image,
+  FileUp,
+  Sliders,
+  Zap,
+  GitBranch,
+  Layers,
+  PieChart,
+  Target,
+  Sparkles,
+  Award,
+  Loader2
+} from 'lucide-react'
 
-type ViewMode = 'all' | 'active' | 'closed' | 'draft'
+// Types
+type SurveyStatus = 'draft' | 'active' | 'paused' | 'closed'
+type QuestionType = 'short_text' | 'long_text' | 'multiple_choice' | 'checkbox' | 'rating' | 'nps' | 'date' | 'file_upload' | 'dropdown' | 'linear_scale' | 'matrix'
+type DistributionChannel = 'link' | 'email' | 'embed' | 'qr'
 
-interface SurveysClientProps {
-  initialSurveys: Survey[]
+interface Question {
+  id: string
+  type: QuestionType
+  title: string
+  description?: string
+  required: boolean
+  options?: string[]
+  minValue?: number
+  maxValue?: number
+  hasLogicJump: boolean
+  logicRules?: {
+    condition: string
+    value: string
+    jumpTo: string
+  }[]
+  order: number
 }
 
-export default function SurveysClient({ initialSurveys }: SurveysClientProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('all')
+interface Survey {
+  id: string
+  title: string
+  description: string
+  status: SurveyStatus
+  theme: {
+    primaryColor: string
+    backgroundColor: string
+    fontFamily: string
+  }
+  questions: Question[]
+  responses: number
+  completionRate: number
+  avgTime: number
+  createdAt: string
+  updatedAt: string
+  publishedAt?: string
+  closedAt?: string
+  tags: string[]
+  isTemplate: boolean
+  createdBy: string
+  settings: {
+    showProgressBar: boolean
+    showQuestionNumbers: boolean
+    allowMultipleResponses: boolean
+    requireLogin: boolean
+    customThankYou: string
+    redirectUrl?: string
+  }
+}
 
-  const { surveys, stats, isLoading } = useSurveys(initialSurveys, {
-    status: viewMode === 'all' ? undefined : viewMode
+interface Response {
+  id: string
+  surveyId: string
+  respondentId?: string
+  respondentEmail?: string
+  startedAt: string
+  completedAt?: string
+  duration: number
+  answers: {
+    questionId: string
+    questionTitle: string
+    answer: string | string[] | number
+  }[]
+  metadata: {
+    device: string
+    browser: string
+    location: string
+    referrer?: string
+  }
+  isComplete: boolean
+  npsScore?: number
+}
+
+interface Template {
+  id: string
+  name: string
+  description: string
+  category: string
+  questions: number
+  uses: number
+  rating: number
+  thumbnail: string
+  isPremium: boolean
+}
+
+interface SurveyStats {
+  totalSurveys: number
+  activeSurveys: number
+  totalResponses: number
+  avgCompletionRate: number
+  avgNPS: number
+  responsesThisWeek: number
+  responsesLastWeek: number
+}
+
+// Mock Data
+const mockSurveys: Survey[] = [
+  {
+    id: 'survey-1',
+    title: 'Customer Satisfaction Survey 2024',
+    description: 'Annual customer satisfaction and feedback collection',
+    status: 'active',
+    theme: { primaryColor: '#10b981', backgroundColor: '#ffffff', fontFamily: 'Inter' },
+    questions: [
+      { id: 'q1', type: 'nps', title: 'How likely are you to recommend us?', required: true, minValue: 0, maxValue: 10, hasLogicJump: true, logicRules: [{ condition: 'less_than', value: '7', jumpTo: 'q3' }], order: 1 },
+      { id: 'q2', type: 'long_text', title: 'What do you love most about our product?', required: false, hasLogicJump: false, order: 2 },
+      { id: 'q3', type: 'long_text', title: 'What can we improve?', required: true, hasLogicJump: false, order: 3 },
+      { id: 'q4', type: 'rating', title: 'Rate your overall experience', required: true, minValue: 1, maxValue: 5, hasLogicJump: false, order: 4 },
+      { id: 'q5', type: 'multiple_choice', title: 'How did you hear about us?', required: false, options: ['Social Media', 'Search Engine', 'Friend Referral', 'Advertisement', 'Other'], hasLogicJump: false, order: 5 }
+    ],
+    responses: 1247,
+    completionRate: 89.4,
+    avgTime: 4.2,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-01-15',
+    publishedAt: '2024-01-02',
+    tags: ['customer', 'feedback', '2024'],
+    isTemplate: false,
+    createdBy: 'John Smith',
+    settings: { showProgressBar: true, showQuestionNumbers: true, allowMultipleResponses: false, requireLogin: false, customThankYou: 'Thank you for your feedback!' }
+  },
+  {
+    id: 'survey-2',
+    title: 'Employee Engagement Survey',
+    description: 'Quarterly employee satisfaction and engagement assessment',
+    status: 'active',
+    theme: { primaryColor: '#6366f1', backgroundColor: '#f8fafc', fontFamily: 'Plus Jakarta Sans' },
+    questions: [
+      { id: 'q1', type: 'rating', title: 'How satisfied are you with your work?', required: true, minValue: 1, maxValue: 5, hasLogicJump: false, order: 1 },
+      { id: 'q2', type: 'multiple_choice', title: 'What motivates you at work?', required: true, options: ['Career Growth', 'Compensation', 'Team Culture', 'Work-Life Balance', 'Learning Opportunities'], hasLogicJump: false, order: 2 },
+      { id: 'q3', type: 'long_text', title: 'Any suggestions for improvement?', required: false, hasLogicJump: false, order: 3 }
+    ],
+    responses: 892,
+    completionRate: 94.7,
+    avgTime: 3.8,
+    createdAt: '2024-01-05',
+    updatedAt: '2024-01-14',
+    publishedAt: '2024-01-06',
+    tags: ['hr', 'employee', 'engagement'],
+    isTemplate: false,
+    createdBy: 'HR Team',
+    settings: { showProgressBar: true, showQuestionNumbers: false, allowMultipleResponses: false, requireLogin: true, customThankYou: 'Your input helps us build a better workplace!' }
+  },
+  {
+    id: 'survey-3',
+    title: 'Product Feature Request',
+    description: 'Gather ideas for new product features',
+    status: 'draft',
+    theme: { primaryColor: '#f59e0b', backgroundColor: '#fffbeb', fontFamily: 'Inter' },
+    questions: [
+      { id: 'q1', type: 'short_text', title: 'What feature would you like to see?', required: true, hasLogicJump: false, order: 1 },
+      { id: 'q2', type: 'linear_scale', title: 'How important is this feature?', required: true, minValue: 1, maxValue: 10, hasLogicJump: false, order: 2 }
+    ],
+    responses: 0,
+    completionRate: 0,
+    avgTime: 0,
+    createdAt: '2024-01-14',
+    updatedAt: '2024-01-15',
+    tags: ['product', 'features'],
+    isTemplate: false,
+    createdBy: 'Product Team',
+    settings: { showProgressBar: true, showQuestionNumbers: true, allowMultipleResponses: true, requireLogin: false, customThankYou: 'Thanks for sharing your ideas!' }
+  },
+  {
+    id: 'survey-4',
+    title: 'Event Feedback Form',
+    description: 'Post-event satisfaction survey',
+    status: 'closed',
+    theme: { primaryColor: '#ec4899', backgroundColor: '#fdf2f8', fontFamily: 'Outfit' },
+    questions: [
+      { id: 'q1', type: 'nps', title: 'How likely are you to attend future events?', required: true, minValue: 0, maxValue: 10, hasLogicJump: false, order: 1 },
+      { id: 'q2', type: 'checkbox', title: 'What did you enjoy most?', required: false, options: ['Speakers', 'Networking', 'Content', 'Venue', 'Food'], hasLogicJump: false, order: 2 },
+      { id: 'q3', type: 'rating', title: 'Rate the event organization', required: true, minValue: 1, maxValue: 5, hasLogicJump: false, order: 3 }
+    ],
+    responses: 456,
+    completionRate: 78.3,
+    avgTime: 2.9,
+    createdAt: '2023-12-15',
+    updatedAt: '2024-01-10',
+    publishedAt: '2023-12-16',
+    closedAt: '2024-01-01',
+    tags: ['event', 'feedback'],
+    isTemplate: false,
+    createdBy: 'Events Team',
+    settings: { showProgressBar: true, showQuestionNumbers: true, allowMultipleResponses: false, requireLogin: false, customThankYou: 'See you at the next event!' }
+  },
+  {
+    id: 'survey-5',
+    title: 'Website Usability Study',
+    description: 'User experience research for website redesign',
+    status: 'paused',
+    theme: { primaryColor: '#0ea5e9', backgroundColor: '#f0f9ff', fontFamily: 'Inter' },
+    questions: [
+      { id: 'q1', type: 'rating', title: 'How easy is it to navigate our website?', required: true, minValue: 1, maxValue: 5, hasLogicJump: false, order: 1 },
+      { id: 'q2', type: 'multiple_choice', title: 'What device do you primarily use?', required: true, options: ['Desktop', 'Laptop', 'Tablet', 'Mobile'], hasLogicJump: false, order: 2 },
+      { id: 'q3', type: 'long_text', title: 'What would improve your experience?', required: false, hasLogicJump: false, order: 3 }
+    ],
+    responses: 234,
+    completionRate: 65.2,
+    avgTime: 5.1,
+    createdAt: '2024-01-08',
+    updatedAt: '2024-01-12',
+    publishedAt: '2024-01-09',
+    tags: ['ux', 'research', 'website'],
+    isTemplate: false,
+    createdBy: 'UX Team',
+    settings: { showProgressBar: true, showQuestionNumbers: true, allowMultipleResponses: false, requireLogin: false, customThankYou: 'Your feedback shapes our design!' }
+  }
+]
+
+const mockResponses: Response[] = [
+  {
+    id: 'resp-1',
+    surveyId: 'survey-1',
+    respondentEmail: 'user1@example.com',
+    startedAt: '2024-01-15T10:30:00',
+    completedAt: '2024-01-15T10:34:15',
+    duration: 255,
+    answers: [
+      { questionId: 'q1', questionTitle: 'How likely are you to recommend us?', answer: 9 },
+      { questionId: 'q2', questionTitle: 'What do you love most about our product?', answer: 'The intuitive interface and excellent customer support' },
+      { questionId: 'q4', questionTitle: 'Rate your overall experience', answer: 5 },
+      { questionId: 'q5', questionTitle: 'How did you hear about us?', answer: 'Social Media' }
+    ],
+    metadata: { device: 'Desktop', browser: 'Chrome', location: 'New York, US' },
+    isComplete: true,
+    npsScore: 9
+  },
+  {
+    id: 'resp-2',
+    surveyId: 'survey-1',
+    respondentEmail: 'user2@example.com',
+    startedAt: '2024-01-15T11:00:00',
+    completedAt: '2024-01-15T11:05:30',
+    duration: 330,
+    answers: [
+      { questionId: 'q1', questionTitle: 'How likely are you to recommend us?', answer: 6 },
+      { questionId: 'q3', questionTitle: 'What can we improve?', answer: 'Faster response times from support team' },
+      { questionId: 'q4', questionTitle: 'Rate your overall experience', answer: 3 },
+      { questionId: 'q5', questionTitle: 'How did you hear about us?', answer: 'Friend Referral' }
+    ],
+    metadata: { device: 'Mobile', browser: 'Safari', location: 'London, UK' },
+    isComplete: true,
+    npsScore: 6
+  },
+  {
+    id: 'resp-3',
+    surveyId: 'survey-1',
+    startedAt: '2024-01-15T12:15:00',
+    duration: 45,
+    answers: [
+      { questionId: 'q1', questionTitle: 'How likely are you to recommend us?', answer: 8 }
+    ],
+    metadata: { device: 'Tablet', browser: 'Firefox', location: 'Toronto, CA' },
+    isComplete: false
+  }
+]
+
+const mockTemplates: Template[] = [
+  { id: 'tpl-1', name: 'Customer Satisfaction (CSAT)', description: 'Measure customer satisfaction with your product or service', category: 'Customer Feedback', questions: 8, uses: 15420, rating: 4.8, thumbnail: '📊', isPremium: false },
+  { id: 'tpl-2', name: 'Net Promoter Score (NPS)', description: 'Gauge customer loyalty and likelihood to recommend', category: 'Customer Feedback', questions: 5, uses: 23150, rating: 4.9, thumbnail: '📈', isPremium: false },
+  { id: 'tpl-3', name: 'Employee Engagement', description: 'Assess workplace satisfaction and engagement levels', category: 'HR & Internal', questions: 15, uses: 8930, rating: 4.7, thumbnail: '👥', isPremium: false },
+  { id: 'tpl-4', name: 'Event Feedback', description: 'Collect feedback after events and conferences', category: 'Events', questions: 10, uses: 12340, rating: 4.6, thumbnail: '🎉', isPremium: false },
+  { id: 'tpl-5', name: 'Product Research', description: 'Validate product ideas and gather feature requests', category: 'Product', questions: 12, uses: 6780, rating: 4.5, thumbnail: '💡', isPremium: true },
+  { id: 'tpl-6', name: 'Market Research', description: 'Understand market trends and customer preferences', category: 'Research', questions: 20, uses: 5420, rating: 4.4, thumbnail: '🔍', isPremium: true },
+  { id: 'tpl-7', name: 'Website Usability', description: 'Evaluate website user experience and navigation', category: 'UX Research', questions: 12, uses: 7890, rating: 4.6, thumbnail: '🌐', isPremium: false },
+  { id: 'tpl-8', name: 'Course Evaluation', description: 'Get feedback on training and educational content', category: 'Education', questions: 8, uses: 9120, rating: 4.7, thumbnail: '📚', isPremium: false }
+]
+
+const mockStats: SurveyStats = {
+  totalSurveys: 5,
+  activeSurveys: 2,
+  totalResponses: 2829,
+  avgCompletionRate: 81.9,
+  avgNPS: 7.8,
+  responsesThisWeek: 342,
+  responsesLastWeek: 289
+}
+
+// Helper functions
+const getStatusColor = (status: SurveyStatus) => {
+  switch (status) {
+    case 'active': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+    case 'draft': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+    case 'paused': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+    case 'closed': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+  }
+}
+
+const getQuestionTypeIcon = (type: QuestionType) => {
+  switch (type) {
+    case 'short_text': return <Type className="w-4 h-4" />
+    case 'long_text': return <FileText className="w-4 h-4" />
+    case 'multiple_choice': return <List className="w-4 h-4" />
+    case 'checkbox': return <ToggleLeft className="w-4 h-4" />
+    case 'rating': return <Star className="w-4 h-4" />
+    case 'nps': return <Target className="w-4 h-4" />
+    case 'date': return <Calendar className="w-4 h-4" />
+    case 'file_upload': return <FileUp className="w-4 h-4" />
+    case 'dropdown': return <Sliders className="w-4 h-4" />
+    case 'linear_scale': return <Hash className="w-4 h-4" />
+    case 'matrix': return <Layout className="w-4 h-4" />
+  }
+}
+
+const formatDuration = (seconds: number) => {
+  if (seconds < 60) return `${seconds}s`
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${mins}m ${secs}s`
+}
+
+const formatDate = (dateStr: string) => {
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
   })
+}
 
-  const { createSurvey, publishSurvey, isCreating } = useSurveyMutations()
+const formatDateTime = (dateStr: string) => {
+  return new Date(dateStr).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
 
-  const filteredSurveys = viewMode === 'all'
-    ? surveys
-    : surveys.filter(survey => survey.status === viewMode)
+const getNPSCategory = (score: number) => {
+  if (score >= 9) return { label: 'Promoter', color: 'text-green-600' }
+  if (score >= 7) return { label: 'Passive', color: 'text-yellow-600' }
+  return { label: 'Detractor', color: 'text-red-600' }
+}
 
-  const handleCreateSurvey = () => {
-    createSurvey({
-      title: 'New Survey',
-      description: 'Survey description',
-      survey_type: 'customer-feedback',
-      target_responses: 100
+export default function SurveysClient() {
+  const [activeTab, setActiveTab] = useState('surveys')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState<SurveyStatus | 'all'>('all')
+  const [selectedSurvey, setSelectedSurvey] = useState<Survey | null>(null)
+  const [selectedResponse, setSelectedResponse] = useState<Response | null>(null)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [sharingSurvey, setSharingSurvey] = useState<Survey | null>(null)
+
+  // Computed values
+  const filteredSurveys = useMemo(() => {
+    return mockSurveys.filter(survey => {
+      const matchesSearch = survey.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        survey.description.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesStatus = statusFilter === 'all' || survey.status === statusFilter
+      return matchesSearch && matchesStatus
     })
+  }, [searchTerm, statusFilter])
+
+  const surveyResponses = useMemo(() => {
+    if (!selectedSurvey) return []
+    return mockResponses.filter(r => r.surveyId === selectedSurvey.id)
+  }, [selectedSurvey])
+
+  const npsDistribution = useMemo(() => {
+    const promoters = mockResponses.filter(r => r.npsScore && r.npsScore >= 9).length
+    const passives = mockResponses.filter(r => r.npsScore && r.npsScore >= 7 && r.npsScore < 9).length
+    const detractors = mockResponses.filter(r => r.npsScore && r.npsScore < 7).length
+    const total = promoters + passives + detractors
+    return {
+      promoters: total > 0 ? (promoters / total) * 100 : 0,
+      passives: total > 0 ? (passives / total) * 100 : 0,
+      detractors: total > 0 ? (detractors / total) * 100 : 0,
+      nps: total > 0 ? Math.round(((promoters - detractors) / total) * 100) : 0
+    }
+  }, [])
+
+  const handleShare = (survey: Survey) => {
+    setSharingSurvey(survey)
+    setShowShareDialog(true)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:bg-none dark:bg-gray-900">
-      <div className="max-w-[1600px] mx-auto p-6 space-y-6">
-
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900 p-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-              Surveys
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-1">
-              Gather insights and feedback from your audience
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg">
+              <ClipboardList className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Surveys</h1>
+              <p className="text-gray-600 dark:text-gray-400">Typeform-level survey experience</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={handleCreateSurvey}
-              disabled={isCreating}
-              className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:shadow-lg hover:shadow-green-500/50 transition-all duration-300 disabled:opacity-50"
-            >
-              {isCreating ? 'Creating...' : 'Create Survey'}
-            </button>
+            <Button variant="outline" size="sm">
+              <Upload className="w-4 h-4 mr-2" />
+              Import
+            </Button>
+            <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Survey
+            </Button>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <StatGrid
-          stats={[
-            {
-              label: 'Total Surveys',
-              value: stats.total.toString(),
-              change: '+15',
-              trend: 'up' as const,
-              subtitle: 'all time'
-            },
-            {
-              label: 'Total Responses',
-              value: stats.totalResponses.toLocaleString(),
-              change: '+28.7%',
-              trend: 'up' as const,
-              subtitle: 'this month'
-            },
-            {
-              label: 'Avg Completion',
-              value: `${stats.avgCompletionRate.toFixed(1)}%`,
-              change: '+6.4%',
-              trend: 'up' as const,
-              subtitle: 'completion rate'
-            },
-            {
-              label: 'Avg NPS Score',
-              value: stats.avgNPS > 0 ? stats.avgNPS.toFixed(0) : 'N/A',
-              change: '+8.2',
-              trend: 'up' as const,
-              subtitle: 'across surveys'
-            }
-          ]}
-        />
-
-        {/* Quick Actions */}
-        <BentoQuickAction
-          actions={[
-            { label: 'Create Survey', icon: '➕', onClick: handleCreateSurvey },
-            { label: 'Publish Survey', icon: '📤', onClick: () => {} },
-            { label: 'Schedule Survey', icon: '📅', onClick: () => {} },
-            { label: 'View Analytics', icon: '📊', onClick: () => {} },
-            { label: 'Export Responses', icon: '📥', onClick: () => {} },
-            { label: 'Import Questions', icon: '📤', onClick: () => {} },
-            { label: 'Manage Templates', icon: '📋', onClick: () => {} },
-            { label: 'Settings', icon: '⚙️', onClick: () => {} }
-          ]}
-        />
-
-        {/* Filter Pills */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <PillButton
-            label="All Surveys"
-            isActive={viewMode === 'all'}
-            onClick={() => setViewMode('all')}
-          />
-          <PillButton
-            label="Active"
-            isActive={viewMode === 'active'}
-            onClick={() => setViewMode('active')}
-          />
-          <PillButton
-            label="Closed"
-            isActive={viewMode === 'closed'}
-            onClick={() => setViewMode('closed')}
-          />
-          <PillButton
-            label="Drafts"
-            isActive={viewMode === 'draft'}
-            onClick={() => setViewMode('draft')}
-          />
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-emerald-600 mb-1">
+                <ClipboardList className="w-4 h-4" />
+                <span className="text-xs font-medium">Total Surveys</span>
+              </div>
+              <p className="text-2xl font-bold">{mockStats.totalSurveys}</p>
+              <p className="text-xs text-muted-foreground">{mockStats.activeSurveys} active</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-blue-600 mb-1">
+                <Users className="w-4 h-4" />
+                <span className="text-xs font-medium">Responses</span>
+              </div>
+              <p className="text-2xl font-bold">{mockStats.totalResponses.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">all time</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-green-600 mb-1">
+                <CheckCircle className="w-4 h-4" />
+                <span className="text-xs font-medium">Completion</span>
+              </div>
+              <p className="text-2xl font-bold">{mockStats.avgCompletionRate}%</p>
+              <p className="text-xs text-muted-foreground">avg rate</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-purple-600 mb-1">
+                <Target className="w-4 h-4" />
+                <span className="text-xs font-medium">Avg NPS</span>
+              </div>
+              <p className="text-2xl font-bold">{mockStats.avgNPS}</p>
+              <p className="text-xs text-muted-foreground">score</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-amber-600 mb-1">
+                <TrendingUp className="w-4 h-4" />
+                <span className="text-xs font-medium">This Week</span>
+              </div>
+              <p className="text-2xl font-bold">{mockStats.responsesThisWeek}</p>
+              <p className="text-xs text-green-600">+{Math.round(((mockStats.responsesThisWeek - mockStats.responsesLastWeek) / mockStats.responsesLastWeek) * 100)}%</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-green-600 mb-1">
+                <ThumbsUp className="w-4 h-4" />
+                <span className="text-xs font-medium">Promoters</span>
+              </div>
+              <p className="text-2xl font-bold">{Math.round(npsDistribution.promoters)}%</p>
+              <p className="text-xs text-muted-foreground">NPS 9-10</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-yellow-600 mb-1">
+                <MessageSquare className="w-4 h-4" />
+                <span className="text-xs font-medium">Passives</span>
+              </div>
+              <p className="text-2xl font-bold">{Math.round(npsDistribution.passives)}%</p>
+              <p className="text-xs text-muted-foreground">NPS 7-8</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-red-600 mb-1">
+                <ThumbsDown className="w-4 h-4" />
+                <span className="text-xs font-medium">Detractors</span>
+              </div>
+              <p className="text-2xl font-bold">{Math.round(npsDistribution.detractors)}%</p>
+              <p className="text-xs text-muted-foreground">NPS 0-6</p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between mb-4">
+            <TabsList className="bg-white/80 dark:bg-gray-800/80">
+              <TabsTrigger value="surveys" className="flex items-center gap-2">
+                <ClipboardList className="w-4 h-4" />
+                Surveys
+              </TabsTrigger>
+              <TabsTrigger value="responses" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Responses
+              </TabsTrigger>
+              <TabsTrigger value="templates" className="flex items-center gap-2">
+                <Layout className="w-4 h-4" />
+                Templates
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4" />
+                Analytics
+              </TabsTrigger>
+              <TabsTrigger value="builder" className="flex items-center gap-2">
+                <Layers className="w-4 h-4" />
+                Question Types
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
+              </TabsTrigger>
+            </TabsList>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search surveys..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 w-64 bg-white/80 dark:bg-gray-800/80"
+                />
+              </div>
+            </div>
+          </div>
 
-          {/* Surveys List */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-              <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white">
-                Surveys ({filteredSurveys.length})
-              </h2>
-              {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-                </div>
-              ) : filteredSurveys.length === 0 ? (
-                <div className="text-center py-12 text-slate-500 dark:text-slate-400">
-                  No surveys found. Click "Create Survey" to get started.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {filteredSurveys.map((survey) => (
-                    <div
-                      key={survey.id}
-                      className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-green-500/50 dark:hover:border-green-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/10 group cursor-pointer bg-white dark:bg-slate-800/50"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className={`px-2 py-1 rounded-full text-xs border ${getSurveyStatusColor(survey.status)}`}>
-                              {survey.status}
-                            </span>
-                            <span className={`px-2 py-1 rounded-full text-xs border ${getSurveyTypeColor(survey.survey_type)}`}>
-                              {survey.survey_type}
-                            </span>
-                            {survey.nps_score && (
-                              <span className="px-2 py-1 rounded-full text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                                NPS: {survey.nps_score}
-                              </span>
-                            )}
-                            {survey.csat_score && (
-                              <span className="px-2 py-1 rounded-full text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
-                                CSAT: {survey.csat_score}/10
-                              </span>
-                            )}
-                          </div>
-                          <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors mb-2">
-                            {survey.title}
-                          </h3>
-                          {survey.description && (
-                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-2 line-clamp-2">
-                              {survey.description}
-                            </p>
+          {/* Surveys Tab */}
+          <TabsContent value="surveys" className="space-y-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Button
+                variant={statusFilter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setStatusFilter('all')}
+              >
+                All
+              </Button>
+              <Button
+                variant={statusFilter === 'active' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setStatusFilter('active')}
+              >
+                <Play className="w-3 h-3 mr-1" />
+                Active
+              </Button>
+              <Button
+                variant={statusFilter === 'draft' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setStatusFilter('draft')}
+              >
+                <Edit className="w-3 h-3 mr-1" />
+                Draft
+              </Button>
+              <Button
+                variant={statusFilter === 'paused' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setStatusFilter('paused')}
+              >
+                <Pause className="w-3 h-3 mr-1" />
+                Paused
+              </Button>
+              <Button
+                variant={statusFilter === 'closed' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setStatusFilter('closed')}
+              >
+                <Archive className="w-3 h-3 mr-1" />
+                Closed
+              </Button>
+            </div>
+
+            <div className="grid gap-4">
+              {filteredSurveys.map(survey => (
+                <Card key={survey.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur hover:shadow-lg transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge className={getStatusColor(survey.status)}>{survey.status}</Badge>
+                          {survey.questions.some(q => q.hasLogicJump) && (
+                            <Badge variant="outline" className="flex items-center gap-1">
+                              <GitBranch className="w-3 h-3" />
+                              Logic Jumps
+                            </Badge>
                           )}
-                          <p className="text-xs text-slate-500 dark:text-slate-500">
-                            {survey.survey_code} • Created by {survey.created_by || 'Unknown'} • {formatSurveyDate(survey.created_at)}
-                          </p>
+                          {survey.isTemplate && (
+                            <Badge variant="secondary">Template</Badge>
+                          )}
                         </div>
-                        <button className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all">
-                          View
-                        </button>
-                      </div>
+                        <h3 className="text-lg font-semibold mb-1">{survey.title}</h3>
+                        <p className="text-sm text-muted-foreground mb-3">{survey.description}</p>
 
-                      <div className="grid grid-cols-4 gap-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                        <div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">Questions</div>
-                          <div className="text-sm font-bold text-slate-900 dark:text-white">{survey.total_questions}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">Responses</div>
-                          <div className="text-sm font-bold text-slate-900 dark:text-white">{survey.total_responses.toLocaleString()}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">Completion</div>
-                          <div className="text-sm font-bold text-slate-900 dark:text-white">{Number(survey.completion_rate).toFixed(1)}%</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">Avg Time</div>
-                          <div className="text-sm font-bold text-slate-900 dark:text-white">{Number(survey.average_time).toFixed(1)} min</div>
-                        </div>
-                      </div>
-
-                      {survey.status !== 'draft' && (
-                        <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 space-y-2">
-                          <div>
-                            <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
-                              <span>Response Progress</span>
-                              <span>{survey.total_responses.toLocaleString()} / {survey.target_responses.toLocaleString()} ({calculateSurveyProgress(survey.total_responses, survey.target_responses)}%)</span>
-                            </div>
-                            <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-gradient-to-r from-green-600 to-emerald-600 rounded-full transition-all"
-                                style={{ width: `${Math.min(calculateSurveyProgress(survey.total_responses, survey.target_responses), 100)}%` }}
-                              />
-                            </div>
+                        <div className="flex items-center gap-6 text-sm">
+                          <div className="flex items-center gap-1">
+                            <FileText className="w-4 h-4 text-muted-foreground" />
+                            <span>{survey.questions.length} questions</span>
                           </div>
+                          <div className="flex items-center gap-1">
+                            <Users className="w-4 h-4 text-muted-foreground" />
+                            <span>{survey.responses.toLocaleString()} responses</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <CheckCircle className="w-4 h-4 text-muted-foreground" />
+                            <span>{survey.completionRate}% completion</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4 text-muted-foreground" />
+                            <span>{survey.avgTime} min avg</span>
+                          </div>
+                        </div>
 
-                          {survey.sent_to > 0 && (
+                        <div className="flex items-center gap-2 mt-3">
+                          {survey.tags.map(tag => (
+                            <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleShare(survey)}>
+                          <Share2 className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => setSelectedSurvey(survey)}>
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Response Progress */}
+                    {survey.status === 'active' && (
+                      <div className="mt-4 pt-4 border-t dark:border-gray-700">
+                        <div className="flex items-center justify-between text-sm mb-2">
+                          <span className="text-muted-foreground">Response Progress</span>
+                          <span className="font-medium">{survey.responses} collected</span>
+                        </div>
+                        <Progress value={Math.min(survey.responses / 10, 100)} className="h-2" />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Responses Tab */}
+          <TabsContent value="responses" className="space-y-4">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+              <CardContent className="p-0">
+                <ScrollArea className="h-[600px]">
+                  <div className="divide-y dark:divide-gray-700">
+                    {mockResponses.map(response => (
+                      <div
+                        key={response.id}
+                        className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                        onClick={() => setSelectedResponse(response)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="w-10 h-10">
+                              <AvatarFallback className="bg-emerald-100 text-emerald-700">
+                                {response.respondentEmail ? response.respondentEmail[0].toUpperCase() : 'A'}
+                              </AvatarFallback>
+                            </Avatar>
                             <div>
-                              <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
-                                <span>Response Rate</span>
-                                <span>{calculateResponseRate(survey.total_responses, survey.sent_to)}%</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">
+                                  {response.respondentEmail || 'Anonymous'}
+                                </span>
+                                {response.isComplete ? (
+                                  <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                                    Complete
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="secondary">Partial</Badge>
+                                )}
+                                {response.npsScore !== undefined && (
+                                  <Badge className={getNPSCategory(response.npsScore).color}>
+                                    NPS: {response.npsScore}
+                                  </Badge>
+                                )}
                               </div>
-                              <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                <div
-                                  className="h-full bg-gradient-to-r from-blue-500 to-cyan-600 rounded-full transition-all"
-                                  style={{ width: `${calculateResponseRate(survey.total_responses, survey.sent_to)}%` }}
-                                />
-                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                {formatDateTime(response.startedAt)} • {formatDuration(response.duration)} • {response.metadata.device}
+                              </p>
                             </div>
-                          )}
-                        </div>
-                      )}
-
-                      {survey.tags && survey.tags.length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                          <div className="flex flex-wrap gap-2">
-                            {survey.tags.map((tag, index) => (
-                              <span
-                                key={index}
-                                className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 rounded-full text-xs"
-                              >
-                                {tag}
-                              </span>
-                            ))}
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <p className="font-medium">{response.answers.length}</p>
+                              <p className="text-xs text-muted-foreground">answers</p>
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              <ChevronRight className="w-4 h-4" />
+                            </Button>
                           </div>
                         </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Templates Tab */}
+          <TabsContent value="templates" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {mockTemplates.map(template => (
+                <Card key={template.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur hover:shadow-lg transition-all cursor-pointer group">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="text-4xl">{template.thumbnail}</div>
+                      {template.isPremium && (
+                        <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          Premium
+                        </Badge>
                       )}
+                    </div>
+                    <h3 className="font-semibold mb-1 group-hover:text-emerald-600 transition-colors">{template.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{template.description}</p>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">{template.questions} questions</span>
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                        <span>{template.rating}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t dark:border-gray-700">
+                      <span className="text-xs text-muted-foreground">{template.uses.toLocaleString()} uses</span>
+                      <Button size="sm">
+                        Use Template
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Response Trend
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-end justify-between gap-2">
+                    {Array.from({ length: 14 }).map((_, i) => {
+                      const height = 30 + Math.random() * 70
+                      const isToday = i === 13
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                          <div
+                            className={`w-full rounded-t ${isToday ? 'bg-emerald-500' : 'bg-teal-500'}`}
+                            style={{ height: `${height}%` }}
+                          />
+                          <span className="text-[10px] text-muted-foreground">{i + 1}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <p className="text-xs text-muted-foreground text-center mt-2">Last 14 days</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="w-5 h-5" />
+                    NPS Distribution
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-center gap-8 h-64">
+                    <div className="relative">
+                      <svg className="w-40 h-40 transform -rotate-90">
+                        <circle cx="80" cy="80" r="70" fill="none" stroke="#e5e7eb" strokeWidth="12" />
+                        <circle
+                          cx="80"
+                          cy="80"
+                          r="70"
+                          fill="none"
+                          stroke="#22c55e"
+                          strokeWidth="12"
+                          strokeDasharray={`${2 * Math.PI * 70 * (npsDistribution.promoters / 100)} ${2 * Math.PI * 70}`}
+                        />
+                        <circle
+                          cx="80"
+                          cy="80"
+                          r="70"
+                          fill="none"
+                          stroke="#eab308"
+                          strokeWidth="12"
+                          strokeDasharray={`${2 * Math.PI * 70 * (npsDistribution.passives / 100)} ${2 * Math.PI * 70}`}
+                          strokeDashoffset={`${-2 * Math.PI * 70 * (npsDistribution.promoters / 100)}`}
+                        />
+                        <circle
+                          cx="80"
+                          cy="80"
+                          r="70"
+                          fill="none"
+                          stroke="#ef4444"
+                          strokeWidth="12"
+                          strokeDasharray={`${2 * Math.PI * 70 * (npsDistribution.detractors / 100)} ${2 * Math.PI * 70}`}
+                          strokeDashoffset={`${-2 * Math.PI * 70 * ((npsDistribution.promoters + npsDistribution.passives) / 100)}`}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-3xl font-bold">{npsDistribution.nps}</span>
+                        <span className="text-xs text-muted-foreground">NPS Score</span>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-green-500" />
+                        <span className="text-sm">Promoters: {Math.round(npsDistribution.promoters)}%</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                        <span className="text-sm">Passives: {Math.round(npsDistribution.passives)}%</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-red-500" />
+                        <span className="text-sm">Detractors: {Math.round(npsDistribution.detractors)}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5" />
+                    Completion Rates by Survey
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockSurveys.slice(0, 5).map(survey => (
+                      <div key={survey.id} className="flex items-center gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium truncate">{survey.title}</span>
+                            <span className="text-sm text-muted-foreground">{survey.completionRate}%</span>
+                          </div>
+                          <Progress value={survey.completionRate} className="h-2" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <PieChart className="w-5 h-5" />
+                    Device Distribution
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <Globe className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium">Desktop</span>
+                          <span className="text-sm text-muted-foreground">52%</span>
+                        </div>
+                        <Progress value={52} className="h-2" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                        <Globe className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium">Mobile</span>
+                          <span className="text-sm text-muted-foreground">38%</span>
+                        </div>
+                        <Progress value={38} className="h-2" />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                        <Globe className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium">Tablet</span>
+                          <span className="text-sm text-muted-foreground">10%</span>
+                        </div>
+                        <Progress value={10} className="h-2" />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Question Types Tab */}
+          <TabsContent value="builder" className="space-y-4">
+            <h2 className="text-lg font-semibold">Available Question Types</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {[
+                { type: 'short_text', name: 'Short Text', description: 'Single line text response', icon: Type },
+                { type: 'long_text', name: 'Long Text', description: 'Multi-line text response', icon: FileText },
+                { type: 'multiple_choice', name: 'Multiple Choice', description: 'Select one option from a list', icon: List },
+                { type: 'checkbox', name: 'Checkboxes', description: 'Select multiple options', icon: ToggleLeft },
+                { type: 'rating', name: 'Rating', description: '1-5 star rating scale', icon: Star },
+                { type: 'nps', name: 'NPS Score', description: '0-10 Net Promoter Score', icon: Target },
+                { type: 'linear_scale', name: 'Linear Scale', description: 'Custom numeric scale', icon: Hash },
+                { type: 'date', name: 'Date Picker', description: 'Date selection', icon: Calendar },
+                { type: 'file_upload', name: 'File Upload', description: 'Upload files and images', icon: FileUp },
+                { type: 'dropdown', name: 'Dropdown', description: 'Select from dropdown menu', icon: Sliders },
+                { type: 'matrix', name: 'Matrix', description: 'Grid of questions', icon: Layout },
+                { type: 'logic_jump', name: 'Logic Jump', description: 'Conditional branching', icon: GitBranch }
+              ].map(item => (
+                <Card key={item.type} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur hover:shadow-lg transition-all cursor-pointer group">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-900/50 transition-colors">
+                        <item.icon className="w-5 h-5 text-emerald-600" />
+                      </div>
+                      <h3 className="font-semibold">{item.name}</h3>
+                    </div>
+                    <p className="text-sm text-muted-foreground">{item.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="w-5 h-5" />
+                    Branding
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div>
+                      <p className="font-medium text-sm">Custom Logo</p>
+                      <p className="text-xs text-muted-foreground">Add your brand logo</p>
+                    </div>
+                    <Button variant="outline" size="sm">Upload</Button>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div>
+                      <p className="font-medium text-sm">Brand Colors</p>
+                      <p className="text-xs text-muted-foreground">Customize theme colors</p>
+                    </div>
+                    <Button variant="outline" size="sm">Configure</Button>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div>
+                      <p className="font-medium text-sm">Custom Domain</p>
+                      <p className="text-xs text-muted-foreground">surveys.yourdomain.com</p>
+                    </div>
+                    <Button variant="outline" size="sm">Setup</Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="w-5 h-5" />
+                    Integrations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                        <span className="text-lg">📊</span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">Google Sheets</p>
+                        <p className="text-xs text-muted-foreground">Sync responses</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                        <span className="text-lg">💬</span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">Slack</p>
+                        <p className="text-xs text-muted-foreground">Get notifications</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm">Connect</Button>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                        <span className="text-lg">📧</span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">Mailchimp</p>
+                        <p className="text-xs text-muted-foreground">Sync contacts</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm">Connect</Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Award className="w-5 h-5" />
+                    Plan & Usage
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl">
+                      <h3 className="font-semibold text-lg mb-1">Professional</h3>
+                      <p className="text-xs text-muted-foreground mb-4">Current Plan</p>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Responses</span>
+                          <span>{mockStats.totalResponses.toLocaleString()} / 10,000</span>
+                        </div>
+                        <Progress value={(mockStats.totalResponses / 10000) * 100} className="h-2" />
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Surveys</span>
+                          <span>{mockStats.totalSurveys} / unlimited</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="md:col-span-2 space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <p className="text-xs text-muted-foreground">Features</p>
+                          <p className="font-semibold">Logic Jumps, Custom Branding</p>
+                        </div>
+                        <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                          <p className="text-xs text-muted-foreground">Next Billing</p>
+                          <p className="font-semibold">$29/mo on Feb 1</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-3">
+                        <Button variant="outline" className="flex-1">
+                          View Invoices
+                        </Button>
+                        <Button className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600">
+                          Upgrade Plan
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Survey Detail Dialog */}
+        <Dialog open={!!selectedSurvey} onOpenChange={() => setSelectedSurvey(null)}>
+          <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <ClipboardList className="w-5 h-5" />
+                {selectedSurvey?.title}
+              </DialogTitle>
+              <DialogDescription>{selectedSurvey?.description}</DialogDescription>
+            </DialogHeader>
+            {selectedSurvey && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-2">
+                  <Badge className={getStatusColor(selectedSurvey.status)}>{selectedSurvey.status}</Badge>
+                  {selectedSurvey.tags.map(tag => (
+                    <Badge key={tag} variant="outline">{tag}</Badge>
+                  ))}
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{selectedSurvey.questions.length}</p>
+                    <p className="text-xs text-muted-foreground">Questions</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{selectedSurvey.responses.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">Responses</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-green-600">{selectedSurvey.completionRate}%</p>
+                    <p className="text-xs text-muted-foreground">Completion</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{selectedSurvey.avgTime} min</p>
+                    <p className="text-xs text-muted-foreground">Avg Time</p>
+                  </div>
+                </div>
+
+                {/* Questions Preview */}
+                <div>
+                  <h4 className="font-medium mb-3">Questions</h4>
+                  <div className="space-y-3">
+                    {selectedSurvey.questions.map((question, idx) => (
+                      <div key={question.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <span className="text-sm font-bold text-muted-foreground w-6">{idx + 1}</span>
+                        <div className="flex items-center gap-2">
+                          {getQuestionTypeIcon(question.type)}
+                          <span className="text-xs text-muted-foreground capitalize">{question.type.replace('_', ' ')}</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{question.title}</p>
+                          {question.required && (
+                            <Badge variant="outline" className="text-xs mt-1">Required</Badge>
+                          )}
+                          {question.hasLogicJump && (
+                            <Badge variant="secondary" className="text-xs mt-1 ml-1">
+                              <GitBranch className="w-3 h-3 mr-1" />
+                              Logic
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <Button variant="outline" className="flex-1" onClick={() => handleShare(selectedSurvey)}>
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share
+                  </Button>
+                  <Button className="flex-1">
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Survey
+                  </Button>
+                  <Button variant="outline">
+                    <Download className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Response Detail Dialog */}
+        <Dialog open={!!selectedResponse} onOpenChange={() => setSelectedResponse(null)}>
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Response Details
+              </DialogTitle>
+              <DialogDescription>
+                {selectedResponse?.respondentEmail || 'Anonymous response'}
+              </DialogDescription>
+            </DialogHeader>
+            {selectedResponse && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  {selectedResponse.isComplete ? (
+                    <Badge className="bg-green-100 text-green-700">Complete</Badge>
+                  ) : (
+                    <Badge variant="secondary">Partial</Badge>
+                  )}
+                  <span className="text-sm text-muted-foreground">
+                    {formatDateTime(selectedResponse.startedAt)}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {formatDuration(selectedResponse.duration)}
+                  </span>
+                </div>
+
+                {/* Answers */}
+                <div className="space-y-4">
+                  <h4 className="font-medium">Answers</h4>
+                  {selectedResponse.answers.map((answer, idx) => (
+                    <div key={idx} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-sm text-muted-foreground mb-1">{answer.questionTitle}</p>
+                      <p className="font-medium">
+                        {typeof answer.answer === 'number' ? answer.answer : answer.answer.toString()}
+                      </p>
                     </div>
                   ))}
                 </div>
-              )}
+
+                {/* Metadata */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-xs text-muted-foreground">Device</p>
+                    <p className="font-medium">{selectedResponse.metadata.device}</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-xs text-muted-foreground">Browser</p>
+                    <p className="font-medium">{selectedResponse.metadata.browser}</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-xs text-muted-foreground">Location</p>
+                    <p className="font-medium">{selectedResponse.metadata.location}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Dialog */}
+        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="w-5 h-5" />
+                Share Survey
+              </DialogTitle>
+              <DialogDescription>
+                {sharingSurvey?.title}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                <div className="flex items-center gap-3 mb-2">
+                  <Link className="w-5 h-5 text-blue-600" />
+                  <span className="font-medium">Share Link</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    readOnly
+                    value={`https://survey.app/s/${sharingSurvey?.id}`}
+                    className="text-sm"
+                  />
+                  <Button variant="outline" size="sm">
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  Email
+                </Button>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <QrCode className="w-4 h-4" />
+                  QR Code
+                </Button>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <Globe className="w-4 h-4" />
+                  Embed
+                </Button>
+                <Button variant="outline" className="flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4" />
+                  Preview
+                </Button>
+              </div>
             </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-
-            {/* Survey Status */}
-            <ProgressCard
-              title="Survey Status"
-              items={[
-                { label: 'Active', value: stats.active, total: stats.total, color: 'green' },
-                { label: 'Closed', value: stats.closed, total: stats.total, color: 'blue' },
-                { label: 'Paused', value: stats.paused, total: stats.total, color: 'yellow' },
-                { label: 'Draft', value: stats.draft, total: stats.total, color: 'gray' }
-              ]}
-            />
-
-            {/* Top Performing Surveys */}
-            <RankingList
-              title="Best Performers"
-              items={surveys
-                .filter(s => s.completion_rate > 0)
-                .sort((a, b) => Number(b.completion_rate) - Number(a.completion_rate))
-                .slice(0, 5)
-                .map((s, i) => ({
-                  label: s.title.substring(0, 30) + (s.title.length > 30 ? '...' : ''),
-                  value: `${Number(s.completion_rate).toFixed(1)}% completion`,
-                  rank: i + 1,
-                  trend: 'up'
-                }))}
-            />
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <MiniKPI
-                label="Avg Response Time"
-                value={surveys.length > 0 ? `${(surveys.reduce((s, survey) => s + Number(survey.average_time), 0) / surveys.length).toFixed(1)} min` : 'N/A'}
-                trend="down"
-                change="-12%"
-              />
-              <MiniKPI
-                label="Active Surveys"
-                value={stats.active.toString()}
-                trend="up"
-                change="+3"
-              />
-            </div>
-
-            {/* Recent Activity */}
-            <ActivityFeed
-              activities={[
-                {
-                  action: 'Survey published',
-                  subject: 'Product Feedback survey activated',
-                  time: '1 hour ago',
-                  type: 'success'
-                },
-                {
-                  action: 'Target reached',
-                  subject: 'Employee Engagement survey completed',
-                  time: '2 days ago',
-                  type: 'success'
-                },
-                {
-                  action: 'High response rate',
-                  subject: 'NPS survey achieved 91.7% completion',
-                  time: '3 days ago',
-                  type: 'info'
-                },
-                {
-                  action: 'Survey closed',
-                  subject: 'Website Usability survey ended',
-                  time: '1 week ago',
-                  type: 'warning'
-                }
-              ]}
-            />
-
-          </div>
-        </div>
-
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
