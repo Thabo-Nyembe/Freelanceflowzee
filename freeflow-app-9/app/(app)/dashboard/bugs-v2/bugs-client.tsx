@@ -1,365 +1,1316 @@
 'use client'
 
-import { useState } from 'react'
-import { useBugs, useBugMutations, Bug, getSeverityColor, getPriorityColor, getStatusColor } from '@/lib/hooks/use-bugs'
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
-  Bug as BugIcon,
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  TrendingUp,
-  Download,
-  Plus,
+  Bug,
   Search,
-  Code,
-  FileText,
+  Plus,
+  Filter,
+  LayoutGrid,
+  List,
+  BarChart3,
+  Settings,
+  Clock,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  CircleDot,
+  ArrowRight,
+  ArrowUp,
+  ArrowDown,
+  Minus,
+  ChevronRight,
+  MessageSquare,
+  Paperclip,
+  Link2,
+  GitBranch,
+  Tag,
+  Calendar,
+  Users,
+  Target,
+  TrendingUp,
   Activity,
+  FileText,
+  Eye,
+  Edit,
+  Trash2,
+  Copy,
+  MoreHorizontal,
+  Flag,
   Zap,
-  Target
+  RefreshCw,
+  Download,
+  Upload,
+  Layers,
+  GitPullRequest,
+  AlertCircle,
+  Timer,
+  Play,
+  Pause,
+  RotateCcw
 } from 'lucide-react'
 
-interface BugsClientProps {
-  initialBugs: Bug[]
+// Types
+type BugStatus = 'open' | 'in_progress' | 'in_review' | 'resolved' | 'closed' | 'wont_fix' | 'duplicate'
+type BugSeverity = 'critical' | 'high' | 'medium' | 'low'
+type BugPriority = 'blocker' | 'critical' | 'major' | 'minor' | 'trivial'
+type BugType = 'bug' | 'defect' | 'regression' | 'performance' | 'security' | 'ui' | 'crash'
+
+interface BugLabel {
+  id: string
+  name: string
+  color: string
 }
 
-type BugStatus = 'all' | 'open' | 'in-progress' | 'resolved' | 'closed' | 'wont-fix'
-type BugSeverity = 'all' | 'critical' | 'high' | 'medium' | 'low'
+interface BugComment {
+  id: string
+  author: string
+  authorAvatar?: string
+  content: string
+  createdAt: string
+  isEdited: boolean
+}
 
-export default function BugsClient({ initialBugs }: BugsClientProps) {
-  const [status, setStatus] = useState<BugStatus>('all')
-  const [severity, setSeverity] = useState<BugSeverity>('all')
-  const [searchQuery, setSearchQuery] = useState('')
+interface BugAttachment {
+  id: string
+  name: string
+  type: string
+  size: number
+  uploadedBy: string
+  uploadedAt: string
+  url: string
+}
 
-  const { bugs, stats, isLoading } = useBugs(initialBugs, {
-    status: status === 'all' ? undefined : status,
-    severity: severity === 'all' ? undefined : severity
-  })
-  const { createBug, isCreating } = useBugMutations()
+interface LinkedIssue {
+  id: string
+  key: string
+  title: string
+  type: 'blocks' | 'blocked_by' | 'duplicates' | 'related'
+  status: BugStatus
+}
 
-  const filteredBugs = bugs.filter(bug =>
-    bug.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    bug.bug_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    bug.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
-
-  const getStatusBadge = (s: string) => {
-    switch (s) {
-      case 'open':
-        return { color: 'bg-red-100 text-red-800 border-red-200', icon: AlertTriangle, label: 'Open' }
-      case 'in-progress':
-        return { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: Activity, label: 'In Progress' }
-      case 'resolved':
-        return { color: 'bg-green-100 text-green-800 border-green-200', icon: CheckCircle2, label: 'Resolved' }
-      case 'closed':
-        return { color: 'bg-gray-100 text-gray-800 border-gray-200', icon: XCircle, label: 'Closed' }
-      case 'wont-fix':
-        return { color: 'bg-purple-100 text-purple-800 border-purple-200', icon: XCircle, label: "Won't Fix" }
-      default:
-        return { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: Clock, label: s }
-    }
+interface BugItem {
+  id: string
+  key: string
+  title: string
+  description: string
+  status: BugStatus
+  severity: BugSeverity
+  priority: BugPriority
+  type: BugType
+  reporter: {
+    id: string
+    name: string
+    avatar?: string
   }
+  assignee?: {
+    id: string
+    name: string
+    avatar?: string
+  }
+  labels: BugLabel[]
+  affectedVersion: string
+  fixVersion?: string
+  environment: string
+  stepsToReproduce: string[]
+  expectedBehavior: string
+  actualBehavior: string
+  createdAt: string
+  updatedAt: string
+  resolvedAt?: string
+  dueDate?: string
+  timeEstimate?: number
+  timeSpent?: number
+  comments: BugComment[]
+  attachments: BugAttachment[]
+  linkedIssues: LinkedIssue[]
+  votes: number
+  watchers: number
+  sprint?: string
+  component?: string
+}
+
+interface BugStats {
+  total: number
+  open: number
+  inProgress: number
+  resolved: number
+  closed: number
+  critical: number
+  high: number
+  medium: number
+  low: number
+  avgResolutionTime: number
+  openThisWeek: number
+  resolvedThisWeek: number
+}
+
+// Mock Data
+const mockLabels: BugLabel[] = [
+  { id: 'l1', name: 'frontend', color: '#3b82f6' },
+  { id: 'l2', name: 'backend', color: '#10b981' },
+  { id: 'l3', name: 'api', color: '#f59e0b' },
+  { id: 'l4', name: 'database', color: '#8b5cf6' },
+  { id: 'l5', name: 'auth', color: '#ef4444' },
+  { id: 'l6', name: 'performance', color: '#ec4899' },
+  { id: 'l7', name: 'ui/ux', color: '#06b6d4' }
+]
+
+const mockBugs: BugItem[] = [
+  {
+    id: 'bug-1',
+    key: 'BUG-1234',
+    title: 'Login form crashes when password contains special characters',
+    description: 'Users report that the login form crashes when entering passwords with special characters like @ or #. This is blocking multiple users from accessing the system.',
+    status: 'open',
+    severity: 'critical',
+    priority: 'blocker',
+    type: 'crash',
+    reporter: { id: 'u1', name: 'John Smith', avatar: 'JS' },
+    assignee: { id: 'u2', name: 'Sarah Chen', avatar: 'SC' },
+    labels: [mockLabels[0], mockLabels[4]],
+    affectedVersion: '2.4.1',
+    fixVersion: '2.4.2',
+    environment: 'Production',
+    stepsToReproduce: ['Navigate to login page', 'Enter username', 'Enter password with @ symbol', 'Click login button'],
+    expectedBehavior: 'User should be logged in successfully',
+    actualBehavior: 'Application crashes with white screen',
+    createdAt: '2024-01-15T10:30:00',
+    updatedAt: '2024-01-15T14:20:00',
+    dueDate: '2024-01-18',
+    timeEstimate: 4,
+    timeSpent: 2,
+    comments: [
+      { id: 'c1', author: 'Sarah Chen', content: 'Investigating this now. Seems related to regex validation.', createdAt: '2024-01-15T11:00:00', isEdited: false },
+      { id: 'c2', author: 'John Smith', content: 'Thanks for the quick response!', createdAt: '2024-01-15T11:15:00', isEdited: false }
+    ],
+    attachments: [
+      { id: 'a1', name: 'error_screenshot.png', type: 'image/png', size: 245000, uploadedBy: 'John Smith', uploadedAt: '2024-01-15T10:35:00', url: '#' },
+      { id: 'a2', name: 'console_log.txt', type: 'text/plain', size: 1200, uploadedBy: 'John Smith', uploadedAt: '2024-01-15T10:36:00', url: '#' }
+    ],
+    linkedIssues: [
+      { id: 'li1', key: 'BUG-1200', title: 'Input validation improvements', type: 'related', status: 'closed' }
+    ],
+    votes: 24,
+    watchers: 15,
+    sprint: 'Sprint 12',
+    component: 'Authentication'
+  },
+  {
+    id: 'bug-2',
+    key: 'BUG-1235',
+    title: 'Dashboard loads slowly with large datasets',
+    description: 'Dashboard takes over 30 seconds to load when displaying more than 1000 records. Users are experiencing timeouts and poor performance.',
+    status: 'in_progress',
+    severity: 'high',
+    priority: 'major',
+    type: 'performance',
+    reporter: { id: 'u3', name: 'Mike Johnson', avatar: 'MJ' },
+    assignee: { id: 'u4', name: 'Alex Rivera', avatar: 'AR' },
+    labels: [mockLabels[0], mockLabels[5]],
+    affectedVersion: '2.4.0',
+    fixVersion: '2.5.0',
+    environment: 'Production',
+    stepsToReproduce: ['Login as admin', 'Navigate to dashboard', 'Set date range to last year'],
+    expectedBehavior: 'Dashboard loads within 3 seconds',
+    actualBehavior: 'Dashboard takes 30+ seconds or times out',
+    createdAt: '2024-01-14T09:00:00',
+    updatedAt: '2024-01-15T16:00:00',
+    dueDate: '2024-01-20',
+    timeEstimate: 16,
+    timeSpent: 8,
+    comments: [
+      { id: 'c3', author: 'Alex Rivera', content: 'Implementing pagination and lazy loading. PR coming soon.', createdAt: '2024-01-15T15:00:00', isEdited: true }
+    ],
+    attachments: [],
+    linkedIssues: [],
+    votes: 18,
+    watchers: 22,
+    sprint: 'Sprint 12',
+    component: 'Dashboard'
+  },
+  {
+    id: 'bug-3',
+    key: 'BUG-1236',
+    title: 'Export to CSV missing some columns',
+    description: 'When exporting data to CSV, the "Created Date" and "Modified Date" columns are missing from the output file.',
+    status: 'in_review',
+    severity: 'medium',
+    priority: 'minor',
+    type: 'bug',
+    reporter: { id: 'u5', name: 'Emily Davis', avatar: 'ED' },
+    assignee: { id: 'u2', name: 'Sarah Chen', avatar: 'SC' },
+    labels: [mockLabels[1], mockLabels[2]],
+    affectedVersion: '2.4.1',
+    environment: 'Staging',
+    stepsToReproduce: ['Go to Reports', 'Select any report', 'Click Export to CSV'],
+    expectedBehavior: 'All columns including dates should be exported',
+    actualBehavior: 'Date columns are missing',
+    createdAt: '2024-01-12T14:30:00',
+    updatedAt: '2024-01-15T10:00:00',
+    timeEstimate: 2,
+    timeSpent: 1.5,
+    comments: [],
+    attachments: [
+      { id: 'a3', name: 'exported_file.csv', type: 'text/csv', size: 5000, uploadedBy: 'Emily Davis', uploadedAt: '2024-01-12T14:35:00', url: '#' }
+    ],
+    linkedIssues: [],
+    votes: 8,
+    watchers: 5,
+    sprint: 'Sprint 11',
+    component: 'Reporting'
+  },
+  {
+    id: 'bug-4',
+    key: 'BUG-1237',
+    title: 'Button color inconsistent in dark mode',
+    description: 'Primary action buttons appear with wrong color in dark mode theme.',
+    status: 'resolved',
+    severity: 'low',
+    priority: 'trivial',
+    type: 'ui',
+    reporter: { id: 'u6', name: 'Chris Brown', avatar: 'CB' },
+    assignee: { id: 'u7', name: 'Lisa Park', avatar: 'LP' },
+    labels: [mockLabels[0], mockLabels[6]],
+    affectedVersion: '2.4.0',
+    fixVersion: '2.4.1',
+    environment: 'Development',
+    stepsToReproduce: ['Enable dark mode', 'Navigate to settings page', 'Observe button colors'],
+    expectedBehavior: 'Buttons should have correct brand color',
+    actualBehavior: 'Buttons appear gray instead of blue',
+    createdAt: '2024-01-10T11:00:00',
+    updatedAt: '2024-01-14T09:00:00',
+    resolvedAt: '2024-01-14T09:00:00',
+    timeEstimate: 1,
+    timeSpent: 0.5,
+    comments: [
+      { id: 'c4', author: 'Lisa Park', content: 'Fixed in PR #456. Updated CSS variables for dark mode.', createdAt: '2024-01-14T09:00:00', isEdited: false }
+    ],
+    attachments: [],
+    linkedIssues: [],
+    votes: 3,
+    watchers: 2,
+    component: 'UI Components'
+  },
+  {
+    id: 'bug-5',
+    key: 'BUG-1238',
+    title: 'API rate limiting not working correctly',
+    description: 'Rate limiting is allowing more requests than configured. Set to 100 req/min but allowing 500+.',
+    status: 'open',
+    severity: 'high',
+    priority: 'critical',
+    type: 'security',
+    reporter: { id: 'u8', name: 'David Kim', avatar: 'DK' },
+    labels: [mockLabels[1], mockLabels[2]],
+    affectedVersion: '2.4.1',
+    environment: 'Production',
+    stepsToReproduce: ['Send 100+ requests in 1 minute', 'Observe no rate limiting'],
+    expectedBehavior: 'Requests should be blocked after 100/minute',
+    actualBehavior: 'No rate limiting is applied',
+    createdAt: '2024-01-15T08:00:00',
+    updatedAt: '2024-01-15T08:00:00',
+    dueDate: '2024-01-16',
+    timeEstimate: 8,
+    comments: [],
+    attachments: [],
+    linkedIssues: [
+      { id: 'li2', key: 'SEC-89', title: 'Security audit findings', type: 'related', status: 'open' }
+    ],
+    votes: 12,
+    watchers: 18,
+    sprint: 'Sprint 12',
+    component: 'API Gateway'
+  },
+  {
+    id: 'bug-6',
+    key: 'BUG-1239',
+    title: 'Duplicate email notifications',
+    description: 'Users receiving 2-3 copies of the same notification email.',
+    status: 'closed',
+    severity: 'medium',
+    priority: 'minor',
+    type: 'bug',
+    reporter: { id: 'u9', name: 'Rachel Green', avatar: 'RG' },
+    assignee: { id: 'u4', name: 'Alex Rivera', avatar: 'AR' },
+    labels: [mockLabels[1]],
+    affectedVersion: '2.3.5',
+    fixVersion: '2.4.0',
+    environment: 'Production',
+    stepsToReproduce: ['Trigger any notification', 'Check email inbox'],
+    expectedBehavior: 'One email per notification',
+    actualBehavior: 'Multiple duplicate emails received',
+    createdAt: '2024-01-05T16:00:00',
+    updatedAt: '2024-01-08T10:00:00',
+    resolvedAt: '2024-01-07T15:00:00',
+    timeEstimate: 4,
+    timeSpent: 3,
+    comments: [],
+    attachments: [],
+    linkedIssues: [],
+    votes: 45,
+    watchers: 32,
+    component: 'Notifications'
+  }
+]
+
+const mockStats: BugStats = {
+  total: 156,
+  open: 42,
+  inProgress: 28,
+  resolved: 54,
+  closed: 32,
+  critical: 5,
+  high: 18,
+  medium: 45,
+  low: 88,
+  avgResolutionTime: 3.2,
+  openThisWeek: 12,
+  resolvedThisWeek: 18
+}
+
+// Helper functions
+const getStatusColor = (status: BugStatus) => {
+  switch (status) {
+    case 'open': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+    case 'in_progress': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+    case 'in_review': return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+    case 'resolved': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+    case 'closed': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+    case 'wont_fix': return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+    case 'duplicate': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+  }
+}
+
+const getStatusIcon = (status: BugStatus) => {
+  switch (status) {
+    case 'open': return <AlertCircle className="w-4 h-4" />
+    case 'in_progress': return <Play className="w-4 h-4" />
+    case 'in_review': return <Eye className="w-4 h-4" />
+    case 'resolved': return <CheckCircle className="w-4 h-4" />
+    case 'closed': return <XCircle className="w-4 h-4" />
+    case 'wont_fix': return <Minus className="w-4 h-4" />
+    case 'duplicate': return <Copy className="w-4 h-4" />
+  }
+}
+
+const getSeverityColor = (severity: BugSeverity) => {
+  switch (severity) {
+    case 'critical': return 'bg-red-600 text-white'
+    case 'high': return 'bg-orange-500 text-white'
+    case 'medium': return 'bg-yellow-500 text-white'
+    case 'low': return 'bg-blue-500 text-white'
+  }
+}
+
+const getPriorityIcon = (priority: BugPriority) => {
+  switch (priority) {
+    case 'blocker': return <ArrowUp className="w-4 h-4 text-red-600" />
+    case 'critical': return <ArrowUp className="w-4 h-4 text-orange-600" />
+    case 'major': return <Minus className="w-4 h-4 text-yellow-600" />
+    case 'minor': return <ArrowDown className="w-4 h-4 text-blue-600" />
+    case 'trivial': return <ArrowDown className="w-4 h-4 text-gray-500" />
+  }
+}
+
+const getTypeIcon = (type: BugType) => {
+  switch (type) {
+    case 'bug': return <Bug className="w-4 h-4 text-red-600" />
+    case 'defect': return <AlertTriangle className="w-4 h-4 text-orange-600" />
+    case 'regression': return <RotateCcw className="w-4 h-4 text-purple-600" />
+    case 'performance': return <Zap className="w-4 h-4 text-yellow-600" />
+    case 'security': return <AlertCircle className="w-4 h-4 text-red-600" />
+    case 'ui': return <Layers className="w-4 h-4 text-blue-600" />
+    case 'crash': return <XCircle className="w-4 h-4 text-red-600" />
+  }
+}
+
+const formatDate = (dateStr: string) => {
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  })
+}
+
+const formatDateTime = (dateStr: string) => {
+  return new Date(dateStr).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const formatFileSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+export default function BugsClient() {
+  const [activeTab, setActiveTab] = useState('list')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState<BugStatus | 'all'>('all')
+  const [severityFilter, setSeverityFilter] = useState<BugSeverity | 'all'>('all')
+  const [selectedBug, setSelectedBug] = useState<BugItem | null>(null)
+  const [viewMode, setViewMode] = useState<'list' | 'board'>('list')
+
+  // Computed values
+  const filteredBugs = useMemo(() => {
+    return mockBugs.filter(bug => {
+      const matchesSearch = bug.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        bug.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        bug.description.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesStatus = statusFilter === 'all' || bug.status === statusFilter
+      const matchesSeverity = severityFilter === 'all' || bug.severity === severityFilter
+      return matchesSearch && matchesStatus && matchesSeverity
+    })
+  }, [searchTerm, statusFilter, severityFilter])
+
+  const bugsByStatus = useMemo(() => {
+    return {
+      open: mockBugs.filter(b => b.status === 'open'),
+      in_progress: mockBugs.filter(b => b.status === 'in_progress'),
+      in_review: mockBugs.filter(b => b.status === 'in_review'),
+      resolved: mockBugs.filter(b => b.status === 'resolved'),
+      closed: mockBugs.filter(b => b.status === 'closed')
+    }
+  }, [])
+
+  const boardColumns = [
+    { id: 'open', label: 'Open', bugs: bugsByStatus.open, color: 'border-red-500' },
+    { id: 'in_progress', label: 'In Progress', bugs: bugsByStatus.in_progress, color: 'border-blue-500' },
+    { id: 'in_review', label: 'In Review', bugs: bugsByStatus.in_review, color: 'border-purple-500' },
+    { id: 'resolved', label: 'Resolved', bugs: bugsByStatus.resolved, color: 'border-green-500' }
+  ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50/30 to-amber-50/40 dark:bg-none dark:bg-gray-900 p-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
-              Bug Tracking
-            </h1>
-            <p className="text-gray-600 mt-2">Track and resolve software defects</p>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl shadow-lg">
+              <Bug className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Bug Tracker</h1>
+              <p className="text-gray-600 dark:text-gray-400">Jira-level issue tracking</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
-              <Search className="w-4 h-4" />
-              Search
-            </button>
-            <button className="px-4 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
-              <Plus className="w-4 h-4" />
+            <div className="flex items-center bg-white/80 dark:bg-gray-800/80 rounded-lg p-1">
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+              >
+                <List className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'board' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('board')}
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </Button>
+            </div>
+            <Button variant="outline" size="sm">
+              <Upload className="w-4 h-4 mr-2" />
+              Import
+            </Button>
+            <Button className="bg-gradient-to-r from-red-500 to-orange-600 text-white">
+              <Plus className="w-4 h-4 mr-2" />
               Report Bug
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <BugIcon className="w-8 h-8 text-red-600" />
-              <span className="text-sm font-medium text-red-600">-18.2%</span>
-            </div>
-            <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-            <p className="text-sm text-gray-500">Total Bugs</p>
-          </div>
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <AlertTriangle className="w-8 h-8 text-orange-600" />
-              <span className="text-sm font-medium text-red-600">-24.7%</span>
-            </div>
-            <p className="text-2xl font-bold text-gray-900">{stats.open}</p>
-            <p className="text-sm text-gray-500">Open Bugs</p>
-          </div>
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <CheckCircle2 className="w-8 h-8 text-green-600" />
-              <span className="text-sm font-medium text-green-600">+32.4%</span>
-            </div>
-            <p className="text-2xl font-bold text-gray-900">{stats.resolved}</p>
-            <p className="text-sm text-gray-500">Resolved</p>
-          </div>
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <Clock className="w-8 h-8 text-blue-600" />
-              <span className="text-sm font-medium text-green-600">-15.8%</span>
-            </div>
-            <p className="text-2xl font-bold text-gray-900">{stats.avgResolutionDays.toFixed(1)}d</p>
-            <p className="text-sm text-gray-500">Avg Fix Time</p>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-            {[
-              { label: 'Report Bug', icon: Plus, color: 'from-red-500 to-pink-500' },
-              { label: 'Triage Bugs', icon: Target, color: 'from-orange-500 to-amber-500' },
-              { label: 'Bug Analytics', icon: TrendingUp, color: 'from-blue-500 to-cyan-500' },
-              { label: 'Export Report', icon: Download, color: 'from-green-500 to-emerald-500' },
-              { label: 'Code Analysis', icon: Code, color: 'from-purple-500 to-violet-500' },
-              { label: 'Auto-Assign', icon: Zap, color: 'from-indigo-500 to-purple-500' },
-              { label: 'Release Notes', icon: FileText, color: 'from-teal-500 to-cyan-500' },
-              { label: 'Hot Fixes', icon: Activity, color: 'from-pink-500 to-rose-500' }
-            ].map((action) => (
-              <button
-                key={action.label}
-                className="p-4 bg-white rounded-xl border border-gray-100 hover:shadow-lg transition-all duration-200 group"
-              >
-                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center text-white mb-3 mx-auto`}>
-                  <action.icon className="w-5 h-5" />
-                </div>
-                <p className="text-sm font-medium text-gray-900 text-center">{action.label}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">Status</label>
-              <div className="flex flex-wrap gap-2">
-                {(['all', 'open', 'in-progress', 'resolved', 'closed', 'wont-fix'] as BugStatus[]).map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setStatus(s)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      status === s
-                        ? 'bg-red-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {s === 'all' ? 'All Bugs' : s === 'wont-fix' ? "Won't Fix" : s.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                  </button>
-                ))}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-red-600 mb-1">
+                <Bug className="w-4 h-4" />
+                <span className="text-xs font-medium">Total Bugs</span>
               </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">Severity</label>
-              <div className="flex flex-wrap gap-2">
-                {(['all', 'critical', 'high', 'medium', 'low'] as BugSeverity[]).map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setSeverity(s)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      severity === s
-                        ? 'bg-red-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {s === 'all' ? 'All Severities' : s.charAt(0).toUpperCase() + s.slice(1)}
-                  </button>
-                ))}
+              <p className="text-2xl font-bold">{mockStats.total}</p>
+              <p className="text-xs text-muted-foreground">all time</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-orange-600 mb-1">
+                <AlertCircle className="w-4 h-4" />
+                <span className="text-xs font-medium">Open</span>
               </div>
-            </div>
-          </div>
+              <p className="text-2xl font-bold">{mockStats.open}</p>
+              <p className="text-xs text-red-600">+{mockStats.openThisWeek} this week</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-blue-600 mb-1">
+                <Play className="w-4 h-4" />
+                <span className="text-xs font-medium">In Progress</span>
+              </div>
+              <p className="text-2xl font-bold">{mockStats.inProgress}</p>
+              <p className="text-xs text-muted-foreground">being fixed</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-green-600 mb-1">
+                <CheckCircle className="w-4 h-4" />
+                <span className="text-xs font-medium">Resolved</span>
+              </div>
+              <p className="text-2xl font-bold">{mockStats.resolved}</p>
+              <p className="text-xs text-green-600">+{mockStats.resolvedThisWeek} this week</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-red-600 mb-1">
+                <AlertTriangle className="w-4 h-4" />
+                <span className="text-xs font-medium">Critical</span>
+              </div>
+              <p className="text-2xl font-bold">{mockStats.critical}</p>
+              <p className="text-xs text-muted-foreground">need attention</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-orange-600 mb-1">
+                <Flag className="w-4 h-4" />
+                <span className="text-xs font-medium">High</span>
+              </div>
+              <p className="text-2xl font-bold">{mockStats.high}</p>
+              <p className="text-xs text-muted-foreground">priority</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-purple-600 mb-1">
+                <Timer className="w-4 h-4" />
+                <span className="text-xs font-medium">Avg Resolution</span>
+              </div>
+              <p className="text-2xl font-bold">{mockStats.avgResolutionTime}d</p>
+              <p className="text-xs text-muted-foreground">days to fix</p>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 text-cyan-600 mb-1">
+                <TrendingUp className="w-4 h-4" />
+                <span className="text-xs font-medium">Resolution</span>
+              </div>
+              <Progress value={Math.round((mockStats.resolved / mockStats.total) * 100)} className="h-2 mt-2" />
+              <p className="text-xs text-muted-foreground mt-1">{Math.round((mockStats.resolved / mockStats.total) * 100)}% fixed</p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Bugs List */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Bug Reports</h2>
-              <div className="text-sm text-gray-600">{filteredBugs.length} bugs</div>
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between mb-4">
+            <TabsList className="bg-white/80 dark:bg-gray-800/80">
+              <TabsTrigger value="list" className="flex items-center gap-2">
+                <Bug className="w-4 h-4" />
+                Bugs
+              </TabsTrigger>
+              <TabsTrigger value="board" className="flex items-center gap-2">
+                <LayoutGrid className="w-4 h-4" />
+                Board
+              </TabsTrigger>
+              <TabsTrigger value="sprints" className="flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                Sprints
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex items-center gap-2">
+                <BarChart3 className="w-4 h-4" />
+                Analytics
+              </TabsTrigger>
+              <TabsTrigger value="team" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Team
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
+              </TabsTrigger>
+            </TabsList>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search bugs..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 w-64 bg-white/80 dark:bg-gray-800/80"
+                />
+              </div>
+              <Button variant="outline" size="sm">
+                <Filter className="w-4 h-4 mr-2" />
+                Filters
+              </Button>
+            </div>
+          </div>
+
+          {/* Bugs List Tab */}
+          <TabsContent value="list" className="space-y-4">
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
+              <span className="text-sm font-medium text-muted-foreground">Status:</span>
+              {(['all', 'open', 'in_progress', 'in_review', 'resolved', 'closed'] as const).map(s => (
+                <Button
+                  key={s}
+                  variant={statusFilter === s ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setStatusFilter(s)}
+                  className="capitalize"
+                >
+                  {s === 'all' ? 'All' : s.replace('_', ' ')}
+                </Button>
+              ))}
+              <span className="text-sm font-medium text-muted-foreground ml-4">Severity:</span>
+              {(['all', 'critical', 'high', 'medium', 'low'] as const).map(s => (
+                <Button
+                  key={s}
+                  variant={severityFilter === s ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSeverityFilter(s)}
+                  className="capitalize"
+                >
+                  {s === 'all' ? 'All' : s}
+                </Button>
+              ))}
             </div>
 
-            {isLoading ? (
-              <div className="text-center py-8 text-gray-500">Loading bugs...</div>
-            ) : filteredBugs.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">No bugs found</div>
-            ) : (
-              <div className="space-y-3">
-                {filteredBugs.map((bug) => {
-                  const statusBadge = getStatusBadge(bug.status)
-                  const StatusIcon = statusBadge.icon
-
-                  return (
-                    <div
-                      key={bug.id}
-                      className="bg-white rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-200 hover:border-red-200"
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center text-white">
-                            <BugIcon className="w-6 h-6" />
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+              <CardContent className="p-0">
+                <ScrollArea className="h-[600px]">
+                  <div className="divide-y dark:divide-gray-700">
+                    {filteredBugs.map(bug => (
+                      <div
+                        key={bug.id}
+                        className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
+                        onClick={() => setSelectedBug(bug)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-3">
+                            {getTypeIcon(bug.type)}
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-medium text-muted-foreground">{bug.key}</span>
+                                <Badge className={getSeverityColor(bug.severity)}>{bug.severity}</Badge>
+                                <Badge className={getStatusColor(bug.status)} variant="outline">
+                                  {getStatusIcon(bug.status)}
+                                  <span className="ml-1 capitalize">{bug.status.replace('_', ' ')}</span>
+                                </Badge>
+                              </div>
+                              <h3 className="font-semibold mb-1">{bug.title}</h3>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  {getPriorityIcon(bug.priority)}
+                                  <span className="capitalize">{bug.priority}</span>
+                                </span>
+                                <span>v{bug.affectedVersion}</span>
+                                {bug.component && <span>{bug.component}</span>}
+                                <span>{formatDate(bug.createdAt)}</span>
+                              </div>
+                              <div className="flex items-center gap-2 mt-2">
+                                {bug.labels.slice(0, 3).map(label => (
+                                  <Badge key={label.id} variant="outline" style={{ borderColor: label.color, color: label.color }}>
+                                    {label.name}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900">{bug.title}</h3>
-                            <div className="flex items-center gap-3 mt-1">
-                              <span className="text-sm text-gray-500">{bug.bug_code}</span>
-                              <span className="text-sm text-gray-400">•</span>
-                              <span className="text-sm text-gray-500">{bug.priority}</span>
-                              <span className="text-sm text-gray-400">•</span>
-                              <span className="text-sm text-gray-500">{bug.category || 'Uncategorized'}</span>
+                          <div className="flex items-center gap-4">
+                            {bug.assignee && (
+                              <Avatar className="w-8 h-8">
+                                <AvatarFallback className="bg-red-100 text-red-700 text-xs">
+                                  {bug.assignee.avatar || bug.assignee.name.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                            )}
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <MessageSquare className="w-4 h-4" />
+                                {bug.comments.length}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Paperclip className="w-4 h-4" />
+                                {bug.attachments.length}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <ArrowUp className="w-4 h-4" />
+                                {bug.votes}
+                              </span>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <div className={`px-3 py-1 rounded-full border text-xs font-medium capitalize ${getSeverityColor(bug.severity)}`}>
-                            {bug.severity}
-                          </div>
-                          <div className={`px-3 py-1 rounded-full border text-xs font-medium flex items-center gap-1 ${statusBadge.color}`}>
-                            <StatusIcon className="w-3 h-3" />
-                            {statusBadge.label}
-                          </div>
-                        </div>
                       </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                      {bug.description && (
-                        <p className="text-sm text-gray-600 mb-4">{bug.description}</p>
-                      )}
+          {/* Board Tab */}
+          <TabsContent value="board" className="space-y-4">
+            <div className="grid grid-cols-4 gap-4">
+              {boardColumns.map(column => (
+                <div key={column.id} className="space-y-4">
+                  <div className={`flex items-center justify-between p-3 bg-white/80 dark:bg-gray-800/80 rounded-lg border-t-4 ${column.color}`}>
+                    <h3 className="font-semibold">{column.label}</h3>
+                    <Badge variant="secondary">{column.bugs.length}</Badge>
+                  </div>
+                  <ScrollArea className="h-[500px]">
+                    <div className="space-y-3 pr-2">
+                      {column.bugs.map(bug => (
+                        <Card key={bug.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur cursor-pointer hover:shadow-lg transition-all" onClick={() => setSelectedBug(bug)}>
+                          <CardContent className="p-3">
+                            <div className="flex items-start justify-between mb-2">
+                              <span className="text-xs font-medium text-muted-foreground">{bug.key}</span>
+                              <Badge className={getSeverityColor(bug.severity)} className="text-[10px]">{bug.severity}</Badge>
+                            </div>
+                            <h4 className="text-sm font-medium mb-2 line-clamp-2">{bug.title}</h4>
+                            <div className="flex items-center justify-between">
+                              {bug.assignee ? (
+                                <Avatar className="w-6 h-6">
+                                  <AvatarFallback className="bg-red-100 text-red-700 text-[10px]">
+                                    {bug.assignee.avatar || bug.assignee.name.charAt(0)}
+                                  </AvatarFallback>
+                                </Avatar>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">Unassigned</span>
+                              )}
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                {getPriorityIcon(bug.priority)}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              ))}
+            </div>
+          </TabsContent>
 
-                      <div className="grid grid-cols-4 gap-4 mb-4">
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">Assignee</div>
-                          <div className="font-medium text-gray-900 text-sm">{bug.assignee_name || 'Unassigned'}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">Reporter</div>
-                          <div className="font-medium text-gray-900 text-sm">{bug.reporter_name || 'Unknown'}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">Created</div>
-                          <div className="font-medium text-gray-900 text-sm">
-                            {new Date(bug.created_date).toLocaleDateString()}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">Due Date</div>
-                          <div className="font-medium text-gray-900 text-sm">
-                            {bug.due_date ? new Date(bug.due_date).toLocaleDateString() : 'Not set'}
-                          </div>
-                        </div>
+          {/* Sprints Tab */}
+          <TabsContent value="sprints" className="space-y-4">
+            <div className="grid gap-4">
+              {['Sprint 12', 'Sprint 11', 'Backlog'].map(sprint => {
+                const sprintBugs = mockBugs.filter(b => b.sprint === sprint || (!b.sprint && sprint === 'Backlog'))
+                return (
+                  <Card key={sprint} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="flex items-center gap-2">
+                          <Target className="w-5 h-5" />
+                          {sprint}
+                        </CardTitle>
+                        <Badge variant="secondary">{sprintBugs.length} bugs</Badge>
                       </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {sprintBugs.slice(0, 3).map(bug => (
+                          <div key={bug.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              {getTypeIcon(bug.type)}
+                              <span className="text-sm font-medium">{bug.key}</span>
+                              <span className="text-sm text-muted-foreground truncate max-w-[300px]">{bug.title}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge className={getStatusColor(bug.status)} variant="outline">{bug.status.replace('_', ' ')}</Badge>
+                              {bug.assignee && (
+                                <Avatar className="w-6 h-6">
+                                  <AvatarFallback className="text-[10px]">{bug.assignee.avatar}</AvatarFallback>
+                                </Avatar>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                        {sprintBugs.length > 3 && (
+                          <Button variant="ghost" className="w-full text-sm">
+                            View all {sprintBugs.length} bugs
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          </TabsContent>
 
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-100 text-sm">
-                        <div className="flex items-center gap-4">
-                          <span className="text-gray-600">
-                            Version: <span className="font-medium text-gray-900">{bug.affected_version || 'N/A'}</span>
-                          </span>
-                          {bug.target_version && (
-                            <>
-                              <span className="text-gray-400">→</span>
-                              <span className="text-gray-600">
-                                Fix: <span className="font-medium text-gray-900">{bug.target_version}</span>
-                              </span>
-                            </>
-                          )}
-                          <span className="text-gray-400">•</span>
-                          <span className="text-gray-600">{bug.votes} votes</span>
-                          <span className="text-gray-400">•</span>
-                          <span className="text-gray-600">{bug.watchers} watchers</span>
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Bug Trend (14 days)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-end justify-between gap-2">
+                    {Array.from({ length: 14 }).map((_, i) => {
+                      const opened = Math.floor(Math.random() * 8) + 2
+                      const resolved = Math.floor(Math.random() * 10) + 3
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                          <div className="w-full flex flex-col gap-1">
+                            <div
+                              className="w-full bg-green-500 rounded-t"
+                              style={{ height: `${resolved * 4}px` }}
+                            />
+                            <div
+                              className="w-full bg-red-500"
+                              style={{ height: `${opened * 4}px` }}
+                            />
+                          </div>
+                          <span className="text-[10px] text-muted-foreground">{i + 1}</span>
                         </div>
-                        <div className="text-gray-500">
-                          {new Date(bug.last_updated).toLocaleString()}
+                      )
+                    })}
+                  </div>
+                  <div className="flex items-center justify-center gap-6 mt-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded bg-red-500" />
+                      <span className="text-sm">Opened</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded bg-green-500" />
+                      <span className="text-sm">Resolved</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertTriangle className="w-5 h-5" />
+                    Severity Distribution
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { label: 'Critical', count: mockStats.critical, color: 'bg-red-500', total: mockStats.total },
+                      { label: 'High', count: mockStats.high, color: 'bg-orange-500', total: mockStats.total },
+                      { label: 'Medium', count: mockStats.medium, color: 'bg-yellow-500', total: mockStats.total },
+                      { label: 'Low', count: mockStats.low, color: 'bg-blue-500', total: mockStats.total }
+                    ].map(item => (
+                      <div key={item.label} className="flex items-center gap-3">
+                        <span className="w-16 text-sm font-medium">{item.label}</span>
+                        <div className="flex-1">
+                          <Progress value={(item.count / item.total) * 100} className={`h-3 ${item.color}`} />
                         </div>
+                        <span className="w-12 text-sm text-right">{item.count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    Top Bug Fixers
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { name: 'Sarah Chen', fixed: 24, avatar: 'SC' },
+                      { name: 'Alex Rivera', fixed: 19, avatar: 'AR' },
+                      { name: 'Lisa Park', fixed: 15, avatar: 'LP' },
+                      { name: 'David Kim', fixed: 12, avatar: 'DK' }
+                    ].map((user, idx) => (
+                      <div key={user.name} className="flex items-center gap-3">
+                        <span className="text-lg font-bold text-muted-foreground w-6">{idx + 1}</span>
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback className="bg-red-100 text-red-700 text-xs">{user.avatar}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{user.name}</p>
+                          <Progress value={(user.fixed / 24) * 100} className="h-2 mt-1" />
+                        </div>
+                        <span className="font-bold">{user.fixed}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Layers className="w-5 h-5" />
+                    Bugs by Component
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { name: 'Authentication', count: 12, color: '#ef4444' },
+                      { name: 'Dashboard', count: 18, color: '#f59e0b' },
+                      { name: 'API Gateway', count: 8, color: '#10b981' },
+                      { name: 'Notifications', count: 6, color: '#6366f1' },
+                      { name: 'Reporting', count: 15, color: '#ec4899' }
+                    ].map(component => (
+                      <div key={component.name} className="flex items-center gap-3">
+                        <div className="w-3 h-3 rounded" style={{ backgroundColor: component.color }} />
+                        <span className="flex-1 text-sm">{component.name}</span>
+                        <Badge variant="secondary">{component.count}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Team Tab */}
+          <TabsContent value="team" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                { name: 'Sarah Chen', role: 'Senior Developer', avatar: 'SC', assigned: 8, resolved: 24, inProgress: 3 },
+                { name: 'Alex Rivera', role: 'Full Stack Developer', avatar: 'AR', assigned: 6, resolved: 19, inProgress: 2 },
+                { name: 'Lisa Park', role: 'Frontend Developer', avatar: 'LP', assigned: 4, resolved: 15, inProgress: 2 },
+                { name: 'David Kim', role: 'Backend Developer', avatar: 'DK', assigned: 5, resolved: 12, inProgress: 3 },
+                { name: 'Mike Johnson', role: 'QA Engineer', avatar: 'MJ', assigned: 0, resolved: 0, inProgress: 0 },
+                { name: 'Emily Davis', role: 'Product Manager', avatar: 'ED', assigned: 0, resolved: 0, inProgress: 0 }
+              ].map(member => (
+                <Card key={member.name} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Avatar className="w-12 h-12">
+                        <AvatarFallback className="bg-red-100 text-red-700">{member.avatar}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h3 className="font-semibold">{member.name}</h3>
+                        <p className="text-sm text-muted-foreground">{member.role}</p>
                       </div>
                     </div>
-                  )
-                })}
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                        <p className="text-lg font-bold text-blue-600">{member.assigned}</p>
+                        <p className="text-xs text-muted-foreground">Assigned</p>
+                      </div>
+                      <div className="p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                        <p className="text-lg font-bold text-orange-600">{member.inProgress}</p>
+                        <p className="text-xs text-muted-foreground">In Progress</p>
+                      </div>
+                      <div className="p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                        <p className="text-lg font-bold text-green-600">{member.resolved}</p>
+                        <p className="text-xs text-muted-foreground">Resolved</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Tag className="w-5 h-5" />
+                    Labels
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {mockLabels.map(label => (
+                    <div key={label.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded" style={{ backgroundColor: label.color }} />
+                        <span className="font-medium">{label.name}</span>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button variant="outline" className="w-full">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Label
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <GitBranch className="w-5 h-5" />
+                    Workflow
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {['open', 'in_progress', 'in_review', 'resolved', 'closed'].map((status, idx, arr) => (
+                    <div key={status} className="flex items-center gap-2">
+                      <Badge className={getStatusColor(status as BugStatus)} variant="outline" className="capitalize">
+                        {status.replace('_', ' ')}
+                      </Badge>
+                      {idx < arr.length - 1 && <ArrowRight className="w-4 h-4 text-muted-foreground" />}
+                    </div>
+                  ))}
+                  <Button variant="outline" className="w-full mt-4">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Configure Workflow
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="w-5 h-5" />
+                    Integrations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[
+                      { name: 'GitHub', icon: '🐙', status: 'Connected', description: 'Link PRs to bugs' },
+                      { name: 'Slack', icon: '💬', status: 'Connected', description: 'Bug notifications' },
+                      { name: 'Sentry', icon: '🔍', status: 'Not connected', description: 'Error tracking' }
+                    ].map(integration => (
+                      <div key={integration.name} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl">{integration.icon}</span>
+                            <span className="font-semibold">{integration.name}</span>
+                          </div>
+                          <Badge variant={integration.status === 'Connected' ? 'default' : 'secondary'}>
+                            {integration.status}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{integration.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Bug Detail Dialog */}
+        <Dialog open={!!selectedBug} onOpenChange={() => setSelectedBug(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                {selectedBug && getTypeIcon(selectedBug.type)}
+                <span className="text-muted-foreground">{selectedBug?.key}</span>
+                {selectedBug?.title}
+              </DialogTitle>
+            </DialogHeader>
+            {selectedBug && (
+              <div className="space-y-6">
+                {/* Status & Actions */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Badge className={getSeverityColor(selectedBug.severity)}>{selectedBug.severity}</Badge>
+                    <Badge className={getStatusColor(selectedBug.status)} variant="outline">
+                      {getStatusIcon(selectedBug.status)}
+                      <span className="ml-1 capitalize">{selectedBug.status.replace('_', ' ')}</span>
+                    </Badge>
+                    {selectedBug.labels.map(label => (
+                      <Badge key={label.id} variant="outline" style={{ borderColor: label.color, color: label.color }}>
+                        {label.name}
+                      </Badge>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm">
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                    <Button size="sm">
+                      <Play className="w-4 h-4 mr-2" />
+                      Start Progress
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Details Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-xs text-muted-foreground mb-1">Priority</p>
+                    <div className="flex items-center gap-1">
+                      {getPriorityIcon(selectedBug.priority)}
+                      <span className="font-medium capitalize">{selectedBug.priority}</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-xs text-muted-foreground mb-1">Reporter</p>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="w-6 h-6">
+                        <AvatarFallback className="text-[10px]">{selectedBug.reporter.avatar}</AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium">{selectedBug.reporter.name}</span>
+                    </div>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-xs text-muted-foreground mb-1">Assignee</p>
+                    {selectedBug.assignee ? (
+                      <div className="flex items-center gap-2">
+                        <Avatar className="w-6 h-6">
+                          <AvatarFallback className="text-[10px]">{selectedBug.assignee.avatar}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{selectedBug.assignee.name}</span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">Unassigned</span>
+                    )}
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-xs text-muted-foreground mb-1">Due Date</p>
+                    <span className="font-medium">{selectedBug.dueDate ? formatDate(selectedBug.dueDate) : 'Not set'}</span>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <h4 className="font-medium mb-2">Description</h4>
+                  <p className="text-sm text-muted-foreground">{selectedBug.description}</p>
+                </div>
+
+                {/* Steps to Reproduce */}
+                <div>
+                  <h4 className="font-medium mb-2">Steps to Reproduce</h4>
+                  <ol className="list-decimal list-inside space-y-1">
+                    {selectedBug.stepsToReproduce.map((step, idx) => (
+                      <li key={idx} className="text-sm text-muted-foreground">{step}</li>
+                    ))}
+                  </ol>
+                </div>
+
+                {/* Expected vs Actual */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <h4 className="font-medium text-green-700 dark:text-green-400 mb-1">Expected Behavior</h4>
+                    <p className="text-sm">{selectedBug.expectedBehavior}</p>
+                  </div>
+                  <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                    <h4 className="font-medium text-red-700 dark:text-red-400 mb-1">Actual Behavior</h4>
+                    <p className="text-sm">{selectedBug.actualBehavior}</p>
+                  </div>
+                </div>
+
+                {/* Comments */}
+                {selectedBug.comments.length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-3">Comments ({selectedBug.comments.length})</h4>
+                    <div className="space-y-3">
+                      {selectedBug.comments.map(comment => (
+                        <div key={comment.id} className="flex gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <Avatar className="w-8 h-8">
+                            <AvatarFallback className="text-xs">{comment.author.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-medium text-sm">{comment.author}</span>
+                              <span className="text-xs text-muted-foreground">{formatDateTime(comment.createdAt)}</span>
+                              {comment.isEdited && <span className="text-xs text-muted-foreground">(edited)</span>}
+                            </div>
+                            <p className="text-sm">{comment.content}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Attachments */}
+                {selectedBug.attachments.length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-3">Attachments ({selectedBug.attachments.length})</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {selectedBug.attachments.map(att => (
+                        <div key={att.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <Paperclip className="w-5 h-5 text-muted-foreground" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{att.name}</p>
+                            <p className="text-xs text-muted-foreground">{formatFileSize(att.size)}</p>
+                          </div>
+                          <Button variant="ghost" size="sm">
+                            <Download className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Linked Issues */}
+                {selectedBug.linkedIssues.length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-3">Linked Issues</h4>
+                    <div className="space-y-2">
+                      {selectedBug.linkedIssues.map(issue => (
+                        <div key={issue.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <Link2 className="w-4 h-4 text-muted-foreground" />
+                            <Badge variant="outline" className="capitalize">{issue.type.replace('_', ' ')}</Badge>
+                            <span className="text-sm font-medium">{issue.key}</span>
+                            <span className="text-sm text-muted-foreground">{issue.title}</span>
+                          </div>
+                          <Badge className={getStatusColor(issue.status)} variant="outline">
+                            {issue.status}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Activity Info */}
+                <div className="grid grid-cols-4 gap-4 pt-4 border-t dark:border-gray-700">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Created</p>
+                    <p className="text-sm font-medium">{formatDateTime(selectedBug.createdAt)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Updated</p>
+                    <p className="text-sm font-medium">{formatDateTime(selectedBug.updatedAt)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Votes</p>
+                    <p className="text-sm font-medium">{selectedBug.votes}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Watchers</p>
+                    <p className="text-sm font-medium">{selectedBug.watchers}</p>
+                  </div>
+                </div>
               </div>
             )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold mb-4">Resolution Rate</h3>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-3xl font-bold text-gray-900">
-                    {stats.total > 0 ? ((stats.resolved / stats.total) * 100).toFixed(1) : 0}%
-                  </span>
-                  <span className="text-sm text-gray-500">of 85% target</span>
-                </div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-red-500 to-orange-500"
-                    style={{ width: `${stats.total > 0 ? (stats.resolved / stats.total) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold mb-4">Bugs by Severity</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Critical</span>
-                  <span className="font-semibold text-red-600">{stats.critical}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">High</span>
-                  <span className="font-semibold text-orange-600">{stats.high}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Medium</span>
-                  <span className="font-semibold text-yellow-600">{stats.medium}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Low</span>
-                  <span className="font-semibold text-blue-600">{stats.low}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold mb-4">Status Overview</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Open</span>
-                  <span className="font-semibold text-red-600">{stats.open}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">In Progress</span>
-                  <span className="font-semibold text-blue-600">{stats.inProgress}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Resolved</span>
-                  <span className="font-semibold text-green-600">{stats.resolved}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Closed</span>
-                  <span className="font-semibold text-gray-600">{stats.closed}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
