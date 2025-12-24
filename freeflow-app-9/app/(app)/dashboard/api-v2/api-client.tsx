@@ -1,21 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import {
-  BentoCard,
-  BentoQuickAction
-} from '@/components/ui/bento-grid-advanced'
-import {
-  StatGrid,
-  MiniKPI,
-  RankingList,
-  ActivityFeed
-} from '@/components/ui/results-display'
-import {
-  ModernButton,
-  GradientButton,
-  PillButton
-} from '@/components/ui/modern-buttons'
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Progress } from '@/components/ui/progress'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
   Code,
   Key,
@@ -25,6 +19,7 @@ import {
   Clock,
   AlertCircle,
   CheckCircle,
+  CheckCircle2,
   BarChart3,
   Globe,
   Users,
@@ -33,415 +28,899 @@ import {
   Eye,
   EyeOff,
   Plus,
-  Trash2
+  Trash2,
+  Search,
+  Filter,
+  MoreVertical,
+  ArrowUpRight,
+  ArrowDownRight,
+  Send,
+  Play,
+  Pause,
+  RefreshCw,
+  Download,
+  Upload,
+  FileJson,
+  Folder,
+  FolderOpen,
+  File,
+  Terminal,
+  Activity,
+  Server,
+  Database,
+  Lock,
+  Unlock,
+  BookOpen,
+  History,
+  GitBranch,
+  Tag,
+  Link2,
+  ExternalLink,
+  Layers,
+  Box,
+  Cpu,
+  HardDrive,
+  Wifi,
+  WifiOff,
+  AlertTriangle,
+  XCircle,
+  Timer,
+  Gauge,
+  TestTube,
+  Braces,
+  FileCode,
+  Variable,
+  Webhook
 } from 'lucide-react'
-import { useApiEndpoints, ApiEndpoint, getMethodColor, getStatusColor, formatRequests, formatLatency } from '@/lib/hooks/use-api-endpoints'
-import { useApiKeys, ApiKey, getKeyStatusColor as getApiKeyStatusColor, getEnvironmentColor, formatKeyDate } from '@/lib/hooks/use-api-keys'
 
-interface RateLimitTier {
+// Types
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
+type EndpointStatus = 'active' | 'deprecated' | 'draft' | 'disabled'
+type KeyStatus = 'active' | 'revoked' | 'expired' | 'restricted'
+type Environment = 'production' | 'staging' | 'development' | 'local'
+type TestStatus = 'passed' | 'failed' | 'skipped' | 'running'
+type MonitorStatus = 'healthy' | 'degraded' | 'down' | 'unknown'
+
+interface ApiEndpoint {
   id: string
-  tier_name: string
-  requests_limit: number
-  requests_used: number
+  name: string
+  method: HttpMethod
+  path: string
+  description: string
+  status: EndpointStatus
+  version: string
+  totalRequests: number
+  avgLatency: number
+  p95Latency: number
+  errorRate: number
+  lastCalled: string
+  createdAt: string
+  tags: string[]
+  rateLimit: number
+  authentication: string
 }
 
-interface ApiClientProps {
-  initialEndpoints: ApiEndpoint[]
-  initialStats: {
-    total: number
-    active: number
-    totalRequests: number
-    requestsToday: number
-    avgLatency: number
-    avgSuccessRate: number
-  }
-  initialApiKeys?: ApiKey[]
-  initialRateLimits?: RateLimitTier[]
+interface ApiKey {
+  id: string
+  name: string
+  keyPrefix: string
+  environment: Environment
+  status: KeyStatus
+  scopes: string[]
+  totalRequests: number
+  rateLimit: number
+  lastUsed: string
+  createdAt: string
+  expiresAt: string | null
+  ipWhitelist: string[]
+  createdBy: string
 }
 
-export default function ApiClient({ initialEndpoints, initialStats, initialApiKeys, initialRateLimits }: ApiClientProps) {
-  const [selectedPeriod, setSelectedPeriod] = useState<'hour' | 'day' | 'week'>('day')
-  const [showApiKey, setShowApiKey] = useState<{ [key: string]: boolean }>({})
+interface Collection {
+  id: string
+  name: string
+  description: string
+  requests: number
+  folders: number
+  environment: Environment
+  lastRun: string
+  createdBy: string
+  isShared: boolean
+  tests: number
+  passRate: number
+}
 
-  const {
-    endpoints,
-    stats,
-    isLoading,
-    error,
-    fetchEndpoints,
-    createEndpoint,
-    updateEndpoint,
-    deleteEndpoint
-  } = useApiEndpoints(initialEndpoints)
+interface RequestHistory {
+  id: string
+  method: HttpMethod
+  url: string
+  status: number
+  duration: number
+  size: number
+  timestamp: string
+  environment: Environment
+}
 
-  useEffect(() => {
-    fetchEndpoints()
-  }, [fetchEndpoints])
+interface Monitor {
+  id: string
+  name: string
+  endpoint: string
+  status: MonitorStatus
+  uptime: number
+  avgResponseTime: number
+  lastCheck: string
+  interval: number
+  alerts: number
+  region: string
+}
 
-  const displayStats = [
-    { label: 'Total Requests', value: formatRequests(stats.totalRequests || initialStats.totalRequests), change: 42.3, icon: <Zap className="w-5 h-5" /> },
-    { label: 'Avg Response Time', value: formatLatency(stats.avgLatency || initialStats.avgLatency), change: -18.5, icon: <Clock className="w-5 h-5" /> },
-    { label: 'Success Rate', value: `${(stats.avgSuccessRate || initialStats.avgSuccessRate).toFixed(1)}%`, change: 2.3, icon: <CheckCircle className="w-5 h-5" /> },
-    { label: 'Active Endpoints', value: String(stats.active || initialStats.active), change: 15.7, icon: <Key className="w-5 h-5" /> }
+interface TestResult {
+  id: string
+  name: string
+  status: TestStatus
+  duration: number
+  assertions: number
+  passed: number
+  failed: number
+  timestamp: string
+  environment: Environment
+}
+
+interface Webhook {
+  id: string
+  name: string
+  url: string
+  events: string[]
+  isActive: boolean
+  lastTriggered: string
+  successRate: number
+  totalDeliveries: number
+}
+
+// Mock Data
+const mockEndpoints: ApiEndpoint[] = [
+  { id: '1', name: 'Get Users', method: 'GET', path: '/api/v1/users', description: 'Retrieve all users with pagination', status: 'active', version: 'v1', totalRequests: 1250000, avgLatency: 45, p95Latency: 120, errorRate: 0.2, lastCalled: '2024-01-15T12:30:00Z', createdAt: '2023-06-15T09:00:00Z', tags: ['users', 'core'], rateLimit: 1000, authentication: 'Bearer Token' },
+  { id: '2', name: 'Create User', method: 'POST', path: '/api/v1/users', description: 'Create a new user account', status: 'active', version: 'v1', totalRequests: 89000, avgLatency: 120, p95Latency: 250, errorRate: 0.5, lastCalled: '2024-01-15T12:28:00Z', createdAt: '2023-06-15T09:00:00Z', tags: ['users', 'core'], rateLimit: 100, authentication: 'Bearer Token' },
+  { id: '3', name: 'Update User', method: 'PUT', path: '/api/v1/users/:id', description: 'Update user information', status: 'active', version: 'v1', totalRequests: 45000, avgLatency: 85, p95Latency: 180, errorRate: 0.3, lastCalled: '2024-01-15T12:25:00Z', createdAt: '2023-06-15T09:00:00Z', tags: ['users', 'core'], rateLimit: 500, authentication: 'Bearer Token' },
+  { id: '4', name: 'Delete User', method: 'DELETE', path: '/api/v1/users/:id', description: 'Soft delete a user account', status: 'active', version: 'v1', totalRequests: 12000, avgLatency: 65, p95Latency: 150, errorRate: 0.1, lastCalled: '2024-01-15T11:00:00Z', createdAt: '2023-06-15T09:00:00Z', tags: ['users', 'core'], rateLimit: 50, authentication: 'Bearer Token' },
+  { id: '5', name: 'Get Products', method: 'GET', path: '/api/v1/products', description: 'Retrieve product catalog', status: 'active', version: 'v1', totalRequests: 890000, avgLatency: 55, p95Latency: 140, errorRate: 0.15, lastCalled: '2024-01-15T12:29:00Z', createdAt: '2023-07-20T10:00:00Z', tags: ['products', 'catalog'], rateLimit: 2000, authentication: 'API Key' },
+  { id: '6', name: 'Create Order', method: 'POST', path: '/api/v1/orders', description: 'Place a new order', status: 'active', version: 'v1', totalRequests: 156000, avgLatency: 200, p95Latency: 450, errorRate: 0.8, lastCalled: '2024-01-15T12:27:00Z', createdAt: '2023-08-10T14:00:00Z', tags: ['orders', 'commerce'], rateLimit: 200, authentication: 'Bearer Token' },
+  { id: '7', name: 'Get Analytics', method: 'GET', path: '/api/v1/analytics', description: 'Retrieve analytics data', status: 'deprecated', version: 'v1', totalRequests: 34000, avgLatency: 350, p95Latency: 800, errorRate: 1.2, lastCalled: '2024-01-14T16:00:00Z', createdAt: '2023-05-01T08:00:00Z', tags: ['analytics'], rateLimit: 100, authentication: 'Bearer Token' },
+  { id: '8', name: 'Webhook Events', method: 'POST', path: '/api/v1/webhooks', description: 'Send webhook events', status: 'active', version: 'v1', totalRequests: 450000, avgLatency: 30, p95Latency: 80, errorRate: 0.05, lastCalled: '2024-01-15T12:30:00Z', createdAt: '2023-09-05T11:00:00Z', tags: ['webhooks', 'events'], rateLimit: 5000, authentication: 'HMAC' }
+]
+
+const mockApiKeys: ApiKey[] = [
+  { id: '1', name: 'Production API', keyPrefix: 'pk_live_abc123', environment: 'production', status: 'active', scopes: ['read', 'write', 'delete'], totalRequests: 2450000, rateLimit: 10000, lastUsed: '2024-01-15T12:30:00Z', createdAt: '2023-06-01T09:00:00Z', expiresAt: null, ipWhitelist: ['192.168.1.0/24'], createdBy: 'John Smith' },
+  { id: '2', name: 'Mobile App Key', keyPrefix: 'pk_live_def456', environment: 'production', status: 'active', scopes: ['read', 'write'], totalRequests: 890000, rateLimit: 5000, lastUsed: '2024-01-15T12:28:00Z', createdAt: '2023-08-15T10:00:00Z', expiresAt: '2024-12-31T23:59:59Z', ipWhitelist: [], createdBy: 'Sarah Johnson' },
+  { id: '3', name: 'Development Key', keyPrefix: 'pk_test_ghi789', environment: 'development', status: 'active', scopes: ['read', 'write', 'delete', 'admin'], totalRequests: 45000, rateLimit: 1000, lastUsed: '2024-01-15T11:00:00Z', createdAt: '2024-01-01T08:00:00Z', expiresAt: null, ipWhitelist: [], createdBy: 'Mike Chen' },
+  { id: '4', name: 'Legacy Integration', keyPrefix: 'pk_live_jkl012', environment: 'production', status: 'restricted', scopes: ['read'], totalRequests: 12000, rateLimit: 100, lastUsed: '2024-01-10T14:00:00Z', createdAt: '2022-03-20T09:00:00Z', expiresAt: '2024-03-20T23:59:59Z', ipWhitelist: ['10.0.0.0/8'], createdBy: 'Legacy System' },
+  { id: '5', name: 'Staging Key', keyPrefix: 'pk_stg_mno345', environment: 'staging', status: 'active', scopes: ['read', 'write'], totalRequests: 78000, rateLimit: 2000, lastUsed: '2024-01-15T10:00:00Z', createdAt: '2023-11-01T09:00:00Z', expiresAt: null, ipWhitelist: [], createdBy: 'QA Team' }
+]
+
+const mockCollections: Collection[] = [
+  { id: '1', name: 'User Management', description: 'Complete user CRUD operations', requests: 15, folders: 4, environment: 'development', lastRun: '2024-01-15T10:00:00Z', createdBy: 'John Smith', isShared: true, tests: 25, passRate: 96 },
+  { id: '2', name: 'E-Commerce API', description: 'Product and order endpoints', requests: 28, folders: 6, environment: 'staging', lastRun: '2024-01-14T16:00:00Z', createdBy: 'Sarah Johnson', isShared: true, tests: 42, passRate: 89 },
+  { id: '3', name: 'Authentication Flow', description: 'OAuth and JWT endpoints', requests: 8, folders: 2, environment: 'production', lastRun: '2024-01-15T08:00:00Z', createdBy: 'Mike Chen', isShared: false, tests: 12, passRate: 100 },
+  { id: '4', name: 'Analytics API', description: 'Data and reporting endpoints', requests: 12, folders: 3, environment: 'development', lastRun: '2024-01-13T14:00:00Z', createdBy: 'Emily Davis', isShared: true, tests: 18, passRate: 78 }
+]
+
+const mockHistory: RequestHistory[] = [
+  { id: '1', method: 'GET', url: '/api/v1/users', status: 200, duration: 45, size: 12500, timestamp: '2024-01-15T12:30:00Z', environment: 'production' },
+  { id: '2', method: 'POST', url: '/api/v1/orders', status: 201, duration: 180, size: 2400, timestamp: '2024-01-15T12:28:00Z', environment: 'production' },
+  { id: '3', method: 'GET', url: '/api/v1/products?page=1', status: 200, duration: 65, size: 45000, timestamp: '2024-01-15T12:25:00Z', environment: 'production' },
+  { id: '4', method: 'PUT', url: '/api/v1/users/123', status: 200, duration: 95, size: 1200, timestamp: '2024-01-15T12:20:00Z', environment: 'staging' },
+  { id: '5', method: 'DELETE', url: '/api/v1/users/456', status: 204, duration: 35, size: 0, timestamp: '2024-01-15T12:15:00Z', environment: 'development' },
+  { id: '6', method: 'POST', url: '/api/v1/auth/login', status: 401, duration: 25, size: 150, timestamp: '2024-01-15T12:10:00Z', environment: 'development' },
+  { id: '7', method: 'GET', url: '/api/v1/analytics', status: 500, duration: 5000, size: 0, timestamp: '2024-01-15T12:05:00Z', environment: 'production' }
+]
+
+const mockMonitors: Monitor[] = [
+  { id: '1', name: 'API Health Check', endpoint: '/api/health', status: 'healthy', uptime: 99.98, avgResponseTime: 25, lastCheck: '2024-01-15T12:30:00Z', interval: 60, alerts: 0, region: 'us-east-1' },
+  { id: '2', name: 'User API', endpoint: '/api/v1/users', status: 'healthy', uptime: 99.95, avgResponseTime: 48, lastCheck: '2024-01-15T12:30:00Z', interval: 300, alerts: 2, region: 'us-west-2' },
+  { id: '3', name: 'Payment Gateway', endpoint: '/api/v1/payments', status: 'degraded', uptime: 98.5, avgResponseTime: 350, lastCheck: '2024-01-15T12:30:00Z', interval: 60, alerts: 5, region: 'eu-west-1' },
+  { id: '4', name: 'Analytics Service', endpoint: '/api/v1/analytics', status: 'down', uptime: 95.2, avgResponseTime: 0, lastCheck: '2024-01-15T12:25:00Z', interval: 300, alerts: 12, region: 'ap-southeast-1' }
+]
+
+const mockWebhooks: Webhook[] = [
+  { id: '1', name: 'Order Notifications', url: 'https://webhook.example.com/orders', events: ['order.created', 'order.updated', 'order.completed'], isActive: true, lastTriggered: '2024-01-15T12:28:00Z', successRate: 99.5, totalDeliveries: 45000 },
+  { id: '2', name: 'User Events', url: 'https://webhook.example.com/users', events: ['user.created', 'user.updated'], isActive: true, lastTriggered: '2024-01-15T12:30:00Z', successRate: 98.2, totalDeliveries: 12000 },
+  { id: '3', name: 'Payment Callbacks', url: 'https://payments.example.com/callback', events: ['payment.success', 'payment.failed'], isActive: false, lastTriggered: '2024-01-10T14:00:00Z', successRate: 95.0, totalDeliveries: 8500 }
+]
+
+export default function ApiClient() {
+  const [endpoints] = useState<ApiEndpoint[]>(mockEndpoints)
+  const [apiKeys] = useState<ApiKey[]>(mockApiKeys)
+  const [collections] = useState<Collection[]>(mockCollections)
+  const [history] = useState<RequestHistory[]>(mockHistory)
+  const [monitors] = useState<Monitor[]>(mockMonitors)
+  const [webhooks] = useState<Webhook[]>(mockWebhooks)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedEndpoint, setSelectedEndpoint] = useState<ApiEndpoint | null>(null)
+  const [selectedKey, setSelectedKey] = useState<ApiKey | null>(null)
+  const [methodFilter, setMethodFilter] = useState<HttpMethod | 'all'>('all')
+  const [showApiKey, setShowApiKey] = useState<Record<string, boolean>>({})
+
+  // Stats
+  const stats = useMemo(() => {
+    const totalRequests = endpoints.reduce((sum, e) => sum + e.totalRequests, 0)
+    const avgLatency = endpoints.reduce((sum, e) => sum + e.avgLatency, 0) / endpoints.length
+    const activeEndpoints = endpoints.filter(e => e.status === 'active').length
+    const avgErrorRate = endpoints.reduce((sum, e) => sum + e.errorRate, 0) / endpoints.length
+    const totalKeys = apiKeys.length
+    const activeKeys = apiKeys.filter(k => k.status === 'active').length
+    const totalMonitors = monitors.length
+    const healthyMonitors = monitors.filter(m => m.status === 'healthy').length
+    return { totalRequests, avgLatency, activeEndpoints, avgErrorRate, totalKeys, activeKeys, totalMonitors, healthyMonitors }
+  }, [endpoints, apiKeys, monitors])
+
+  // Filtered endpoints
+  const filteredEndpoints = useMemo(() => {
+    return endpoints.filter(endpoint => {
+      const matchesSearch = endpoint.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        endpoint.path.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesMethod = methodFilter === 'all' || endpoint.method === methodFilter
+      return matchesSearch && matchesMethod
+    })
+  }, [endpoints, searchQuery, methodFilter])
+
+  // Helper functions
+  const getMethodColor = (method: HttpMethod) => {
+    const colors: Record<HttpMethod, string> = {
+      GET: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      POST: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      PUT: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+      PATCH: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+      DELETE: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+      HEAD: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+      OPTIONS: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+    }
+    return colors[method]
+  }
+
+  const getStatusColor = (status: EndpointStatus) => {
+    const colors: Record<EndpointStatus, string> = {
+      active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      deprecated: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+      draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+      disabled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+    }
+    return colors[status]
+  }
+
+  const getKeyStatusColor = (status: KeyStatus) => {
+    const colors: Record<KeyStatus, string> = {
+      active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      revoked: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+      expired: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+      restricted: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+    }
+    return colors[status]
+  }
+
+  const getEnvironmentColor = (env: Environment) => {
+    const colors: Record<Environment, string> = {
+      production: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+      staging: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+      development: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      local: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+    }
+    return colors[env]
+  }
+
+  const getMonitorStatusColor = (status: MonitorStatus) => {
+    const colors: Record<MonitorStatus, string> = {
+      healthy: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      degraded: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+      down: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+      unknown: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+    }
+    return colors[status]
+  }
+
+  const getHttpStatusColor = (status: number) => {
+    if (status >= 200 && status < 300) return 'text-green-600'
+    if (status >= 300 && status < 400) return 'text-blue-600'
+    if (status >= 400 && status < 500) return 'text-yellow-600'
+    return 'text-red-600'
+  }
+
+  const formatNumber = (num: number) => {
+    if (num >= 1e6) return `${(num / 1e6).toFixed(1)}M`
+    if (num >= 1e3) return `${(num / 1e3).toFixed(1)}K`
+    return num.toString()
+  }
+
+  const formatLatency = (ms: number) => {
+    if (ms >= 1000) return `${(ms / 1000).toFixed(1)}s`
+    return `${ms}ms`
+  }
+
+  const formatSize = (bytes: number) => {
+    if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`
+    if (bytes >= 1e3) return `${(bytes / 1e3).toFixed(1)} KB`
+    return `${bytes} B`
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+    return `${diffDays}d ago`
+  }
+
+  const statCards = [
+    { label: 'Total Requests', value: formatNumber(stats.totalRequests), change: 42.3, icon: Zap, color: 'from-indigo-500 to-blue-500' },
+    { label: 'Avg Latency', value: formatLatency(stats.avgLatency), change: -18.5, icon: Clock, color: 'from-green-500 to-emerald-500' },
+    { label: 'Active Endpoints', value: stats.activeEndpoints.toString(), change: 15.7, icon: Server, color: 'from-purple-500 to-pink-500' },
+    { label: 'Error Rate', value: `${stats.avgErrorRate.toFixed(2)}%`, change: -8.2, icon: AlertTriangle, color: 'from-red-500 to-orange-500' },
+    { label: 'API Keys', value: `${stats.activeKeys}/${stats.totalKeys}`, change: 5.0, icon: Key, color: 'from-yellow-500 to-amber-500' },
+    { label: 'Uptime', value: '99.98%', change: 0.02, icon: Activity, color: 'from-cyan-500 to-teal-500' },
+    { label: 'Monitors', value: `${stats.healthyMonitors}/${stats.totalMonitors}`, change: 0, icon: Gauge, color: 'from-blue-500 to-indigo-500' },
+    { label: 'Webhooks', value: webhooks.filter(w => w.isActive).length.toString(), change: 12.0, icon: Webhook, color: 'from-pink-500 to-rose-500' }
   ]
-
-  // Real API keys from database via props and hooks
-  const { keys: apiKeys, stats: keyStats, fetchKeys, createKey, revokeKey } = useApiKeys(initialApiKeys || [])
-
-  // Fetch keys on mount if not provided
-  useEffect(() => {
-    if (!initialApiKeys?.length) {
-      fetchKeys()
-    }
-  }, [fetchKeys, initialApiKeys])
-
-  // Rate limits from database
-  const rateLimits = initialRateLimits?.length ? initialRateLimits.map(tier => ({
-    tier: tier.tier_name.charAt(0).toUpperCase() + tier.tier_name.slice(1),
-    limit: tier.requests_limit,
-    used: tier.requests_used,
-    percentage: tier.requests_limit > 0 ? (tier.requests_used / tier.requests_limit) * 100 : 0,
-    color: tier.tier_name === 'free' ? 'from-gray-500 to-slate-500' :
-           tier.tier_name === 'starter' ? 'from-blue-500 to-cyan-500' :
-           tier.tier_name === 'professional' ? 'from-purple-500 to-pink-500' :
-           'from-green-500 to-emerald-500'
-  })) : [
-    { tier: 'Free', limit: 1000, used: 0, percentage: 0, color: 'from-gray-500 to-slate-500' },
-    { tier: 'Starter', limit: 10000, used: 0, percentage: 0, color: 'from-blue-500 to-cyan-500' },
-    { tier: 'Professional', limit: 50000, used: 0, percentage: 0, color: 'from-purple-500 to-pink-500' },
-    { tier: 'Enterprise', limit: 0, used: 0, percentage: 0, color: 'from-green-500 to-emerald-500' }
-  ]
-
-  const topEndpoints = endpoints.slice(0, 5).map((endpoint, index) => ({
-    rank: index + 1,
-    name: endpoint.path,
-    avatar: endpoint.method === 'GET' ? '📥' : endpoint.method === 'POST' ? '📤' : '🔄',
-    value: formatRequests(endpoint.total_requests),
-    change: 42.3 - (index * 8)
-  }))
-
-  const recentActivity = [
-    { icon: <CheckCircle className="w-5 h-5" />, title: 'API key created', description: 'Production API Key for Mobile App', time: '10 minutes ago', status: 'success' as const },
-    { icon: <AlertCircle className="w-5 h-5" />, title: 'Rate limit warning', description: 'Starter tier approaching 80%', time: '2 hours ago', status: 'warning' as const },
-    { icon: <Shield className="w-5 h-5" />, title: 'Key restricted', description: 'Legacy Integration permissions updated', time: '1 day ago', status: 'info' as const },
-    { icon: <Zap className="w-5 h-5" />, title: 'High traffic spike', description: '2.4M requests in last hour', time: '2 days ago', status: 'success' as const }
-  ]
-
-  const getEnvironmentColor = (env: string) => {
-    switch (env) {
-      case 'production': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-      case 'development': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-      case 'staging': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-      default: return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
-    }
-  }
-
-  const getKeyStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-      case 'restricted': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-      case 'revoked': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-      default: return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
-    }
-  }
-
-  const maskApiKey = (key: string) => {
-    const prefix = key.substring(0, 12)
-    const suffix = key.substring(key.length - 4)
-    return `${prefix}${'•'.repeat(24)}${suffix}`
-  }
-
-  const maxRequests = Math.max(...endpoints.map(e => e.total_requests), 1)
-
-  const handleCreateEndpoint = async () => {
-    try {
-      await createEndpoint({
-        name: 'New Endpoint',
-        method: 'GET',
-        path: '/api/v1/new',
-        description: 'New API endpoint'
-      })
-    } catch (err) {
-      console.error('Failed to create endpoint:', err)
-    }
-  }
-
-  const handleDeleteEndpoint = async (endpointId: string) => {
-    if (confirm('Are you sure you want to delete this endpoint?')) {
-      try {
-        await deleteEndpoint(endpointId)
-      } catch (err) {
-        console.error('Failed to delete endpoint:', err)
-      }
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50/30 to-cyan-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-              <Code className="w-10 h-10 text-indigo-600" />
-              API Management
-            </h1>
-            <p className="text-muted-foreground">Monitor API usage, keys, and performance</p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center">
+              <Code className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">API Management</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Postman-level API development platform</p>
+            </div>
           </div>
-          <GradientButton from="indigo" to="blue" onClick={handleCreateEndpoint}>
-            <Plus className="w-5 h-5 mr-2" />
-            Create Endpoint
-          </GradientButton>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            {error}
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="Search endpoints..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 w-64"
+              />
+            </div>
+            <Button variant="outline" size="icon">
+              <Filter className="w-4 h-4" />
+            </Button>
+            <Button className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              New Request
+            </Button>
           </div>
-        )}
-
-        <StatGrid columns={4} stats={displayStats} />
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <BentoQuickAction icon={<Key />} title="API Keys" description="Manage keys" onClick={() => console.log('Keys')} />
-          <BentoQuickAction icon={<BarChart3 />} title="Analytics" description="Usage stats" onClick={() => console.log('Analytics')} />
-          <BentoQuickAction icon={<Shield />} title="Security" description="Permissions" onClick={() => console.log('Security')} />
-          <BentoQuickAction icon={<Settings />} title="Settings" description="Configure" onClick={() => console.log('Settings')} />
         </div>
 
-        <div className="flex items-center gap-3">
-          <PillButton variant={selectedPeriod === 'hour' ? 'primary' : 'ghost'} onClick={() => setSelectedPeriod('hour')}>
-            Last Hour
-          </PillButton>
-          <PillButton variant={selectedPeriod === 'day' ? 'primary' : 'ghost'} onClick={() => setSelectedPeriod('day')}>
-            Last 24 Hours
-          </PillButton>
-          <PillButton variant={selectedPeriod === 'week' ? 'primary' : 'ghost'} onClick={() => setSelectedPeriod('week')}>
-            Last 7 Days
-          </PillButton>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <BentoCard className="p-6 mb-6">
-              <h3 className="text-xl font-semibold mb-4">API Keys</h3>
-              <div className="space-y-3">
-                {apiKeys.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Key className="w-10 h-10 mx-auto mb-3 opacity-50" />
-                    <p>No API keys yet</p>
-                    <ModernButton variant="outline" size="sm" className="mt-3" onClick={() => createKey({ name: 'My API Key', environment: 'development' })}>
-                      Create Your First Key
-                    </ModernButton>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {statCards.map((stat, index) => (
+            <Card key={index} className="border-0 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                    <stat.icon className="w-4 h-4 text-white" />
                   </div>
-                ) : apiKeys.map((apiKey) => (
-                  <div key={apiKey.id} className="p-4 rounded-xl border border-border bg-background">
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold">{apiKey.name}</h4>
-                            <span className={`text-xs px-2 py-1 rounded-md ${getEnvironmentColor(apiKey.environment)}`}>
-                              {apiKey.environment}
-                            </span>
-                            <span className={`text-xs px-2 py-1 rounded-md ${getApiKeyStatusColor(apiKey.status)}`}>
-                              {apiKey.status}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <code className="text-xs font-mono bg-muted px-2 py-1 rounded">
-                              {apiKey.key_prefix}{'•'.repeat(24)}
-                            </code>
-                            <button
-                              onClick={() => navigator.clipboard.writeText(apiKey.key_prefix)}
-                              className="p-1 hover:bg-muted rounded"
-                              title="Copy key prefix"
-                            >
-                              <Copy className="w-3 h-3" />
-                            </button>
-                          </div>
+                  <div className={`flex items-center gap-1 text-xs ${stat.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {stat.change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                    {Math.abs(stat.change)}%
+                  </div>
+                </div>
+                <div className="text-lg font-bold text-gray-900 dark:text-white">{stat.value}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Main Tabs */}
+        <Tabs defaultValue="endpoints" className="space-y-6">
+          <TabsList className="bg-white dark:bg-gray-800 p-1 shadow-sm">
+            <TabsTrigger value="endpoints" className="flex items-center gap-2">
+              <Server className="w-4 h-4" />
+              Endpoints
+            </TabsTrigger>
+            <TabsTrigger value="keys" className="flex items-center gap-2">
+              <Key className="w-4 h-4" />
+              API Keys
+            </TabsTrigger>
+            <TabsTrigger value="collections" className="flex items-center gap-2">
+              <Folder className="w-4 h-4" />
+              Collections
+            </TabsTrigger>
+            <TabsTrigger value="history" className="flex items-center gap-2">
+              <History className="w-4 h-4" />
+              History
+            </TabsTrigger>
+            <TabsTrigger value="monitors" className="flex items-center gap-2">
+              <Gauge className="w-4 h-4" />
+              Monitors
+            </TabsTrigger>
+            <TabsTrigger value="webhooks" className="flex items-center gap-2">
+              <Webhook className="w-4 h-4" />
+              Webhooks
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Endpoints Tab */}
+          <TabsContent value="endpoints" className="space-y-6">
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button
+                variant={methodFilter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setMethodFilter('all')}
+              >
+                All ({endpoints.length})
+              </Button>
+              {(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as HttpMethod[]).map(method => (
+                <Button
+                  key={method}
+                  variant={methodFilter === method ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setMethodFilter(method)}
+                  className={methodFilter === method ? '' : getMethodColor(method)}
+                >
+                  {method} ({endpoints.filter(e => e.method === method).length})
+                </Button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                {filteredEndpoints.map(endpoint => (
+                  <Card key={endpoint.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedEndpoint(endpoint)}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Badge className={`font-mono font-bold ${getMethodColor(endpoint.method)}`}>
+                            {endpoint.method}
+                          </Badge>
+                          <code className="text-sm font-mono text-gray-900 dark:text-white">{endpoint.path}</code>
+                          <Badge className={getStatusColor(endpoint.status)}>{endpoint.status}</Badge>
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </div>
+
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{endpoint.description}</p>
+
+                      <div className="grid grid-cols-4 gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-3">
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-gray-900 dark:text-white">{formatNumber(endpoint.totalRequests)}</p>
+                          <p className="text-xs text-gray-500">Requests</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-gray-900 dark:text-white">{formatLatency(endpoint.avgLatency)}</p>
+                          <p className="text-xs text-gray-500">Avg Latency</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-gray-900 dark:text-white">{formatLatency(endpoint.p95Latency)}</p>
+                          <p className="text-xs text-gray-500">P95</p>
+                        </div>
+                        <div className="text-center">
+                          <p className={`text-lg font-bold ${endpoint.errorRate > 1 ? 'text-red-600' : 'text-green-600'}`}>{endpoint.errorRate}%</p>
+                          <p className="text-xs text-gray-500">Error Rate</p>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-4 gap-3 text-xs">
-                        <div>
-                          <p className="text-muted-foreground">Requests</p>
-                          <p className="font-semibold">{formatRequests(apiKey.total_requests || 0)}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Rate Limit</p>
-                          <p className="font-semibold">{apiKey.rate_limit_per_hour === 0 ? 'Unlimited' : `${apiKey.rate_limit_per_hour}/hr`}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Last Used</p>
-                          <p className="font-semibold">{formatKeyDate(apiKey.last_used_at)}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Created</p>
-                          <p className="font-semibold">{formatKeyDate(apiKey.created_at)}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 pt-2 border-t">
-                        <div className="flex flex-wrap gap-1">
-                          {(apiKey.scopes || [apiKey.permission]).map((scope) => (
-                            <span key={scope} className="text-xs px-2 py-1 rounded-md bg-muted">
-                              {scope}
-                            </span>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <div className="flex items-center gap-2">
+                          {endpoint.tags.map(tag => (
+                            <Badge key={tag} variant="secondary">{tag}</Badge>
                           ))}
                         </div>
-                        <div className="ml-auto flex gap-2">
-                          <ModernButton variant="outline" size="sm" onClick={() => console.log('Edit', apiKey.id)}>
-                            Edit
-                          </ModernButton>
-                          <ModernButton variant="outline" size="sm" onClick={() => revokeKey(apiKey.id, 'User requested revocation')}>
-                            Revoke
-                          </ModernButton>
-                        </div>
+                        <span>Last called {formatTimeAgo(endpoint.lastCalled)}</span>
                       </div>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
-            </BentoCard>
 
-            <BentoCard className="p-6 mb-6">
-              <h3 className="text-xl font-semibold mb-4">Endpoint Analytics</h3>
-              {isLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {endpoints.map((endpoint) => {
-                    const requestPercent = (endpoint.total_requests / maxRequests) * 100
+              <div className="space-y-6">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Terminal className="w-5 h-5" />
+                      Request Builder
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex gap-2">
+                      <Badge className={getMethodColor('GET')}>GET</Badge>
+                      <Input placeholder="Enter request URL" className="flex-1 font-mono text-sm" />
+                    </div>
+                    <Button className="w-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white">
+                      <Send className="w-4 h-4 mr-2" />
+                      Send Request
+                    </Button>
+                  </CardContent>
+                </Card>
 
-                    return (
-                      <div key={endpoint.id} className="p-4 rounded-lg border border-border bg-background">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className={`text-xs px-2 py-1 rounded-md font-mono font-semibold ${getMethodColor(endpoint.method)}`}>
-                                {endpoint.method}
-                              </span>
-                              <code className="text-sm font-mono">{endpoint.path}</code>
-                              <span className={`text-xs px-2 py-1 rounded-md ${getStatusColor(endpoint.status)}`}>
-                                {endpoint.status}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-semibold">{formatRequests(endpoint.total_requests)} requests</span>
-                              <button
-                                onClick={() => handleDeleteEndpoint(endpoint.id)}
-                                className="p-1 hover:bg-red-100 rounded text-red-600"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-3 gap-3 text-xs">
-                            <div>
-                              <p className="text-muted-foreground">Avg Latency</p>
-                              <p className="font-semibold">{formatLatency(endpoint.avg_latency_ms)}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">P95 Latency</p>
-                              <p className="font-semibold">{formatLatency(endpoint.p95_latency_ms)}</p>
-                            </div>
-                            <div>
-                              <p className="text-muted-foreground">Error Rate</p>
-                              <p className={`font-semibold ${endpoint.error_rate > 1 ? 'text-red-600' : 'text-green-600'}`}>
-                                {endpoint.error_rate.toFixed(1)}%
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-gradient-to-r from-indigo-600 to-blue-600"
-                              style={{ width: `${requestPercent}%` }}
-                            />
-                          </div>
-                        </div>
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Variable className="w-5 h-5" />
+                      Environment Variables
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {[
+                      { name: 'base_url', value: 'https://api.example.com' },
+                      { name: 'api_key', value: '••••••••' },
+                      { name: 'version', value: 'v1' }
+                    ].map((variable, i) => (
+                      <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
+                        <code className="text-xs font-mono text-indigo-600">{`{{${variable.name}}}`}</code>
+                        <span className="text-xs text-gray-500 truncate flex-1">{variable.value}</span>
                       </div>
-                    )
-                  })}
-                </div>
-              )}
-            </BentoCard>
+                    ))}
+                  </CardContent>
+                </Card>
 
-            <BentoCard className="p-6">
-              <h3 className="text-xl font-semibold mb-4">Rate Limits by Tier</h3>
-              <div className="space-y-4">
-                {rateLimits.map((tier) => (
-                  <div key={tier.tier} className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileCode className="w-5 h-5" />
+                      Code Generation
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {['cURL', 'JavaScript', 'Python', 'Go', 'PHP'].map(lang => (
+                      <Button key={lang} variant="outline" size="sm" className="w-full justify-start">
+                        <Code className="w-4 h-4 mr-2" />
+                        {lang}
+                      </Button>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* API Keys Tab */}
+          <TabsContent value="keys" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">API Keys</h3>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Key
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {apiKeys.map(key => (
+                <Card key={key.id} className="border-0 shadow-sm">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${tier.color} flex items-center justify-center text-white font-semibold`}>
-                          {tier.tier.charAt(0)}
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center">
+                          <Key className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                          <p className="font-semibold">{tier.tier}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {tier.limit === 0 ? 'Unlimited requests' : `${tier.limit.toLocaleString()} requests/hour`}
-                          </p>
+                          <h4 className="font-semibold text-gray-900 dark:text-white">{key.name}</h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge className={getEnvironmentColor(key.environment)}>{key.environment}</Badge>
+                            <Badge className={getKeyStatusColor(key.status)}>{key.status}</Badge>
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-bold">{tier.used.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {tier.limit === 0 ? 'used' : `${tier.percentage.toFixed(0)}% used`}
-                        </p>
+                      <Button variant="ghost" size="icon">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </div>
+
+                    <div className="flex items-center gap-2 mb-4">
+                      <code className="text-sm font-mono bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded flex-1">
+                        {showApiKey[key.id] ? key.keyPrefix + '••••••••••••••••' : key.keyPrefix + '••••••••••••••••'}
+                      </code>
+                      <Button variant="ghost" size="icon" onClick={() => setShowApiKey({ ...showApiKey, [key.id]: !showApiKey[key.id] })}>
+                        {showApiKey[key.id] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </Button>
+                      <Button variant="ghost" size="icon">
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-3">
+                      <div>
+                        <p className="text-xs text-gray-500">Requests</p>
+                        <p className="font-semibold">{formatNumber(key.totalRequests)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Rate Limit</p>
+                        <p className="font-semibold">{key.rateLimit === 0 ? 'Unlimited' : `${key.rateLimit}/hr`}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Last Used</p>
+                        <p className="font-semibold">{formatTimeAgo(key.lastUsed)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Expires</p>
+                        <p className="font-semibold">{key.expiresAt ? formatDate(key.expiresAt) : 'Never'}</p>
                       </div>
                     </div>
-                    {tier.limit > 0 && (
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className={`h-full bg-gradient-to-r ${tier.color} transition-all duration-300`}
-                          style={{ width: `${tier.percentage}%` }}
-                        />
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-1">
+                        {key.scopes.map(scope => (
+                          <Badge key={scope} variant="secondary">{scope}</Badge>
+                        ))}
                       </div>
-                    )}
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm">Edit</Button>
+                        <Button variant="outline" size="sm" className="text-red-600">Revoke</Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Collections Tab */}
+          <TabsContent value="collections" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {collections.map(collection => (
+                <Card key={collection.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                          <FolderOpen className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900 dark:text-white">{collection.name}</h4>
+                          <p className="text-xs text-gray-500">{collection.description}</p>
+                        </div>
+                      </div>
+                      {collection.isShared && <Users className="w-4 h-4 text-gray-400" />}
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className="text-lg font-bold">{collection.requests}</p>
+                        <p className="text-xs text-gray-500">Requests</p>
+                      </div>
+                      <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className="text-lg font-bold">{collection.tests}</p>
+                        <p className="text-xs text-gray-500">Tests</p>
+                      </div>
+                      <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className={`text-lg font-bold ${collection.passRate >= 90 ? 'text-green-600' : collection.passRate >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>{collection.passRate}%</p>
+                        <p className="text-xs text-gray-500">Pass Rate</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <Badge className={getEnvironmentColor(collection.environment)}>{collection.environment}</Badge>
+                      <span>Last run {formatTimeAgo(collection.lastRun)}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+              <Card className="border-0 shadow-sm border-dashed border-2 border-gray-300 dark:border-gray-600">
+                <CardContent className="p-6 flex flex-col items-center justify-center h-full min-h-[200px]">
+                  <Plus className="w-12 h-12 text-gray-400 mb-2" />
+                  <p className="text-gray-600 dark:text-gray-300 font-medium">Create Collection</p>
+                  <p className="text-sm text-gray-500">Organize your API requests</p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* History Tab */}
+          <TabsContent value="history" className="space-y-6">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle>Request History</CardTitle>
+                <CardDescription>Recent API requests and responses</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {history.map(request => (
+                    <div key={request.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                      <Badge className={`font-mono font-bold ${getMethodColor(request.method)}`}>
+                        {request.method}
+                      </Badge>
+                      <code className="text-sm font-mono flex-1 text-gray-700 dark:text-gray-300">{request.url}</code>
+                      <span className={`font-mono font-bold ${getHttpStatusColor(request.status)}`}>{request.status}</span>
+                      <span className="text-sm text-gray-500 w-16 text-right">{formatLatency(request.duration)}</span>
+                      <span className="text-sm text-gray-500 w-20 text-right">{formatSize(request.size)}</span>
+                      <Badge className={getEnvironmentColor(request.environment)}>{request.environment}</Badge>
+                      <span className="text-xs text-gray-400 w-24 text-right">{formatTimeAgo(request.timestamp)}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Monitors Tab */}
+          <TabsContent value="monitors" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {monitors.map(monitor => (
+                <Card key={monitor.id} className="border-0 shadow-sm">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h4 className="font-semibold text-gray-900 dark:text-white">{monitor.name}</h4>
+                        <code className="text-sm text-gray-500">{monitor.endpoint}</code>
+                      </div>
+                      <Badge className={getMonitorStatusColor(monitor.status)}>
+                        {monitor.status === 'healthy' && <CheckCircle2 className="w-3 h-3 mr-1" />}
+                        {monitor.status === 'degraded' && <AlertTriangle className="w-3 h-3 mr-1" />}
+                        {monitor.status === 'down' && <XCircle className="w-3 h-3 mr-1" />}
+                        {monitor.status}
+                      </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-4 gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
+                      <div className="text-center">
+                        <p className={`text-lg font-bold ${monitor.uptime >= 99.9 ? 'text-green-600' : monitor.uptime >= 99 ? 'text-yellow-600' : 'text-red-600'}`}>{monitor.uptime}%</p>
+                        <p className="text-xs text-gray-500">Uptime</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-bold">{monitor.avgResponseTime > 0 ? formatLatency(monitor.avgResponseTime) : 'N/A'}</p>
+                        <p className="text-xs text-gray-500">Response</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-bold">{monitor.interval}s</p>
+                        <p className="text-xs text-gray-500">Interval</p>
+                      </div>
+                      <div className="text-center">
+                        <p className={`text-lg font-bold ${monitor.alerts > 0 ? 'text-red-600' : 'text-green-600'}`}>{monitor.alerts}</p>
+                        <p className="text-xs text-gray-500">Alerts</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>Region: {monitor.region}</span>
+                      <span>Last check: {formatTimeAgo(monitor.lastCheck)}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Webhooks Tab */}
+          <TabsContent value="webhooks" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Webhooks</h3>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Webhook
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {webhooks.map(webhook => (
+                <Card key={webhook.id} className="border-0 shadow-sm">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${webhook.isActive ? 'bg-gradient-to-br from-green-500 to-emerald-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                          <Webhook className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900 dark:text-white">{webhook.name}</h4>
+                          <code className="text-xs text-gray-500">{webhook.url}</code>
+                        </div>
+                      </div>
+                      <Badge className={webhook.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                        {webhook.isActive ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {webhook.events.map(event => (
+                        <Badge key={event} variant="secondary">{event}</Badge>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div>
+                        <p className="text-xs text-gray-500">Deliveries</p>
+                        <p className="font-semibold">{formatNumber(webhook.totalDeliveries)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Success Rate</p>
+                        <p className={`font-semibold ${webhook.successRate >= 99 ? 'text-green-600' : webhook.successRate >= 95 ? 'text-yellow-600' : 'text-red-600'}`}>{webhook.successRate}%</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Last Triggered</p>
+                        <p className="font-semibold">{formatTimeAgo(webhook.lastTriggered)}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Endpoint Detail Dialog */}
+        <Dialog open={!!selectedEndpoint} onOpenChange={() => setSelectedEndpoint(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Badge className={`font-mono font-bold ${selectedEndpoint && getMethodColor(selectedEndpoint.method)}`}>
+                  {selectedEndpoint?.method}
+                </Badge>
+                <code>{selectedEndpoint?.path}</code>
+              </DialogTitle>
+              <DialogDescription>{selectedEndpoint?.description}</DialogDescription>
+            </DialogHeader>
+            {selectedEndpoint && (
+              <ScrollArea className="max-h-96">
+                <div className="space-y-4 pr-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-gray-500">Total Requests</p>
+                      <p className="text-xl font-bold">{formatNumber(selectedEndpoint.totalRequests)}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-gray-500">Avg Latency</p>
+                      <p className="text-xl font-bold">{formatLatency(selectedEndpoint.avgLatency)}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-gray-500">P95 Latency</p>
+                      <p className="text-xl font-bold">{formatLatency(selectedEndpoint.p95Latency)}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-gray-500">Error Rate</p>
+                      <p className={`text-xl font-bold ${selectedEndpoint.errorRate > 1 ? 'text-red-600' : 'text-green-600'}`}>{selectedEndpoint.errorRate}%</p>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </BentoCard>
-          </div>
 
-          <div className="space-y-6">
-            <RankingList title="Top Endpoints" items={topEndpoints} />
+                  <div>
+                    <h4 className="font-medium mb-2">Configuration</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center justify-between p-2 rounded bg-gray-50 dark:bg-gray-800">
+                        <span className="text-gray-500">Authentication</span>
+                        <span className="font-medium">{selectedEndpoint.authentication}</span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded bg-gray-50 dark:bg-gray-800">
+                        <span className="text-gray-500">Rate Limit</span>
+                        <span className="font-medium">{selectedEndpoint.rateLimit} req/min</span>
+                      </div>
+                      <div className="flex items-center justify-between p-2 rounded bg-gray-50 dark:bg-gray-800">
+                        <span className="text-gray-500">Version</span>
+                        <span className="font-medium">{selectedEndpoint.version}</span>
+                      </div>
+                    </div>
+                  </div>
 
-            <ActivityFeed title="Recent Activity" activities={recentActivity} />
-
-            <BentoCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">API Metrics</h3>
-              <div className="space-y-3">
-                <MiniKPI label="Uptime" value="99.98%" change={0.02} />
-                <MiniKPI label="Avg Throughput" value="2.4K/s" change={42.3} />
-                <MiniKPI label="Total Errors" value="847" change={-28.5} />
-                <MiniKPI label="Cache Hit Rate" value="87%" change={15.3} />
-              </div>
-            </BentoCard>
-
-            <BentoCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-              <div className="space-y-2">
-                <ModernButton variant="outline" className="w-full justify-start" onClick={() => console.log('Docs')}>
-                  <Code className="w-4 h-4 mr-2" />
-                  View Documentation
-                </ModernButton>
-                <ModernButton variant="outline" className="w-full justify-start" onClick={() => console.log('Logs')}>
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  View Request Logs
-                </ModernButton>
-                <ModernButton variant="outline" className="w-full justify-start" onClick={() => console.log('Webhooks')}>
-                  <Zap className="w-4 h-4 mr-2" />
-                  Configure Webhooks
-                </ModernButton>
-              </div>
-            </BentoCard>
-          </div>
-        </div>
+                  <div className="flex gap-2">
+                    <Button className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-500 text-white">
+                      <Send className="w-4 h-4 mr-2" />
+                      Try It
+                    </Button>
+                    <Button variant="outline">
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      Docs
+                    </Button>
+                    <Button variant="outline">
+                      <Code className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </ScrollArea>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
