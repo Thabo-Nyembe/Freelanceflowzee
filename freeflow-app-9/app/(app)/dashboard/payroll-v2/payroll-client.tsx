@@ -1,369 +1,1549 @@
 'use client'
 
-import { useState } from 'react'
-import StatGrid from '@/components/dashboard-results/StatGrid'
-import BentoQuickAction from '@/components/dashboard-results/BentoQuickAction'
-import PillButton from '@/components/modern-button-suite/PillButton'
-import MiniKPI from '@/components/dashboard-results/MiniKPI'
-import ActivityFeed from '@/components/dashboard-results/ActivityFeed'
-import RankingList from '@/components/dashboard-results/RankingList'
-import ProgressCard from '@/components/dashboard-results/ProgressCard'
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
-  usePayrollRuns,
-  usePayrollMutations,
-  formatCurrency,
-  getPayrollStatusColor,
-  getEmployeeStatusColor,
-  getPaymentMethodColor,
-  type PayrollRun,
-  type EmployeePayroll
-} from '@/lib/hooks/use-payroll'
+  DollarSign,
+  Users,
+  Calendar,
+  Clock,
+  CreditCard,
+  FileText,
+  Building2,
+  PieChart,
+  TrendingUp,
+  TrendingDown,
+  CheckCircle2,
+  AlertCircle,
+  XCircle,
+  PlayCircle,
+  PauseCircle,
+  Search,
+  Filter,
+  Download,
+  Upload,
+  Plus,
+  MoreHorizontal,
+  Eye,
+  Edit,
+  Trash2,
+  Send,
+  RefreshCw,
+  ChevronRight,
+  ArrowUpRight,
+  ArrowDownRight,
+  Banknote,
+  Receipt,
+  Calculator,
+  Shield,
+  Briefcase,
+  Heart,
+  GraduationCap,
+  Plane,
+  Car,
+  Home,
+  Wallet,
+  Settings,
+  Bell,
+  HelpCircle,
+  BarChart3,
+  Globe,
+  Lock,
+  UserCheck,
+  FileClock,
+  Landmark,
+  Scale,
+  FileSpreadsheet
+} from 'lucide-react'
 
-type ViewMode = 'all' | 'processing' | 'completed' | 'failed'
+// Types
+type PayRunStatus = 'draft' | 'pending_approval' | 'approved' | 'processing' | 'completed' | 'failed' | 'cancelled'
+type PayFrequency = 'weekly' | 'bi_weekly' | 'semi_monthly' | 'monthly'
+type EmployeeType = 'full_time' | 'part_time' | 'contractor' | 'intern'
+type PaymentMethod = 'direct_deposit' | 'check' | 'wire_transfer' | 'paypal'
+type TaxFilingStatus = 'pending' | 'filed' | 'accepted' | 'rejected'
+type BenefitType = 'health' | 'dental' | 'vision' | 'life' | '401k' | 'hsa' | 'fsa' | 'pto' | 'parental' | 'education'
 
-interface PayrollClientProps {
-  initialRuns: PayrollRun[]
-  initialEmployeePayroll: EmployeePayroll[]
+interface PayRun {
+  id: string
+  period: string
+  payDate: string
+  frequency: PayFrequency
+  status: PayRunStatus
+  totalGross: number
+  totalNet: number
+  totalTaxes: number
+  totalDeductions: number
+  employeeCount: number
+  processedCount: number
+  pendingCount: number
+  failedCount: number
+  approvedBy?: string
+  approvedAt?: string
+  notes?: string
+  createdAt: string
 }
 
-export default function PayrollClient({ initialRuns, initialEmployeePayroll }: PayrollClientProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('all')
+interface Employee {
+  id: string
+  name: string
+  email: string
+  avatar?: string
+  department: string
+  role: string
+  employeeType: EmployeeType
+  paymentMethod: PaymentMethod
+  salary: number
+  hourlyRate?: number
+  hoursWorked?: number
+  grossPay: number
+  netPay: number
+  taxes: number
+  deductions: number
+  benefits: number
+  startDate: string
+  lastPayDate?: string
+  status: 'active' | 'on_leave' | 'terminated'
+  bankAccount?: string
+}
 
-  const { runs, stats, isLoading } = usePayrollRuns(initialRuns, {
-    status: viewMode === 'all' ? undefined : viewMode
-  })
+interface TaxFiling {
+  id: string
+  type: string
+  period: string
+  dueDate: string
+  filedDate?: string
+  amount: number
+  status: TaxFilingStatus
+  agency: string
+  confirmationNumber?: string
+}
 
-  const {
-    createPayrollRun,
-    processPayrollRun,
-    approvePayrollRun,
-    isCreating,
-    isProcessing
-  } = usePayrollMutations()
+interface Benefit {
+  id: string
+  name: string
+  type: BenefitType
+  provider: string
+  coverage: string
+  employerContribution: number
+  employeeContribution: number
+  enrolledCount: number
+  totalCost: number
+  effectiveDate: string
+  renewalDate: string
+}
 
-  const filteredRuns = viewMode === 'all'
-    ? runs
-    : runs.filter(run => run.status === viewMode)
+interface TimeEntry {
+  id: string
+  employeeId: string
+  employeeName: string
+  date: string
+  regularHours: number
+  overtimeHours: number
+  ptoHours: number
+  totalHours: number
+  status: 'pending' | 'approved' | 'rejected'
+}
 
-  const handleCreatePayrollRun = () => {
-    const now = new Date()
-    const period = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-    const payDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+interface PayrollStats {
+  totalPayroll: number
+  totalEmployees: number
+  avgSalary: number
+  monthlyGross: number
+  monthlyTaxes: number
+  monthlyDeductions: number
+  pendingApprovals: number
+  upcomingPayRuns: number
+}
 
-    createPayrollRun({
-      period,
-      pay_date: payDate,
-      department: 'All Departments',
-      total_employees: 0,
-      total_amount: 0,
-      currency: 'USD'
-    })
+// Mock data
+const mockPayRuns: PayRun[] = [
+  {
+    id: '1',
+    period: 'December 1-15, 2024',
+    payDate: '2024-12-20',
+    frequency: 'semi_monthly',
+    status: 'completed',
+    totalGross: 485000,
+    totalNet: 342000,
+    totalTaxes: 108000,
+    totalDeductions: 35000,
+    employeeCount: 156,
+    processedCount: 156,
+    pendingCount: 0,
+    failedCount: 0,
+    approvedBy: 'Sarah Chen',
+    approvedAt: '2024-12-18T14:30:00Z',
+    createdAt: '2024-12-16T09:00:00Z'
+  },
+  {
+    id: '2',
+    period: 'December 16-31, 2024',
+    payDate: '2024-12-31',
+    frequency: 'semi_monthly',
+    status: 'pending_approval',
+    totalGross: 492000,
+    totalNet: 347000,
+    totalTaxes: 110000,
+    totalDeductions: 35000,
+    employeeCount: 158,
+    processedCount: 0,
+    pendingCount: 158,
+    failedCount: 0,
+    createdAt: '2024-12-20T09:00:00Z'
+  },
+  {
+    id: '3',
+    period: 'November 16-30, 2024',
+    payDate: '2024-12-05',
+    frequency: 'semi_monthly',
+    status: 'completed',
+    totalGross: 478000,
+    totalNet: 338000,
+    totalTaxes: 106000,
+    totalDeductions: 34000,
+    employeeCount: 154,
+    processedCount: 154,
+    pendingCount: 0,
+    failedCount: 0,
+    approvedBy: 'Michael Ross',
+    approvedAt: '2024-12-03T10:15:00Z',
+    createdAt: '2024-11-28T09:00:00Z'
+  },
+  {
+    id: '4',
+    period: 'Q4 2024 Bonuses',
+    payDate: '2024-12-22',
+    frequency: 'monthly',
+    status: 'processing',
+    totalGross: 125000,
+    totalNet: 87500,
+    totalTaxes: 31250,
+    totalDeductions: 6250,
+    employeeCount: 45,
+    processedCount: 28,
+    pendingCount: 17,
+    failedCount: 0,
+    approvedBy: 'Sarah Chen',
+    approvedAt: '2024-12-20T16:00:00Z',
+    createdAt: '2024-12-15T09:00:00Z'
+  },
+  {
+    id: '5',
+    period: 'Contractor Payments - December',
+    payDate: '2024-12-28',
+    frequency: 'monthly',
+    status: 'draft',
+    totalGross: 68000,
+    totalNet: 68000,
+    totalTaxes: 0,
+    totalDeductions: 0,
+    employeeCount: 12,
+    processedCount: 0,
+    pendingCount: 12,
+    failedCount: 0,
+    createdAt: '2024-12-18T11:00:00Z'
   }
+]
+
+const mockEmployees: Employee[] = [
+  {
+    id: '1',
+    name: 'Alex Thompson',
+    email: 'alex.t@company.com',
+    avatar: '/avatars/alex.jpg',
+    department: 'Engineering',
+    role: 'Senior Software Engineer',
+    employeeType: 'full_time',
+    paymentMethod: 'direct_deposit',
+    salary: 145000,
+    grossPay: 6041.67,
+    netPay: 4270.00,
+    taxes: 1328.00,
+    deductions: 443.67,
+    benefits: 850,
+    startDate: '2021-03-15',
+    lastPayDate: '2024-12-20',
+    status: 'active',
+    bankAccount: '****4521'
+  },
+  {
+    id: '2',
+    name: 'Emma Rodriguez',
+    email: 'emma.r@company.com',
+    department: 'Product',
+    role: 'Product Manager',
+    employeeType: 'full_time',
+    paymentMethod: 'direct_deposit',
+    salary: 135000,
+    grossPay: 5625.00,
+    netPay: 3975.00,
+    taxes: 1237.50,
+    deductions: 412.50,
+    benefits: 780,
+    startDate: '2020-08-01',
+    lastPayDate: '2024-12-20',
+    status: 'active',
+    bankAccount: '****7892'
+  },
+  {
+    id: '3',
+    name: 'James Wilson',
+    email: 'james.w@company.com',
+    department: 'Sales',
+    role: 'Account Executive',
+    employeeType: 'full_time',
+    paymentMethod: 'direct_deposit',
+    salary: 95000,
+    grossPay: 3958.33,
+    netPay: 2798.00,
+    taxes: 870.83,
+    deductions: 289.50,
+    benefits: 650,
+    startDate: '2022-01-10',
+    lastPayDate: '2024-12-20',
+    status: 'active',
+    bankAccount: '****3345'
+  },
+  {
+    id: '4',
+    name: 'Sofia Martinez',
+    email: 'sofia.m@company.com',
+    department: 'Design',
+    role: 'UX Designer',
+    employeeType: 'full_time',
+    paymentMethod: 'direct_deposit',
+    salary: 110000,
+    grossPay: 4583.33,
+    netPay: 3238.00,
+    taxes: 1008.33,
+    deductions: 337.00,
+    benefits: 720,
+    startDate: '2021-06-20',
+    lastPayDate: '2024-12-20',
+    status: 'active'
+  },
+  {
+    id: '5',
+    name: 'David Chen',
+    email: 'david.c@company.com',
+    department: 'Engineering',
+    role: 'DevOps Engineer',
+    employeeType: 'full_time',
+    paymentMethod: 'direct_deposit',
+    salary: 130000,
+    grossPay: 5416.67,
+    netPay: 3825.00,
+    taxes: 1191.67,
+    deductions: 400.00,
+    benefits: 780,
+    startDate: '2020-11-15',
+    lastPayDate: '2024-12-20',
+    status: 'active'
+  },
+  {
+    id: '6',
+    name: 'Lisa Park',
+    email: 'lisa.p@company.com',
+    department: 'Marketing',
+    role: 'Marketing Manager',
+    employeeType: 'full_time',
+    paymentMethod: 'direct_deposit',
+    salary: 105000,
+    grossPay: 4375.00,
+    netPay: 3090.00,
+    taxes: 962.50,
+    deductions: 322.50,
+    benefits: 700,
+    startDate: '2021-09-01',
+    lastPayDate: '2024-12-20',
+    status: 'on_leave'
+  },
+  {
+    id: '7',
+    name: 'Ryan Foster',
+    email: 'ryan.f@company.com',
+    department: 'Engineering',
+    role: 'Frontend Developer',
+    employeeType: 'contractor',
+    paymentMethod: 'wire_transfer',
+    hourlyRate: 85,
+    hoursWorked: 160,
+    salary: 0,
+    grossPay: 13600,
+    netPay: 13600,
+    taxes: 0,
+    deductions: 0,
+    benefits: 0,
+    startDate: '2024-01-15',
+    lastPayDate: '2024-12-15',
+    status: 'active'
+  }
+]
+
+const mockTaxFilings: TaxFiling[] = [
+  {
+    id: '1',
+    type: 'Form 941 - Quarterly Federal Tax',
+    period: 'Q4 2024',
+    dueDate: '2025-01-31',
+    amount: 324500,
+    status: 'pending',
+    agency: 'IRS'
+  },
+  {
+    id: '2',
+    type: 'State Unemployment Tax',
+    period: 'Q4 2024',
+    dueDate: '2025-01-31',
+    amount: 12800,
+    status: 'pending',
+    agency: 'CA EDD'
+  },
+  {
+    id: '3',
+    type: 'Form 941 - Quarterly Federal Tax',
+    period: 'Q3 2024',
+    dueDate: '2024-10-31',
+    filedDate: '2024-10-28',
+    amount: 298000,
+    status: 'accepted',
+    agency: 'IRS',
+    confirmationNumber: 'IRS-2024-Q3-78451'
+  },
+  {
+    id: '4',
+    type: 'W-2 Forms',
+    period: '2024',
+    dueDate: '2025-01-31',
+    amount: 0,
+    status: 'pending',
+    agency: 'SSA'
+  },
+  {
+    id: '5',
+    type: '1099-NEC Forms',
+    period: '2024',
+    dueDate: '2025-01-31',
+    amount: 0,
+    status: 'pending',
+    agency: 'IRS'
+  }
+]
+
+const mockBenefits: Benefit[] = [
+  {
+    id: '1',
+    name: 'Medical Insurance - PPO',
+    type: 'health',
+    provider: 'Blue Cross Blue Shield',
+    coverage: 'Employee + Family',
+    employerContribution: 850,
+    employeeContribution: 350,
+    enrolledCount: 142,
+    totalCost: 170400,
+    effectiveDate: '2024-01-01',
+    renewalDate: '2024-12-31'
+  },
+  {
+    id: '2',
+    name: 'Dental Insurance',
+    type: 'dental',
+    provider: 'Delta Dental',
+    coverage: 'Employee + Family',
+    employerContribution: 80,
+    employeeContribution: 30,
+    enrolledCount: 138,
+    totalCost: 15180,
+    effectiveDate: '2024-01-01',
+    renewalDate: '2024-12-31'
+  },
+  {
+    id: '3',
+    name: 'Vision Insurance',
+    type: 'vision',
+    provider: 'VSP',
+    coverage: 'Employee + Family',
+    employerContribution: 25,
+    employeeContribution: 10,
+    enrolledCount: 125,
+    totalCost: 4375,
+    effectiveDate: '2024-01-01',
+    renewalDate: '2024-12-31'
+  },
+  {
+    id: '4',
+    name: '401(k) Retirement Plan',
+    type: '401k',
+    provider: 'Fidelity',
+    coverage: '6% Match',
+    employerContribution: 450,
+    employeeContribution: 650,
+    enrolledCount: 148,
+    totalCost: 162800,
+    effectiveDate: '2024-01-01',
+    renewalDate: '2024-12-31'
+  },
+  {
+    id: '5',
+    name: 'Life Insurance',
+    type: 'life',
+    provider: 'MetLife',
+    coverage: '2x Annual Salary',
+    employerContribution: 45,
+    employeeContribution: 0,
+    enrolledCount: 156,
+    totalCost: 7020,
+    effectiveDate: '2024-01-01',
+    renewalDate: '2024-12-31'
+  },
+  {
+    id: '6',
+    name: 'HSA Account',
+    type: 'hsa',
+    provider: 'HealthEquity',
+    coverage: '$1,500 Annual Contribution',
+    employerContribution: 125,
+    employeeContribution: 200,
+    enrolledCount: 89,
+    totalCost: 28925,
+    effectiveDate: '2024-01-01',
+    renewalDate: '2024-12-31'
+  }
+]
+
+const mockTimeEntries: TimeEntry[] = [
+  { id: '1', employeeId: '1', employeeName: 'Alex Thompson', date: '2024-12-20', regularHours: 8, overtimeHours: 0, ptoHours: 0, totalHours: 8, status: 'approved' },
+  { id: '2', employeeId: '2', employeeName: 'Emma Rodriguez', date: '2024-12-20', regularHours: 8, overtimeHours: 2, ptoHours: 0, totalHours: 10, status: 'approved' },
+  { id: '3', employeeId: '3', employeeName: 'James Wilson', date: '2024-12-20', regularHours: 6, overtimeHours: 0, ptoHours: 2, totalHours: 8, status: 'pending' },
+  { id: '4', employeeId: '4', employeeName: 'Sofia Martinez', date: '2024-12-20', regularHours: 8, overtimeHours: 1, ptoHours: 0, totalHours: 9, status: 'approved' },
+  { id: '5', employeeId: '5', employeeName: 'David Chen', date: '2024-12-20', regularHours: 8, overtimeHours: 0, ptoHours: 0, totalHours: 8, status: 'pending' }
+]
+
+// Helper functions
+const getStatusColor = (status: PayRunStatus) => {
+  const colors = {
+    draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+    pending_approval: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    approved: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    processing: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+    completed: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    failed: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    cancelled: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+  }
+  return colors[status]
+}
+
+const getEmployeeTypeColor = (type: EmployeeType) => {
+  const colors = {
+    full_time: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    part_time: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    contractor: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+    intern: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+  }
+  return colors[type]
+}
+
+const getTaxStatusColor = (status: TaxFilingStatus) => {
+  const colors = {
+    pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    filed: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    accepted: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    rejected: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+  }
+  return colors[status]
+}
+
+const getBenefitIcon = (type: BenefitType) => {
+  const icons = {
+    health: Heart,
+    dental: Heart,
+    vision: Eye,
+    life: Shield,
+    '401k': Landmark,
+    hsa: Wallet,
+    fsa: Wallet,
+    pto: Plane,
+    parental: Home,
+    education: GraduationCap
+  }
+  return icons[type]
+}
+
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount)
+}
+
+const formatCurrencyDetailed = (amount: number) => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount)
+}
+
+export default function PayrollClient() {
+  const [activeTab, setActiveTab] = useState('pay-runs')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedPayRun, setSelectedPayRun] = useState<PayRun | null>(null)
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
+  const [showPayRunDialog, setShowPayRunDialog] = useState(false)
+  const [showEmployeeDialog, setShowEmployeeDialog] = useState(false)
+
+  // Stats
+  const stats: PayrollStats = useMemo(() => ({
+    totalPayroll: mockPayRuns.reduce((sum, run) => sum + run.totalGross, 0),
+    totalEmployees: 158,
+    avgSalary: 115000,
+    monthlyGross: 977000,
+    monthlyTaxes: 218000,
+    monthlyDeductions: 70000,
+    pendingApprovals: mockPayRuns.filter(r => r.status === 'pending_approval').length,
+    upcomingPayRuns: mockPayRuns.filter(r => ['draft', 'pending_approval', 'approved', 'processing'].includes(r.status)).length
+  }), [])
+
+  // Filtered data
+  const filteredPayRuns = useMemo(() => {
+    return mockPayRuns.filter(run =>
+      run.period.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }, [searchQuery])
+
+  const filteredEmployees = useMemo(() => {
+    return mockEmployees.filter(emp =>
+      emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.role.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }, [searchQuery])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:bg-none dark:bg-gray-900">
-      <div className="max-w-[1600px] mx-auto p-6 space-y-6">
-
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:bg-none dark:bg-gray-900">
+      <div className="max-w-[1800px] mx-auto p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Payroll Management
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-1">
-              Process and manage employee compensation
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Payroll Hub
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Gusto-level payroll and benefits management
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={handleCreatePayrollRun}
-              disabled={isCreating}
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:shadow-lg hover:shadow-blue-500/50 transition-all duration-300 disabled:opacity-50"
-            >
-              {isCreating ? 'Creating...' : 'Run Payroll'}
-            </button>
+            <Button variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+            <Button variant="outline" size="sm">
+              <Upload className="w-4 h-4 mr-2" />
+              Import
+            </Button>
+            <Button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              Run Payroll
+            </Button>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <StatGrid
-          stats={[
-            {
-              label: 'Total Payroll',
-              value: formatCurrency(stats.totalAmount),
-              change: '+124k',
-              trend: 'up' as const,
-              subtitle: 'this month'
-            },
-            {
-              label: 'Active Employees',
-              value: stats.totalEmployees.toString(),
-              change: '+12',
-              trend: 'up' as const,
-              subtitle: 'across all departments'
-            },
-            {
-              label: 'Pending Runs',
-              value: stats.pending.toString(),
-              change: stats.pending > 0 ? '+' + stats.pending : '0',
-              trend: stats.pending > 0 ? 'up' as const : 'same' as const,
-              subtitle: 'awaiting processing'
-            },
-            {
-              label: 'Completed',
-              value: stats.completed.toString(),
-              change: '+' + stats.completed,
-              trend: 'up' as const,
-              subtitle: 'this period'
-            }
-          ]}
-        />
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="w-4 h-4 text-green-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Total Payroll</span>
+              </div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white">
+                {formatCurrency(stats.totalPayroll)}
+              </div>
+              <div className="flex items-center gap-1 text-xs text-green-600">
+                <TrendingUp className="w-3 h-3" />
+                <span>+5.2% YTD</span>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Quick Actions */}
-        <BentoQuickAction
-          actions={[
-            { label: 'Process Payroll', icon: '💰', onClick: () => {} },
-            { label: 'Review Timesheets', icon: '⏰', onClick: () => {} },
-            { label: 'Approve Bonuses', icon: '🎁', onClick: () => {} },
-            { label: 'Tax Reports', icon: '📋', onClick: () => {} },
-            { label: 'Employee Records', icon: '👥', onClick: () => {} },
-            { label: 'Payment History', icon: '📊', onClick: () => {} },
-            { label: 'Export Data', icon: '📥', onClick: () => {} },
-            { label: 'Settings', icon: '⚙️', onClick: () => {} }
-          ]}
-        />
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="w-4 h-4 text-blue-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Employees</span>
+              </div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white">
+                {stats.totalEmployees}
+              </div>
+              <div className="flex items-center gap-1 text-xs text-blue-600">
+                <TrendingUp className="w-3 h-3" />
+                <span>+12 this month</span>
+              </div>
+            </CardContent>
+          </Card>
 
-        {/* Filter Pills */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <PillButton
-            label="All Runs"
-            isActive={viewMode === 'all'}
-            onClick={() => setViewMode('all')}
-          />
-          <PillButton
-            label="Processing"
-            isActive={viewMode === 'processing'}
-            onClick={() => setViewMode('processing')}
-          />
-          <PillButton
-            label="Completed"
-            isActive={viewMode === 'completed'}
-            onClick={() => setViewMode('completed')}
-          />
-          <PillButton
-            label="Failed"
-            isActive={viewMode === 'failed'}
-            onClick={() => setViewMode('failed')}
-          />
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Calculator className="w-4 h-4 text-purple-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Avg Salary</span>
+              </div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white">
+                {formatCurrency(stats.avgSalary)}
+              </div>
+              <div className="flex items-center gap-1 text-xs text-purple-600">
+                <TrendingUp className="w-3 h-3" />
+                <span>+3.8% YoY</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Banknote className="w-4 h-4 text-emerald-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Monthly Gross</span>
+              </div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white">
+                {formatCurrency(stats.monthlyGross)}
+              </div>
+              <div className="flex items-center gap-1 text-xs text-emerald-600">
+                <span>Semi-monthly</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Receipt className="w-4 h-4 text-red-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Taxes</span>
+              </div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white">
+                {formatCurrency(stats.monthlyTaxes)}
+              </div>
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <span>22.3% rate</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Heart className="w-4 h-4 text-pink-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Benefits</span>
+              </div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white">
+                {formatCurrency(stats.monthlyDeductions)}
+              </div>
+              <div className="flex items-center gap-1 text-xs text-pink-600">
+                <span>6 plans active</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertCircle className="w-4 h-4 text-yellow-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Pending</span>
+              </div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white">
+                {stats.pendingApprovals}
+              </div>
+              <div className="flex items-center gap-1 text-xs text-yellow-600">
+                <span>Needs approval</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="w-4 h-4 text-indigo-500" />
+                <span className="text-xs text-gray-500 dark:text-gray-400">Upcoming</span>
+              </div>
+              <div className="text-xl font-bold text-gray-900 dark:text-white">
+                {stats.upcomingPayRuns}
+              </div>
+              <div className="flex items-center gap-1 text-xs text-indigo-600">
+                <span>Pay runs</span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Search */}
+        <div className="flex items-center gap-4">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
+              placeholder="Search pay runs, employees, or departments..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Button variant="outline" size="sm">
+            <Filter className="w-4 h-4 mr-2" />
+            Filters
+          </Button>
+        </div>
 
-          {/* Payroll Runs List */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-              <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white">
-                Payroll Runs ({filteredRuns.length})
-              </h2>
-              {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                </div>
-              ) : filteredRuns.length === 0 ? (
-                <div className="text-center py-12 text-slate-500 dark:text-slate-400">
-                  No payroll runs found. Click "Run Payroll" to create one.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {filteredRuns.map((run) => (
-                    <div
-                      key={run.id}
-                      className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-blue-500/50 dark:hover:border-blue-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10 group cursor-pointer bg-white dark:bg-slate-800/50"
-                    >
+        {/* Main Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-1">
+            <TabsTrigger value="pay-runs" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-700">
+              <Banknote className="w-4 h-4 mr-2" />
+              Pay Runs
+            </TabsTrigger>
+            <TabsTrigger value="employees" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-700">
+              <Users className="w-4 h-4 mr-2" />
+              Employees
+            </TabsTrigger>
+            <TabsTrigger value="taxes" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-700">
+              <Receipt className="w-4 h-4 mr-2" />
+              Taxes
+            </TabsTrigger>
+            <TabsTrigger value="benefits" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-700">
+              <Heart className="w-4 h-4 mr-2" />
+              Benefits
+            </TabsTrigger>
+            <TabsTrigger value="time" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-700">
+              <Clock className="w-4 h-4 mr-2" />
+              Time & Attendance
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-700">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Pay Runs Tab */}
+          <TabsContent value="pay-runs" className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                {filteredPayRuns.map((run) => (
+                  <Card
+                    key={run.id}
+                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                    onClick={() => {
+                      setSelectedPayRun(run)
+                      setShowPayRunDialog(true)
+                    }}
+                  >
+                    <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                              {run.period}
-                            </h3>
-                            <span className={`px-2 py-1 rounded-full text-xs border ${getPayrollStatusColor(run.status)}`}>
-                              {run.status}
-                            </span>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-gray-900 dark:text-white">{run.period}</h3>
+                            <Badge className={getStatusColor(run.status)}>
+                              {run.status.replace('_', ' ')}
+                            </Badge>
                           </div>
-                          <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
+                          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                             <span className="flex items-center gap-1">
-                              <span className="text-blue-500">📅</span>
-                              Pay Date: {run.pay_date}
+                              <Calendar className="w-3 h-3" />
+                              Pay date: {run.payDate}
                             </span>
                             <span className="flex items-center gap-1">
-                              <span className="text-blue-500">🏢</span>
-                              {run.department || 'All Departments'}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <span className="text-blue-500">👥</span>
-                              {run.total_employees} employees
+                              <Users className="w-3 h-3" />
+                              {run.employeeCount} employees
                             </span>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                            {formatCurrency(run.total_amount, run.currency)}
+                          <div className="text-xl font-bold text-green-600 dark:text-green-400">
+                            {formatCurrency(run.totalGross)}
                           </div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">
-                            Total Amount
-                          </div>
+                          <div className="text-xs text-gray-500">Gross pay</div>
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                      <div className="grid grid-cols-4 gap-4 pt-3 border-t dark:border-gray-700">
                         <div className="text-center">
-                          <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">{run.processed_count}</div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">Processed</div>
+                          <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                            {formatCurrency(run.totalNet)}
+                          </div>
+                          <div className="text-xs text-gray-500">Net Pay</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-lg font-bold text-yellow-600 dark:text-yellow-400">{run.pending_count}</div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">Pending</div>
+                          <div className="text-sm font-semibold text-red-600">
+                            {formatCurrency(run.totalTaxes)}
+                          </div>
+                          <div className="text-xs text-gray-500">Taxes</div>
                         </div>
                         <div className="text-center">
-                          <div className="text-lg font-bold text-red-600 dark:text-red-400">{run.failed_count}</div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">Failed</div>
+                          <div className="text-sm font-semibold text-purple-600">
+                            {formatCurrency(run.totalDeductions)}
+                          </div>
+                          <div className="text-xs text-gray-500">Deductions</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-sm font-semibold text-blue-600">
+                            {run.processedCount}/{run.employeeCount}
+                          </div>
+                          <div className="text-xs text-gray-500">Processed</div>
                         </div>
                       </div>
 
-                      <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                        <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 mb-2">
-                          <span>Progress: {run.total_employees > 0 ? Math.round((run.processed_count / run.total_employees) * 100) : 0}%</span>
-                          {run.approved_by && <span>Approved by {run.approved_by}</span>}
+                      {run.status === 'processing' && (
+                        <div className="mt-3 pt-3 border-t dark:border-gray-700">
+                          <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                            <span>Processing progress</span>
+                            <span>{Math.round((run.processedCount / run.employeeCount) * 100)}%</span>
+                          </div>
+                          <Progress value={(run.processedCount / run.employeeCount) * 100} className="h-2" />
                         </div>
-                        <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full transition-all duration-500"
-                            style={{ width: `${run.total_employees > 0 ? (run.processed_count / run.total_employees) * 100 : 0}%` }}
-                          />
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Pay Run Summary */}
+              <div className="space-y-4">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <PieChart className="w-4 h-4 text-green-500" />
+                      Payroll Breakdown
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Gross Pay</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(977000)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Federal Taxes</span>
+                      <span className="font-semibold text-red-600">-{formatCurrency(156000)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">State Taxes</span>
+                      <span className="font-semibold text-red-600">-{formatCurrency(62000)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Benefits</span>
+                      <span className="font-semibold text-purple-600">-{formatCurrency(70000)}</span>
+                    </div>
+                    <div className="pt-2 border-t dark:border-gray-700 flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-900 dark:text-white">Net Pay</span>
+                      <span className="font-bold text-green-600">{formatCurrency(689000)}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4 text-blue-500" />
+                      Department Breakdown
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {[
+                      { dept: 'Engineering', amount: 380000, percentage: 39 },
+                      { dept: 'Product', amount: 185000, percentage: 19 },
+                      { dept: 'Sales', amount: 156000, percentage: 16 },
+                      { dept: 'Marketing', amount: 127000, percentage: 13 },
+                      { dept: 'Design', amount: 98000, percentage: 10 },
+                      { dept: 'Operations', amount: 31000, percentage: 3 }
+                    ].map((dept) => (
+                      <div key={dept.dept} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">{dept.dept}</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{formatCurrency(dept.amount)}</span>
                         </div>
+                        <Progress value={dept.percentage} className="h-1.5" />
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <FileClock className="w-4 h-4 text-yellow-500" />
+                      Upcoming Deadlines
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {[
+                      { task: 'Q4 Tax Filing', date: 'Jan 31, 2025', status: 'pending' },
+                      { task: 'W-2 Distribution', date: 'Jan 31, 2025', status: 'pending' },
+                      { task: '1099 Distribution', date: 'Jan 31, 2025', status: 'pending' },
+                      { task: 'Benefits Renewal', date: 'Dec 31, 2024', status: 'urgent' }
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                        <div>
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{item.task}</div>
+                          <div className="text-xs text-gray-500">{item.date}</div>
+                        </div>
+                        <Badge className={item.status === 'urgent' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}>
+                          {item.status}
+                        </Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Employees Tab */}
+          <TabsContent value="employees" className="space-y-4">
+            <div className="grid gap-4">
+              {filteredEmployees.map((employee) => (
+                <Card
+                  key={employee.id}
+                  className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm hover:shadow-md transition-all cursor-pointer"
+                  onClick={() => {
+                    setSelectedEmployee(employee)
+                    setShowEmployeeDialog(true)
+                  }}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="w-12 h-12">
+                        <AvatarImage src={employee.avatar} />
+                        <AvatarFallback className="bg-gradient-to-br from-green-400 to-emerald-500 text-white">
+                          {employee.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-gray-900 dark:text-white">{employee.name}</h3>
+                          <Badge className={getEmployeeTypeColor(employee.employeeType)}>
+                            {employee.employeeType.replace('_', ' ')}
+                          </Badge>
+                          {employee.status === 'on_leave' && (
+                            <Badge className="bg-orange-100 text-orange-700">On Leave</Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                          <span>{employee.role}</span>
+                          <span>•</span>
+                          <span>{employee.department}</span>
+                          <span>•</span>
+                          <span>{employee.email}</span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-4 gap-8 text-center">
+                        <div>
+                          <div className="text-lg font-bold text-gray-900 dark:text-white">
+                            {employee.salary > 0 ? formatCurrency(employee.salary) : `$${employee.hourlyRate}/hr`}
+                          </div>
+                          <div className="text-xs text-gray-500">{employee.salary > 0 ? 'Annual' : 'Rate'}</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-green-600">
+                            {formatCurrencyDetailed(employee.grossPay)}
+                          </div>
+                          <div className="text-xs text-gray-500">Gross</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-blue-600">
+                            {formatCurrencyDetailed(employee.netPay)}
+                          </div>
+                          <div className="text-xs text-gray-500">Net</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-red-600">
+                            {formatCurrencyDetailed(employee.taxes)}
+                          </div>
+                          <div className="text-xs text-gray-500">Taxes</div>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Taxes Tab */}
+          <TabsContent value="taxes" className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Receipt className="w-5 h-5 text-green-500" />
+                      Tax Filings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {mockTaxFilings.map((filing) => (
+                        <div key={filing.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-medium text-gray-900 dark:text-white">{filing.type}</h4>
+                              <Badge className={getTaxStatusColor(filing.status)}>{filing.status}</Badge>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <span>Period: {filing.period}</span>
+                              <span>Due: {filing.dueDate}</span>
+                              <span>Agency: {filing.agency}</span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            {filing.amount > 0 && (
+                              <div className="text-lg font-bold text-red-600">{formatCurrency(filing.amount)}</div>
+                            )}
+                            {filing.confirmationNumber && (
+                              <div className="text-xs text-gray-500">{filing.confirmationNumber}</div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <Scale className="w-4 h-4 text-blue-500" />
+                      Tax Summary YTD
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Federal Income Tax</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(1872000)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Social Security</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(725000)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Medicare</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(169000)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">State Income Tax</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(744000)}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">State Disability</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(128000)}</span>
+                    </div>
+                    <div className="pt-2 border-t dark:border-gray-700 flex items-center justify-between">
+                      <span className="font-medium text-gray-900 dark:text-white">Total Taxes</span>
+                      <span className="font-bold text-red-600">{formatCurrency(3638000)}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                      <FileSpreadsheet className="w-4 h-4 text-purple-500" />
+                      Quick Actions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <Button variant="outline" className="w-full justify-start">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download Tax Reports
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <FileText className="w-4 h-4 mr-2" />
+                      Generate W-2 Forms
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <FileText className="w-4 h-4 mr-2" />
+                      Generate 1099 Forms
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <Send className="w-4 h-4 mr-2" />
+                      File Quarterly Taxes
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Benefits Tab */}
+          <TabsContent value="benefits" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {mockBenefits.map((benefit) => {
+                const BenefitIcon = getBenefitIcon(benefit.type)
+                return (
+                  <Card key={benefit.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center">
+                          <BenefitIcon className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 dark:text-white">{benefit.name}</h3>
+                          <p className="text-sm text-gray-500">{benefit.provider}</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500">Coverage</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{benefit.coverage}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500">Employer Contribution</span>
+                          <span className="font-medium text-green-600">{formatCurrency(benefit.employerContribution)}/mo</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500">Employee Contribution</span>
+                          <span className="font-medium text-blue-600">{formatCurrency(benefit.employeeContribution)}/mo</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500">Enrolled</span>
+                          <span className="font-medium text-gray-900 dark:text-white">{benefit.enrolledCount} employees</span>
+                        </div>
+                        <div className="pt-2 border-t dark:border-gray-700">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-500">Monthly Cost</span>
+                            <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(benefit.totalCost)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          </TabsContent>
+
+          {/* Time & Attendance Tab */}
+          <TabsContent value="time" className="space-y-4">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-blue-500" />
+                  Time Entries - This Week
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {mockTimeEntries.map((entry) => (
+                    <div key={entry.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                      <div className="flex items-center gap-4">
+                        <Avatar className="w-10 h-10">
+                          <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-500 text-white text-sm">
+                            {entry.employeeName.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">{entry.employeeName}</div>
+                          <div className="text-sm text-gray-500">{entry.date}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-8">
+                        <div className="text-center">
+                          <div className="font-semibold text-gray-900 dark:text-white">{entry.regularHours}h</div>
+                          <div className="text-xs text-gray-500">Regular</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-semibold text-orange-600">{entry.overtimeHours}h</div>
+                          <div className="text-xs text-gray-500">Overtime</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-semibold text-blue-600">{entry.ptoHours}h</div>
+                          <div className="text-xs text-gray-500">PTO</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="font-semibold text-green-600">{entry.totalHours}h</div>
+                          <div className="text-xs text-gray-500">Total</div>
+                        </div>
+                        <Badge className={entry.status === 'approved' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
+                          {entry.status}
+                        </Badge>
+                        {entry.status === 'pending' && (
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" variant="outline" className="text-green-600 border-green-600">
+                              <CheckCircle2 className="w-4 h-4" />
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-red-600 border-red-600">
+                              <XCircle className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-          </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-
-            {/* Employee Payroll */}
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-              <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">Employee Payroll</h3>
-              <div className="space-y-3">
-                {initialEmployeePayroll.slice(0, 5).map((emp) => (
-                  <div
-                    key={emp.id}
-                    className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-blue-500/50 transition-all duration-300 cursor-pointer group bg-white dark:bg-slate-800/50"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1">
-                        <div className="font-medium text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors text-sm">
-                          {emp.employee_name}
-                        </div>
-                        <div className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                          {emp.role || 'Employee'}
-                        </div>
-                      </div>
-                      <span className={`px-2 py-1 rounded-full text-xs border ${getEmployeeStatusColor(emp.status)}`}>
-                        {emp.status}
-                      </span>
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="w-5 h-5 text-green-500" />
+                    Company Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">Pay Frequency</div>
+                      <div className="text-sm text-gray-500">Semi-monthly (1st & 15th)</div>
                     </div>
-                    <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
-                      <span>Net: {formatCurrency(emp.net_pay)}</span>
-                      <span className={`px-2 py-1 rounded-full border ${getPaymentMethodColor(emp.payment_method)}`}>
-                        {emp.payment_method}
-                      </span>
-                    </div>
+                    <Button variant="outline" size="sm">Edit</Button>
                   </div>
-                ))}
-                {initialEmployeePayroll.length === 0 && (
-                  <div className="text-center py-4 text-slate-500 dark:text-slate-400 text-sm">
-                    No employee payroll records yet
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">Fiscal Year</div>
+                      <div className="text-sm text-gray-500">January - December</div>
+                    </div>
+                    <Button variant="outline" size="sm">Edit</Button>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">Default Currency</div>
+                      <div className="text-sm text-gray-500">USD - US Dollar</div>
+                    </div>
+                    <Button variant="outline" size="sm">Edit</Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-blue-500" />
+                    Payment Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">Bank Account</div>
+                      <div className="text-sm text-gray-500">Chase Business ****4521</div>
+                    </div>
+                    <Button variant="outline" size="sm">Manage</Button>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">Auto-process</div>
+                      <div className="text-sm text-gray-500">Enabled - 2 days before pay date</div>
+                    </div>
+                    <Button variant="outline" size="sm">Configure</Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Bell className="w-5 h-5 text-yellow-500" />
+                    Notifications
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">Payroll Reminders</div>
+                      <div className="text-sm text-gray-500">3 days before pay date</div>
+                    </div>
+                    <input type="checkbox" defaultChecked className="toggle" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">Tax Filing Alerts</div>
+                      <div className="text-sm text-gray-500">7 days before due date</div>
+                    </div>
+                    <input type="checkbox" defaultChecked className="toggle" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">Failed Payment Alerts</div>
+                      <div className="text-sm text-gray-500">Immediate notification</div>
+                    </div>
+                    <input type="checkbox" defaultChecked className="toggle" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Lock className="w-5 h-5 text-red-500" />
+                    Security & Access
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">Approval Workflow</div>
+                      <div className="text-sm text-gray-500">Dual approval required</div>
+                    </div>
+                    <Button variant="outline" size="sm">Configure</Button>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">Access Roles</div>
+                      <div className="text-sm text-gray-500">5 admins, 3 managers</div>
+                    </div>
+                    <Button variant="outline" size="sm">Manage</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Pay Run Detail Dialog */}
+        <Dialog open={showPayRunDialog} onOpenChange={setShowPayRunDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Pay Run Details</DialogTitle>
+            </DialogHeader>
+            {selectedPayRun && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">{selectedPayRun.period}</h3>
+                  <Badge className={getStatusColor(selectedPayRun.status)}>
+                    {selectedPayRun.status.replace('_', ' ')}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div className="text-sm text-gray-500">Pay Date</div>
+                    <div className="font-semibold">{selectedPayRun.payDate}</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div className="text-sm text-gray-500">Employees</div>
+                    <div className="font-semibold">{selectedPayRun.employeeCount}</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div className="text-sm text-gray-500">Gross Pay</div>
+                    <div className="font-semibold text-green-600">{formatCurrency(selectedPayRun.totalGross)}</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div className="text-sm text-gray-500">Net Pay</div>
+                    <div className="font-semibold text-blue-600">{formatCurrency(selectedPayRun.totalNet)}</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div className="text-sm text-gray-500">Taxes</div>
+                    <div className="font-semibold text-red-600">{formatCurrency(selectedPayRun.totalTaxes)}</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div className="text-sm text-gray-500">Deductions</div>
+                    <div className="font-semibold text-purple-600">{formatCurrency(selectedPayRun.totalDeductions)}</div>
+                  </div>
+                </div>
+                {selectedPayRun.approvedBy && (
+                  <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
+                    <div className="text-sm text-gray-500">Approved by</div>
+                    <div className="font-semibold text-green-700 dark:text-green-400">{selectedPayRun.approvedBy}</div>
                   </div>
                 )}
+                <div className="flex gap-2">
+                  <Button className="flex-1" variant="outline">
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Report
+                  </Button>
+                  <Button className="flex-1" variant="outline">
+                    <Eye className="w-4 h-4 mr-2" />
+                    View Details
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
-            {/* Payroll Breakdown */}
-            <ProgressCard
-              title="Payroll Breakdown"
-              items={[
-                { label: 'Base Salary', value: 2280000, total: 2847000, color: 'blue' },
-                { label: 'Bonuses', value: 284000, total: 2847000, color: 'green' },
-                { label: 'Benefits', value: 142000, total: 2847000, color: 'purple' },
-                { label: 'Deductions', value: 97000, total: 2847000, color: 'red' },
-                { label: 'Taxes', value: 244000, total: 2847000, color: 'orange' }
-              ]}
-            />
-
-            {/* Top Earning Departments */}
-            <RankingList
-              title="Top Earning Departments"
-              items={[
-                { label: 'Engineering', value: '$1.2M', rank: 1, trend: 'up' },
-                { label: 'Product', value: '$540K', rank: 2, trend: 'up' },
-                { label: 'Sales', value: '$420K', rank: 3, trend: 'same' },
-                { label: 'Marketing', value: '$380K', rank: 4, trend: 'down' },
-                { label: 'Design', value: '$307K', rank: 5, trend: 'up' }
-              ]}
-            />
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <MiniKPI
-                label="Avg Tax Rate"
-                value="27.5%"
-                trend="up"
-                change="+0.5%"
-              />
-              <MiniKPI
-                label="Total Deductions"
-                value="$97K"
-                trend="down"
-                change="-2K"
-              />
-            </div>
-
-            {/* Recent Activity */}
-            <ActivityFeed
-              activities={[
-                {
-                  action: 'Payroll approved',
-                  subject: 'February 2024 - All Departments',
-                  time: '2 hours ago',
-                  type: 'success'
-                },
-                {
-                  action: 'Bonus processed',
-                  subject: 'Engineering Team - Q1 2024',
-                  time: '1 day ago',
-                  type: 'success'
-                },
-                {
-                  action: 'Payment failed',
-                  subject: '4 contractor payments',
-                  time: '2 days ago',
-                  type: 'error'
-                },
-                {
-                  action: 'Payroll completed',
-                  subject: 'January 2024 - All Departments',
-                  time: '1 month ago',
-                  type: 'success'
-                }
-              ]}
-            />
-
-          </div>
-        </div>
-
+        {/* Employee Detail Dialog */}
+        <Dialog open={showEmployeeDialog} onOpenChange={setShowEmployeeDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Employee Details</DialogTitle>
+            </DialogHeader>
+            {selectedEmployee && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Avatar className="w-16 h-16">
+                    <AvatarImage src={selectedEmployee.avatar} />
+                    <AvatarFallback className="bg-gradient-to-br from-green-400 to-emerald-500 text-white text-xl">
+                      {selectedEmployee.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="text-lg font-semibold">{selectedEmployee.name}</h3>
+                    <p className="text-gray-500">{selectedEmployee.role} • {selectedEmployee.department}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge className={getEmployeeTypeColor(selectedEmployee.employeeType)}>
+                        {selectedEmployee.employeeType.replace('_', ' ')}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div className="text-sm text-gray-500">Annual Salary</div>
+                    <div className="font-semibold">{selectedEmployee.salary > 0 ? formatCurrency(selectedEmployee.salary) : `$${selectedEmployee.hourlyRate}/hr`}</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div className="text-sm text-gray-500">Payment Method</div>
+                    <div className="font-semibold">{selectedEmployee.paymentMethod.replace('_', ' ')}</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div className="text-sm text-gray-500">Last Pay (Gross)</div>
+                    <div className="font-semibold text-green-600">{formatCurrencyDetailed(selectedEmployee.grossPay)}</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div className="text-sm text-gray-500">Last Pay (Net)</div>
+                    <div className="font-semibold text-blue-600">{formatCurrencyDetailed(selectedEmployee.netPay)}</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div className="text-sm text-gray-500">Taxes Withheld</div>
+                    <div className="font-semibold text-red-600">{formatCurrencyDetailed(selectedEmployee.taxes)}</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                    <div className="text-sm text-gray-500">Benefits</div>
+                    <div className="font-semibold text-purple-600">{formatCurrencyDetailed(selectedEmployee.benefits)}/mo</div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button className="flex-1" variant="outline">
+                    <FileText className="w-4 h-4 mr-2" />
+                    View Pay Stubs
+                  </Button>
+                  <Button className="flex-1" variant="outline">
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Details
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
