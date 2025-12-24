@@ -1,7 +1,20 @@
 'use client'
 
-import { useState } from 'react'
-import { useCiCd, type CiCd, type PipelineType, type PipelineStatus } from '@/lib/hooks/use-ci-cd'
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   GitBranch,
   Play,
@@ -20,347 +33,1389 @@ import {
   Calendar,
   Users,
   FileText,
-  Shield
+  Shield,
+  Plus,
+  Search,
+  RefreshCw,
+  Clock,
+  Eye,
+  Download,
+  Upload,
+  Trash2,
+  Copy,
+  MoreHorizontal,
+  Terminal,
+  Server,
+  Cloud,
+  Lock,
+  Key,
+  Globe,
+  Zap,
+  Pause,
+  StopCircle,
+  RotateCcw,
+  ExternalLink,
+  ChevronRight,
+  ChevronDown,
+  Layers,
+  Box,
+  Database,
+  Cpu,
+  HardDrive,
+  Workflow,
+  GitPullRequest,
+  Tag,
+  Filter,
+  TrendingUp,
+  TrendingDown,
+  AlertCircle,
+  Info,
+  CheckSquare,
+  Circle,
+  CircleDot
 } from 'lucide-react'
-import StatGrid from '@/components/dashboard-results/StatGrid'
-import BentoQuickAction from '@/components/dashboard-results/BentoQuickAction'
-import PillButton from '@/components/modern-button-suite/PillButton'
-import MiniKPI from '@/components/dashboard-results/MiniKPI'
-import ActivityFeed from '@/components/dashboard-results/ActivityFeed'
-import RankingList from '@/components/dashboard-results/RankingList'
-import ProgressCard from '@/components/dashboard-results/ProgressCard'
 
-type BuildStatus = 'success' | 'failure' | 'running' | 'cancelled' | 'skipped' | 'pending'
+// Types
+type WorkflowStatus = 'success' | 'failure' | 'running' | 'cancelled' | 'queued' | 'pending'
+type RunStatus = 'completed' | 'in_progress' | 'queued' | 'waiting' | 'failed' | 'cancelled'
+type Environment = 'production' | 'staging' | 'development' | 'testing'
+type TriggerType = 'push' | 'pull_request' | 'schedule' | 'workflow_dispatch' | 'release'
 
-export default function CiCdClient({ initialPipelines }: { initialPipelines: CiCd[] }) {
-  const [pipelineTypeFilter, setPipelineTypeFilter] = useState<PipelineType | 'all'>('all')
-  const [statusFilter, setStatusFilter] = useState<PipelineStatus | 'all'>('all')
-  const { pipelines, loading, error } = useCiCd({ pipelineType: pipelineTypeFilter, status: statusFilter })
+interface WorkflowStep {
+  id: string
+  name: string
+  status: RunStatus
+  duration: number
+  startedAt?: string
+  completedAt?: string
+  logs?: string[]
+}
 
-  const displayPipelines = pipelines.length > 0 ? pipelines : initialPipelines
+interface WorkflowJob {
+  id: string
+  name: string
+  status: RunStatus
+  runner: string
+  steps: WorkflowStep[]
+  duration: number
+  startedAt: string
+}
 
-  const totalPipelines = displayPipelines.length
-  const runningPipelines = displayPipelines.filter(p => p.is_running).length
-  const successfulPipelines = displayPipelines.filter(p => p.last_status === 'success').length
-  const successRate = totalPipelines > 0 ? (successfulPipelines / totalPipelines) * 100 : 0
-  const avgDuration = displayPipelines.length > 0
-    ? displayPipelines.reduce((sum, p) => sum + (p.avg_duration_seconds || 0), 0) / displayPipelines.length
-    : 0
+interface WorkflowRun {
+  id: string
+  workflowId: string
+  runNumber: number
+  status: RunStatus
+  conclusion?: WorkflowStatus
+  triggeredBy: string
+  triggerType: TriggerType
+  branch: string
+  commit: string
+  commitMessage: string
+  jobs: WorkflowJob[]
+  duration: number
+  startedAt: string
+  completedAt?: string
+}
 
-  const getStatusColor = (status?: string) => {
-    switch (status) {
-      case 'running': return 'text-blue-600 bg-blue-50'
-      case 'success': return 'text-green-600 bg-green-50'
-      case 'failure': return 'text-red-600 bg-red-50'
-      case 'cancelled': return 'text-gray-600 bg-gray-50'
-      case 'pending': return 'text-yellow-600 bg-yellow-50'
-      default: return 'text-gray-600 bg-gray-50'
+interface Workflow {
+  id: string
+  name: string
+  path: string
+  status: WorkflowStatus
+  lastRun?: WorkflowRun
+  runs: number
+  successRate: number
+  avgDuration: number
+  createdAt: string
+  updatedAt: string
+}
+
+interface Artifact {
+  id: string
+  name: string
+  workflowId: string
+  runNumber: number
+  size: number
+  expiresAt: string
+  createdAt: string
+}
+
+interface EnvironmentConfig {
+  id: string
+  name: Environment
+  url?: string
+  protection: boolean
+  reviewers: string[]
+  secrets: number
+  variables: number
+  lastDeployment?: string
+  status: 'active' | 'inactive'
+}
+
+interface Secret {
+  name: string
+  createdAt: string
+  updatedAt: string
+  scope: 'repository' | 'environment' | 'organization'
+  environment?: string
+}
+
+interface Runner {
+  id: string
+  name: string
+  os: 'linux' | 'windows' | 'macos'
+  status: 'online' | 'offline' | 'busy'
+  labels: string[]
+  lastJob?: string
+  version: string
+}
+
+interface UsageStats {
+  totalMinutes: number
+  usedMinutes: number
+  storageUsed: number
+  storageLimit: number
+  concurrentJobs: number
+  maxConcurrentJobs: number
+}
+
+interface CiCdStats {
+  totalWorkflows: number
+  activeWorkflows: number
+  totalRuns: number
+  successfulRuns: number
+  failedRuns: number
+  avgDuration: number
+  successRate: number
+  runningNow: number
+}
+
+// Mock Data
+const mockWorkflows: Workflow[] = [
+  {
+    id: 'w1',
+    name: 'CI Pipeline',
+    path: '.github/workflows/ci.yml',
+    status: 'success',
+    runs: 234,
+    successRate: 94.2,
+    avgDuration: 185,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-03-12',
+    lastRun: {
+      id: 'r1',
+      workflowId: 'w1',
+      runNumber: 234,
+      status: 'completed',
+      conclusion: 'success',
+      triggeredBy: 'Sarah Chen',
+      triggerType: 'push',
+      branch: 'main',
+      commit: 'abc123f',
+      commitMessage: 'fix: resolve authentication issue',
+      jobs: [
+        {
+          id: 'j1',
+          name: 'build',
+          status: 'completed',
+          runner: 'ubuntu-latest',
+          duration: 45,
+          startedAt: '2024-03-12T10:00:00Z',
+          steps: [
+            { id: 's1', name: 'Checkout', status: 'completed', duration: 2 },
+            { id: 's2', name: 'Setup Node.js', status: 'completed', duration: 5 },
+            { id: 's3', name: 'Install dependencies', status: 'completed', duration: 25 },
+            { id: 's4', name: 'Build', status: 'completed', duration: 13 }
+          ]
+        },
+        {
+          id: 'j2',
+          name: 'test',
+          status: 'completed',
+          runner: 'ubuntu-latest',
+          duration: 120,
+          startedAt: '2024-03-12T10:01:00Z',
+          steps: [
+            { id: 's1', name: 'Checkout', status: 'completed', duration: 2 },
+            { id: 's2', name: 'Setup Node.js', status: 'completed', duration: 5 },
+            { id: 's3', name: 'Install dependencies', status: 'completed', duration: 25 },
+            { id: 's4', name: 'Run tests', status: 'completed', duration: 88 }
+          ]
+        },
+        {
+          id: 'j3',
+          name: 'lint',
+          status: 'completed',
+          runner: 'ubuntu-latest',
+          duration: 20,
+          startedAt: '2024-03-12T10:01:00Z',
+          steps: [
+            { id: 's1', name: 'Checkout', status: 'completed', duration: 2 },
+            { id: 's2', name: 'Setup Node.js', status: 'completed', duration: 5 },
+            { id: 's3', name: 'Run linter', status: 'completed', duration: 13 }
+          ]
+        }
+      ],
+      duration: 185,
+      startedAt: '2024-03-12T10:00:00Z',
+      completedAt: '2024-03-12T10:03:05Z'
     }
+  },
+  {
+    id: 'w2',
+    name: 'Deploy to Production',
+    path: '.github/workflows/deploy-prod.yml',
+    status: 'success',
+    runs: 89,
+    successRate: 97.8,
+    avgDuration: 312,
+    createdAt: '2024-01-15',
+    updatedAt: '2024-03-11'
+  },
+  {
+    id: 'w3',
+    name: 'Deploy to Staging',
+    path: '.github/workflows/deploy-staging.yml',
+    status: 'running',
+    runs: 156,
+    successRate: 91.2,
+    avgDuration: 245,
+    createdAt: '2024-01-15',
+    updatedAt: '2024-03-12'
+  },
+  {
+    id: 'w4',
+    name: 'Nightly Tests',
+    path: '.github/workflows/nightly.yml',
+    status: 'failure',
+    runs: 45,
+    successRate: 82.2,
+    avgDuration: 1800,
+    createdAt: '2024-02-01',
+    updatedAt: '2024-03-12'
+  },
+  {
+    id: 'w5',
+    name: 'Release Workflow',
+    path: '.github/workflows/release.yml',
+    status: 'success',
+    runs: 23,
+    successRate: 100,
+    avgDuration: 420,
+    createdAt: '2024-02-15',
+    updatedAt: '2024-03-10'
+  },
+  {
+    id: 'w6',
+    name: 'Security Scan',
+    path: '.github/workflows/security.yml',
+    status: 'success',
+    runs: 234,
+    successRate: 98.7,
+    avgDuration: 156,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-03-12'
   }
+]
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'build': return 'text-blue-600 bg-blue-50'
-      case 'test': return 'text-purple-600 bg-purple-50'
-      case 'deployment':
-      case 'deploy': return 'text-green-600 bg-green-50'
-      case 'release': return 'text-orange-600 bg-orange-50'
-      case 'rollback': return 'text-red-600 bg-red-50'
-      default: return 'text-gray-600 bg-gray-50'
-    }
+const mockRuns: WorkflowRun[] = [
+  {
+    id: 'r1',
+    workflowId: 'w1',
+    runNumber: 234,
+    status: 'completed',
+    conclusion: 'success',
+    triggeredBy: 'Sarah Chen',
+    triggerType: 'push',
+    branch: 'main',
+    commit: 'abc123f',
+    commitMessage: 'fix: resolve authentication issue',
+    jobs: [],
+    duration: 185,
+    startedAt: '2024-03-12T10:00:00Z',
+    completedAt: '2024-03-12T10:03:05Z'
+  },
+  {
+    id: 'r2',
+    workflowId: 'w3',
+    runNumber: 156,
+    status: 'in_progress',
+    triggeredBy: 'Mike Johnson',
+    triggerType: 'push',
+    branch: 'feature/new-dashboard',
+    commit: 'def456a',
+    commitMessage: 'feat: add new dashboard components',
+    jobs: [],
+    duration: 120,
+    startedAt: '2024-03-12T11:30:00Z'
+  },
+  {
+    id: 'r3',
+    workflowId: 'w4',
+    runNumber: 45,
+    status: 'failed',
+    conclusion: 'failure',
+    triggeredBy: 'Scheduled',
+    triggerType: 'schedule',
+    branch: 'main',
+    commit: 'ghi789b',
+    commitMessage: 'chore: nightly test run',
+    jobs: [],
+    duration: 1456,
+    startedAt: '2024-03-12T02:00:00Z',
+    completedAt: '2024-03-12T02:24:16Z'
+  },
+  {
+    id: 'r4',
+    workflowId: 'w1',
+    runNumber: 233,
+    status: 'completed',
+    conclusion: 'success',
+    triggeredBy: 'Alex Rivera',
+    triggerType: 'pull_request',
+    branch: 'fix/button-styles',
+    commit: 'jkl012c',
+    commitMessage: 'fix: button hover states',
+    jobs: [],
+    duration: 178,
+    startedAt: '2024-03-12T09:00:00Z',
+    completedAt: '2024-03-12T09:02:58Z'
+  },
+  {
+    id: 'r5',
+    workflowId: 'w2',
+    runNumber: 89,
+    status: 'completed',
+    conclusion: 'success',
+    triggeredBy: 'Sarah Chen',
+    triggerType: 'workflow_dispatch',
+    branch: 'main',
+    commit: 'mno345d',
+    commitMessage: 'release: v2.3.0',
+    jobs: [],
+    duration: 298,
+    startedAt: '2024-03-11T15:00:00Z',
+    completedAt: '2024-03-11T15:04:58Z'
   }
+]
 
-  const formatDuration = (seconds?: number) => {
-    if (!seconds || seconds === 0) return 'N/A'
-    const minutes = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return minutes > 0 ? `${minutes}m ${secs}s` : `${secs}s`
-  }
+const mockArtifacts: Artifact[] = [
+  { id: 'a1', name: 'build-artifacts', workflowId: 'w1', runNumber: 234, size: 45600000, expiresAt: '2024-03-19', createdAt: '2024-03-12' },
+  { id: 'a2', name: 'test-reports', workflowId: 'w1', runNumber: 234, size: 2340000, expiresAt: '2024-03-19', createdAt: '2024-03-12' },
+  { id: 'a3', name: 'coverage-report', workflowId: 'w1', runNumber: 234, size: 1890000, expiresAt: '2024-03-19', createdAt: '2024-03-12' },
+  { id: 'a4', name: 'docker-image', workflowId: 'w2', runNumber: 89, size: 156000000, expiresAt: '2024-03-18', createdAt: '2024-03-11' },
+  { id: 'a5', name: 'release-notes', workflowId: 'w5', runNumber: 23, size: 45000, expiresAt: '2024-03-17', createdAt: '2024-03-10' }
+]
 
-  const formatDate = (date?: string) => {
-    if (!date) return 'N/A'
-    return new Date(date).toLocaleString()
+const mockEnvironments: EnvironmentConfig[] = [
+  { id: 'e1', name: 'production', url: 'https://app.example.com', protection: true, reviewers: ['Sarah Chen', 'Mike Johnson'], secrets: 12, variables: 8, lastDeployment: '2024-03-11', status: 'active' },
+  { id: 'e2', name: 'staging', url: 'https://staging.example.com', protection: true, reviewers: ['Alex Rivera'], secrets: 10, variables: 8, lastDeployment: '2024-03-12', status: 'active' },
+  { id: 'e3', name: 'development', url: 'https://dev.example.com', protection: false, reviewers: [], secrets: 8, variables: 6, lastDeployment: '2024-03-12', status: 'active' },
+  { id: 'e4', name: 'testing', protection: false, reviewers: [], secrets: 5, variables: 4, status: 'inactive' }
+]
+
+const mockSecrets: Secret[] = [
+  { name: 'AWS_ACCESS_KEY_ID', createdAt: '2024-01-01', updatedAt: '2024-03-01', scope: 'repository' },
+  { name: 'AWS_SECRET_ACCESS_KEY', createdAt: '2024-01-01', updatedAt: '2024-03-01', scope: 'repository' },
+  { name: 'DATABASE_URL', createdAt: '2024-01-15', updatedAt: '2024-02-28', scope: 'environment', environment: 'production' },
+  { name: 'STRIPE_SECRET_KEY', createdAt: '2024-02-01', updatedAt: '2024-02-01', scope: 'environment', environment: 'production' },
+  { name: 'NPM_TOKEN', createdAt: '2024-01-01', updatedAt: '2024-01-01', scope: 'organization' },
+  { name: 'DOCKER_PASSWORD', createdAt: '2024-01-01', updatedAt: '2024-03-05', scope: 'repository' }
+]
+
+const mockRunners: Runner[] = [
+  { id: 'run1', name: 'ubuntu-runner-1', os: 'linux', status: 'online', labels: ['ubuntu-latest', 'self-hosted'], version: '2.311.0' },
+  { id: 'run2', name: 'ubuntu-runner-2', os: 'linux', status: 'busy', labels: ['ubuntu-latest', 'self-hosted'], lastJob: 'Deploy to Staging #156', version: '2.311.0' },
+  { id: 'run3', name: 'macos-runner-1', os: 'macos', status: 'online', labels: ['macos-latest', 'self-hosted'], version: '2.311.0' },
+  { id: 'run4', name: 'windows-runner-1', os: 'windows', status: 'offline', labels: ['windows-latest', 'self-hosted'], version: '2.309.0' }
+]
+
+const mockUsage: UsageStats = {
+  totalMinutes: 3000,
+  usedMinutes: 2145,
+  storageUsed: 4.2,
+  storageLimit: 10,
+  concurrentJobs: 2,
+  maxConcurrentJobs: 20
+}
+
+// Helper Functions
+const getStatusColor = (status: RunStatus | WorkflowStatus) => {
+  switch (status) {
+    case 'success':
+    case 'completed': return 'bg-green-100 text-green-800 border-green-200'
+    case 'failure':
+    case 'failed': return 'bg-red-100 text-red-800 border-red-200'
+    case 'running':
+    case 'in_progress': return 'bg-blue-100 text-blue-800 border-blue-200'
+    case 'queued':
+    case 'waiting': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+    case 'cancelled':
+    case 'pending': return 'bg-gray-100 text-gray-800 border-gray-200'
+    default: return 'bg-gray-100 text-gray-800 border-gray-200'
   }
+}
+
+const getStatusIcon = (status: RunStatus | WorkflowStatus) => {
+  switch (status) {
+    case 'success':
+    case 'completed': return <CheckCircle2 className="w-4 h-4 text-green-600" />
+    case 'failure':
+    case 'failed': return <XCircle className="w-4 h-4 text-red-600" />
+    case 'running':
+    case 'in_progress': return <RefreshCw className="w-4 h-4 text-blue-600 animate-spin" />
+    case 'queued':
+    case 'waiting': return <Clock className="w-4 h-4 text-yellow-600" />
+    case 'cancelled': return <StopCircle className="w-4 h-4 text-gray-600" />
+    default: return <Circle className="w-4 h-4 text-gray-600" />
+  }
+}
+
+const getTriggerIcon = (trigger: TriggerType) => {
+  switch (trigger) {
+    case 'push': return <GitCommit className="w-4 h-4" />
+    case 'pull_request': return <GitPullRequest className="w-4 h-4" />
+    case 'schedule': return <Clock className="w-4 h-4" />
+    case 'workflow_dispatch': return <Play className="w-4 h-4" />
+    case 'release': return <Tag className="w-4 h-4" />
+    default: return <Zap className="w-4 h-4" />
+  }
+}
+
+const getRunnerOsIcon = (os: string) => {
+  switch (os) {
+    case 'linux': return '🐧'
+    case 'windows': return '🪟'
+    case 'macos': return '🍎'
+    default: return '💻'
+  }
+}
+
+const formatDuration = (seconds: number) => {
+  if (seconds < 60) return `${seconds}s`
+  const minutes = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  if (minutes < 60) return `${minutes}m ${secs}s`
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  return `${hours}h ${mins}m`
+}
+
+const formatBytes = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
+}
+
+const formatTimeAgo = (dateString: string) => {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diff = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+  if (diff < 60) return 'just now'
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+  return `${Math.floor(diff / 86400)}d ago`
+}
+
+export default function CiCdClient() {
+  const [activeTab, setActiveTab] = useState('workflows')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<WorkflowStatus | 'all'>('all')
+  const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null)
+  const [selectedRun, setSelectedRun] = useState<WorkflowRun | null>(null)
+
+  // Calculate stats
+  const stats: CiCdStats = useMemo(() => ({
+    totalWorkflows: mockWorkflows.length,
+    activeWorkflows: mockWorkflows.filter(w => w.status === 'running').length,
+    totalRuns: mockRuns.length,
+    successfulRuns: mockRuns.filter(r => r.conclusion === 'success').length,
+    failedRuns: mockRuns.filter(r => r.conclusion === 'failure').length,
+    avgDuration: mockWorkflows.reduce((sum, w) => sum + w.avgDuration, 0) / mockWorkflows.length,
+    successRate: mockWorkflows.reduce((sum, w) => sum + w.successRate, 0) / mockWorkflows.length,
+    runningNow: mockRuns.filter(r => r.status === 'in_progress').length
+  }), [])
+
+  // Filter workflows
+  const filteredWorkflows = useMemo(() => {
+    return mockWorkflows.filter(workflow => {
+      const matchesSearch = workflow.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        workflow.path.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesStatus = statusFilter === 'all' || workflow.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [searchQuery, statusFilter])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
-
         {/* Header */}
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-900 via-indigo-800 to-purple-900 bg-clip-text text-transparent mb-2">
-            CI/CD Pipelines
-          </h1>
-          <p className="text-slate-600">Continuous integration and deployment automation</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+              <Workflow className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                CI/CD Hub
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Continuous integration & deployment
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" className="gap-2">
+              <Download className="w-4 h-4" />
+              Export Logs
+            </Button>
+            <Button className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+              <Plus className="w-4 h-4" />
+              New Workflow
+            </Button>
+          </div>
         </div>
 
         {/* Stats Grid */}
-        <StatGrid
-          stats={[
-            {
-              label: 'Total Pipelines',
-              value: totalPipelines.toString(),
-              icon: GitBranch,
-              trend: { value: 15, isPositive: true },
-              color: 'blue'
-            },
-            {
-              label: 'Success Rate',
-              value: `${successRate.toFixed(0)}%`,
-              icon: CheckCircle2,
-              trend: { value: 5.2, isPositive: true },
-              color: 'green'
-            },
-            {
-              label: 'Avg Duration',
-              value: formatDuration(Math.round(avgDuration)),
-              icon: Timer,
-              trend: { value: 12, isPositive: true },
-              color: 'purple'
-            },
-            {
-              label: 'Running Now',
-              value: runningPipelines.toString(),
-              icon: Activity,
-              trend: { value: 2, isPositive: true },
-              color: 'orange'
-            }
-          ]}
-        />
-
-        {/* Quick Actions */}
-        <BentoQuickAction
-          actions={[
-            {
-              title: 'Trigger Build',
-              description: 'Start pipeline',
-              icon: Play,
-              gradient: 'from-blue-500 to-indigo-600',
-              onClick: () => console.log('Trigger build')
-            },
-            {
-              title: 'View Logs',
-              description: 'Pipeline output',
-              icon: FileText,
-              gradient: 'from-green-500 to-emerald-600',
-              onClick: () => console.log('Logs')
-            },
-            {
-              title: 'Deployments',
-              description: 'Manage releases',
-              icon: Rocket,
-              gradient: 'from-purple-500 to-pink-600',
-              onClick: () => console.log('Deployments')
-            },
-            {
-              title: 'Analytics',
-              description: 'Pipeline metrics',
-              icon: BarChart3,
-              gradient: 'from-orange-500 to-red-600',
-              onClick: () => console.log('Analytics')
-            }
-          ]}
-        />
-
-        {/* Filters */}
-        <div className="flex flex-wrap gap-3">
-          <div className="flex gap-2">
-            <PillButton
-              label="All Types"
-              isActive={pipelineTypeFilter === 'all'}
-              onClick={() => setPipelineTypeFilter('all')}
-            />
-            <PillButton
-              label="Build"
-              isActive={pipelineTypeFilter === 'build'}
-              onClick={() => setPipelineTypeFilter('build')}
-            />
-            <PillButton
-              label="Test"
-              isActive={pipelineTypeFilter === 'test'}
-              onClick={() => setPipelineTypeFilter('test')}
-            />
-            <PillButton
-              label="Deploy"
-              isActive={pipelineTypeFilter === 'deployment'}
-              onClick={() => setPipelineTypeFilter('deployment')}
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <PillButton
-              label="All Status"
-              isActive={statusFilter === 'all'}
-              onClick={() => setStatusFilter('all')}
-            />
-            <PillButton
-              label="Active"
-              isActive={statusFilter === 'active'}
-              onClick={() => setStatusFilter('active')}
-            />
-            <PillButton
-              label="Paused"
-              isActive={statusFilter === 'paused'}
-              onClick={() => setStatusFilter('paused')}
-            />
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Workflow className="w-4 h-4 text-blue-600" />
+                <span className="text-xs text-gray-500">Workflows</span>
+              </div>
+              <p className="text-2xl font-bold">{stats.totalWorkflows}</p>
+              <p className="text-xs text-blue-600">Active</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Activity className="w-4 h-4 text-green-600" />
+                <span className="text-xs text-gray-500">Running</span>
+              </div>
+              <p className="text-2xl font-bold">{stats.runningNow}</p>
+              <p className="text-xs text-green-600">In progress</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span className="text-xs text-gray-500">Success Rate</span>
+              </div>
+              <p className="text-2xl font-bold">{stats.successRate.toFixed(1)}%</p>
+              <p className="text-xs text-emerald-600">+2.3% this week</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Timer className="w-4 h-4 text-purple-600" />
+                <span className="text-xs text-gray-500">Avg Duration</span>
+              </div>
+              <p className="text-2xl font-bold">{formatDuration(Math.round(stats.avgDuration))}</p>
+              <p className="text-xs text-purple-600">-15s improved</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Play className="w-4 h-4 text-orange-600" />
+                <span className="text-xs text-gray-500">Total Runs</span>
+              </div>
+              <p className="text-2xl font-bold">{mockWorkflows.reduce((sum, w) => sum + w.runs, 0)}</p>
+              <p className="text-xs text-orange-600">This month</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <XCircle className="w-4 h-4 text-red-600" />
+                <span className="text-xs text-gray-500">Failed</span>
+              </div>
+              <p className="text-2xl font-bold">{stats.failedRuns}</p>
+              <p className="text-xs text-red-600">Last 24h</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Server className="w-4 h-4 text-cyan-600" />
+                <span className="text-xs text-gray-500">Runners</span>
+              </div>
+              <p className="text-2xl font-bold">{mockRunners.filter(r => r.status !== 'offline').length}/{mockRunners.length}</p>
+              <p className="text-xs text-cyan-600">Online</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Clock className="w-4 h-4 text-pink-600" />
+                <span className="text-xs text-gray-500">Minutes Used</span>
+              </div>
+              <p className="text-2xl font-bold">{mockUsage.usedMinutes}</p>
+              <p className="text-xs text-pink-600">of {mockUsage.totalMinutes}</p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-3 gap-8">
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="bg-white dark:bg-gray-800 p-1 shadow-sm">
+            <TabsTrigger value="workflows" className="gap-2">
+              <Workflow className="w-4 h-4" />
+              Workflows
+            </TabsTrigger>
+            <TabsTrigger value="runs" className="gap-2">
+              <Activity className="w-4 h-4" />
+              Runs
+            </TabsTrigger>
+            <TabsTrigger value="artifacts" className="gap-2">
+              <Package className="w-4 h-4" />
+              Artifacts
+            </TabsTrigger>
+            <TabsTrigger value="environments" className="gap-2">
+              <Globe className="w-4 h-4" />
+              Environments
+            </TabsTrigger>
+            <TabsTrigger value="runners" className="gap-2">
+              <Server className="w-4 h-4" />
+              Runners
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Pipelines List */}
-          <div className="lg:col-span-2 space-y-4">
-            {displayPipelines.map((pipeline) => (
-              <div
-                key={pipeline.id}
-                className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-all"
+          {/* Workflows Tab */}
+          <TabsContent value="workflows" className="space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search workflows..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as WorkflowStatus | 'all')}
+                className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <GitBranch className="w-5 h-5 text-blue-600" />
-                      <h3 className="font-semibold text-slate-900">{pipeline.pipeline_name}</h3>
+                <option value="all">All Status</option>
+                <option value="success">Success</option>
+                <option value="failure">Failure</option>
+                <option value="running">Running</option>
+              </select>
+            </div>
+
+            <div className="grid gap-4">
+              {filteredWorkflows.map((workflow) => (
+                <Card key={workflow.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedWorkflow(workflow)}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          {getStatusIcon(workflow.status)}
+                          <h3 className="text-lg font-semibold">{workflow.name}</h3>
+                          <Badge className={getStatusColor(workflow.status)}>
+                            {workflow.status}
+                          </Badge>
+                        </div>
+                        <p className="text-gray-500 text-sm font-mono mb-4">{workflow.path}</p>
+
+                        <div className="flex items-center gap-6 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Play className="w-4 h-4 text-gray-400" />
+                            <span>{workflow.runs} runs</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4 text-gray-400" />
+                            <span>{workflow.successRate}% success</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Timer className="w-4 h-4 text-gray-400" />
+                            <span>{formatDuration(workflow.avgDuration)} avg</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-gray-400" />
+                            <span>Updated {workflow.updatedAt}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" className="gap-1">
+                          <Play className="w-4 h-4" />
+                          Run
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </div>
-                    {pipeline.description && (
-                      <p className="text-xs text-slate-500">{pipeline.description}</p>
-                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Runs Tab */}
+          <TabsContent value="runs" className="space-y-6">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input placeholder="Search runs..." className="pl-9" />
+              </div>
+              <select className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
+                <option value="all">All Workflows</option>
+                {mockWorkflows.map(w => (
+                  <option key={w.id} value={w.id}>{w.name}</option>
+                ))}
+              </select>
+              <select className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
+                <option value="all">All Status</option>
+                <option value="completed">Completed</option>
+                <option value="in_progress">In Progress</option>
+                <option value="failed">Failed</option>
+              </select>
+            </div>
+
+            <div className="space-y-3">
+              {mockRuns.map((run) => {
+                const workflow = mockWorkflows.find(w => w.id === run.workflowId)
+                return (
+                  <Card key={run.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedRun(run)}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-4">
+                        <div className="flex-shrink-0">
+                          {getStatusIcon(run.status)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold">{workflow?.name}</span>
+                            <span className="text-gray-500">#{run.runNumber}</span>
+                            <Badge className={getStatusColor(run.conclusion || run.status)}>
+                              {run.conclusion || run.status}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <div className="flex items-center gap-1">
+                              {getTriggerIcon(run.triggerType)}
+                              <span>{run.triggerType.replace('_', ' ')}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <GitBranch className="w-3 h-3" />
+                              <span className="font-mono text-xs">{run.branch}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <GitCommit className="w-3 h-3" />
+                              <span className="font-mono text-xs">{run.commit}</span>
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-600 truncate mt-1">{run.commitMessage}</p>
+                        </div>
+                        <div className="text-right text-sm">
+                          <p className="font-medium">{formatDuration(run.duration)}</p>
+                          <p className="text-gray-500">{formatTimeAgo(run.startedAt)}</p>
+                        </div>
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback>{run.triggeredBy.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          </TabsContent>
+
+          {/* Artifacts Tab */}
+          <TabsContent value="artifacts" className="space-y-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input placeholder="Search artifacts..." className="pl-9" />
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <HardDrive className="w-4 h-4" />
+                <span>Storage: {mockUsage.storageUsed}GB / {mockUsage.storageLimit}GB</span>
+              </div>
+            </div>
+
+            <Card>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 dark:bg-gray-800">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Artifact</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Workflow</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Run</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Size</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expires</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                      {mockArtifacts.map((artifact) => {
+                        const workflow = mockWorkflows.find(w => w.id === artifact.workflowId)
+                        return (
+                          <tr key={artifact.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <Package className="w-5 h-5 text-gray-400" />
+                                <span className="font-medium">{artifact.name}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-500">{workflow?.name}</td>
+                            <td className="px-6 py-4 text-sm text-gray-500">#{artifact.runNumber}</td>
+                            <td className="px-6 py-4 text-sm">{formatBytes(artifact.size)}</td>
+                            <td className="px-6 py-4 text-sm text-gray-500">{artifact.expiresAt}</td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm">
+                                  <Download className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm">
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Environments Tab */}
+          <TabsContent value="environments" className="space-y-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold">Deployment Environments</h3>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                New Environment
+              </Button>
+            </div>
+
+            <div className="grid gap-4">
+              {mockEnvironments.map((env) => (
+                <Card key={env.id}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <Globe className="w-5 h-5 text-blue-600" />
+                          <h3 className="text-lg font-semibold capitalize">{env.name}</h3>
+                          <Badge className={env.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                            {env.status}
+                          </Badge>
+                          {env.protection && (
+                            <Badge variant="outline" className="gap-1">
+                              <Shield className="w-3 h-3" />
+                              Protected
+                            </Badge>
+                          )}
+                        </div>
+
+                        {env.url && (
+                          <a href={env.url} className="text-blue-600 text-sm flex items-center gap-1 mb-3 hover:underline">
+                            {env.url}
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+
+                        <div className="flex items-center gap-6 text-sm">
+                          <div className="flex items-center gap-2">
+                            <Key className="w-4 h-4 text-gray-400" />
+                            <span>{env.secrets} secrets</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Code className="w-4 h-4 text-gray-400" />
+                            <span>{env.variables} variables</span>
+                          </div>
+                          {env.reviewers.length > 0 && (
+                            <div className="flex items-center gap-2">
+                              <Users className="w-4 h-4 text-gray-400" />
+                              <span>{env.reviewers.length} reviewers</span>
+                            </div>
+                          )}
+                          {env.lastDeployment && (
+                            <div className="flex items-center gap-2">
+                              <Rocket className="w-4 h-4 text-gray-400" />
+                              <span>Last deployed {env.lastDeployment}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm">
+                          <Settings className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Secrets Section */}
+            <div className="mt-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Secrets</h3>
+                <Button variant="outline" className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  New Secret
+                </Button>
+              </div>
+
+              <Card>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 dark:bg-gray-800">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Scope</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Environment</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Updated</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                        {mockSecrets.map((secret) => (
+                          <tr key={secret.name} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2">
+                                <Lock className="w-4 h-4 text-gray-400" />
+                                <span className="font-mono text-sm">{secret.name}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <Badge variant="outline" className="capitalize">{secret.scope}</Badge>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-500">
+                              {secret.environment || '-'}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-500">{secret.updatedAt}</td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm">
+                                  <Settings className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm">
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                  <div className="flex gap-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(pipeline.last_status || undefined)}`}>
-                      {pipeline.last_status || 'pending'}
-                    </span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTypeColor(pipeline.pipeline_type)}`}>
-                      {pipeline.pipeline_type}
-                    </span>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Runners Tab */}
+          <TabsContent value="runners" className="space-y-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold">Self-Hosted Runners</h3>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                Add Runner
+              </Button>
+            </div>
+
+            <div className="grid gap-4">
+              {mockRunners.map((runner) => (
+                <Card key={runner.id}>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="text-2xl">{getRunnerOsIcon(runner.os)}</div>
+                        <div>
+                          <div className="flex items-center gap-3 mb-1">
+                            <h3 className="font-semibold">{runner.name}</h3>
+                            <Badge className={
+                              runner.status === 'online' ? 'bg-green-100 text-green-800' :
+                              runner.status === 'busy' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800'
+                            }>
+                              {runner.status}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span className="capitalize">{runner.os}</span>
+                            <span>v{runner.version}</span>
+                            {runner.lastJob && (
+                              <span className="text-blue-600">Running: {runner.lastJob}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <div className="flex gap-1">
+                          {runner.labels.map((label) => (
+                            <Badge key={label} variant="outline" className="text-xs">{label}</Badge>
+                          ))}
+                        </div>
+                        <Button variant="outline" size="sm">
+                          <Settings className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Usage Stats */}
+            <Card className="mt-8">
+              <CardHeader>
+                <CardTitle>Usage This Month</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-6">
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Minutes Used</p>
+                    <div className="flex items-end gap-2">
+                      <span className="text-3xl font-bold">{mockUsage.usedMinutes}</span>
+                      <span className="text-gray-500 mb-1">/ {mockUsage.totalMinutes}</span>
+                    </div>
+                    <Progress value={(mockUsage.usedMinutes / mockUsage.totalMinutes) * 100} className="mt-2" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Storage Used</p>
+                    <div className="flex items-end gap-2">
+                      <span className="text-3xl font-bold">{mockUsage.storageUsed}GB</span>
+                      <span className="text-gray-500 mb-1">/ {mockUsage.storageLimit}GB</span>
+                    </div>
+                    <Progress value={(mockUsage.storageUsed / mockUsage.storageLimit) * 100} className="mt-2" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Concurrent Jobs</p>
+                    <div className="flex items-end gap-2">
+                      <span className="text-3xl font-bold">{mockUsage.concurrentJobs}</span>
+                      <span className="text-gray-500 mb-1">/ {mockUsage.maxConcurrentJobs} max</span>
+                    </div>
+                    <Progress value={(mockUsage.concurrentJobs / mockUsage.maxConcurrentJobs) * 100} className="mt-2" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* General Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Settings className="w-5 h-5" />
+                    General Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Workflow Permissions</p>
+                      <p className="text-xs text-gray-500">Allow workflows to modify repository</p>
+                    </div>
+                    <select className="px-3 py-1 border rounded text-sm">
+                      <option>Read and write</option>
+                      <option>Read only</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Fork PR Workflows</p>
+                      <p className="text-xs text-gray-500">Run workflows from fork pull requests</p>
+                    </div>
+                    <input type="checkbox" className="w-5 h-5" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Required Approval</p>
+                      <p className="text-xs text-gray-500">First-time contributors need approval</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="w-5 h-5" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Notifications */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5" />
+                    Notifications
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Failed Workflow Alerts</p>
+                      <p className="text-xs text-gray-500">Email on workflow failure</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="w-5 h-5" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Slack Integration</p>
+                      <p className="text-xs text-gray-500">Send status to Slack</p>
+                    </div>
+                    <Button variant="outline" size="sm">Configure</Button>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Deployment Notifications</p>
+                      <p className="text-xs text-gray-500">Notify on production deployments</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="w-5 h-5" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Cache Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Database className="w-5 h-5" />
+                    Cache Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Cache Storage Used</p>
+                    <div className="flex items-center gap-2">
+                      <Progress value={42} className="flex-1" />
+                      <span className="text-sm font-medium">4.2GB / 10GB</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Cache Retention</p>
+                      <p className="text-xs text-gray-500">Days before cache expires</p>
+                    </div>
+                    <Input type="number" defaultValue={7} className="w-20 text-center" />
+                  </div>
+                  <Button variant="outline" className="w-full gap-2">
+                    <Trash2 className="w-4 h-4" />
+                    Clear All Caches
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Danger Zone */}
+              <Card className="border-red-200">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2 text-red-600">
+                    <AlertTriangle className="w-5 h-5" />
+                    Danger Zone
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-red-200">
+                    <div>
+                      <p className="font-medium">Disable All Workflows</p>
+                      <p className="text-xs text-gray-500">Temporarily disable all workflows</p>
+                    </div>
+                    <Button variant="outline" className="text-red-600 border-red-200">
+                      Disable
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-lg border border-red-200">
+                    <div>
+                      <p className="font-medium">Delete All Artifacts</p>
+                      <p className="text-xs text-gray-500">Remove all stored artifacts</p>
+                    </div>
+                    <Button variant="outline" className="text-red-600 border-red-200">
+                      Delete
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Workflow Detail Dialog */}
+        <Dialog open={!!selectedWorkflow} onOpenChange={() => setSelectedWorkflow(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Workflow className="w-5 h-5 text-blue-600" />
+                {selectedWorkflow?.name}
+              </DialogTitle>
+            </DialogHeader>
+
+            {selectedWorkflow && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <Badge className={getStatusColor(selectedWorkflow.status)}>
+                    {selectedWorkflow.status}
+                  </Badge>
+                  <span className="text-gray-500 font-mono text-sm">{selectedWorkflow.path}</span>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Total Runs</p>
+                    <p className="text-2xl font-bold">{selectedWorkflow.runs}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Success Rate</p>
+                    <p className="text-2xl font-bold text-green-600">{selectedWorkflow.successRate}%</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Avg Duration</p>
+                    <p className="text-2xl font-bold">{formatDuration(selectedWorkflow.avgDuration)}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Last Updated</p>
+                    <p className="text-lg font-bold">{selectedWorkflow.updatedAt}</p>
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-4 mb-4">
+                {/* Last Run */}
+                {selectedWorkflow.lastRun && (
                   <div>
-                    <p className="text-xs text-slate-500 mb-1">Branch</p>
-                    <div className="flex items-center gap-1">
-                      <GitCommit className="w-3 h-3 text-slate-400" />
-                      <span className="text-sm font-medium text-slate-900">{pipeline.trigger_branch || 'N/A'}</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-slate-500 mb-1">Environment</p>
-                    <span className="text-sm font-medium text-slate-900 capitalize">{pipeline.deployment_environment || 'N/A'}</span>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-slate-500 mb-1">Runs</p>
-                    <span className="text-sm font-medium text-slate-900">{pipeline.run_count}</span>
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-4 gap-4 mb-4">
-                  <div>
-                    <p className="text-xs text-slate-500 mb-1">Duration</p>
-                    <p className="text-sm font-medium text-slate-900">{formatDuration(pipeline.avg_duration_seconds || undefined)}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-slate-500 mb-1">Success Rate</p>
-                    <p className="text-sm font-medium text-slate-900">
-                      {pipeline.run_count > 0 ? `${Math.round((pipeline.success_count / pipeline.run_count) * 100)}%` : 'N/A'}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-slate-500 mb-1">Tests</p>
-                    <div className="flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3 text-green-600" />
-                      <span className="text-sm font-medium text-slate-900">
-                        {pipeline.passed_tests}/{pipeline.total_tests}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-slate-500 mb-1">Coverage</p>
-                    <p className="text-sm font-medium text-slate-900">{pipeline.test_coverage?.toFixed(1) || '0'}%</p>
-                  </div>
-                </div>
-
-                {pipeline.test_coverage && pipeline.test_coverage > 0 && (
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-slate-500">Code Coverage</span>
-                      <span className="text-xs font-medium text-slate-900">{pipeline.test_coverage.toFixed(1)}%</span>
-                    </div>
-                    <div className="w-full bg-slate-100 rounded-full h-2">
-                      <div
-                        className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600"
-                        style={{ width: `${Math.min(pipeline.test_coverage, 100)}%` }}
-                      />
+                    <h4 className="font-semibold mb-4">Last Run #{selectedWorkflow.lastRun.runNumber}</h4>
+                    <div className="space-y-3">
+                      {selectedWorkflow.lastRun.jobs.map((job) => (
+                        <div key={job.id} className="border rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              {getStatusIcon(job.status)}
+                              <span className="font-medium">{job.name}</span>
+                              <Badge variant="outline">{job.runner}</Badge>
+                            </div>
+                            <span className="text-sm text-gray-500">{formatDuration(job.duration)}</span>
+                          </div>
+                          <div className="space-y-2 pl-7">
+                            {job.steps.map((step) => (
+                              <div key={step.id} className="flex items-center justify-between text-sm">
+                                <div className="flex items-center gap-2">
+                                  {getStatusIcon(step.status)}
+                                  <span>{step.name}</span>
+                                </div>
+                                <span className="text-gray-500">{step.duration}s</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
 
-                <div className="flex gap-2 pt-4 border-t border-slate-100">
-                  <button className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-indigo-700 transition-all">
-                    View Details
-                  </button>
-                  <button className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-all">
-                    Logs
-                  </button>
-                  <button className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-200 transition-all">
-                    {pipeline.is_running ? 'Cancel' : 'Run'}
-                  </button>
+                {/* Actions */}
+                <div className="flex items-center gap-3 pt-4">
+                  <Button className="gap-2">
+                    <Play className="w-4 h-4" />
+                    Run Workflow
+                  </Button>
+                  <Button variant="outline" className="gap-2">
+                    <FileText className="w-4 h-4" />
+                    View YAML
+                  </Button>
+                  <Button variant="outline" className="gap-2">
+                    <BarChart3 className="w-4 h-4" />
+                    View Analytics
+                  </Button>
+                  <Button variant="outline" className="gap-2">
+                    <Settings className="w-4 h-4" />
+                    Settings
+                  </Button>
                 </div>
               </div>
-            ))}
+            )}
+          </DialogContent>
+        </Dialog>
 
-            {displayPipelines.length === 0 && (
-              <div className="bg-white rounded-2xl p-12 text-center">
-                <GitBranch className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">No Pipelines Yet</h3>
-                <p className="text-slate-600 mb-4">Create your first CI/CD pipeline to get started</p>
-                <button className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-indigo-700 transition-all">
-                  Create Pipeline
-                </button>
+        {/* Run Detail Dialog */}
+        <Dialog open={!!selectedRun} onOpenChange={() => setSelectedRun(null)}>
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Activity className="w-5 h-5 text-blue-600" />
+                Run #{selectedRun?.runNumber}
+              </DialogTitle>
+            </DialogHeader>
+
+            {selectedRun && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <Badge className={getStatusColor(selectedRun.conclusion || selectedRun.status)}>
+                    {selectedRun.conclusion || selectedRun.status}
+                  </Badge>
+                  <Badge variant="outline" className="gap-1">
+                    {getTriggerIcon(selectedRun.triggerType)}
+                    {selectedRun.triggerType.replace('_', ' ')}
+                  </Badge>
+                  <Badge variant="outline" className="font-mono">{selectedRun.branch}</Badge>
+                </div>
+
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <GitCommit className="w-4 h-4" />
+                    <span className="font-mono text-sm">{selectedRun.commit}</span>
+                  </div>
+                  <p className="text-gray-600">{selectedRun.commitMessage}</p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{formatDuration(selectedRun.duration)}</p>
+                    <p className="text-sm text-gray-500">Duration</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{selectedRun.triggeredBy}</p>
+                    <p className="text-sm text-gray-500">Triggered By</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-lg font-bold">{formatTimeAgo(selectedRun.startedAt)}</p>
+                    <p className="text-sm text-gray-500">Started</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 pt-4">
+                  <Button variant="outline" className="gap-2">
+                    <Terminal className="w-4 h-4" />
+                    View Logs
+                  </Button>
+                  <Button variant="outline" className="gap-2">
+                    <RotateCcw className="w-4 h-4" />
+                    Re-run
+                  </Button>
+                  {selectedRun.status === 'in_progress' && (
+                    <Button variant="outline" className="gap-2 text-red-600">
+                      <StopCircle className="w-4 h-4" />
+                      Cancel
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-
-            {/* Success Rate */}
-            <MiniKPI
-              label="Success Rate"
-              value={`${successRate.toFixed(0)}%`}
-              icon={CheckCircle2}
-              trend={{ value: 5.2, isPositive: true }}
-              className="bg-gradient-to-br from-green-500 to-emerald-600"
-            />
-
-            {/* Recent Activity */}
-            <ActivityFeed
-              title="Recent Builds"
-              activities={displayPipelines.slice(0, 4).map((p, idx) => ({
-                id: p.id,
-                title: p.pipeline_name,
-                description: `${p.pipeline_type} - ${p.last_status || 'pending'}`,
-                timestamp: p.last_run_at ? new Date(p.last_run_at).toLocaleString() : 'Not run yet',
-                type: p.last_status === 'success' ? 'success' : p.last_status === 'failure' ? 'error' : 'info'
-              }))}
-            />
-
-            {/* Build Health */}
-            <ProgressCard
-              title="Build Health Score"
-              progress={successRate}
-              subtitle="Last 30 days"
-              color="blue"
-            />
-
-          </div>
-        </div>
-
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
