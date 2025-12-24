@@ -1,26 +1,24 @@
 'use client'
 
-import { useState } from 'react'
-import { useServers, useSystemAlerts, useServerMutations, useAlertMutations, Server, SystemAlert } from '@/lib/hooks/use-monitoring'
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Progress } from '@/components/ui/progress'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
-  BentoCard,
-  BentoQuickAction
-} from '@/components/ui/bento-grid-advanced'
-import {
-  StatGrid,
-  MiniKPI,
-  ActivityFeed,
-  RankingList,
-  ProgressCard
-} from '@/components/ui/results-display'
-import {
-  ModernButton,
-  GradientButton,
-  PillButton
-} from '@/components/ui/modern-buttons'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   Activity,
-  Server as ServerIcon,
+  Server,
   Cpu,
   HardDrive,
   TrendingUp,
@@ -32,395 +30,1087 @@ import {
   Globe,
   BarChart3,
   Eye,
-  MoreVertical,
   Search,
   Filter,
   Download,
-  RefreshCw
+  RefreshCw,
+  Plus,
+  ArrowUpRight,
+  ArrowDownRight,
+  Settings,
+  Bell,
+  Layers,
+  Box,
+  Container,
+  Cloud,
+  Wifi,
+  WifiOff,
+  Terminal,
+  FileText,
+  AlertCircle,
+  XCircle,
+  Pause,
+  Play,
+  Timer,
+  GitBranch,
+  Network,
+  Radio,
+  Gauge,
+  LineChart,
+  PieChart,
+  Target,
+  Shield,
+  Lock,
+  Key,
+  Users,
+  MapPin,
+  ThermometerSun,
+  Flame,
+  Snowflake,
+  MemoryStick,
+  MonitorSmartphone,
+  Laptop,
+  Smartphone
 } from 'lucide-react'
 
-interface MonitoringClientProps {
-  initialServers: Server[]
-  initialAlerts: SystemAlert[]
+// ============================================================================
+// TYPE DEFINITIONS - Datadog Level Infrastructure Monitoring
+// ============================================================================
+
+type HostStatus = 'healthy' | 'warning' | 'critical' | 'unknown' | 'offline'
+type AlertSeverity = 'info' | 'low' | 'medium' | 'high' | 'critical'
+type AlertStatus = 'triggered' | 'acknowledged' | 'resolved' | 'muted'
+type ServiceStatus = 'operational' | 'degraded' | 'partial_outage' | 'major_outage'
+type MetricType = 'gauge' | 'counter' | 'histogram' | 'rate'
+type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal'
+
+interface Host {
+  id: string
+  name: string
+  hostname: string
+  ip_address: string
+  os: string
+  status: HostStatus
+  cpu_usage: number
+  memory_usage: number
+  disk_usage: number
+  network_in: number
+  network_out: number
+  load_avg: number
+  uptime_seconds: number
+  processes: number
+  containers: number
+  region: string
+  availability_zone: string
+  instance_type: string
+  tags: string[]
+  last_seen_at: string
+  agent_version: string
 }
 
-export default function MonitoringClient({ initialServers, initialAlerts }: MonitoringClientProps) {
-  const [selectedMetric, setSelectedMetric] = useState<'all' | 'cpu' | 'memory' | 'disk' | 'network'>('all')
+interface Service {
+  id: string
+  name: string
+  status: ServiceStatus
+  type: 'web' | 'api' | 'database' | 'cache' | 'queue' | 'worker'
+  hosts_count: number
+  requests_per_sec: number
+  error_rate: number
+  latency_p50: number
+  latency_p95: number
+  latency_p99: number
+  apdex_score: number
+  dependencies: string[]
+  last_deploy_at: string
+  version: string
+}
+
+interface Alert {
+  id: string
+  title: string
+  message: string
+  severity: AlertSeverity
+  status: AlertStatus
+  source: string
+  host_id: string | null
+  host_name: string | null
+  service_name: string | null
+  metric_name: string
+  threshold: number
+  current_value: number
+  triggered_at: string
+  acknowledged_at: string | null
+  acknowledged_by: string | null
+  resolved_at: string | null
+  escalation_level: number
+  notification_sent: boolean
+}
+
+interface LogEntry {
+  id: string
+  timestamp: string
+  level: LogLevel
+  service: string
+  host: string
+  message: string
+  trace_id: string | null
+  span_id: string | null
+  attributes: Record<string, unknown>
+}
+
+interface Metric {
+  id: string
+  name: string
+  display_name: string
+  type: MetricType
+  unit: string
+  current_value: number
+  previous_value: number
+  change_percent: number
+  tags: string[]
+}
+
+interface Dashboard {
+  id: string
+  name: string
+  description: string
+  widgets_count: number
+  created_by: string
+  is_shared: boolean
+  last_modified_at: string
+}
+
+interface SLO {
+  id: string
+  name: string
+  target: number
+  current: number
+  status: 'met' | 'at_risk' | 'breached'
+  time_window: '7d' | '30d' | '90d'
+  service: string
+  metric_type: string
+}
+
+// ============================================================================
+// MOCK DATA GENERATION
+// ============================================================================
+
+const mockHosts: Host[] = [
+  {
+    id: 'host-001',
+    name: 'web-prod-01',
+    hostname: 'ip-10-0-1-101.ec2.internal',
+    ip_address: '10.0.1.101',
+    os: 'Ubuntu 22.04 LTS',
+    status: 'healthy',
+    cpu_usage: 42,
+    memory_usage: 68,
+    disk_usage: 55,
+    network_in: 245.6,
+    network_out: 123.4,
+    load_avg: 2.34,
+    uptime_seconds: 2592000,
+    processes: 156,
+    containers: 12,
+    region: 'us-west-2',
+    availability_zone: 'us-west-2a',
+    instance_type: 'c5.2xlarge',
+    tags: ['env:production', 'service:web', 'team:platform'],
+    last_seen_at: '2024-01-15T10:30:00Z',
+    agent_version: '7.45.0'
+  },
+  {
+    id: 'host-002',
+    name: 'web-prod-02',
+    hostname: 'ip-10-0-1-102.ec2.internal',
+    ip_address: '10.0.1.102',
+    os: 'Ubuntu 22.04 LTS',
+    status: 'healthy',
+    cpu_usage: 38,
+    memory_usage: 62,
+    disk_usage: 48,
+    network_in: 198.3,
+    network_out: 98.7,
+    load_avg: 1.87,
+    uptime_seconds: 2592000,
+    processes: 142,
+    containers: 10,
+    region: 'us-west-2',
+    availability_zone: 'us-west-2b',
+    instance_type: 'c5.2xlarge',
+    tags: ['env:production', 'service:web', 'team:platform'],
+    last_seen_at: '2024-01-15T10:30:00Z',
+    agent_version: '7.45.0'
+  },
+  {
+    id: 'host-003',
+    name: 'api-prod-01',
+    hostname: 'ip-10-0-2-101.ec2.internal',
+    ip_address: '10.0.2.101',
+    os: 'Amazon Linux 2',
+    status: 'warning',
+    cpu_usage: 78,
+    memory_usage: 85,
+    disk_usage: 72,
+    network_in: 567.8,
+    network_out: 234.5,
+    load_avg: 4.56,
+    uptime_seconds: 1728000,
+    processes: 234,
+    containers: 18,
+    region: 'us-west-2',
+    availability_zone: 'us-west-2a',
+    instance_type: 'c5.4xlarge',
+    tags: ['env:production', 'service:api', 'team:backend'],
+    last_seen_at: '2024-01-15T10:30:00Z',
+    agent_version: '7.45.0'
+  },
+  {
+    id: 'host-004',
+    name: 'db-prod-01',
+    hostname: 'ip-10-0-3-101.ec2.internal',
+    ip_address: '10.0.3.101',
+    os: 'Ubuntu 20.04 LTS',
+    status: 'healthy',
+    cpu_usage: 25,
+    memory_usage: 78,
+    disk_usage: 67,
+    network_in: 89.4,
+    network_out: 456.7,
+    load_avg: 1.23,
+    uptime_seconds: 5184000,
+    processes: 89,
+    containers: 0,
+    region: 'us-west-2',
+    availability_zone: 'us-west-2a',
+    instance_type: 'r5.2xlarge',
+    tags: ['env:production', 'service:database', 'team:data'],
+    last_seen_at: '2024-01-15T10:30:00Z',
+    agent_version: '7.44.1'
+  },
+  {
+    id: 'host-005',
+    name: 'cache-prod-01',
+    hostname: 'ip-10-0-4-101.ec2.internal',
+    ip_address: '10.0.4.101',
+    os: 'Amazon Linux 2',
+    status: 'critical',
+    cpu_usage: 92,
+    memory_usage: 95,
+    disk_usage: 45,
+    network_in: 789.2,
+    network_out: 654.3,
+    load_avg: 8.76,
+    uptime_seconds: 864000,
+    processes: 67,
+    containers: 3,
+    region: 'us-west-2',
+    availability_zone: 'us-west-2b',
+    instance_type: 'r5.xlarge',
+    tags: ['env:production', 'service:cache', 'team:platform'],
+    last_seen_at: '2024-01-15T10:30:00Z',
+    agent_version: '7.45.0'
+  },
+  {
+    id: 'host-006',
+    name: 'worker-prod-01',
+    hostname: 'ip-10-0-5-101.ec2.internal',
+    ip_address: '10.0.5.101',
+    os: 'Ubuntu 22.04 LTS',
+    status: 'healthy',
+    cpu_usage: 55,
+    memory_usage: 45,
+    disk_usage: 32,
+    network_in: 45.6,
+    network_out: 23.4,
+    load_avg: 2.12,
+    uptime_seconds: 432000,
+    processes: 45,
+    containers: 8,
+    region: 'us-west-2',
+    availability_zone: 'us-west-2c',
+    instance_type: 'c5.xlarge',
+    tags: ['env:production', 'service:worker', 'team:backend'],
+    last_seen_at: '2024-01-15T10:30:00Z',
+    agent_version: '7.45.0'
+  }
+]
+
+const mockServices: Service[] = [
+  { id: 's1', name: 'web-frontend', status: 'operational', type: 'web', hosts_count: 4, requests_per_sec: 1250, error_rate: 0.12, latency_p50: 45, latency_p95: 120, latency_p99: 250, apdex_score: 0.95, dependencies: ['api-gateway', 'cdn'], last_deploy_at: '2024-01-14T16:00:00Z', version: '2.4.1' },
+  { id: 's2', name: 'api-gateway', status: 'operational', type: 'api', hosts_count: 3, requests_per_sec: 8500, error_rate: 0.08, latency_p50: 12, latency_p95: 45, latency_p99: 120, apdex_score: 0.98, dependencies: ['user-service', 'order-service', 'inventory-service'], last_deploy_at: '2024-01-15T09:00:00Z', version: '3.1.0' },
+  { id: 's3', name: 'user-service', status: 'operational', type: 'api', hosts_count: 2, requests_per_sec: 2100, error_rate: 0.05, latency_p50: 8, latency_p95: 25, latency_p99: 60, apdex_score: 0.99, dependencies: ['postgres-primary', 'redis-cluster'], last_deploy_at: '2024-01-12T14:00:00Z', version: '1.8.2' },
+  { id: 's4', name: 'postgres-primary', status: 'operational', type: 'database', hosts_count: 2, requests_per_sec: 5600, error_rate: 0.01, latency_p50: 2, latency_p95: 8, latency_p99: 15, apdex_score: 0.99, dependencies: [], last_deploy_at: '2024-01-01T00:00:00Z', version: '15.2' },
+  { id: 's5', name: 'redis-cluster', status: 'degraded', type: 'cache', hosts_count: 3, requests_per_sec: 45000, error_rate: 2.5, latency_p50: 0.5, latency_p95: 2, latency_p99: 8, apdex_score: 0.85, dependencies: [], last_deploy_at: '2024-01-10T08:00:00Z', version: '7.0.5' },
+  { id: 's6', name: 'worker-queue', status: 'operational', type: 'queue', hosts_count: 2, requests_per_sec: 890, error_rate: 0.15, latency_p50: 150, latency_p95: 500, latency_p99: 1200, apdex_score: 0.92, dependencies: ['postgres-primary', 'redis-cluster'], last_deploy_at: '2024-01-13T11:00:00Z', version: '2.1.0' }
+]
+
+const mockAlerts: Alert[] = [
+  { id: 'a1', title: 'High CPU Usage', message: 'CPU usage exceeded 90% on cache-prod-01', severity: 'critical', status: 'triggered', source: 'system.cpu', host_id: 'host-005', host_name: 'cache-prod-01', service_name: 'redis-cluster', metric_name: 'system.cpu.user', threshold: 90, current_value: 92, triggered_at: '2024-01-15T10:25:00Z', acknowledged_at: null, acknowledged_by: null, resolved_at: null, escalation_level: 1, notification_sent: true },
+  { id: 'a2', title: 'High Memory Usage', message: 'Memory usage exceeded 90% on cache-prod-01', severity: 'critical', status: 'triggered', source: 'system.memory', host_id: 'host-005', host_name: 'cache-prod-01', service_name: 'redis-cluster', metric_name: 'system.mem.used', threshold: 90, current_value: 95, triggered_at: '2024-01-15T10:26:00Z', acknowledged_at: null, acknowledged_by: null, resolved_at: null, escalation_level: 1, notification_sent: true },
+  { id: 'a3', title: 'API Error Rate Elevated', message: 'Error rate exceeded 2% on api-gateway', severity: 'high', status: 'acknowledged', source: 'apm.error_rate', host_id: null, host_name: null, service_name: 'api-gateway', metric_name: 'trace.error_rate', threshold: 2, current_value: 2.5, triggered_at: '2024-01-15T09:45:00Z', acknowledged_at: '2024-01-15T09:50:00Z', acknowledged_by: 'Sarah Chen', resolved_at: null, escalation_level: 0, notification_sent: true },
+  { id: 'a4', title: 'High Load Average', message: 'Load average exceeded threshold on api-prod-01', severity: 'medium', status: 'resolved', source: 'system.load', host_id: 'host-003', host_name: 'api-prod-01', service_name: 'api-gateway', metric_name: 'system.load.1', threshold: 4, current_value: 4.56, triggered_at: '2024-01-15T08:30:00Z', acknowledged_at: '2024-01-15T08:35:00Z', acknowledged_by: 'Mike Wilson', resolved_at: '2024-01-15T09:00:00Z', escalation_level: 0, notification_sent: true },
+  { id: 'a5', title: 'Disk Usage Warning', message: 'Disk usage approaching threshold on db-prod-01', severity: 'low', status: 'muted', source: 'system.disk', host_id: 'host-004', host_name: 'db-prod-01', service_name: 'postgres-primary', metric_name: 'system.disk.used', threshold: 75, current_value: 67, triggered_at: '2024-01-15T07:00:00Z', acknowledged_at: null, acknowledged_by: null, resolved_at: null, escalation_level: 0, notification_sent: false }
+]
+
+const mockLogs: LogEntry[] = [
+  { id: 'log-001', timestamp: '2024-01-15T10:30:45Z', level: 'error', service: 'redis-cluster', host: 'cache-prod-01', message: 'Out of memory - killing process', trace_id: null, span_id: null, attributes: { pid: 12345, memory_used: '95%' } },
+  { id: 'log-002', timestamp: '2024-01-15T10:30:30Z', level: 'warn', service: 'api-gateway', host: 'api-prod-01', message: 'Request timeout after 30s', trace_id: 'trace-abc123', span_id: 'span-xyz789', attributes: { endpoint: '/api/v1/orders', method: 'POST' } },
+  { id: 'log-003', timestamp: '2024-01-15T10:30:15Z', level: 'info', service: 'user-service', host: 'web-prod-01', message: 'User login successful', trace_id: 'trace-def456', span_id: 'span-uvw123', attributes: { user_id: 'u-12345', ip: '192.168.1.100' } },
+  { id: 'log-004', timestamp: '2024-01-15T10:30:00Z', level: 'debug', service: 'worker-queue', host: 'worker-prod-01', message: 'Processing job batch', trace_id: 'trace-ghi789', span_id: 'span-rst456', attributes: { batch_size: 100, queue: 'emails' } },
+  { id: 'log-005', timestamp: '2024-01-15T10:29:45Z', level: 'error', service: 'api-gateway', host: 'api-prod-01', message: 'Database connection failed', trace_id: 'trace-jkl012', span_id: 'span-opq789', attributes: { error_code: 'ECONNREFUSED', attempts: 3 } }
+]
+
+const mockSLOs: SLO[] = [
+  { id: 'slo-001', name: 'API Availability', target: 99.9, current: 99.95, status: 'met', time_window: '30d', service: 'api-gateway', metric_type: 'availability' },
+  { id: 'slo-002', name: 'API Latency P95', target: 100, current: 120, status: 'breached', time_window: '7d', service: 'api-gateway', metric_type: 'latency_p95' },
+  { id: 'slo-003', name: 'Error Rate', target: 0.5, current: 0.35, status: 'met', time_window: '30d', service: 'user-service', metric_type: 'error_rate' },
+  { id: 'slo-004', name: 'Database Availability', target: 99.99, current: 99.98, status: 'at_risk', time_window: '30d', service: 'postgres-primary', metric_type: 'availability' }
+]
+
+const mockDashboards: Dashboard[] = [
+  { id: 'dash-001', name: 'Infrastructure Overview', description: 'High-level view of all infrastructure', widgets_count: 12, created_by: 'Sarah Chen', is_shared: true, last_modified_at: '2024-01-14T10:00:00Z' },
+  { id: 'dash-002', name: 'API Performance', description: 'API latency and error rates', widgets_count: 8, created_by: 'Mike Wilson', is_shared: true, last_modified_at: '2024-01-15T09:00:00Z' },
+  { id: 'dash-003', name: 'Database Metrics', description: 'PostgreSQL performance metrics', widgets_count: 10, created_by: 'Alex Johnson', is_shared: false, last_modified_at: '2024-01-13T14:00:00Z' },
+  { id: 'dash-004', name: 'Cache Performance', description: 'Redis cluster monitoring', widgets_count: 6, created_by: 'Emma Davis', is_shared: true, last_modified_at: '2024-01-15T08:00:00Z' }
+]
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+const getHostStatusColor = (status: HostStatus): string => {
+  switch (status) {
+    case 'healthy': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+    case 'warning': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+    case 'critical': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+    case 'unknown': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+    case 'offline': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+  }
+}
+
+const getServiceStatusColor = (status: ServiceStatus): string => {
+  switch (status) {
+    case 'operational': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+    case 'degraded': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+    case 'partial_outage': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+    case 'major_outage': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+  }
+}
+
+const getAlertSeverityColor = (severity: AlertSeverity): string => {
+  switch (severity) {
+    case 'info': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+    case 'low': return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400'
+    case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+    case 'high': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+    case 'critical': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+  }
+}
+
+const getAlertStatusColor = (status: AlertStatus): string => {
+  switch (status) {
+    case 'triggered': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+    case 'acknowledged': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+    case 'resolved': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+    case 'muted': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+  }
+}
+
+const getLogLevelColor = (level: LogLevel): string => {
+  switch (level) {
+    case 'debug': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+    case 'info': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+    case 'warn': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+    case 'error': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+    case 'fatal': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+  }
+}
+
+const getSLOStatusColor = (status: string): string => {
+  switch (status) {
+    case 'met': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+    case 'at_risk': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+    case 'breached': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+  }
+}
+
+const formatUptime = (seconds: number): string => {
+  const days = Math.floor(seconds / 86400)
+  const hours = Math.floor((seconds % 86400) / 3600)
+  return `${days}d ${hours}h`
+}
+
+const getMetricColor = (value: number, threshold: number): string => {
+  if (value >= threshold) return 'text-red-600'
+  if (value >= threshold * 0.8) return 'text-yellow-600'
+  return 'text-green-600'
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+export default function MonitoringClient() {
+  const [activeTab, setActiveTab] = useState('infrastructure')
   const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<HostStatus | 'all'>('all')
+  const [selectedHost, setSelectedHost] = useState<Host | null>(null)
+  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null)
 
-  const { servers, stats, isLoading, refetch } = useServers(initialServers, { status: selectedMetric === 'all' ? undefined : undefined })
-  const { alerts } = useSystemAlerts(initialAlerts)
-  const { createServer, updateServer, deleteServer, isCreating } = useServerMutations()
-  const { acknowledgeAlert, resolveAlert } = useAlertMutations()
+  // Filtered hosts
+  const filteredHosts = useMemo(() => {
+    return mockHosts.filter(host => {
+      const matchesSearch =
+        host.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        host.hostname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        host.ip_address.includes(searchQuery)
+      const matchesStatus = statusFilter === 'all' || host.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [searchQuery, statusFilter])
 
-  const filteredServers = servers.filter(server =>
-    server.server_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    server.location?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  // Stats calculations
+  const stats = useMemo(() => {
+    const total = mockHosts.length
+    const healthy = mockHosts.filter(h => h.status === 'healthy').length
+    const warning = mockHosts.filter(h => h.status === 'warning').length
+    const critical = mockHosts.filter(h => h.status === 'critical').length
+    const avgCpu = Math.round(mockHosts.reduce((acc, h) => acc + h.cpu_usage, 0) / total)
+    const avgMemory = Math.round(mockHosts.reduce((acc, h) => acc + h.memory_usage, 0) / total)
+    const totalContainers = mockHosts.reduce((acc, h) => acc + h.containers, 0)
+    const activeAlerts = mockAlerts.filter(a => a.status === 'triggered').length
 
-  const statItems = [
-    { label: 'Uptime', value: `${stats.avgUptime}%`, change: 0.2, icon: <Activity className="w-5 h-5" /> },
-    { label: 'Active Servers', value: stats.total.toString(), change: 2.1, icon: <ServerIcon className="w-5 h-5" /> },
-    { label: 'Healthy', value: stats.healthy.toString(), change: 5.3, icon: <CheckCircle className="w-5 h-5" /> },
-    { label: 'Critical', value: stats.critical.toString(), change: stats.critical > 0 ? -10 : 0, icon: <AlertTriangle className="w-5 h-5" /> }
-  ]
-
-  const topServers = servers
-    .sort((a, b) => b.requests_per_hour - a.requests_per_hour)
-    .slice(0, 5)
-    .map((server, index) => ({
-      rank: index + 1,
-      name: server.server_name,
-      avatar: server.server_name.substring(0, 2).toUpperCase(),
-      value: `${(server.requests_per_hour / 1000).toFixed(1)}K`,
-      change: Math.random() * 20
-    }))
-
-  const recentActivity = alerts.slice(0, 4).map(alert => ({
-    icon: alert.severity === 'critical' ? <AlertTriangle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />,
-    title: alert.title,
-    time: new Date(alert.created_at).toLocaleTimeString(),
-    type: alert.severity === 'critical' ? 'error' as const : alert.severity === 'warning' ? 'warning' as const : 'success' as const
-  }))
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'healthy':
-        return { color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400', icon: <CheckCircle className="w-3 h-3" />, label: 'Healthy' }
-      case 'warning':
-        return { color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400', icon: <AlertTriangle className="w-3 h-3" />, label: 'Warning' }
-      case 'critical':
-        return { color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400', icon: <AlertTriangle className="w-3 h-3" />, label: 'Critical' }
-      default:
-        return { color: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400', icon: <ServerIcon className="w-3 h-3" />, label: status }
-    }
-  }
-
-  const getMetricColor = (value: number, metric: string) => {
-    if (metric === 'uptime') {
-      if (value >= 99.9) return 'text-green-600'
-      if (value >= 99.0) return 'text-yellow-600'
-      return 'text-red-600'
-    }
-    if (value >= 90) return 'text-red-600'
-    if (value >= 75) return 'text-yellow-600'
-    if (value >= 50) return 'text-blue-600'
-    return 'text-green-600'
-  }
-
-  const getServerGradient = (status: string) => {
-    switch (status) {
-      case 'healthy': return 'from-green-500 to-emerald-500'
-      case 'warning': return 'from-yellow-500 to-amber-500'
-      case 'critical': return 'from-red-500 to-orange-500'
-      default: return 'from-gray-500 to-slate-500'
-    }
-  }
+    return { total, healthy, warning, critical, avgCpu, avgMemory, totalContainers, activeAlerts }
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50/30 to-zinc-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-              <Activity className="w-10 h-10 text-slate-600" />
-              System Monitoring
-            </h1>
-            <p className="text-muted-foreground">Real-time infrastructure monitoring and alerts</p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-500 to-gray-600 flex items-center justify-center">
+              <Activity className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Infrastructure Monitoring</h1>
+              <p className="text-gray-500 dark:text-gray-400">Datadog level observability platform</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <ModernButton variant="outline" onClick={() => refetch()}>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm">
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
-            </ModernButton>
-            <GradientButton from="slate" to="gray" onClick={() => console.log('Export')}>
-              <Download className="w-5 h-5 mr-2" />
-              Export Metrics
-            </GradientButton>
+            </Button>
+            <Button className="bg-gradient-to-r from-slate-500 to-gray-600 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Host
+            </Button>
           </div>
         </div>
 
-        <StatGrid columns={4} stats={statItems} />
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <BentoQuickAction icon={<Cpu />} title="CPU" description="Usage" onClick={() => setSelectedMetric('cpu')} />
-          <BentoQuickAction icon={<Activity />} title="Memory" description="RAM usage" onClick={() => setSelectedMetric('memory')} />
-          <BentoQuickAction icon={<HardDrive />} title="Disk" description="Storage" onClick={() => setSelectedMetric('disk')} />
-          <BentoQuickAction icon={<Globe />} title="Network" description="Traffic" onClick={() => setSelectedMetric('network')} />
-        </div>
-
-        <div className="flex items-center gap-3">
-          <PillButton variant={selectedMetric === 'all' ? 'primary' : 'ghost'} onClick={() => setSelectedMetric('all')}>
-            All Metrics
-          </PillButton>
-          <PillButton variant={selectedMetric === 'cpu' ? 'primary' : 'ghost'} onClick={() => setSelectedMetric('cpu')}>
-            <Cpu className="w-4 h-4 mr-2" />
-            CPU
-          </PillButton>
-          <PillButton variant={selectedMetric === 'memory' ? 'primary' : 'ghost'} onClick={() => setSelectedMetric('memory')}>
-            <Activity className="w-4 h-4 mr-2" />
-            Memory
-          </PillButton>
-          <PillButton variant={selectedMetric === 'disk' ? 'primary' : 'ghost'} onClick={() => setSelectedMetric('disk')}>
-            <HardDrive className="w-4 h-4 mr-2" />
-            Disk
-          </PillButton>
-          <PillButton variant={selectedMetric === 'network' ? 'primary' : 'ghost'} onClick={() => setSelectedMetric('network')}>
-            <Globe className="w-4 h-4 mr-2" />
-            Network
-          </PillButton>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <BentoCard className="p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-semibold">Server Status</h3>
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input
-                      type="text"
-                      placeholder="Search servers..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 pr-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-slate-500"
-                    />
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {[
+            { label: 'Total Hosts', value: stats.total.toString(), icon: Server, color: 'from-slate-500 to-gray-500', change: 0 },
+            { label: 'Healthy', value: stats.healthy.toString(), icon: CheckCircle, color: 'from-green-500 to-emerald-500', change: 5.2 },
+            { label: 'Warning', value: stats.warning.toString(), icon: AlertTriangle, color: 'from-yellow-500 to-orange-500', change: -2.1 },
+            { label: 'Critical', value: stats.critical.toString(), icon: XCircle, color: 'from-red-500 to-rose-500', change: 0 },
+            { label: 'Avg CPU', value: `${stats.avgCpu}%`, icon: Cpu, color: 'from-blue-500 to-cyan-500', change: 3.4 },
+            { label: 'Avg Memory', value: `${stats.avgMemory}%`, icon: MemoryStick, color: 'from-purple-500 to-violet-500', change: 8.7 },
+            { label: 'Containers', value: stats.totalContainers.toString(), icon: Container, color: 'from-teal-500 to-cyan-500', change: 12.3 },
+            { label: 'Active Alerts', value: stats.activeAlerts.toString(), icon: Bell, color: 'from-orange-500 to-red-500', change: 0 }
+          ].map((stat, index) => (
+            <Card key={index} className="border-0 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                    <stat.icon className="w-4 h-4 text-white" />
                   </div>
-                  <ModernButton variant="outline" size="sm">
-                    <Filter className="w-4 h-4" />
-                  </ModernButton>
+                  {stat.change !== 0 && (
+                    <span className={`text-xs font-medium flex items-center ${stat.change > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {stat.change > 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                      {Math.abs(stat.change)}%
+                    </span>
+                  )}
                 </div>
-              </div>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
-              <div className="space-y-3">
-                {isLoading ? (
-                  <div className="text-center py-8 text-muted-foreground">Loading servers...</div>
-                ) : filteredServers.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">No servers found</div>
-                ) : (
-                  filteredServers.map((server) => {
-                    const statusBadge = getStatusBadge(server.status)
-                    const gradient = getServerGradient(server.status)
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="bg-white dark:bg-gray-800 border shadow-sm">
+            <TabsTrigger value="infrastructure" className="flex items-center gap-2">
+              <Server className="w-4 h-4" />
+              Infrastructure
+            </TabsTrigger>
+            <TabsTrigger value="apm" className="flex items-center gap-2">
+              <Layers className="w-4 h-4" />
+              APM
+            </TabsTrigger>
+            <TabsTrigger value="logs" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Logs
+            </TabsTrigger>
+            <TabsTrigger value="alerts" className="flex items-center gap-2">
+              <Bell className="w-4 h-4" />
+              Alerts
+              {stats.activeAlerts > 0 && (
+                <Badge className="ml-1 bg-red-500 text-white">{stats.activeAlerts}</Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="dashboards" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Dashboards
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
+          </TabsList>
 
-                    return (
-                      <div key={server.id} className="p-4 rounded-xl border border-border bg-background hover:bg-muted/50 transition-colors">
-                        <div className="space-y-3">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-semibold">{server.server_name}</h4>
-                                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold flex items-center gap-1 ${statusBadge.color}`}>
-                                  {statusBadge.icon}
-                                  {statusBadge.label}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                <span>{server.id.substring(0, 8)}</span>
-                                <span>•</span>
-                                <span>{server.server_type}</span>
-                                <span>•</span>
-                                <span>{server.location || 'Unknown'}</span>
-                                <span>•</span>
-                                <span className={getMetricColor(Number(server.uptime_percentage), 'uptime')}>{server.uptime_percentage}% uptime</span>
-                              </div>
-                            </div>
-                            <ModernButton variant="ghost" size="sm">
-                              <MoreVertical className="w-4 h-4" />
-                            </ModernButton>
+          {/* Infrastructure Tab */}
+          <TabsContent value="infrastructure" className="mt-6">
+            <Card>
+              <CardHeader className="border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle>Host List</CardTitle>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        placeholder="Search hosts..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 w-64"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {(['all', 'healthy', 'warning', 'critical'] as const).map(status => (
+                        <Button
+                          key={status}
+                          variant={statusFilter === status ? 'default' : 'ghost'}
+                          size="sm"
+                          onClick={() => setStatusFilter(status)}
+                          className={statusFilter === status ? 'bg-slate-600' : ''}
+                        >
+                          {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="divide-y">
+                  {filteredHosts.map(host => (
+                    <div
+                      key={host.id}
+                      className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors"
+                      onClick={() => setSelectedHost(host)}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          host.status === 'healthy' ? 'bg-green-100 text-green-600' :
+                          host.status === 'warning' ? 'bg-yellow-100 text-yellow-600' :
+                          host.status === 'critical' ? 'bg-red-100 text-red-600' :
+                          'bg-gray-100 text-gray-600'
+                        }`}>
+                          <Server className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              {host.name}
+                            </span>
+                            <Badge className={getHostStatusColor(host.status)}>
+                              {host.status}
+                            </Badge>
+                            {host.containers > 0 && (
+                              <Badge variant="outline" className="text-xs">
+                                <Container className="w-3 h-3 mr-1" />
+                                {host.containers}
+                              </Badge>
+                            )}
                           </div>
-
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            <div>
-                              <div className="flex items-center justify-between mb-1 text-xs">
-                                <span className="text-muted-foreground flex items-center gap-1">
-                                  <Cpu className="w-3 h-3" />
-                                  CPU
-                                </span>
-                                <span className={`font-semibold ${getMetricColor(Number(server.cpu_usage), 'cpu')}`}>{server.cpu_usage}%</span>
-                              </div>
-                              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full bg-gradient-to-r ${gradient}`}
-                                  style={{ width: `${server.cpu_usage}%` }}
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <div className="flex items-center justify-between mb-1 text-xs">
-                                <span className="text-muted-foreground flex items-center gap-1">
-                                  <Activity className="w-3 h-3" />
-                                  RAM
-                                </span>
-                                <span className={`font-semibold ${getMetricColor(Number(server.memory_usage), 'memory')}`}>{server.memory_usage}%</span>
-                              </div>
-                              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full bg-gradient-to-r ${gradient}`}
-                                  style={{ width: `${server.memory_usage}%` }}
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <div className="flex items-center justify-between mb-1 text-xs">
-                                <span className="text-muted-foreground flex items-center gap-1">
-                                  <HardDrive className="w-3 h-3" />
-                                  Disk
-                                </span>
-                                <span className={`font-semibold ${getMetricColor(Number(server.disk_usage), 'disk')}`}>{server.disk_usage}%</span>
-                              </div>
-                              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full bg-gradient-to-r ${gradient}`}
-                                  style={{ width: `${server.disk_usage}%` }}
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <div className="flex items-center justify-between mb-1 text-xs">
-                                <span className="text-muted-foreground flex items-center gap-1">
-                                  <Globe className="w-3 h-3" />
-                                  Network
-                                </span>
-                                <span className="font-semibold text-blue-600">{server.network_throughput} MB/s</span>
-                              </div>
-                              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full bg-gradient-to-r ${gradient}`}
-                                  style={{ width: `${Math.min((Number(server.network_throughput) / 500) * 100, 100)}%` }}
-                                />
-                              </div>
-                            </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            {host.ip_address} • {host.instance_type} • {host.os}
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              {host.region}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              Uptime: {formatUptime(host.uptime_seconds)}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Activity className="w-3 h-3" />
+                              Agent v{host.agent_version}
+                            </span>
                           </div>
-
-                          <div className="flex items-center justify-between pt-2 border-t text-xs">
-                            <div className="text-muted-foreground">
-                              {(server.requests_per_hour / 1000).toFixed(1)}K requests/hour
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <ModernButton variant="outline" size="sm">
-                                <Eye className="w-3 h-3 mr-1" />
-                                Details
-                              </ModernButton>
-                              <ModernButton variant="outline" size="sm">
-                                <BarChart3 className="w-3 h-3 mr-1" />
-                                Metrics
-                              </ModernButton>
-                            </div>
+                        </div>
+                        <div className="grid grid-cols-4 gap-4 text-center">
+                          <div>
+                            <p className={`text-lg font-bold ${getMetricColor(host.cpu_usage, 80)}`}>
+                              {host.cpu_usage}%
+                            </p>
+                            <p className="text-xs text-gray-500">CPU</p>
+                          </div>
+                          <div>
+                            <p className={`text-lg font-bold ${getMetricColor(host.memory_usage, 80)}`}>
+                              {host.memory_usage}%
+                            </p>
+                            <p className="text-xs text-gray-500">Memory</p>
+                          </div>
+                          <div>
+                            <p className={`text-lg font-bold ${getMetricColor(host.disk_usage, 80)}`}>
+                              {host.disk_usage}%
+                            </p>
+                            <p className="text-xs text-gray-500">Disk</p>
+                          </div>
+                          <div>
+                            <p className="text-lg font-bold text-blue-600">
+                              {host.load_avg.toFixed(2)}
+                            </p>
+                            <p className="text-xs text-gray-500">Load</p>
                           </div>
                         </div>
                       </div>
-                    )
-                  })
-                )}
-              </div>
-            </BentoCard>
-
-            <BentoCard className="p-6">
-              <h3 className="text-xl font-semibold mb-4">Resource Overview</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 rounded-lg border border-border bg-background">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Cpu className="w-4 h-4 text-blue-600" />
-                    <p className="text-sm font-medium">Avg CPU</p>
-                  </div>
-                  <p className="text-2xl font-bold">{stats.avgCpu}%</p>
-                  <p className="text-xs text-blue-600 mt-1">Normal range</p>
-                </div>
-                <div className="p-4 rounded-lg border border-border bg-background">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Activity className="w-4 h-4 text-purple-600" />
-                    <p className="text-sm font-medium">Avg Memory</p>
-                  </div>
-                  <p className="text-2xl font-bold">{stats.avgMemory}%</p>
-                  <p className="text-xs text-purple-600 mt-1">Good capacity</p>
-                </div>
-                <div className="p-4 rounded-lg border border-border bg-background">
-                  <div className="flex items-center gap-2 mb-2">
-                    <HardDrive className="w-4 h-4 text-green-600" />
-                    <p className="text-sm font-medium">Avg Disk</p>
-                  </div>
-                  <p className="text-2xl font-bold">{stats.avgDisk}%</p>
-                  <p className="text-xs text-green-600 mt-1">Plenty of space</p>
-                </div>
-                <div className="p-4 rounded-lg border border-border bg-background">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Globe className="w-4 h-4 text-orange-600" />
-                    <p className="text-sm font-medium">Total Requests</p>
-                  </div>
-                  <p className="text-2xl font-bold">{(stats.totalRequests / 1000).toFixed(0)}K/hr</p>
-                  <p className="text-xs text-orange-600 mt-1">Avg throughput</p>
-                </div>
-              </div>
-            </BentoCard>
-          </div>
-
-          <div className="space-y-6">
-            <RankingList title="📊 Most Active" items={topServers} />
-
-            <BentoCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">System Metrics</h3>
-              <div className="space-y-3">
-                <MiniKPI label="Uptime" value={`${stats.avgUptime}%`} change={0.2} />
-                <MiniKPI label="Active Servers" value={stats.total.toString()} change={2.1} />
-                <MiniKPI label="Healthy" value={stats.healthy.toString()} change={5.3} />
-                <MiniKPI label="Critical" value={stats.critical.toString()} change={stats.critical > 0 ? -10 : 0} />
-              </div>
-            </BentoCard>
-
-            <ActivityFeed title="Recent Alerts" activities={recentActivity} />
-
-            <ProgressCard
-              title="Capacity"
-              value={stats.avgCpu}
-              target={80}
-              label="Average resource usage"
-              color="from-slate-500 to-gray-500"
-            />
-
-            <BentoCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Server Health</h3>
-              <div className="space-y-3">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 text-green-600" />
-                      <span className="text-sm">Healthy</span>
                     </div>
-                    <span className="text-xs font-semibold">{stats.healthy} ({stats.total > 0 ? Math.round((stats.healthy / stats.total) * 100) : 0}%)</span>
-                  </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-green-500 to-emerald-500" style={{ width: `${stats.total > 0 ? (stats.healthy / stats.total) * 100 : 0}%` }} />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* APM Tab */}
+          <TabsContent value="apm" className="mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+              {mockServices.map(service => (
+                <Card key={service.id}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{service.name}</CardTitle>
+                      <Badge className={getServiceStatusColor(service.status)}>
+                        {service.status.replace('_', ' ')}
+                      </Badge>
+                    </div>
+                    <CardDescription>{service.type} • v{service.version}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-3 mb-4">
+                      <div className="text-center">
+                        <p className="text-lg font-bold">{service.requests_per_sec}</p>
+                        <p className="text-xs text-gray-500">req/s</p>
+                      </div>
+                      <div className="text-center">
+                        <p className={`text-lg font-bold ${service.error_rate > 1 ? 'text-red-600' : 'text-green-600'}`}>
+                          {service.error_rate}%
+                        </p>
+                        <p className="text-xs text-gray-500">Errors</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-bold">{service.latency_p50}ms</p>
+                        <p className="text-xs text-gray-500">P50</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Apdex</span>
+                        <span className={`font-semibold ${service.apdex_score >= 0.9 ? 'text-green-600' : 'text-yellow-600'}`}>
+                          {service.apdex_score.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Hosts</span>
+                        <span className="font-semibold">{service.hosts_count}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>SLO Status</CardTitle>
+                <CardDescription>Service Level Objectives tracking</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mockSLOs.map(slo => (
+                    <div key={slo.id} className="flex items-center gap-4 p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium">{slo.name}</span>
+                          <Badge className={getSLOStatusColor(slo.status)}>{slo.status}</Badge>
+                        </div>
+                        <p className="text-sm text-gray-500">{slo.service} • {slo.time_window}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold">
+                          {slo.current}
+                          <span className="text-sm text-gray-500 ml-1">/ {slo.target}</span>
+                        </p>
+                        <Progress value={(slo.current / slo.target) * 100} className="w-24 h-2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Logs Tab */}
+          <TabsContent value="logs" className="mt-6">
+            <Card>
+              <CardHeader className="border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle>Log Stream</CardTitle>
+                  <div className="flex items-center gap-3">
+                    <Input placeholder="Search logs..." className="w-64" />
+                    <Button variant="outline" size="sm">
+                      <Filter className="w-4 h-4 mr-2" />
+                      Filter
+                    </Button>
                   </div>
                 </div>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-yellow-600" />
-                      <span className="text-sm">Warning</span>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="divide-y font-mono text-sm">
+                  {mockLogs.map(log => (
+                    <div key={log.id} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                      <div className="flex items-start gap-3">
+                        <span className="text-gray-400 text-xs">
+                          {new Date(log.timestamp).toLocaleTimeString()}
+                        </span>
+                        <Badge className={getLogLevelColor(log.level)}>
+                          {log.level.toUpperCase()}
+                        </Badge>
+                        <span className="text-blue-600">[{log.service}]</span>
+                        <span className="text-purple-600">{log.host}</span>
+                        <span className="flex-1 text-gray-700 dark:text-gray-300">
+                          {log.message}
+                        </span>
+                      </div>
+                      {log.trace_id && (
+                        <div className="mt-1 ml-20 text-xs text-gray-400">
+                          trace_id: {log.trace_id}
+                        </div>
+                      )}
                     </div>
-                    <span className="text-xs font-semibold">{stats.warning} ({stats.total > 0 ? Math.round((stats.warning / stats.total) * 100) : 0}%)</span>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Alerts Tab */}
+          <TabsContent value="alerts" className="mt-6">
+            <Card>
+              <CardHeader className="border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle>Active Alerts</CardTitle>
+                  <Button variant="outline" size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Alert
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="divide-y">
+                  {mockAlerts.map(alert => (
+                    <div
+                      key={alert.id}
+                      className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer"
+                      onClick={() => setSelectedAlert(alert)}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          alert.severity === 'critical' ? 'bg-red-100 text-red-600' :
+                          alert.severity === 'high' ? 'bg-orange-100 text-orange-600' :
+                          alert.severity === 'medium' ? 'bg-yellow-100 text-yellow-600' :
+                          'bg-blue-100 text-blue-600'
+                        }`}>
+                          <AlertTriangle className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold">{alert.title}</span>
+                            <Badge className={getAlertSeverityColor(alert.severity)}>{alert.severity}</Badge>
+                            <Badge className={getAlertStatusColor(alert.status)}>{alert.status}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{alert.message}</p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
+                            <span>Triggered: {new Date(alert.triggered_at).toLocaleString()}</span>
+                            {alert.host_name && <span>Host: {alert.host_name}</span>}
+                            {alert.service_name && <span>Service: {alert.service_name}</span>}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-red-600">{alert.current_value}</p>
+                          <p className="text-xs text-gray-500">Threshold: {alert.threshold}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Dashboards Tab */}
+          <TabsContent value="dashboards" className="mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {mockDashboards.map(dashboard => (
+                <Card key={dashboard.id} className="hover:shadow-md transition-shadow cursor-pointer">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{dashboard.name}</CardTitle>
+                      {dashboard.is_shared && (
+                        <Badge variant="outline">
+                          <Users className="w-3 h-3 mr-1" />
+                          Shared
+                        </Badge>
+                      )}
+                    </div>
+                    <CardDescription>{dashboard.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-500">{dashboard.widgets_count} widgets</span>
+                      <span className="text-gray-500">by {dashboard.created_by}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              <Card className="hover:shadow-md transition-shadow cursor-pointer border-dashed">
+                <CardContent className="flex flex-col items-center justify-center h-full py-8">
+                  <Plus className="w-8 h-8 text-gray-400 mb-2" />
+                  <span className="text-gray-500">Create Dashboard</span>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Agent Configuration</CardTitle>
+                  <CardDescription>Datadog agent settings</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Agent Version</p>
+                        <p className="text-sm text-gray-500">Current installed version</p>
+                      </div>
+                      <Badge variant="outline">7.45.0</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Collection Interval</p>
+                        <p className="text-sm text-gray-500">Metric collection frequency</p>
+                      </div>
+                      <Badge variant="outline">15s</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Log Collection</p>
+                        <p className="text-sm text-gray-500">Collect and forward logs</p>
+                      </div>
+                      <Button variant="outline" size="sm">Enabled</Button>
+                    </div>
                   </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-yellow-500 to-amber-500" style={{ width: `${stats.total > 0 ? (stats.warning / stats.total) * 100 : 0}%` }} />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Alerting</CardTitle>
+                  <CardDescription>Notification channels</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {['Slack #alerts', 'PagerDuty', 'Email ops@company.com', 'Webhook'].map((channel, i) => (
+                      <div key={channel} className="flex items-center justify-between p-2 border rounded-lg">
+                        <span className="text-sm">{channel}</span>
+                        <Badge variant={i < 3 ? 'default' : 'secondary'}>
+                          {i < 3 ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Integrations</CardTitle>
+                  <CardDescription>Connected services</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { name: 'AWS', status: 'connected' },
+                      { name: 'Kubernetes', status: 'connected' },
+                      { name: 'PostgreSQL', status: 'connected' },
+                      { name: 'Redis', status: 'connected' },
+                      { name: 'Nginx', status: 'connected' }
+                    ].map(integration => (
+                      <div key={integration.name} className="flex items-center justify-between p-2 border rounded-lg">
+                        <span className="font-medium">{integration.name}</span>
+                        <Badge className="bg-green-100 text-green-800">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Connected
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Retention</CardTitle>
+                  <CardDescription>Data retention policies</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span>Metrics</span>
+                      <Badge variant="outline">15 months</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Logs</span>
+                      <Badge variant="outline">30 days</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Traces</span>
+                      <Badge variant="outline">15 days</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Events</span>
+                      <Badge variant="outline">30 days</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Host Detail Dialog */}
+        <Dialog open={!!selectedHost} onOpenChange={() => setSelectedHost(null)}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Server className="w-5 h-5" />
+                {selectedHost?.name}
+              </DialogTitle>
+              <DialogDescription>
+                {selectedHost?.hostname} • {selectedHost?.ip_address}
+              </DialogDescription>
+            </DialogHeader>
+            {selectedHost && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-2">
+                  <Badge className={getHostStatusColor(selectedHost.status)}>{selectedHost.status}</Badge>
+                  <Badge variant="outline">{selectedHost.instance_type}</Badge>
+                  <Badge variant="outline">{selectedHost.os}</Badge>
+                </div>
+
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="p-4 border rounded-lg text-center">
+                    <Cpu className="w-6 h-6 mx-auto mb-2 text-blue-600" />
+                    <p className={`text-2xl font-bold ${getMetricColor(selectedHost.cpu_usage, 80)}`}>
+                      {selectedHost.cpu_usage}%
+                    </p>
+                    <p className="text-xs text-gray-500">CPU</p>
+                  </div>
+                  <div className="p-4 border rounded-lg text-center">
+                    <MemoryStick className="w-6 h-6 mx-auto mb-2 text-purple-600" />
+                    <p className={`text-2xl font-bold ${getMetricColor(selectedHost.memory_usage, 80)}`}>
+                      {selectedHost.memory_usage}%
+                    </p>
+                    <p className="text-xs text-gray-500">Memory</p>
+                  </div>
+                  <div className="p-4 border rounded-lg text-center">
+                    <HardDrive className="w-6 h-6 mx-auto mb-2 text-green-600" />
+                    <p className={`text-2xl font-bold ${getMetricColor(selectedHost.disk_usage, 80)}`}>
+                      {selectedHost.disk_usage}%
+                    </p>
+                    <p className="text-xs text-gray-500">Disk</p>
+                  </div>
+                  <div className="p-4 border rounded-lg text-center">
+                    <Activity className="w-6 h-6 mx-auto mb-2 text-orange-600" />
+                    <p className="text-2xl font-bold">{selectedHost.load_avg.toFixed(2)}</p>
+                    <p className="text-xs text-gray-500">Load</p>
                   </div>
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-xs text-gray-500 mb-1">Region / AZ</p>
+                    <p className="font-medium">{selectedHost.region} / {selectedHost.availability_zone}</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-xs text-gray-500 mb-1">Uptime</p>
+                    <p className="font-medium">{formatUptime(selectedHost.uptime_seconds)}</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-xs text-gray-500 mb-1">Processes</p>
+                    <p className="font-medium">{selectedHost.processes}</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-xs text-gray-500 mb-1">Containers</p>
+                    <p className="font-medium">{selectedHost.containers}</p>
+                  </div>
+                </div>
+
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="w-4 h-4 text-red-600" />
-                      <span className="text-sm">Critical</span>
-                    </div>
-                    <span className="text-xs font-semibold">{stats.critical} ({stats.total > 0 ? Math.round((stats.critical / stats.total) * 100) : 0}%)</span>
+                  <p className="text-sm font-medium mb-2">Tags</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedHost.tags.map(tag => (
+                      <Badge key={tag} variant="outline">{tag}</Badge>
+                    ))}
                   </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-red-500 to-orange-500" style={{ width: `${stats.total > 0 ? (stats.critical / stats.total) * 100 : 0}%` }} />
-                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 pt-4 border-t">
+                  <Button variant="outline" className="flex-1">
+                    <Terminal className="w-4 h-4 mr-2" />
+                    SSH
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Metrics
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <FileText className="w-4 h-4 mr-2" />
+                    Logs
+                  </Button>
                 </div>
               </div>
-            </BentoCard>
-          </div>
-        </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
