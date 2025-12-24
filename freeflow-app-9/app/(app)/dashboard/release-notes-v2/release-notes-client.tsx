@@ -1,196 +1,1014 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useReleaseNotes, ReleaseNote, ReleaseNotesStats } from '@/lib/hooks/use-release-notes'
 import { createReleaseNote, deleteReleaseNote, publishReleaseNote, archiveReleaseNote, likeReleaseNote } from '@/app/actions/release-notes'
+import { Rocket, Calendar, Flag, GitBranch, Tag, ChevronRight, Clock, Users, Download, Eye, Heart, MessageSquare, Bell, BellOff, Share2, Code, Smartphone, Monitor, Globe, CheckCircle, XCircle, AlertCircle, Zap, TrendingUp, BarChart3, Settings, Filter, Search, Plus, ArrowUpRight, Sparkles, Star, BookOpen, FileText, History, Target, Layers } from 'lucide-react'
 
-type ReleaseStatus = 'published' | 'draft' | 'scheduled' | 'archived'
-type ReleaseType = 'major' | 'minor' | 'patch' | 'hotfix'
+// ProductBoard/LaunchDarkly Level Types
+interface Release {
+  id: string
+  version: string
+  title: string
+  description: string
+  fullChangelog: string
+  releaseType: 'major' | 'minor' | 'patch' | 'hotfix' | 'beta' | 'alpha'
+  status: 'published' | 'draft' | 'scheduled' | 'archived' | 'rolling-out'
+  platforms: Platform[]
+  releaseDate: string
+  scheduledDate?: string
+  author: Author
+  highlights: string[]
+  features: ChangeItem[]
+  improvements: ChangeItem[]
+  bugFixes: ChangeItem[]
+  breakingChanges: ChangeItem[]
+  deprecations: ChangeItem[]
+  knownIssues: string[]
+  migrationGuide?: string
+  rolloutPercentage: number
+  downloadUrl?: string
+  metrics: ReleaseMetrics
+  tags: string[]
+  relatedReleases: string[]
+  featureFlags: FeatureFlag[]
+}
+
+interface Platform {
+  id: string
+  name: string
+  icon: 'ios' | 'android' | 'web' | 'desktop' | 'api'
+  version: string
+  minVersion?: string
+  status: 'available' | 'coming-soon' | 'deprecated'
+}
+
+interface Author {
+  id: string
+  name: string
+  avatar: string
+  role: string
+}
+
+interface ChangeItem {
+  id: string
+  title: string
+  description?: string
+  ticketId?: string
+  category?: string
+  impact?: 'high' | 'medium' | 'low'
+}
+
+interface ReleaseMetrics {
+  downloads: number
+  views: number
+  likes: number
+  comments: number
+  adoptionRate: number
+  feedbackScore: number
+  issuesReported: number
+}
+
+interface FeatureFlag {
+  id: string
+  name: string
+  key: string
+  enabled: boolean
+  rolloutPercentage: number
+  platforms: string[]
+  description: string
+}
+
+interface RoadmapItem {
+  id: string
+  title: string
+  description: string
+  quarter: string
+  status: 'planned' | 'in-progress' | 'completed' | 'delayed'
+  category: string
+  votes: number
+}
+
+interface Subscription {
+  id: string
+  releaseTypes: string[]
+  platforms: string[]
+  email: boolean
+  push: boolean
+  slack: boolean
+}
 
 interface ReleaseNotesClientProps {
   initialReleases: ReleaseNote[]
   initialStats: ReleaseNotesStats
 }
 
+// Mock Data - ProductBoard Level
+const mockAuthors: Author[] = [
+  { id: 'a-1', name: 'Sarah Chen', avatar: 'SC', role: 'Product Manager' },
+  { id: 'a-2', name: 'Alex Rivera', avatar: 'AR', role: 'Engineering Lead' },
+  { id: 'a-3', name: 'Marcus Johnson', avatar: 'MJ', role: 'Release Manager' },
+]
+
+const mockReleases: Release[] = [
+  {
+    id: 'rel-1',
+    version: 'v3.0.0',
+    title: 'The AI Revolution Update',
+    description: 'Introducing AI-powered features across the entire platform with enhanced automation and smart insights.',
+    fullChangelog: '## What\'s New\n\nThis major release brings AI capabilities to every aspect of the platform...',
+    releaseType: 'major',
+    status: 'published',
+    platforms: [
+      { id: 'p-1', name: 'iOS', icon: 'ios', version: '3.0.0', minVersion: '14.0', status: 'available' },
+      { id: 'p-2', name: 'Android', icon: 'android', version: '3.0.0', minVersion: '10', status: 'available' },
+      { id: 'p-3', name: 'Web', icon: 'web', version: '3.0.0', status: 'available' },
+      { id: 'p-4', name: 'Desktop', icon: 'desktop', version: '3.0.0', status: 'available' },
+    ],
+    releaseDate: '2024-01-20',
+    author: mockAuthors[0],
+    highlights: [
+      'AI-powered smart suggestions across all workflows',
+      'New dashboard with real-time analytics',
+      'Enhanced collaboration features with live cursors',
+      '50% performance improvement on large datasets'
+    ],
+    features: [
+      { id: 'f-1', title: 'AI Smart Suggestions', description: 'Get intelligent recommendations based on your usage patterns', ticketId: 'PROD-1234', category: 'AI', impact: 'high' },
+      { id: 'f-2', title: 'Real-time Collaboration', description: 'See teammates\' cursors and edits in real-time', ticketId: 'PROD-1235', category: 'Collaboration', impact: 'high' },
+      { id: 'f-3', title: 'Advanced Analytics Dashboard', description: 'New visualization options and export capabilities', ticketId: 'PROD-1236', category: 'Analytics', impact: 'medium' },
+      { id: 'f-4', title: 'Custom Workflows', description: 'Build and automate your own workflows', ticketId: 'PROD-1237', category: 'Automation', impact: 'high' },
+    ],
+    improvements: [
+      { id: 'i-1', title: 'Search Performance', description: 'Search is now 3x faster with improved relevance', impact: 'high' },
+      { id: 'i-2', title: 'Mobile Navigation', description: 'Redesigned navigation for easier one-hand use', impact: 'medium' },
+      { id: 'i-3', title: 'Dark Mode Enhancement', description: 'Improved contrast and readability in dark mode', impact: 'low' },
+    ],
+    bugFixes: [
+      { id: 'b-1', title: 'Fixed login issues on Safari', ticketId: 'BUG-456' },
+      { id: 'b-2', title: 'Resolved data sync delays', ticketId: 'BUG-457' },
+      { id: 'b-3', title: 'Fixed notification delivery', ticketId: 'BUG-458' },
+    ],
+    breakingChanges: [
+      { id: 'bc-1', title: 'API v1 Deprecated', description: 'Please migrate to API v2 before March 2024' },
+      { id: 'bc-2', title: 'Legacy Export Format Removed', description: 'Use the new export format with enhanced options' },
+    ],
+    deprecations: [
+      { id: 'd-1', title: 'Old Dashboard', description: 'Will be removed in v3.2.0' },
+    ],
+    knownIssues: [
+      'Some users may experience slow initial load on first launch',
+      'PDF export may have formatting issues with complex tables'
+    ],
+    migrationGuide: '## Migration from v2.x\n\n1. Update your API calls to use v2 endpoints\n2. Review breaking changes above\n3. Test in staging before production deployment',
+    rolloutPercentage: 100,
+    downloadUrl: 'https://releases.example.com/v3.0.0',
+    metrics: { downloads: 125000, views: 450000, likes: 8420, comments: 1256, adoptionRate: 78, feedbackScore: 4.7, issuesReported: 45 },
+    tags: ['ai', 'major-release', 'collaboration', 'performance'],
+    relatedReleases: ['rel-2'],
+    featureFlags: [
+      { id: 'ff-1', name: 'AI Suggestions', key: 'ai_suggestions_v3', enabled: true, rolloutPercentage: 100, platforms: ['ios', 'android', 'web'], description: 'Enable AI-powered suggestions' },
+      { id: 'ff-2', name: 'Live Cursors', key: 'live_cursors', enabled: true, rolloutPercentage: 85, platforms: ['web', 'desktop'], description: 'Show live cursors in documents' },
+    ]
+  },
+  {
+    id: 'rel-2',
+    version: 'v2.9.5',
+    title: 'Security & Performance Patch',
+    description: 'Critical security updates and performance optimizations.',
+    fullChangelog: '## Security Patch\n\nThis release addresses several security vulnerabilities...',
+    releaseType: 'patch',
+    status: 'published',
+    platforms: [
+      { id: 'p-1', name: 'iOS', icon: 'ios', version: '2.9.5', status: 'available' },
+      { id: 'p-2', name: 'Android', icon: 'android', version: '2.9.5', status: 'available' },
+      { id: 'p-3', name: 'Web', icon: 'web', version: '2.9.5', status: 'available' },
+    ],
+    releaseDate: '2024-01-15',
+    author: mockAuthors[1],
+    highlights: ['Critical security patches', 'Memory leak fixes', 'Improved error handling'],
+    features: [],
+    improvements: [
+      { id: 'i-1', title: 'Memory Management', description: 'Fixed memory leaks in long-running sessions', impact: 'high' },
+    ],
+    bugFixes: [
+      { id: 'b-1', title: 'Fixed XSS vulnerability in comments', ticketId: 'SEC-101' },
+      { id: 'b-2', title: 'Patched CSRF vulnerability', ticketId: 'SEC-102' },
+      { id: 'b-3', title: 'Fixed session hijacking issue', ticketId: 'SEC-103' },
+    ],
+    breakingChanges: [],
+    deprecations: [],
+    knownIssues: [],
+    rolloutPercentage: 100,
+    metrics: { downloads: 98000, views: 156000, likes: 2100, comments: 342, adoptionRate: 95, feedbackScore: 4.2, issuesReported: 12 },
+    tags: ['security', 'patch', 'hotfix'],
+    relatedReleases: ['rel-1'],
+    featureFlags: []
+  },
+  {
+    id: 'rel-3',
+    version: 'v3.1.0',
+    title: 'Team Collaboration Suite',
+    description: 'Enhanced team features with new workspace management and permissions.',
+    fullChangelog: '## Collaboration Update\n\nNew features for team productivity...',
+    releaseType: 'minor',
+    status: 'rolling-out',
+    platforms: [
+      { id: 'p-1', name: 'iOS', icon: 'ios', version: '3.1.0', status: 'available' },
+      { id: 'p-2', name: 'Android', icon: 'android', version: '3.1.0', status: 'coming-soon' },
+      { id: 'p-3', name: 'Web', icon: 'web', version: '3.1.0', status: 'available' },
+    ],
+    releaseDate: '2024-01-22',
+    scheduledDate: '2024-01-25',
+    author: mockAuthors[2],
+    highlights: ['Team workspaces', 'Advanced permissions', 'Activity timeline'],
+    features: [
+      { id: 'f-1', title: 'Team Workspaces', description: 'Create dedicated spaces for your team', category: 'Collaboration', impact: 'high' },
+      { id: 'f-2', title: 'Role-based Permissions', description: 'Fine-grained access control', category: 'Security', impact: 'high' },
+      { id: 'f-3', title: 'Activity Timeline', description: 'See all team activity in one place', category: 'Productivity', impact: 'medium' },
+    ],
+    improvements: [],
+    bugFixes: [],
+    breakingChanges: [],
+    deprecations: [],
+    knownIssues: [],
+    rolloutPercentage: 45,
+    metrics: { downloads: 23000, views: 67000, likes: 890, comments: 156, adoptionRate: 45, feedbackScore: 4.5, issuesReported: 8 },
+    tags: ['collaboration', 'teams', 'permissions'],
+    relatedReleases: ['rel-1'],
+    featureFlags: [
+      { id: 'ff-1', name: 'Team Workspaces', key: 'team_workspaces_v1', enabled: true, rolloutPercentage: 45, platforms: ['ios', 'web'], description: 'Enable team workspace feature' },
+    ]
+  },
+  {
+    id: 'rel-4',
+    version: 'v3.2.0-beta',
+    title: 'Mobile Experience Overhaul',
+    description: 'Complete redesign of the mobile experience with new gestures and offline mode.',
+    fullChangelog: '## Beta Release\n\nTesting the new mobile experience...',
+    releaseType: 'beta',
+    status: 'draft',
+    platforms: [
+      { id: 'p-1', name: 'iOS', icon: 'ios', version: '3.2.0-beta', status: 'available' },
+      { id: 'p-2', name: 'Android', icon: 'android', version: '3.2.0-beta', status: 'available' },
+    ],
+    releaseDate: '',
+    scheduledDate: '2024-02-01',
+    author: mockAuthors[0],
+    highlights: ['New gesture navigation', 'Offline mode', 'Battery optimization'],
+    features: [
+      { id: 'f-1', title: 'Gesture Navigation', description: 'Swipe gestures for common actions', category: 'UX', impact: 'high' },
+      { id: 'f-2', title: 'Offline Mode', description: 'Work without internet connection', category: 'Productivity', impact: 'high' },
+      { id: 'f-3', title: 'Battery Saver', description: 'Reduced battery consumption by 40%', category: 'Performance', impact: 'medium' },
+    ],
+    improvements: [],
+    bugFixes: [],
+    breakingChanges: [],
+    deprecations: [],
+    knownIssues: ['Offline sync may take longer than expected', 'Some gestures conflict with system gestures on iOS'],
+    rolloutPercentage: 0,
+    metrics: { downloads: 5600, views: 12000, likes: 340, comments: 89, adoptionRate: 12, feedbackScore: 4.1, issuesReported: 34 },
+    tags: ['beta', 'mobile', 'offline'],
+    relatedReleases: [],
+    featureFlags: []
+  }
+]
+
+const mockRoadmap: RoadmapItem[] = [
+  { id: 'r-1', title: 'AI Writing Assistant', description: 'AI-powered writing suggestions and grammar corrections', quarter: 'Q1 2024', status: 'in-progress', category: 'AI', votes: 1245 },
+  { id: 'r-2', title: 'Advanced Integrations', description: 'Connect with 100+ third-party tools', quarter: 'Q1 2024', status: 'planned', category: 'Integrations', votes: 890 },
+  { id: 'r-3', title: 'Custom Themes', description: 'Create and share custom themes', quarter: 'Q2 2024', status: 'planned', category: 'Customization', votes: 567 },
+  { id: 'r-4', title: 'Video Conferencing', description: 'Built-in video calls and screen sharing', quarter: 'Q2 2024', status: 'planned', category: 'Collaboration', votes: 2341 },
+  { id: 'r-5', title: 'Enterprise SSO', description: 'SAML and OIDC support for enterprise', quarter: 'Q1 2024', status: 'completed', category: 'Security', votes: 456 },
+]
+
+const platformIcons: Record<string, React.ReactNode> = {
+  ios: <Smartphone className="w-4 h-4" />,
+  android: <Smartphone className="w-4 h-4" />,
+  web: <Globe className="w-4 h-4" />,
+  desktop: <Monitor className="w-4 h-4" />,
+  api: <Code className="w-4 h-4" />,
+}
+
 export default function ReleaseNotesClient({ initialReleases, initialStats }: ReleaseNotesClientProps) {
   const { releases, stats } = useReleaseNotes(initialReleases, initialStats)
-  const [statusFilter, setStatusFilter] = useState<ReleaseStatus | 'all'>('all')
-  const [typeFilter, setTypeFilter] = useState<ReleaseType | 'all'>('all')
+  const [activeTab, setActiveTab] = useState('releases')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [typeFilter, setTypeFilter] = useState<string>('all')
+  const [platformFilter, setPlatformFilter] = useState<string>('all')
+  const [selectedRelease, setSelectedRelease] = useState<Release | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const [formData, setFormData] = useState({
-    version: '', title: '', description: '', release_type: 'minor' as ReleaseType,
-    platform: 'all' as const, author: '', highlights: '', features: '', improvements: '', bug_fixes: ''
-  })
+  const [subscribed, setSubscribed] = useState(true)
 
-  const filteredReleases = releases.filter(r => {
-    if (statusFilter !== 'all' && r.status !== statusFilter) return false
-    if (typeFilter !== 'all' && r.release_type !== typeFilter) return false
-    return true
-  })
+  const filteredReleases = useMemo(() => {
+    let filtered = [...mockReleases]
 
-  const statsDisplay = [
-    { label: 'Total Releases', value: stats.total.toString(), trend: '+15%' },
-    { label: 'Published', value: stats.published.toString(), trend: '+12%' },
-    { label: 'Downloads', value: stats.totalDownloads.toLocaleString(), trend: '+25%' },
-    { label: 'Avg Likes', value: stats.avgLikes.toFixed(0), trend: '+18%' }
-  ]
-
-  const handleCreate = async () => {
-    try {
-      await createReleaseNote({
-        ...formData,
-        highlights: formData.highlights ? formData.highlights.split('\n').filter(h => h.trim()) : [],
-        features: formData.features ? formData.features.split('\n').filter(f => f.trim()) : [],
-        improvements: formData.improvements ? formData.improvements.split('\n').filter(i => i.trim()) : [],
-        bug_fixes: formData.bug_fixes ? formData.bug_fixes.split('\n').filter(b => b.trim()) : []
-      })
-      setShowCreateModal(false)
-      setFormData({ version: '', title: '', description: '', release_type: 'minor', platform: 'all', author: '', highlights: '', features: '', improvements: '', bug_fixes: '' })
-    } catch (error) {
-      console.error('Failed to create:', error)
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(r =>
+        r.title.toLowerCase().includes(query) ||
+        r.version.toLowerCase().includes(query) ||
+        r.description.toLowerCase().includes(query) ||
+        r.tags.some(t => t.toLowerCase().includes(query))
+      )
     }
+
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(r => r.status === statusFilter)
+    }
+
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter(r => r.releaseType === typeFilter)
+    }
+
+    if (platformFilter !== 'all') {
+      filtered = filtered.filter(r => r.platforms.some(p => p.icon === platformFilter))
+    }
+
+    return filtered
+  }, [searchQuery, statusFilter, typeFilter, platformFilter])
+
+  const getStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
+      'published': 'bg-green-100 text-green-700 border-green-200',
+      'draft': 'bg-gray-100 text-gray-700 border-gray-200',
+      'scheduled': 'bg-blue-100 text-blue-700 border-blue-200',
+      'archived': 'bg-slate-100 text-slate-700 border-slate-200',
+      'rolling-out': 'bg-amber-100 text-amber-700 border-amber-200',
+    }
+    return colors[status] || 'bg-gray-100 text-gray-700'
   }
 
-  const handleDelete = async (id: string) => { if (confirm('Delete?')) await deleteReleaseNote(id) }
-  const handlePublish = async (id: string) => { await publishReleaseNote(id) }
-  const handleArchive = async (id: string) => { await archiveReleaseNote(id) }
-  const handleLike = async (id: string) => { await likeReleaseNote(id) }
+  const getTypeColor = (type: string) => {
+    const colors: Record<string, string> = {
+      'major': 'bg-purple-100 text-purple-700',
+      'minor': 'bg-blue-100 text-blue-700',
+      'patch': 'bg-green-100 text-green-700',
+      'hotfix': 'bg-red-100 text-red-700',
+      'beta': 'bg-orange-100 text-orange-700',
+      'alpha': 'bg-pink-100 text-pink-700',
+    }
+    return colors[type] || 'bg-gray-100 text-gray-700'
+  }
 
-  const getStatusColor = (s: ReleaseStatus) => ({ published: 'bg-green-100 text-green-700', draft: 'bg-gray-100 text-gray-700', scheduled: 'bg-blue-100 text-blue-700', archived: 'bg-slate-100 text-slate-700' }[s] || 'bg-gray-100 text-gray-700')
-  const getTypeColor = (t: ReleaseType) => ({ major: 'bg-purple-100 text-purple-700', minor: 'bg-blue-100 text-blue-700', patch: 'bg-green-100 text-green-700', hotfix: 'bg-red-100 text-red-700' }[t] || 'bg-gray-100 text-gray-700')
+  const getRoadmapStatusColor = (status: string) => {
+    const colors: Record<string, string> = {
+      'completed': 'bg-green-500',
+      'in-progress': 'bg-blue-500',
+      'planned': 'bg-gray-300',
+      'delayed': 'bg-red-500',
+    }
+    return colors[status] || 'bg-gray-300'
+  }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 p-6">
-      <div className="max-w-[1400px] mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 bg-clip-text text-transparent">Release Notes</h1>
-            <p className="text-gray-600 mt-1">Product updates, new features, and version documentation</p>
-          </div>
-          <button onClick={() => setShowCreateModal(true)} className="px-6 py-2.5 bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 text-white rounded-lg">New Release</button>
-        </div>
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
+    return num.toString()
+  }
 
-        <div className="grid grid-cols-4 gap-4">
-          {statsDisplay.map((s, i) => (
-            <div key={i} className="bg-white rounded-xl p-4 border border-gray-200">
-              <p className="text-sm text-gray-600">{s.label}</p>
-              <p className="text-2xl font-bold mt-1">{s.value}</p>
-              <p className="text-sm text-green-600 mt-1">{s.trend}</p>
+  const ReleaseCard = ({ release }: { release: Release }) => (
+    <Card
+      className="hover:shadow-lg transition-all cursor-pointer border-gray-200 hover:border-orange-300"
+      onClick={() => setSelectedRelease(release)}
+    >
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg text-white">
+              <Rocket className="w-5 h-5" />
             </div>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-          <div className="flex gap-2">
-            {(['all', 'published', 'draft', 'scheduled'] as const).map(s => (
-              <button key={s} onClick={() => setStatusFilter(s)} className={`px-4 py-2 rounded-full text-sm ${statusFilter === s ? 'bg-orange-600 text-white' : 'bg-white text-gray-700'}`}>
-                {s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            {(['all', 'major', 'minor', 'patch', 'hotfix'] as const).map(t => (
-              <button key={t} onClick={() => setTypeFilter(t)} className={`px-4 py-2 rounded-full text-sm ${typeFilter === t ? 'bg-orange-600 text-white' : 'bg-white text-gray-700'}`}>
-                {t === 'all' ? 'All Types' : t.charAt(0).toUpperCase() + t.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
-            {filteredReleases.length === 0 ? (
-              <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
-                <p className="text-gray-500 mb-4">No release notes found</p>
-                <button onClick={() => setShowCreateModal(true)} className="px-4 py-2 bg-orange-600 text-white rounded-lg">Create First Release</button>
-              </div>
-            ) : filteredReleases.map(release => (
-              <div key={release.id} className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-2xl">🚀</span>
-                      <h3 className="font-bold text-lg">{release.version}</h3>
-                      <span className="text-gray-600">•</span>
-                      <span className="font-semibold">{release.title}</span>
-                    </div>
-                    <p className="text-sm text-gray-600">{release.description}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(release.status)}`}>{release.status}</span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTypeColor(release.release_type)}`}>{release.release_type}</span>
-                  </div>
-                </div>
-
-                {release.highlights && release.highlights.length > 0 && (
-                  <div className="mb-4 p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg">
-                    <h4 className="font-semibold text-sm mb-2">Highlights</h4>
-                    <ul className="space-y-1">{release.highlights.map((h, i) => <li key={i} className="text-sm text-gray-700 flex items-center gap-2"><span className="text-orange-500">⭐</span>{h}</li>)}</ul>
-                  </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-lg">{release.version}</span>
+                <Badge className={getTypeColor(release.releaseType)}>{release.releaseType}</Badge>
+                {release.status === 'rolling-out' && (
+                  <Badge className="bg-amber-100 text-amber-700">
+                    {release.rolloutPercentage}% rolled out
+                  </Badge>
                 )}
-
-                {release.features && release.features.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-xs text-gray-700 mb-2">New Features</h4>
-                    <ul className="space-y-1">{release.features.map((f, i) => <li key={i} className="text-sm text-gray-600 flex items-center gap-2"><span className="text-green-500">+</span>{f}</li>)}</ul>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-4 gap-4 mb-4 text-sm">
-                  <div><span className="text-gray-500 text-xs">Downloads</span><p className="font-semibold">{(release.downloads_count || 0).toLocaleString()}</p></div>
-                  <div><span className="text-gray-500 text-xs">Views</span><p className="font-semibold">{(release.views_count || 0).toLocaleString()}</p></div>
-                  <div><span className="text-gray-500 text-xs">Likes</span><p className="font-semibold">{release.likes_count || 0}</p></div>
-                  <div><span className="text-gray-500 text-xs">Comments</span><p className="font-semibold">{release.comments_count || 0}</p></div>
-                </div>
-
-                {release.tags && release.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {release.tags.map((tag, i) => <span key={i} className="px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-xs">#{tag}</span>)}
-                  </div>
-                )}
-
-                <div className="flex gap-2 pt-4 border-t">
-                  <button onClick={() => handleLike(release.id)} className="flex-1 px-3 py-1.5 bg-orange-50 text-orange-700 rounded text-xs font-medium">Like</button>
-                  {release.status === 'draft' && <button onClick={() => handlePublish(release.id)} className="flex-1 px-3 py-1.5 bg-green-50 text-green-700 rounded text-xs font-medium">Publish</button>}
-                  {release.status === 'published' && <button onClick={() => handleArchive(release.id)} className="flex-1 px-3 py-1.5 bg-gray-50 text-gray-700 rounded text-xs font-medium">Archive</button>}
-                  <button onClick={() => handleDelete(release.id)} className="px-3 py-1.5 bg-red-50 text-red-700 rounded text-xs font-medium">Delete</button>
-                </div>
               </div>
-            ))}
-          </div>
-
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="font-semibold mb-4">Quick Stats</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between"><span className="text-gray-600">Published</span><span className="font-semibold">{stats.published}</span></div>
-                <div className="flex justify-between"><span className="text-gray-600">Draft</span><span className="font-semibold">{stats.draft}</span></div>
-                <div className="flex justify-between"><span className="text-gray-600">Scheduled</span><span className="font-semibold">{stats.scheduled}</span></div>
-                <div className="flex justify-between"><span className="text-gray-600">Total Downloads</span><span className="font-semibold">{stats.totalDownloads.toLocaleString()}</span></div>
-              </div>
+              <h3 className="font-semibold text-gray-900">{release.title}</h3>
             </div>
           </div>
+          <Badge className={getStatusColor(release.status)}>{release.status}</Badge>
         </div>
 
-        {showCreateModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
-              <h2 className="text-xl font-semibold mb-4">New Release</h2>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div><label className="block text-sm font-medium mb-1">Version</label><input type="text" value={formData.version} onChange={e => setFormData({...formData, version: e.target.value})} className="w-full px-3 py-2 border rounded-lg" placeholder="v2.5.0" /></div>
-                  <div><label className="block text-sm font-medium mb-1">Type</label><select value={formData.release_type} onChange={e => setFormData({...formData, release_type: e.target.value as ReleaseType})} className="w-full px-3 py-2 border rounded-lg"><option value="major">Major</option><option value="minor">Minor</option><option value="patch">Patch</option><option value="hotfix">Hotfix</option></select></div>
-                </div>
-                <div><label className="block text-sm font-medium mb-1">Title</label><input type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full px-3 py-2 border rounded-lg" /></div>
-                <div><label className="block text-sm font-medium mb-1">Description</label><textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full px-3 py-2 border rounded-lg" rows={2} /></div>
-                <div><label className="block text-sm font-medium mb-1">Highlights (one per line)</label><textarea value={formData.highlights} onChange={e => setFormData({...formData, highlights: e.target.value})} className="w-full px-3 py-2 border rounded-lg" rows={3} /></div>
-                <div><label className="block text-sm font-medium mb-1">Features (one per line)</label><textarea value={formData.features} onChange={e => setFormData({...formData, features: e.target.value})} className="w-full px-3 py-2 border rounded-lg" rows={3} /></div>
-              </div>
-              <div className="flex gap-3 mt-6"><button onClick={() => setShowCreateModal(false)} className="flex-1 px-4 py-2 border rounded-lg">Cancel</button><button onClick={handleCreate} className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg">Create</button></div>
-            </div>
+        <p className="text-sm text-gray-600 mb-4 line-clamp-2">{release.description}</p>
+
+        {release.highlights.length > 0 && (
+          <div className="mb-4 p-3 bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg">
+            <ul className="space-y-1">
+              {release.highlights.slice(0, 2).map((h, i) => (
+                <li key={i} className="text-sm text-gray-700 flex items-center gap-2">
+                  <Star className="w-3 h-3 text-orange-500 fill-orange-500" />
+                  {h}
+                </li>
+              ))}
+              {release.highlights.length > 2 && (
+                <li className="text-xs text-orange-600">+{release.highlights.length - 2} more highlights</li>
+              )}
+            </ul>
           </div>
         )}
+
+        <div className="flex items-center gap-4 mb-4">
+          <div className="flex -space-x-1">
+            {release.platforms.map(p => (
+              <div
+                key={p.id}
+                className={`w-7 h-7 rounded-full flex items-center justify-center border-2 border-white ${
+                  p.status === 'available' ? 'bg-green-100 text-green-600' :
+                  p.status === 'coming-soon' ? 'bg-yellow-100 text-yellow-600' :
+                  'bg-gray-100 text-gray-400'
+                }`}
+                title={`${p.name}: ${p.status}`}
+              >
+                {platformIcons[p.icon]}
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center gap-1 text-xs text-gray-500">
+            <Calendar className="w-3 h-3" />
+            {release.releaseDate || release.scheduledDate}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-4 gap-2 text-center text-xs border-t pt-3">
+          <div>
+            <div className="font-semibold text-gray-900">{formatNumber(release.metrics.downloads)}</div>
+            <div className="text-gray-500">Downloads</div>
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900">{formatNumber(release.metrics.views)}</div>
+            <div className="text-gray-500">Views</div>
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900">{release.metrics.adoptionRate}%</div>
+            <div className="text-gray-500">Adoption</div>
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900">{release.metrics.feedbackScore}</div>
+            <div className="text-gray-500">Score</div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 text-white">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold flex items-center gap-3">
+                <Rocket className="w-8 h-8" />
+                Release Notes
+              </h1>
+              <p className="text-orange-100 mt-1">Product updates, changelogs, and version history</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="secondary"
+                className={`${subscribed ? 'bg-white/20' : 'bg-white/10'} hover:bg-white/30 border-0`}
+                onClick={() => setSubscribed(!subscribed)}
+              >
+                {subscribed ? <Bell className="w-4 h-4 mr-2" /> : <BellOff className="w-4 h-4 mr-2" />}
+                {subscribed ? 'Subscribed' : 'Subscribe'}
+              </Button>
+              <Button className="bg-white text-orange-600 hover:bg-orange-50">
+                <Plus className="w-4 h-4 mr-2" />
+                New Release
+              </Button>
+            </div>
+          </div>
+
+          {/* Search */}
+          <div className="relative max-w-2xl">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Input
+              placeholder="Search releases, features, or versions..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-12 py-6 text-lg bg-white border-0 shadow-lg rounded-xl text-gray-900"
+            />
+          </div>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-4 gap-6 mt-8">
+            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <div className="text-3xl font-bold">{mockReleases.length}</div>
+              <div className="text-orange-100 text-sm">Total Releases</div>
+            </div>
+            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <div className="text-3xl font-bold">{mockReleases.filter(r => r.status === 'published').length}</div>
+              <div className="text-orange-100 text-sm">Published</div>
+            </div>
+            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <div className="text-3xl font-bold">{formatNumber(mockReleases.reduce((sum, r) => sum + r.metrics.downloads, 0))}</div>
+              <div className="text-orange-100 text-sm">Total Downloads</div>
+            </div>
+            <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <div className="text-3xl font-bold">4.5</div>
+              <div className="text-orange-100 text-sm">Avg Feedback</div>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between mb-6">
+            <TabsList className="bg-white dark:bg-gray-800 shadow-sm">
+              <TabsTrigger value="releases" className="gap-2">
+                <FileText className="w-4 h-4" />
+                Releases
+              </TabsTrigger>
+              <TabsTrigger value="timeline" className="gap-2">
+                <History className="w-4 h-4" />
+                Timeline
+              </TabsTrigger>
+              <TabsTrigger value="roadmap" className="gap-2">
+                <Target className="w-4 h-4" />
+                Roadmap
+              </TabsTrigger>
+              <TabsTrigger value="flags" className="gap-2">
+                <Flag className="w-4 h-4" />
+                Feature Flags
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="flex items-center gap-3">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800"
+              >
+                <option value="all">All Status</option>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+                <option value="scheduled">Scheduled</option>
+                <option value="rolling-out">Rolling Out</option>
+              </select>
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800"
+              >
+                <option value="all">All Types</option>
+                <option value="major">Major</option>
+                <option value="minor">Minor</option>
+                <option value="patch">Patch</option>
+                <option value="beta">Beta</option>
+              </select>
+              <select
+                value={platformFilter}
+                onChange={(e) => setPlatformFilter(e.target.value)}
+                className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800"
+              >
+                <option value="all">All Platforms</option>
+                <option value="ios">iOS</option>
+                <option value="android">Android</option>
+                <option value="web">Web</option>
+                <option value="desktop">Desktop</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Releases Tab */}
+          <TabsContent value="releases" className="space-y-6">
+            {filteredReleases.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Rocket className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No releases found</h3>
+                  <p className="text-gray-500 mb-4">Try adjusting your filters or create a new release</p>
+                  <Button className="bg-orange-600">Create Release</Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {filteredReleases.map(release => (
+                  <ReleaseCard key={release.id} release={release} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Timeline Tab */}
+          <TabsContent value="timeline" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <History className="w-5 h-5" />
+                  Release Timeline
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="relative">
+                  <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />
+                  <div className="space-y-8">
+                    {mockReleases.sort((a, b) => new Date(b.releaseDate || b.scheduledDate || '').getTime() - new Date(a.releaseDate || a.scheduledDate || '').getTime()).map((release, idx) => (
+                      <div key={release.id} className="relative pl-10">
+                        <div className={`absolute left-2 w-5 h-5 rounded-full border-4 border-white ${
+                          release.status === 'published' ? 'bg-green-500' :
+                          release.status === 'rolling-out' ? 'bg-amber-500' :
+                          release.status === 'draft' ? 'bg-gray-400' :
+                          'bg-blue-500'
+                        }`} />
+                        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedRelease(release)}>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold">{release.version}</span>
+                              <Badge className={getTypeColor(release.releaseType)}>{release.releaseType}</Badge>
+                            </div>
+                            <span className="text-sm text-gray-500">{release.releaseDate || release.scheduledDate}</span>
+                          </div>
+                          <h4 className="font-semibold text-gray-900 dark:text-white">{release.title}</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{release.description}</p>
+                          <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                            <span className="flex items-center gap-1"><Download className="w-3 h-3" />{formatNumber(release.metrics.downloads)}</span>
+                            <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{formatNumber(release.metrics.views)}</span>
+                            <span className="flex items-center gap-1"><Heart className="w-3 h-3" />{release.metrics.likes}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Roadmap Tab */}
+          <TabsContent value="roadmap" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {['Q1 2024', 'Q2 2024'].map(quarter => (
+                <Card key={quarter}>
+                  <CardHeader>
+                    <CardTitle>{quarter}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {mockRoadmap.filter(r => r.quarter === quarter).map(item => (
+                      <div key={item.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className={`w-2 h-2 rounded-full mt-2 ${getRoadmapStatusColor(item.status)}`} />
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-semibold text-gray-900 dark:text-white">{item.title}</h4>
+                            <Badge variant="outline" className="text-xs">{item.category}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{item.description}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge className={
+                              item.status === 'completed' ? 'bg-green-100 text-green-700' :
+                              item.status === 'in-progress' ? 'bg-blue-100 text-blue-700' :
+                              item.status === 'delayed' ? 'bg-red-100 text-red-700' :
+                              'bg-gray-100 text-gray-700'
+                            }>
+                              {item.status}
+                            </Badge>
+                            <span className="text-xs text-gray-500 flex items-center gap-1">
+                              <TrendingUp className="w-3 h-3" />
+                              {item.votes} votes
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Feature Flags Tab */}
+          <TabsContent value="flags" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Flag className="w-5 h-5" />
+                    Feature Flags
+                  </CardTitle>
+                  <Button size="sm" className="bg-orange-600">
+                    <Plus className="w-4 h-4 mr-1" />
+                    New Flag
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mockReleases.flatMap(r => r.featureFlags).map(flag => (
+                    <div key={flag.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-3 h-3 rounded-full ${flag.enabled ? 'bg-green-500' : 'bg-gray-300'}`} />
+                        <div>
+                          <h4 className="font-semibold text-gray-900 dark:text-white">{flag.name}</h4>
+                          <code className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">{flag.key}</code>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex -space-x-1">
+                          {flag.platforms.map(p => (
+                            <div key={p} className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center border-2 border-white">
+                              {platformIcons[p]}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="text-sm">
+                          <div className="text-gray-900 dark:text-white font-semibold">{flag.rolloutPercentage}%</div>
+                          <div className="text-xs text-gray-500">rollout</div>
+                        </div>
+                        <Progress value={flag.rolloutPercentage} className="w-24 h-2" />
+                        <Button variant="outline" size="sm">
+                          <Settings className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Release Detail Dialog */}
+      <Dialog open={!!selectedRelease} onOpenChange={() => setSelectedRelease(null)}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          {selectedRelease && (
+            <div className="flex flex-col h-full">
+              <DialogHeader className="border-b pb-4">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl text-white">
+                    <Rocket className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <DialogTitle className="text-2xl">{selectedRelease.version}</DialogTitle>
+                      <Badge className={getTypeColor(selectedRelease.releaseType)}>{selectedRelease.releaseType}</Badge>
+                      <Badge className={getStatusColor(selectedRelease.status)}>{selectedRelease.status}</Badge>
+                    </div>
+                    <h3 className="font-semibold text-lg text-gray-900 mt-1">{selectedRelease.title}</h3>
+                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Avatar className="w-5 h-5">
+                          <AvatarFallback className="text-xs">{selectedRelease.author.avatar}</AvatarFallback>
+                        </Avatar>
+                        {selectedRelease.author.name}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        {selectedRelease.releaseDate || selectedRelease.scheduledDate}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Share2 className="w-4 h-4 mr-1" />
+                      Share
+                    </Button>
+                    {selectedRelease.downloadUrl && (
+                      <Button size="sm" className="bg-orange-600">
+                        <Download className="w-4 h-4 mr-1" />
+                        Download
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </DialogHeader>
+
+              <ScrollArea className="flex-1 py-4">
+                <Tabs defaultValue="overview">
+                  <TabsList className="mb-4">
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="changelog">Changelog</TabsTrigger>
+                    <TabsTrigger value="platforms">Platforms</TabsTrigger>
+                    <TabsTrigger value="metrics">Metrics</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="overview" className="space-y-6">
+                    <div>
+                      <p className="text-gray-600">{selectedRelease.description}</p>
+                    </div>
+
+                    {selectedRelease.highlights.length > 0 && (
+                      <div className="p-4 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl">
+                        <h4 className="font-semibold mb-3 flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 text-orange-500" />
+                          Highlights
+                        </h4>
+                        <ul className="space-y-2">
+                          {selectedRelease.highlights.map((h, i) => (
+                            <li key={i} className="flex items-start gap-2 text-sm">
+                              <Star className="w-4 h-4 text-orange-500 fill-orange-500 flex-shrink-0 mt-0.5" />
+                              {h}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {selectedRelease.rolloutPercentage < 100 && (
+                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-semibold text-amber-800">Rollout Progress</span>
+                          <span className="text-amber-700">{selectedRelease.rolloutPercentage}%</span>
+                        </div>
+                        <Progress value={selectedRelease.rolloutPercentage} className="h-2" />
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap gap-2">
+                      {selectedRelease.tags.map(tag => (
+                        <Badge key={tag} variant="outline" className="text-orange-600 border-orange-200">
+                          #{tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="changelog" className="space-y-6">
+                    {selectedRelease.features.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold mb-3 flex items-center gap-2 text-green-700">
+                          <Plus className="w-4 h-4" />
+                          New Features ({selectedRelease.features.length})
+                        </h4>
+                        <div className="space-y-2">
+                          {selectedRelease.features.map(f => (
+                            <div key={f.id} className="p-3 bg-green-50 rounded-lg">
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium">{f.title}</span>
+                                {f.ticketId && <code className="text-xs bg-green-100 px-2 py-0.5 rounded">{f.ticketId}</code>}
+                              </div>
+                              {f.description && <p className="text-sm text-gray-600 mt-1">{f.description}</p>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedRelease.improvements.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold mb-3 flex items-center gap-2 text-blue-700">
+                          <TrendingUp className="w-4 h-4" />
+                          Improvements ({selectedRelease.improvements.length})
+                        </h4>
+                        <div className="space-y-2">
+                          {selectedRelease.improvements.map(i => (
+                            <div key={i.id} className="p-3 bg-blue-50 rounded-lg">
+                              <span className="font-medium">{i.title}</span>
+                              {i.description && <p className="text-sm text-gray-600 mt-1">{i.description}</p>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedRelease.bugFixes.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold mb-3 flex items-center gap-2 text-red-700">
+                          <CheckCircle className="w-4 h-4" />
+                          Bug Fixes ({selectedRelease.bugFixes.length})
+                        </h4>
+                        <div className="space-y-2">
+                          {selectedRelease.bugFixes.map(b => (
+                            <div key={b.id} className="p-3 bg-red-50 rounded-lg flex items-center justify-between">
+                              <span>{b.title}</span>
+                              {b.ticketId && <code className="text-xs bg-red-100 px-2 py-0.5 rounded">{b.ticketId}</code>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedRelease.breakingChanges.length > 0 && (
+                      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <h4 className="font-semibold mb-3 flex items-center gap-2 text-red-700">
+                          <AlertCircle className="w-4 h-4" />
+                          Breaking Changes
+                        </h4>
+                        <ul className="space-y-2">
+                          {selectedRelease.breakingChanges.map(bc => (
+                            <li key={bc.id}>
+                              <span className="font-medium">{bc.title}</span>
+                              {bc.description && <p className="text-sm text-red-600">{bc.description}</p>}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="platforms" className="space-y-4">
+                    {selectedRelease.platforms.map(p => (
+                      <div key={p.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${
+                            p.status === 'available' ? 'bg-green-100 text-green-600' :
+                            p.status === 'coming-soon' ? 'bg-yellow-100 text-yellow-600' :
+                            'bg-gray-100 text-gray-400'
+                          }`}>
+                            {platformIcons[p.icon]}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold">{p.name}</h4>
+                            <p className="text-sm text-gray-500">Version {p.version}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          {p.minVersion && (
+                            <span className="text-sm text-gray-500">Min: {p.minVersion}</span>
+                          )}
+                          <Badge className={
+                            p.status === 'available' ? 'bg-green-100 text-green-700' :
+                            p.status === 'coming-soon' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-gray-100 text-gray-700'
+                          }>
+                            {p.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </TabsContent>
+
+                  <TabsContent value="metrics" className="space-y-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <Card>
+                        <CardContent className="p-4 text-center">
+                          <Download className="w-6 h-6 mx-auto text-blue-500 mb-2" />
+                          <div className="text-2xl font-bold">{formatNumber(selectedRelease.metrics.downloads)}</div>
+                          <div className="text-sm text-gray-500">Downloads</div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4 text-center">
+                          <Eye className="w-6 h-6 mx-auto text-green-500 mb-2" />
+                          <div className="text-2xl font-bold">{formatNumber(selectedRelease.metrics.views)}</div>
+                          <div className="text-sm text-gray-500">Views</div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4 text-center">
+                          <TrendingUp className="w-6 h-6 mx-auto text-purple-500 mb-2" />
+                          <div className="text-2xl font-bold">{selectedRelease.metrics.adoptionRate}%</div>
+                          <div className="text-sm text-gray-500">Adoption Rate</div>
+                        </CardContent>
+                      </Card>
+                      <Card>
+                        <CardContent className="p-4 text-center">
+                          <Star className="w-6 h-6 mx-auto text-yellow-500 mb-2" />
+                          <div className="text-2xl font-bold">{selectedRelease.metrics.feedbackScore}</div>
+                          <div className="text-sm text-gray-500">Feedback Score</div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Engagement</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="flex items-center gap-2 text-gray-600">
+                            <Heart className="w-4 h-4" /> Likes
+                          </span>
+                          <span className="font-semibold">{selectedRelease.metrics.likes.toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="flex items-center gap-2 text-gray-600">
+                            <MessageSquare className="w-4 h-4" /> Comments
+                          </span>
+                          <span className="font-semibold">{selectedRelease.metrics.comments.toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="flex items-center gap-2 text-gray-600">
+                            <AlertCircle className="w-4 h-4" /> Issues Reported
+                          </span>
+                          <span className="font-semibold">{selectedRelease.metrics.issuesReported}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </ScrollArea>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
