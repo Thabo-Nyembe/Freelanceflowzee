@@ -1,380 +1,1499 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import StatGrid from '@/components/dashboard-results/StatGrid'
-import BentoQuickAction from '@/components/dashboard-results/BentoQuickAction'
-import PillButton from '@/components/modern-button-suite/PillButton'
-import MiniKPI from '@/components/dashboard-results/MiniKPI'
-import ActivityFeed from '@/components/dashboard-results/ActivityFeed'
-import RankingList from '@/components/dashboard-results/RankingList'
-import ProgressCard from '@/components/dashboard-results/ProgressCard'
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
-  useRenewals,
-  useRenewalMutations,
-  getRenewalStatusColor,
-  getRenewalTypeColor,
-  getRenewalPriorityColor,
-  formatCurrency,
-  type Renewal
-} from '@/lib/hooks/use-renewals'
+  RefreshCw,
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  Users,
+  Calendar,
+  Clock,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  ArrowUpRight,
+  ArrowDownRight,
+  Target,
+  BarChart3,
+  PieChart,
+  Activity,
+  Bell,
+  Mail,
+  Phone,
+  MessageSquare,
+  FileText,
+  Settings,
+  Search,
+  Filter,
+  MoreVertical,
+  ChevronRight,
+  Star,
+  Heart,
+  Zap,
+  Shield,
+  Award,
+  Layers,
+  GitBranch,
+  Play,
+  Pause,
+  Send,
+  Eye,
+  Edit3,
+  Trash2,
+  Copy,
+  ExternalLink,
+  Download,
+  Upload,
+  Sparkles,
+  Building2,
+  UserCheck,
+  CalendarDays,
+  LineChart,
+  Gauge,
+  AlertCircle,
+  ThumbsUp,
+  ThumbsDown,
+  Handshake,
+  Receipt,
+  CreditCard,
+  Wallet,
+  Banknote
+} from 'lucide-react'
 
-type ViewMode = 'all' | 'upcoming' | 'in-negotiation' | 'at-risk'
+// Types
+type RenewalStatus = 'upcoming' | 'in_progress' | 'negotiating' | 'at_risk' | 'won' | 'lost' | 'churned'
+type RenewalType = 'expansion' | 'flat' | 'contraction' | 'multi_year' | 'early_renewal'
+type Priority = 'critical' | 'high' | 'medium' | 'low'
+type HealthScore = 'healthy' | 'needs_attention' | 'at_risk' | 'critical'
+type PlaybookType = 'expansion' | 'retention' | 'win_back' | 'upsell' | 'cross_sell'
+
+interface RenewalContact {
+  id: string
+  name: string
+  role: string
+  email: string
+  phone: string
+  avatar: string
+  isPrimary: boolean
+  sentiment: 'positive' | 'neutral' | 'negative'
+}
+
+interface RenewalActivity {
+  id: string
+  type: 'call' | 'email' | 'meeting' | 'note' | 'proposal' | 'contract'
+  title: string
+  description: string
+  date: Date
+  user: string
+  outcome?: 'positive' | 'neutral' | 'negative'
+}
+
+interface RenewalMilestone {
+  id: string
+  name: string
+  dueDate: Date
+  completed: boolean
+  completedDate?: Date
+}
+
+interface Renewal {
+  id: string
+  customerName: string
+  customerLogo: string
+  status: RenewalStatus
+  type: RenewalType
+  priority: Priority
+  healthScore: HealthScore
+  healthScoreValue: number
+  currentARR: number
+  proposedARR: number
+  expansionValue: number
+  probability: number
+  renewalDate: Date
+  daysToRenewal: number
+  contractTerm: number
+  currency: string
+  csmName: string
+  csmAvatar: string
+  aeName: string
+  aeAvatar: string
+  lastContactDate: Date
+  nextActionDate: Date
+  nextAction: string
+  meetingsScheduled: number
+  proposalSent: boolean
+  contractSent: boolean
+  contacts: RenewalContact[]
+  activities: RenewalActivity[]
+  milestones: RenewalMilestone[]
+  products: string[]
+  riskFactors: string[]
+  notes: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+interface Playbook {
+  id: string
+  name: string
+  type: PlaybookType
+  description: string
+  steps: string[]
+  successRate: number
+  timesUsed: number
+}
+
+interface Forecast {
+  month: string
+  renewals: number
+  arr: number
+  expansion: number
+  churn: number
+  netRetention: number
+}
+
+// Mock Data
+const mockRenewals: Renewal[] = [
+  {
+    id: '1',
+    customerName: 'Acme Corporation',
+    customerLogo: '',
+    status: 'negotiating',
+    type: 'expansion',
+    priority: 'high',
+    healthScore: 'healthy',
+    healthScoreValue: 92,
+    currentARR: 180000,
+    proposedARR: 240000,
+    expansionValue: 60000,
+    probability: 85,
+    renewalDate: new Date('2025-02-15'),
+    daysToRenewal: 52,
+    contractTerm: 12,
+    currency: 'USD',
+    csmName: 'Sarah Chen',
+    csmAvatar: '',
+    aeName: 'Mike Johnson',
+    aeAvatar: '',
+    lastContactDate: new Date('2024-12-20'),
+    nextActionDate: new Date('2024-12-28'),
+    nextAction: 'Send revised proposal',
+    meetingsScheduled: 3,
+    proposalSent: true,
+    contractSent: false,
+    contacts: [
+      { id: 'c1', name: 'John Smith', role: 'VP Engineering', email: 'john@acme.com', phone: '+1 555-0101', avatar: '', isPrimary: true, sentiment: 'positive' },
+      { id: 'c2', name: 'Lisa Wang', role: 'Director of IT', email: 'lisa@acme.com', phone: '+1 555-0102', avatar: '', isPrimary: false, sentiment: 'positive' }
+    ],
+    activities: [
+      { id: 'a1', type: 'meeting', title: 'QBR Meeting', description: 'Quarterly business review with stakeholders', date: new Date('2024-12-15'), user: 'Sarah Chen', outcome: 'positive' },
+      { id: 'a2', type: 'proposal', title: 'Sent Expansion Proposal', description: 'Proposal for additional seats and features', date: new Date('2024-12-18'), user: 'Mike Johnson', outcome: 'positive' }
+    ],
+    milestones: [
+      { id: 'm1', name: 'Initial Outreach', dueDate: new Date('2024-11-01'), completed: true, completedDate: new Date('2024-10-28') },
+      { id: 'm2', name: 'QBR Completed', dueDate: new Date('2024-12-15'), completed: true, completedDate: new Date('2024-12-15') },
+      { id: 'm3', name: 'Proposal Sent', dueDate: new Date('2024-12-20'), completed: true, completedDate: new Date('2024-12-18') },
+      { id: 'm4', name: 'Contract Signed', dueDate: new Date('2025-01-15'), completed: false }
+    ],
+    products: ['Enterprise Plan', 'API Access', 'Priority Support'],
+    riskFactors: [],
+    notes: 'Customer is very happy with the product. Looking to expand to 3 more departments.',
+    createdAt: new Date('2024-10-01'),
+    updatedAt: new Date('2024-12-20')
+  },
+  {
+    id: '2',
+    customerName: 'TechStart Inc',
+    customerLogo: '',
+    status: 'at_risk',
+    type: 'contraction',
+    priority: 'critical',
+    healthScore: 'at_risk',
+    healthScoreValue: 45,
+    currentARR: 96000,
+    proposedARR: 72000,
+    expansionValue: -24000,
+    probability: 55,
+    renewalDate: new Date('2025-01-31'),
+    daysToRenewal: 37,
+    contractTerm: 12,
+    currency: 'USD',
+    csmName: 'Alex Rivera',
+    csmAvatar: '',
+    aeName: 'Emma Wilson',
+    aeAvatar: '',
+    lastContactDate: new Date('2024-12-10'),
+    nextActionDate: new Date('2024-12-26'),
+    nextAction: 'Executive escalation call',
+    meetingsScheduled: 1,
+    proposalSent: false,
+    contractSent: false,
+    contacts: [
+      { id: 'c3', name: 'David Park', role: 'CTO', email: 'david@techstart.com', phone: '+1 555-0201', avatar: '', isPrimary: true, sentiment: 'negative' }
+    ],
+    activities: [
+      { id: 'a3', type: 'call', title: 'Check-in Call', description: 'Discussed concerns about ROI', date: new Date('2024-12-10'), user: 'Alex Rivera', outcome: 'negative' }
+    ],
+    milestones: [
+      { id: 'm5', name: 'Initial Outreach', dueDate: new Date('2024-11-15'), completed: true, completedDate: new Date('2024-11-20') },
+      { id: 'm6', name: 'Risk Assessment', dueDate: new Date('2024-12-01'), completed: true, completedDate: new Date('2024-12-05') },
+      { id: 'm7', name: 'Executive Escalation', dueDate: new Date('2024-12-26'), completed: false }
+    ],
+    products: ['Pro Plan', 'Standard Support'],
+    riskFactors: ['Low product usage', 'Budget constraints', 'Champion left company'],
+    notes: 'Customer expressing concerns about value. Need executive alignment.',
+    createdAt: new Date('2024-09-15'),
+    updatedAt: new Date('2024-12-10')
+  },
+  {
+    id: '3',
+    customerName: 'Global Enterprises',
+    customerLogo: '',
+    status: 'upcoming',
+    type: 'multi_year',
+    priority: 'high',
+    healthScore: 'healthy',
+    healthScoreValue: 88,
+    currentARR: 450000,
+    proposedARR: 520000,
+    expansionValue: 70000,
+    probability: 90,
+    renewalDate: new Date('2025-03-31'),
+    daysToRenewal: 96,
+    contractTerm: 36,
+    currency: 'USD',
+    csmName: 'Sarah Chen',
+    csmAvatar: '',
+    aeName: 'James Park',
+    aeAvatar: '',
+    lastContactDate: new Date('2024-12-18'),
+    nextActionDate: new Date('2025-01-10'),
+    nextAction: 'Schedule QBR',
+    meetingsScheduled: 0,
+    proposalSent: false,
+    contractSent: false,
+    contacts: [
+      { id: 'c4', name: 'Maria Garcia', role: 'SVP Operations', email: 'maria@global.com', phone: '+1 555-0301', avatar: '', isPrimary: true, sentiment: 'positive' },
+      { id: 'c5', name: 'Robert Chen', role: 'Director IT', email: 'robert@global.com', phone: '+1 555-0302', avatar: '', isPrimary: false, sentiment: 'positive' }
+    ],
+    activities: [],
+    milestones: [
+      { id: 'm8', name: 'Initial Outreach', dueDate: new Date('2025-01-01'), completed: false },
+      { id: 'm9', name: 'QBR Scheduled', dueDate: new Date('2025-01-15'), completed: false }
+    ],
+    products: ['Enterprise Plan', 'API Access', 'Premium Support', 'Custom Integrations'],
+    riskFactors: [],
+    notes: 'Strategic account. Looking to lock in 3-year deal with volume discount.',
+    createdAt: new Date('2024-08-01'),
+    updatedAt: new Date('2024-12-18')
+  },
+  {
+    id: '4',
+    customerName: 'Startup Labs',
+    customerLogo: '',
+    status: 'won',
+    type: 'expansion',
+    priority: 'medium',
+    healthScore: 'healthy',
+    healthScoreValue: 95,
+    currentARR: 36000,
+    proposedARR: 60000,
+    expansionValue: 24000,
+    probability: 100,
+    renewalDate: new Date('2024-12-15'),
+    daysToRenewal: -9,
+    contractTerm: 12,
+    currency: 'USD',
+    csmName: 'Alex Rivera',
+    csmAvatar: '',
+    aeName: 'Emma Wilson',
+    aeAvatar: '',
+    lastContactDate: new Date('2024-12-14'),
+    nextActionDate: new Date('2024-12-14'),
+    nextAction: 'Completed',
+    meetingsScheduled: 2,
+    proposalSent: true,
+    contractSent: true,
+    contacts: [
+      { id: 'c6', name: 'Tom Wilson', role: 'CEO', email: 'tom@startuplabs.com', phone: '+1 555-0401', avatar: '', isPrimary: true, sentiment: 'positive' }
+    ],
+    activities: [
+      { id: 'a4', type: 'contract', title: 'Contract Signed', description: '12-month expansion contract signed', date: new Date('2024-12-14'), user: 'Emma Wilson', outcome: 'positive' }
+    ],
+    milestones: [
+      { id: 'm10', name: 'Contract Signed', dueDate: new Date('2024-12-15'), completed: true, completedDate: new Date('2024-12-14') }
+    ],
+    products: ['Pro Plan', 'API Access'],
+    riskFactors: [],
+    notes: 'Great renewal with 67% expansion!',
+    createdAt: new Date('2024-09-01'),
+    updatedAt: new Date('2024-12-14')
+  },
+  {
+    id: '5',
+    customerName: 'MegaCorp Industries',
+    customerLogo: '',
+    status: 'in_progress',
+    type: 'flat',
+    priority: 'medium',
+    healthScore: 'needs_attention',
+    healthScoreValue: 68,
+    currentARR: 120000,
+    proposedARR: 120000,
+    expansionValue: 0,
+    probability: 75,
+    renewalDate: new Date('2025-02-28'),
+    daysToRenewal: 65,
+    contractTerm: 12,
+    currency: 'USD',
+    csmName: 'Sarah Chen',
+    csmAvatar: '',
+    aeName: 'Mike Johnson',
+    aeAvatar: '',
+    lastContactDate: new Date('2024-12-15'),
+    nextActionDate: new Date('2024-12-30'),
+    nextAction: 'Follow up on proposal',
+    meetingsScheduled: 2,
+    proposalSent: true,
+    contractSent: false,
+    contacts: [
+      { id: 'c7', name: 'Jennifer Lee', role: 'VP Technology', email: 'jennifer@megacorp.com', phone: '+1 555-0501', avatar: '', isPrimary: true, sentiment: 'neutral' }
+    ],
+    activities: [],
+    milestones: [
+      { id: 'm11', name: 'Proposal Sent', dueDate: new Date('2024-12-20'), completed: true, completedDate: new Date('2024-12-18') },
+      { id: 'm12', name: 'Follow-up Meeting', dueDate: new Date('2024-12-30'), completed: false }
+    ],
+    products: ['Enterprise Plan', 'Standard Support'],
+    riskFactors: ['Competitive evaluation'],
+    notes: 'Customer evaluating alternatives. Need to reinforce value.',
+    createdAt: new Date('2024-10-15'),
+    updatedAt: new Date('2024-12-15')
+  },
+  {
+    id: '6',
+    customerName: 'DataFlow Systems',
+    customerLogo: '',
+    status: 'churned',
+    type: 'contraction',
+    priority: 'low',
+    healthScore: 'critical',
+    healthScoreValue: 20,
+    currentARR: 84000,
+    proposedARR: 0,
+    expansionValue: -84000,
+    probability: 0,
+    renewalDate: new Date('2024-11-30'),
+    daysToRenewal: -24,
+    contractTerm: 12,
+    currency: 'USD',
+    csmName: 'Alex Rivera',
+    csmAvatar: '',
+    aeName: 'James Park',
+    aeAvatar: '',
+    lastContactDate: new Date('2024-11-25'),
+    nextActionDate: new Date('2024-11-30'),
+    nextAction: 'N/A',
+    meetingsScheduled: 0,
+    proposalSent: false,
+    contractSent: false,
+    contacts: [],
+    activities: [],
+    milestones: [],
+    products: ['Pro Plan'],
+    riskFactors: ['Product fit issues', 'Acquisition by competitor'],
+    notes: 'Customer acquired by competitor. Churn unavoidable.',
+    createdAt: new Date('2024-06-01'),
+    updatedAt: new Date('2024-11-30')
+  }
+]
+
+const mockPlaybooks: Playbook[] = [
+  {
+    id: 'p1',
+    name: 'Expansion Playbook',
+    type: 'expansion',
+    description: 'Guide for expanding existing accounts with additional products or seats',
+    steps: ['Identify expansion opportunities', 'Schedule value review', 'Present ROI analysis', 'Send expansion proposal', 'Negotiate terms', 'Close deal'],
+    successRate: 78,
+    timesUsed: 156
+  },
+  {
+    id: 'p2',
+    name: 'At-Risk Retention',
+    type: 'retention',
+    description: 'Playbook for saving at-risk renewals',
+    steps: ['Escalate to leadership', 'Conduct root cause analysis', 'Create success plan', 'Weekly check-ins', 'Offer incentives if needed', 'Secure commitment'],
+    successRate: 62,
+    timesUsed: 89
+  },
+  {
+    id: 'p3',
+    name: 'Win-Back Campaign',
+    type: 'win_back',
+    description: 'Strategy for winning back churned customers',
+    steps: ['Wait 90 days', 'Send re-engagement email', 'Offer special pricing', 'Demonstrate new features', 'Remove friction', 'Close'],
+    successRate: 24,
+    timesUsed: 45
+  },
+  {
+    id: 'p4',
+    name: 'Strategic Upsell',
+    type: 'upsell',
+    description: 'Playbook for upgrading customers to higher tiers',
+    steps: ['Analyze usage patterns', 'Identify tier limitations', 'Present upgrade benefits', 'Offer trial of premium features', 'Propose upgrade', 'Execute'],
+    successRate: 71,
+    timesUsed: 203
+  }
+]
+
+const mockForecasts: Forecast[] = [
+  { month: 'Jan 2025', renewals: 12, arr: 420000, expansion: 85000, churn: 24000, netRetention: 114 },
+  { month: 'Feb 2025', renewals: 8, arr: 280000, expansion: 45000, churn: 36000, netRetention: 103 },
+  { month: 'Mar 2025', renewals: 15, arr: 680000, expansion: 120000, churn: 48000, netRetention: 111 },
+  { month: 'Apr 2025', renewals: 10, arr: 350000, expansion: 65000, churn: 30000, netRetention: 110 },
+  { month: 'May 2025', renewals: 6, arr: 180000, expansion: 25000, churn: 18000, netRetention: 104 },
+  { month: 'Jun 2025', renewals: 14, arr: 520000, expansion: 95000, churn: 42000, netRetention: 110 }
+]
+
+// Helper Functions
+const getStatusColor = (status: RenewalStatus): string => {
+  const colors: Record<RenewalStatus, string> = {
+    upcoming: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+    in_progress: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+    negotiating: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400',
+    at_risk: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+    won: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+    lost: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+    churned: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+  }
+  return colors[status] || colors.upcoming
+}
+
+const getStatusIcon = (status: RenewalStatus) => {
+  const icons: Record<RenewalStatus, React.ReactNode> = {
+    upcoming: <Calendar className="w-3 h-3" />,
+    in_progress: <Play className="w-3 h-3" />,
+    negotiating: <Handshake className="w-3 h-3" />,
+    at_risk: <AlertTriangle className="w-3 h-3" />,
+    won: <CheckCircle className="w-3 h-3" />,
+    lost: <XCircle className="w-3 h-3" />,
+    churned: <XCircle className="w-3 h-3" />
+  }
+  return icons[status] || icons.upcoming
+}
+
+const getPriorityColor = (priority: Priority): string => {
+  const colors: Record<Priority, string> = {
+    critical: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+    high: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
+    medium: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
+    low: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+  }
+  return colors[priority] || colors.medium
+}
+
+const getHealthColor = (health: HealthScore): string => {
+  const colors: Record<HealthScore, string> = {
+    healthy: 'text-green-600 dark:text-green-400',
+    needs_attention: 'text-yellow-600 dark:text-yellow-400',
+    at_risk: 'text-orange-600 dark:text-orange-400',
+    critical: 'text-red-600 dark:text-red-400'
+  }
+  return colors[health] || colors.healthy
+}
+
+const getTypeColor = (type: RenewalType): string => {
+  const colors: Record<RenewalType, string> = {
+    expansion: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
+    flat: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+    contraction: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
+    multi_year: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
+    early_renewal: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400'
+  }
+  return colors[type] || colors.flat
+}
+
+const formatCurrency = (amount: number, currency: string = 'USD'): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount)
+}
+
+const formatDate = (date: Date): string => {
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(date)
+}
 
 interface RenewalsClientProps {
-  initialRenewals: Renewal[]
+  initialRenewals?: any[]
 }
 
 export default function RenewalsClient({ initialRenewals }: RenewalsClientProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('all')
+  const [activeTab, setActiveTab] = useState('overview')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState<RenewalStatus | 'all'>('all')
+  const [selectedRenewal, setSelectedRenewal] = useState<Renewal | null>(null)
+  const [isRenewalDialogOpen, setIsRenewalDialogOpen] = useState(false)
 
-  const { renewals, stats, isLoading } = useRenewals(initialRenewals, {
-    status: viewMode === 'all' ? undefined : viewMode
-  })
+  const renewals = mockRenewals
+  const playbooks = mockPlaybooks
+  const forecasts = mockForecasts
 
-  const { createRenewal, isCreating } = useRenewalMutations()
+  // Computed Statistics
+  const stats = useMemo(() => {
+    const activeRenewals = renewals.filter(r => !['won', 'lost', 'churned'].includes(r.status))
+    const totalCurrentARR = activeRenewals.reduce((sum, r) => sum + r.currentARR, 0)
+    const totalProposedARR = activeRenewals.reduce((sum, r) => sum + r.proposedARR, 0)
+    const totalExpansion = activeRenewals.reduce((sum, r) => sum + Math.max(0, r.expansionValue), 0)
+    const totalContraction = activeRenewals.reduce((sum, r) => sum + Math.min(0, r.expansionValue), 0)
+    const avgProbability = activeRenewals.length > 0
+      ? activeRenewals.reduce((sum, r) => sum + r.probability, 0) / activeRenewals.length
+      : 0
+    const atRiskCount = renewals.filter(r => r.status === 'at_risk').length
+    const atRiskARR = renewals.filter(r => r.status === 'at_risk').reduce((sum, r) => sum + r.currentARR, 0)
+    const upcomingCount = renewals.filter(r => r.status === 'upcoming').length
+    const wonCount = renewals.filter(r => r.status === 'won').length
+    const lostCount = renewals.filter(r => ['lost', 'churned'].includes(r.status)).length
 
-  const filteredRenewals = viewMode === 'all'
-    ? renewals
-    : renewals.filter(renewal => renewal.status === viewMode)
+    return {
+      total: renewals.length,
+      active: activeRenewals.length,
+      totalCurrentARR,
+      totalProposedARR,
+      totalExpansion,
+      totalContraction,
+      avgProbability,
+      atRiskCount,
+      atRiskARR,
+      upcomingCount,
+      wonCount,
+      lostCount
+    }
+  }, [renewals])
 
-  const handleCreateRenewal = () => {
-    const renewalDate = new Date()
-    renewalDate.setMonth(renewalDate.getMonth() + 3)
-
-    createRenewal({
-      customer_name: 'New Customer',
-      current_arr: 50000,
-      proposed_arr: 50000,
-      renewal_date: renewalDate.toISOString().split('T')[0],
-      priority: 'medium'
+  // Filtered Renewals
+  const filteredRenewals = useMemo(() => {
+    return renewals.filter(renewal => {
+      const matchesSearch = renewal.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        renewal.csmName.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesStatus = selectedStatus === 'all' || renewal.status === selectedStatus
+      return matchesSearch && matchesStatus
     })
+  }, [renewals, searchQuery, selectedStatus])
+
+  const openRenewalDetail = (renewal: Renewal) => {
+    setSelectedRenewal(renewal)
+    setIsRenewalDialogOpen(true)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
-      <div className="max-w-[1600px] mx-auto p-6 space-y-6">
-
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-              Contract Renewals
-            </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-1">
-              Manage customer renewals and expansion opportunities
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg">
+              <RefreshCw className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">Renewal Management</h1>
+              <p className="text-muted-foreground">Chargebee-level subscription renewal platform</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              onClick={handleCreateRenewal}
-              disabled={isCreating}
-              className="px-4 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg hover:shadow-lg hover:shadow-violet-500/50 transition-all duration-300 disabled:opacity-50"
-            >
-              {isCreating ? 'Creating...' : 'Schedule Renewal'}
-            </button>
+            <Button variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+            <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Schedule Renewal
+            </Button>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <StatGrid
-          stats={[
-            {
-              label: 'Upcoming Renewals',
-              value: stats.upcoming.toString(),
-              change: '+8',
-              trend: 'up' as const,
-              subtitle: 'next 90 days'
-            },
-            {
-              label: 'Renewal ARR',
-              value: formatCurrency(stats.totalCurrentARR),
-              change: '+420K',
-              trend: 'up' as const,
-              subtitle: 'at-risk value'
-            },
-            {
-              label: 'Expansion Pipeline',
-              value: formatCurrency(stats.totalExpansion),
-              change: '+125K',
-              trend: 'up' as const,
-              subtitle: 'potential upsell'
-            },
-            {
-              label: 'Avg Probability',
-              value: `${stats.avgProbability.toFixed(0)}%`,
-              change: '+4%',
-              trend: 'up' as const,
-              subtitle: 'success rate'
-            }
-          ]}
-        />
-
-        {/* Quick Actions */}
-        <BentoQuickAction
-          actions={[
-            { label: 'Renewal Queue', icon: '📋', onClick: () => {} },
-            { label: 'Schedule QBR', icon: '📅', onClick: () => {} },
-            { label: 'Send Proposal', icon: '📧', onClick: () => {} },
-            { label: 'Expansion Opps', icon: '📈', onClick: () => {} },
-            { label: 'Risk Analysis', icon: '⚠️', onClick: () => {} },
-            { label: 'Forecast', icon: '🎯', onClick: () => {} },
-            { label: 'Reports', icon: '📊', onClick: () => {} },
-            { label: 'Settings', icon: '⚙️', onClick: () => {} }
-          ]}
-        />
-
-        {/* Filter Pills */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <PillButton
-            label="All Renewals"
-            isActive={viewMode === 'all'}
-            onClick={() => setViewMode('all')}
-          />
-          <PillButton
-            label="Upcoming"
-            isActive={viewMode === 'upcoming'}
-            onClick={() => setViewMode('upcoming')}
-          />
-          <PillButton
-            label="In Negotiation"
-            isActive={viewMode === 'in-negotiation'}
-            onClick={() => setViewMode('in-negotiation')}
-          />
-          <PillButton
-            label="At Risk"
-            isActive={viewMode === 'at-risk'}
-            onClick={() => setViewMode('at-risk')}
-          />
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+                  <RefreshCw className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.active}</p>
+                  <p className="text-xs text-muted-foreground">Active Renewals</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{formatCurrency(stats.totalCurrentARR / 1000)}K</p>
+                  <p className="text-xs text-muted-foreground">Pipeline ARR</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">+{formatCurrency(stats.totalExpansion / 1000)}K</p>
+                  <p className="text-xs text-muted-foreground">Expansion</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                  <TrendingDown className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{formatCurrency(stats.totalContraction / 1000)}K</p>
+                  <p className="text-xs text-muted-foreground">Contraction</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                  <Target className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.avgProbability.toFixed(0)}%</p>
+                  <p className="text-xs text-muted-foreground">Avg Probability</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                  <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.atRiskCount}</p>
+                  <p className="text-xs text-muted-foreground">At Risk</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                  <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.wonCount}</p>
+                  <p className="text-xs text-muted-foreground">Won</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                  <XCircle className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{stats.lostCount}</p>
+                  <p className="text-xs text-muted-foreground">Lost/Churned</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-1">
+            <TabsTrigger value="overview" className="gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="pipeline" className="gap-2">
+              <GitBranch className="w-4 h-4" />
+              Pipeline
+            </TabsTrigger>
+            <TabsTrigger value="customers" className="gap-2">
+              <Building2 className="w-4 h-4" />
+              Customers
+            </TabsTrigger>
+            <TabsTrigger value="forecasts" className="gap-2">
+              <LineChart className="w-4 h-4" />
+              Forecasts
+            </TabsTrigger>
+            <TabsTrigger value="playbooks" className="gap-2">
+              <FileText className="w-4 h-4" />
+              Playbooks
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Renewals List */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-              <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white">
-                Renewals ({filteredRenewals.length})
-              </h2>
-              {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
-                </div>
-              ) : filteredRenewals.length === 0 ? (
-                <div className="text-center py-12 text-slate-500 dark:text-slate-400">
-                  No renewals found. Click "Schedule Renewal" to get started.
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {filteredRenewals.map((renewal) => (
-                    <div
-                      key={renewal.id}
-                      className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-violet-500/50 dark:hover:border-violet-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/10 group cursor-pointer bg-white dark:bg-slate-800/50"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
-                              {renewal.customer_name}
-                            </h3>
-                            <span className={`px-2 py-1 rounded-full text-xs border ${getRenewalStatusColor(renewal.status)}`}>
-                              {renewal.status}
-                            </span>
-                            <span className={`px-2 py-1 rounded-full text-xs border ${getRenewalTypeColor(renewal.renewal_type)}`}>
-                              {renewal.renewal_type}
-                            </span>
-                            <span className={`px-2 py-1 rounded-full text-xs border ${getRenewalPriorityColor(renewal.priority)}`}>
-                              {renewal.priority}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-                            <span className="flex items-center gap-1">
-                              <span className="text-violet-500">👤</span>
-                              CSM: {renewal.csm_name || 'Unassigned'}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <span className="text-violet-500">📅</span>
-                              Due: {renewal.renewal_date || 'TBD'}
-                            </span>
-                            {renewal.days_to_renewal > 0 ? (
-                              <span className={`flex items-center gap-1 ${renewal.days_to_renewal <= 90 ? 'text-red-600 dark:text-red-400 font-bold' : ''}`}>
-                                <span className="text-violet-500">⏰</span>
-                                {renewal.days_to_renewal} days
-                              </span>
-                            ) : renewal.days_to_renewal < 0 ? (
-                              <span className="flex items-center gap-1 text-slate-600 dark:text-slate-400">
-                                <span>✓</span>
-                                Processed
-                              </span>
-                            ) : null}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">
-                            {renewal.probability}%
-                          </div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">
-                            Probability
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-4 gap-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                        <div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">Current ARR</div>
-                          <div className="text-sm font-bold text-slate-900 dark:text-white">
-                            {formatCurrency(Number(renewal.current_arr), renewal.currency)}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">Proposed ARR</div>
-                          <div className="text-sm font-bold text-violet-600 dark:text-violet-400">
-                            {formatCurrency(Number(renewal.proposed_arr), renewal.currency)}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">Change</div>
-                          <div className={`text-sm font-bold ${
-                            Number(renewal.expansion_value) > 0 ? 'text-green-600 dark:text-green-400' :
-                            Number(renewal.expansion_value) < 0 ? 'text-red-600 dark:text-red-400' :
-                            'text-slate-900 dark:text-white'
-                          }`}>
-                            {Number(renewal.expansion_value) > 0 ? '+' : ''}{formatCurrency(Number(renewal.expansion_value), renewal.currency)}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-slate-600 dark:text-slate-400">Health Score</div>
-                          <div className={`text-sm font-bold ${
-                            renewal.health_score >= 80 ? 'text-green-600 dark:text-green-400' :
-                            renewal.health_score >= 60 ? 'text-yellow-600 dark:text-yellow-400' :
-                            'text-red-600 dark:text-red-400'
-                          }`}>
-                            {renewal.health_score}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                        <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 mb-2">
-                          <span>Win Probability: {renewal.probability}%</span>
-                          <span>Term: {renewal.contract_term} months</span>
-                        </div>
-                        <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-500 ${
-                              renewal.probability >= 80
-                                ? 'bg-gradient-to-r from-green-600 to-emerald-600'
-                                : renewal.probability >= 50
-                                ? 'bg-gradient-to-r from-yellow-600 to-orange-600'
-                                : 'bg-gradient-to-r from-red-600 to-orange-600'
-                            }`}
-                            style={{ width: `${renewal.probability}%` }}
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-6">
+                {/* Renewal Pipeline */}
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Renewal Pipeline</CardTitle>
+                      <div className="flex items-center gap-2">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Search renewals..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10 w-64"
                           />
                         </div>
+                        <select
+                          value={selectedStatus}
+                          onChange={(e) => setSelectedStatus(e.target.value as RenewalStatus | 'all')}
+                          className="h-10 px-3 rounded-md border border-input bg-background"
+                        >
+                          <option value="all">All Status</option>
+                          <option value="upcoming">Upcoming</option>
+                          <option value="in_progress">In Progress</option>
+                          <option value="negotiating">Negotiating</option>
+                          <option value="at_risk">At Risk</option>
+                          <option value="won">Won</option>
+                          <option value="churned">Churned</option>
+                        </select>
                       </div>
-
-                      <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                        <div className="flex items-center justify-between text-xs">
-                          <div className="flex items-center gap-3">
-                            <span className="text-slate-600 dark:text-slate-400">
-                              Last Contact: {renewal.last_contact_date || 'N/A'}
-                            </span>
-                            <span className="px-2 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300">
-                              {renewal.meetings_scheduled} meetings
-                            </span>
-                            {renewal.proposal_sent && (
-                              <span className="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
-                                Proposal Sent
-                              </span>
-                            )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {filteredRenewals.map((renewal) => (
+                        <div
+                          key={renewal.id}
+                          className="p-4 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
+                          onClick={() => openRenewalDetail(renewal)}
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="w-10 h-10">
+                                <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+                                  {renewal.customerName.substring(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <h4 className="font-semibold">{renewal.customerName}</h4>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge className={getStatusColor(renewal.status)}>
+                                    {getStatusIcon(renewal.status)}
+                                    <span className="ml-1 capitalize">{renewal.status.replace('_', ' ')}</span>
+                                  </Badge>
+                                  <Badge className={getTypeColor(renewal.type)}>
+                                    {renewal.type.replace('_', ' ')}
+                                  </Badge>
+                                  <Badge className={getPriorityColor(renewal.priority)}>
+                                    {renewal.priority}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">
+                                {renewal.probability}%
+                              </div>
+                              <div className="text-xs text-muted-foreground">probability</div>
+                            </div>
                           </div>
+
+                          <div className="grid grid-cols-4 gap-4 mb-3">
+                            <div>
+                              <p className="text-xs text-muted-foreground">Current ARR</p>
+                              <p className="font-semibold">{formatCurrency(renewal.currentARR)}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Proposed ARR</p>
+                              <p className="font-semibold text-violet-600 dark:text-violet-400">
+                                {formatCurrency(renewal.proposedARR)}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Change</p>
+                              <p className={`font-semibold flex items-center gap-1 ${
+                                renewal.expansionValue > 0 ? 'text-green-600 dark:text-green-400' :
+                                renewal.expansionValue < 0 ? 'text-red-600 dark:text-red-400' :
+                                'text-muted-foreground'
+                              }`}>
+                                {renewal.expansionValue > 0 ? <ArrowUpRight className="w-3 h-3" /> :
+                                 renewal.expansionValue < 0 ? <ArrowDownRight className="w-3 h-3" /> : null}
+                                {renewal.expansionValue > 0 ? '+' : ''}{formatCurrency(renewal.expansionValue)}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-muted-foreground">Renewal Date</p>
+                              <p className={`font-semibold ${renewal.daysToRenewal <= 30 && renewal.daysToRenewal > 0 ? 'text-red-600 dark:text-red-400' : ''}`}>
+                                {formatDate(renewal.renewalDate)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center gap-4 text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <UserCheck className="w-4 h-4" />
+                                {renewal.csmName}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                {renewal.daysToRenewal > 0 ? `${renewal.daysToRenewal} days` : 'Completed'}
+                              </span>
+                              <span className={`flex items-center gap-1 ${getHealthColor(renewal.healthScore)}`}>
+                                <Gauge className="w-4 h-4" />
+                                {renewal.healthScoreValue}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {renewal.proposalSent && (
+                                <Badge variant="outline" className="text-xs">Proposal Sent</Badge>
+                              )}
+                              {renewal.contractSent && (
+                                <Badge variant="outline" className="text-xs">Contract Sent</Badge>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Progress Bar */}
+                          <div className="mt-3 pt-3 border-t">
+                            <Progress
+                              value={renewal.probability}
+                              className="h-2"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Sidebar */}
+              <div className="space-y-6">
+                {/* At Risk Summary */}
+                <Card className="border-red-200 dark:border-red-900/50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                      <AlertTriangle className="w-5 h-5" />
+                      At Risk Accounts
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {renewals.filter(r => r.status === 'at_risk').map((renewal) => (
+                        <div key={renewal.id} className="p-3 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">{renewal.customerName}</span>
+                            <span className="text-sm font-bold text-red-600 dark:text-red-400">
+                              {formatCurrency(renewal.currentARR)}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {renewal.riskFactors.map((factor, i) => (
+                              <Badge key={i} variant="outline" className="text-xs text-red-600 border-red-300">
+                                {factor}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      {renewals.filter(r => r.status === 'at_risk').length === 0 && (
+                        <p className="text-sm text-muted-foreground text-center py-4">No at-risk accounts</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Upcoming Renewals */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CalendarDays className="w-5 h-5 text-blue-500" />
+                      Next 30 Days
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {renewals
+                        .filter(r => r.daysToRenewal > 0 && r.daysToRenewal <= 30 && !['won', 'lost', 'churned'].includes(r.status))
+                        .sort((a, b) => a.daysToRenewal - b.daysToRenewal)
+                        .map((renewal) => (
+                          <div key={renewal.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
+                            <div>
+                              <p className="font-medium text-sm">{renewal.customerName}</p>
+                              <p className="text-xs text-muted-foreground">{renewal.daysToRenewal} days</p>
+                            </div>
+                            <span className="font-semibold text-sm">{formatCurrency(renewal.currentARR)}</span>
+                          </div>
+                        ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Health Distribution */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-green-500" />
+                      Health Distribution
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {(['healthy', 'needs_attention', 'at_risk', 'critical'] as HealthScore[]).map((health) => {
+                      const count = renewals.filter(r => r.healthScore === health && !['won', 'lost', 'churned'].includes(r.status)).length
+                      const percentage = stats.active > 0 ? (count / stats.active) * 100 : 0
+                      return (
+                        <div key={health}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className={`text-sm capitalize ${getHealthColor(health)}`}>
+                              {health.replace('_', ' ')}
+                            </span>
+                            <span className="text-sm font-medium">{count}</span>
+                          </div>
+                          <Progress value={percentage} className="h-2" />
+                        </div>
+                      )
+                    })}
+                  </CardContent>
+                </Card>
+
+                {/* Recent Activity */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Activity</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {[
+                        { icon: <CheckCircle className="w-4 h-4 text-green-500" />, text: 'Startup Labs renewal won', time: '2 hours ago' },
+                        { icon: <Send className="w-4 h-4 text-blue-500" />, text: 'Proposal sent to Acme Corp', time: '4 hours ago' },
+                        { icon: <AlertTriangle className="w-4 h-4 text-red-500" />, text: 'TechStart marked at-risk', time: '1 day ago' },
+                        { icon: <Phone className="w-4 h-4 text-purple-500" />, text: 'QBR call with Global Enterprises', time: '2 days ago' }
+                      ].map((activity, i) => (
+                        <div key={i} className="flex items-start gap-3">
+                          {activity.icon}
+                          <div className="flex-1">
+                            <p className="text-sm">{activity.text}</p>
+                            <p className="text-xs text-muted-foreground">{activity.time}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Pipeline Tab */}
+          <TabsContent value="pipeline" className="mt-6">
+            <div className="grid grid-cols-5 gap-4">
+              {(['upcoming', 'in_progress', 'negotiating', 'at_risk', 'won'] as RenewalStatus[]).map((status) => {
+                const statusRenewals = renewals.filter(r => r.status === status)
+                const statusARR = statusRenewals.reduce((sum, r) => sum + r.currentARR, 0)
+                return (
+                  <div key={status} className="space-y-3">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <div>
+                        <p className="font-semibold capitalize">{status.replace('_', ' ')}</p>
+                        <p className="text-sm text-muted-foreground">{statusRenewals.length} renewals</p>
+                      </div>
+                      <p className="font-bold">{formatCurrency(statusARR)}</p>
+                    </div>
+                    <div className="space-y-2">
+                      {statusRenewals.map((renewal) => (
+                        <Card
+                          key={renewal.id}
+                          className="cursor-pointer hover:shadow-md transition-shadow"
+                          onClick={() => openRenewalDetail(renewal)}
+                        >
+                          <CardContent className="p-3">
+                            <p className="font-medium text-sm mb-1">{renewal.customerName}</p>
+                            <p className="text-lg font-bold text-violet-600 dark:text-violet-400">
+                              {formatCurrency(renewal.currentARR)}
+                            </p>
+                            <div className="flex items-center justify-between mt-2">
+                              <span className="text-xs text-muted-foreground">
+                                {renewal.daysToRenewal > 0 ? `${renewal.daysToRenewal}d` : 'Done'}
+                              </span>
+                              <span className={`text-xs font-medium ${getHealthColor(renewal.healthScore)}`}>
+                                {renewal.healthScoreValue}
+                              </span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </TabsContent>
+
+          {/* Customers Tab */}
+          <TabsContent value="customers" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Customer Accounts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {renewals.map((renewal) => (
+                    <div
+                      key={renewal.id}
+                      className="p-4 rounded-lg border hover:bg-muted/50 cursor-pointer"
+                      onClick={() => openRenewalDetail(renewal)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="w-12 h-12">
+                            <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+                              {renewal.customerName.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h4 className="font-semibold">{renewal.customerName}</h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge className={getStatusColor(renewal.status)}>
+                                {renewal.status.replace('_', ' ')}
+                              </Badge>
+                              <span className="text-sm text-muted-foreground">
+                                CSM: {renewal.csmName}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-8">
+                          <div className="text-center">
+                            <p className="text-2xl font-bold">{formatCurrency(renewal.currentARR)}</p>
+                            <p className="text-xs text-muted-foreground">ARR</p>
+                          </div>
+                          <div className="text-center">
+                            <p className={`text-2xl font-bold ${getHealthColor(renewal.healthScore)}`}>
+                              {renewal.healthScoreValue}
+                            </p>
+                            <p className="text-xs text-muted-foreground">Health</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-2xl font-bold">{renewal.probability}%</p>
+                            <p className="text-xs text-muted-foreground">Probability</p>
+                          </div>
+                          <Button variant="ghost" size="sm">
+                            <ChevronRight className="w-4 h-4" />
+                          </Button>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-              )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Forecasts Tab */}
+          <TabsContent value="forecasts" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <LineChart className="w-5 h-5 text-violet-500" />
+                    Renewal Forecast
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {forecasts.map((forecast) => (
+                      <div key={forecast.month} className="p-4 rounded-lg border">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="font-semibold">{forecast.month}</span>
+                          <Badge variant="outline">{forecast.renewals} renewals</Badge>
+                        </div>
+                        <div className="grid grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <p className="text-muted-foreground">ARR</p>
+                            <p className="font-semibold">{formatCurrency(forecast.arr)}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Expansion</p>
+                            <p className="font-semibold text-green-600">+{formatCurrency(forecast.expansion)}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Churn</p>
+                            <p className="font-semibold text-red-600">-{formatCurrency(forecast.churn)}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Net Retention</p>
+                            <p className={`font-semibold ${forecast.netRetention >= 100 ? 'text-green-600' : 'text-red-600'}`}>
+                              {forecast.netRetention}%
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <PieChart className="w-5 h-5 text-blue-500" />
+                    Revenue Breakdown
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-center justify-center bg-muted/50 rounded-lg mb-4">
+                    <PieChart className="w-12 h-12 text-muted-foreground" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/10">
+                      <p className="text-sm text-muted-foreground">Expansion Revenue</p>
+                      <p className="text-xl font-bold text-green-600">{formatCurrency(stats.totalExpansion)}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/10">
+                      <p className="text-sm text-muted-foreground">At-Risk ARR</p>
+                      <p className="text-xl font-bold text-red-600">{formatCurrency(stats.atRiskARR)}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </div>
+          </TabsContent>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-
-            {/* Renewal Types */}
-            <ProgressCard
-              title="Renewal Types"
-              items={[
-                { label: 'Expansion', value: renewals.filter(r => r.renewal_type === 'expansion').length, total: stats.total, color: 'green' },
-                { label: 'Flat Renewal', value: renewals.filter(r => r.renewal_type === 'flat').length, total: stats.total, color: 'blue' },
-                { label: 'Contraction', value: renewals.filter(r => r.renewal_type === 'contraction').length, total: stats.total, color: 'orange' },
-                { label: 'Churned', value: stats.churned, total: stats.total, color: 'red' }
-              ]}
-            />
-
-            {/* Top Expansion Opportunities */}
-            <RankingList
-              title="Top Expansion Opportunities"
-              items={renewals
-                .filter(r => Number(r.expansion_value) > 0)
-                .sort((a, b) => Number(b.expansion_value) - Number(a.expansion_value))
-                .slice(0, 5)
-                .map((r, i) => ({
-                  label: r.customer_name,
-                  value: `+${formatCurrency(Number(r.expansion_value))}`,
-                  rank: i + 1,
-                  trend: 'up'
-                }))}
-            />
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <MiniKPI
-                label="Avg Deal Size"
-                value={formatCurrency(stats.total > 0 ? stats.totalCurrentARR / stats.total : 0)}
-                trend="up"
-                change="+$12K"
-              />
-              <MiniKPI
-                label="Avg Probability"
-                value={`${stats.avgProbability.toFixed(0)}%`}
-                trend="up"
-                change="+4%"
-              />
+          {/* Playbooks Tab */}
+          <TabsContent value="playbooks" className="mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {playbooks.map((playbook) => (
+                <Card key={playbook.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <Zap className="w-5 h-5 text-amber-500" />
+                          {playbook.name}
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground mt-1">{playbook.description}</p>
+                      </div>
+                      <Badge className={getTypeColor(playbook.type as any)}>{playbook.type}</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3 mb-4">
+                      {playbook.steps.map((step, i) => (
+                        <div key={i} className="flex items-center gap-3">
+                          <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-xs font-medium text-violet-600">
+                            {i + 1}
+                          </div>
+                          <span className="text-sm">{step}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between pt-4 border-t">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Target className="w-4 h-4" />
+                          {playbook.successRate}% success
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Play className="w-4 h-4" />
+                          {playbook.timesUsed} times used
+                        </span>
+                      </div>
+                      <Button size="sm">Use Playbook</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
+          </TabsContent>
 
-            {/* Recent Activity */}
-            <ActivityFeed
-              activities={[
-                {
-                  action: 'Renewal won',
-                  subject: 'Customer - $72K ARR',
-                  time: '2 hours ago',
-                  type: 'success'
-                },
-                {
-                  action: 'At-risk renewal',
-                  subject: 'Customer - Low probability',
-                  time: '5 hours ago',
-                  type: 'error'
-                },
-                {
-                  action: 'Proposal sent',
-                  subject: 'Customer - $270K ARR',
-                  time: '1 day ago',
-                  type: 'info'
-                },
-                {
-                  action: 'Customer churned',
-                  subject: 'Customer - $84K lost',
-                  time: '30 days ago',
-                  type: 'warning'
-                }
-              ]}
-            />
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Renewal Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[
+                    { title: 'Auto-create renewals', description: '90 days before expiration', enabled: true },
+                    { title: 'Risk alerts', description: 'Notify when health drops below 50', enabled: true },
+                    { title: 'Escalation rules', description: 'Auto-escalate at-risk accounts', enabled: false },
+                    { title: 'Renewal reminders', description: 'Weekly pipeline digest', enabled: true }
+                  ].map((setting, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 rounded-lg border">
+                      <div>
+                        <p className="font-medium">{setting.title}</p>
+                        <p className="text-sm text-muted-foreground">{setting.description}</p>
+                      </div>
+                      <div className={`w-10 h-6 rounded-full transition-colors ${setting.enabled ? 'bg-green-500' : 'bg-gray-300'}`}>
+                        <div className={`w-4 h-4 rounded-full bg-white shadow mt-1 transition-transform ${setting.enabled ? 'translate-x-5' : 'translate-x-1'}`} />
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
 
-          </div>
-        </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notification Preferences</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[
+                    { icon: <Bell className="w-4 h-4" />, title: 'Renewal due reminders', enabled: true },
+                    { icon: <AlertTriangle className="w-4 h-4" />, title: 'At-risk alerts', enabled: true },
+                    { icon: <CheckCircle className="w-4 h-4" />, title: 'Won/Lost notifications', enabled: true },
+                    { icon: <Mail className="w-4 h-4" />, title: 'Weekly summary email', enabled: false }
+                  ].map((pref, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                          {pref.icon}
+                        </div>
+                        <span className="font-medium">{pref.title}</span>
+                      </div>
+                      <div className={`w-10 h-6 rounded-full transition-colors ${pref.enabled ? 'bg-green-500' : 'bg-gray-300'}`}>
+                        <div className={`w-4 h-4 rounded-full bg-white shadow mt-1 transition-transform ${pref.enabled ? 'translate-x-5' : 'translate-x-1'}`} />
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
 
+        {/* Renewal Detail Dialog */}
+        <Dialog open={isRenewalDialogOpen} onOpenChange={setIsRenewalDialogOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+            {selectedRenewal && (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-3">
+                    <Avatar className="w-10 h-10">
+                      <AvatarFallback className="bg-gradient-to-br from-violet-500 to-purple-600 text-white">
+                        {selectedRenewal.customerName.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    {selectedRenewal.customerName}
+                  </DialogTitle>
+                </DialogHeader>
+                <ScrollArea className="max-h-[calc(90vh-120px)]">
+                  <div className="space-y-6 p-1">
+                    {/* Status Badges */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge className={getStatusColor(selectedRenewal.status)}>
+                        {getStatusIcon(selectedRenewal.status)}
+                        <span className="ml-1 capitalize">{selectedRenewal.status.replace('_', ' ')}</span>
+                      </Badge>
+                      <Badge className={getTypeColor(selectedRenewal.type)}>
+                        {selectedRenewal.type.replace('_', ' ')}
+                      </Badge>
+                      <Badge className={getPriorityColor(selectedRenewal.priority)}>
+                        {selectedRenewal.priority} priority
+                      </Badge>
+                    </div>
+
+                    {/* Key Metrics */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="p-4 rounded-lg bg-muted/50">
+                        <p className="text-sm text-muted-foreground">Current ARR</p>
+                        <p className="text-2xl font-bold">{formatCurrency(selectedRenewal.currentARR)}</p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-muted/50">
+                        <p className="text-sm text-muted-foreground">Proposed ARR</p>
+                        <p className="text-2xl font-bold text-violet-600">{formatCurrency(selectedRenewal.proposedARR)}</p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-muted/50">
+                        <p className="text-sm text-muted-foreground">Change</p>
+                        <p className={`text-2xl font-bold ${selectedRenewal.expansionValue >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {selectedRenewal.expansionValue >= 0 ? '+' : ''}{formatCurrency(selectedRenewal.expansionValue)}
+                        </p>
+                      </div>
+                      <div className="p-4 rounded-lg bg-muted/50">
+                        <p className="text-sm text-muted-foreground">Health Score</p>
+                        <p className={`text-2xl font-bold ${getHealthColor(selectedRenewal.healthScore)}`}>
+                          {selectedRenewal.healthScoreValue}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Timeline */}
+                    <div>
+                      <h4 className="font-semibold mb-3">Renewal Timeline</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="p-3 rounded-lg border">
+                          <p className="text-xs text-muted-foreground">Renewal Date</p>
+                          <p className="font-medium">{formatDate(selectedRenewal.renewalDate)}</p>
+                        </div>
+                        <div className="p-3 rounded-lg border">
+                          <p className="text-xs text-muted-foreground">Days Remaining</p>
+                          <p className={`font-medium ${selectedRenewal.daysToRenewal <= 30 && selectedRenewal.daysToRenewal > 0 ? 'text-red-600' : ''}`}>
+                            {selectedRenewal.daysToRenewal > 0 ? `${selectedRenewal.daysToRenewal} days` : 'Completed'}
+                          </p>
+                        </div>
+                        <div className="p-3 rounded-lg border">
+                          <p className="text-xs text-muted-foreground">Contract Term</p>
+                          <p className="font-medium">{selectedRenewal.contractTerm} months</p>
+                        </div>
+                        <div className="p-3 rounded-lg border">
+                          <p className="text-xs text-muted-foreground">Probability</p>
+                          <p className="font-medium">{selectedRenewal.probability}%</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Team */}
+                    <div>
+                      <h4 className="font-semibold mb-3">Account Team</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex items-center gap-3 p-3 rounded-lg border">
+                          <Avatar>
+                            <AvatarFallback>{selectedRenewal.csmName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{selectedRenewal.csmName}</p>
+                            <p className="text-sm text-muted-foreground">Customer Success Manager</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 rounded-lg border">
+                          <Avatar>
+                            <AvatarFallback>{selectedRenewal.aeName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{selectedRenewal.aeName}</p>
+                            <p className="text-sm text-muted-foreground">Account Executive</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Contacts */}
+                    {selectedRenewal.contacts.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold mb-3">Customer Contacts</h4>
+                        <div className="space-y-2">
+                          {selectedRenewal.contacts.map((contact) => (
+                            <div key={contact.id} className="flex items-center justify-between p-3 rounded-lg border">
+                              <div className="flex items-center gap-3">
+                                <Avatar>
+                                  <AvatarFallback>{contact.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-medium">{contact.name}</p>
+                                    {contact.isPrimary && <Badge variant="secondary">Primary</Badge>}
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">{contact.role}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm"><Mail className="w-4 h-4" /></Button>
+                                <Button variant="ghost" size="sm"><Phone className="w-4 h-4" /></Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Risk Factors */}
+                    {selectedRenewal.riskFactors.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold mb-3 text-red-600">Risk Factors</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedRenewal.riskFactors.map((factor, i) => (
+                            <Badge key={i} variant="outline" className="text-red-600 border-red-300">
+                              <AlertTriangle className="w-3 h-3 mr-1" />
+                              {factor}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Products */}
+                    <div>
+                      <h4 className="font-semibold mb-3">Products</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedRenewal.products.map((product, i) => (
+                          <Badge key={i} variant="secondary">{product}</Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Notes */}
+                    {selectedRenewal.notes && (
+                      <div>
+                        <h4 className="font-semibold mb-3">Notes</h4>
+                        <p className="text-sm text-muted-foreground p-3 rounded-lg bg-muted/50">
+                          {selectedRenewal.notes}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-3 pt-4 border-t">
+                      <Button className="flex-1">
+                        <Send className="w-4 h-4 mr-2" />
+                        Send Proposal
+                      </Button>
+                      <Button variant="outline" className="flex-1">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Schedule Meeting
+                      </Button>
+                      <Button variant="outline">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </ScrollArea>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
