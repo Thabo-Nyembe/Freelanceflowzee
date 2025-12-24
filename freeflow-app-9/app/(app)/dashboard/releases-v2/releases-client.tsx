@@ -1,21 +1,15 @@
-"use client"
+'use client'
 
-import { useState } from 'react'
-import {
-  BentoCard,
-  BentoQuickAction
-} from '@/components/ui/bento-grid-advanced'
-import {
-  StatGrid,
-  MiniKPI,
-  ActivityFeed,
-  RankingList
-} from '@/components/ui/results-display'
-import {
-  ModernButton,
-  GradientButton,
-  PillButton
-} from '@/components/ui/modern-buttons'
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Rocket,
   GitBranch,
@@ -28,329 +22,1201 @@ import {
   Calendar,
   Settings,
   Play,
-  Pause
+  Pause,
+  Download,
+  FileText,
+  Users,
+  GitCommit,
+  GitMerge,
+  GitPullRequest,
+  Eye,
+  Edit,
+  Trash2,
+  Copy,
+  ExternalLink,
+  MoreVertical,
+  Search,
+  Filter,
+  Plus,
+  ChevronDown,
+  ChevronRight,
+  RefreshCw,
+  AlertTriangle,
+  Archive,
+  Star,
+  History,
+  RotateCcw,
+  Zap,
+  Shield,
+  Server,
+  Globe,
+  Terminal,
+  FileCode,
+  Activity,
+  BarChart3
 } from 'lucide-react'
-import { useReleases, useReleaseStats, type Release } from '@/lib/hooks/use-releases'
-import { deployRelease, rollbackRelease, pauseRollingDeployment } from '@/app/actions/releases'
 
-interface ReleasesClientProps {
-  initialReleases: Release[]
+// Types
+type ReleaseStatus = 'deployed' | 'rolling' | 'scheduled' | 'draft' | 'failed' | 'cancelled'
+type ReleaseType = 'major' | 'minor' | 'patch' | 'hotfix' | 'prerelease'
+type Environment = 'production' | 'staging' | 'development' | 'canary'
+type AssetType = 'binary' | 'source' | 'docker' | 'docs' | 'checksums'
+
+interface Release {
+  id: string
+  version: string
+  name: string
+  description: string
+  changelog: string
+  status: ReleaseStatus
+  type: ReleaseType
+  environment: Environment
+  tagName: string
+  branch: string
+  commitHash: string
+  author: {
+    id: string
+    name: string
+    avatar: string
+  }
+  contributors: {
+    id: string
+    name: string
+    avatar: string
+    commits: number
+  }[]
+  commits: number
+  additions: number
+  deletions: number
+  filesChanged: number
+  deployTime: number
+  coverage: number
+  isPrerelease: boolean
+  isDraft: boolean
+  isLatest: boolean
+  assets: ReleaseAsset[]
+  deployments: Deployment[]
+  createdAt: string
+  publishedAt: string | null
+  scheduledFor: string | null
+  deployedAt: string | null
+  downloads: number
+  views: number
 }
 
-export default function ReleasesClient({ initialReleases }: ReleasesClientProps) {
-  const [selectedStatus, setSelectedStatus] = useState<'all' | 'deployed' | 'scheduled' | 'rolling'>('all')
+interface ReleaseAsset {
+  id: string
+  name: string
+  type: AssetType
+  size: number
+  downloads: number
+  contentType: string
+  createdAt: string
+  uploadedBy: string
+}
+
+interface Deployment {
+  id: string
+  environment: Environment
+  status: 'success' | 'failed' | 'in_progress' | 'pending' | 'rolled_back'
+  startedAt: string
+  completedAt: string | null
+  duration: number
+  deployedBy: string
+  servers: number
+  coverage: number
+}
+
+interface Commit {
+  id: string
+  hash: string
+  message: string
+  author: {
+    name: string
+    avatar: string
+  }
+  additions: number
+  deletions: number
+  files: number
+  createdAt: string
+}
+
+interface RollbackEvent {
+  id: string
+  releaseId: string
+  releaseVersion: string
+  targetVersion: string
+  reason: string
+  initiatedBy: {
+    name: string
+    avatar: string
+  }
+  status: 'completed' | 'failed' | 'in_progress'
+  startedAt: string
+  completedAt: string | null
+}
+
+interface ReleaseStats {
+  totalReleases: number
+  deployedReleases: number
+  scheduledReleases: number
+  rollingReleases: number
+  failedReleases: number
+  draftReleases: number
+  successRate: number
+  avgDeployTime: number
+  totalDownloads: number
+  totalCommits: number
+  releaseFrequency: number
+}
+
+// Mock data
+const mockReleases: Release[] = [
+  {
+    id: '1',
+    version: 'v2.5.0',
+    name: 'Aurora Release',
+    description: 'Major feature release with new dashboard and improved performance',
+    changelog: '## New Features\n- Redesigned dashboard with real-time metrics\n- Added dark mode support\n- Improved API response times by 40%\n\n## Bug Fixes\n- Fixed memory leak in worker process\n- Resolved authentication edge cases',
+    status: 'deployed',
+    type: 'major',
+    environment: 'production',
+    tagName: 'v2.5.0',
+    branch: 'main',
+    commitHash: 'abc123f',
+    author: { id: '1', name: 'Alex Chen', avatar: '' },
+    contributors: [
+      { id: '1', name: 'Alex Chen', avatar: '', commits: 24 },
+      { id: '2', name: 'Sarah Miller', avatar: '', commits: 18 },
+      { id: '3', name: 'Mike Johnson', avatar: '', commits: 12 }
+    ],
+    commits: 54,
+    additions: 8456,
+    deletions: 2341,
+    filesChanged: 89,
+    deployTime: 4.5,
+    coverage: 100,
+    isPrerelease: false,
+    isDraft: false,
+    isLatest: true,
+    assets: [
+      { id: '1', name: 'app-v2.5.0-linux.tar.gz', type: 'binary', size: 45678901, downloads: 1234, contentType: 'application/gzip', createdAt: '2024-12-20', uploadedBy: 'Alex Chen' },
+      { id: '2', name: 'app-v2.5.0-windows.zip', type: 'binary', size: 52345678, downloads: 2345, contentType: 'application/zip', createdAt: '2024-12-20', uploadedBy: 'Alex Chen' },
+      { id: '3', name: 'source-v2.5.0.tar.gz', type: 'source', size: 12345678, downloads: 567, contentType: 'application/gzip', createdAt: '2024-12-20', uploadedBy: 'Alex Chen' }
+    ],
+    deployments: [
+      { id: '1', environment: 'production', status: 'success', startedAt: '2024-12-20T10:00:00Z', completedAt: '2024-12-20T10:05:00Z', duration: 4.5, deployedBy: 'Alex Chen', servers: 12, coverage: 100 }
+    ],
+    createdAt: '2024-12-18T14:00:00Z',
+    publishedAt: '2024-12-20T10:00:00Z',
+    scheduledFor: null,
+    deployedAt: '2024-12-20T10:05:00Z',
+    downloads: 4156,
+    views: 12456
+  },
+  {
+    id: '2',
+    version: 'v2.5.1',
+    name: 'Aurora Patch',
+    description: 'Hotfix for critical security vulnerability',
+    changelog: '## Security Fixes\n- Patched XSS vulnerability in comment system\n- Updated dependencies with known vulnerabilities\n\n## Bug Fixes\n- Fixed date picker timezone issues',
+    status: 'rolling',
+    type: 'hotfix',
+    environment: 'production',
+    tagName: 'v2.5.1',
+    branch: 'hotfix/security-patch',
+    commitHash: 'def456a',
+    author: { id: '2', name: 'Sarah Miller', avatar: '' },
+    contributors: [
+      { id: '2', name: 'Sarah Miller', avatar: '', commits: 5 },
+      { id: '1', name: 'Alex Chen', avatar: '', commits: 3 }
+    ],
+    commits: 8,
+    additions: 234,
+    deletions: 156,
+    filesChanged: 12,
+    deployTime: 2.1,
+    coverage: 67,
+    isPrerelease: false,
+    isDraft: false,
+    isLatest: false,
+    assets: [
+      { id: '4', name: 'app-v2.5.1-linux.tar.gz', type: 'binary', size: 45789012, downloads: 234, contentType: 'application/gzip', createdAt: '2024-12-22', uploadedBy: 'Sarah Miller' }
+    ],
+    deployments: [
+      { id: '2', environment: 'production', status: 'in_progress', startedAt: '2024-12-24T09:00:00Z', completedAt: null, duration: 0, deployedBy: 'Sarah Miller', servers: 12, coverage: 67 }
+    ],
+    createdAt: '2024-12-22T11:00:00Z',
+    publishedAt: '2024-12-24T09:00:00Z',
+    scheduledFor: null,
+    deployedAt: null,
+    downloads: 234,
+    views: 567
+  },
+  {
+    id: '3',
+    version: 'v2.6.0-beta.1',
+    name: 'Nebula Beta',
+    description: 'Beta release for upcoming v2.6.0 with experimental features',
+    changelog: '## Experimental Features\n- AI-powered code suggestions\n- Real-time collaboration mode\n- WebSocket-based notifications\n\n## Known Issues\n- Performance may be slower than stable releases',
+    status: 'deployed',
+    type: 'prerelease',
+    environment: 'staging',
+    tagName: 'v2.6.0-beta.1',
+    branch: 'develop',
+    commitHash: 'ghi789b',
+    author: { id: '3', name: 'Mike Johnson', avatar: '' },
+    contributors: [
+      { id: '3', name: 'Mike Johnson', avatar: '', commits: 34 },
+      { id: '4', name: 'Emma Wilson', avatar: '', commits: 28 }
+    ],
+    commits: 62,
+    additions: 12345,
+    deletions: 4567,
+    filesChanged: 134,
+    deployTime: 6.2,
+    coverage: 100,
+    isPrerelease: true,
+    isDraft: false,
+    isLatest: false,
+    assets: [],
+    deployments: [
+      { id: '3', environment: 'staging', status: 'success', startedAt: '2024-12-21T14:00:00Z', completedAt: '2024-12-21T14:06:00Z', duration: 6.2, deployedBy: 'Mike Johnson', servers: 4, coverage: 100 }
+    ],
+    createdAt: '2024-12-19T09:00:00Z',
+    publishedAt: '2024-12-21T14:00:00Z',
+    scheduledFor: null,
+    deployedAt: '2024-12-21T14:06:00Z',
+    downloads: 89,
+    views: 234
+  },
+  {
+    id: '4',
+    version: 'v2.6.0',
+    name: 'Nebula Release',
+    description: 'Major feature release scheduled for next week',
+    changelog: '## Planned Features\n- AI-powered code suggestions (stable)\n- Real-time collaboration\n- New notification system\n- Performance improvements',
+    status: 'scheduled',
+    type: 'major',
+    environment: 'production',
+    tagName: 'v2.6.0',
+    branch: 'release/v2.6.0',
+    commitHash: 'jkl012c',
+    author: { id: '1', name: 'Alex Chen', avatar: '' },
+    contributors: [
+      { id: '1', name: 'Alex Chen', avatar: '', commits: 45 },
+      { id: '3', name: 'Mike Johnson', avatar: '', commits: 38 },
+      { id: '4', name: 'Emma Wilson', avatar: '', commits: 29 }
+    ],
+    commits: 112,
+    additions: 18567,
+    deletions: 6789,
+    filesChanged: 178,
+    deployTime: 0,
+    coverage: 0,
+    isPrerelease: false,
+    isDraft: false,
+    isLatest: false,
+    assets: [],
+    deployments: [],
+    createdAt: '2024-12-23T16:00:00Z',
+    publishedAt: null,
+    scheduledFor: '2024-12-30T10:00:00Z',
+    deployedAt: null,
+    downloads: 0,
+    views: 345
+  },
+  {
+    id: '5',
+    version: 'v2.4.3',
+    name: 'Legacy Patch',
+    description: 'Final patch for v2.4 branch',
+    changelog: '## Bug Fixes\n- Fixed edge case in payment processing\n- Resolved caching issues',
+    status: 'deployed',
+    type: 'patch',
+    environment: 'production',
+    tagName: 'v2.4.3',
+    branch: 'release/v2.4',
+    commitHash: 'mno345d',
+    author: { id: '4', name: 'Emma Wilson', avatar: '' },
+    contributors: [{ id: '4', name: 'Emma Wilson', avatar: '', commits: 6 }],
+    commits: 6,
+    additions: 145,
+    deletions: 89,
+    filesChanged: 8,
+    deployTime: 1.8,
+    coverage: 100,
+    isPrerelease: false,
+    isDraft: false,
+    isLatest: false,
+    assets: [],
+    deployments: [
+      { id: '4', environment: 'production', status: 'success', startedAt: '2024-12-15T11:00:00Z', completedAt: '2024-12-15T11:02:00Z', duration: 1.8, deployedBy: 'Emma Wilson', servers: 12, coverage: 100 }
+    ],
+    createdAt: '2024-12-14T10:00:00Z',
+    publishedAt: '2024-12-15T11:00:00Z',
+    scheduledFor: null,
+    deployedAt: '2024-12-15T11:02:00Z',
+    downloads: 567,
+    views: 890
+  },
+  {
+    id: '6',
+    version: 'v2.7.0',
+    name: 'Cosmos Draft',
+    description: 'Work in progress - next major release',
+    changelog: '## Planned\n- New features TBD\n- Performance improvements TBD',
+    status: 'draft',
+    type: 'major',
+    environment: 'development',
+    tagName: 'v2.7.0',
+    branch: 'develop',
+    commitHash: 'pqr678e',
+    author: { id: '1', name: 'Alex Chen', avatar: '' },
+    contributors: [],
+    commits: 23,
+    additions: 4567,
+    deletions: 1234,
+    filesChanged: 45,
+    deployTime: 0,
+    coverage: 0,
+    isPrerelease: false,
+    isDraft: true,
+    isLatest: false,
+    assets: [],
+    deployments: [],
+    createdAt: '2024-12-24T08:00:00Z',
+    publishedAt: null,
+    scheduledFor: null,
+    deployedAt: null,
+    downloads: 0,
+    views: 12
+  }
+]
+
+const mockCommits: Commit[] = [
+  { id: '1', hash: 'abc123f', message: 'feat: Add new dashboard components', author: { name: 'Alex Chen', avatar: '' }, additions: 456, deletions: 123, files: 12, createdAt: '2024-12-20T09:30:00Z' },
+  { id: '2', hash: 'bcd234g', message: 'fix: Resolve memory leak in worker', author: { name: 'Sarah Miller', avatar: '' }, additions: 23, deletions: 89, files: 3, createdAt: '2024-12-20T08:45:00Z' },
+  { id: '3', hash: 'cde345h', message: 'chore: Update dependencies', author: { name: 'Mike Johnson', avatar: '' }, additions: 567, deletions: 234, files: 5, createdAt: '2024-12-19T16:20:00Z' },
+  { id: '4', hash: 'def456i', message: 'feat: Implement dark mode', author: { name: 'Emma Wilson', avatar: '' }, additions: 234, deletions: 45, files: 8, createdAt: '2024-12-19T14:00:00Z' },
+  { id: '5', hash: 'efg567j', message: 'docs: Update API documentation', author: { name: 'Alex Chen', avatar: '' }, additions: 189, deletions: 67, files: 4, createdAt: '2024-12-18T11:30:00Z' }
+]
+
+const mockRollbacks: RollbackEvent[] = [
+  { id: '1', releaseId: '2', releaseVersion: 'v2.4.2', targetVersion: 'v2.4.1', reason: 'Critical bug in payment processing', initiatedBy: { name: 'Alex Chen', avatar: '' }, status: 'completed', startedAt: '2024-12-10T15:30:00Z', completedAt: '2024-12-10T15:32:00Z' },
+  { id: '2', releaseId: '3', releaseVersion: 'v2.5.0-beta.2', targetVersion: 'v2.5.0-beta.1', reason: 'Performance regression detected', initiatedBy: { name: 'Sarah Miller', avatar: '' }, status: 'completed', startedAt: '2024-12-05T10:00:00Z', completedAt: '2024-12-05T10:03:00Z' }
+]
+
+const mockStats: ReleaseStats = {
+  totalReleases: 45,
+  deployedReleases: 38,
+  scheduledReleases: 3,
+  rollingReleases: 1,
+  failedReleases: 2,
+  draftReleases: 1,
+  successRate: 95.5,
+  avgDeployTime: 3.8,
+  totalDownloads: 45678,
+  totalCommits: 1234,
+  releaseFrequency: 2.3
+}
+
+export default function ReleasesClient() {
+  const [activeTab, setActiveTab] = useState('releases')
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState<string>('all')
+  const [selectedType, setSelectedType] = useState<string>('all')
+  const [selectedRelease, setSelectedRelease] = useState<Release | null>(null)
+  const [showReleaseDialog, setShowReleaseDialog] = useState(false)
 
-  // Use hooks for real-time data
-  const { data: releases } = useReleases({
-    status: selectedStatus === 'all' ? undefined : selectedStatus,
-    searchQuery: searchQuery || undefined
-  })
-  const { stats } = useReleaseStats()
+  const filteredReleases = useMemo(() => {
+    return mockReleases.filter(release => {
+      const matchesSearch = release.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        release.version.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesStatus = selectedStatus === 'all' || release.status === selectedStatus
+      const matchesType = selectedType === 'all' || release.type === selectedType
+      return matchesSearch && matchesStatus && matchesType
+    })
+  }, [searchQuery, selectedStatus, selectedType])
 
-  const displayReleases = releases || initialReleases
+  const getStatusColor = (status: ReleaseStatus) => {
+    switch (status) {
+      case 'deployed': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+      case 'rolling': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+      case 'scheduled': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
+      case 'draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+      case 'failed': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+      case 'cancelled': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  }
 
-  const filteredReleases = selectedStatus === 'all'
-    ? displayReleases
-    : displayReleases.filter(release => release.status === selectedStatus)
+  const getTypeColor = (type: ReleaseType) => {
+    switch (type) {
+      case 'major': return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300'
+      case 'minor': return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300'
+      case 'patch': return 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300'
+      case 'hotfix': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+      case 'prerelease': return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  }
 
-  const statItems = [
-    { label: 'Total Releases', value: stats?.totalReleases?.toString() || displayReleases.length.toString(), change: 28.4, icon: <Rocket className="w-5 h-5" /> },
-    { label: 'Success Rate', value: stats?.successRate ? `${stats.successRate.toFixed(1)}%` : '0%', change: 12.5, icon: <CheckCircle className="w-5 h-5" /> },
-    { label: 'Avg Deploy Time', value: stats?.averageDeployTime ? `${stats.averageDeployTime.toFixed(1)}min` : '0min', change: -18.7, icon: <Clock className="w-5 h-5" /> },
-    { label: 'Total Commits', value: stats?.totalCommits?.toString() || '0', change: 42.3, icon: <TrendingUp className="w-5 h-5" /> }
+  const getStatusIcon = (status: ReleaseStatus) => {
+    switch (status) {
+      case 'deployed': return CheckCircle
+      case 'rolling': return RefreshCw
+      case 'scheduled': return Calendar
+      case 'draft': return Edit
+      case 'failed': return AlertCircle
+      case 'cancelled': return AlertTriangle
+      default: return Rocket
+    }
+  }
+
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+  }
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
+    return num.toString()
+  }
+
+  const openReleaseDialog = (release: Release) => {
+    setSelectedRelease(release)
+    setShowReleaseDialog(true)
+  }
+
+  const stats = [
+    { label: 'Total Releases', value: mockStats.totalReleases.toString(), icon: Rocket, change: '+12', color: 'text-indigo-600' },
+    { label: 'Deployed', value: mockStats.deployedReleases.toString(), icon: CheckCircle, change: '+8', color: 'text-green-600' },
+    { label: 'Success Rate', value: `${mockStats.successRate}%`, icon: TrendingUp, change: '+2.3%', color: 'text-blue-600' },
+    { label: 'Avg Deploy', value: `${mockStats.avgDeployTime}min`, icon: Clock, change: '-0.5min', color: 'text-purple-600' },
+    { label: 'Downloads', value: formatNumber(mockStats.totalDownloads), icon: Download, change: '+2.3K', color: 'text-cyan-600' },
+    { label: 'Commits', value: formatNumber(mockStats.totalCommits), icon: GitCommit, change: '+156', color: 'text-pink-600' },
+    { label: 'Frequency', value: `${mockStats.releaseFrequency}/wk`, icon: Activity, change: '+0.3', color: 'text-orange-600' },
+    { label: 'Rolling', value: mockStats.rollingReleases.toString(), icon: RefreshCw, change: '1 active', color: 'text-teal-600' }
   ]
-
-  const topReleases = displayReleases
-    .sort((a, b) => b.commits_count - a.commits_count)
-    .slice(0, 5)
-    .map((release, index) => ({
-      rank: index + 1,
-      name: `${release.version} ${release.release_name}`,
-      avatar: release.status === 'deployed' ? '✅' : release.status === 'rolling' ? '⚡' : '📅',
-      value: release.commits_count.toString(),
-      change: 0
-    }))
-
-  const recentActivity = [
-    { icon: <CheckCircle className="w-5 h-5" />, title: 'Release deployed', description: 'to Production', time: '2 days ago', status: 'success' as const },
-    { icon: <Rocket className="w-5 h-5" />, title: 'Rolling deployment', description: 'in progress', time: '1 hour ago', status: 'info' as const },
-    { icon: <Calendar className="w-5 h-5" />, title: 'Release scheduled', description: 'for next week', time: '3 days ago', status: 'info' as const },
-    { icon: <AlertCircle className="w-5 h-5" />, title: 'Rollback executed', description: 'due to errors', time: '1 week ago', status: 'warning' as const }
-  ]
-
-  const maxCommits = Math.max(...displayReleases.map(r => r.commits_count), 1)
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'deployed': return 'bg-green-100 text-green-700'
-      case 'rolling': return 'bg-blue-100 text-blue-700'
-      case 'scheduled': return 'bg-purple-100 text-purple-700'
-      case 'failed': return 'bg-red-100 text-red-700'
-      case 'draft': return 'bg-gray-100 text-gray-700'
-      default: return 'bg-gray-100 text-gray-700'
-    }
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'deployed': return <CheckCircle className="w-3 h-3" />
-      case 'rolling': return <Play className="w-3 h-3" />
-      case 'scheduled': return <Calendar className="w-3 h-3" />
-      case 'failed': return <AlertCircle className="w-3 h-3" />
-      default: return <Rocket className="w-3 h-3" />
-    }
-  }
-
-  const getGradientColor = (status: string) => {
-    switch (status) {
-      case 'deployed': return 'from-green-500 to-emerald-500'
-      case 'rolling': return 'from-blue-500 to-cyan-500'
-      case 'scheduled': return 'from-purple-500 to-pink-500'
-      case 'failed': return 'from-red-500 to-orange-500'
-      default: return 'from-gray-500 to-slate-500'
-    }
-  }
-
-  const handleDeploy = async (releaseId: string) => {
-    await deployRelease(releaseId)
-  }
-
-  const handleRollback = async (releaseId: string) => {
-    await rollbackRelease(releaseId)
-  }
-
-  const handlePause = async (releaseId: string) => {
-    await pauseRollingDeployment(releaseId)
-  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-              <Rocket className="w-10 h-10 text-indigo-600" />
-              Release Management
-            </h1>
-            <p className="text-muted-foreground">Track deployments, versions, and rollouts</p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <Rocket className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Release Management</h1>
+              <p className="text-gray-500 dark:text-gray-400">GitHub Releases level deployment control</p>
+            </div>
           </div>
-          <GradientButton from="indigo" to="purple" onClick={() => console.log('New release')}>
-            <Rocket className="w-5 h-5 mr-2" />
-            Create Release
-          </GradientButton>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search releases..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 w-64"
+              />
+            </div>
+            <Button variant="outline" size="icon">
+              <Filter className="w-4 h-4" />
+            </Button>
+            <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Release
+            </Button>
+          </div>
         </div>
 
-        <StatGrid columns={4} stats={statItems} />
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <BentoQuickAction icon={<Rocket />} title="Releases" description="All versions" onClick={() => console.log('Releases')} />
-          <BentoQuickAction icon={<GitBranch />} title="Branches" description="Git workflow" onClick={() => console.log('Branches')} />
-          <BentoQuickAction icon={<Package />} title="Artifacts" description="Build packages" onClick={() => console.log('Artifacts')} />
-          <BentoQuickAction icon={<Settings />} title="Settings" description="Configure" onClick={() => console.log('Settings')} />
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {stats.map((stat, index) => (
+            <Card key={index} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                  <span className="text-xs text-green-600 font-medium">{stat.change}</span>
+                </div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        <div className="flex items-center gap-3">
-          <PillButton variant={selectedStatus === 'all' ? 'primary' : 'ghost'} onClick={() => setSelectedStatus('all')}>
-            All Releases
-          </PillButton>
-          <PillButton variant={selectedStatus === 'deployed' ? 'primary' : 'ghost'} onClick={() => setSelectedStatus('deployed')}>
-            <CheckCircle className="w-4 h-4 mr-2" />
-            Deployed
-          </PillButton>
-          <PillButton variant={selectedStatus === 'rolling' ? 'primary' : 'ghost'} onClick={() => setSelectedStatus('rolling')}>
-            <Play className="w-4 h-4 mr-2" />
-            Rolling Out
-          </PillButton>
-          <PillButton variant={selectedStatus === 'scheduled' ? 'primary' : 'ghost'} onClick={() => setSelectedStatus('scheduled')}>
-            <Calendar className="w-4 h-4 mr-2" />
-            Scheduled
-          </PillButton>
-        </div>
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border shadow-sm">
+            <TabsTrigger value="releases" className="data-[state=active]:bg-indigo-100 dark:data-[state=active]:bg-indigo-900">
+              <Tag className="w-4 h-4 mr-2" />
+              Releases
+            </TabsTrigger>
+            <TabsTrigger value="deployments" className="data-[state=active]:bg-indigo-100 dark:data-[state=active]:bg-indigo-900">
+              <Server className="w-4 h-4 mr-2" />
+              Deployments
+            </TabsTrigger>
+            <TabsTrigger value="commits" className="data-[state=active]:bg-indigo-100 dark:data-[state=active]:bg-indigo-900">
+              <GitCommit className="w-4 h-4 mr-2" />
+              Commits
+            </TabsTrigger>
+            <TabsTrigger value="rollbacks" className="data-[state=active]:bg-indigo-100 dark:data-[state=active]:bg-indigo-900">
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Rollbacks
+            </TabsTrigger>
+            <TabsTrigger value="assets" className="data-[state=active]:bg-indigo-100 dark:data-[state=active]:bg-indigo-900">
+              <Package className="w-4 h-4 mr-2" />
+              Assets
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="data-[state=active]:bg-indigo-100 dark:data-[state=active]:bg-indigo-900">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Analytics
+            </TabsTrigger>
+          </TabsList>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <BentoCard className="p-6 mb-6">
-              <h3 className="text-xl font-semibold mb-4">Recent Releases</h3>
-              <div className="space-y-3">
-                {filteredReleases.map((release) => (
-                  <div key={release.id} className="p-4 rounded-xl border border-border bg-background hover:bg-muted/50 transition-colors">
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${getGradientColor(release.status)} flex items-center justify-center text-white font-mono font-bold text-sm`}>
-                              {release.version.replace('v', '').split('.')[0]}
+          {/* Releases Tab */}
+          <TabsContent value="releases" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Filters Sidebar */}
+              <Card className="lg:col-span-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm">Filters</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 mb-2 block">Status</label>
+                    <div className="space-y-1">
+                      {['all', 'deployed', 'rolling', 'scheduled', 'draft', 'failed'].map(status => (
+                        <button
+                          key={status}
+                          onClick={() => setSelectedStatus(status)}
+                          className={`w-full px-3 py-2 text-sm rounded-lg text-left transition-colors ${
+                            selectedStatus === status
+                              ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                          }`}
+                        >
+                          {status === 'all' ? 'All Status' : status.charAt(0).toUpperCase() + status.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 mb-2 block">Type</label>
+                    <div className="space-y-1">
+                      {['all', 'major', 'minor', 'patch', 'hotfix', 'prerelease'].map(type => (
+                        <button
+                          key={type}
+                          onClick={() => setSelectedType(type)}
+                          className={`w-full px-3 py-2 text-sm rounded-lg text-left transition-colors ${
+                            selectedType === type
+                              ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                          }`}
+                        >
+                          {type === 'all' ? 'All Types' : type.charAt(0).toUpperCase() + type.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Releases List */}
+              <div className="lg:col-span-3 space-y-4">
+                {filteredReleases.map(release => {
+                  const StatusIcon = getStatusIcon(release.status)
+                  return (
+                    <Card
+                      key={release.id}
+                      className="bg-white/80 dark:bg-gray-800/80 backdrop-blur hover:shadow-lg transition-all cursor-pointer"
+                      onClick={() => openReleaseDialog(release)}
+                    >
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${
+                              release.status === 'deployed' ? 'from-green-500 to-emerald-500' :
+                              release.status === 'rolling' ? 'from-blue-500 to-cyan-500' :
+                              release.status === 'scheduled' ? 'from-purple-500 to-pink-500' :
+                              'from-gray-500 to-slate-500'
+                            } flex items-center justify-center text-white font-mono font-bold text-lg`}>
+                              {release.version.split('.')[0]}
                             </div>
                             <div>
-                              <h4 className="font-semibold">{release.release_name}</h4>
-                              <code className="text-xs font-mono text-muted-foreground">{release.version}</code>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-semibold text-lg">{release.name}</h3>
+                                {release.isLatest && (
+                                  <Badge className="bg-indigo-100 text-indigo-800">Latest</Badge>
+                                )}
+                                {release.isPrerelease && (
+                                  <Badge className="bg-orange-100 text-orange-800">Pre-release</Badge>
+                                )}
+                                {release.isDraft && (
+                                  <Badge className="bg-gray-100 text-gray-800">Draft</Badge>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
+                                <code className="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">{release.version}</code>
+                                <span className="flex items-center gap-1">
+                                  <GitBranch className="w-3 h-3" />
+                                  {release.branch}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <GitCommit className="w-3 h-3" />
+                                  {release.commitHash}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className={`text-xs px-2 py-1 rounded-md flex items-center gap-1 ${getStatusColor(release.status)}`}>
-                              {getStatusIcon(release.status)}
+                          <div className="flex items-center gap-2">
+                            <Badge className={getStatusColor(release.status)}>
+                              <StatusIcon className="w-3 h-3 mr-1" />
                               {release.status}
-                            </span>
-                            <span className="text-xs px-2 py-1 rounded-md bg-muted">
-                              {release.environment}
-                            </span>
+                            </Badge>
+                            <Badge className={getTypeColor(release.type)}>{release.type}</Badge>
                           </div>
                         </div>
+
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">{release.description}</p>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-4">
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">Commits</div>
+                            <div className="font-semibold">{release.commits}</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">Changes</div>
+                            <div className="font-semibold flex items-center gap-1">
+                              <span className="text-green-600">+{release.additions}</span>
+                              <span className="text-red-600">-{release.deletions}</span>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">Files</div>
+                            <div className="font-semibold">{release.filesChanged}</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">Downloads</div>
+                            <div className="font-semibold">{formatNumber(release.downloads)}</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">Deploy Time</div>
+                            <div className="font-semibold">{release.deployTime ? `${release.deployTime}min` : 'N/A'}</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">Coverage</div>
+                            <div className="font-semibold">{release.coverage}%</div>
+                          </div>
+                        </div>
+
                         {release.status === 'rolling' && (
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-indigo-600">{release.coverage_percentage}%</p>
-                            <p className="text-xs text-muted-foreground">Coverage</p>
+                          <div className="mb-4">
+                            <div className="flex items-center justify-between text-sm mb-1">
+                              <span className="text-gray-500">Rollout Progress</span>
+                              <span className="font-semibold">{release.coverage}%</span>
+                            </div>
+                            <Progress value={release.coverage} className="h-2" />
                           </div>
                         )}
+
+                        <div className="flex items-center justify-between pt-4 border-t dark:border-gray-700">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <Avatar className="w-6 h-6">
+                                <AvatarFallback className="text-xs">{release.author.name.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <span className="text-sm text-gray-500">{release.author.name}</span>
+                            </div>
+                            <div className="flex -space-x-2">
+                              {release.contributors.slice(0, 3).map(c => (
+                                <Avatar key={c.id} className="w-6 h-6 border-2 border-white">
+                                  <AvatarFallback className="text-xs">{c.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                              ))}
+                              {release.contributors.length > 3 && (
+                                <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center text-xs">
+                                  +{release.contributors.length - 3}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {release.status === 'scheduled' && (
+                              <Button size="sm" className="bg-indigo-500 text-white">
+                                <Rocket className="w-3 h-3 mr-1" />
+                                Deploy Now
+                              </Button>
+                            )}
+                            {release.status === 'rolling' && (
+                              <Button size="sm" variant="outline">
+                                <Pause className="w-3 h-3 mr-1" />
+                                Pause
+                              </Button>
+                            )}
+                            {release.status === 'deployed' && (
+                              <Button size="sm" variant="outline">
+                                <RotateCcw className="w-3 h-3 mr-1" />
+                                Rollback
+                              </Button>
+                            )}
+                            <Button size="sm" variant="outline">
+                              <Eye className="w-3 h-3 mr-1" />
+                              View
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Deployments Tab */}
+          <TabsContent value="deployments" className="mt-6">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="text-lg">Deployment History</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mockReleases.flatMap(r => r.deployments).map(deployment => (
+                    <div key={deployment.id} className="flex items-center gap-4 p-4 rounded-lg border dark:border-gray-700">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        deployment.status === 'success' ? 'bg-green-100 text-green-600' :
+                        deployment.status === 'in_progress' ? 'bg-blue-100 text-blue-600' :
+                        deployment.status === 'failed' ? 'bg-red-100 text-red-600' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {deployment.status === 'success' ? <CheckCircle className="w-5 h-5" /> :
+                         deployment.status === 'in_progress' ? <RefreshCw className="w-5 h-5 animate-spin" /> :
+                         deployment.status === 'failed' ? <AlertCircle className="w-5 h-5" /> :
+                         <Clock className="w-5 h-5" />}
                       </div>
-
-                      <div className="grid grid-cols-4 gap-3 text-xs">
-                        <div>
-                          <p className="text-muted-foreground">Commits</p>
-                          <p className="font-semibold">{release.commits_count}</p>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium capitalize">{deployment.environment}</span>
+                          <Badge className={
+                            deployment.status === 'success' ? 'bg-green-100 text-green-800' :
+                            deployment.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                            deployment.status === 'failed' ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-800'
+                          }>{deployment.status.replace('_', ' ')}</Badge>
                         </div>
-                        <div>
-                          <p className="text-muted-foreground">Contributors</p>
-                          <p className="font-semibold">{release.contributors_count}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">
-                            {release.status === 'scheduled' ? 'Scheduled' : 'Deployed'}
-                          </p>
-                          <p className="font-semibold">
-                            {release.deployed_at
-                              ? new Date(release.deployed_at).toLocaleDateString()
-                              : release.scheduled_for
-                              ? new Date(release.scheduled_for).toLocaleDateString()
-                              : 'N/A'}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Deploy Time</p>
-                          <p className="font-semibold">
-                            {release.deploy_time_minutes ? `${release.deploy_time_minutes.toFixed(1)}min` : 'N/A'}
-                          </p>
+                        <div className="text-sm text-gray-500 mt-1">
+                          {deployment.servers} servers • {deployment.coverage}% coverage • {deployment.duration}min
                         </div>
                       </div>
+                      <div className="text-right text-sm text-gray-500">
+                        <div>{formatDate(deployment.startedAt)}</div>
+                        <div>by {deployment.deployedBy}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                      {release.status === 'rolling' && (
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-muted-foreground">Rollout Progress</span>
-                            <span className="font-semibold">{release.coverage_percentage}%</span>
+          {/* Commits Tab */}
+          <TabsContent value="commits" className="mt-6">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="text-lg">Recent Commits</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mockCommits.map(commit => (
+                    <div key={commit.id} className="flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <Avatar>
+                        <AvatarFallback>{commit.author.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <p className="font-medium">{commit.message}</p>
+                        <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
+                          <span>{commit.author.name}</span>
+                          <code className="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-xs">{commit.hash}</code>
+                          <span className="text-green-600">+{commit.additions}</span>
+                          <span className="text-red-600">-{commit.deletions}</span>
+                          <span>{commit.files} files</span>
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-500">{formatDate(commit.createdAt)}</div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Rollbacks Tab */}
+          <TabsContent value="rollbacks" className="mt-6">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <RotateCcw className="w-5 h-5 text-yellow-500" />
+                  Rollback History
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {mockRollbacks.length > 0 ? (
+                  <div className="space-y-4">
+                    {mockRollbacks.map(rollback => (
+                      <div key={rollback.id} className="flex items-start gap-4 p-4 rounded-lg border dark:border-gray-700">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          rollback.status === 'completed' ? 'bg-green-100 text-green-600' :
+                          rollback.status === 'in_progress' ? 'bg-blue-100 text-blue-600' :
+                          'bg-red-100 text-red-600'
+                        }`}>
+                          <RotateCcw className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium">{rollback.releaseVersion}</span>
+                            <ChevronRight className="w-4 h-4 text-gray-400" />
+                            <span className="font-medium">{rollback.targetVersion}</span>
+                            <Badge className={
+                              rollback.status === 'completed' ? 'bg-green-100 text-green-800' :
+                              rollback.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                              'bg-red-100 text-red-800'
+                            }>{rollback.status}</Badge>
                           </div>
-                          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                            <div
-                              className={`h-full bg-gradient-to-r ${getGradientColor(release.status)}`}
-                              style={{ width: `${release.coverage_percentage}%` }}
-                            />
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{rollback.reason}</p>
+                          <div className="flex items-center gap-2 text-sm text-gray-500 mt-2">
+                            <Avatar className="w-5 h-5">
+                              <AvatarFallback className="text-xs">{rollback.initiatedBy.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <span>{rollback.initiatedBy.name}</span>
                           </div>
                         </div>
-                      )}
+                        <div className="text-right text-sm text-gray-500">
+                          <div>{formatDate(rollback.startedAt)}</div>
+                          {rollback.completedAt && (
+                            <div className="text-green-600">Completed</div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <RotateCcw className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2">No Rollbacks</h3>
+                    <p className="text-gray-500">All deployments have been successful</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                      <div className="flex items-center gap-2 pt-2 border-t">
-                        <ModernButton variant="outline" size="sm" onClick={() => console.log('View', release.id)}>
-                          <Tag className="w-3 h-3 mr-1" />
-                          View
-                        </ModernButton>
-                        <ModernButton variant="outline" size="sm" onClick={() => console.log('Changelog', release.id)}>
-                          Changelog
-                        </ModernButton>
-                        {release.status === 'deployed' && (
-                          <ModernButton variant="outline" size="sm" onClick={() => handleRollback(release.id)}>
-                            Rollback
-                          </ModernButton>
-                        )}
-                        {release.status === 'rolling' && (
-                          <ModernButton variant="outline" size="sm" onClick={() => handlePause(release.id)}>
-                            <Pause className="w-3 h-3 mr-1" />
-                            Pause
-                          </ModernButton>
-                        )}
-                        {release.status === 'scheduled' && (
-                          <ModernButton variant="primary" size="sm" onClick={() => handleDeploy(release.id)}>
-                            <Rocket className="w-3 h-3 mr-1" />
-                            Deploy
-                          </ModernButton>
-                        )}
+          {/* Assets Tab */}
+          <TabsContent value="assets" className="mt-6">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+              <CardHeader>
+                <CardTitle className="text-lg">Release Assets</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mockReleases.filter(r => r.assets.length > 0).map(release => (
+                    <div key={release.id} className="p-4 rounded-lg border dark:border-gray-700">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <code className="font-mono bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-300 px-2 py-1 rounded text-sm">{release.version}</code>
+                          <span className="text-gray-500">{release.name}</span>
+                        </div>
+                        <span className="text-sm text-gray-500">{release.assets.length} assets</span>
+                      </div>
+                      <div className="space-y-2">
+                        {release.assets.map(asset => (
+                          <div key={asset.id} className="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                            <Package className="w-5 h-5 text-gray-400" />
+                            <div className="flex-1">
+                              <div className="font-medium text-sm">{asset.name}</div>
+                              <div className="text-xs text-gray-500">{formatSize(asset.size)} • {asset.contentType}</div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-sm text-gray-500">{asset.downloads} downloads</span>
+                              <Button size="sm" variant="outline">
+                                <Download className="w-3 h-3 mr-1" />
+                                Download
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-indigo-500" />
+                    Release Metrics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500">Success Rate</span>
+                    <span className="font-semibold text-green-600">{mockStats.successRate}%</span>
+                  </div>
+                  <Progress value={mockStats.successRate} className="h-2" />
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500">Avg Deploy Time</span>
+                    <span className="font-semibold">{mockStats.avgDeployTime} min</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-500">Release Frequency</span>
+                    <span className="font-semibold">{mockStats.releaseFrequency}/week</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Download className="w-5 h-5 text-green-500" />
+                    Download Stats
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {mockReleases.slice(0, 5).map(release => (
+                    <div key={release.id} className="flex items-center gap-3">
+                      <code className="font-mono text-sm bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">{release.version}</code>
+                      <div className="flex-1">
+                        <Progress value={(release.downloads / 5000) * 100} className="h-2" />
+                      </div>
+                      <span className="text-sm font-medium">{formatNumber(release.downloads)}</span>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Users className="w-5 h-5 text-purple-500" />
+                    Top Contributors
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[
+                    { name: 'Alex Chen', commits: 45, avatar: '' },
+                    { name: 'Sarah Miller', commits: 38, avatar: '' },
+                    { name: 'Mike Johnson', commits: 29, avatar: '' },
+                    { name: 'Emma Wilson', commits: 23, avatar: '' }
+                  ].map((contributor, index) => (
+                    <div key={contributor.name} className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
+                        {index + 1}
+                      </div>
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback>{contributor.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="font-medium text-sm">{contributor.name}</div>
+                        <div className="text-xs text-gray-500">{contributor.commits} commits</div>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Release Detail Dialog */}
+      <Dialog open={showReleaseDialog} onOpenChange={setShowReleaseDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          {selectedRelease && (
+            <>
+              <DialogHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${
+                      selectedRelease.status === 'deployed' ? 'from-green-500 to-emerald-500' :
+                      selectedRelease.status === 'rolling' ? 'from-blue-500 to-cyan-500' :
+                      'from-gray-500 to-slate-500'
+                    } flex items-center justify-center text-white font-mono font-bold text-lg`}>
+                      {selectedRelease.version.split('.')[0]}
+                    </div>
+                    <div>
+                      <DialogTitle className="text-xl flex items-center gap-2">
+                        {selectedRelease.name}
+                        {selectedRelease.isLatest && <Badge className="bg-indigo-100 text-indigo-800">Latest</Badge>}
+                      </DialogTitle>
+                      <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                        <code className="font-mono bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">{selectedRelease.version}</code>
+                        <Badge className={getStatusColor(selectedRelease.status)}>{selectedRelease.status}</Badge>
+                        <Badge className={getTypeColor(selectedRelease.type)}>{selectedRelease.type}</Badge>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
-            </BentoCard>
-
-            <BentoCard className="p-6">
-              <h3 className="text-xl font-semibold mb-4">Release Statistics</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-4 rounded-lg border border-border bg-background">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                    <p className="text-sm font-medium">Deployed</p>
-                  </div>
-                  <p className="text-2xl font-bold">{stats?.deployedReleases || 0}</p>
+                  <Button variant="outline" size="icon">
+                    <MoreVertical className="w-4 h-4" />
+                  </Button>
                 </div>
-                <div className="p-4 rounded-lg border border-border bg-background">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Play className="w-4 h-4 text-blue-600" />
-                    <p className="text-sm font-medium">Rolling</p>
+              </DialogHeader>
+              <ScrollArea className="h-[60vh] mt-4">
+                <div className="space-y-6 pr-4">
+                  {/* Description */}
+                  <div>
+                    <h3 className="font-semibold mb-2">Description</h3>
+                    <p className="text-gray-600 dark:text-gray-300">{selectedRelease.description}</p>
                   </div>
-                  <p className="text-2xl font-bold">{stats?.rollingReleases || 0}</p>
+
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <div className="text-sm text-gray-500 mb-1">Commits</div>
+                      <div className="text-xl font-semibold">{selectedRelease.commits}</div>
+                    </div>
+                    <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <div className="text-sm text-gray-500 mb-1">Changes</div>
+                      <div className="text-xl font-semibold flex items-center gap-1">
+                        <span className="text-green-600">+{selectedRelease.additions}</span>
+                        <span className="text-red-600">-{selectedRelease.deletions}</span>
+                      </div>
+                    </div>
+                    <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <div className="text-sm text-gray-500 mb-1">Downloads</div>
+                      <div className="text-xl font-semibold">{formatNumber(selectedRelease.downloads)}</div>
+                    </div>
+                    <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <div className="text-sm text-gray-500 mb-1">Deploy Time</div>
+                      <div className="text-xl font-semibold">{selectedRelease.deployTime ? `${selectedRelease.deployTime}min` : 'N/A'}</div>
+                    </div>
+                  </div>
+
+                  {/* Changelog */}
+                  <div>
+                    <h3 className="font-semibold mb-2">Changelog</h3>
+                    <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800 prose prose-sm dark:prose-invert max-w-none">
+                      <pre className="whitespace-pre-wrap text-sm">{selectedRelease.changelog}</pre>
+                    </div>
+                  </div>
+
+                  {/* Contributors */}
+                  <div>
+                    <h3 className="font-semibold mb-2">Contributors ({selectedRelease.contributors.length})</h3>
+                    <div className="flex flex-wrap gap-3">
+                      {selectedRelease.contributors.map(c => (
+                        <div key={c.id} className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-1">
+                          <Avatar className="w-6 h-6">
+                            <AvatarFallback className="text-xs">{c.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm">{c.name}</span>
+                          <Badge variant="outline" className="text-xs">{c.commits} commits</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Assets */}
+                  {selectedRelease.assets.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold mb-2">Assets ({selectedRelease.assets.length})</h3>
+                      <div className="space-y-2">
+                        {selectedRelease.assets.map(asset => (
+                          <div key={asset.id} className="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                            <Package className="w-5 h-5 text-gray-400" />
+                            <div className="flex-1">
+                              <div className="font-medium text-sm">{asset.name}</div>
+                              <div className="text-xs text-gray-500">{formatSize(asset.size)}</div>
+                            </div>
+                            <span className="text-sm text-gray-500">{asset.downloads} downloads</span>
+                            <Button size="sm" variant="outline">
+                              <Download className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Metadata */}
+                  <div>
+                    <h3 className="font-semibold mb-2">Details</h3>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Tag</span>
+                        <code className="font-mono">{selectedRelease.tagName}</code>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Branch</span>
+                        <span>{selectedRelease.branch}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Commit</span>
+                        <code className="font-mono">{selectedRelease.commitHash}</code>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Environment</span>
+                        <span className="capitalize">{selectedRelease.environment}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Created</span>
+                        <span>{formatDate(selectedRelease.createdAt)}</span>
+                      </div>
+                      {selectedRelease.deployedAt && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Deployed</span>
+                          <span>{formatDate(selectedRelease.deployedAt)}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div className="p-4 rounded-lg border border-border bg-background">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Calendar className="w-4 h-4 text-purple-600" />
-                    <p className="text-sm font-medium">Scheduled</p>
-                  </div>
-                  <p className="text-2xl font-bold">{stats?.scheduledReleases || 0}</p>
+              </ScrollArea>
+              <div className="flex items-center justify-between pt-4 border-t">
+                <div className="flex items-center gap-2">
+                  <Button variant="outline">
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copy Link
+                  </Button>
+                  <Button variant="outline">
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    View on Git
+                  </Button>
                 </div>
-                <div className="p-4 rounded-lg border border-border bg-background">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertCircle className="w-4 h-4 text-red-600" />
-                    <p className="text-sm font-medium">Failed</p>
-                  </div>
-                  <p className="text-2xl font-bold">{stats?.failedReleases || 0}</p>
+                <div className="flex items-center gap-2">
+                  {selectedRelease.status === 'deployed' && (
+                    <Button variant="outline" className="text-yellow-600">
+                      <RotateCcw className="w-4 h-4 mr-2" />
+                      Rollback
+                    </Button>
+                  )}
+                  <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit Release
+                  </Button>
                 </div>
               </div>
-            </BentoCard>
-          </div>
-
-          <div className="space-y-6">
-            <RankingList title="Top Releases" items={topReleases} />
-
-            <ActivityFeed title="Recent Activity" activities={recentActivity} />
-
-            <BentoCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Release Metrics</h3>
-              <div className="space-y-3">
-                <MiniKPI label="Deploy Frequency" value={`${((stats?.totalReleases || 0) / 4).toFixed(1)}/week`} change={28.4} />
-                <MiniKPI label="Success Rate" value={`${(stats?.successRate || 0).toFixed(1)}%`} change={12.5} />
-                <MiniKPI label="Avg Deploy Time" value={`${(stats?.averageDeployTime || 0).toFixed(1)}min`} change={-18.7} />
-                <MiniKPI label="Total Commits" value={stats?.totalCommits?.toString() || '0'} change={42.3} />
-              </div>
-            </BentoCard>
-
-            <BentoCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-              <div className="space-y-2">
-                <ModernButton variant="outline" className="w-full justify-start" onClick={() => console.log('Schedule')}>
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Schedule Release
-                </ModernButton>
-                <ModernButton variant="outline" className="w-full justify-start" onClick={() => console.log('Branches')}>
-                  <GitBranch className="w-4 h-4 mr-2" />
-                  View Branches
-                </ModernButton>
-                <ModernButton variant="outline" className="w-full justify-start" onClick={() => console.log('Builds')}>
-                  <Package className="w-4 h-4 mr-2" />
-                  Build Artifacts
-                </ModernButton>
-              </div>
-            </BentoCard>
-          </div>
-        </div>
-      </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
