@@ -1,26 +1,19 @@
 'use client'
 
-import { useState } from 'react'
-import { useVideoProjects, VideoProject, VideoStats } from '@/lib/hooks/use-video-projects'
-import {
-  BentoCard,
-  BentoQuickAction
-} from '@/components/ui/bento-grid-advanced'
-import {
-  StatGrid,
-  ProgressCard,
-  ActivityFeed,
-  MiniKPI
-} from '@/components/ui/results-display'
-import {
-  ModernButton,
-  GradientButton,
-  PillButton,
-  IconButton
-} from '@/components/ui/modern-buttons'
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Progress } from '@/components/ui/progress'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
   Video,
   Play,
+  Pause,
   Plus,
   Upload,
   Camera,
@@ -34,125 +27,434 @@ import {
   Wand2,
   Target,
   Clock,
-  X,
+  Search,
+  Filter,
+  MoreVertical,
+  ArrowUpRight,
+  ArrowDownRight,
+  CheckCircle2,
+  AlertCircle,
   Loader2,
   Trash2,
   RefreshCw,
   Pencil,
-  Layers
+  Layers,
+  Music,
+  Image,
+  Type,
+  Palette,
+  Sliders,
+  Zap,
+  Volume2,
+  VolumeX,
+  SkipBack,
+  SkipForward,
+  Maximize2,
+  Download,
+  Copy,
+  Move,
+  Grid3X3,
+  Layout,
+  Monitor,
+  Smartphone,
+  Tablet,
+  Square,
+  Star,
+  Heart,
+  MessageSquare,
+  Users,
+  Calendar,
+  FileVideo,
+  Folder,
+  HardDrive,
+  Cloud,
+  Lock,
+  Unlock
 } from 'lucide-react'
 
-interface VideoStudioClientProps {
-  initialProjects: VideoProject[]
-  initialStats: VideoStats
+// Types
+type ProjectStatus = 'draft' | 'editing' | 'rendering' | 'ready' | 'published' | 'archived'
+type AssetType = 'video' | 'audio' | 'image' | 'graphic' | 'title' | 'transition'
+type TrackType = 'video' | 'audio' | 'title' | 'effects'
+type ExportPreset = '4k' | '1080p' | '720p' | 'instagram' | 'youtube' | 'tiktok' | 'custom'
+type EffectCategory = 'color' | 'blur' | 'distort' | 'stylize' | 'transition' | 'audio'
+type RenderStatus = 'queued' | 'rendering' | 'completed' | 'failed' | 'paused'
+
+interface VideoProject {
+  id: string
+  title: string
+  description: string
+  status: ProjectStatus
+  thumbnail: string
+  duration: number
+  fps: number
+  resolution: string
+  tracks: Track[]
+  lastEdited: string
+  createdAt: string
+  size: number
+  collaborators: Collaborator[]
+  version: number
+  isLocked: boolean
+  tags: string[]
 }
 
-export default function VideoStudioClient({ initialProjects, initialStats }: VideoStudioClientProps) {
-  const {
-    projects,
-    stats,
-    loading,
-    createProject,
-    updateProject,
-    deleteProject,
-    processVideo
-  } = useVideoProjects(initialProjects, initialStats)
+interface Track {
+  id: string
+  type: TrackType
+  name: string
+  clips: Clip[]
+  muted: boolean
+  locked: boolean
+  volume: number
+  visible: boolean
+}
 
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [selectedTab, setSelectedTab] = useState<'projects' | 'templates' | 'assets'>('projects')
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [newProject, setNewProject] = useState({
-    title: '',
-    description: ''
-  })
+interface Clip {
+  id: string
+  name: string
+  startTime: number
+  endTime: number
+  duration: number
+  assetId: string
+  effects: Effect[]
+}
 
-  const handleCreateProject = async () => {
-    if (!newProject.title.trim()) return
-    await createProject(newProject)
-    setShowCreateModal(false)
-    setNewProject({ title: '', description: '' })
+interface Effect {
+  id: string
+  name: string
+  category: EffectCategory
+  intensity: number
+  enabled: boolean
+  parameters: Record<string, number | string | boolean>
+}
+
+interface Asset {
+  id: string
+  name: string
+  type: AssetType
+  duration: number
+  size: number
+  thumbnail: string
+  resolution: string
+  createdAt: string
+  usageCount: number
+  tags: string[]
+}
+
+interface Template {
+  id: string
+  name: string
+  description: string
+  thumbnail: string
+  category: string
+  duration: number
+  downloads: number
+  rating: number
+  isPremium: boolean
+  tags: string[]
+}
+
+interface RenderJob {
+  id: string
+  projectId: string
+  projectName: string
+  preset: ExportPreset
+  status: RenderStatus
+  progress: number
+  startTime: string
+  estimatedTime: number
+  outputSize: number
+  outputPath: string
+}
+
+interface Collaborator {
+  id: string
+  name: string
+  email: string
+  avatar: string
+  role: 'owner' | 'editor' | 'viewer'
+  lastActive: string
+}
+
+// Mock Data
+const mockProjects: VideoProject[] = [
+  {
+    id: '1',
+    title: 'Product Launch Video',
+    description: 'Official launch video for Q1 product release',
+    status: 'editing',
+    thumbnail: '/thumbnails/product-launch.jpg',
+    duration: 180,
+    fps: 30,
+    resolution: '1920x1080',
+    tracks: [],
+    lastEdited: '2024-01-15T10:30:00Z',
+    createdAt: '2024-01-10T09:00:00Z',
+    size: 2.5e9,
+    collaborators: [],
+    version: 5,
+    isLocked: false,
+    tags: ['product', 'launch', 'marketing']
+  },
+  {
+    id: '2',
+    title: 'Customer Testimonial',
+    description: 'Interview with key customer about success story',
+    status: 'ready',
+    thumbnail: '/thumbnails/testimonial.jpg',
+    duration: 240,
+    fps: 24,
+    resolution: '3840x2160',
+    tracks: [],
+    lastEdited: '2024-01-14T16:45:00Z',
+    createdAt: '2024-01-08T11:00:00Z',
+    size: 4.2e9,
+    collaborators: [],
+    version: 8,
+    isLocked: false,
+    tags: ['testimonial', 'interview', 'customer']
+  },
+  {
+    id: '3',
+    title: 'Tutorial Series Ep. 1',
+    description: 'Getting started with our platform',
+    status: 'published',
+    thumbnail: '/thumbnails/tutorial.jpg',
+    duration: 600,
+    fps: 30,
+    resolution: '1920x1080',
+    tracks: [],
+    lastEdited: '2024-01-12T14:20:00Z',
+    createdAt: '2024-01-05T08:00:00Z',
+    size: 1.8e9,
+    collaborators: [],
+    version: 12,
+    isLocked: true,
+    tags: ['tutorial', 'education', 'series']
+  },
+  {
+    id: '4',
+    title: 'Social Media Promo',
+    description: 'Short promotional video for social channels',
+    status: 'rendering',
+    thumbnail: '/thumbnails/promo.jpg',
+    duration: 30,
+    fps: 60,
+    resolution: '1080x1920',
+    tracks: [],
+    lastEdited: '2024-01-15T09:15:00Z',
+    createdAt: '2024-01-14T10:00:00Z',
+    size: 0.5e9,
+    collaborators: [],
+    version: 3,
+    isLocked: true,
+    tags: ['social', 'promo', 'short']
+  },
+  {
+    id: '5',
+    title: 'Company Overview',
+    description: 'Corporate introduction video',
+    status: 'draft',
+    thumbnail: '/thumbnails/overview.jpg',
+    duration: 0,
+    fps: 30,
+    resolution: '1920x1080',
+    tracks: [],
+    lastEdited: '2024-01-15T11:00:00Z',
+    createdAt: '2024-01-15T11:00:00Z',
+    size: 0,
+    collaborators: [],
+    version: 1,
+    isLocked: false,
+    tags: ['corporate', 'overview']
+  }
+]
+
+const mockAssets: Asset[] = [
+  { id: '1', name: 'Interview Footage A', type: 'video', duration: 1200, size: 3.2e9, thumbnail: '/assets/interview-a.jpg', resolution: '4K', createdAt: '2024-01-10T09:00:00Z', usageCount: 5, tags: ['interview', 'footage'] },
+  { id: '2', name: 'Background Music', type: 'audio', duration: 180, size: 12e6, thumbnail: '/assets/music.jpg', resolution: 'N/A', createdAt: '2024-01-08T11:00:00Z', usageCount: 12, tags: ['music', 'background'] },
+  { id: '3', name: 'Logo Animation', type: 'graphic', duration: 5, size: 50e6, thumbnail: '/assets/logo.jpg', resolution: '1080p', createdAt: '2024-01-05T08:00:00Z', usageCount: 25, tags: ['logo', 'animation'] },
+  { id: '4', name: 'Product Photos', type: 'image', duration: 0, size: 25e6, thumbnail: '/assets/product.jpg', resolution: '4K', createdAt: '2024-01-12T14:20:00Z', usageCount: 8, tags: ['product', 'photos'] },
+  { id: '5', name: 'Lower Third Title', type: 'title', duration: 3, size: 2e6, thumbnail: '/assets/title.jpg', resolution: '1080p', createdAt: '2024-01-14T10:00:00Z', usageCount: 15, tags: ['title', 'lower-third'] },
+  { id: '6', name: 'Fade Transition', type: 'transition', duration: 1, size: 1e6, thumbnail: '/assets/fade.jpg', resolution: 'N/A', createdAt: '2024-01-13T16:00:00Z', usageCount: 30, tags: ['transition', 'fade'] },
+  { id: '7', name: 'Drone Footage B', type: 'video', duration: 600, size: 5.5e9, thumbnail: '/assets/drone.jpg', resolution: '4K', createdAt: '2024-01-11T10:00:00Z', usageCount: 3, tags: ['drone', 'aerial'] },
+  { id: '8', name: 'Voiceover Track', type: 'audio', duration: 300, size: 35e6, thumbnail: '/assets/voice.jpg', resolution: 'N/A', createdAt: '2024-01-09T12:00:00Z', usageCount: 7, tags: ['voiceover', 'narration'] }
+]
+
+const mockTemplates: Template[] = [
+  { id: '1', name: 'Corporate Intro', description: 'Professional company introduction', thumbnail: '/templates/corporate.jpg', category: 'Business', duration: 60, downloads: 1250, rating: 4.8, isPremium: false, tags: ['corporate', 'intro'] },
+  { id: '2', name: 'Social Story', description: 'Vertical story format for social media', thumbnail: '/templates/story.jpg', category: 'Social', duration: 15, downloads: 3500, rating: 4.6, isPremium: false, tags: ['social', 'story', 'vertical'] },
+  { id: '3', name: 'Product Showcase', description: 'Elegant product presentation', thumbnail: '/templates/product.jpg', category: 'Marketing', duration: 45, downloads: 890, rating: 4.9, isPremium: true, tags: ['product', 'showcase'] },
+  { id: '4', name: 'Event Highlights', description: 'Dynamic event recap template', thumbnail: '/templates/event.jpg', category: 'Events', duration: 120, downloads: 560, rating: 4.7, isPremium: true, tags: ['event', 'highlights'] },
+  { id: '5', name: 'Tutorial Opener', description: 'Educational video intro', thumbnail: '/templates/tutorial.jpg', category: 'Education', duration: 10, downloads: 2100, rating: 4.5, isPremium: false, tags: ['tutorial', 'education', 'opener'] },
+  { id: '6', name: 'Podcast Visual', description: 'Animated podcast video template', thumbnail: '/templates/podcast.jpg', category: 'Audio', duration: 0, downloads: 780, rating: 4.4, isPremium: false, tags: ['podcast', 'audio', 'visual'] }
+]
+
+const mockRenderJobs: RenderJob[] = [
+  { id: '1', projectId: '4', projectName: 'Social Media Promo', preset: 'instagram', status: 'rendering', progress: 67, startTime: '2024-01-15T09:20:00Z', estimatedTime: 120, outputSize: 45e6, outputPath: '/exports/promo-instagram.mp4' },
+  { id: '2', projectId: '1', projectName: 'Product Launch Video', preset: '1080p', status: 'queued', progress: 0, startTime: '', estimatedTime: 300, outputSize: 0, outputPath: '/exports/product-launch.mp4' },
+  { id: '3', projectId: '2', projectName: 'Customer Testimonial', preset: '4k', status: 'completed', progress: 100, startTime: '2024-01-14T16:00:00Z', estimatedTime: 0, outputSize: 850e6, outputPath: '/exports/testimonial-4k.mp4' },
+  { id: '4', projectId: '3', projectName: 'Tutorial Series Ep. 1', preset: 'youtube', status: 'completed', progress: 100, startTime: '2024-01-12T14:00:00Z', estimatedTime: 0, outputSize: 420e6, outputPath: '/exports/tutorial-ep1.mp4' }
+]
+
+const mockEffects: Effect[] = [
+  { id: '1', name: 'Color Correction', category: 'color', intensity: 75, enabled: true, parameters: { brightness: 10, contrast: 15, saturation: 5 } },
+  { id: '2', name: 'Gaussian Blur', category: 'blur', intensity: 50, enabled: false, parameters: { radius: 5 } },
+  { id: '3', name: 'Film Grain', category: 'stylize', intensity: 30, enabled: true, parameters: { amount: 20, size: 2 } },
+  { id: '4', name: 'Lens Distortion', category: 'distort', intensity: 25, enabled: false, parameters: { curvature: 10 } },
+  { id: '5', name: 'Cross Dissolve', category: 'transition', intensity: 100, enabled: true, parameters: { duration: 1 } },
+  { id: '6', name: 'Audio Fade', category: 'audio', intensity: 80, enabled: true, parameters: { fadeIn: 0.5, fadeOut: 1 } }
+]
+
+export default function VideoStudioClient() {
+  const [projects] = useState<VideoProject[]>(mockProjects)
+  const [assets] = useState<Asset[]>(mockAssets)
+  const [templates] = useState<Template[]>(mockTemplates)
+  const [renderJobs] = useState<RenderJob[]>(mockRenderJobs)
+  const [effects] = useState<Effect[]>(mockEffects)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedProject, setSelectedProject] = useState<VideoProject | null>(null)
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
+  const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all')
+  const [assetTypeFilter, setAssetTypeFilter] = useState<AssetType | 'all'>('all')
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [volume, setVolume] = useState(100)
+
+  // Stats
+  const stats = useMemo(() => {
+    const totalProjects = projects.length
+    const totalAssets = assets.length
+    const totalStorage = assets.reduce((sum, a) => sum + a.size, 0) + projects.reduce((sum, p) => sum + p.size, 0)
+    const totalDuration = projects.reduce((sum, p) => sum + p.duration, 0)
+    const publishedCount = projects.filter(p => p.status === 'published').length
+    const renderingCount = renderJobs.filter(j => j.status === 'rendering').length
+    const avgRating = templates.reduce((sum, t) => sum + t.rating, 0) / templates.length
+    const totalDownloads = templates.reduce((sum, t) => sum + t.downloads, 0)
+    return { totalProjects, totalAssets, totalStorage, totalDuration, publishedCount, renderingCount, avgRating, totalDownloads }
+  }, [projects, assets, templates, renderJobs])
+
+  // Filtered data
+  const filteredProjects = useMemo(() => {
+    return projects.filter(project => {
+      const matchesSearch = project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+      const matchesStatus = statusFilter === 'all' || project.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [projects, searchQuery, statusFilter])
+
+  const filteredAssets = useMemo(() => {
+    return assets.filter(asset => {
+      const matchesSearch = asset.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        asset.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+      const matchesType = assetTypeFilter === 'all' || asset.type === assetTypeFilter
+      return matchesSearch && matchesType
+    })
+  }, [assets, searchQuery, assetTypeFilter])
+
+  // Helper functions
+  const getStatusColor = (status: ProjectStatus) => {
+    const colors: Record<ProjectStatus, string> = {
+      draft: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+      editing: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      rendering: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+      ready: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      published: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+      archived: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+    }
+    return colors[status]
   }
 
-  const handleProcessVideo = async (id: string) => {
-    setIsProcessing(true)
-    await processVideo(id)
-    setTimeout(() => setIsProcessing(false), 3000)
+  const getStatusIcon = (status: ProjectStatus) => {
+    const icons: Record<ProjectStatus, React.ReactNode> = {
+      draft: <Pencil className="w-3 h-3" />,
+      editing: <Scissors className="w-3 h-3" />,
+      rendering: <Loader2 className="w-3 h-3 animate-spin" />,
+      ready: <CheckCircle2 className="w-3 h-3" />,
+      published: <Share2 className="w-3 h-3" />,
+      archived: <Folder className="w-3 h-3" />
+    }
+    return icons[status]
   }
 
-  const displayStats = [
-    {
-      label: 'Total Videos',
-      value: stats.total.toString(),
-      change: 12.5,
-      icon: <Video className="w-5 h-5" />
-    },
-    {
-      label: 'Total Views',
-      value: stats.totalViews.toLocaleString(),
-      change: 25.3,
-      icon: <Eye className="w-5 h-5" />
-    },
-    {
-      label: 'Total Likes',
-      value: stats.totalLikes.toLocaleString(),
-      change: 8.7,
-      icon: <TrendingUp className="w-5 h-5" />
-    },
-    {
-      label: 'Ready',
-      value: stats.ready.toString(),
-      change: 15.2,
-      icon: <Play className="w-5 h-5" />
+  const getRenderStatusColor = (status: RenderStatus) => {
+    const colors: Record<RenderStatus, string> = {
+      queued: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+      rendering: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      completed: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      failed: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+      paused: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
     }
-  ]
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'ready': return 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300'
-      case 'processing': return 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
-      case 'draft': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
-      case 'failed': return 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300'
-      default: return 'bg-gray-100 text-gray-700'
-    }
+    return colors[status]
   }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'ready': return <Play className="w-3 h-3" />
-      case 'processing': return <RefreshCw className="w-3 h-3 animate-spin" />
-      case 'draft': return <Pencil className="w-3 h-3" />
-      default: return null
+  const getAssetIcon = (type: AssetType) => {
+    const icons: Record<AssetType, React.ReactNode> = {
+      video: <FileVideo className="w-4 h-4" />,
+      audio: <Music className="w-4 h-4" />,
+      image: <Image className="w-4 h-4" />,
+      graphic: <Layers className="w-4 h-4" />,
+      title: <Type className="w-4 h-4" />,
+      transition: <Zap className="w-4 h-4" />
     }
+    return icons[type]
+  }
+
+  const getEffectCategoryColor = (category: EffectCategory) => {
+    const colors: Record<EffectCategory, string> = {
+      color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+      blur: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      distort: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+      stylize: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
+      transition: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      audio: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400'
+    }
+    return colors[category]
   }
 
   const formatDuration = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
+    const hrs = Math.floor(seconds / 3600)
+    const mins = Math.floor((seconds % 3600) / 60)
     const secs = seconds % 60
+    if (hrs > 0) return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
-  const recentActivity = [
-    {
-      icon: <Video className="w-5 h-5" />,
-      title: 'Video rendered',
-      description: 'Project ready for review',
-      time: '10 minutes ago',
-      status: 'success' as const
-    },
-    {
-      icon: <Brain className="w-5 h-5" />,
-      title: 'AI enhancement',
-      description: 'Auto-captions added',
-      time: '1 hour ago',
-      status: 'success' as const
-    },
-    {
-      icon: <Upload className="w-5 h-5" />,
-      title: 'Asset uploaded',
-      description: 'New media added',
-      time: '2 hours ago',
-      status: 'info' as const
-    }
+  const formatFileSize = (bytes: number) => {
+    if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(1)} GB`
+    if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`
+    if (bytes >= 1e3) return `${(bytes / 1e3).toFixed(1)} KB`
+    return `${bytes} B`
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+    return `${diffDays}d ago`
+  }
+
+  const statCards = [
+    { label: 'Total Projects', value: stats.totalProjects.toString(), change: 12.5, icon: Video, color: 'from-purple-500 to-pink-500' },
+    { label: 'Total Assets', value: stats.totalAssets.toString(), change: 8.3, icon: Layers, color: 'from-blue-500 to-cyan-500' },
+    { label: 'Storage Used', value: formatFileSize(stats.totalStorage), change: 15.2, icon: HardDrive, color: 'from-green-500 to-emerald-500' },
+    { label: 'Total Duration', value: formatDuration(stats.totalDuration), change: 5.7, icon: Clock, color: 'from-orange-500 to-amber-500' },
+    { label: 'Published', value: stats.publishedCount.toString(), change: 20.0, icon: Share2, color: 'from-indigo-500 to-violet-500' },
+    { label: 'Rendering', value: stats.renderingCount.toString(), change: -10.0, icon: RefreshCw, color: 'from-rose-500 to-red-500' },
+    { label: 'Avg Rating', value: stats.avgRating.toFixed(1), change: 3.2, icon: Star, color: 'from-yellow-500 to-orange-500' },
+    { label: 'Downloads', value: stats.totalDownloads.toLocaleString(), change: 25.8, icon: Download, color: 'from-teal-500 to-green-500' }
   ]
 
   return (
@@ -160,286 +462,745 @@ export default function VideoStudioClient({ initialProjects, initialStats }: Vid
       <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-              <Film className="w-10 h-10 text-purple-600" />
-              Video Studio
-            </h1>
-            <p className="text-muted-foreground">
-              Create, edit, and manage your video content
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+              <Film className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Video Studio</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Adobe Premiere-level video production</p>
+            </div>
           </div>
-
           <div className="flex items-center gap-3">
-            <IconButton
-              icon={<Camera />}
-              ariaLabel="Record"
-              variant="ghost"
-              size="md"
-            />
-            <IconButton
-              icon={<Settings />}
-              ariaLabel="Settings"
-              variant="ghost"
-              size="md"
-            />
-            <GradientButton
-              from="purple"
-              to="pink"
-              onClick={() => setShowCreateModal(true)}
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              New Video
-            </GradientButton>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="Search projects, assets..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 w-64"
+              />
+            </div>
+            <Button variant="outline" size="icon">
+              <Filter className="w-4 h-4" />
+            </Button>
+            <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              New Project
+            </Button>
           </div>
         </div>
 
-        {/* Stats */}
-        <StatGrid columns={4} stats={displayStats} />
-
-        {/* Tabs */}
-        <div className="flex items-center gap-3">
-          <PillButton
-            variant={selectedTab === 'projects' ? 'primary' : 'ghost'}
-            onClick={() => setSelectedTab('projects')}
-          >
-            <Video className="w-4 h-4 mr-2" />
-            My Videos
-          </PillButton>
-          <PillButton
-            variant={selectedTab === 'templates' ? 'primary' : 'ghost'}
-            onClick={() => setSelectedTab('templates')}
-          >
-            <Wand2 className="w-4 h-4 mr-2" />
-            Templates
-          </PillButton>
-          <PillButton
-            variant={selectedTab === 'assets' ? 'primary' : 'ghost'}
-            onClick={() => setSelectedTab('assets')}
-          >
-            <Layers className="w-4 h-4 mr-2" />
-            Assets
-          </PillButton>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {statCards.map((stat, index) => (
+            <Card key={index} className="border-0 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                    <stat.icon className="w-4 h-4 text-white" />
+                  </div>
+                  <div className={`flex items-center gap-1 text-xs ${stat.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {stat.change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                    {Math.abs(stat.change)}%
+                  </div>
+                </div>
+                <div className="text-lg font-bold text-gray-900 dark:text-white">{stat.value}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Video Projects */}
-          <div className="lg:col-span-2 space-y-6">
-            <BentoCard className="p-6">
-              <h3 className="text-xl font-semibold mb-4">Video Projects ({projects.length})</h3>
-              {loading && projects.length === 0 ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
-                </div>
-              ) : projects.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <Video className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No video projects yet</p>
-                  <ModernButton
-                    variant="outline"
-                    size="sm"
-                    className="mt-4"
-                    onClick={() => setShowCreateModal(true)}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create First Video
-                  </ModernButton>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {projects.map((video) => (
-                    <div
-                      key={video.id}
-                      className="p-4 rounded-xl border border-border bg-background hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="w-24 h-16 bg-muted rounded-lg flex items-center justify-center">
-                          {video.thumbnail_url ? (
-                            <img
-                              src={video.thumbnail_url}
-                              alt={video.title}
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                          ) : (
-                            <Video className="w-8 h-8 text-muted-foreground" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold">{video.title}</h4>
-                            <span className={`text-xs px-2 py-1 rounded-md flex items-center gap-1 ${getStatusColor(video.status)}`}>
-                              {getStatusIcon(video.status)}
-                              {video.status}
-                            </span>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-2">{video.description || 'No description'}</p>
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {formatDuration(video.duration_seconds)}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Eye className="w-3 h-3" />
-                              {video.views_count} views
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <TrendingUp className="w-3 h-3" />
-                              {video.likes_count} likes
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {video.status === 'draft' && (
-                            <ModernButton
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleProcessVideo(video.id)}
-                            >
-                              <Play className="w-3 h-3 mr-1" />
-                              Render
-                            </ModernButton>
-                          )}
-                          {video.status === 'ready' && (
-                            <ModernButton
-                              variant="primary"
-                              size="sm"
-                              onClick={() => console.log('Share', video.id)}
-                            >
-                              <Share2 className="w-3 h-3 mr-1" />
-                              Share
-                            </ModernButton>
-                          )}
-                          <ModernButton
-                            variant="outline"
-                            size="sm"
-                            onClick={() => deleteProject(video.id)}
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </ModernButton>
-                        </div>
+        {/* Main Tabs */}
+        <Tabs defaultValue="projects" className="space-y-6">
+          <TabsList className="bg-white dark:bg-gray-800 p-1 shadow-sm">
+            <TabsTrigger value="projects" className="flex items-center gap-2">
+              <Video className="w-4 h-4" />
+              Projects
+            </TabsTrigger>
+            <TabsTrigger value="timeline" className="flex items-center gap-2">
+              <Sliders className="w-4 h-4" />
+              Timeline
+            </TabsTrigger>
+            <TabsTrigger value="assets" className="flex items-center gap-2">
+              <Layers className="w-4 h-4" />
+              Assets
+            </TabsTrigger>
+            <TabsTrigger value="effects" className="flex items-center gap-2">
+              <Wand2 className="w-4 h-4" />
+              Effects
+            </TabsTrigger>
+            <TabsTrigger value="render" className="flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              Render Queue
+            </TabsTrigger>
+            <TabsTrigger value="templates" className="flex items-center gap-2">
+              <Grid3X3 className="w-4 h-4" />
+              Templates
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Projects Tab */}
+          <TabsContent value="projects" className="space-y-6">
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button
+                variant={statusFilter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setStatusFilter('all')}
+              >
+                All ({projects.length})
+              </Button>
+              {(['draft', 'editing', 'rendering', 'ready', 'published'] as ProjectStatus[]).map(status => (
+                <Button
+                  key={status}
+                  variant={statusFilter === status ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setStatusFilter(status)}
+                >
+                  {status.charAt(0).toUpperCase() + status.slice(1)} ({projects.filter(p => p.status === status).length})
+                </Button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProjects.map(project => (
+                <Card key={project.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedProject(project)}>
+                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-t-lg relative overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-black/50 flex items-center justify-center">
+                        <Play className="w-6 h-6 text-white ml-1" />
                       </div>
                     </div>
-                  ))}
+                    <div className="absolute top-3 left-3">
+                      <Badge className={getStatusColor(project.status)}>
+                        {getStatusIcon(project.status)}
+                        <span className="ml-1">{project.status}</span>
+                      </Badge>
+                    </div>
+                    <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                      {formatDuration(project.duration)}
+                    </div>
+                    {project.isLocked && (
+                      <div className="absolute top-3 right-3">
+                        <Lock className="w-4 h-4 text-white drop-shadow-lg" />
+                      </div>
+                    )}
+                  </div>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{project.title}</h3>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 line-clamp-2">{project.description}</p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center gap-1">
+                        <Monitor className="w-3 h-3" />
+                        {project.resolution}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Film className="w-3 h-3" />
+                        {project.fps} fps
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <HardDrive className="w-3 h-3" />
+                        {formatFileSize(project.size)}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        v{project.version} • {formatTimeAgo(project.lastEdited)}
+                      </div>
+                      <div className="flex gap-1">
+                        {project.tags.slice(0, 2).map((tag, i) => (
+                          <Badge key={i} variant="secondary" className="text-xs">{tag}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Timeline Tab */}
+          <TabsContent value="timeline" className="space-y-6">
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Monitor className="w-5 h-5" />
+                  Preview Window
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="aspect-video bg-black rounded-lg relative overflow-hidden mb-4">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center text-white">
+                      <Film className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                      <p className="text-sm opacity-70">Select a project to preview</p>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </BentoCard>
-          </div>
+                {/* Playback Controls */}
+                <div className="flex items-center justify-center gap-4 mb-4">
+                  <Button variant="ghost" size="icon">
+                    <SkipBack className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="default"
+                    size="icon"
+                    className="w-12 h-12 rounded-full"
+                    onClick={() => setIsPlaying(!isPlaying)}
+                  >
+                    {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+                  </Button>
+                  <Button variant="ghost" size="icon">
+                    <SkipForward className="w-4 h-4" />
+                  </Button>
+                  <div className="flex items-center gap-2 ml-4">
+                    <Button variant="ghost" size="icon" onClick={() => setVolume(volume === 0 ? 100 : 0)}>
+                      {volume === 0 ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                    </Button>
+                    <div className="w-20 h-1 bg-gray-200 dark:bg-gray-700 rounded-full">
+                      <div className="h-full bg-purple-500 rounded-full" style={{ width: `${volume}%` }} />
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon" className="ml-auto">
+                    <Maximize2 className="w-4 h-4" />
+                  </Button>
+                </div>
+                {/* Timeline Scrubber */}
+                <div className="relative">
+                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                    <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" style={{ width: '35%' }} />
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <span>00:00</span>
+                    <span>01:03 / 03:00</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Right Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Actions */}
-            <BentoCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-              <div className="space-y-2">
-                <ModernButton
-                  variant="primary"
-                  className="w-full justify-start"
-                  onClick={() => console.log('Record')}
+            {/* Multi-track Timeline */}
+            <Card className="border-0 shadow-sm">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Sliders className="w-5 h-5" />
+                    Timeline Tracks
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm">
+                      <Plus className="w-3 h-3 mr-1" />
+                      Add Track
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {/* Video Track */}
+                  <div className="flex items-center gap-3 p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <div className="flex items-center gap-2 w-32">
+                      <Video className="w-4 h-4 text-purple-600" />
+                      <span className="text-sm font-medium">Video 1</span>
+                    </div>
+                    <div className="flex-1 h-12 bg-purple-200 dark:bg-purple-800 rounded-lg relative overflow-hidden">
+                      <div className="absolute left-4 top-2 bottom-2 w-48 bg-purple-500 rounded flex items-center px-2">
+                        <span className="text-xs text-white truncate">Main Footage</span>
+                      </div>
+                      <div className="absolute left-56 top-2 bottom-2 w-32 bg-purple-400 rounded flex items-center px-2">
+                        <span className="text-xs text-white truncate">B-Roll</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8"><Eye className="w-3 h-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8"><Lock className="w-3 h-3" /></Button>
+                    </div>
+                  </div>
+
+                  {/* Audio Track */}
+                  <div className="flex items-center gap-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="flex items-center gap-2 w-32">
+                      <Music className="w-4 h-4 text-blue-600" />
+                      <span className="text-sm font-medium">Audio 1</span>
+                    </div>
+                    <div className="flex-1 h-12 bg-blue-200 dark:bg-blue-800 rounded-lg relative overflow-hidden">
+                      <div className="absolute left-0 top-2 bottom-2 w-full bg-blue-500 rounded flex items-center px-2">
+                        <span className="text-xs text-white truncate">Background Music</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8"><Volume2 className="w-3 h-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8"><Unlock className="w-3 h-3" /></Button>
+                    </div>
+                  </div>
+
+                  {/* Title Track */}
+                  <div className="flex items-center gap-3 p-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div className="flex items-center gap-2 w-32">
+                      <Type className="w-4 h-4 text-green-600" />
+                      <span className="text-sm font-medium">Titles</span>
+                    </div>
+                    <div className="flex-1 h-12 bg-green-200 dark:bg-green-800 rounded-lg relative overflow-hidden">
+                      <div className="absolute left-8 top-2 bottom-2 w-24 bg-green-500 rounded flex items-center px-2">
+                        <span className="text-xs text-white truncate">Intro Title</span>
+                      </div>
+                      <div className="absolute right-8 top-2 bottom-2 w-20 bg-green-400 rounded flex items-center px-2">
+                        <span className="text-xs text-white truncate">Lower 3rd</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8"><Eye className="w-3 h-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8"><Unlock className="w-3 h-3" /></Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Assets Tab */}
+          <TabsContent value="assets" className="space-y-6">
+            <div className="flex items-center gap-3 flex-wrap">
+              <Button
+                variant={assetTypeFilter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setAssetTypeFilter('all')}
+              >
+                All ({assets.length})
+              </Button>
+              {(['video', 'audio', 'image', 'graphic', 'title', 'transition'] as AssetType[]).map(type => (
+                <Button
+                  key={type}
+                  variant={assetTypeFilter === type ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setAssetTypeFilter(type)}
                 >
-                  <Camera className="w-4 h-4 mr-2" />
-                  Record Screen
-                </ModernButton>
-                <ModernButton
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => console.log('Upload')}
-                >
+                  {type.charAt(0).toUpperCase() + type.slice(1)} ({assets.filter(a => a.type === type).length})
+                </Button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {filteredAssets.map(asset => (
+                <Card key={asset.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedAsset(asset)}>
+                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-t-lg relative overflow-hidden flex items-center justify-center">
+                    {getAssetIcon(asset.type)}
+                    {asset.duration > 0 && (
+                      <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
+                        {formatDuration(asset.duration)}
+                      </div>
+                    )}
+                  </div>
+                  <CardContent className="p-3">
+                    <h4 className="font-medium text-sm text-gray-900 dark:text-white truncate">{asset.name}</h4>
+                    <div className="flex items-center justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
+                      <span>{formatFileSize(asset.size)}</span>
+                      <span>{asset.usageCount} uses</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            <Card className="border-0 shadow-sm border-dashed border-2 border-gray-300 dark:border-gray-600">
+              <CardContent className="p-8 text-center">
+                <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                <p className="text-gray-600 dark:text-gray-300 font-medium mb-2">Drop files here or click to upload</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Support for video, audio, images, and graphics</p>
+                <Button variant="outline" className="mt-4">
                   <Upload className="w-4 h-4 mr-2" />
-                  Upload Video
-                </ModernButton>
-                <ModernButton
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => console.log('AI Enhance')}
-                >
-                  <Brain className="w-4 h-4 mr-2" />
-                  AI Enhance
-                </ModernButton>
+                  Browse Files
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Effects Tab */}
+          <TabsContent value="effects" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle>Effects Library</CardTitle>
+                    <CardDescription>Browse and apply professional video effects</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {effects.map(effect => (
+                        <div
+                          key={effect.id}
+                          className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                            effect.enabled
+                              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <Badge className={getEffectCategoryColor(effect.category)}>
+                              {effect.category}
+                            </Badge>
+                            {effect.enabled && <CheckCircle2 className="w-4 h-4 text-purple-500" />}
+                          </div>
+                          <h4 className="font-medium text-gray-900 dark:text-white">{effect.name}</h4>
+                          <div className="mt-2">
+                            <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                              <span>Intensity</span>
+                              <span>{effect.intensity}%</span>
+                            </div>
+                            <Progress value={effect.intensity} className="h-1" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            </BentoCard>
 
-            {/* Progress Card */}
-            <ProgressCard
-              title="Render Queue"
-              current={stats.processing}
-              goal={stats.total || 1}
-              icon={<Target className="w-5 h-5" />}
-            />
+              <div className="space-y-6">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Palette className="w-5 h-5" />
+                      Color Grading
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {['Exposure', 'Contrast', 'Highlights', 'Shadows', 'Saturation', 'Temperature'].map((param, i) => (
+                      <div key={param}>
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span>{param}</span>
+                          <span className="text-gray-500">{50 + i * 5}</span>
+                        </div>
+                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+                          <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" style={{ width: `${50 + i * 5}%` }} />
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
 
-            {/* Recent Activity */}
-            <ActivityFeed
-              title="Recent Activity"
-              activities={recentActivity}
-            />
-
-            {/* Quick Stats */}
-            <BentoCard className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Quick Stats</h3>
-              <div className="space-y-3">
-                <MiniKPI label="Avg. Duration" value={formatDuration(stats.avgDuration)} change={12.5} />
-                <MiniKPI label="Ready Videos" value={stats.ready.toString()} change={5.2} />
-                <MiniKPI label="Draft Videos" value={stats.draft.toString()} change={8.7} />
-                <MiniKPI label="Processing" value={stats.processing.toString()} change={-2.1} />
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Brain className="w-5 h-5" />
+                      AI Features
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button variant="outline" className="w-full justify-start">
+                      <Wand2 className="w-4 h-4 mr-2" />
+                      Auto Color Correct
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <Type className="w-4 h-4 mr-2" />
+                      Generate Captions
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <Scissors className="w-4 h-4 mr-2" />
+                      Scene Detection
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <Music className="w-4 h-4 mr-2" />
+                      Audio Enhancement
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
-            </BentoCard>
-          </div>
-        </div>
+            </div>
+          </TabsContent>
+
+          {/* Render Queue Tab */}
+          <TabsContent value="render" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Render Queue</CardTitle>
+                      <Button>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add to Queue
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {renderJobs.map(job => (
+                        <div key={job.id} className="p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                                <FileVideo className="w-5 h-5 text-white" />
+                              </div>
+                              <div>
+                                <h4 className="font-medium text-gray-900 dark:text-white">{job.projectName}</h4>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Preset: {job.preset.toUpperCase()}</p>
+                              </div>
+                            </div>
+                            <Badge className={getRenderStatusColor(job.status)}>
+                              {job.status === 'rendering' && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
+                              {job.status}
+                            </Badge>
+                          </div>
+                          {job.status === 'rendering' && (
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-gray-500">Progress</span>
+                                <span className="font-medium">{job.progress}%</span>
+                              </div>
+                              <Progress value={job.progress} className="h-2" />
+                              <p className="text-xs text-gray-500">Est. time remaining: {Math.ceil(job.estimatedTime * (100 - job.progress) / 100 / 60)}min</p>
+                            </div>
+                          )}
+                          {job.status === 'completed' && (
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-500">Output: {formatFileSize(job.outputSize)}</span>
+                              <div className="flex gap-2">
+                                <Button variant="outline" size="sm">
+                                  <Download className="w-3 h-3 mr-1" />
+                                  Download
+                                </Button>
+                                <Button variant="outline" size="sm">
+                                  <Share2 className="w-3 h-3 mr-1" />
+                                  Share
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-6">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle>Export Presets</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {[
+                      { name: '4K Ultra HD', icon: Monitor, desc: '3840x2160 @ 60fps' },
+                      { name: '1080p Full HD', icon: Monitor, desc: '1920x1080 @ 30fps' },
+                      { name: 'YouTube', icon: Video, desc: 'Optimized for YouTube' },
+                      { name: 'Instagram Reels', icon: Smartphone, desc: '1080x1920 vertical' },
+                      { name: 'TikTok', icon: Smartphone, desc: '1080x1920 @ 60fps' },
+                      { name: 'Twitter/X', icon: Square, desc: '1:1 square format' }
+                    ].map((preset, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                        <preset.icon className="w-5 h-5 text-purple-500" />
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{preset.name}</p>
+                          <p className="text-xs text-gray-500">{preset.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Cloud className="w-5 h-5" />
+                      Cloud Rendering
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                      Render projects faster using cloud processing power
+                    </p>
+                    <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                      Enable Cloud Render
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Templates Tab */}
+          <TabsContent value="templates" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {templates.map(template => (
+                <Card key={template.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 relative">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Play className="w-12 h-12 text-white/80" />
+                    </div>
+                    {template.isPremium && (
+                      <div className="absolute top-3 left-3">
+                        <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
+                          <Star className="w-3 h-3 mr-1" />
+                          Premium
+                        </Badge>
+                      </div>
+                    )}
+                    <div className="absolute bottom-3 right-3 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                      {formatDuration(template.duration)}
+                    </div>
+                  </div>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{template.name}</h3>
+                      <div className="flex items-center gap-1 text-yellow-500">
+                        <Star className="w-4 h-4 fill-current" />
+                        <span className="text-sm">{template.rating}</span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{template.description}</p>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="secondary">{template.category}</Badge>
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <Download className="w-3 h-3" />
+                        {template.downloads.toLocaleString()}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Project Detail Dialog */}
+        <Dialog open={!!selectedProject} onOpenChange={() => setSelectedProject(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Film className="w-5 h-5" />
+                {selectedProject?.title}
+              </DialogTitle>
+              <DialogDescription>{selectedProject?.description}</DialogDescription>
+            </DialogHeader>
+            {selectedProject && (
+              <ScrollArea className="max-h-96">
+                <div className="space-y-6 pr-4">
+                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-lg flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-black/50 flex items-center justify-center cursor-pointer hover:bg-black/70">
+                      <Play className="w-8 h-8 text-white ml-1" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-gray-500">Duration</p>
+                      <p className="font-medium">{formatDuration(selectedProject.duration)}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-gray-500">Resolution</p>
+                      <p className="font-medium">{selectedProject.resolution}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-gray-500">Frame Rate</p>
+                      <p className="font-medium">{selectedProject.fps} fps</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-gray-500">File Size</p>
+                      <p className="font-medium">{formatFileSize(selectedProject.size)}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium mb-2">Project Details</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500">Status</span>
+                        <Badge className={getStatusColor(selectedProject.status)}>{selectedProject.status}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500">Version</span>
+                        <span>v{selectedProject.version}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500">Created</span>
+                        <span>{formatDate(selectedProject.createdAt)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500">Last Edited</span>
+                        <span>{formatTimeAgo(selectedProject.lastEdited)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                      <Pencil className="w-4 h-4 mr-2" />
+                      Open in Editor
+                    </Button>
+                    <Button variant="outline">
+                      <Download className="w-4 h-4 mr-2" />
+                      Export
+                    </Button>
+                    <Button variant="outline">
+                      <Share2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </ScrollArea>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Asset Detail Dialog */}
+        <Dialog open={!!selectedAsset} onOpenChange={() => setSelectedAsset(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                {selectedAsset && getAssetIcon(selectedAsset.type)}
+                {selectedAsset?.name}
+              </DialogTitle>
+            </DialogHeader>
+            {selectedAsset && (
+              <div className="space-y-4">
+                <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-lg flex items-center justify-center">
+                  {getAssetIcon(selectedAsset.type)}
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <p className="text-xs text-gray-500">Type</p>
+                    <p className="font-medium capitalize">{selectedAsset.type}</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <p className="text-xs text-gray-500">Size</p>
+                    <p className="font-medium">{formatFileSize(selectedAsset.size)}</p>
+                  </div>
+                  {selectedAsset.duration > 0 && (
+                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-gray-500">Duration</p>
+                      <p className="font-medium">{formatDuration(selectedAsset.duration)}</p>
+                    </div>
+                  )}
+                  <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <p className="text-xs text-gray-500">Used In</p>
+                    <p className="font-medium">{selectedAsset.usageCount} projects</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button variant="outline" className="flex-1">
+                    <Copy className="w-4 h-4 mr-2" />
+                    Duplicate
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <Move className="w-4 h-4 mr-2" />
+                    Move
+                  </Button>
+                  <Button variant="destructive" size="icon">
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
-
-      {/* Create Project Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-background rounded-xl p-6 w-full max-w-md mx-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">Create Video Project</h2>
-              <button onClick={() => setShowCreateModal(false)}>
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Title *</label>
-                <input
-                  type="text"
-                  value={newProject.title}
-                  onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="Enter video title"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
-                <textarea
-                  value={newProject.description}
-                  onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-                  rows={3}
-                  className="w-full px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="Enter description"
-                />
-              </div>
-              <div className="flex gap-3 pt-4">
-                <ModernButton
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setShowCreateModal(false)}
-                >
-                  Cancel
-                </ModernButton>
-                <GradientButton
-                  from="purple"
-                  to="pink"
-                  className="flex-1"
-                  onClick={handleCreateProject}
-                  disabled={loading || !newProject.title.trim()}
-                >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create Project'}
-                </GradientButton>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
