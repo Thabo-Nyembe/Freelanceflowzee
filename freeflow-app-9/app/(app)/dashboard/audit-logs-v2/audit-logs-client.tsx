@@ -1,7 +1,21 @@
 'use client'
 
-import { useState } from 'react'
-import { useAuditLogs, useAuditAlertRules, AuditLog, AuditAlertRule, getSeverityColor, getStatusColor } from '@/lib/hooks/use-audit-logs'
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Progress } from '@/components/ui/progress'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   FileText,
   Activity,
@@ -10,7 +24,7 @@ import {
   Database,
   Shield,
   AlertTriangle,
-  CheckCircle2,
+  CheckCircle,
   XCircle,
   Clock,
   Filter,
@@ -24,385 +38,1335 @@ import {
   Edit,
   Plus,
   LogIn,
-  LogOut
+  LogOut,
+  Globe,
+  MapPin,
+  Monitor,
+  Smartphone,
+  Server,
+  Key,
+  Bell,
+  TrendingUp,
+  TrendingDown,
+  ArrowUpRight,
+  ArrowDownRight,
+  RefreshCw,
+  Play,
+  Pause,
+  AlertCircle,
+  Info,
+  Zap,
+  BarChart3,
+  PieChart,
+  Users,
+  Building,
+  ChevronRight,
+  Copy,
+  ExternalLink,
+  Terminal,
+  Code,
+  Layers,
+  Archive,
+  FileWarning,
+  ShieldCheck,
+  ShieldAlert,
+  Fingerprint,
+  Cpu,
+  HardDrive,
+  Wifi,
+  WifiOff
 } from 'lucide-react'
 
-interface AuditLogsClientProps {
-  initialLogs: AuditLog[]
-  initialRules: AuditAlertRule[]
+// ============================================================================
+// TYPE DEFINITIONS - Datadog/Splunk Level Audit Logging
+// ============================================================================
+
+type LogSeverity = 'debug' | 'info' | 'warning' | 'error' | 'critical'
+type LogType = 'authentication' | 'authorization' | 'data_access' | 'data_modification' | 'system' | 'security' | 'admin' | 'api'
+type LogStatus = 'success' | 'failed' | 'blocked' | 'pending' | 'timeout'
+type AlertStatus = 'active' | 'acknowledged' | 'resolved' | 'muted'
+type AlertSeverity = 'low' | 'medium' | 'high' | 'critical'
+type ComplianceFramework = 'SOC2' | 'GDPR' | 'HIPAA' | 'PCI-DSS' | 'ISO27001'
+type RetentionPeriod = '7d' | '30d' | '90d' | '1y' | '7y'
+
+interface AuditLog {
+  id: string
+  timestamp: string
+  log_type: LogType
+  severity: LogSeverity
+  status: LogStatus
+  action: string
+  description: string
+  user_id: string | null
+  user_email: string | null
+  user_name: string | null
+  user_role: string | null
+  ip_address: string
+  user_agent: string
+  device_type: 'desktop' | 'mobile' | 'tablet' | 'api'
+  location: string
+  country: string
+  city: string
+  resource_type: string
+  resource_id: string
+  resource_name: string
+  request_id: string
+  session_id: string | null
+  duration_ms: number
+  metadata: Record<string, unknown>
+  tags: string[]
+  is_anomaly: boolean
+  risk_score: number
 }
 
-type LogType = 'all' | 'authentication' | 'data' | 'system' | 'security' | 'admin'
-type LogSeverity = 'all' | 'info' | 'warning' | 'error' | 'critical'
+interface AlertRule {
+  id: string
+  name: string
+  description: string
+  condition: string
+  severity: AlertSeverity
+  is_active: boolean
+  threshold: number
+  window_minutes: number
+  notification_channels: string[]
+  last_triggered_at: string | null
+  trigger_count_24h: number
+  created_at: string
+  updated_at: string
+}
 
-export default function AuditLogsClient({ initialLogs, initialRules }: AuditLogsClientProps) {
-  const [logType, setLogType] = useState<LogType>('all')
-  const [severity, setSeverity] = useState<LogSeverity>('all')
+interface Alert {
+  id: string
+  rule_id: string
+  rule_name: string
+  severity: AlertSeverity
+  status: AlertStatus
+  message: string
+  triggered_at: string
+  acknowledged_at: string | null
+  resolved_at: string | null
+  acknowledged_by: string | null
+  resolved_by: string | null
+  affected_resources: number
+  sample_logs: string[]
+}
+
+interface ComplianceReport {
+  id: string
+  framework: ComplianceFramework
+  period: string
+  status: 'compliant' | 'non_compliant' | 'partial' | 'pending'
+  score: number
+  total_controls: number
+  passed_controls: number
+  failed_controls: number
+  findings: number
+  generated_at: string
+}
+
+interface UserSession {
+  id: string
+  user_id: string
+  user_email: string
+  user_name: string
+  started_at: string
+  last_activity_at: string
+  ip_address: string
+  location: string
+  device_type: 'desktop' | 'mobile' | 'tablet'
+  browser: string
+  os: string
+  is_active: boolean
+  actions_count: number
+  risk_level: 'low' | 'medium' | 'high'
+}
+
+interface GeoDistribution {
+  country: string
+  country_code: string
+  count: number
+  percentage: number
+}
+
+// ============================================================================
+// MOCK DATA GENERATION
+// ============================================================================
+
+const mockLogs: AuditLog[] = [
+  {
+    id: 'log-001',
+    timestamp: '2024-01-15T10:30:45Z',
+    log_type: 'authentication',
+    severity: 'info',
+    status: 'success',
+    action: 'user.login',
+    description: 'User successfully authenticated via SSO',
+    user_id: 'u-001',
+    user_email: 'sarah.chen@company.com',
+    user_name: 'Sarah Chen',
+    user_role: 'Admin',
+    ip_address: '192.168.1.100',
+    user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+    device_type: 'desktop',
+    location: 'San Francisco, CA',
+    country: 'United States',
+    city: 'San Francisco',
+    resource_type: 'session',
+    resource_id: 'sess-12345',
+    resource_name: 'Web Session',
+    request_id: 'req-abc123',
+    session_id: 'sess-12345',
+    duration_ms: 245,
+    metadata: { auth_method: 'sso', provider: 'okta' },
+    tags: ['sso', 'admin'],
+    is_anomaly: false,
+    risk_score: 5
+  },
+  {
+    id: 'log-002',
+    timestamp: '2024-01-15T10:28:30Z',
+    log_type: 'security',
+    severity: 'warning',
+    status: 'blocked',
+    action: 'security.rate_limit_exceeded',
+    description: 'Rate limit exceeded for API endpoint /api/v1/users',
+    user_id: null,
+    user_email: null,
+    user_name: null,
+    user_role: null,
+    ip_address: '45.33.32.156',
+    user_agent: 'python-requests/2.28.0',
+    device_type: 'api',
+    location: 'Unknown',
+    country: 'Russia',
+    city: 'Moscow',
+    resource_type: 'api_endpoint',
+    resource_id: '/api/v1/users',
+    resource_name: 'Users API',
+    request_id: 'req-def456',
+    session_id: null,
+    duration_ms: 12,
+    metadata: { requests_count: 1500, limit: 100, window: '1m' },
+    tags: ['rate-limit', 'api', 'suspicious'],
+    is_anomaly: true,
+    risk_score: 75
+  },
+  {
+    id: 'log-003',
+    timestamp: '2024-01-15T10:25:15Z',
+    log_type: 'data_modification',
+    severity: 'info',
+    status: 'success',
+    action: 'record.update',
+    description: 'Customer record updated',
+    user_id: 'u-002',
+    user_email: 'mike.wilson@company.com',
+    user_name: 'Mike Wilson',
+    user_role: 'Manager',
+    ip_address: '192.168.1.105',
+    user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    device_type: 'desktop',
+    location: 'New York, NY',
+    country: 'United States',
+    city: 'New York',
+    resource_type: 'customer',
+    resource_id: 'cust-789',
+    resource_name: 'Acme Corp',
+    request_id: 'req-ghi789',
+    session_id: 'sess-67890',
+    duration_ms: 156,
+    metadata: { fields_changed: ['email', 'phone'], old_email: 'old@acme.com', new_email: 'new@acme.com' },
+    tags: ['customer', 'pii'],
+    is_anomaly: false,
+    risk_score: 20
+  },
+  {
+    id: 'log-004',
+    timestamp: '2024-01-15T10:22:00Z',
+    log_type: 'authentication',
+    severity: 'error',
+    status: 'failed',
+    action: 'user.login_failed',
+    description: 'Failed login attempt - invalid password',
+    user_id: null,
+    user_email: 'admin@company.com',
+    user_name: null,
+    user_role: null,
+    ip_address: '203.0.113.50',
+    user_agent: 'Mozilla/5.0 (Linux; Android 11)',
+    device_type: 'mobile',
+    location: 'Beijing, China',
+    country: 'China',
+    city: 'Beijing',
+    resource_type: 'authentication',
+    resource_id: 'auth-001',
+    resource_name: 'Login Form',
+    request_id: 'req-jkl012',
+    session_id: null,
+    duration_ms: 89,
+    metadata: { attempt_number: 3, lockout_threshold: 5 },
+    tags: ['failed-login', 'suspicious'],
+    is_anomaly: true,
+    risk_score: 60
+  },
+  {
+    id: 'log-005',
+    timestamp: '2024-01-15T10:20:00Z',
+    log_type: 'admin',
+    severity: 'warning',
+    status: 'success',
+    action: 'user.permissions_changed',
+    description: 'User role elevated to Admin',
+    user_id: 'u-001',
+    user_email: 'sarah.chen@company.com',
+    user_name: 'Sarah Chen',
+    user_role: 'Admin',
+    ip_address: '192.168.1.100',
+    user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+    device_type: 'desktop',
+    location: 'San Francisco, CA',
+    country: 'United States',
+    city: 'San Francisco',
+    resource_type: 'user',
+    resource_id: 'u-003',
+    resource_name: 'Emma Davis',
+    request_id: 'req-mno345',
+    session_id: 'sess-12345',
+    duration_ms: 234,
+    metadata: { old_role: 'User', new_role: 'Admin', reason: 'Promotion' },
+    tags: ['privilege-escalation', 'admin'],
+    is_anomaly: false,
+    risk_score: 45
+  },
+  {
+    id: 'log-006',
+    timestamp: '2024-01-15T10:15:00Z',
+    log_type: 'security',
+    severity: 'critical',
+    status: 'blocked',
+    action: 'security.sql_injection_attempt',
+    description: 'SQL injection attempt detected and blocked',
+    user_id: null,
+    user_email: null,
+    user_name: null,
+    user_role: null,
+    ip_address: '198.51.100.23',
+    user_agent: 'sqlmap/1.7',
+    device_type: 'api',
+    location: 'Unknown',
+    country: 'Netherlands',
+    city: 'Amsterdam',
+    resource_type: 'api_endpoint',
+    resource_id: '/api/v1/search',
+    resource_name: 'Search API',
+    request_id: 'req-pqr678',
+    session_id: null,
+    duration_ms: 5,
+    metadata: { payload: "'; DROP TABLE users; --", blocked_by: 'WAF' },
+    tags: ['attack', 'sql-injection', 'blocked'],
+    is_anomaly: true,
+    risk_score: 95
+  },
+  {
+    id: 'log-007',
+    timestamp: '2024-01-15T10:10:00Z',
+    log_type: 'data_access',
+    severity: 'info',
+    status: 'success',
+    action: 'data.export',
+    description: 'Customer data exported to CSV',
+    user_id: 'u-002',
+    user_email: 'mike.wilson@company.com',
+    user_name: 'Mike Wilson',
+    user_role: 'Manager',
+    ip_address: '192.168.1.105',
+    user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+    device_type: 'desktop',
+    location: 'New York, NY',
+    country: 'United States',
+    city: 'New York',
+    resource_type: 'export',
+    resource_id: 'exp-001',
+    resource_name: 'Customer Export',
+    request_id: 'req-stu901',
+    session_id: 'sess-67890',
+    duration_ms: 4567,
+    metadata: { records_count: 1500, format: 'csv', includes_pii: true },
+    tags: ['export', 'pii', 'bulk'],
+    is_anomaly: false,
+    risk_score: 35
+  },
+  {
+    id: 'log-008',
+    timestamp: '2024-01-15T10:05:00Z',
+    log_type: 'system',
+    severity: 'info',
+    status: 'success',
+    action: 'system.backup_completed',
+    description: 'Scheduled database backup completed successfully',
+    user_id: null,
+    user_email: null,
+    user_name: null,
+    user_role: null,
+    ip_address: '10.0.0.50',
+    user_agent: 'BackupService/2.0',
+    device_type: 'api',
+    location: 'AWS us-west-2',
+    country: 'United States',
+    city: 'Oregon',
+    resource_type: 'database',
+    resource_id: 'db-prod-001',
+    resource_name: 'Production Database',
+    request_id: 'req-vwx234',
+    session_id: null,
+    duration_ms: 125000,
+    metadata: { backup_size: '45.2GB', tables_count: 156, compressed: true },
+    tags: ['backup', 'scheduled', 'database'],
+    is_anomaly: false,
+    risk_score: 0
+  }
+]
+
+const mockAlertRules: AlertRule[] = [
+  {
+    id: 'rule-001',
+    name: 'Failed Login Threshold',
+    description: 'Alert when failed login attempts exceed threshold',
+    condition: 'count(action:user.login_failed) > threshold',
+    severity: 'high',
+    is_active: true,
+    threshold: 5,
+    window_minutes: 15,
+    notification_channels: ['slack', 'email'],
+    last_triggered_at: '2024-01-15T09:45:00Z',
+    trigger_count_24h: 3,
+    created_at: '2023-06-01T00:00:00Z',
+    updated_at: '2024-01-10T14:00:00Z'
+  },
+  {
+    id: 'rule-002',
+    name: 'SQL Injection Detection',
+    description: 'Alert on any SQL injection attempt',
+    condition: 'action:security.sql_injection_attempt',
+    severity: 'critical',
+    is_active: true,
+    threshold: 1,
+    window_minutes: 1,
+    notification_channels: ['pagerduty', 'slack', 'email'],
+    last_triggered_at: '2024-01-15T10:15:00Z',
+    trigger_count_24h: 1,
+    created_at: '2023-06-01T00:00:00Z',
+    updated_at: '2023-12-15T10:00:00Z'
+  },
+  {
+    id: 'rule-003',
+    name: 'Bulk Data Export',
+    description: 'Alert when large data exports occur',
+    condition: 'action:data.export AND metadata.records_count > threshold',
+    severity: 'medium',
+    is_active: true,
+    threshold: 1000,
+    window_minutes: 60,
+    notification_channels: ['slack'],
+    last_triggered_at: '2024-01-15T10:10:00Z',
+    trigger_count_24h: 2,
+    created_at: '2023-08-15T00:00:00Z',
+    updated_at: '2024-01-05T09:00:00Z'
+  },
+  {
+    id: 'rule-004',
+    name: 'Privilege Escalation',
+    description: 'Alert on any role/permission changes',
+    condition: 'action:user.permissions_changed AND metadata.new_role:Admin',
+    severity: 'high',
+    is_active: true,
+    threshold: 1,
+    window_minutes: 1,
+    notification_channels: ['slack', 'email'],
+    last_triggered_at: '2024-01-15T10:20:00Z',
+    trigger_count_24h: 1,
+    created_at: '2023-06-01T00:00:00Z',
+    updated_at: '2023-11-20T16:00:00Z'
+  },
+  {
+    id: 'rule-005',
+    name: 'Rate Limit Exceeded',
+    description: 'Alert when rate limiting is triggered',
+    condition: 'action:security.rate_limit_exceeded',
+    severity: 'medium',
+    is_active: true,
+    threshold: 1,
+    window_minutes: 5,
+    notification_channels: ['slack'],
+    last_triggered_at: '2024-01-15T10:28:30Z',
+    trigger_count_24h: 5,
+    created_at: '2023-07-01T00:00:00Z',
+    updated_at: '2024-01-08T11:00:00Z'
+  }
+]
+
+const mockAlerts: Alert[] = [
+  { id: 'alert-001', rule_id: 'rule-002', rule_name: 'SQL Injection Detection', severity: 'critical', status: 'active', message: 'SQL injection attempt detected from 198.51.100.23', triggered_at: '2024-01-15T10:15:00Z', acknowledged_at: null, resolved_at: null, acknowledged_by: null, resolved_by: null, affected_resources: 1, sample_logs: ['log-006'] },
+  { id: 'alert-002', rule_id: 'rule-005', rule_name: 'Rate Limit Exceeded', severity: 'medium', status: 'acknowledged', message: 'Rate limit exceeded for /api/v1/users from 45.33.32.156', triggered_at: '2024-01-15T10:28:30Z', acknowledged_at: '2024-01-15T10:30:00Z', resolved_at: null, acknowledged_by: 'Sarah Chen', resolved_by: null, affected_resources: 1, sample_logs: ['log-002'] },
+  { id: 'alert-003', rule_id: 'rule-001', rule_name: 'Failed Login Threshold', severity: 'high', status: 'resolved', message: '5 failed login attempts for admin@company.com', triggered_at: '2024-01-15T09:45:00Z', acknowledged_at: '2024-01-15T09:50:00Z', resolved_at: '2024-01-15T10:00:00Z', acknowledged_by: 'Mike Wilson', resolved_by: 'Mike Wilson', affected_resources: 1, sample_logs: ['log-004'] }
+]
+
+const mockComplianceReports: ComplianceReport[] = [
+  { id: 'comp-001', framework: 'SOC2', period: '2024-Q1', status: 'compliant', score: 94, total_controls: 116, passed_controls: 109, failed_controls: 7, findings: 3, generated_at: '2024-01-15T00:00:00Z' },
+  { id: 'comp-002', framework: 'GDPR', period: '2024-Q1', status: 'compliant', score: 98, total_controls: 72, passed_controls: 71, failed_controls: 1, findings: 1, generated_at: '2024-01-15T00:00:00Z' },
+  { id: 'comp-003', framework: 'HIPAA', period: '2024-Q1', status: 'partial', score: 87, total_controls: 89, passed_controls: 77, failed_controls: 12, findings: 8, generated_at: '2024-01-15T00:00:00Z' },
+  { id: 'comp-004', framework: 'PCI-DSS', period: '2024-Q1', status: 'compliant', score: 96, total_controls: 256, passed_controls: 246, failed_controls: 10, findings: 4, generated_at: '2024-01-15T00:00:00Z' },
+  { id: 'comp-005', framework: 'ISO27001', period: '2024-Q1', status: 'compliant', score: 92, total_controls: 114, passed_controls: 105, failed_controls: 9, findings: 5, generated_at: '2024-01-15T00:00:00Z' }
+]
+
+const mockSessions: UserSession[] = [
+  { id: 'sess-001', user_id: 'u-001', user_email: 'sarah.chen@company.com', user_name: 'Sarah Chen', started_at: '2024-01-15T08:00:00Z', last_activity_at: '2024-01-15T10:30:45Z', ip_address: '192.168.1.100', location: 'San Francisco, CA', device_type: 'desktop', browser: 'Chrome 120', os: 'macOS 14.2', is_active: true, actions_count: 156, risk_level: 'low' },
+  { id: 'sess-002', user_id: 'u-002', user_email: 'mike.wilson@company.com', user_name: 'Mike Wilson', started_at: '2024-01-15T09:15:00Z', last_activity_at: '2024-01-15T10:25:15Z', ip_address: '192.168.1.105', location: 'New York, NY', device_type: 'desktop', browser: 'Firefox 121', os: 'Windows 11', is_active: true, actions_count: 89, risk_level: 'low' },
+  { id: 'sess-003', user_id: 'u-003', user_email: 'emma.davis@company.com', user_name: 'Emma Davis', started_at: '2024-01-15T07:30:00Z', last_activity_at: '2024-01-15T09:45:00Z', ip_address: '192.168.1.110', location: 'Austin, TX', device_type: 'mobile', browser: 'Safari 17', os: 'iOS 17.2', is_active: false, actions_count: 45, risk_level: 'low' }
+]
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+const getSeverityColor = (severity: LogSeverity | AlertSeverity): string => {
+  switch (severity) {
+    case 'debug': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+    case 'info': case 'low': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+    case 'warning': case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+    case 'error': case 'high': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+    case 'critical': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+  }
+}
+
+const getStatusColor = (status: LogStatus | AlertStatus): string => {
+  switch (status) {
+    case 'success': case 'resolved': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+    case 'failed': case 'active': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+    case 'blocked': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
+    case 'pending': case 'acknowledged': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+    case 'timeout': case 'muted': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+  }
+}
+
+const getComplianceColor = (status: string): string => {
+  switch (status) {
+    case 'compliant': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+    case 'non_compliant': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+    case 'partial': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+    case 'pending': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400'
+  }
+}
+
+const getLogTypeIcon = (type: LogType) => {
+  switch (type) {
+    case 'authentication': return <LogIn className="w-4 h-4" />
+    case 'authorization': return <Key className="w-4 h-4" />
+    case 'data_access': return <Eye className="w-4 h-4" />
+    case 'data_modification': return <Edit className="w-4 h-4" />
+    case 'system': return <Server className="w-4 h-4" />
+    case 'security': return <Shield className="w-4 h-4" />
+    case 'admin': return <Settings className="w-4 h-4" />
+    case 'api': return <Code className="w-4 h-4" />
+    default: return <Activity className="w-4 h-4" />
+  }
+}
+
+const getDeviceIcon = (type: string) => {
+  switch (type) {
+    case 'desktop': return <Monitor className="w-4 h-4" />
+    case 'mobile': return <Smartphone className="w-4 h-4" />
+    case 'tablet': return <Monitor className="w-4 h-4" />
+    case 'api': return <Terminal className="w-4 h-4" />
+    default: return <Monitor className="w-4 h-4" />
+  }
+}
+
+const formatDuration = (ms: number): string => {
+  if (ms < 1000) return `${ms}ms`
+  if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`
+  return `${Math.floor(ms / 60000)}m ${Math.floor((ms % 60000) / 1000)}s`
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+export default function AuditLogsClient() {
+  const [activeTab, setActiveTab] = useState('events')
   const [searchQuery, setSearchQuery] = useState('')
+  const [severityFilter, setSeverityFilter] = useState<LogSeverity | 'all'>('all')
+  const [typeFilter, setTypeFilter] = useState<LogType | 'all'>('all')
+  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null)
+  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null)
+  const [isLiveMode, setIsLiveMode] = useState(true)
 
-  const { logs, stats, isLoading } = useAuditLogs(initialLogs, {
-    logType: logType === 'all' ? undefined : logType,
-    severity: severity === 'all' ? undefined : severity
-  })
-  const { rules } = useAuditAlertRules(initialRules)
+  // Filtered logs
+  const filteredLogs = useMemo(() => {
+    return mockLogs.filter(log => {
+      const matchesSearch =
+        log.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        log.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (log.user_email?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+        log.ip_address.includes(searchQuery)
+      const matchesSeverity = severityFilter === 'all' || log.severity === severityFilter
+      const matchesType = typeFilter === 'all' || log.log_type === typeFilter
+      return matchesSearch && matchesSeverity && matchesType
+    })
+  }, [searchQuery, severityFilter, typeFilter])
 
-  const filteredLogs = logs.filter(log =>
-    log.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    log.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    log.user_email?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  // Stats calculations
+  const stats = useMemo(() => {
+    const total = mockLogs.length
+    const critical = mockLogs.filter(l => l.severity === 'critical').length
+    const warnings = mockLogs.filter(l => l.severity === 'warning').length
+    const errors = mockLogs.filter(l => l.severity === 'error').length
+    const anomalies = mockLogs.filter(l => l.is_anomaly).length
+    const blocked = mockLogs.filter(l => l.status === 'blocked').length
+    const activeAlerts = mockAlerts.filter(a => a.status === 'active').length
+    const avgRisk = mockLogs.reduce((acc, l) => acc + l.risk_score, 0) / total
 
-  const statItems = [
-    {
-      label: 'Total Events',
-      value: stats.total.toLocaleString(),
-      change: '+18.2%',
-      trend: 'up' as const,
-      icon: Activity,
-      color: 'text-blue-600'
-    },
-    {
-      label: 'Critical Events',
-      value: stats.critical.toString(),
-      change: '-24.7%',
-      trend: 'down' as const,
-      icon: AlertTriangle,
-      color: 'text-red-600'
-    },
-    {
-      label: 'User Actions',
-      value: stats.authentication.toLocaleString(),
-      change: '+12.4%',
-      trend: 'up' as const,
-      icon: User,
-      color: 'text-purple-600'
-    },
-    {
-      label: 'System Events',
-      value: stats.system.toLocaleString(),
-      change: '+8.7%',
-      trend: 'up' as const,
-      icon: Settings,
-      color: 'text-green-600'
-    }
-  ]
-
-  const quickActions = [
-    { label: 'Export Logs', description: 'Download audit trail', icon: Download, color: 'from-blue-500 to-cyan-500' },
-    { label: 'Search Logs', description: 'Advanced log search', icon: Search, color: 'from-purple-500 to-violet-500' },
-    { label: 'Filter Events', description: 'Custom log filtering', icon: Filter, color: 'from-green-500 to-emerald-500' },
-    { label: 'Security Report', description: 'Generate security audit', icon: Shield, color: 'from-red-500 to-pink-500' },
-    { label: 'User Activity', description: 'View user actions', icon: User, color: 'from-orange-500 to-amber-500' },
-    { label: 'System Health', description: 'Check system events', icon: Activity, color: 'from-teal-500 to-cyan-500' },
-    { label: 'Alert Rules', description: 'Configure log alerts', icon: AlertTriangle, color: 'from-indigo-500 to-purple-500' },
-    { label: 'Compliance Export', description: 'Export for compliance', icon: FileText, color: 'from-pink-500 to-rose-500' }
-  ]
-
-  const getSeverityBadge = (sev: string) => {
-    switch (sev) {
-      case 'critical':
-        return { color: 'bg-red-100 text-red-800 border-red-200', icon: AlertTriangle, label: 'Critical' }
-      case 'error':
-        return { color: 'bg-orange-100 text-orange-800 border-orange-200', icon: XCircle, label: 'Error' }
-      case 'warning':
-        return { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: AlertTriangle, label: 'Warning' }
-      case 'info':
-        return { color: 'bg-blue-100 text-blue-800 border-blue-200', icon: CheckCircle2, label: 'Info' }
-      default:
-        return { color: 'bg-gray-100 text-gray-800 border-gray-200', icon: Activity, label: sev }
-    }
-  }
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'success': return 'bg-green-100 text-green-800 border-green-200'
-      case 'failed':
-      case 'error': return 'bg-red-100 text-red-800 border-red-200'
-      case 'blocked': return 'bg-orange-100 text-orange-800 border-orange-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
-    }
-  }
-
-  const getActionIcon = (action: string) => {
-    if (action.includes('Login')) return LogIn
-    if (action.includes('Logout')) return LogOut
-    if (action.includes('Delete')) return Trash2
-    if (action.includes('Update') || action.includes('Change')) return Edit
-    if (action.includes('Create') || action.includes('New')) return Plus
-    if (action.includes('Export')) return Download
-    if (action.includes('Security') || action.includes('Unauthorized')) return Shield
-    if (action.includes('Lock')) return Lock
-    if (action.includes('Unlock')) return Unlock
-    return Activity
-  }
-
-  const recentActivity = filteredLogs.slice(0, 5).map(log => ({
-    label: log.action,
-    time: new Date(log.created_at).toLocaleTimeString(),
-    color: log.severity === 'critical' ? 'text-red-600' :
-           log.severity === 'error' ? 'text-orange-600' :
-           log.severity === 'warning' ? 'text-yellow-600' : 'text-blue-600'
-  }))
-
-  const topEventTypes = [
-    { label: 'System Events', value: `${(stats.system / 1000).toFixed(1)}K`, color: 'bg-blue-500' },
-    { label: 'User Actions', value: `${(stats.authentication / 1000).toFixed(1)}K`, color: 'bg-purple-500' },
-    { label: 'Data Changes', value: `${(stats.data / 1000).toFixed(1)}K`, color: 'bg-green-500' },
-    { label: 'Authentication', value: `${(stats.authentication / 1000).toFixed(1)}K`, color: 'bg-orange-500' },
-    { label: 'Security', value: `${(stats.security / 1000).toFixed(1)}K`, color: 'bg-red-500' }
-  ]
+    return { total, critical, warnings, errors, anomalies, blocked, activeAlerts, avgRisk }
+  }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-violet-50/40 dark:bg-none dark:bg-gray-900 p-6">
+      <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-              Audit Logs
-            </h1>
-            <p className="text-gray-600 mt-2">Monitor and analyze system activity and security events</p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+              <FileText className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Audit Logs</h1>
+              <p className="text-gray-500 dark:text-gray-400">Datadog level security monitoring</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search logs..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-            <button className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
-              <Download className="w-4 h-4" />
+            <Button
+              variant={isLiveMode ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setIsLiveMode(!isLiveMode)}
+              className={isLiveMode ? 'bg-green-600 hover:bg-green-700' : ''}
+            >
+              {isLiveMode ? <Play className="w-4 h-4 mr-2" /> : <Pause className="w-4 h-4 mr-2" />}
+              {isLiveMode ? 'Live' : 'Paused'}
+            </Button>
+            <Button variant="outline" size="sm">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
+            <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+              <Download className="w-4 h-4 mr-2" />
               Export
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statItems.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <stat.icon className={`w-8 h-8 ${stat.color}`} />
-                <span className={`text-sm font-medium ${stat.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                  {stat.change}
-                </span>
-              </div>
-              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              <p className="text-sm text-gray-500">{stat.label}</p>
-            </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {[
+            { label: 'Total Events', value: stats.total.toLocaleString(), icon: Activity, color: 'from-indigo-500 to-purple-500', change: 18.2 },
+            { label: 'Critical', value: stats.critical.toString(), icon: AlertTriangle, color: 'from-red-500 to-rose-500', change: -24.7 },
+            { label: 'Warnings', value: stats.warnings.toString(), icon: AlertCircle, color: 'from-yellow-500 to-orange-500', change: 5.3 },
+            { label: 'Errors', value: stats.errors.toString(), icon: XCircle, color: 'from-orange-500 to-red-500', change: -12.4 },
+            { label: 'Anomalies', value: stats.anomalies.toString(), icon: Zap, color: 'from-purple-500 to-pink-500', change: 8.1 },
+            { label: 'Blocked', value: stats.blocked.toString(), icon: Shield, color: 'from-green-500 to-emerald-500', change: 15.6 },
+            { label: 'Active Alerts', value: stats.activeAlerts.toString(), icon: Bell, color: 'from-blue-500 to-cyan-500', change: 0 },
+            { label: 'Avg Risk', value: `${stats.avgRisk.toFixed(0)}%`, icon: TrendingUp, color: 'from-teal-500 to-cyan-500', change: -3.2 }
+          ].map((stat, index) => (
+            <Card key={index} className="border-0 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                    <stat.icon className="w-4 h-4 text-white" />
+                  </div>
+                  {stat.change !== 0 && (
+                    <span className={`text-xs font-medium flex items-center ${stat.change > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {stat.change > 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                      {Math.abs(stat.change)}%
+                    </span>
+                  )}
+                </div>
+                <p className="text-xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
-        {/* Quick Actions */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {quickActions.map((action, index) => (
-              <button
-                key={index}
-                className="p-4 bg-white rounded-xl border border-gray-100 hover:shadow-lg transition-all duration-200 text-left"
-              >
-                <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${action.color} flex items-center justify-center mb-3`}>
-                  <action.icon className="w-5 h-5 text-white" />
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="bg-white dark:bg-gray-800 border shadow-sm">
+            <TabsTrigger value="events" className="flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              Events
+            </TabsTrigger>
+            <TabsTrigger value="search" className="flex items-center gap-2">
+              <Search className="w-4 h-4" />
+              Search
+            </TabsTrigger>
+            <TabsTrigger value="alerts" className="flex items-center gap-2">
+              <Bell className="w-4 h-4" />
+              Alerts
+              {stats.activeAlerts > 0 && (
+                <Badge className="ml-1 bg-red-500 text-white">{stats.activeAlerts}</Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="compliance" className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4" />
+              Compliance
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Events Tab */}
+          <TabsContent value="events" className="mt-6">
+            <Card>
+              <CardHeader className="border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle>Event Stream</CardTitle>
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        placeholder="Search events..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10 w-64"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {(['all', 'critical', 'error', 'warning', 'info'] as const).map(sev => (
+                        <Button
+                          key={sev}
+                          variant={severityFilter === sev ? 'default' : 'ghost'}
+                          size="sm"
+                          onClick={() => setSeverityFilter(sev)}
+                          className={severityFilter === sev ? 'bg-indigo-600' : ''}
+                        >
+                          {sev === 'all' ? 'All' : sev.charAt(0).toUpperCase() + sev.slice(1)}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-gray-900">{action.label}</h3>
-                <p className="text-sm text-gray-500">{action.description}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">Event Type</label>
-              <div className="flex flex-wrap gap-2">
-                {(['all', 'authentication', 'data', 'system', 'security', 'admin'] as LogType[]).map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setLogType(type)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      logType === type
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {type === 'all' ? 'All Events' : type.charAt(0).toUpperCase() + type.slice(1)}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium text-gray-700 mb-2 block">Severity</label>
-              <div className="flex flex-wrap gap-2">
-                {(['all', 'info', 'warning', 'error', 'critical'] as LogSeverity[]).map((sev) => (
-                  <button
-                    key={sev}
-                    onClick={() => setSeverity(sev)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      severity === sev
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {sev === 'all' ? 'All Levels' : sev.charAt(0).toUpperCase() + sev.slice(1)}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Logs List */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Event Log</h2>
-              <div className="text-sm text-gray-600">
-                {filteredLogs.length} events
-              </div>
-            </div>
-
-            {isLoading ? (
-              <div className="text-center py-8 text-gray-500">Loading logs...</div>
-            ) : filteredLogs.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">No logs found</div>
-            ) : (
-              <div className="space-y-3">
-                {filteredLogs.map((log) => {
-                  const severityBadge = getSeverityBadge(log.severity)
-                  const SeverityIcon = severityBadge.icon
-                  const ActionIcon = getActionIcon(log.action)
-
-                  return (
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="divide-y">
+                  {filteredLogs.map(log => (
                     <div
                       key={log.id}
-                      className="bg-white rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-200 hover:border-indigo-200"
+                      className={`p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors ${log.is_anomaly ? 'bg-red-50/50 dark:bg-red-900/10' : ''}`}
+                      onClick={() => setSelectedLog(log)}
                     >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white">
-                            <ActionIcon className="w-6 h-6" />
+                      <div className="flex items-start gap-4">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          log.severity === 'critical' ? 'bg-red-100 text-red-600' :
+                          log.severity === 'error' ? 'bg-orange-100 text-orange-600' :
+                          log.severity === 'warning' ? 'bg-yellow-100 text-yellow-600' :
+                          'bg-blue-100 text-blue-600'
+                        }`}>
+                          {getLogTypeIcon(log.log_type)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              {log.action}
+                            </span>
+                            <Badge className={getSeverityColor(log.severity)}>
+                              {log.severity}
+                            </Badge>
+                            <Badge className={getStatusColor(log.status)}>
+                              {log.status}
+                            </Badge>
+                            {log.is_anomaly && (
+                              <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
+                                <Zap className="w-3 h-3 mr-1" />
+                                Anomaly
+                              </Badge>
+                            )}
                           </div>
-                          <div>
-                            <h3 className="font-semibold text-gray-900">{log.action}</h3>
-                            <div className="flex items-center gap-3 mt-1">
-                              <span className="text-sm text-gray-500">{log.id.substring(0, 8)}</span>
-                              <span className="text-sm text-gray-400">•</span>
-                              <span className="text-sm text-gray-500">{new Date(log.created_at).toLocaleString()}</span>
+                          <p className="text-sm text-gray-600 dark:text-gray-300 truncate mb-1">
+                            {log.description}
+                          </p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {new Date(log.timestamp).toLocaleString()}
+                            </span>
+                            {log.user_email && (
+                              <span className="flex items-center gap-1">
+                                <User className="w-3 h-3" />
+                                {log.user_email}
+                              </span>
+                            )}
+                            <span className="flex items-center gap-1">
+                              <Globe className="w-3 h-3" />
+                              {log.ip_address}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              {log.location}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white">
+                            Risk: {log.risk_score}%
+                          </p>
+                          <p className="text-xs text-gray-500">{formatDuration(log.duration_ms)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Search Tab */}
+          <TabsContent value="search" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Advanced Search</CardTitle>
+                <CardDescription>Use query language to search logs</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex gap-3">
+                    <Input
+                      placeholder="severity:critical AND log_type:security"
+                      className="flex-1 font-mono"
+                    />
+                    <Button className="bg-indigo-600">
+                      <Search className="w-4 h-4 mr-2" />
+                      Search
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">severity:critical</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">log_type:security</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">is_anomaly:true</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">status:blocked</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">risk_score:&gt;50</Badge>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <h4 className="font-medium mb-2">Saved Searches</h4>
+                    <div className="space-y-2">
+                      {['Failed logins last 24h', 'High risk events', 'Data exports with PII', 'Security incidents'].map((search, i) => (
+                        <div key={i} className="flex items-center justify-between p-2 hover:bg-white dark:hover:bg-gray-700 rounded cursor-pointer">
+                          <span className="text-sm">{search}</span>
+                          <ChevronRight className="w-4 h-4 text-gray-400" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Alerts Tab */}
+          <TabsContent value="alerts" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Active Alerts</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="divide-y">
+                      {mockAlerts.map(alert => (
+                        <div
+                          key={alert.id}
+                          className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer"
+                          onClick={() => setSelectedAlert(alert)}
+                        >
+                          <div className="flex items-start gap-4">
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                              alert.severity === 'critical' ? 'bg-red-100 text-red-600' :
+                              alert.severity === 'high' ? 'bg-orange-100 text-orange-600' :
+                              alert.severity === 'medium' ? 'bg-yellow-100 text-yellow-600' :
+                              'bg-blue-100 text-blue-600'
+                            }`}>
+                              <Bell className="w-5 h-5" />
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-semibold">{alert.rule_name}</span>
+                                <Badge className={getSeverityColor(alert.severity)}>{alert.severity}</Badge>
+                                <Badge className={getStatusColor(alert.status)}>{alert.status}</Badge>
+                              </div>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">{alert.message}</p>
+                              <p className="text-xs text-gray-500 mt-1">
+                                Triggered {new Date(alert.triggered_at).toLocaleString()}
+                              </p>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <div className={`px-3 py-1 rounded-full border text-xs font-medium flex items-center gap-1 ${severityBadge.color}`}>
-                            <SeverityIcon className="w-3 h-3" />
-                            {severityBadge.label}
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Alert Rules</CardTitle>
+                      <Button size="sm">
+                        <Plus className="w-4 h-4 mr-2" />
+                        New Rule
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="divide-y">
+                      {mockAlertRules.map(rule => (
+                        <div key={rule.id} className="p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{rule.name}</span>
+                              <Badge className={getSeverityColor(rule.severity)}>{rule.severity}</Badge>
+                              <Badge variant={rule.is_active ? 'default' : 'secondary'}>
+                                {rule.is_active ? 'Active' : 'Inactive'}
+                              </Badge>
+                            </div>
+                            <span className="text-sm text-gray-500">
+                              {rule.trigger_count_24h} triggers/24h
+                            </span>
                           </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{rule.description}</p>
+                          <code className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded mt-2 inline-block">
+                            {rule.condition}
+                          </code>
                         </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Alert Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500">Active</span>
+                        <span className="font-bold text-red-600">{mockAlerts.filter(a => a.status === 'active').length}</span>
                       </div>
-
-                      <p className="text-sm text-gray-600 mb-4">{log.description || 'No description'}</p>
-
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">User</div>
-                          <div className="font-medium text-gray-900 text-sm">{log.user_email || 'System'}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">Resource</div>
-                          <div className="font-medium text-gray-900 text-sm">{log.resource || 'N/A'}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">IP Address</div>
-                          <div className="font-medium text-gray-900 text-sm">{log.ip_address || 'N/A'}</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">Location</div>
-                          <div className="font-medium text-gray-900 text-sm">{log.location || 'Unknown'}</div>
-                        </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500">Acknowledged</span>
+                        <span className="font-bold text-yellow-600">{mockAlerts.filter(a => a.status === 'acknowledged').length}</span>
                       </div>
-
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500">Type:</span>
-                          <span className="text-xs font-medium text-gray-900 uppercase">{log.log_type}</span>
-                        </div>
-                        <div className={`px-3 py-1 rounded-full border text-xs font-medium capitalize ${getStatusBadge(log.status)}`}>
-                          {log.status}
-                        </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500">Resolved (24h)</span>
+                        <span className="font-bold text-green-600">{mockAlerts.filter(a => a.status === 'resolved').length}</span>
                       </div>
                     </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
+                  </CardContent>
+                </Card>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-xl p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold mb-4">Daily Event Volume</h3>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-3xl font-bold text-gray-900">{stats.total.toLocaleString()}</span>
-                  <span className="text-sm text-gray-500">events</span>
-                </div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-indigo-500 to-purple-500"
-                    style={{ width: `${Math.min((stats.total / 30000) * 100, 100)}%` }}
-                  />
-                </div>
-                <p className="text-sm text-gray-500">{((stats.total / 30000) * 100).toFixed(1)}% of daily capacity</p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold mb-4">Critical Events</h3>
-              <div className="flex items-center gap-4">
-                <span className="text-4xl font-bold text-red-600">{stats.critical}</span>
-                <div>
-                  <span className="text-sm text-green-600 font-medium">-24.7%</span>
-                  <p className="text-sm text-gray-500">Last 24 hours</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold mb-4">Event Distribution</h3>
-              <div className="space-y-3">
-                {topEventTypes.map((type, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full ${type.color}`} />
-                      <span className="text-sm text-gray-700">{type.label}</span>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Notification Channels</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {['Slack #security-alerts', 'PagerDuty On-Call', 'Email security@company.com'].map((channel, i) => (
+                        <div key={i} className="flex items-center gap-3 p-2 border rounded-lg">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          <span className="text-sm">{channel}</span>
+                        </div>
+                      ))}
                     </div>
-                    <span className="text-sm font-medium text-gray-900">{type.value}</span>
-                  </div>
-                ))}
+                  </CardContent>
+                </Card>
               </div>
             </div>
+          </TabsContent>
 
-            <div className="bg-white rounded-xl p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-              <div className="space-y-3">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-center justify-between">
-                    <span className={`text-sm ${activity.color}`}>{activity.label}</span>
-                    <span className="text-xs text-gray-500">{activity.time}</span>
-                  </div>
-                ))}
-              </div>
+          {/* Compliance Tab */}
+          <TabsContent value="compliance" className="mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {mockComplianceReports.map(report => (
+                <Card key={report.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{report.framework}</CardTitle>
+                      <Badge className={getComplianceColor(report.status)}>
+                        {report.status.replace('_', ' ')}
+                      </Badge>
+                    </div>
+                    <CardDescription>{report.period}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="text-center">
+                        <span className={`text-4xl font-bold ${
+                          report.score >= 90 ? 'text-green-600' :
+                          report.score >= 70 ? 'text-yellow-600' : 'text-red-600'
+                        }`}>
+                          {report.score}%
+                        </span>
+                        <p className="text-sm text-gray-500">Compliance Score</p>
+                      </div>
+                      <Progress value={report.score} className="h-2" />
+                      <div className="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                          <p className="text-2xl font-bold text-green-600">{report.passed_controls}</p>
+                          <p className="text-xs text-gray-500">Passed</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-red-600">{report.failed_controls}</p>
+                          <p className="text-xs text-gray-500">Failed</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <Download className="w-4 h-4 mr-2" />
+                        Download Report
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          </div>
-        </div>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Events by Type</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { type: 'authentication', count: 45, color: 'bg-blue-500' },
+                      { type: 'data_modification', count: 32, color: 'bg-green-500' },
+                      { type: 'security', count: 18, color: 'bg-red-500' },
+                      { type: 'system', count: 12, color: 'bg-purple-500' },
+                      { type: 'admin', count: 8, color: 'bg-orange-500' }
+                    ].map(item => (
+                      <div key={item.type} className="flex items-center gap-3">
+                        <div className={`w-3 h-3 rounded-full ${item.color}`} />
+                        <span className="flex-1 text-sm capitalize">{item.type.replace('_', ' ')}</span>
+                        <span className="font-semibold">{item.count}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Geographic Distribution</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { country: 'United States', count: 156, pct: 65 },
+                      { country: 'Germany', count: 34, pct: 14 },
+                      { country: 'United Kingdom', count: 28, pct: 12 },
+                      { country: 'Japan', count: 15, pct: 6 },
+                      { country: 'Other', count: 7, pct: 3 }
+                    ].map(item => (
+                      <div key={item.country} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span>{item.country}</span>
+                          <span className="font-semibold">{item.count} ({item.pct}%)</span>
+                        </div>
+                        <Progress value={item.pct} className="h-1.5" />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Active Sessions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {mockSessions.map(session => (
+                      <div key={session.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                        <Avatar className="w-10 h-10">
+                          <AvatarFallback>{session.user_name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="font-medium">{session.user_name}</p>
+                          <p className="text-xs text-gray-500">{session.location} • {session.browser}</p>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant={session.is_active ? 'default' : 'secondary'}>
+                            {session.is_active ? 'Active' : 'Idle'}
+                          </Badge>
+                          <p className="text-xs text-gray-500 mt-1">{session.actions_count} actions</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Risk Trends</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <TrendingDown className="w-5 h-5 text-green-600" />
+                        <span>Critical Events</span>
+                      </div>
+                      <span className="font-bold text-green-600">-24.7%</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-red-600" />
+                        <span>Anomaly Detection</span>
+                      </div>
+                      <span className="font-bold text-red-600">+8.1%</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-green-600" />
+                        <span>Blocked Attacks</span>
+                      </div>
+                      <span className="font-bold text-green-600">+15.6%</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Retention Policy</CardTitle>
+                  <CardDescription>Configure log retention periods</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[
+                      { type: 'Security Logs', retention: '7 years', required: true },
+                      { type: 'Authentication Logs', retention: '1 year', required: true },
+                      { type: 'System Logs', retention: '90 days', required: false },
+                      { type: 'Debug Logs', retention: '7 days', required: false }
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <p className="font-medium">{item.type}</p>
+                          {item.required && <span className="text-xs text-gray-500">Compliance required</span>}
+                        </div>
+                        <Badge variant="outline">{item.retention}</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Log Sources</CardTitle>
+                  <CardDescription>Connected log sources</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { name: 'Application Server', status: 'connected', events: '12.4K/hr' },
+                      { name: 'Database', status: 'connected', events: '8.2K/hr' },
+                      { name: 'Load Balancer', status: 'connected', events: '45.6K/hr' },
+                      { name: 'Firewall', status: 'connected', events: '23.1K/hr' }
+                    ].map((source, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="w-2 h-2 rounded-full bg-green-500" />
+                          <span className="font-medium">{source.name}</span>
+                        </div>
+                        <span className="text-sm text-gray-500">{source.events}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Anomaly Detection</CardTitle>
+                  <CardDescription>ML-powered anomaly settings</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Enable Anomaly Detection</p>
+                        <p className="text-sm text-gray-500">Uses ML to detect unusual patterns</p>
+                      </div>
+                      <Button variant="outline" size="sm">Enabled</Button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Sensitivity Level</p>
+                        <p className="text-sm text-gray-500">Higher = more alerts</p>
+                      </div>
+                      <Badge>Medium</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Learning Period</p>
+                        <p className="text-sm text-gray-500">Baseline learning window</p>
+                      </div>
+                      <Badge variant="outline">14 days</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Export Settings</CardTitle>
+                  <CardDescription>Configure log export options</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">Export Format</p>
+                        <p className="text-sm text-gray-500">Default export format</p>
+                      </div>
+                      <Badge variant="outline">JSON</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">S3 Archive</p>
+                        <p className="text-sm text-gray-500">Auto-archive to S3</p>
+                      </div>
+                      <Button variant="outline" size="sm">Enabled</Button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">SIEM Integration</p>
+                        <p className="text-sm text-gray-500">Forward to SIEM</p>
+                      </div>
+                      <Button variant="outline" size="sm">Configure</Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Log Detail Dialog */}
+        <Dialog open={!!selectedLog} onOpenChange={() => setSelectedLog(null)}>
+          <DialogContent className="max-w-3xl max-h-[85vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Activity className="w-5 h-5" />
+                Event Details
+              </DialogTitle>
+              <DialogDescription>
+                {selectedLog?.id} • {selectedLog?.timestamp && new Date(selectedLog.timestamp).toLocaleString()}
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[calc(85vh-120px)]">
+              {selectedLog && (
+                <div className="space-y-6 pr-4">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge className={getSeverityColor(selectedLog.severity)}>{selectedLog.severity}</Badge>
+                    <Badge className={getStatusColor(selectedLog.status)}>{selectedLog.status}</Badge>
+                    <Badge variant="outline">{selectedLog.log_type}</Badge>
+                    {selectedLog.is_anomaly && (
+                      <Badge className="bg-purple-100 text-purple-800">Anomaly</Badge>
+                    )}
+                  </div>
+
+                  <div>
+                    <h4 className="font-semibold mb-2">{selectedLog.action}</h4>
+                    <p className="text-gray-600 dark:text-gray-300">{selectedLog.description}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">User</p>
+                      <p className="font-medium">{selectedLog.user_email || 'System'}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">IP Address</p>
+                      <p className="font-medium font-mono">{selectedLog.ip_address}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">Location</p>
+                      <p className="font-medium">{selectedLog.city}, {selectedLog.country}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">Duration</p>
+                      <p className="font-medium">{formatDuration(selectedLog.duration_ms)}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">Resource</p>
+                      <p className="font-medium">{selectedLog.resource_name}</p>
+                    </div>
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-xs text-gray-500 mb-1">Risk Score</p>
+                      <p className={`font-medium ${selectedLog.risk_score > 50 ? 'text-red-600' : 'text-green-600'}`}>
+                        {selectedLog.risk_score}%
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-medium mb-2">Tags</p>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedLog.tags.map(tag => (
+                        <Badge key={tag} variant="outline">{tag}</Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-medium mb-2">Metadata</p>
+                    <pre className="p-3 bg-gray-900 text-gray-100 rounded-lg text-xs overflow-x-auto">
+                      {JSON.stringify(selectedLog.metadata, null, 2)}
+                    </pre>
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-4 border-t">
+                    <Button variant="outline" className="flex-1">
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy ID
+                    </Button>
+                    <Button variant="outline" className="flex-1">
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Related Events
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
