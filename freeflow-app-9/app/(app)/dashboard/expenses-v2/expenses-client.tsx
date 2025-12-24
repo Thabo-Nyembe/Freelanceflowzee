@@ -1,256 +1,994 @@
 'use client'
 
-import { useState } from 'react'
-import { useExpenses, type Expense, type ExpenseCategory, type ExpenseStatus } from '@/lib/hooks/use-expenses'
-import { BentoCard } from '@/components/ui/bento-grid-advanced'
-import { StatGrid, MiniKPI, ActivityFeed, RankingList, ProgressCard } from '@/components/ui/results-display'
-import { ModernButton, GradientButton, PillButton } from '@/components/ui/modern-buttons'
-import { Receipt, DollarSign, CheckCircle2, Clock, XCircle, Paperclip, Plane, ShoppingBag } from 'lucide-react'
+import { useState, useMemo } from 'react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Progress } from '@/components/ui/progress'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  Receipt, DollarSign, CheckCircle, XCircle, Clock, Search, Filter,
+  Upload, Camera, CreditCard, Plane, Car, Coffee, ShoppingBag, Briefcase,
+  Building, Globe, TrendingUp, Calendar, FileText, Download, AlertTriangle,
+  BarChart3, PieChart, Users, Send, Plus, MoreVertical, ChevronRight,
+  Banknote, MapPin, Percent, Shield, ArrowRight, Eye
+} from 'lucide-react'
 
-export default function ExpensesClient({ initialExpenses }: { initialExpenses: Expense[] }) {
+// Types
+type ExpenseStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'reimbursed' | 'processing'
+type ExpenseCategory = 'travel' | 'meals' | 'transport' | 'lodging' | 'supplies' | 'software' | 'entertainment' | 'other'
+type PaymentMethod = 'cash' | 'corporate_card' | 'personal_card' | 'bank_transfer'
+type Currency = 'USD' | 'EUR' | 'GBP' | 'CAD' | 'AUD'
+
+interface ExpenseLineItem {
+  id: string
+  description: string
+  amount: number
+  category: ExpenseCategory
+  date: string
+  merchant: string
+  receipt?: string
+  taxAmount?: number
+  isBillable: boolean
+  projectCode?: string
+}
+
+interface ExpenseReport {
+  id: string
+  title: string
+  status: ExpenseStatus
+  submittedBy: { id: string; name: string; email: string; avatar: string; department: string }
+  approver?: { id: string; name: string; email: string; avatar: string }
+  lineItems: ExpenseLineItem[]
+  totalAmount: number
+  currency: Currency
+  paymentMethod: PaymentMethod
+  createdAt: string
+  submittedAt?: string
+  approvedAt?: string
+  reimbursedAt?: string
+  notes?: string
+  policyViolations: { rule: string; severity: 'warning' | 'error' }[]
+  attachments: number
+  tripId?: string
+}
+
+interface Policy {
+  id: string
+  name: string
+  category: ExpenseCategory
+  maxAmount: number
+  requiresReceipt: boolean
+  requiresApproval: boolean
+  approvalThreshold: number
+  notes: string
+}
+
+interface MileageEntry {
+  id: string
+  date: string
+  origin: string
+  destination: string
+  distance: number
+  rate: number
+  purpose: string
+  status: ExpenseStatus
+}
+
+interface PerDiem {
+  id: string
+  location: string
+  startDate: string
+  endDate: string
+  dailyRate: number
+  totalAmount: number
+  meals: { breakfast: boolean; lunch: boolean; dinner: boolean }
+  status: ExpenseStatus
+}
+
+interface ExpensesClientProps {
+  initialExpenses: any[]
+}
+
+// Mock Data
+const mockEmployees = [
+  { id: 'e1', name: 'Sarah Johnson', email: 'sarah@company.com', avatar: '/avatars/sarah.jpg', department: 'Engineering' },
+  { id: 'e2', name: 'Mike Chen', email: 'mike@company.com', avatar: '/avatars/mike.jpg', department: 'Sales' },
+  { id: 'e3', name: 'Emily Davis', email: 'emily@company.com', avatar: '/avatars/emily.jpg', department: 'Marketing' },
+]
+
+const mockReports: ExpenseReport[] = [
+  {
+    id: 'r1', title: 'Q1 Sales Conference - NYC', status: 'pending',
+    submittedBy: mockEmployees[1], approver: mockEmployees[0],
+    lineItems: [
+      { id: 'l1', description: 'Flight to NYC', amount: 450, category: 'travel', date: '2024-01-15', merchant: 'Delta Airlines', isBillable: false, taxAmount: 0 },
+      { id: 'l2', description: 'Hotel - 3 nights', amount: 890, category: 'lodging', date: '2024-01-15', merchant: 'Marriott Times Square', isBillable: false, taxAmount: 89 },
+      { id: 'l3', description: 'Client dinner', amount: 245, category: 'meals', date: '2024-01-16', merchant: 'The Capital Grille', isBillable: true, projectCode: 'PRJ-2024-001', taxAmount: 24.5 },
+      { id: 'l4', description: 'Uber rides', amount: 78, category: 'transport', date: '2024-01-17', merchant: 'Uber', isBillable: false, taxAmount: 0 },
+    ],
+    totalAmount: 1663, currency: 'USD', paymentMethod: 'corporate_card',
+    createdAt: '2024-01-18', submittedAt: '2024-01-18',
+    policyViolations: [{ rule: 'Meal expense exceeds $200 daily limit', severity: 'warning' }],
+    attachments: 4
+  },
+  {
+    id: 'r2', title: 'Software Licenses - January', status: 'approved',
+    submittedBy: mockEmployees[0],
+    lineItems: [
+      { id: 'l5', description: 'GitHub Enterprise', amount: 1200, category: 'software', date: '2024-01-01', merchant: 'GitHub', isBillable: false, taxAmount: 0 },
+      { id: 'l6', description: 'Figma Team', amount: 45, category: 'software', date: '2024-01-01', merchant: 'Figma', isBillable: false, taxAmount: 0 },
+    ],
+    totalAmount: 1245, currency: 'USD', paymentMethod: 'corporate_card',
+    createdAt: '2024-01-05', submittedAt: '2024-01-05', approvedAt: '2024-01-06',
+    policyViolations: [], attachments: 2
+  },
+  {
+    id: 'r3', title: 'Office Supplies', status: 'reimbursed',
+    submittedBy: mockEmployees[2],
+    lineItems: [
+      { id: 'l7', description: 'Printer paper & ink', amount: 89, category: 'supplies', date: '2024-01-10', merchant: 'Staples', isBillable: false, taxAmount: 8.9 },
+      { id: 'l8', description: 'Standing desk mat', amount: 65, category: 'supplies', date: '2024-01-10', merchant: 'Amazon', isBillable: false, taxAmount: 6.5 },
+    ],
+    totalAmount: 154, currency: 'USD', paymentMethod: 'personal_card',
+    createdAt: '2024-01-12', submittedAt: '2024-01-12', approvedAt: '2024-01-13', reimbursedAt: '2024-01-15',
+    policyViolations: [], attachments: 2
+  },
+  {
+    id: 'r4', title: 'Team Building Event', status: 'draft',
+    submittedBy: mockEmployees[0],
+    lineItems: [
+      { id: 'l9', description: 'Escape room booking', amount: 320, category: 'entertainment', date: '2024-01-20', merchant: 'Escape Room NYC', isBillable: false, taxAmount: 32 },
+    ],
+    totalAmount: 320, currency: 'USD', paymentMethod: 'corporate_card',
+    createdAt: '2024-01-19',
+    policyViolations: [], attachments: 1
+  },
+]
+
+const mockPolicies: Policy[] = [
+  { id: 'p1', name: 'Meals', category: 'meals', maxAmount: 75, requiresReceipt: true, requiresApproval: true, approvalThreshold: 50, notes: 'Per person per meal' },
+  { id: 'p2', name: 'Travel', category: 'travel', maxAmount: 1000, requiresReceipt: true, requiresApproval: true, approvalThreshold: 500, notes: 'Flights must be economy class' },
+  { id: 'p3', name: 'Lodging', category: 'lodging', maxAmount: 300, requiresReceipt: true, requiresApproval: true, approvalThreshold: 200, notes: 'Per night maximum' },
+  { id: 'p4', name: 'Software', category: 'software', maxAmount: 500, requiresReceipt: true, requiresApproval: true, approvalThreshold: 100, notes: 'Manager approval required' },
+]
+
+const mockMileage: MileageEntry[] = [
+  { id: 'm1', date: '2024-01-15', origin: 'Office', destination: 'Client Site A', distance: 25, rate: 0.67, purpose: 'Client meeting', status: 'approved' },
+  { id: 'm2', date: '2024-01-17', origin: 'Office', destination: 'Airport', distance: 18, rate: 0.67, purpose: 'Business travel', status: 'pending' },
+]
+
+const mockPerDiems: PerDiem[] = [
+  { id: 'pd1', location: 'New York, NY', startDate: '2024-01-15', endDate: '2024-01-18', dailyRate: 79, totalAmount: 237, meals: { breakfast: true, lunch: true, dinner: true }, status: 'pending' },
+]
+
+export default function ExpensesClient({ initialExpenses }: ExpensesClientProps) {
+  const [activeTab, setActiveTab] = useState('reports')
   const [statusFilter, setStatusFilter] = useState<ExpenseStatus | 'all'>('all')
   const [categoryFilter, setCategoryFilter] = useState<ExpenseCategory | 'all'>('all')
-  const { expenses, loading, error } = useExpenses({ status: statusFilter, category: categoryFilter })
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedReport, setSelectedReport] = useState<ExpenseReport | null>(null)
+  const [showReportDialog, setShowReportDialog] = useState(false)
+  const [showNewExpenseDialog, setShowNewExpenseDialog] = useState(false)
 
-  const displayExpenses = (expenses && expenses.length > 0) ? expenses : (initialExpenses || [])
+  const reports = mockReports
+  const policies = mockPolicies
+  const mileage = mockMileage
+  const perDiems = mockPerDiems
 
-  const stats = [
-    {
-      label: 'Total Expenses',
-      value: `$${(displayExpenses.reduce((sum, e) => sum + e.total_amount, 0) / 1000).toFixed(1)}K`,
-      change: 14.2,
-      icon: <Receipt className="w-5 h-5" />
-    },
-    {
-      label: 'Pending Approval',
-      value: `$${(displayExpenses.filter(e => e.status === 'pending').reduce((sum, e) => sum + e.total_amount, 0) / 1000).toFixed(1)}K`,
-      change: 8.7,
-      icon: <Clock className="w-5 h-5" />
-    },
-    {
-      label: 'Approved',
-      value: `$${(displayExpenses.filter(e => e.status === 'approved').reduce((sum, e) => sum + e.total_amount, 0) / 1000).toFixed(1)}K`,
-      change: 18.4,
-      icon: <CheckCircle2 className="w-5 h-5" />
-    },
-    {
-      label: 'Avg Expense',
-      value: displayExpenses.length > 0
-        ? `$${(displayExpenses.reduce((sum, e) => sum + e.amount, 0) / displayExpenses.length).toFixed(0)}`
-        : '$0',
-      change: 5.2,
-      icon: <DollarSign className="w-5 h-5" />
+  const filteredReports = useMemo(() => {
+    return reports.filter(report => {
+      if (statusFilter !== 'all' && report.status !== statusFilter) return false
+      if (searchQuery && !report.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          !report.submittedBy.name.toLowerCase().includes(searchQuery.toLowerCase())) return false
+      return true
+    })
+  }, [reports, statusFilter, searchQuery])
+
+  const stats = {
+    totalExpenses: reports.reduce((sum, r) => sum + r.totalAmount, 0),
+    pendingApproval: reports.filter(r => r.status === 'pending').reduce((sum, r) => sum + r.totalAmount, 0),
+    approved: reports.filter(r => r.status === 'approved').reduce((sum, r) => sum + r.totalAmount, 0),
+    reimbursed: reports.filter(r => r.status === 'reimbursed').reduce((sum, r) => sum + r.totalAmount, 0),
+    pendingCount: reports.filter(r => r.status === 'pending').length,
+    avgProcessingTime: 2.3
+  }
+
+  const getStatusColor = (status: ExpenseStatus) => {
+    const colors: Record<ExpenseStatus, string> = {
+      draft: 'bg-gray-100 text-gray-700',
+      pending: 'bg-yellow-100 text-yellow-700',
+      approved: 'bg-green-100 text-green-700',
+      rejected: 'bg-red-100 text-red-700',
+      reimbursed: 'bg-blue-100 text-blue-700',
+      processing: 'bg-purple-100 text-purple-700'
     }
-  ]
-
-  const getStatusBadge = (status: ExpenseStatus) => {
-    switch (status) {
-      case 'approved':
-        return { color: 'bg-green-100 text-green-800', icon: CheckCircle2, label: 'Approved' }
-      case 'pending':
-        return { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'Pending' }
-      case 'rejected':
-        return { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Rejected' }
-      case 'reimbursed':
-        return { color: 'bg-blue-100 text-blue-800', icon: DollarSign, label: 'Reimbursed' }
-      default:
-        return { color: 'bg-gray-100 text-gray-800', icon: Receipt, label: status }
-    }
+    return colors[status]
   }
 
   const getCategoryIcon = (category: ExpenseCategory) => {
-    switch (category) {
-      case 'travel': return Plane
-      case 'meals': return ShoppingBag
-      default: return Receipt
+    const icons: Record<ExpenseCategory, any> = {
+      travel: Plane, meals: Coffee, transport: Car, lodging: Building,
+      supplies: ShoppingBag, software: Globe, entertainment: Users, other: Receipt
     }
+    return icons[category] || Receipt
   }
 
   const getCategoryColor = (category: ExpenseCategory) => {
-    const colors = {
-      travel: 'from-blue-500 to-cyan-500',
-      meals: 'from-purple-500 to-pink-500',
-      supplies: 'from-green-500 to-emerald-500',
-      software: 'from-indigo-500 to-purple-500',
-      other: 'from-gray-500 to-slate-500'
+    const colors: Record<ExpenseCategory, string> = {
+      travel: 'bg-blue-100 text-blue-700',
+      meals: 'bg-orange-100 text-orange-700',
+      transport: 'bg-cyan-100 text-cyan-700',
+      lodging: 'bg-purple-100 text-purple-700',
+      supplies: 'bg-green-100 text-green-700',
+      software: 'bg-indigo-100 text-indigo-700',
+      entertainment: 'bg-pink-100 text-pink-700',
+      other: 'bg-gray-100 text-gray-700'
     }
-    return colors[category] || colors.other
+    return colors[category]
   }
 
-  const recentActivity = displayExpenses.slice(0, 4).map((e) => {
-    const badge = getStatusBadge(e.status)
-    return {
-      icon: <badge.icon className="w-5 h-5" />,
-      title: badge.label,
-      description: e.expense_title,
-      time: new Date(e.updated_at).toLocaleDateString(),
-      status: (e.status === 'approved' || e.status === 'reimbursed' ? 'success' : e.status === 'rejected' ? 'error' : 'warning') as const
-    }
-  })
+  const openReportDetails = (report: ExpenseReport) => {
+    setSelectedReport(report)
+    setShowReportDialog(true)
+  }
 
-  const topCategories = [
-    {
-      label: 'Travel',
-      value: `$${(displayExpenses.filter(e => e.expense_category === 'travel').reduce((sum, e) => sum + e.amount, 0) / 1000).toFixed(1)}K`,
-      color: 'bg-blue-500'
-    },
-    {
-      label: 'Meals',
-      value: `$${(displayExpenses.filter(e => e.expense_category === 'meals').reduce((sum, e) => sum + e.amount, 0) / 1000).toFixed(1)}K`,
-      color: 'bg-purple-500'
-    }
-  ]
+  const categoryBreakdown = useMemo(() => {
+    const breakdown: Record<string, number> = {}
+    reports.forEach(report => {
+      report.lineItems.forEach(item => {
+        breakdown[item.category] = (breakdown[item.category] || 0) + item.amount
+      })
+    })
+    return Object.entries(breakdown).sort((a, b) => b[1] - a[1])
+  }, [reports])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-violet-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 p-6">
-      <div className="max-w-[1800px] mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-              <Receipt className="w-10 h-10 text-purple-600" />
-              Expenses
-            </h1>
-            <p className="text-muted-foreground">Track and manage employee expense reports</p>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-purple-600 via-violet-600 to-fuchsia-600 text-white">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold flex items-center gap-3">
+                <Receipt className="h-8 w-8" />
+                Expense Management
+              </h1>
+              <p className="text-purple-100 mt-1">Track, submit, and manage expense reports</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+              <Button className="bg-white text-purple-600 hover:bg-purple-50" onClick={() => setShowNewExpenseDialog(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                New Expense
+              </Button>
+            </div>
           </div>
-          <GradientButton from="purple" to="violet" onClick={() => console.log('New expense')}>
-            <Receipt className="w-5 h-5 mr-2" />
-            New Expense
-          </GradientButton>
-        </div>
 
-        <StatGrid columns={4} stats={stats} />
-
-        <div className="flex items-center gap-3 flex-wrap">
-          <PillButton variant={statusFilter === 'all' ? 'primary' : 'ghost'} onClick={() => setStatusFilter('all')}>
-            All Expenses
-          </PillButton>
-          <PillButton variant={statusFilter === 'pending' ? 'primary' : 'ghost'} onClick={() => setStatusFilter('pending')}>
-            Pending
-          </PillButton>
-          <PillButton variant={statusFilter === 'approved' ? 'primary' : 'ghost'} onClick={() => setStatusFilter('approved')}>
-            Approved
-          </PillButton>
-          <PillButton variant={statusFilter === 'rejected' ? 'primary' : 'ghost'} onClick={() => setStatusFilter('rejected')}>
-            Rejected
-          </PillButton>
-          <PillButton variant={statusFilter === 'reimbursed' ? 'primary' : 'ghost'} onClick={() => setStatusFilter('reimbursed')}>
-            Reimbursed
-          </PillButton>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
-            {displayExpenses.map((expense) => {
-              const statusBadge = getStatusBadge(expense.status)
-              const StatusIcon = statusBadge.icon
-              const CategoryIcon = getCategoryIcon(expense.expense_category)
-
-              return (
-                <BentoCard key={expense.id} className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${getCategoryColor(expense.expense_category)} flex items-center justify-center text-white`}>
-                        <CategoryIcon className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{expense.expense_title}</h3>
-                        <div className="flex items-center gap-3 mt-1">
-                          <span className="text-sm text-gray-500">{expense.submitted_by || 'Unknown'}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-purple-600">
-                        ${expense.amount.toLocaleString()}
-                      </div>
-                      <div className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 mt-2 ${statusBadge.color}`}>
-                        <StatusIcon className="w-3 h-3" />
-                        {statusBadge.label}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    {expense.merchant_name && (
-                      <div>
-                        <div className="text-xs text-gray-500 mb-1">Merchant</div>
-                        <div className="font-medium text-gray-900">{expense.merchant_name}</div>
-                      </div>
-                    )}
-                    {expense.payment_method && (
-                      <div>
-                        <div className="text-xs text-gray-500 mb-1">Payment Method</div>
-                        <div className="font-medium text-gray-900">{expense.payment_method}</div>
-                      </div>
-                    )}
-                    {expense.submitted_at && (
-                      <div>
-                        <div className="text-xs text-gray-500 mb-1">Submitted</div>
-                        <div className="font-medium text-gray-900">{new Date(expense.submitted_at).toLocaleDateString()}</div>
-                      </div>
-                    )}
-                    <div>
-                      <div className="text-xs text-gray-500 mb-1">Category</div>
-                      <div className="font-medium text-gray-900 capitalize">{expense.expense_category}</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div className="flex items-center gap-3">
-                      {expense.has_receipt && (
-                        <div className="flex items-center gap-1 text-sm text-green-600">
-                          <Paperclip className="w-4 h-4" />
-                          Receipt Attached
-                        </div>
-                      )}
-                      {expense.reimbursed && (
-                        <div className="flex items-center gap-1 text-sm text-blue-600">
-                          <DollarSign className="w-4 h-4" />
-                          Reimbursed
-                        </div>
-                      )}
-                    </div>
-                    {expense.status === 'rejected' && expense.rejection_reason && (
-                      <div className="text-sm text-red-600">
-                        Reason: {expense.rejection_reason}
-                      </div>
-                    )}
-                  </div>
-                </BentoCard>
-              )
-            })}
-
-            {displayExpenses.length === 0 && (
-              <div className="text-center py-12 bg-white rounded-xl border">
-                <Receipt className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Expenses</h3>
-                <p className="text-muted-foreground">Submit your first expense report</p>
+          {/* Stats */}
+          <div className="grid grid-cols-6 gap-4">
+            {[
+              { label: 'Total Expenses', value: `$${(stats.totalExpenses / 1000).toFixed(1)}K`, icon: DollarSign, trend: '+12.5%' },
+              { label: 'Pending Approval', value: `$${(stats.pendingApproval / 1000).toFixed(1)}K`, icon: Clock, count: stats.pendingCount },
+              { label: 'Approved', value: `$${(stats.approved / 1000).toFixed(1)}K`, icon: CheckCircle, trend: '+8.3%' },
+              { label: 'Reimbursed', value: `$${(stats.reimbursed / 1000).toFixed(1)}K`, icon: Banknote, trend: '+15.2%' },
+              { label: 'Avg Processing', value: `${stats.avgProcessingTime} days`, icon: TrendingUp, trend: '-0.5 days' },
+              { label: 'Policy Compliance', value: '94%', icon: Shield, trend: '+2.1%' }
+            ].map((stat, i) => (
+              <div key={i} className="bg-white/10 backdrop-blur rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <stat.icon className="h-5 w-5 text-purple-200" />
+                  {stat.trend && <span className="text-xs text-emerald-300">{stat.trend}</span>}
+                  {stat.count !== undefined && <Badge className="bg-yellow-500 text-xs">{stat.count}</Badge>}
+                </div>
+                <p className="text-2xl font-bold">{stat.value}</p>
+                <p className="text-sm text-purple-100">{stat.label}</p>
               </div>
-            )}
-          </div>
-
-          <div className="space-y-6">
-            <ProgressCard
-              title="Expenses Approved"
-              current={displayExpenses.filter(e => e.status === 'approved').reduce((sum, e) => sum + e.total_amount, 0)}
-              goal={displayExpenses.reduce((sum, e) => sum + e.total_amount, 0)}
-              subtitle={displayExpenses.length > 0
-                ? `${((displayExpenses.filter(e => e.status === 'approved').length / displayExpenses.length) * 100).toFixed(1)}% approval rate`
-                : '0% approval rate'}
-            />
-
-            <MiniKPI
-              label="Pending Review"
-              value={`$${(displayExpenses.filter(e => e.status === 'pending').reduce((sum, e) => sum + e.total_amount, 0) / 1000).toFixed(1)}K`}
-              change={8.7}
-            />
-
-            <RankingList title="Top Categories" items={topCategories} />
-
-            <ActivityFeed title="Recent Activity" activities={recentActivity} />
+            ))}
           </div>
         </div>
       </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-6">
+            <TabsTrigger value="reports">Expense Reports</TabsTrigger>
+            <TabsTrigger value="receipts">Receipts</TabsTrigger>
+            <TabsTrigger value="mileage">Mileage</TabsTrigger>
+            <TabsTrigger value="per-diem">Per Diem</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="policies">Policies</TabsTrigger>
+          </TabsList>
+
+          {/* Expense Reports Tab */}
+          <TabsContent value="reports">
+            <div className="flex gap-6">
+              {/* Report List */}
+              <div className="flex-1">
+                {/* Filters */}
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Search reports..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value as any)}
+                    className="px-3 py-2 border rounded-lg text-sm"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="draft">Draft</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="reimbursed">Reimbursed</option>
+                  </select>
+                </div>
+
+                {/* Quick Filters */}
+                <div className="flex gap-2 mb-4">
+                  {[
+                    { label: 'My Reports', count: 3 },
+                    { label: 'Needs Review', count: 2 },
+                    { label: 'Policy Violations', count: 1 },
+                    { label: 'This Month', count: 4 },
+                  ].map((filter, i) => (
+                    <button key={i} className="px-3 py-1.5 bg-white border rounded-lg text-sm hover:bg-gray-50 flex items-center gap-2">
+                      {filter.label}
+                      <Badge variant="secondary" className="text-xs">{filter.count}</Badge>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Report Cards */}
+                <div className="space-y-4">
+                  {filteredReports.map(report => (
+                    <Card key={report.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => openReportDetails(report)}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-4">
+                          <div className="p-3 bg-purple-100 rounded-lg">
+                            <Receipt className="h-6 w-6 text-purple-600" />
+                          </div>
+
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-semibold">{report.title}</h3>
+                              <Badge className={getStatusColor(report.status)}>{report.status}</Badge>
+                              {report.policyViolations.length > 0 && (
+                                <Badge variant="destructive" className="text-xs">
+                                  <AlertTriangle className="h-3 w-3 mr-1" />
+                                  {report.policyViolations.length} violation{report.policyViolations.length > 1 ? 's' : ''}
+                                </Badge>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                              <span className="flex items-center gap-1">
+                                <Avatar className="h-4 w-4">
+                                  <AvatarImage src={report.submittedBy.avatar} />
+                                  <AvatarFallback>{report.submittedBy.name[0]}</AvatarFallback>
+                                </Avatar>
+                                {report.submittedBy.name}
+                              </span>
+                              <span>{report.submittedBy.department}</span>
+                              <span>{report.lineItems.length} items</span>
+                              <span>{report.attachments} receipts</span>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2">
+                              {report.lineItems.slice(0, 3).map((item, i) => {
+                                const Icon = getCategoryIcon(item.category)
+                                return (
+                                  <div key={i} className="flex items-center gap-1 text-xs bg-gray-100 px-2 py-1 rounded">
+                                    <Icon className="h-3 w-3" />
+                                    {item.description.slice(0, 20)}...
+                                  </div>
+                                )
+                              })}
+                              {report.lineItems.length > 3 && (
+                                <span className="text-xs text-gray-500">+{report.lineItems.length - 3} more</span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="text-right">
+                            <p className="text-2xl font-bold text-purple-600">${report.totalAmount.toLocaleString()}</p>
+                            <p className="text-sm text-gray-500">{report.currency}</p>
+                            {report.submittedAt && (
+                              <p className="text-xs text-gray-400 mt-1">
+                                Submitted {new Date(report.submittedAt).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sidebar */}
+              <div className="w-80 space-y-4">
+                {/* Quick Actions */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Quick Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {[
+                      { label: 'Scan Receipt', icon: Camera, color: 'text-purple-600' },
+                      { label: 'Add Mileage', icon: Car, color: 'text-blue-600' },
+                      { label: 'Request Per Diem', icon: Calendar, color: 'text-green-600' },
+                      { label: 'Link Card Transaction', icon: CreditCard, color: 'text-orange-600' },
+                    ].map((action, i) => (
+                      <button key={i} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-left">
+                        <action.icon className={`h-5 w-5 ${action.color}`} />
+                        <span className="text-sm">{action.label}</span>
+                      </button>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                {/* Category Breakdown */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm">Spending by Category</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {categoryBreakdown.slice(0, 5).map(([category, amount], i) => {
+                      const Icon = getCategoryIcon(category as ExpenseCategory)
+                      const total = stats.totalExpenses
+                      const percent = ((amount / total) * 100).toFixed(0)
+                      return (
+                        <div key={i}>
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="flex items-center gap-2 text-sm">
+                              <Icon className="h-4 w-4" />
+                              {category.charAt(0).toUpperCase() + category.slice(1)}
+                            </span>
+                            <span className="text-sm font-medium">${amount.toLocaleString()}</span>
+                          </div>
+                          <Progress value={Number(percent)} className="h-1.5" />
+                        </div>
+                      )
+                    })}
+                  </CardContent>
+                </Card>
+
+                {/* Pending Approvals */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm flex items-center justify-between">
+                      <span>Needs Your Approval</span>
+                      <Badge variant="secondary">{stats.pendingCount}</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {reports.filter(r => r.status === 'pending').slice(0, 3).map(report => (
+                      <div key={report.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => openReportDetails(report)}>
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={report.submittedBy.avatar} />
+                          <AvatarFallback>{report.submittedBy.name[0]}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{report.submittedBy.name}</p>
+                          <p className="text-xs text-gray-500">${report.totalAmount}</p>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Receipts Tab */}
+          <TabsContent value="receipts">
+            <div className="grid grid-cols-3 gap-6">
+              <Card className="col-span-2">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Receipt Scanner</CardTitle>
+                    <Button className="bg-purple-600 hover:bg-purple-700">
+                      <Camera className="h-4 w-4 mr-2" />
+                      Scan Receipt
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="border-2 border-dashed rounded-xl p-12 text-center">
+                    <Upload className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">Drop receipts here</h3>
+                    <p className="text-gray-500 mb-4">or click to browse files</p>
+                    <p className="text-sm text-gray-400">Supports JPG, PNG, PDF up to 10MB</p>
+                  </div>
+
+                  <div className="mt-6">
+                    <h4 className="font-medium mb-4">Recent Uploads</h4>
+                    <div className="grid grid-cols-4 gap-4">
+                      {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
+                          <FileText className="h-8 w-8 text-gray-400" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">OCR Results</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center py-8">
+                    <Receipt className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500">Upload a receipt to extract data</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Mileage Tab */}
+          <TabsContent value="mileage">
+            <div className="grid grid-cols-3 gap-6">
+              <div className="col-span-2">
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Mileage Log</CardTitle>
+                      <Button className="bg-purple-600 hover:bg-purple-700">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Trip
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {mileage.map(entry => (
+                        <div key={entry.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                          <div className="p-3 bg-blue-100 rounded-lg">
+                            <Car className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-medium">{entry.origin}</span>
+                              <ArrowRight className="h-4 w-4 text-gray-400" />
+                              <span className="font-medium">{entry.destination}</span>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <span>{entry.date}</span>
+                              <span>{entry.distance} miles</span>
+                              <span>{entry.purpose}</span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold">${(entry.distance * entry.rate).toFixed(2)}</p>
+                            <Badge className={getStatusColor(entry.status)}>{entry.status}</Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Mileage Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <p className="text-3xl font-bold text-blue-600">
+                      {mileage.reduce((sum, m) => sum + m.distance, 0)} mi
+                    </p>
+                    <p className="text-sm text-gray-600">This Month</p>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">IRS Rate</span>
+                      <span className="font-medium">$0.67/mile</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Pending Reimbursement</span>
+                      <span className="font-medium">
+                        ${mileage.filter(m => m.status === 'pending').reduce((sum, m) => sum + (m.distance * m.rate), 0).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Per Diem Tab */}
+          <TabsContent value="per-diem">
+            <div className="grid grid-cols-3 gap-6">
+              <div className="col-span-2">
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Per Diem Requests</CardTitle>
+                      <Button className="bg-purple-600 hover:bg-purple-700">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Request Per Diem
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {perDiems.map(pd => (
+                      <div key={pd.id} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-green-100 rounded-lg">
+                              <MapPin className="h-5 w-5 text-green-600" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold">{pd.location}</h4>
+                              <p className="text-sm text-gray-500">{pd.startDate} - {pd.endDate}</p>
+                            </div>
+                          </div>
+                          <Badge className={getStatusColor(pd.status)}>{pd.status}</Badge>
+                        </div>
+                        <div className="grid grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-500">Daily Rate</span>
+                            <p className="font-medium">${pd.dailyRate}</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Total</span>
+                            <p className="font-medium">${pd.totalAmount}</p>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-gray-500">Meals Included</span>
+                            <div className="flex gap-2 mt-1">
+                              {pd.meals.breakfast && <Badge variant="outline">Breakfast</Badge>}
+                              {pd.meals.lunch && <Badge variant="outline">Lunch</Badge>}
+                              {pd.meals.dinner && <Badge variant="outline">Dinner</Badge>}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">GSA Rates</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { city: 'New York, NY', rate: 79 },
+                      { city: 'San Francisco, CA', rate: 79 },
+                      { city: 'Chicago, IL', rate: 59 },
+                      { city: 'Other US Locations', rate: 59 },
+                    ].map((item, i) => (
+                      <div key={i} className="flex justify-between text-sm">
+                        <span>{item.city}</span>
+                        <span className="font-medium">${item.rate}/day</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics">
+            <div className="grid grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Monthly Spending Trend</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
+                    <BarChart3 className="h-16 w-16 text-gray-300" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Category Distribution</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
+                    <PieChart className="h-16 w-16 text-gray-300" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top Spenders</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockEmployees.map((emp, i) => {
+                      const empTotal = reports.filter(r => r.submittedBy.id === emp.id).reduce((sum, r) => sum + r.totalAmount, 0)
+                      return (
+                        <div key={emp.id} className="flex items-center gap-3">
+                          <span className="text-lg font-bold text-gray-400 w-6">{i + 1}</span>
+                          <Avatar>
+                            <AvatarImage src={emp.avatar} />
+                            <AvatarFallback>{emp.name[0]}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="font-medium">{emp.name}</p>
+                            <p className="text-sm text-gray-500">{emp.department}</p>
+                          </div>
+                          <span className="font-semibold">${empTotal.toLocaleString()}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Processing Metrics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-gray-50 rounded-lg text-center">
+                      <p className="text-3xl font-bold text-purple-600">2.3</p>
+                      <p className="text-sm text-gray-500">Avg. Days to Approve</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded-lg text-center">
+                      <p className="text-3xl font-bold text-green-600">94%</p>
+                      <p className="text-sm text-gray-500">Approval Rate</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded-lg text-center">
+                      <p className="text-3xl font-bold text-blue-600">1.8</p>
+                      <p className="text-sm text-gray-500">Avg. Days to Reimburse</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 rounded-lg text-center">
+                      <p className="text-3xl font-bold text-orange-600">6%</p>
+                      <p className="text-sm text-gray-500">Policy Violations</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Policies Tab */}
+          <TabsContent value="policies">
+            <div className="grid grid-cols-2 gap-6">
+              {policies.map(policy => (
+                <Card key={policy.id}>
+                  <CardContent className="pt-6">
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className={`p-3 rounded-lg ${getCategoryColor(policy.category)}`}>
+                        {(() => {
+                          const Icon = getCategoryIcon(policy.category)
+                          return <Icon className="h-5 w-5" />
+                        })()}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">{policy.name} Policy</h3>
+                        <p className="text-sm text-gray-500 capitalize">{policy.category}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Maximum Amount</span>
+                        <span className="font-medium">${policy.maxAmount}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Approval Threshold</span>
+                        <span className="font-medium">${policy.approvalThreshold}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Receipt Required</span>
+                        <Badge variant={policy.requiresReceipt ? 'default' : 'secondary'}>
+                          {policy.requiresReceipt ? 'Yes' : 'No'}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Approval Required</span>
+                        <Badge variant={policy.requiresApproval ? 'default' : 'secondary'}>
+                          {policy.requiresApproval ? 'Yes' : 'No'}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {policy.notes && (
+                      <p className="text-sm text-gray-500 mt-4 pt-4 border-t">{policy.notes}</p>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* Report Detail Dialog */}
+      <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden">
+          {selectedReport && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-3">
+                  <span>{selectedReport.title}</span>
+                  <Badge className={getStatusColor(selectedReport.status)}>{selectedReport.status}</Badge>
+                </DialogTitle>
+              </DialogHeader>
+
+              <ScrollArea className="h-[60vh]">
+                <div className="space-y-6 pr-4">
+                  {/* Summary */}
+                  <div className="flex items-center justify-between p-4 bg-purple-50 rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <Avatar>
+                        <AvatarImage src={selectedReport.submittedBy.avatar} />
+                        <AvatarFallback>{selectedReport.submittedBy.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{selectedReport.submittedBy.name}</p>
+                        <p className="text-sm text-gray-500">{selectedReport.submittedBy.department}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-3xl font-bold text-purple-600">${selectedReport.totalAmount.toLocaleString()}</p>
+                      <p className="text-sm text-gray-500">{selectedReport.lineItems.length} items</p>
+                    </div>
+                  </div>
+
+                  {/* Policy Violations */}
+                  {selectedReport.policyViolations.length > 0 && (
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <h4 className="font-medium text-red-800 mb-2 flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4" />
+                        Policy Violations
+                      </h4>
+                      {selectedReport.policyViolations.map((violation, i) => (
+                        <p key={i} className="text-sm text-red-700">{violation.rule}</p>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Line Items */}
+                  <div>
+                    <h4 className="font-medium mb-3">Expense Items</h4>
+                    <div className="space-y-3">
+                      {selectedReport.lineItems.map(item => {
+                        const Icon = getCategoryIcon(item.category)
+                        return (
+                          <div key={item.id} className="flex items-center gap-4 p-3 border rounded-lg">
+                            <div className={`p-2 rounded-lg ${getCategoryColor(item.category)}`}>
+                              <Icon className="h-4 w-4" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium">{item.description}</p>
+                              <div className="flex items-center gap-3 text-sm text-gray-500">
+                                <span>{item.merchant}</span>
+                                <span>{item.date}</span>
+                                {item.isBillable && (
+                                  <Badge variant="outline" className="text-xs">Billable</Badge>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold">${item.amount.toFixed(2)}</p>
+                              {item.taxAmount && item.taxAmount > 0 && (
+                                <p className="text-xs text-gray-500">+${item.taxAmount.toFixed(2)} tax</p>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Timeline */}
+                  <div>
+                    <h4 className="font-medium mb-3">Timeline</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="w-2 h-2 rounded-full bg-gray-400" />
+                        <span className="text-gray-500">Created:</span>
+                        <span>{selectedReport.createdAt}</span>
+                      </div>
+                      {selectedReport.submittedAt && (
+                        <div className="flex items-center gap-3 text-sm">
+                          <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                          <span className="text-gray-500">Submitted:</span>
+                          <span>{selectedReport.submittedAt}</span>
+                        </div>
+                      )}
+                      {selectedReport.approvedAt && (
+                        <div className="flex items-center gap-3 text-sm">
+                          <div className="w-2 h-2 rounded-full bg-green-500" />
+                          <span className="text-gray-500">Approved:</span>
+                          <span>{selectedReport.approvedAt}</span>
+                        </div>
+                      )}
+                      {selectedReport.reimbursedAt && (
+                        <div className="flex items-center gap-3 text-sm">
+                          <div className="w-2 h-2 rounded-full bg-blue-500" />
+                          <span className="text-gray-500">Reimbursed:</span>
+                          <span>{selectedReport.reimbursedAt}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </ScrollArea>
+
+              {/* Actions */}
+              {selectedReport.status === 'pending' && (
+                <div className="flex gap-3 pt-4 border-t">
+                  <Button variant="outline" className="flex-1 text-red-600 hover:bg-red-50">
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Reject
+                  </Button>
+                  <Button className="flex-1 bg-green-600 hover:bg-green-700">
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Approve
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* New Expense Dialog */}
+      <Dialog open={showNewExpenseDialog} onOpenChange={setShowNewExpenseDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Expense Report</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Report Title</label>
+              <Input placeholder="e.g., Q1 Sales Conference" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Payment Method</label>
+              <select className="w-full px-3 py-2 border rounded-lg">
+                <option value="corporate_card">Corporate Card</option>
+                <option value="personal_card">Personal Card</option>
+                <option value="cash">Cash</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Notes (Optional)</label>
+              <textarea className="w-full px-3 py-2 border rounded-lg" rows={3} placeholder="Add any relevant notes..." />
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowNewExpenseDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-purple-600 hover:bg-purple-700">
+                Create Report
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
