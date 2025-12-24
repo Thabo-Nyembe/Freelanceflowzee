@@ -1,7 +1,20 @@
 'use client'
 
-import { useState } from 'react'
-import { useOnboardingPrograms, useOnboardingTasks, useOnboardingMutations, OnboardingProgram, OnboardingTask, getProgramStatusColor, getTaskStatusColor, getTaskPriorityColor, getCompletionColor, calculateDaysRemaining } from '@/lib/hooks/use-onboarding'
+import { useState, useMemo } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   UserPlus,
   Users,
@@ -16,350 +29,1378 @@ import {
   BookOpen,
   Settings,
   BarChart3,
-  AlertCircle
+  AlertCircle,
+  Play,
+  Pause,
+  Edit,
+  Trash2,
+  Copy,
+  Eye,
+  Target,
+  Layers,
+  MessageSquare,
+  Lightbulb,
+  MousePointer,
+  Maximize2,
+  CheckSquare,
+  ArrowRight,
+  GitBranch,
+  Filter,
+  Download,
+  Upload,
+  Palette,
+  Zap,
+  Star,
+  Globe,
+  Lock,
+  RefreshCw,
+  Info,
+  ChevronRight,
+  ChevronDown,
+  Sparkles,
+  GripVertical,
+  MoreHorizontal,
+  ExternalLink,
+  Share2,
+  Flag,
+  Timer,
+  Activity,
+  PieChart,
+  LineChart,
+  LayoutDashboard,
+  UserCheck,
+  UserX,
+  Bell
 } from 'lucide-react'
 
-interface OnboardingClientProps {
-  initialPrograms: OnboardingProgram[]
-  initialTasks: OnboardingTask[]
+// Types
+type FlowStatus = 'active' | 'paused' | 'draft' | 'archived'
+type FlowType = 'onboarding' | 'feature_adoption' | 'announcement' | 'survey' | 'checklist'
+type StepType = 'modal' | 'tooltip' | 'hotspot' | 'slideout' | 'checklist' | 'banner'
+type TriggerType = 'page_load' | 'click' | 'delay' | 'scroll' | 'event' | 'segment'
+type SegmentOperator = 'is' | 'is_not' | 'contains' | 'greater_than' | 'less_than'
+
+interface FlowStep {
+  id: string
+  type: StepType
+  title: string
+  content: string
+  target?: string
+  position?: 'top' | 'bottom' | 'left' | 'right' | 'center'
+  order: number
 }
 
-type ViewMode = 'all' | 'in-progress' | 'pending' | 'completed'
+interface FlowTrigger {
+  type: TriggerType
+  value: string
+  delay?: number
+}
 
-export default function OnboardingClient({ initialPrograms, initialTasks }: OnboardingClientProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('all')
-  const [searchQuery, setSearchQuery] = useState('')
+interface Flow {
+  id: string
+  name: string
+  description: string
+  type: FlowType
+  status: FlowStatus
+  steps: FlowStep[]
+  trigger: FlowTrigger
+  segmentId?: string
+  views: number
+  completions: number
+  completionRate: number
+  dropoffRate: number
+  avgTimeToComplete: number
+  createdAt: string
+  updatedAt: string
+  createdBy: string
+}
 
-  const { programs, stats, isLoading } = useOnboardingPrograms(initialPrograms, {
-    status: viewMode === 'all' ? undefined : viewMode
-  })
-  const { tasks } = useOnboardingTasks(initialTasks)
-  const { createProgram, isCreatingProgram } = useOnboardingMutations()
+interface ChecklistItem {
+  id: string
+  title: string
+  description: string
+  completed: boolean
+  order: number
+  actionUrl?: string
+  isRequired: boolean
+}
 
-  const filteredPrograms = programs.filter(program =>
-    program.employee_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    program.onboarding_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    program.role?.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+interface Checklist {
+  id: string
+  name: string
+  description: string
+  items: ChecklistItem[]
+  segmentId?: string
+  status: FlowStatus
+  usersStarted: number
+  usersCompleted: number
+  completionRate: number
+  createdAt: string
+}
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'full-time': return 'bg-green-100 text-green-800 border-green-200'
-      case 'part-time': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'contract': return 'bg-purple-100 text-purple-800 border-purple-200'
-      case 'intern': return 'bg-cyan-100 text-cyan-800 border-cyan-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
-    }
+interface UserJourney {
+  userId: string
+  userName: string
+  userEmail: string
+  avatar?: string
+  flowsCompleted: number
+  totalFlows: number
+  checklistProgress: number
+  lastActive: string
+  signupDate: string
+  segment: string
+  status: 'active' | 'at_risk' | 'churned' | 'new'
+}
+
+interface Segment {
+  id: string
+  name: string
+  description: string
+  rules: SegmentRule[]
+  userCount: number
+  flowsUsing: number
+  createdAt: string
+}
+
+interface SegmentRule {
+  property: string
+  operator: SegmentOperator
+  value: string
+}
+
+interface FlowAnalytics {
+  date: string
+  views: number
+  starts: number
+  completions: number
+}
+
+interface OnboardingStats {
+  totalFlows: number
+  activeFlows: number
+  totalUsers: number
+  avgCompletionRate: number
+  totalViews: number
+  totalCompletions: number
+  activeChecklists: number
+  usersOnboarded: number
+}
+
+// Mock Data
+const mockFlows: Flow[] = [
+  {
+    id: '1',
+    name: 'Welcome Tour',
+    description: 'Introduction to the platform for new users',
+    type: 'onboarding',
+    status: 'active',
+    steps: [
+      { id: 's1', type: 'modal', title: 'Welcome!', content: 'Welcome to our platform', order: 1 },
+      { id: 's2', type: 'tooltip', title: 'Dashboard', content: 'This is your main dashboard', target: '#dashboard', position: 'bottom', order: 2 },
+      { id: 's3', type: 'hotspot', title: 'Quick Actions', content: 'Access common actions here', target: '#actions', position: 'right', order: 3 }
+    ],
+    trigger: { type: 'page_load', value: '/dashboard' },
+    views: 4523,
+    completions: 3892,
+    completionRate: 86.1,
+    dropoffRate: 13.9,
+    avgTimeToComplete: 145,
+    createdAt: '2024-01-15',
+    updatedAt: '2024-03-10',
+    createdBy: 'Sarah Chen'
+  },
+  {
+    id: '2',
+    name: 'Feature Discovery: Reports',
+    description: 'Guide users through the reporting features',
+    type: 'feature_adoption',
+    status: 'active',
+    steps: [
+      { id: 's1', type: 'slideout', title: 'New Reports!', content: 'Check out our new reporting features', order: 1 },
+      { id: 's2', type: 'tooltip', title: 'Create Report', content: 'Click here to create your first report', target: '#create-report', position: 'bottom', order: 2 }
+    ],
+    trigger: { type: 'event', value: 'viewed_dashboard_3_times' },
+    segmentId: 'seg1',
+    views: 2341,
+    completions: 1876,
+    completionRate: 80.1,
+    dropoffRate: 19.9,
+    avgTimeToComplete: 89,
+    createdAt: '2024-02-01',
+    updatedAt: '2024-03-12',
+    createdBy: 'Mike Johnson'
+  },
+  {
+    id: '3',
+    name: 'NPS Survey',
+    description: 'Collect feedback from active users',
+    type: 'survey',
+    status: 'active',
+    steps: [
+      { id: 's1', type: 'modal', title: 'Quick Question', content: 'How likely are you to recommend us?', order: 1 }
+    ],
+    trigger: { type: 'delay', value: '30_days', delay: 30 },
+    segmentId: 'seg2',
+    views: 1892,
+    completions: 1234,
+    completionRate: 65.2,
+    dropoffRate: 34.8,
+    avgTimeToComplete: 35,
+    createdAt: '2024-02-15',
+    updatedAt: '2024-03-08',
+    createdBy: 'Sarah Chen'
+  },
+  {
+    id: '4',
+    name: 'New Feature Announcement',
+    description: 'Announce the new AI-powered assistant',
+    type: 'announcement',
+    status: 'paused',
+    steps: [
+      { id: 's1', type: 'banner', title: 'AI Assistant', content: 'Try our new AI-powered assistant!', order: 1 }
+    ],
+    trigger: { type: 'page_load', value: '/dashboard' },
+    views: 5621,
+    completions: 4532,
+    completionRate: 80.6,
+    dropoffRate: 19.4,
+    avgTimeToComplete: 12,
+    createdAt: '2024-03-01',
+    updatedAt: '2024-03-10',
+    createdBy: 'Alex Rivera'
+  },
+  {
+    id: '5',
+    name: 'Power User Onboarding',
+    description: 'Advanced features for power users',
+    type: 'onboarding',
+    status: 'draft',
+    steps: [
+      { id: 's1', type: 'modal', title: 'Advanced Features', content: 'Unlock your full potential', order: 1 },
+      { id: 's2', type: 'tooltip', title: 'API Access', content: 'Access our developer API', target: '#api', position: 'left', order: 2 },
+      { id: 's3', type: 'tooltip', title: 'Automations', content: 'Set up automated workflows', target: '#automations', position: 'bottom', order: 3 },
+      { id: 's4', type: 'modal', title: 'All Set!', content: 'You are ready to use advanced features', order: 4 }
+    ],
+    trigger: { type: 'segment', value: 'power_users' },
+    segmentId: 'seg3',
+    views: 0,
+    completions: 0,
+    completionRate: 0,
+    dropoffRate: 0,
+    avgTimeToComplete: 0,
+    createdAt: '2024-03-12',
+    updatedAt: '2024-03-12',
+    createdBy: 'Mike Johnson'
   }
+]
+
+const mockChecklists: Checklist[] = [
+  {
+    id: 'c1',
+    name: 'Getting Started Checklist',
+    description: 'Complete these steps to set up your account',
+    items: [
+      { id: 'i1', title: 'Complete your profile', description: 'Add your photo and bio', completed: false, order: 1, actionUrl: '/settings/profile', isRequired: true },
+      { id: 'i2', title: 'Connect your calendar', description: 'Sync your calendar for scheduling', completed: false, order: 2, actionUrl: '/integrations/calendar', isRequired: false },
+      { id: 'i3', title: 'Invite team members', description: 'Add colleagues to your workspace', completed: false, order: 3, actionUrl: '/team/invite', isRequired: true },
+      { id: 'i4', title: 'Create your first project', description: 'Set up a project to get started', completed: false, order: 4, actionUrl: '/projects/new', isRequired: true },
+      { id: 'i5', title: 'Enable notifications', description: 'Stay updated on important events', completed: false, order: 5, actionUrl: '/settings/notifications', isRequired: false }
+    ],
+    status: 'active',
+    usersStarted: 2341,
+    usersCompleted: 1892,
+    completionRate: 80.8,
+    createdAt: '2024-01-01'
+  },
+  {
+    id: 'c2',
+    name: 'Advanced Setup',
+    description: 'Take your account to the next level',
+    items: [
+      { id: 'i1', title: 'Set up integrations', description: 'Connect third-party apps', completed: false, order: 1, actionUrl: '/integrations', isRequired: false },
+      { id: 'i2', title: 'Configure workflows', description: 'Automate your processes', completed: false, order: 2, actionUrl: '/workflows', isRequired: false },
+      { id: 'i3', title: 'Add custom fields', description: 'Customize your data structure', completed: false, order: 3, actionUrl: '/settings/fields', isRequired: false }
+    ],
+    status: 'active',
+    usersStarted: 892,
+    usersCompleted: 456,
+    completionRate: 51.1,
+    createdAt: '2024-01-15'
+  }
+]
+
+const mockUsers: UserJourney[] = [
+  { userId: 'u1', userName: 'Emily Watson', userEmail: 'emily@example.com', flowsCompleted: 3, totalFlows: 3, checklistProgress: 100, lastActive: '2024-03-12', signupDate: '2024-02-01', segment: 'Power Users', status: 'active' },
+  { userId: 'u2', userName: 'David Chen', userEmail: 'david@example.com', flowsCompleted: 2, totalFlows: 3, checklistProgress: 80, lastActive: '2024-03-11', signupDate: '2024-02-15', segment: 'Enterprise', status: 'active' },
+  { userId: 'u3', userName: 'Sarah Miller', userEmail: 'sarah@example.com', flowsCompleted: 1, totalFlows: 3, checklistProgress: 40, lastActive: '2024-03-05', signupDate: '2024-03-01', segment: 'Free Trial', status: 'at_risk' },
+  { userId: 'u4', userName: 'James Wilson', userEmail: 'james@example.com', flowsCompleted: 0, totalFlows: 3, checklistProgress: 20, lastActive: '2024-02-20', signupDate: '2024-02-10', segment: 'Free Trial', status: 'churned' },
+  { userId: 'u5', userName: 'Lisa Brown', userEmail: 'lisa@example.com', flowsCompleted: 1, totalFlows: 3, checklistProgress: 60, lastActive: '2024-03-12', signupDate: '2024-03-10', segment: 'Starter', status: 'new' }
+]
+
+const mockSegments: Segment[] = [
+  { id: 'seg1', name: 'Power Users', description: 'Users with high engagement', rules: [{ property: 'sessions_count', operator: 'greater_than', value: '50' }], userCount: 1234, flowsUsing: 3, createdAt: '2024-01-01' },
+  { id: 'seg2', name: 'Active 30 Days', description: 'Users active in the last 30 days', rules: [{ property: 'last_active', operator: 'greater_than', value: '30_days_ago' }], userCount: 4567, flowsUsing: 2, createdAt: '2024-01-15' },
+  { id: 'seg3', name: 'Enterprise', description: 'Enterprise plan users', rules: [{ property: 'plan', operator: 'is', value: 'enterprise' }], userCount: 234, flowsUsing: 1, createdAt: '2024-02-01' },
+  { id: 'seg4', name: 'Free Trial', description: 'Users on free trial', rules: [{ property: 'plan', operator: 'is', value: 'trial' }], userCount: 789, flowsUsing: 2, createdAt: '2024-02-15' },
+  { id: 'seg5', name: 'New Users', description: 'Users who signed up in the last 7 days', rules: [{ property: 'signup_date', operator: 'greater_than', value: '7_days_ago' }], userCount: 156, flowsUsing: 1, createdAt: '2024-03-01' }
+]
+
+const mockAnalytics: FlowAnalytics[] = [
+  { date: '2024-03-06', views: 423, starts: 398, completions: 356 },
+  { date: '2024-03-07', views: 456, starts: 421, completions: 389 },
+  { date: '2024-03-08', views: 512, starts: 478, completions: 432 },
+  { date: '2024-03-09', views: 389, starts: 356, completions: 312 },
+  { date: '2024-03-10', views: 478, starts: 445, completions: 401 },
+  { date: '2024-03-11', views: 534, starts: 502, completions: 456 },
+  { date: '2024-03-12', views: 567, starts: 534, completions: 489 }
+]
+
+// Helper Functions
+const getFlowStatusColor = (status: FlowStatus) => {
+  switch (status) {
+    case 'active': return 'bg-green-100 text-green-800 border-green-200'
+    case 'paused': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+    case 'draft': return 'bg-gray-100 text-gray-800 border-gray-200'
+    case 'archived': return 'bg-red-100 text-red-800 border-red-200'
+    default: return 'bg-gray-100 text-gray-800 border-gray-200'
+  }
+}
+
+const getFlowTypeColor = (type: FlowType) => {
+  switch (type) {
+    case 'onboarding': return 'bg-blue-100 text-blue-800 border-blue-200'
+    case 'feature_adoption': return 'bg-purple-100 text-purple-800 border-purple-200'
+    case 'announcement': return 'bg-orange-100 text-orange-800 border-orange-200'
+    case 'survey': return 'bg-pink-100 text-pink-800 border-pink-200'
+    case 'checklist': return 'bg-cyan-100 text-cyan-800 border-cyan-200'
+    default: return 'bg-gray-100 text-gray-800 border-gray-200'
+  }
+}
+
+const getStepTypeIcon = (type: StepType) => {
+  switch (type) {
+    case 'modal': return Maximize2
+    case 'tooltip': return MessageSquare
+    case 'hotspot': return MousePointer
+    case 'slideout': return Layers
+    case 'checklist': return CheckSquare
+    case 'banner': return Flag
+    default: return Info
+  }
+}
+
+const getUserStatusColor = (status: string) => {
+  switch (status) {
+    case 'active': return 'bg-green-100 text-green-800 border-green-200'
+    case 'at_risk': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+    case 'churned': return 'bg-red-100 text-red-800 border-red-200'
+    case 'new': return 'bg-blue-100 text-blue-800 border-blue-200'
+    default: return 'bg-gray-100 text-gray-800 border-gray-200'
+  }
+}
+
+const formatDuration = (seconds: number) => {
+  if (seconds < 60) return `${seconds}s`
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = seconds % 60
+  return `${minutes}m ${remainingSeconds}s`
+}
+
+export default function OnboardingClient() {
+  const [activeTab, setActiveTab] = useState('flows')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<FlowStatus | 'all'>('all')
+  const [typeFilter, setTypeFilter] = useState<FlowType | 'all'>('all')
+  const [selectedFlow, setSelectedFlow] = useState<Flow | null>(null)
+  const [selectedChecklist, setSelectedChecklist] = useState<Checklist | null>(null)
+
+  // Calculate stats
+  const stats: OnboardingStats = useMemo(() => ({
+    totalFlows: mockFlows.length,
+    activeFlows: mockFlows.filter(f => f.status === 'active').length,
+    totalUsers: mockUsers.length,
+    avgCompletionRate: mockFlows.reduce((sum, f) => sum + f.completionRate, 0) / mockFlows.length,
+    totalViews: mockFlows.reduce((sum, f) => sum + f.views, 0),
+    totalCompletions: mockFlows.reduce((sum, f) => sum + f.completions, 0),
+    activeChecklists: mockChecklists.filter(c => c.status === 'active').length,
+    usersOnboarded: mockUsers.filter(u => u.flowsCompleted === u.totalFlows).length
+  }), [])
+
+  // Filter flows
+  const filteredFlows = useMemo(() => {
+    return mockFlows.filter(flow => {
+      const matchesSearch = flow.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        flow.description.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesStatus = statusFilter === 'all' || flow.status === statusFilter
+      const matchesType = typeFilter === 'all' || flow.type === typeFilter
+      return matchesSearch && matchesStatus && matchesType
+    })
+  }, [searchQuery, statusFilter, typeFilter])
+
+  // Filter users
+  const filteredUsers = useMemo(() => {
+    return mockUsers.filter(user =>
+      user.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.userEmail.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }, [searchQuery])
+
+  const maxViews = Math.max(...mockAnalytics.map(a => a.views))
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-              Employee Onboarding
-            </h1>
-            <p className="text-gray-600 mt-2">Manage new employee onboarding programs</p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+                Onboarding Hub
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Build engaging user experiences
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
-              <Search className="w-4 h-4" />
-              Search
-            </button>
-            <button className="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
+            <Button variant="outline" className="gap-2">
+              <Download className="w-4 h-4" />
+              Export
+            </Button>
+            <Button className="gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
               <Plus className="w-4 h-4" />
-              Create Onboarding Plan
-            </button>
+              Create Flow
+            </Button>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <UserPlus className="w-8 h-8 text-green-600" />
-              <span className="text-sm font-medium text-green-600">+6</span>
-            </div>
-            <p className="text-2xl font-bold text-gray-900">{stats.inProgress}</p>
-            <p className="text-sm text-gray-500">Active Onboardings</p>
-          </div>
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <TrendingUp className="w-8 h-8 text-blue-600" />
-              <span className="text-sm font-medium text-green-600">+5%</span>
-            </div>
-            <p className="text-2xl font-bold text-gray-900">{stats.avgCompletionRate.toFixed(0)}%</p>
-            <p className="text-sm text-gray-500">Avg Completion Rate</p>
-          </div>
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <CheckCircle2 className="w-8 h-8 text-purple-600" />
-              <span className="text-sm font-medium text-green-600">-12</span>
-            </div>
-            <p className="text-2xl font-bold text-gray-900">{stats.totalTasks - stats.tasksCompleted}</p>
-            <p className="text-sm text-gray-500">Pending Tasks</p>
-          </div>
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <Clock className="w-8 h-8 text-orange-600" />
-              <span className="text-sm font-medium text-green-600">-4 days</span>
-            </div>
-            <p className="text-2xl font-bold text-gray-900">{stats.avgDaysToComplete.toFixed(0)}d</p>
-            <p className="text-sm text-gray-500">Avg Time to Complete</p>
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Layers className="w-4 h-4 text-green-600" />
+                <span className="text-xs text-gray-500">Total Flows</span>
+              </div>
+              <p className="text-2xl font-bold">{stats.totalFlows}</p>
+              <p className="text-xs text-green-600">+2 this week</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Play className="w-4 h-4 text-blue-600" />
+                <span className="text-xs text-gray-500">Active Flows</span>
+              </div>
+              <p className="text-2xl font-bold">{stats.activeFlows}</p>
+              <p className="text-xs text-blue-600">Running</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Eye className="w-4 h-4 text-purple-600" />
+                <span className="text-xs text-gray-500">Total Views</span>
+              </div>
+              <p className="text-2xl font-bold">{(stats.totalViews / 1000).toFixed(1)}K</p>
+              <p className="text-xs text-purple-600">+12% vs last week</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span className="text-xs text-gray-500">Completions</span>
+              </div>
+              <p className="text-2xl font-bold">{(stats.totalCompletions / 1000).toFixed(1)}K</p>
+              <p className="text-xs text-emerald-600">+8% vs last week</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="w-4 h-4 text-orange-600" />
+                <span className="text-xs text-gray-500">Avg Completion</span>
+              </div>
+              <p className="text-2xl font-bold">{stats.avgCompletionRate.toFixed(1)}%</p>
+              <p className="text-xs text-orange-600">+5% improvement</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="w-4 h-4 text-pink-600" />
+                <span className="text-xs text-gray-500">Total Users</span>
+              </div>
+              <p className="text-2xl font-bold">{mockUsers.length}</p>
+              <p className="text-xs text-pink-600">Active today</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <UserCheck className="w-4 h-4 text-cyan-600" />
+                <span className="text-xs text-gray-500">Onboarded</span>
+              </div>
+              <p className="text-2xl font-bold">{stats.usersOnboarded}</p>
+              <p className="text-xs text-cyan-600">Fully complete</p>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckSquare className="w-4 h-4 text-teal-600" />
+                <span className="text-xs text-gray-500">Checklists</span>
+              </div>
+              <p className="text-2xl font-bold">{stats.activeChecklists}</p>
+              <p className="text-xs text-teal-600">Active</p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Quick Actions */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-            {[
-              { label: 'New Onboarding', icon: Plus, color: 'from-green-500 to-emerald-500' },
-              { label: 'View Schedule', icon: Calendar, color: 'from-blue-500 to-cyan-500' },
-              { label: 'Assign Buddy', icon: Users, color: 'from-purple-500 to-violet-500' },
-              { label: 'Send Welcome', icon: Mail, color: 'from-yellow-500 to-orange-500' },
-              { label: 'IT Setup', icon: Laptop, color: 'from-indigo-500 to-purple-500' },
-              { label: 'Training', icon: BookOpen, color: 'from-teal-500 to-cyan-500' },
-              { label: 'Reports', icon: BarChart3, color: 'from-pink-500 to-rose-500' },
-              { label: 'Settings', icon: Settings, color: 'from-gray-500 to-slate-500' }
-            ].map((action) => (
-              <button
-                key={action.label}
-                className="p-4 bg-white rounded-xl border border-gray-100 hover:shadow-lg transition-all duration-200 group"
+        {/* Main Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="bg-white dark:bg-gray-800 p-1 shadow-sm">
+            <TabsTrigger value="flows" className="gap-2">
+              <Layers className="w-4 h-4" />
+              Flows
+            </TabsTrigger>
+            <TabsTrigger value="checklists" className="gap-2">
+              <CheckSquare className="w-4 h-4" />
+              Checklists
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="users" className="gap-2">
+              <Users className="w-4 h-4" />
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="segments" className="gap-2">
+              <Target className="w-4 h-4" />
+              Segments
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Flows Tab */}
+          <TabsContent value="flows" className="space-y-6">
+            {/* Filters */}
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search flows..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as FlowStatus | 'all')}
+                className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800"
               >
-                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center text-white mb-3 mx-auto`}>
-                  <action.icon className="w-5 h-5" />
-                </div>
-                <p className="text-sm font-medium text-gray-900 text-center">{action.label}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="flex flex-wrap gap-2">
-          {(['all', 'in-progress', 'pending', 'completed'] as ViewMode[]).map((mode) => (
-            <button
-              key={mode}
-              onClick={() => setViewMode(mode)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                viewMode === mode
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {mode === 'all' ? 'All Programs' : mode.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-            </button>
-          ))}
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Onboarding Programs List */}
-          <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">Onboarding Programs</h2>
-              <div className="text-sm text-gray-600">{filteredPrograms.length} programs</div>
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="draft">Draft</option>
+                <option value="archived">Archived</option>
+              </select>
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value as FlowType | 'all')}
+                className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800"
+              >
+                <option value="all">All Types</option>
+                <option value="onboarding">Onboarding</option>
+                <option value="feature_adoption">Feature Adoption</option>
+                <option value="announcement">Announcement</option>
+                <option value="survey">Survey</option>
+              </select>
             </div>
 
-            {isLoading ? (
-              <div className="text-center py-8 text-gray-500">Loading programs...</div>
-            ) : filteredPrograms.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">No onboarding programs found</div>
-            ) : (
-              <div className="space-y-3">
-                {filteredPrograms.map((program) => {
-                  const daysRemaining = calculateDaysRemaining(program.end_date)
-
-                  return (
-                    <div
-                      key={program.id}
-                      className="bg-white rounded-xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-200 hover:border-green-200"
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white">
-                            <UserPlus className="w-6 h-6" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-gray-900">{program.employee_name}</h3>
-                            <div className="flex items-center gap-3 mt-1">
-                              <span className="text-sm text-gray-500">{program.onboarding_code}</span>
-                              <span className="text-sm text-gray-400">•</span>
-                              <span className="text-sm text-gray-500">{program.role || 'New Employee'}</span>
-                              <span className="text-sm text-gray-400">•</span>
-                              <span className="text-sm text-gray-500">{program.department || 'General'}</span>
-                            </div>
-                          </div>
+            {/* Flow Cards */}
+            <div className="grid gap-4">
+              {filteredFlows.map((flow) => (
+                <Card key={flow.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedFlow(flow)}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-semibold">{flow.name}</h3>
+                          <Badge className={getFlowStatusColor(flow.status)}>
+                            {flow.status}
+                          </Badge>
+                          <Badge variant="outline" className={getFlowTypeColor(flow.type)}>
+                            {flow.type.replace('_', ' ')}
+                          </Badge>
                         </div>
-                        <div className="flex flex-col items-end gap-2">
+                        <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+                          {flow.description}
+                        </p>
+
+                        {/* Steps Preview */}
+                        <div className="flex items-center gap-2 mb-4">
+                          {flow.steps.map((step, index) => {
+                            const StepIcon = getStepTypeIcon(step.type)
+                            return (
+                              <div key={step.id} className="flex items-center">
+                                <div className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs">
+                                  <StepIcon className="w-3 h-3" />
+                                  {step.type}
+                                </div>
+                                {index < flow.steps.length - 1 && (
+                                  <ChevronRight className="w-4 h-4 text-gray-400 mx-1" />
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+
+                        {/* Stats */}
+                        <div className="flex items-center gap-6 text-sm">
                           <div className="flex items-center gap-2">
-                            <div className={`px-3 py-1 rounded-full border text-xs font-medium ${getProgramStatusColor(program.status)}`}>
-                              {program.status}
-                            </div>
-                            <div className={`px-3 py-1 rounded-full border text-xs font-medium ${getTypeColor(program.employee_type)}`}>
-                              {program.employee_type}
-                            </div>
+                            <Eye className="w-4 h-4 text-gray-400" />
+                            <span>{flow.views.toLocaleString()} views</span>
                           </div>
-                          <div className={`text-2xl font-bold ${getCompletionColor(Number(program.completion_rate))}`}>
-                            {Number(program.completion_rate).toFixed(0)}%
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-gray-400" />
+                            <span>{flow.completions.toLocaleString()} completions</span>
                           </div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-4 mb-4">
-                        <div>
-                          <div className="text-sm text-gray-500">Tasks Progress</div>
-                          <div className="text-lg font-bold text-gray-900">
-                            {program.tasks_completed}/{program.total_tasks}
+                          <div className="flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4 text-gray-400" />
+                            <span>{flow.completionRate}% completion rate</span>
                           </div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-500">Days Remaining</div>
-                          <div className="text-lg font-bold text-yellow-600">
-                            {program.days_remaining}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-sm text-gray-500">Buddy</div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {program.buddy_name || 'Not assigned'}
+                          <div className="flex items-center gap-2">
+                            <Timer className="w-4 h-4 text-gray-400" />
+                            <span>{formatDuration(flow.avgTimeToComplete)} avg time</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-6 mb-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-3 h-3 rounded-full ${program.welcome_email_sent ? 'bg-green-500' : 'bg-gray-300'}`} />
-                          <span className="text-gray-600">Welcome Email</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`w-3 h-3 rounded-full ${program.equipment_provided ? 'bg-green-500' : 'bg-gray-300'}`} />
-                          <span className="text-gray-600">Equipment</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`w-3 h-3 rounded-full ${program.access_granted ? 'bg-green-500' : 'bg-gray-300'}`} />
-                          <span className="text-gray-600">System Access</span>
-                        </div>
+                      {/* Actions */}
+                      <div className="flex items-center gap-2">
+                        {flow.status === 'active' ? (
+                          <Button variant="outline" size="sm">
+                            <Pause className="w-4 h-4" />
+                          </Button>
+                        ) : (
+                          <Button variant="outline" size="sm">
+                            <Play className="w-4 h-4" />
+                          </Button>
+                        )}
+                        <Button variant="outline" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
                       </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
 
-                      <div className="pt-4 border-t border-gray-100">
-                        <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
-                          <span>Progress</span>
-                          <span>{Number(program.completion_rate).toFixed(0)}%</span>
+          {/* Checklists Tab */}
+          <TabsContent value="checklists" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input placeholder="Search checklists..." className="pl-9" />
+              </div>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                Create Checklist
+              </Button>
+            </div>
+
+            <div className="grid gap-4">
+              {mockChecklists.map((checklist) => (
+                <Card key={checklist.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedChecklist(checklist)}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-semibold">{checklist.name}</h3>
+                          <Badge className={getFlowStatusColor(checklist.status)}>
+                            {checklist.status}
+                          </Badge>
                         </div>
-                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <p className="text-gray-600 dark:text-gray-400 text-sm">
+                          {checklist.description}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-green-600">{checklist.completionRate}%</p>
+                        <p className="text-xs text-gray-500">Completion Rate</p>
+                      </div>
+                    </div>
+
+                    {/* Checklist Items */}
+                    <div className="space-y-2 mb-4">
+                      {checklist.items.map((item) => (
+                        <div key={item.id} className="flex items-center gap-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
+                          <div className="w-5 h-5 rounded border-2 border-gray-300 flex items-center justify-center">
+                            {item.completed && <CheckCircle2 className="w-4 h-4 text-green-600" />}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{item.title}</p>
+                            <p className="text-xs text-gray-500">{item.description}</p>
+                          </div>
+                          {item.isRequired && (
+                            <Badge variant="outline" className="text-xs">Required</Badge>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Stats */}
+                    <div className="flex items-center gap-6 text-sm pt-4 border-t">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-gray-400" />
+                        <span>{checklist.usersStarted.toLocaleString()} users started</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <UserCheck className="w-4 h-4 text-gray-400" />
+                        <span>{checklist.usersCompleted.toLocaleString()} users completed</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckSquare className="w-4 h-4 text-gray-400" />
+                        <span>{checklist.items.length} tasks</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Views & Completions Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Flow Performance (Last 7 Days)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {mockAnalytics.map((day) => (
+                      <div key={day.date} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">{new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                          <span className="font-medium">{day.completions} completions</span>
+                        </div>
+                        <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500"
-                            style={{ width: `${Number(program.completion_rate)}%` }}
+                            className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"
+                            style={{ width: `${(day.views / maxViews) * 100}%` }}
                           />
                         </div>
-                        <div className="flex items-center justify-between text-xs text-gray-500 mt-2">
-                          {program.start_date && (
-                            <span>Started: {new Date(program.start_date).toLocaleDateString()}</span>
-                          )}
-                          {program.manager_name && (
-                            <span>Manager: {program.manager_name}</span>
-                          )}
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>{day.views} views</span>
+                          <span>{((day.completions / day.views) * 100).toFixed(1)}% rate</span>
                         </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Recent Tasks */}
-            <div className="bg-white rounded-xl p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold mb-4">Recent Tasks</h3>
-              <div className="space-y-3">
-                {tasks.slice(0, 5).map((task) => (
-                  <div
-                    key={task.id}
-                    className="p-3 rounded-xl border border-gray-100 hover:border-green-200 transition-all duration-200"
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <div className="font-medium text-gray-900 text-sm">{task.task_name}</div>
-                        <div className="text-xs text-gray-500 mt-1">{task.assigned_to || 'Unassigned'}</div>
+              {/* Top Performing Flows */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Top Performing Flows</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockFlows.sort((a, b) => b.completionRate - a.completionRate).slice(0, 5).map((flow, index) => (
+                      <div key={flow.id} className="flex items-center gap-4">
+                        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center font-bold text-sm">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{flow.name}</p>
+                          <p className="text-xs text-gray-500">{flow.completions.toLocaleString()} completions</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-green-600">{flow.completionRate}%</p>
+                          <p className="text-xs text-gray-500">completion</p>
+                        </div>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs border ${getTaskStatusColor(task.status)}`}>
-                        {task.status}
-                      </span>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Drop-off Analysis */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Drop-off Analysis</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockFlows.filter(f => f.status === 'active').map((flow) => (
+                      <div key={flow.id} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">{flow.name}</span>
+                          <span className="text-sm text-red-600">{flow.dropoffRate}% drop-off</span>
+                        </div>
+                        <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-red-400 to-red-600 rounded-full"
+                            style={{ width: `${flow.dropoffRate}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Time to Complete */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Average Time to Complete</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockFlows.filter(f => f.avgTimeToComplete > 0).map((flow) => (
+                      <div key={flow.id} className="flex items-center gap-4">
+                        <Timer className="w-5 h-5 text-gray-400" />
+                        <div className="flex-1">
+                          <p className="font-medium text-sm">{flow.name}</p>
+                          <p className="text-xs text-gray-500">{flow.steps.length} steps</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold">{formatDuration(flow.avgTimeToComplete)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Users Tab */}
+          <TabsContent value="users" className="space-y-6">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search users..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <select className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="at_risk">At Risk</option>
+                <option value="new">New</option>
+                <option value="churned">Churned</option>
+              </select>
+              <select className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
+                <option value="all">All Segments</option>
+                {mockSegments.map(seg => (
+                  <option key={seg.id} value={seg.id}>{seg.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <Card>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 dark:bg-gray-800">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Segment</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Flows</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Checklist</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Active</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+                      {filteredUsers.map((user) => (
+                        <tr key={user.userId} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="w-8 h-8">
+                                <AvatarImage src={user.avatar} />
+                                <AvatarFallback>{user.userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium text-sm">{user.userName}</p>
+                                <p className="text-xs text-gray-500">{user.userEmail}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <Badge className={getUserStatusColor(user.status)}>
+                              {user.status.replace('_', ' ')}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-sm">{user.segment}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium">{user.flowsCompleted}/{user.totalFlows}</span>
+                              <Progress value={(user.flowsCompleted / user.totalFlows) * 100} className="w-16 h-2" />
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium">{user.checklistProgress}%</span>
+                              <Progress value={user.checklistProgress} className="w-16 h-2" />
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-sm text-gray-500">{user.lastActive}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <Button variant="ghost" size="sm">
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm">
+                                <Mail className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Segments Tab */}
+          <TabsContent value="segments" className="space-y-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input placeholder="Search segments..." className="pl-9" />
+              </div>
+              <Button className="gap-2">
+                <Plus className="w-4 h-4" />
+                Create Segment
+              </Button>
+            </div>
+
+            <div className="grid gap-4">
+              {mockSegments.map((segment) => (
+                <Card key={segment.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <div className="flex items-center gap-3 mb-2">
+                          <Target className="w-5 h-5 text-purple-600" />
+                          <h3 className="text-lg font-semibold">{segment.name}</h3>
+                        </div>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm">
+                          {segment.description}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold">{segment.userCount.toLocaleString()}</p>
+                        <p className="text-xs text-gray-500">users</p>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span className={`px-2 py-1 rounded-full border ${getTaskPriorityColor(task.priority)}`}>
-                        {task.priority}
-                      </span>
-                      {task.due_date && (
-                        <span>Due: {new Date(task.due_date).toLocaleDateString()}</span>
-                      )}
+
+                    {/* Rules */}
+                    <div className="mb-4">
+                      <p className="text-xs text-gray-500 uppercase mb-2">Rules</p>
+                      <div className="flex flex-wrap gap-2">
+                        {segment.rules.map((rule, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {rule.property} {rule.operator} {rule.value}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="flex items-center gap-6 text-sm pt-4 border-t">
+                      <div className="flex items-center gap-2">
+                        <Layers className="w-4 h-4 text-gray-400" />
+                        <span>{segment.flowsUsing} flows using this segment</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-gray-400" />
+                        <span>Created {segment.createdAt}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Branding */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Palette className="w-5 h-5" />
+                    Branding
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Primary Color</label>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-green-600 border-2 border-gray-200" />
+                      <Input defaultValue="#16a34a" className="max-w-[150px]" />
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Font Family</label>
+                    <select className="w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
+                      <option>Inter</option>
+                      <option>Roboto</option>
+                      <option>Open Sans</option>
+                      <option>System Default</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 block">Border Radius</label>
+                    <select className="w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
+                      <option>Rounded (8px)</option>
+                      <option>Square (0px)</option>
+                      <option>Pill (999px)</option>
+                    </select>
+                  </div>
+                  <Button className="w-full">Save Branding</Button>
+                </CardContent>
+              </Card>
 
-            {/* Completion Summary */}
-            <div className="bg-white rounded-xl p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold mb-4">Completion Summary</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Pending</span>
-                  <span className="font-semibold text-yellow-600">{stats.pending}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">In Progress</span>
-                  <span className="font-semibold text-blue-600">{stats.inProgress}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Completed</span>
-                  <span className="font-semibold text-green-600">{stats.completed}</span>
-                </div>
-                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                  <span className="text-sm text-gray-600">Total Programs</span>
-                  <span className="font-semibold text-gray-900">{stats.total}</span>
-                </div>
-              </div>
-            </div>
+              {/* Defaults */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Settings className="w-5 h-5" />
+                    Default Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Allow Skip</p>
+                      <p className="text-xs text-gray-500">Let users skip flows</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="w-5 h-5" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Show Progress</p>
+                      <p className="text-xs text-gray-500">Display step progress indicator</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="w-5 h-5" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Keyboard Navigation</p>
+                      <p className="text-xs text-gray-500">Allow arrow key navigation</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="w-5 h-5" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Click Outside to Close</p>
+                      <p className="text-xs text-gray-500">Close modals on backdrop click</p>
+                    </div>
+                    <input type="checkbox" className="w-5 h-5" />
+                  </div>
+                </CardContent>
+              </Card>
 
-            {/* Task Progress */}
-            <div className="bg-white rounded-xl p-6 border border-gray-100">
-              <h3 className="text-lg font-semibold mb-4">Task Progress</h3>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-3xl font-bold text-gray-900">{stats.tasksCompleted}</span>
-                  <span className="text-sm text-gray-500">of {stats.totalTasks} tasks</span>
-                </div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-green-500 to-emerald-500"
-                    style={{ width: `${stats.totalTasks > 0 ? (stats.tasksCompleted / stats.totalTasks) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-            </div>
+              {/* Integrations */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Zap className="w-5 h-5" />
+                    Integrations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[
+                    { name: 'Segment', description: 'Send events to Segment', connected: true, icon: '📊' },
+                    { name: 'Mixpanel', description: 'Track flow analytics', connected: true, icon: '📈' },
+                    { name: 'Slack', description: 'Get notified on completions', connected: false, icon: '💬' },
+                    { name: 'HubSpot', description: 'Sync user data', connected: false, icon: '🔶' }
+                  ].map((integration) => (
+                    <div key={integration.name} className="flex items-center justify-between p-3 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{integration.icon}</span>
+                        <div>
+                          <p className="font-medium text-sm">{integration.name}</p>
+                          <p className="text-xs text-gray-500">{integration.description}</p>
+                        </div>
+                      </div>
+                      <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                        {integration.connected ? 'Connected' : 'Connect'}
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white rounded-xl p-4 border border-gray-100">
-                <div className="text-2xl font-bold text-gray-900">4.8/5</div>
-                <div className="text-xs text-gray-500">Satisfaction</div>
-                <div className="text-xs text-green-600">+0.2</div>
-              </div>
-              <div className="bg-white rounded-xl p-4 border border-gray-100">
-                <div className="text-2xl font-bold text-gray-900">96%</div>
-                <div className="text-xs text-gray-500">90d Retention</div>
-                <div className="text-xs text-green-600">+3%</div>
-              </div>
+              {/* Notifications */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Bell className="w-5 h-5" />
+                    Notifications
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Email on Flow Completion</p>
+                      <p className="text-xs text-gray-500">Get notified when users complete flows</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="w-5 h-5" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Weekly Reports</p>
+                      <p className="text-xs text-gray-500">Receive weekly performance summary</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="w-5 h-5" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Low Completion Alerts</p>
+                      <p className="text-xs text-gray-500">Alert when completion drops below 50%</p>
+                    </div>
+                    <input type="checkbox" className="w-5 h-5" />
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </div>
-        </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Flow Detail Dialog */}
+        <Dialog open={!!selectedFlow} onOpenChange={() => setSelectedFlow(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Layers className="w-5 h-5 text-green-600" />
+                {selectedFlow?.name}
+              </DialogTitle>
+            </DialogHeader>
+
+            {selectedFlow && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <Badge className={getFlowStatusColor(selectedFlow.status)}>
+                    {selectedFlow.status}
+                  </Badge>
+                  <Badge variant="outline" className={getFlowTypeColor(selectedFlow.type)}>
+                    {selectedFlow.type.replace('_', ' ')}
+                  </Badge>
+                </div>
+
+                <p className="text-gray-600 dark:text-gray-400">
+                  {selectedFlow.description}
+                </p>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Views</p>
+                    <p className="text-2xl font-bold">{selectedFlow.views.toLocaleString()}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Completions</p>
+                    <p className="text-2xl font-bold">{selectedFlow.completions.toLocaleString()}</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Completion Rate</p>
+                    <p className="text-2xl font-bold text-green-600">{selectedFlow.completionRate}%</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <p className="text-sm text-gray-500">Avg Time</p>
+                    <p className="text-2xl font-bold">{formatDuration(selectedFlow.avgTimeToComplete)}</p>
+                  </div>
+                </div>
+
+                {/* Steps */}
+                <div>
+                  <h4 className="font-semibold mb-4">Flow Steps</h4>
+                  <div className="space-y-3">
+                    {selectedFlow.steps.map((step, index) => {
+                      const StepIcon = getStepTypeIcon(step.type)
+                      return (
+                        <div key={step.id} className="flex items-center gap-4 p-4 rounded-lg border">
+                          <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-sm">
+                            {index + 1}
+                          </div>
+                          <StepIcon className="w-5 h-5 text-gray-400" />
+                          <div className="flex-1">
+                            <p className="font-medium">{step.title}</p>
+                            <p className="text-sm text-gray-500">{step.content}</p>
+                          </div>
+                          <Badge variant="outline">{step.type}</Badge>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Trigger */}
+                <div>
+                  <h4 className="font-semibold mb-2">Trigger</h4>
+                  <div className="p-4 rounded-lg border">
+                    <div className="flex items-center gap-3">
+                      <Zap className="w-5 h-5 text-yellow-500" />
+                      <div>
+                        <p className="font-medium capitalize">{selectedFlow.trigger.type.replace('_', ' ')}</p>
+                        <p className="text-sm text-gray-500">{selectedFlow.trigger.value}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Meta */}
+                <div className="flex items-center gap-6 text-sm text-gray-500 pt-4 border-t">
+                  <span>Created by {selectedFlow.createdBy}</span>
+                  <span>Created {selectedFlow.createdAt}</span>
+                  <span>Updated {selectedFlow.updatedAt}</span>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-3 pt-4">
+                  <Button className="gap-2">
+                    <Edit className="w-4 h-4" />
+                    Edit Flow
+                  </Button>
+                  <Button variant="outline" className="gap-2">
+                    <Copy className="w-4 h-4" />
+                    Duplicate
+                  </Button>
+                  <Button variant="outline" className="gap-2">
+                    <BarChart3 className="w-4 h-4" />
+                    View Analytics
+                  </Button>
+                  {selectedFlow.status === 'active' ? (
+                    <Button variant="outline" className="gap-2">
+                      <Pause className="w-4 h-4" />
+                      Pause
+                    </Button>
+                  ) : (
+                    <Button variant="outline" className="gap-2">
+                      <Play className="w-4 h-4" />
+                      Activate
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Checklist Detail Dialog */}
+        <Dialog open={!!selectedChecklist} onOpenChange={() => setSelectedChecklist(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <CheckSquare className="w-5 h-5 text-green-600" />
+                {selectedChecklist?.name}
+              </DialogTitle>
+            </DialogHeader>
+
+            {selectedChecklist && (
+              <div className="space-y-6">
+                <p className="text-gray-600 dark:text-gray-400">
+                  {selectedChecklist.description}
+                </p>
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{selectedChecklist.usersStarted.toLocaleString()}</p>
+                    <p className="text-sm text-gray-500">Users Started</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold">{selectedChecklist.usersCompleted.toLocaleString()}</p>
+                    <p className="text-sm text-gray-500">Users Completed</p>
+                  </div>
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                    <p className="text-2xl font-bold text-green-600">{selectedChecklist.completionRate}%</p>
+                    <p className="text-sm text-gray-500">Completion Rate</p>
+                  </div>
+                </div>
+
+                {/* Checklist Items */}
+                <div>
+                  <h4 className="font-semibold mb-4">Checklist Items</h4>
+                  <div className="space-y-3">
+                    {selectedChecklist.items.map((item, index) => (
+                      <div key={item.id} className="flex items-center gap-4 p-4 rounded-lg border">
+                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold text-sm">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium">{item.title}</p>
+                          <p className="text-sm text-gray-500">{item.description}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {item.isRequired && (
+                            <Badge variant="outline" className="text-xs">Required</Badge>
+                          )}
+                          <Button variant="ghost" size="sm">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-3 pt-4">
+                  <Button className="gap-2">
+                    <Edit className="w-4 h-4" />
+                    Edit Checklist
+                  </Button>
+                  <Button variant="outline" className="gap-2">
+                    <Plus className="w-4 h-4" />
+                    Add Item
+                  </Button>
+                  <Button variant="outline" className="gap-2">
+                    <BarChart3 className="w-4 h-4" />
+                    View Analytics
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
