@@ -1,14 +1,22 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { useBookings, type Booking, type BookingType, type BookingStatus, type PaymentStatus } from '@/lib/hooks/use-bookings'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Calendar, Clock, Users, DollarSign, Video, MapPin, Plus, Settings,
   ChevronLeft, ChevronRight, Search, Filter, MoreVertical, Check, X,
   Bell, Link2, Mail, Phone, Globe, Copy, ExternalLink, CreditCard,
-  Repeat, UserCheck, CalendarClock, Zap, RefreshCw, Download
+  Repeat, UserCheck, CalendarClock, Zap, RefreshCw, Download, Shield, Lock,
+  Key, Database, Palette, AlertTriangle, MessageSquare, Webhook, Timer, Edit,
+  Trash2, BarChart3, FileText
 } from 'lucide-react'
 
 // View types
@@ -55,6 +63,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
   const [showSettings, setShowSettings] = useState(false)
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [settingsTab, setSettingsTab] = useState('availability')
 
   const { bookings, loading, error } = useBookings({ bookingType: bookingTypeFilter, status: statusFilter, paymentStatus: paymentStatusFilter })
   const displayBookings = (bookings && bookings.length > 0) ? bookings : (initialBookings || [])
@@ -319,130 +328,716 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                       <Settings className="h-5 w-5" />
                     </button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Booking Settings</DialogTitle>
                     </DialogHeader>
-                    <Tabs defaultValue="availability" className="mt-4">
-                      <TabsList className="grid grid-cols-4 w-full">
-                        <TabsTrigger value="availability">Availability</TabsTrigger>
-                        <TabsTrigger value="services">Services</TabsTrigger>
-                        <TabsTrigger value="team">Team</TabsTrigger>
-                        <TabsTrigger value="integrations">Integrations</TabsTrigger>
+                    <Tabs value={settingsTab} onValueChange={setSettingsTab} className="mt-4">
+                      <TabsList className="grid grid-cols-6 w-full">
+                        <TabsTrigger value="availability" className="gap-2">
+                          <Clock className="w-4 h-4" />
+                          Availability
+                        </TabsTrigger>
+                        <TabsTrigger value="services" className="gap-2">
+                          <Calendar className="w-4 h-4" />
+                          Services
+                        </TabsTrigger>
+                        <TabsTrigger value="team" className="gap-2">
+                          <Users className="w-4 h-4" />
+                          Team
+                        </TabsTrigger>
+                        <TabsTrigger value="notifications" className="gap-2">
+                          <Bell className="w-4 h-4" />
+                          Notifications
+                        </TabsTrigger>
+                        <TabsTrigger value="integrations" className="gap-2">
+                          <Link2 className="w-4 h-4" />
+                          Integrations
+                        </TabsTrigger>
+                        <TabsTrigger value="advanced" className="gap-2">
+                          <Shield className="w-4 h-4" />
+                          Advanced
+                        </TabsTrigger>
                       </TabsList>
-                      <TabsContent value="availability" className="mt-4 space-y-4">
-                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <h4 className="font-medium mb-3">Working Hours</h4>
-                          {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map(day => (
-                            <div key={day} className="flex items-center justify-between py-2 border-b last:border-0 dark:border-gray-700">
-                              <span className="font-medium">{day}</span>
-                              <div className="flex items-center gap-2">
-                                <select className="px-2 py-1 text-sm border rounded dark:bg-gray-700 dark:border-gray-600">
-                                  <option>9:00 AM</option>
-                                  <option>10:00 AM</option>
-                                </select>
-                                <span className="text-gray-400">to</span>
-                                <select className="px-2 py-1 text-sm border rounded dark:bg-gray-700 dark:border-gray-600">
-                                  <option>5:00 PM</option>
-                                  <option>6:00 PM</option>
-                                </select>
+
+                      {/* Availability Settings */}
+                      <TabsContent value="availability" className="mt-6 space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-2 bg-sky-100 dark:bg-sky-900/30 rounded-lg">
+                                <Clock className="w-5 h-5 text-sky-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Working Hours</h3>
+                                <p className="text-sm text-gray-500">Set your available time slots</p>
                               </div>
                             </div>
-                          ))}
+                            <div className="space-y-3">
+                              {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map(day => (
+                                <div key={day} className="flex items-center justify-between py-2 border-b last:border-0 dark:border-gray-700">
+                                  <div className="flex items-center gap-3">
+                                    <Switch defaultChecked />
+                                    <span className="font-medium">{day}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Select defaultValue="9">
+                                      <SelectTrigger className="w-24">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {[8, 9, 10].map(h => (
+                                          <SelectItem key={h} value={h.toString()}>{h}:00 AM</SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                    <span className="text-gray-400">to</span>
+                                    <Select defaultValue="17">
+                                      <SelectTrigger className="w-24">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {[17, 18, 19].map(h => (
+                                          <SelectItem key={h} value={h.toString()}>{h - 12}:00 PM</SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                                <Timer className="w-5 h-5 text-purple-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Buffer Time</h3>
+                                <p className="text-sm text-gray-500">Time between meetings</p>
+                              </div>
+                            </div>
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label>Before Meetings</Label>
+                                <Select defaultValue="10">
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="5">5 minutes</SelectItem>
+                                    <SelectItem value="10">10 minutes</SelectItem>
+                                    <SelectItem value="15">15 minutes</SelectItem>
+                                    <SelectItem value="30">30 minutes</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-2">
+                                <Label>After Meetings</Label>
+                                <Select defaultValue="10">
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="5">5 minutes</SelectItem>
+                                    <SelectItem value="10">10 minutes</SelectItem>
+                                    <SelectItem value="15">15 minutes</SelectItem>
+                                    <SelectItem value="30">30 minutes</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <Label>Minimum Booking Notice</Label>
+                                  <p className="text-xs text-gray-500">How far in advance</p>
+                                </div>
+                                <Select defaultValue="4">
+                                  <SelectTrigger className="w-32">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="1">1 hour</SelectItem>
+                                    <SelectItem value="4">4 hours</SelectItem>
+                                    <SelectItem value="24">24 hours</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <h4 className="font-medium mb-3">Buffer Time</h4>
-                          <div className="flex items-center gap-4">
+
+                        <div className="p-6 border rounded-xl dark:border-gray-700">
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                              <Calendar className="w-5 h-5 text-green-600" />
+                            </div>
                             <div>
-                              <label className="block text-sm text-gray-500 mb-1">Before meetings</label>
-                              <select className="px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                                <option>5 minutes</option>
-                                <option>10 minutes</option>
-                                <option>15 minutes</option>
-                              </select>
+                              <h3 className="font-semibold text-gray-900 dark:text-white">Scheduling Window</h3>
+                              <p className="text-sm text-gray-500">How far in advance clients can book</p>
+                            </div>
+                          </div>
+                          <div className="grid md:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                              <Label>Booking Window</Label>
+                              <Select defaultValue="60">
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="14">14 days</SelectItem>
+                                  <SelectItem value="30">30 days</SelectItem>
+                                  <SelectItem value="60">60 days</SelectItem>
+                                  <SelectItem value="90">90 days</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Time Slot Duration</Label>
+                              <Select defaultValue="30">
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="15">15 minutes</SelectItem>
+                                  <SelectItem value="30">30 minutes</SelectItem>
+                                  <SelectItem value="60">60 minutes</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-600">
+                              <div>
+                                <Label>Show Timezone</Label>
+                                <p className="text-xs text-gray-500">Display client's timezone</p>
+                              </div>
+                              <Switch defaultChecked />
+                            </div>
+                          </div>
+                        </div>
+                      </TabsContent>
+
+                      {/* Services Settings */}
+                      <TabsContent value="services" className="mt-6 space-y-6">
+                        <div className="p-6 border rounded-xl dark:border-gray-700">
+                          <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-sky-100 dark:bg-sky-900/30 rounded-lg">
+                                <CalendarClock className="w-5 h-5 text-sky-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Event Types</h3>
+                                <p className="text-sm text-gray-500">Configure your booking services</p>
+                              </div>
+                            </div>
+                            <Button className="gap-2 bg-sky-600 hover:bg-sky-700">
+                              <Plus className="w-4 h-4" />
+                              Add Service
+                            </Button>
+                          </div>
+                          <div className="space-y-3">
+                            {serviceTypes.map(service => (
+                              <div key={service.id} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-600 hover:border-sky-300 dark:hover:border-sky-700 transition-colors">
+                                <div className="flex items-center gap-4">
+                                  <div className={`w-4 h-4 rounded-full bg-${service.color}-500`} />
+                                  <div>
+                                    <p className="font-medium text-gray-900 dark:text-white">{service.name}</p>
+                                    <p className="text-sm text-gray-500">{service.description}</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <div className="text-right">
+                                    <p className="font-medium">{service.duration} min</p>
+                                    <p className="text-sm text-gray-500">${service.price}</p>
+                                  </div>
+                                  <Badge variant="outline">{service.maxCapacity === 1 ? '1:1' : `${service.maxCapacity} max`}</Badge>
+                                  <Button size="sm" variant="ghost">
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                                <CreditCard className="w-5 h-5 text-green-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Payment Settings</h3>
+                                <p className="text-sm text-gray-500">Payment collection options</p>
+                              </div>
+                            </div>
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <Label>Require Payment Upfront</Label>
+                                  <p className="text-xs text-gray-500">Collect payment at booking</p>
+                                </div>
+                                <Switch defaultChecked />
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <Label>Allow Partial Payment</Label>
+                                  <p className="text-xs text-gray-500">Accept deposits</p>
+                                </div>
+                                <Switch />
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <Label>Auto-Refund on Cancel</Label>
+                                  <p className="text-xs text-gray-500">If within policy</p>
+                                </div>
+                                <Switch defaultChecked />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                                <FileText className="w-5 h-5 text-orange-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Cancellation Policy</h3>
+                                <p className="text-sm text-gray-500">Set cancellation rules</p>
+                              </div>
+                            </div>
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label>Cancellation Window</Label>
+                                <Select defaultValue="24">
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="0">No cancellations</SelectItem>
+                                    <SelectItem value="2">2 hours before</SelectItem>
+                                    <SelectItem value="24">24 hours before</SelectItem>
+                                    <SelectItem value="48">48 hours before</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <Label>Allow Rescheduling</Label>
+                                  <p className="text-xs text-gray-500">Let clients reschedule</p>
+                                </div>
+                                <Switch defaultChecked />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </TabsContent>
+
+                      {/* Team Settings */}
+                      <TabsContent value="team" className="mt-6 space-y-6">
+                        <div className="p-6 border rounded-xl dark:border-gray-700">
+                          <div className="flex items-center gap-3 mb-6">
+                            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                              <Repeat className="w-5 h-5 text-purple-600" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-900 dark:text-white">Round-Robin Assignment</h3>
+                              <p className="text-sm text-gray-500">Automatically distribute bookings evenly among team members</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="grid md:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                              <Label>Assignment Method</Label>
+                              <Select defaultValue="equal">
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="equal">Equal Distribution</SelectItem>
+                                  <SelectItem value="availability">By Availability</SelectItem>
+                                  <SelectItem value="priority">Priority Based</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Max Per Day Per Member</Label>
+                              <Select defaultValue="8">
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="4">4 bookings</SelectItem>
+                                  <SelectItem value="6">6 bookings</SelectItem>
+                                  <SelectItem value="8">8 bookings</SelectItem>
+                                  <SelectItem value="10">10 bookings</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-600">
+                              <div>
+                                <Label>Skill-Based Matching</Label>
+                                <p className="text-xs text-gray-500">Match by expertise</p>
+                              </div>
+                              <Switch />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-6 border rounded-xl dark:border-gray-700">
+                          <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-sky-100 dark:bg-sky-900/30 rounded-lg">
+                                <Users className="w-5 h-5 text-sky-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Team Members</h3>
+                                <p className="text-sm text-gray-500">Manage who can receive bookings</p>
+                              </div>
+                            </div>
+                            <Button variant="outline" className="gap-2">
+                              <Plus className="w-4 h-4" />
+                              Add Member
+                            </Button>
+                          </div>
+                          <div className="space-y-3">
+                            {teamMembers.map(member => (
+                              <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-600">
+                                <div className="flex items-center gap-4">
+                                  <div className="h-12 w-12 bg-gradient-to-br from-sky-500 to-indigo-600 text-white rounded-full flex items-center justify-center font-medium text-lg">
+                                    {member.avatar}
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-gray-900 dark:text-white">{member.name}</p>
+                                    <p className="text-sm text-gray-500">{member.role}</p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <div className="text-right">
+                                    <p className="text-sm font-medium">{member.bookingsToday} today</p>
+                                    <p className="text-xs text-gray-500">{member.availability.join(', ')}</p>
+                                  </div>
+                                  <Badge className="bg-green-100 text-green-700">Active</Badge>
+                                  <Button size="sm" variant="ghost">
+                                    <Edit className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </TabsContent>
+
+                      {/* Notifications Settings */}
+                      <TabsContent value="notifications" className="mt-6 space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                <Mail className="w-5 h-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Email Notifications</h3>
+                                <p className="text-sm text-gray-500">Client email settings</p>
+                              </div>
+                            </div>
+                            <div className="space-y-3">
+                              {[
+                                { label: 'Booking Confirmation', desc: 'When booking is made', enabled: true },
+                                { label: 'Reminder - 24h', desc: '24 hours before', enabled: true },
+                                { label: 'Reminder - 1h', desc: '1 hour before', enabled: true },
+                                { label: 'Cancellation Notice', desc: 'When cancelled', enabled: true },
+                                { label: 'Reschedule Notice', desc: 'When rescheduled', enabled: true },
+                                { label: 'Follow-up Email', desc: 'After meeting', enabled: false },
+                              ].map((item, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                                  <div>
+                                    <Label className="font-medium">{item.label}</Label>
+                                    <p className="text-xs text-gray-500">{item.desc}</p>
+                                  </div>
+                                  <Switch defaultChecked={item.enabled} />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                                <MessageSquare className="w-5 h-5 text-green-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">SMS Notifications</h3>
+                                <p className="text-sm text-gray-500">Text message reminders</p>
+                              </div>
+                            </div>
+                            <div className="space-y-3">
+                              {[
+                                { label: 'SMS Confirmation', desc: 'Booking confirmation text', enabled: true },
+                                { label: 'SMS Reminder - 24h', desc: '24 hours before', enabled: true },
+                                { label: 'SMS Reminder - 2h', desc: '2 hours before', enabled: false },
+                                { label: 'SMS Cancellation', desc: 'Cancellation notice', enabled: true },
+                              ].map((item, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                                  <div>
+                                    <Label className="font-medium">{item.label}</Label>
+                                    <p className="text-xs text-gray-500">{item.desc}</p>
+                                  </div>
+                                  <Switch defaultChecked={item.enabled} />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-6 border rounded-xl dark:border-gray-700">
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                              <Bell className="w-5 h-5 text-purple-600" />
                             </div>
                             <div>
-                              <label className="block text-sm text-gray-500 mb-1">After meetings</label>
-                              <select className="px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                                <option>5 minutes</option>
-                                <option>10 minutes</option>
-                                <option>15 minutes</option>
-                              </select>
+                              <h3 className="font-semibold text-gray-900 dark:text-white">Team Notifications</h3>
+                              <p className="text-sm text-gray-500">Alerts for your team</p>
+                            </div>
+                          </div>
+                          <div className="grid md:grid-cols-3 gap-4">
+                            {[
+                              { label: 'New Booking', desc: 'When booking created', enabled: true },
+                              { label: 'Cancellation', desc: 'Client cancels', enabled: true },
+                              { label: 'Reschedule', desc: 'Client reschedules', enabled: true },
+                              { label: 'No-Show Alert', desc: 'Client didn\'t show', enabled: true },
+                              { label: 'Payment Received', desc: 'Payment processed', enabled: false },
+                              { label: 'Daily Summary', desc: 'End of day report', enabled: true },
+                            ].map((item, idx) => (
+                              <div key={idx} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-600">
+                                <div>
+                                  <Label className="font-medium">{item.label}</Label>
+                                  <p className="text-xs text-gray-500">{item.desc}</p>
+                                </div>
+                                <Switch defaultChecked={item.enabled} />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </TabsContent>
+
+                      {/* Integrations Settings */}
+                      <TabsContent value="integrations" className="mt-6 space-y-6">
+                        <div className="p-6 border rounded-xl dark:border-gray-700">
+                          <div className="flex items-center gap-3 mb-6">
+                            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                              <Link2 className="w-5 h-5 text-purple-600" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-gray-900 dark:text-white">Connected Services</h3>
+                              <p className="text-sm text-gray-500">Integrate with your favorite tools</p>
+                            </div>
+                          </div>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            {[
+                              { name: 'Zoom', desc: 'Auto-create meeting links', icon: Video, connected: true, color: 'blue' },
+                              { name: 'Google Calendar', desc: 'Two-way sync', icon: Calendar, connected: true, color: 'green' },
+                              { name: 'Stripe', desc: 'Accept payments', icon: CreditCard, connected: true, color: 'purple' },
+                              { name: 'Google Meet', desc: 'Video meetings', icon: Video, connected: false, color: 'gray' },
+                              { name: 'Microsoft Outlook', desc: 'Calendar & email', icon: Calendar, connected: false, color: 'gray' },
+                              { name: 'Slack', desc: 'Team notifications', icon: MessageSquare, connected: false, color: 'gray' },
+                            ].map((integration, idx) => (
+                              <div key={idx} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                                <div className="flex items-center gap-3">
+                                  <div className={`p-2 rounded-lg ${integration.connected ? `bg-${integration.color}-100 dark:bg-${integration.color}-900/30` : 'bg-gray-100 dark:bg-gray-700'}`}>
+                                    <integration.icon className={`h-5 w-5 ${integration.connected ? `text-${integration.color}-600` : 'text-gray-400'}`} />
+                                  </div>
+                                  <div>
+                                    <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
+                                    <p className="text-sm text-gray-500">{integration.desc}</p>
+                                  </div>
+                                </div>
+                                {integration.connected ? (
+                                  <div className="flex items-center gap-2">
+                                    <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                                    <Button size="sm" variant="outline">Configure</Button>
+                                  </div>
+                                ) : (
+                                  <Button size="sm" className="bg-sky-600 hover:bg-sky-700">Connect</Button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                                <Webhook className="w-5 h-5 text-orange-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Webhooks</h3>
+                                <p className="text-sm text-gray-500">Real-time event notifications</p>
+                              </div>
+                            </div>
+                            <div className="space-y-2">
+                              <Label>Webhook URL</Label>
+                              <Input placeholder="https://your-app.com/webhooks/bookings" />
+                            </div>
+                            <Button variant="outline" className="w-full gap-2">
+                              <Plus className="w-4 h-4" />
+                              Add Webhook
+                            </Button>
+                          </div>
+
+                          <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                <Key className="w-5 h-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">API Access</h3>
+                                <p className="text-sm text-gray-500">Developer access keys</p>
+                              </div>
+                            </div>
+                            <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg font-mono text-sm">
+                              ••••••••••••••••••••
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="outline" className="flex-1 gap-2">
+                                <Copy className="w-4 h-4" />
+                                Copy Key
+                              </Button>
+                              <Button variant="outline" className="gap-2">
+                                <RefreshCw className="w-4 h-4" />
+                                Regenerate
+                              </Button>
                             </div>
                           </div>
                         </div>
                       </TabsContent>
-                      <TabsContent value="services" className="mt-4 space-y-4">
-                        {serviceTypes.map(service => (
-                          <div key={service.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-3 h-3 rounded-full bg-${service.color}-500`}></div>
+
+                      {/* Advanced Settings */}
+                      <TabsContent value="advanced" className="mt-6 space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                <Palette className="w-5 h-5 text-blue-600" />
+                              </div>
                               <div>
-                                <p className="font-medium">{service.name}</p>
-                                <p className="text-sm text-gray-500">{service.duration} min • ${service.price}</p>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Branding</h3>
+                                <p className="text-sm text-gray-500">Customize booking page</p>
                               </div>
                             </div>
-                            <button className="text-sm text-sky-600 hover:underline">Edit</button>
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label>Primary Color</Label>
+                                <div className="flex gap-2">
+                                  <Input defaultValue="#0EA5E9" className="flex-1" />
+                                  <div className="w-10 h-10 rounded-lg bg-sky-500 border" />
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Logo URL</Label>
+                                <Input placeholder="https://cdn.example.com/logo.png" />
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <Label>Hide FreeFlow Branding</Label>
+                                  <p className="text-xs text-gray-500">White-label mode</p>
+                                </div>
+                                <Switch />
+                              </div>
+                            </div>
                           </div>
-                        ))}
-                        <button className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-sky-500 hover:text-sky-500">
-                          + Add Service
-                        </button>
-                      </TabsContent>
-                      <TabsContent value="team" className="mt-4 space-y-4">
-                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div className="flex items-center justify-between mb-3">
-                            <h4 className="font-medium">Round-Robin Assignment</h4>
-                            <label className="relative inline-flex items-center cursor-pointer">
-                              <input type="checkbox" className="sr-only peer" defaultChecked />
-                              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-600"></div>
-                            </label>
+
+                          <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                                <Globe className="w-5 h-5 text-green-600" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white">Localization</h3>
+                                <p className="text-sm text-gray-500">Language and timezone</p>
+                              </div>
+                            </div>
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label>Default Language</Label>
+                                <Select defaultValue="en">
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="en">English</SelectItem>
+                                    <SelectItem value="es">Spanish</SelectItem>
+                                    <SelectItem value="fr">French</SelectItem>
+                                    <SelectItem value="de">German</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Timezone</Label>
+                                <Select defaultValue="america_new_york">
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="america_new_york">Eastern Time (ET)</SelectItem>
+                                    <SelectItem value="america_los_angeles">Pacific Time (PT)</SelectItem>
+                                    <SelectItem value="europe_london">London (GMT)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <Label>24-Hour Format</Label>
+                                  <p className="text-xs text-gray-500">Use 24h time display</p>
+                                </div>
+                                <Switch />
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-sm text-gray-500">Automatically distribute bookings evenly among team members</p>
                         </div>
-                        {teamMembers.map(member => (
-                          <div key={member.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center font-medium">
-                                {member.avatar}
-                              </div>
-                              <div>
-                                <p className="font-medium">{member.name}</p>
-                                <p className="text-sm text-gray-500">{member.role}</p>
-                              </div>
+
+                        <div className="p-6 border border-red-200 dark:border-red-800 rounded-xl bg-red-50 dark:bg-red-900/20">
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                              <AlertTriangle className="w-5 h-5 text-red-600" />
                             </div>
-                            <div className="text-right">
-                              <p className="text-sm font-medium">{member.bookingsToday} bookings today</p>
-                              <p className="text-xs text-gray-500">{member.availability.join(', ')}</p>
+                            <div>
+                              <h3 className="font-semibold text-red-700 dark:text-red-400">Danger Zone</h3>
+                              <p className="text-sm text-red-600 dark:text-red-400">Irreversible actions</p>
                             </div>
                           </div>
-                        ))}
-                      </TabsContent>
-                      <TabsContent value="integrations" className="mt-4 space-y-4">
-                        {[
-                          { name: 'Zoom', description: 'Auto-create meeting links', icon: Video, connected: true },
-                          { name: 'Google Calendar', description: 'Two-way sync', icon: Calendar, connected: true },
-                          { name: 'Stripe', description: 'Accept payments', icon: CreditCard, connected: true },
-                          { name: 'Google Meet', description: 'Alternative video provider', icon: Video, connected: false },
-                          { name: 'Outlook', description: 'Calendar sync', icon: Calendar, connected: false }
-                        ].map((integration, idx) => (
-                          <div key={idx} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg ${integration.connected ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
-                                <integration.icon className="h-5 w-5" />
-                              </div>
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-700 rounded-lg bg-white dark:bg-gray-800">
                               <div>
-                                <p className="font-medium">{integration.name}</p>
-                                <p className="text-sm text-gray-500">{integration.description}</p>
+                                <div className="font-medium text-gray-900 dark:text-white">Cancel All Pending Bookings</div>
+                                <p className="text-sm text-gray-500">Mass cancel all pending bookings</p>
                               </div>
+                              <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                                Cancel All
+                              </Button>
                             </div>
-                            {integration.connected ? (
-                              <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">Connected</span>
-                            ) : (
-                              <button className="px-3 py-1 bg-sky-100 text-sky-600 rounded-full text-sm hover:bg-sky-200">Connect</button>
-                            )}
+                            <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-700 rounded-lg bg-white dark:bg-gray-800">
+                              <div>
+                                <div className="font-medium text-gray-900 dark:text-white">Reset Booking Page</div>
+                                <p className="text-sm text-gray-500">Reset all settings to default</p>
+                              </div>
+                              <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                                <RefreshCw className="w-4 h-4 mr-2" />
+                                Reset
+                              </Button>
+                            </div>
+                            <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-700 rounded-lg bg-white dark:bg-gray-800">
+                              <div>
+                                <div className="font-medium text-gray-900 dark:text-white">Export All Data</div>
+                                <p className="text-sm text-gray-500">Download complete booking history</p>
+                              </div>
+                              <Button variant="outline" className="gap-2">
+                                <Download className="w-4 h-4" />
+                                Export
+                              </Button>
+                            </div>
                           </div>
-                        ))}
+                        </div>
                       </TabsContent>
                     </Tabs>
                   </DialogContent>
