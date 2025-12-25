@@ -19,7 +19,10 @@ import {
   Briefcase, Eye, Edit, Clock, Target, BarChart3, Settings, ArrowUpRight, Trash2, LayoutGrid,
   List, GanttChartSquare, ChevronDown, MoreHorizontal, Flag, Tag, MessageSquare, Archive, Star,
   Sparkles, Zap, Timer, AlertTriangle, CheckSquare, Play, Pause, Milestone, GitBranch, Layers,
-  PieChart, ArrowRight, RefreshCw, Copy, Workflow, FileText, Bell, Shield, Link, ExternalLink, Activity
+  PieChart, ArrowRight, RefreshCw, Copy, Workflow, FileText, Bell, Shield, Link, ExternalLink, Activity,
+  Key, Webhook, Database, Lock, Palette, AlertOctagon, Mail, Globe, Upload, Download,
+  BellRing, Slack, MessageCircle, Inbox, Layout, Gauge, Code, Rss, Monitor, Smartphone,
+  Package, Hash, Columns, ChevronRight
 } from 'lucide-react'
 
 // Types
@@ -729,128 +732,892 @@ export default function ProjectsHubClient() {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="mt-6">
-            <Card className="border-gray-200 dark:border-gray-700">
-              <div className="flex border-b border-gray-200 dark:border-gray-700">
-                {['general', 'notifications', 'integrations', 'custom_fields', 'permissions', 'workflow'].map((tab) => (
-                  <button key={tab} onClick={() => setSettingsTab(tab)} className={`px-6 py-4 text-sm font-medium capitalize ${settingsTab === tab ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>
-                    {tab.replace('_', ' ')}
-                  </button>
-                ))}
+          <TabsContent value="settings" className="mt-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Project Settings</h2>
+                <p className="text-sm text-gray-500">Configure your project management platform</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Settings, label: 'General' },
+                        { id: 'notifications', icon: Bell, label: 'Notifications' },
+                        { id: 'integrations', icon: Link, label: 'Integrations' },
+                        { id: 'custom_fields', icon: Tag, label: 'Custom Fields' },
+                        { id: 'permissions', icon: Shield, label: 'Permissions' },
+                        { id: 'workflow', icon: Workflow, label: 'Workflow' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
               </div>
 
-              <div className="p-6">
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
                 {settingsTab === 'general' && (
-                  <div className="space-y-6">
-                    <h4 className="font-semibold text-lg">General Settings</h4>
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <div><Label>Project Key Prefix</Label><Input defaultValue="WEB" className="mt-1" /></div>
-                        <div><Label>Default Sprint Length</Label><Select defaultValue="2"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="1">1 Week</SelectItem><SelectItem value="2">2 Weeks</SelectItem><SelectItem value="3">3 Weeks</SelectItem><SelectItem value="4">4 Weeks</SelectItem></SelectContent></Select></div>
-                        <div><Label>Time Zone</Label><Select defaultValue="utc"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="utc">UTC</SelectItem><SelectItem value="est">Eastern Time</SelectItem><SelectItem value="pst">Pacific Time</SelectItem><SelectItem value="gmt">GMT</SelectItem></SelectContent></Select></div>
-                      </div>
-                      <div className="space-y-4">
-                        <div><Label>Story Point Scale</Label><Select defaultValue="fibonacci"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="fibonacci">Fibonacci (1,2,3,5,8,13)</SelectItem><SelectItem value="linear">Linear (1,2,3,4,5)</SelectItem><SelectItem value="tshirt">T-Shirt (XS,S,M,L,XL)</SelectItem></SelectContent></Select></div>
-                        <div><Label>Default Issue Type</Label><Select defaultValue="story"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="story">Story</SelectItem><SelectItem value="task">Task</SelectItem><SelectItem value="bug">Bug</SelectItem></SelectContent></Select></div>
-                        <div className="flex items-center justify-between pt-4"><div><p className="font-medium">Enable Time Tracking</p><p className="text-sm text-gray-500">Track time on issues</p></div><Switch defaultChecked /></div>
-                      </div>
-                    </div>
-                  </div>
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Layout className="h-5 w-5" />
+                          Display Preferences
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default View</Label>
+                            <Select defaultValue="board">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="board">Board View</SelectItem>
+                                <SelectItem value="list">List View</SelectItem>
+                                <SelectItem value="timeline">Timeline View</SelectItem>
+                                <SelectItem value="calendar">Calendar View</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Projects Per Page</Label>
+                            <Select defaultValue="20">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="10">10 projects</SelectItem>
+                                <SelectItem value="20">20 projects</SelectItem>
+                                <SelectItem value="50">50 projects</SelectItem>
+                                <SelectItem value="100">100 projects</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Show Progress Bars</div>
+                            <div className="text-sm text-gray-500">Display progress bars on project cards</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Show Budget Information</div>
+                            <div className="text-sm text-gray-500">Display budget and spending on project cards</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Compact Mode</div>
+                            <div className="text-sm text-gray-500">Use a more compact layout for project lists</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Briefcase className="h-5 w-5" />
+                          Project Defaults
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Project Key Prefix</Label>
+                            <Input defaultValue="PRJ" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Sprint Length</Label>
+                            <Select defaultValue="2">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 Week</SelectItem>
+                                <SelectItem value="2">2 Weeks</SelectItem>
+                                <SelectItem value="3">3 Weeks</SelectItem>
+                                <SelectItem value="4">4 Weeks</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Story Point Scale</Label>
+                            <Select defaultValue="fibonacci">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="fibonacci">Fibonacci (1,2,3,5,8,13)</SelectItem>
+                                <SelectItem value="linear">Linear (1,2,3,4,5)</SelectItem>
+                                <SelectItem value="tshirt">T-Shirt (XS,S,M,L,XL)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Issue Type</Label>
+                            <Select defaultValue="story">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="story">Story</SelectItem>
+                                <SelectItem value="task">Task</SelectItem>
+                                <SelectItem value="bug">Bug</SelectItem>
+                                <SelectItem value="epic">Epic</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Enable Time Tracking</div>
+                            <div className="text-sm text-gray-500">Track time spent on issues</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Auto-generate Project Keys</div>
+                            <div className="text-sm text-gray-500">Automatically generate project keys from names</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="h-5 w-5" />
+                          Regional Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Timezone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="est">Eastern Time (ET)</SelectItem>
+                                <SelectItem value="pst">Pacific Time (PT)</SelectItem>
+                                <SelectItem value="gmt">GMT</SelectItem>
+                                <SelectItem value="cet">Central European Time (CET)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Date Format</Label>
+                            <Select defaultValue="mdy">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="mdy">MM/DD/YYYY</SelectItem>
+                                <SelectItem value="dmy">DD/MM/YYYY</SelectItem>
+                                <SelectItem value="ymd">YYYY-MM-DD</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Week Start Day</Label>
+                            <Select defaultValue="monday">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="sunday">Sunday</SelectItem>
+                                <SelectItem value="monday">Monday</SelectItem>
+                                <SelectItem value="saturday">Saturday</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Currency</Label>
+                            <Select defaultValue="usd">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="usd">USD ($)</SelectItem>
+                                <SelectItem value="eur">EUR (€)</SelectItem>
+                                <SelectItem value="gbp">GBP (£)</SelectItem>
+                                <SelectItem value="jpy">JPY (¥)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
                 )}
 
+                {/* Notifications Settings */}
                 {settingsTab === 'notifications' && (
-                  <div className="space-y-6">
-                    <h4 className="font-semibold text-lg">Notification Preferences</h4>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between py-3 border-b"><div><p className="font-medium">Issue Assigned to Me</p><p className="text-sm text-gray-500">When issues are assigned to you</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between py-3 border-b"><div><p className="font-medium">Issue Status Changed</p><p className="text-sm text-gray-500">When watching issue status changes</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between py-3 border-b"><div><p className="font-medium">Mentioned in Comments</p><p className="text-sm text-gray-500">When someone @mentions you</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between py-3 border-b"><div><p className="font-medium">Sprint Started/Ended</p><p className="text-sm text-gray-500">Sprint lifecycle notifications</p></div><Switch /></div>
-                      <div className="flex items-center justify-between py-3 border-b"><div><p className="font-medium">Due Date Approaching</p><p className="text-sm text-gray-500">Issues due within 24 hours</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between py-3"><div><p className="font-medium">Daily Summary Email</p><p className="text-sm text-gray-500">Receive daily digest</p></div><Switch /></div>
-                    </div>
-                  </div>
-                )}
-
-                {settingsTab === 'integrations' && (
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between"><h4 className="font-semibold text-lg">Connected Integrations</h4><Button><Plus className="h-4 w-4 mr-2" />Add Integration</Button></div>
-                    <div className="grid grid-cols-2 gap-4">
-                      {mockIntegrations.map(integration => (
-                        <div key={integration.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <span className="text-2xl">{integration.icon}</span>
-                            <div><p className="font-medium">{integration.name}</p><p className="text-xs text-gray-500">{integration.lastSync ? `Last sync: ${new Date(integration.lastSync).toLocaleString()}` : 'Never synced'}</p></div>
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="h-5 w-5" />
+                          Email Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Issue Assigned to Me</div>
+                            <div className="text-sm text-gray-500">When issues are assigned to you</div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <Badge className={getIntegrationStatusColor(integration.status)}>{integration.status}</Badge>
-                            <Button variant="ghost" size="icon"><Settings className="h-4 w-4" /></Button>
-                          </div>
+                          <Switch defaultChecked />
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {settingsTab === 'custom_fields' && (
-                  <div className="space-y-6">
-                    <div className="flex items-center justify-between"><h4 className="font-semibold text-lg">Custom Fields</h4><Button><Plus className="h-4 w-4 mr-2" />Add Field</Button></div>
-                    <div className="space-y-3">
-                      {mockCustomFields.map(field => (
-                        <div key={field.id} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div className="flex items-center gap-4">
-                            <div className="p-2 bg-blue-100 rounded-lg"><Tag className="h-4 w-4 text-blue-600" /></div>
-                            <div><p className="font-medium">{field.name}</p><p className="text-sm text-gray-500">Type: {field.type} • Applies to: {field.appliesTo.join(', ')}</p></div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Issue Status Changed</div>
+                            <div className="text-sm text-gray-500">When watching issue status changes</div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            {field.required && <Badge variant="outline">Required</Badge>}
-                            <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4 text-red-500" /></Button>
-                          </div>
+                          <Switch defaultChecked />
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Mentioned in Comments</div>
+                            <div className="text-sm text-gray-500">When someone @mentions you</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Due Date Approaching</div>
+                            <div className="text-sm text-gray-500">Issues due within 24 hours</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Daily Summary Email</div>
+                            <div className="text-sm text-gray-500">Receive daily digest of activity</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                {settingsTab === 'permissions' && (
-                  <div className="space-y-6">
-                    <h4 className="font-semibold text-lg">Permission Settings</h4>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between py-3 border-b"><div><p className="font-medium">Default Project Visibility</p><p className="text-sm text-gray-500">Visibility for new projects</p></div><Select defaultValue="team"><SelectTrigger className="w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="public">Public</SelectItem><SelectItem value="team">Team Only</SelectItem><SelectItem value="private">Private</SelectItem></SelectContent></Select></div>
-                      <div className="flex items-center justify-between py-3 border-b"><div><p className="font-medium">Allow External Collaborators</p><p className="text-sm text-gray-500">Invite users outside organization</p></div><Switch /></div>
-                      <div className="flex items-center justify-between py-3 border-b"><div><p className="font-medium">Require Admin Approval</p><p className="text-sm text-gray-500">For creating new projects</p></div><Switch /></div>
-                      <div className="flex items-center justify-between py-3 border-b"><div><p className="font-medium">Allow Issue Deletion</p><p className="text-sm text-gray-500">Who can delete issues</p></div><Select defaultValue="admin"><SelectTrigger className="w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="admin">Admins Only</SelectItem><SelectItem value="lead">Project Leads</SelectItem><SelectItem value="all">All Members</SelectItem></SelectContent></Select></div>
-                      <div className="flex items-center justify-between py-3"><div><p className="font-medium">Export Restrictions</p><p className="text-sm text-gray-500">Who can export project data</p></div><Select defaultValue="lead"><SelectTrigger className="w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="admin">Admins Only</SelectItem><SelectItem value="lead">Project Leads</SelectItem><SelectItem value="all">All Members</SelectItem></SelectContent></Select></div>
-                    </div>
-                  </div>
-                )}
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <BellRing className="h-5 w-5" />
+                          In-App Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Sprint Started/Ended</div>
+                            <div className="text-sm text-gray-500">Sprint lifecycle notifications</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">New Comments</div>
+                            <div className="text-sm text-gray-500">Comments on issues you're watching</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Automation Runs</div>
+                            <div className="text-sm text-gray-500">When automations execute actions</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Integration Errors</div>
+                            <div className="text-sm text-gray-500">When integrations fail to sync</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
 
-                {settingsTab === 'workflow' && (
-                  <div className="space-y-6">
-                    <h4 className="font-semibold text-lg">Workflow Configuration</h4>
-                    <div className="space-y-4">
-                      <Card><CardHeader className="pb-2"><CardTitle className="text-base">Issue Status Workflow</CardTitle></CardHeader><CardContent>
-                        <div className="flex items-center gap-2 overflow-x-auto py-2">
-                          {['Open', 'In Progress', 'In Review', 'Done'].map((status, i) => (
-                            <div key={status} className="flex items-center">
-                              <div className="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-medium whitespace-nowrap">{status}</div>
-                              {i < 3 && <ArrowRight className="h-4 w-4 mx-2 text-gray-400" />}
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Slack className="h-5 w-5" />
+                          Slack Integration
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                              <Slack className="h-6 w-6 text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium">Slack Connected</div>
+                              <div className="text-sm text-gray-500">#engineering channel</div>
+                            </div>
+                            <Badge className="ml-auto bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <Button variant="outline" size="sm">Configure Channel</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Post New Issues</div>
+                            <div className="text-sm text-gray-500">Share new issues to Slack</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Sprint Updates</div>
+                            <div className="text-sm text-gray-500">Post sprint start/end notifications</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Release Notifications</div>
+                            <div className="text-sm text-gray-500">Announce new releases to Slack</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="h-5 w-5" />
+                          Webhooks
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="border rounded-lg divide-y">
+                          {[
+                            { url: 'https://api.company.com/webhooks/jira', events: ['issue.created', 'issue.updated'], status: 'active' },
+                            { url: 'https://hooks.zapier.com/hooks/catch/123456', events: ['sprint.completed'], status: 'active' },
+                          ].map((webhook, i) => (
+                            <div key={i} className="p-4 flex items-center justify-between">
+                              <div>
+                                <code className="text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{webhook.url}</code>
+                                <div className="flex items-center gap-2 mt-2">
+                                  {webhook.events.map(event => (
+                                    <Badge key={event} variant="secondary" className="text-xs">{event}</Badge>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge className="bg-green-100 text-green-700">{webhook.status}</Badge>
+                                <Button variant="ghost" size="sm">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" size="sm" className="mt-3"><Plus className="h-4 w-4 mr-2" />Add Status</Button>
-                      </CardContent></Card>
-                      <Card><CardHeader className="pb-2"><CardTitle className="text-base">Transition Rules</CardTitle></CardHeader><CardContent className="space-y-3">
-                        <div className="flex items-center justify-between py-2 border-b"><div><p className="text-sm font-medium">Require Comment on Block</p><p className="text-xs text-gray-500">Force comment when moving to Blocked</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between py-2 border-b"><div><p className="text-sm font-medium">Auto-assign on In Progress</p><p className="text-xs text-gray-500">Assign to current user when starting work</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between py-2"><div><p className="text-sm font-medium">Require Reviewer for Review</p><p className="text-xs text-gray-500">Must have reviewer before moving to Review</p></div><Switch /></div>
-                      </CardContent></Card>
-                    </div>
-                  </div>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Webhook
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="flex items-center gap-2">
+                            <Link className="h-5 w-5" />
+                            Connected Services
+                          </CardTitle>
+                          <Button size="sm">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Integration
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockIntegrations.map(integration => (
+                          <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{integration.icon}</span>
+                              <div>
+                                <div className="font-medium">{integration.name}</div>
+                                <div className="text-sm text-gray-500">
+                                  {integration.lastSync ? `Last sync: ${new Date(integration.lastSync).toLocaleString()}` : 'Never synced'}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Badge className={getIntegrationStatusColor(integration.status)}>{integration.status}</Badge>
+                              <Button variant="ghost" size="sm">Configure</Button>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="h-5 w-5" />
+                          API Access
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="font-medium">API Token</div>
+                            <Button variant="outline" size="sm">
+                              <RefreshCw className="h-4 w-4 mr-2" />
+                              Regenerate
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm">
+                              prj_live_•••••••••••••••••••••••
+                            </code>
+                            <Button variant="outline" size="sm">
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="text-2xl font-bold">24,567</div>
+                            <div className="text-sm text-gray-500">API Calls (30 days)</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="text-2xl font-bold">89ms</div>
+                            <div className="text-sm text-gray-500">Avg Response Time</div>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          View API Documentation
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Code className="h-5 w-5" />
+                          Developer Tools
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">REST API</div>
+                            <div className="text-sm text-gray-500">Access projects via REST endpoints</div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Enabled</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">GraphQL API</div>
+                            <div className="text-sm text-gray-500">Query projects with GraphQL</div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Enabled</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">CLI Tool</div>
+                            <div className="text-sm text-gray-500">Command-line interface for automation</div>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            <Download className="h-4 w-4 mr-2" />
+                            Download
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Custom Fields Settings */}
+                {settingsTab === 'custom_fields' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="flex items-center gap-2">
+                            <Tag className="h-5 w-5" />
+                            Custom Fields
+                          </CardTitle>
+                          <Button size="sm">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Field
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockCustomFields.map(field => (
+                          <div key={field.id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                <Tag className="h-4 w-4 text-blue-600" />
+                              </div>
+                              <div>
+                                <div className="font-medium">{field.name}</div>
+                                <div className="text-sm text-gray-500">
+                                  Type: {field.type} • Applies to: {field.appliesTo.join(', ')}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              {field.required && <Badge variant="outline">Required</Badge>}
+                              <Button variant="ghost" size="sm">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm">
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Hash className="h-5 w-5" />
+                          Field Types
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-3 gap-4">
+                          {[
+                            { type: 'Text', description: 'Single or multi-line text', icon: FileText },
+                            { type: 'Number', description: 'Numeric values', icon: Hash },
+                            { type: 'Date', description: 'Date or datetime', icon: Calendar },
+                            { type: 'Select', description: 'Single choice dropdown', icon: ChevronDown },
+                            { type: 'Multi-select', description: 'Multiple choice', icon: CheckSquare },
+                            { type: 'User', description: 'Team member picker', icon: Users },
+                          ].map((item) => (
+                            <div key={item.type} className="p-4 border rounded-lg">
+                              <div className="flex items-center gap-2 mb-2">
+                                <item.icon className="h-4 w-4 text-blue-600" />
+                                <span className="font-medium">{item.type}</span>
+                              </div>
+                              <p className="text-sm text-gray-500">{item.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Permissions Settings */}
+                {settingsTab === 'permissions' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="h-5 w-5" />
+                          Project Permissions
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Default Project Visibility</div>
+                            <div className="text-sm text-gray-500">Visibility for new projects</div>
+                          </div>
+                          <Select defaultValue="team">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="public">Public</SelectItem>
+                              <SelectItem value="team">Team Only</SelectItem>
+                              <SelectItem value="private">Private</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Allow External Collaborators</div>
+                            <div className="text-sm text-gray-500">Invite users outside organization</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Require Admin Approval</div>
+                            <div className="text-sm text-gray-500">For creating new projects</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Lock className="h-5 w-5" />
+                          Role Permissions
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Allow Issue Deletion</div>
+                            <div className="text-sm text-gray-500">Who can delete issues</div>
+                          </div>
+                          <Select defaultValue="admin">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="admin">Admins Only</SelectItem>
+                              <SelectItem value="lead">Project Leads</SelectItem>
+                              <SelectItem value="all">All Members</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Export Restrictions</div>
+                            <div className="text-sm text-gray-500">Who can export project data</div>
+                          </div>
+                          <Select defaultValue="lead">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="admin">Admins Only</SelectItem>
+                              <SelectItem value="lead">Project Leads</SelectItem>
+                              <SelectItem value="all">All Members</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Sprint Management</div>
+                            <div className="text-sm text-gray-500">Who can start/complete sprints</div>
+                          </div>
+                          <Select defaultValue="lead">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="admin">Admins Only</SelectItem>
+                              <SelectItem value="lead">Project Leads</SelectItem>
+                              <SelectItem value="all">All Members</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700 border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="h-5 w-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-600">Archive All Projects</div>
+                            <div className="text-sm text-gray-500">Move all projects to archive</div>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Archive className="h-4 w-4 mr-2" />
+                            Archive
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-600">Delete All Data</div>
+                            <div className="text-sm text-gray-500">Permanently delete all projects and issues</div>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Workflow Settings */}
+                {settingsTab === 'workflow' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Columns className="h-5 w-5" />
+                          Issue Status Workflow
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center gap-2 overflow-x-auto py-4">
+                          {['Open', 'In Progress', 'In Review', 'Done'].map((status, i) => (
+                            <div key={status} className="flex items-center">
+                              <div className="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm font-medium whitespace-nowrap">
+                                {status}
+                              </div>
+                              {i < 3 && <ChevronRight className="h-4 w-4 mx-2 text-gray-400" />}
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Status
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Workflow className="h-5 w-5" />
+                          Transition Rules
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Require Comment on Block</div>
+                            <div className="text-sm text-gray-500">Force comment when moving to Blocked</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Auto-assign on In Progress</div>
+                            <div className="text-sm text-gray-500">Assign to current user when starting work</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Require Reviewer for Review</div>
+                            <div className="text-sm text-gray-500">Must have reviewer before moving to Review</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Prevent Reopening Done Issues</div>
+                            <div className="text-sm text-gray-500">Require admin approval to reopen</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Zap className="h-5 w-5" />
+                          Automation Rules
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockAutomations.map(auto => (
+                          <div key={auto.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                            <div className={`p-2 rounded-lg ${auto.enabled ? 'bg-green-100' : 'bg-gray-100'}`}>
+                              <Workflow className={`h-5 w-5 ${auto.enabled ? 'text-green-600' : 'text-gray-400'}`} />
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-medium">{auto.name}</h4>
+                              <p className="text-sm text-gray-500">{auto.trigger} → {auto.action}</p>
+                            </div>
+                            <Badge variant="outline">{auto.runsCount} runs</Badge>
+                            <Switch checked={auto.enabled} />
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Automation Rule
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Database className="h-5 w-5" />
+                          Data Management
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold">{mockProjects.length}</div>
+                            <div className="text-sm text-gray-500">Projects</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold">{mockIssues.length}</div>
+                            <div className="text-sm text-gray-500">Issues</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold">12.4 MB</div>
+                            <div className="text-sm text-gray-500">Storage Used</div>
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="h-4 w-4 mr-2" />
+                            Export All Data
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <Upload className="h-4 w-4 mr-2" />
+                            Import Data
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
                 )}
               </div>
-            </Card>
+            </div>
           </TabsContent>
         </Tabs>
 
