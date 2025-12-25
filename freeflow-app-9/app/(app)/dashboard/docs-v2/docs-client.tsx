@@ -14,7 +14,17 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   FileText,
   Book,
@@ -53,6 +63,20 @@ import {
   Layers,
   ArrowRight,
   Sparkles,
+  Shield,
+  Bell,
+  Key,
+  Webhook,
+  Database,
+  Lock,
+  Mail,
+  RefreshCw,
+  AlertOctagon,
+  Palette,
+  Type,
+  Image,
+  Video,
+  Archive,
 } from 'lucide-react'
 
 // Types
@@ -360,6 +384,7 @@ export default function DocsClient() {
   const [activeTab, setActiveTab] = useState('browse')
   const [expandedSections, setExpandedSections] = useState<string[]>([])
   const [copiedCode, setCopiedCode] = useState<string | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filtered docs
   const filteredDocs = useMemo(() => {
@@ -517,6 +542,10 @@ export default function DocsClient() {
             <TabsTrigger value="changelog" className="gap-2">
               <History className="h-4 w-4" />
               Changelog
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="h-4 w-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -784,6 +813,685 @@ export default function DocsClient() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Settings Tab - Confluence Level with 6 Sub-tabs */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="flex gap-6">
+              {/* Settings Sidebar */}
+              <div className="w-64 shrink-0">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 px-3">Settings</h3>
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General' },
+                      { id: 'appearance', icon: Palette, label: 'Appearance' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications' },
+                      { id: 'permissions', icon: Shield, label: 'Permissions' },
+                      { id: 'integrations', icon: Zap, label: 'Integrations' },
+                      { id: 'advanced', icon: Lock, label: 'Advanced' }
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                        }`}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {item.label}
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              </div>
+
+              {/* Settings Content */}
+              <div className="flex-1 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                            <Book className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Documentation Settings</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Configure your documentation preferences</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Default Space</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Default space for new documents</p>
+                          </div>
+                          <Select defaultValue="getting-started">
+                            <SelectTrigger className="w-48">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="getting-started">Getting Started</SelectItem>
+                              <SelectItem value="api-docs">API Documentation</SelectItem>
+                              <SelectItem value="sdk-guides">SDK Guides</SelectItem>
+                              <SelectItem value="tutorials">Tutorials</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Auto-Save Drafts</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically save document drafts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Version History</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Keep track of document versions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Spell Check</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable spell checking in editor</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                            <Code className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Code Blocks</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Configure code block preferences</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Default Language</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Default syntax highlighting</p>
+                          </div>
+                          <Select defaultValue="typescript">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="typescript">TypeScript</SelectItem>
+                              <SelectItem value="javascript">JavaScript</SelectItem>
+                              <SelectItem value="python">Python</SelectItem>
+                              <SelectItem value="go">Go</SelectItem>
+                              <SelectItem value="rust">Rust</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Line Numbers</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Show line numbers in code blocks</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Copy Button</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Show copy button on code blocks</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Appearance Settings */}
+                {settingsTab === 'appearance' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
+                            <Palette className="h-5 w-5 text-pink-600 dark:text-pink-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Theme & Styling</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Customize documentation appearance</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Color Scheme</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Primary color for documentation</p>
+                          </div>
+                          <Select defaultValue="blue">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="blue">Blue</SelectItem>
+                              <SelectItem value="purple">Purple</SelectItem>
+                              <SelectItem value="green">Green</SelectItem>
+                              <SelectItem value="orange">Orange</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Dark Mode Default</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Default to dark mode for readers</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Sidebar Always Visible</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Keep navigation sidebar expanded</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                            <Type className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Typography</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Configure font and text settings</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Body Font</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Font for document content</p>
+                          </div>
+                          <Select defaultValue="inter">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="inter">Inter</SelectItem>
+                              <SelectItem value="roboto">Roboto</SelectItem>
+                              <SelectItem value="opensans">Open Sans</SelectItem>
+                              <SelectItem value="lato">Lato</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Code Font</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Font for code blocks</p>
+                          </div>
+                          <Select defaultValue="firacode">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="firacode">Fira Code</SelectItem>
+                              <SelectItem value="jetbrains">JetBrains Mono</SelectItem>
+                              <SelectItem value="source">Source Code Pro</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Base Font Size</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Default text size</p>
+                          </div>
+                          <Select defaultValue="16">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="14">14px</SelectItem>
+                              <SelectItem value="16">16px</SelectItem>
+                              <SelectItem value="18">18px</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                            <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Email Notifications</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Configure email alert preferences</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Document Updates</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when watched docs change</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Comment Mentions</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when mentioned in comments</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Weekly Digest</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Weekly summary of doc changes</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Deprecation Notices</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert when docs are deprecated</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                            <Webhook className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Webhook Notifications</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Send updates to external services</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Slack Integration</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Post doc updates to Slack</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Discord Webhook</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Send updates to Discord</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <Label className="text-gray-900 dark:text-white font-medium mb-2 block">Custom Webhook URL</Label>
+                          <div className="flex gap-2">
+                            <Input placeholder="https://your-webhook-url.com/endpoint" className="flex-1" />
+                            <Button variant="outline">Test</Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Permissions Settings */}
+                {settingsTab === 'permissions' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                            <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Access Control</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Manage who can view and edit docs</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Default Visibility</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Default visibility for new docs</p>
+                          </div>
+                          <Select defaultValue="public">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="public">Public</SelectItem>
+                              <SelectItem value="team">Team Only</SelectItem>
+                              <SelectItem value="private">Private</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Allow Guest Access</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Let non-users view public docs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Require Login to Comment</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Users must be logged in to comment</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                            <Edit className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Editor Permissions</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Control editing capabilities</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Who Can Edit</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Default editing permissions</p>
+                          </div>
+                          <Select defaultValue="team">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="owner">Owner Only</SelectItem>
+                              <SelectItem value="admin">Admins</SelectItem>
+                              <SelectItem value="team">Team Members</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Require Approval</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Edits need admin approval</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Lock Published Docs</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Prevent edits to published docs</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <GitBranch className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Source Control</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Sync docs with repositories</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {[
+                            { name: 'GitHub', connected: true },
+                            { name: 'GitLab', connected: false },
+                            { name: 'Bitbucket', connected: false },
+                            { name: 'Azure DevOps', connected: false }
+                          ].map(provider => (
+                            <div key={provider.name} className="flex items-center justify-between p-4 border dark:border-gray-600 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <GitBranch className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                                <span className="font-medium text-gray-900 dark:text-white">{provider.name}</span>
+                              </div>
+                              <Button variant={provider.connected ? 'outline' : 'default'} size="sm">
+                                {provider.connected ? 'Manage' : 'Connect'}
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                            <Key className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                          </div>
+                          <div>
+                            <CardTitle>API Access</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Manage API tokens and access</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <Label className="text-gray-900 dark:text-white font-medium">API Token</Label>
+                            <Button variant="outline" size="sm">
+                              <Copy className="h-4 w-4 mr-2" />
+                              Copy
+                            </Button>
+                          </div>
+                          <code className="text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded block font-mono">
+                            docs_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                          </code>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Regenerate API Token
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                            <Zap className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Third-Party Services</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Connect external services</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Search className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Algolia Search</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Powered search indexing</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Globe className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">Custom Domain</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Use your own domain</p>
+                            </div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <Database className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Data & Storage</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Manage documentation data</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Version Retention</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">How long to keep old versions</p>
+                          </div>
+                          <Select defaultValue="forever">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Auto-Archive Drafts</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Archive drafts after inactivity</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="h-4 w-4 mr-2" />
+                            Export All Docs
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <Archive className="h-4 w-4 mr-2" />
+                            Backup Docs
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg">
+                            <Sparkles className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+                          </div>
+                          <div>
+                            <CardTitle>AI Features</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">AI-powered documentation tools</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">AI Writing Assistant</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Get AI help while writing</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Auto-Generate Summaries</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Create doc summaries with AI</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Smart Search</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">AI-enhanced search results</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <div className="bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-200 dark:border-red-800 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                          <AlertOctagon className="h-5 w-5 text-red-600 dark:text-red-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-red-700 dark:text-red-400">Danger Zone</h3>
+                          <p className="text-sm text-red-600/70 dark:text-red-400/70">Destructive actions</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Clear Search Index</h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Rebuild documentation search index</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20">
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Rebuild
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Delete All Drafts</h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Permanently remove all draft documents</p>
+                          </div>
+                          <Button variant="destructive">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete Drafts
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
