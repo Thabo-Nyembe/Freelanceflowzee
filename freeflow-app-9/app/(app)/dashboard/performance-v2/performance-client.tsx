@@ -49,9 +49,25 @@ import {
   FileText,
   Lock,
   Accessibility,
-  Sparkles
+  Sparkles,
+  Bell,
+  Webhook,
+  Key,
+  HardDrive,
+  AlertOctagon,
+  CreditCard,
+  Sliders,
+  Mail
 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Progress } from '@/components/ui/progress'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
@@ -407,6 +423,7 @@ export default function PerformanceClient() {
   const [showAuditDetail, setShowAuditDetail] = useState(false)
   const [selectedAudit, setSelectedAudit] = useState<Audit | null>(null)
   const [copiedUrl, setCopiedUrl] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filter audits
   const filteredAudits = useMemo(() => {
@@ -542,6 +559,10 @@ export default function PerformanceClient() {
               <TabsTrigger value="history" className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
                 History
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="h-4 w-4" />
+                Settings
               </TabsTrigger>
             </TabsList>
 
@@ -976,6 +997,722 @@ export default function PerformanceClient() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - DataDog Level */}
+          <TabsContent value="settings" className="mt-0 space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-2">
+                <nav className="space-y-1">
+                  {[
+                    { id: 'general', label: 'General', icon: Settings },
+                    { id: 'monitoring', label: 'Monitoring', icon: Gauge },
+                    { id: 'notifications', label: 'Notifications', icon: Bell },
+                    { id: 'thresholds', label: 'Thresholds', icon: Target },
+                    { id: 'integrations', label: 'Integrations', icon: Webhook },
+                    { id: 'advanced', label: 'Advanced', icon: Sliders }
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setSettingsTab(item.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                        settingsTab === item.id
+                          ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-medium'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5" />
+                      {item.label}
+                    </button>
+                  ))}
+                </nav>
+
+                {/* Performance Stats */}
+                <Card className="mt-6">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Performance Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Avg Score</span>
+                      <Badge variant="secondary">{averageScores.performance}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">LCP</span>
+                      <span className="text-sm font-medium text-emerald-600">
+                        {mockWebVitals.find(v => v.name === 'LCP')?.value}ms
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Tests Run</span>
+                      <span className="text-sm font-medium">{mockHistoricalTests.length}</span>
+                    </div>
+                    <Progress value={averageScores.performance} className="h-2 mt-2" />
+                    <p className="text-xs text-gray-500 mt-1">Overall performance score</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="w-5 h-5 text-emerald-600" />
+                          General Settings
+                        </CardTitle>
+                        <CardDescription>Configure performance monitoring settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default URL</Label>
+                            <Input defaultValue="https://yoursite.com" />
+                            <p className="text-xs text-gray-500">Primary URL to monitor</p>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Time Zone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                                <SelectItem value="cet">Central European</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Device</Label>
+                            <Select defaultValue="mobile">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="mobile">Mobile</SelectItem>
+                                <SelectItem value="desktop">Desktop</SelectItem>
+                                <SelectItem value="both">Both</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Network Throttling</Label>
+                            <Select defaultValue="4g">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">No Throttling</SelectItem>
+                                <SelectItem value="4g">4G</SelectItem>
+                                <SelectItem value="3g">3G</SelectItem>
+                                <SelectItem value="slow">Slow 3G</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Lighthouse CI</p>
+                            <p className="text-sm text-gray-500">Run audits in CI/CD pipeline</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-retry Failed Tests</p>
+                            <p className="text-sm text-gray-500">Automatically retry on failure</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-blue-600" />
+                          Test Locations
+                        </CardTitle>
+                        <CardDescription>Configure test regions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {['US East (Virginia)', 'US West (Oregon)', 'EU West (Ireland)', 'Asia Pacific (Tokyo)'].map((location, idx) => (
+                          <div key={location} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <Globe className="w-5 h-5 text-gray-400" />
+                              <span className="font-medium">{location}</span>
+                            </div>
+                            <Switch defaultChecked={idx < 2} />
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Monitoring Settings */}
+                {settingsTab === 'monitoring' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Gauge className="w-5 h-5 text-emerald-600" />
+                          Audit Configuration
+                        </CardTitle>
+                        <CardDescription>Configure what to measure</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Performance</p>
+                            <p className="text-sm text-gray-500">Core Web Vitals and loading metrics</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Accessibility</p>
+                            <p className="text-sm text-gray-500">WCAG compliance checks</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Best Practices</p>
+                            <p className="text-sm text-gray-500">Security and coding standards</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">SEO</p>
+                            <p className="text-sm text-gray-500">Search engine optimization</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">PWA</p>
+                            <p className="text-sm text-gray-500">Progressive Web App standards</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Clock className="w-5 h-5 text-purple-600" />
+                          Schedule
+                        </CardTitle>
+                        <CardDescription>Automated monitoring schedule</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Test Frequency</Label>
+                          <Select defaultValue="hourly">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="15min">Every 15 minutes</SelectItem>
+                              <SelectItem value="hourly">Hourly</SelectItem>
+                              <SelectItem value="daily">Daily</SelectItem>
+                              <SelectItem value="weekly">Weekly</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Schedule Active</p>
+                            <p className="text-sm text-gray-500">Run tests on schedule</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Comparison Tests</p>
+                            <p className="text-sm text-gray-500">Run against competitors</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-amber-500" />
+                          Alert Notifications
+                        </CardTitle>
+                        <CardDescription>Configure when to get notified</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Score Drops</p>
+                            <p className="text-sm text-gray-500">Alert when performance score drops</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Threshold Breaches</p>
+                            <p className="text-sm text-gray-500">Alert on budget violations</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Weekly Report</p>
+                            <p className="text-sm text-gray-500">Weekly performance summary</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">CWV Degradation</p>
+                            <p className="text-sm text-gray-500">Alert on Core Web Vitals issues</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="space-y-2 pt-4">
+                          <Label>Notification Email</Label>
+                          <Input type="email" placeholder="team@company.com" />
+                          <p className="text-xs text-gray-500">Where to send alerts</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-blue-600" />
+                          Delivery Channels
+                        </CardTitle>
+                        <CardDescription>How to receive notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Email</p>
+                            <p className="text-sm text-gray-500">Send alerts via email</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Slack</p>
+                            <p className="text-sm text-gray-500">Post to Slack channel</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">PagerDuty</p>
+                            <p className="text-sm text-gray-500">Trigger PagerDuty incidents</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Slack Webhook</Label>
+                          <Input placeholder="https://hooks.slack.com/..." />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Thresholds Settings */}
+                {settingsTab === 'thresholds' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Target className="w-5 h-5 text-emerald-600" />
+                          Performance Budgets
+                        </CardTitle>
+                        <CardDescription>Set performance thresholds</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>LCP Target (ms)</Label>
+                            <Input type="number" defaultValue="2500" />
+                            <p className="text-xs text-gray-500">Largest Contentful Paint</p>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>FID Target (ms)</Label>
+                            <Input type="number" defaultValue="100" />
+                            <p className="text-xs text-gray-500">First Input Delay</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>CLS Target</Label>
+                            <Input type="number" step="0.01" defaultValue="0.1" />
+                            <p className="text-xs text-gray-500">Cumulative Layout Shift</p>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>TTFB Target (ms)</Label>
+                            <Input type="number" defaultValue="800" />
+                            <p className="text-xs text-gray-500">Time to First Byte</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Total Blocking Time (ms)</Label>
+                            <Input type="number" defaultValue="200" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Speed Index (ms)</Label>
+                            <Input type="number" defaultValue="3400" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Layers className="w-5 h-5 text-blue-600" />
+                          Resource Budgets
+                        </CardTitle>
+                        <CardDescription>Limit resource sizes</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Total Page Size (KB)</Label>
+                            <Input type="number" defaultValue="1500" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>JavaScript (KB)</Label>
+                            <Input type="number" defaultValue="300" />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>CSS (KB)</Label>
+                            <Input type="number" defaultValue="100" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Images (KB)</Label>
+                            <Input type="number" defaultValue="500" />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Fonts (KB)</Label>
+                            <Input type="number" defaultValue="100" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Third-party (KB)</Label>
+                            <Input type="number" defaultValue="200" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-orange-600" />
+                          Webhooks
+                        </CardTitle>
+                        <CardDescription>Send results to external services</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Webhook URL</Label>
+                          <Input placeholder="https://your-service.com/webhook" />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="flex items-center space-x-2">
+                            <Switch id="wh-complete" defaultChecked />
+                            <Label htmlFor="wh-complete">Test Complete</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch id="wh-fail" defaultChecked />
+                            <Label htmlFor="wh-fail">Budget Exceeded</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch id="wh-improve" />
+                            <Label htmlFor="wh-improve">Score Improved</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Switch id="wh-degrade" defaultChecked />
+                            <Label htmlFor="wh-degrade">Score Degraded</Label>
+                          </div>
+                        </div>
+
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Webhook
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-violet-600" />
+                          API Access
+                        </CardTitle>
+                        <CardDescription>Programmatic access to performance data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="perf_xxxxxxxxxxxxxxxxxxxxx" readOnly />
+                            <Button variant="outline">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                            <Button variant="outline">
+                              <RefreshCw className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">API Access</p>
+                            <p className="text-sm text-gray-500">Enable API access</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Server className="w-5 h-5 text-blue-600" />
+                          CI/CD Integration
+                        </CardTitle>
+                        <CardDescription>Connect with your CI pipeline</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">GitHub Actions</p>
+                            <p className="text-sm text-gray-500">Run on PR and merge</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Block on Failure</p>
+                            <p className="text-sm text-gray-500">Fail builds when budgets exceeded</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">PR Comments</p>
+                            <p className="text-sm text-gray-500">Post results as PR comments</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Access and security configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Private Results</p>
+                            <p className="text-sm text-gray-500">Results only visible to team</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auth Required</p>
+                            <p className="text-sm text-gray-500">Require authentication for tested pages</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Audit Logging</p>
+                            <p className="text-sm text-gray-500">Log all configuration changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HardDrive className="w-5 h-5 text-blue-600" />
+                          Data Management
+                        </CardTitle>
+                        <CardDescription>Test data and retention</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Data Retention</Label>
+                          <Select defaultValue="90">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <Button variant="outline" className="w-full">
+                          <Download className="w-4 h-4 mr-2" />
+                          Export All Data
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <CreditCard className="w-5 h-5 text-indigo-600" />
+                          Subscription
+                        </CardTitle>
+                        <CardDescription>Plan and usage information</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-emerald-800 dark:text-emerald-400">Pro Plan</p>
+                            <p className="text-sm text-emerald-600 dark:text-emerald-500">Unlimited tests • 10 URLs</p>
+                          </div>
+                          <Badge className="bg-emerald-600">Active</Badge>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-emerald-600">{mockHistoricalTests.length}</p>
+                            <p className="text-xs text-gray-500">Tests Run</p>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-blue-600">5</p>
+                            <p className="text-xs text-gray-500">URLs Monitored</p>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-purple-600">87%</p>
+                            <p className="text-xs text-gray-500">Quota Used</p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="flex-1">
+                            Manage Subscription
+                          </Button>
+                          <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700">
+                            Upgrade Plan
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete All History</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Remove all test history</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete</Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Reset Budgets</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Clear all performance budgets</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete Project</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Permanently delete this project</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>
