@@ -10,7 +10,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   HardDrive,
   Database,
@@ -22,6 +24,7 @@ import {
   Archive,
   Shield,
   ShieldCheck,
+  ShieldAlert,
   Clock,
   Calendar,
   CheckCircle2,
@@ -58,14 +61,40 @@ import {
   Globe,
   Timer,
   Target,
-  CheckCheck
+  CheckCheck,
+  FileCheck,
+  Scale,
+  Gavel,
+  Building2,
+  Map,
+  MapPin,
+  ClipboardCheck,
+  Fingerprint,
+  Key,
+  Users,
+  UserCheck,
+  Bell,
+  BellRing,
+  Send,
+  MailCheck,
+  FileWarning,
+  FileClock,
+  FolderLock,
+  Package,
+  Boxes,
+  Network,
+  GitBranch,
+  Info,
+  HelpCircle
 } from 'lucide-react'
 
 // Types
-type BackupStatus = 'completed' | 'running' | 'failed' | 'scheduled' | 'cancelled' | 'warning'
-type BackupType = 'full' | 'incremental' | 'differential' | 'snapshot' | 'synthetic' | 'archive'
-type StorageType = 'local' | 'aws-s3' | 'azure-blob' | 'google-cloud' | 'wasabi' | 'nfs'
-type JobFrequency = 'hourly' | 'daily' | 'weekly' | 'monthly' | 'continuous'
+type BackupStatus = 'completed' | 'running' | 'failed' | 'scheduled' | 'cancelled' | 'warning' | 'pending'
+type BackupType = 'full' | 'incremental' | 'differential' | 'snapshot' | 'synthetic' | 'archive' | 'continuous'
+type StorageType = 'local' | 'aws-s3' | 'azure-blob' | 'google-cloud' | 'wasabi' | 'nfs' | 'glacier'
+type JobFrequency = 'hourly' | 'daily' | 'weekly' | 'monthly' | 'continuous' | 'custom'
+type VaultStatus = 'active' | 'locked' | 'pending-deletion' | 'archived'
+type ComplianceStatus = 'compliant' | 'non-compliant' | 'in-progress' | 'not-evaluated'
 
 interface BackupJob {
   id: string
@@ -89,8 +118,11 @@ interface BackupJob {
   verified: boolean
   successRate: number
   restorePoints: number
-  rpo: number // Recovery Point Objective in hours
-  rto: number // Recovery Time Objective in minutes
+  rpo: number
+  rto: number
+  vaultId: string
+  crossRegionEnabled: boolean
+  legalHold: boolean
 }
 
 interface StorageRepository {
@@ -105,6 +137,8 @@ interface StorageRepository {
   lastBackup: string
   region?: string
   tier: 'hot' | 'cool' | 'archive'
+  encryptionKeyId?: string
+  replicationEnabled: boolean
 }
 
 interface RecoveryPoint {
@@ -114,9 +148,13 @@ interface RecoveryPoint {
   timestamp: string
   type: BackupType
   size: number
-  status: 'available' | 'expired' | 'locked'
+  status: 'available' | 'expired' | 'locked' | 'partial' | 'corrupted'
   verified: boolean
   retentionUntil: string
+  vaultId: string
+  legalHold: boolean
+  recoveryTested: boolean
+  lastTestedDate?: string
 }
 
 interface BackupPolicy {
@@ -132,6 +170,81 @@ interface BackupPolicy {
   verification: boolean
   jobCount: number
   isDefault: boolean
+  coldStorageAfter: number
+  deleteAfter: number
+  crossAccountEnabled: boolean
+  crossRegionEnabled: boolean
+}
+
+interface BackupVault {
+  id: string
+  name: string
+  description: string
+  status: VaultStatus
+  region: string
+  recoveryPointCount: number
+  totalSizeBytes: number
+  encryptionKey: string
+  locked: boolean
+  lockDate?: string
+  minRetentionDays: number
+  maxRetentionDays: number
+  accessPolicy: string
+  createdBy: string
+  createdAt: string
+  lastAccessedAt: string
+  legalHoldCount: number
+}
+
+interface ComplianceReport {
+  id: string
+  name: string
+  frameworkName: string
+  status: ComplianceStatus
+  lastEvaluated: string
+  controlsPassed: number
+  controlsFailed: number
+  controlsTotal: number
+  score: number
+  resources: string[]
+  findings: ComplianceFinding[]
+}
+
+interface ComplianceFinding {
+  id: string
+  severity: 'critical' | 'high' | 'medium' | 'low'
+  title: string
+  description: string
+  resource: string
+  recommendation: string
+  status: 'open' | 'resolved' | 'suppressed'
+}
+
+interface AuditEvent {
+  id: string
+  timestamp: string
+  eventType: string
+  userName: string
+  ipAddress: string
+  resourceType: string
+  resourceId: string
+  action: string
+  result: 'success' | 'failure'
+  region: string
+}
+
+interface RecoveryTest {
+  id: string
+  name: string
+  jobId: string
+  jobName: string
+  status: 'passed' | 'failed' | 'running' | 'scheduled'
+  lastRun: string
+  nextRun: string
+  duration: number
+  dataVerified: boolean
+  applicationVerified: boolean
+  notes: string
 }
 
 // Mock data
@@ -159,7 +272,10 @@ const mockJobs: BackupJob[] = [
     successRate: 99.8,
     restorePoints: 28,
     rpo: 24,
-    rto: 30
+    rto: 30,
+    vaultId: '1',
+    crossRegionEnabled: true,
+    legalHold: false
   },
   {
     id: '2',
@@ -184,7 +300,10 @@ const mockJobs: BackupJob[] = [
     successRate: 98.5,
     restorePoints: 168,
     rpo: 1,
-    rto: 15
+    rto: 15,
+    vaultId: '2',
+    crossRegionEnabled: false,
+    legalHold: false
   },
   {
     id: '3',
@@ -209,7 +328,10 @@ const mockJobs: BackupJob[] = [
     successRate: 100,
     restorePoints: 12,
     rpo: 168,
-    rto: 60
+    rto: 60,
+    vaultId: '1',
+    crossRegionEnabled: true,
+    legalHold: true
   },
   {
     id: '4',
@@ -234,7 +356,10 @@ const mockJobs: BackupJob[] = [
     successRate: 92.3,
     restorePoints: 10,
     rpo: 24,
-    rto: 10
+    rto: 10,
+    vaultId: '3',
+    crossRegionEnabled: false,
+    legalHold: false
   },
   {
     id: '5',
@@ -259,30 +384,94 @@ const mockJobs: BackupJob[] = [
     successRate: 97.5,
     restorePoints: 55,
     rpo: 24,
-    rto: 120
+    rto: 120,
+    vaultId: '2',
+    crossRegionEnabled: true,
+    legalHold: false
+  },
+  {
+    id: '6',
+    name: 'Continuous Database Replication',
+    description: 'Continuous backup with point-in-time recovery',
+    type: 'continuous',
+    status: 'running',
+    source: 'primary-mysql',
+    destination: 'glacier-vault',
+    storageType: 'glacier',
+    frequency: 'continuous',
+    lastRun: '2024-01-15T14:55:00Z',
+    nextRun: 'Continuous',
+    duration: 0,
+    sizeBytes: 32212254720,
+    filesCount: 1,
+    progress: 100,
+    retentionDays: 365,
+    encrypted: true,
+    compressed: true,
+    verified: true,
+    successRate: 99.99,
+    restorePoints: 8760,
+    rpo: 0.0167,
+    rto: 5,
+    vaultId: '1',
+    crossRegionEnabled: true,
+    legalHold: true
   }
 ]
 
 const mockRepositories: StorageRepository[] = [
-  { id: '1', name: 'AWS S3 Backup Vault', type: 'aws-s3', capacity: 1099511627776, used: 549755813888, free: 549755813888, status: 'online', backupCount: 156, lastBackup: '5 min ago', region: 'us-east-1', tier: 'hot' },
-  { id: '2', name: 'Azure Blob Storage', type: 'azure-blob', capacity: 549755813888, used: 274877906944, free: 274877906944, status: 'online', backupCount: 89, lastBackup: '2 min ago', region: 'eastus', tier: 'hot' },
-  { id: '3', name: 'Google Cloud Storage', type: 'google-cloud', capacity: 274877906944, used: 137438953472, free: 137438953472, status: 'syncing', backupCount: 45, lastBackup: '1 hour ago', region: 'us-central1', tier: 'cool' },
-  { id: '4', name: 'Local NAS Storage', type: 'local', capacity: 8796093022208, used: 4398046511104, free: 4398046511104, status: 'online', backupCount: 234, lastBackup: '30 min ago', tier: 'hot' },
-  { id: '5', name: 'Wasabi Cold Storage', type: 'wasabi', capacity: 2199023255552, used: 1649267441664, free: 549755813888, status: 'online', backupCount: 78, lastBackup: '2 hours ago', region: 'us-east-1', tier: 'archive' }
+  { id: '1', name: 'AWS S3 Backup Vault', type: 'aws-s3', capacity: 1099511627776, used: 549755813888, free: 549755813888, status: 'online', backupCount: 156, lastBackup: '5 min ago', region: 'us-east-1', tier: 'hot', encryptionKeyId: 'aws/backup', replicationEnabled: true },
+  { id: '2', name: 'Azure Blob Storage', type: 'azure-blob', capacity: 549755813888, used: 274877906944, free: 274877906944, status: 'online', backupCount: 89, lastBackup: '2 min ago', region: 'eastus', tier: 'hot', encryptionKeyId: 'azure-key-vault', replicationEnabled: true },
+  { id: '3', name: 'Google Cloud Storage', type: 'google-cloud', capacity: 274877906944, used: 137438953472, free: 137438953472, status: 'syncing', backupCount: 45, lastBackup: '1 hour ago', region: 'us-central1', tier: 'cool', replicationEnabled: false },
+  { id: '4', name: 'Local NAS Storage', type: 'local', capacity: 8796093022208, used: 4398046511104, free: 4398046511104, status: 'online', backupCount: 234, lastBackup: '30 min ago', tier: 'hot', replicationEnabled: false },
+  { id: '5', name: 'AWS Glacier Deep Archive', type: 'glacier', capacity: 10995116277760, used: 5497558138880, free: 5497558138880, status: 'online', backupCount: 450, lastBackup: '1 day ago', region: 'us-east-1', tier: 'archive', encryptionKeyId: 'aws/backup', replicationEnabled: true },
+  { id: '6', name: 'Wasabi Cold Storage', type: 'wasabi', capacity: 2199023255552, used: 1649267441664, free: 549755813888, status: 'online', backupCount: 78, lastBackup: '2 hours ago', region: 'us-east-1', tier: 'archive', replicationEnabled: false }
 ]
 
 const mockRecoveryPoints: RecoveryPoint[] = [
-  { id: '1', jobId: '1', jobName: 'Production Database Backup', timestamp: '2024-01-15T03:00:00Z', type: 'full', size: 52428800000, status: 'available', verified: true, retentionUntil: '2024-02-14' },
-  { id: '2', jobId: '2', jobName: 'Application Servers Backup', timestamp: '2024-01-15T14:00:00Z', type: 'incremental', size: 2147483648, status: 'available', verified: true, retentionUntil: '2024-01-22' },
-  { id: '3', jobId: '1', jobName: 'Production Database Backup', timestamp: '2024-01-14T03:00:00Z', type: 'full', size: 51539607552, status: 'available', verified: true, retentionUntil: '2024-02-13' },
-  { id: '4', jobId: '3', jobName: 'User Data Snapshot', timestamp: '2024-01-08T06:00:00Z', type: 'snapshot', size: 107374182400, status: 'locked', verified: true, retentionUntil: '2024-04-08' },
-  { id: '5', jobId: '5', jobName: 'Email Server Backup', timestamp: '2024-01-15T04:00:00Z', type: 'full', size: 214748364800, status: 'available', verified: false, retentionUntil: '2024-03-15' }
+  { id: '1', jobId: '1', jobName: 'Production Database Backup', timestamp: '2024-01-15T03:00:00Z', type: 'full', size: 52428800000, status: 'available', verified: true, retentionUntil: '2024-02-14', vaultId: '1', legalHold: false, recoveryTested: true, lastTestedDate: '2024-01-10' },
+  { id: '2', jobId: '2', jobName: 'Application Servers Backup', timestamp: '2024-01-15T14:00:00Z', type: 'incremental', size: 2147483648, status: 'available', verified: true, retentionUntil: '2024-01-22', vaultId: '2', legalHold: false, recoveryTested: false },
+  { id: '3', jobId: '1', jobName: 'Production Database Backup', timestamp: '2024-01-14T03:00:00Z', type: 'full', size: 51539607552, status: 'available', verified: true, retentionUntil: '2024-02-13', vaultId: '1', legalHold: false, recoveryTested: true, lastTestedDate: '2024-01-12' },
+  { id: '4', jobId: '3', jobName: 'User Data Snapshot', timestamp: '2024-01-08T06:00:00Z', type: 'snapshot', size: 107374182400, status: 'locked', verified: true, retentionUntil: '2024-04-08', vaultId: '1', legalHold: true, recoveryTested: true, lastTestedDate: '2024-01-08' },
+  { id: '5', jobId: '5', jobName: 'Email Server Backup', timestamp: '2024-01-15T04:00:00Z', type: 'full', size: 214748364800, status: 'available', verified: false, retentionUntil: '2024-03-15', vaultId: '2', legalHold: false, recoveryTested: false },
+  { id: '6', jobId: '6', jobName: 'Continuous Database Replication', timestamp: '2024-01-15T14:50:00Z', type: 'continuous', size: 1073741824, status: 'available', verified: true, retentionUntil: '2025-01-15', vaultId: '1', legalHold: true, recoveryTested: true, lastTestedDate: '2024-01-14' }
 ]
 
 const mockPolicies: BackupPolicy[] = [
-  { id: '1', name: 'Enterprise Standard', description: 'Daily full backup with 30-day retention', frequency: 'daily', retentionDays: 30, fullBackupDay: 'Sunday', incrementalEnabled: true, encryption: true, compression: true, verification: true, jobCount: 12, isDefault: true },
-  { id: '2', name: 'High Frequency', description: 'Hourly incremental for critical systems', frequency: 'hourly', retentionDays: 7, fullBackupDay: 'Saturday', incrementalEnabled: true, encryption: true, compression: true, verification: false, jobCount: 5, isDefault: false },
-  { id: '3', name: 'Long-Term Archive', description: 'Weekly full backup with 1-year retention', frequency: 'weekly', retentionDays: 365, fullBackupDay: 'Sunday', incrementalEnabled: false, encryption: true, compression: true, verification: true, jobCount: 8, isDefault: false }
+  { id: '1', name: 'Enterprise Standard', description: 'Daily full backup with 30-day retention', frequency: 'daily', retentionDays: 30, fullBackupDay: 'Sunday', incrementalEnabled: true, encryption: true, compression: true, verification: true, jobCount: 12, isDefault: true, coldStorageAfter: 14, deleteAfter: 30, crossAccountEnabled: true, crossRegionEnabled: true },
+  { id: '2', name: 'High Frequency', description: 'Hourly incremental for critical systems', frequency: 'hourly', retentionDays: 7, fullBackupDay: 'Saturday', incrementalEnabled: true, encryption: true, compression: true, verification: false, jobCount: 5, isDefault: false, coldStorageAfter: 3, deleteAfter: 7, crossAccountEnabled: false, crossRegionEnabled: false },
+  { id: '3', name: 'Long-Term Archive', description: 'Weekly full backup with 1-year retention', frequency: 'weekly', retentionDays: 365, fullBackupDay: 'Sunday', incrementalEnabled: false, encryption: true, compression: true, verification: true, jobCount: 8, isDefault: false, coldStorageAfter: 30, deleteAfter: 365, crossAccountEnabled: true, crossRegionEnabled: true },
+  { id: '4', name: 'Compliance Retention', description: '7-year retention for regulatory compliance', frequency: 'monthly', retentionDays: 2555, fullBackupDay: 'First Sunday', incrementalEnabled: false, encryption: true, compression: true, verification: true, jobCount: 3, isDefault: false, coldStorageAfter: 90, deleteAfter: 2555, crossAccountEnabled: true, crossRegionEnabled: true }
+]
+
+const mockVaults: BackupVault[] = [
+  { id: '1', name: 'Primary Production Vault', description: 'Main backup vault for production workloads', status: 'active', region: 'us-east-1', recoveryPointCount: 450, totalSizeBytes: 549755813888, encryptionKey: 'aws/backup', locked: false, minRetentionDays: 7, maxRetentionDays: 365, accessPolicy: 'backup-admin-policy', createdBy: 'admin@company.com', createdAt: '2023-01-15', lastAccessedAt: '2 min ago', legalHoldCount: 2 },
+  { id: '2', name: 'DR Vault - West Region', description: 'Disaster recovery vault in us-west-2', status: 'active', region: 'us-west-2', recoveryPointCount: 320, totalSizeBytes: 274877906944, encryptionKey: 'aws/backup', locked: false, minRetentionDays: 7, maxRetentionDays: 365, accessPolicy: 'dr-admin-policy', createdBy: 'admin@company.com', createdAt: '2023-03-01', lastAccessedAt: '1 hour ago', legalHoldCount: 0 },
+  { id: '3', name: 'Compliance Archive Vault', description: 'Locked vault for regulatory compliance', status: 'locked', region: 'us-east-1', recoveryPointCount: 156, totalSizeBytes: 1099511627776, encryptionKey: 'compliance-key', locked: true, lockDate: '2023-06-01', minRetentionDays: 2555, maxRetentionDays: 2555, accessPolicy: 'compliance-readonly', createdBy: 'compliance@company.com', createdAt: '2023-06-01', lastAccessedAt: '1 day ago', legalHoldCount: 8 },
+  { id: '4', name: 'Development Vault', description: 'Non-production development backups', status: 'active', region: 'us-east-1', recoveryPointCount: 89, totalSizeBytes: 68719476736, encryptionKey: 'dev-key', locked: false, minRetentionDays: 1, maxRetentionDays: 30, accessPolicy: 'dev-team-policy', createdBy: 'devops@company.com', createdAt: '2023-09-01', lastAccessedAt: '30 min ago', legalHoldCount: 0 }
+]
+
+const mockComplianceReports: ComplianceReport[] = [
+  { id: '1', name: 'SOC 2 Type II Compliance', frameworkName: 'SOC 2', status: 'compliant', lastEvaluated: '2024-01-15T08:00:00Z', controlsPassed: 47, controlsFailed: 0, controlsTotal: 47, score: 100, resources: ['Production Database', 'Email Server', 'User Data'], findings: [] },
+  { id: '2', name: 'HIPAA Backup Requirements', frameworkName: 'HIPAA', status: 'compliant', lastEvaluated: '2024-01-14T10:00:00Z', controlsPassed: 23, controlsFailed: 0, controlsTotal: 23, score: 100, resources: ['Patient Records DB', 'Medical Images'], findings: [] },
+  { id: '3', name: 'PCI DSS Data Retention', frameworkName: 'PCI DSS', status: 'non-compliant', lastEvaluated: '2024-01-15T06:00:00Z', controlsPassed: 18, controlsFailed: 2, controlsTotal: 20, score: 90, resources: ['Payment Gateway', 'Transaction Logs'], findings: [{ id: 'f1', severity: 'high', title: 'Insufficient encryption key rotation', description: 'Encryption keys have not been rotated in 180 days', resource: 'Payment Gateway', recommendation: 'Rotate encryption keys every 90 days', status: 'open' }, { id: 'f2', severity: 'medium', title: 'Missing backup verification', description: 'Quarterly backup verification not performed', resource: 'Transaction Logs', recommendation: 'Enable automatic backup verification', status: 'open' }] },
+  { id: '4', name: 'GDPR Data Protection', frameworkName: 'GDPR', status: 'in-progress', lastEvaluated: '2024-01-13T12:00:00Z', controlsPassed: 31, controlsFailed: 1, controlsTotal: 35, score: 88, resources: ['Customer Data', 'Marketing DB'], findings: [{ id: 'f3', severity: 'medium', title: 'Cross-border data transfer review needed', description: 'Data replication to non-EU regions needs assessment', resource: 'Customer Data', recommendation: 'Complete data transfer impact assessment', status: 'open' }] }
+]
+
+const mockAuditEvents: AuditEvent[] = [
+  { id: '1', timestamp: '2024-01-15T14:55:00Z', eventType: 'BackupJobStarted', userName: 'backup-service', ipAddress: '10.0.1.50', resourceType: 'BackupJob', resourceId: 'job-001', action: 'StartBackupJob', result: 'success', region: 'us-east-1' },
+  { id: '2', timestamp: '2024-01-15T14:50:00Z', eventType: 'RecoveryPointCreated', userName: 'backup-service', ipAddress: '10.0.1.50', resourceType: 'RecoveryPoint', resourceId: 'rp-456', action: 'CreateRecoveryPoint', result: 'success', region: 'us-east-1' },
+  { id: '3', timestamp: '2024-01-15T14:30:00Z', eventType: 'VaultAccessPolicyUpdated', userName: 'admin@company.com', ipAddress: '203.0.113.50', resourceType: 'BackupVault', resourceId: 'vault-001', action: 'UpdateAccessPolicy', result: 'success', region: 'us-east-1' },
+  { id: '4', timestamp: '2024-01-15T14:00:00Z', eventType: 'RestoreInitiated', userName: 'devops@company.com', ipAddress: '198.51.100.25', resourceType: 'RecoveryPoint', resourceId: 'rp-123', action: 'StartRestore', result: 'success', region: 'us-west-2' },
+  { id: '5', timestamp: '2024-01-15T13:45:00Z', eventType: 'LegalHoldApplied', userName: 'legal@company.com', ipAddress: '192.0.2.100', resourceType: 'RecoveryPoint', resourceId: 'rp-789', action: 'ApplyLegalHold', result: 'success', region: 'us-east-1' },
+  { id: '6', timestamp: '2024-01-15T12:00:00Z', eventType: 'BackupJobFailed', userName: 'backup-service', ipAddress: '10.0.1.50', resourceType: 'BackupJob', resourceId: 'job-004', action: 'FailBackupJob', result: 'failure', region: 'us-east-1' }
+]
+
+const mockRecoveryTests: RecoveryTest[] = [
+  { id: '1', name: 'Q1 DR Test - Production DB', jobId: '1', jobName: 'Production Database Backup', status: 'passed', lastRun: '2024-01-10T10:00:00Z', nextRun: '2024-04-10T10:00:00Z', duration: 1800, dataVerified: true, applicationVerified: true, notes: 'Full recovery completed in 30 minutes. All data validated.' },
+  { id: '2', name: 'Monthly Restore Test - Email', jobId: '5', jobName: 'Email Server Backup', status: 'passed', lastRun: '2024-01-05T08:00:00Z', nextRun: '2024-02-05T08:00:00Z', duration: 3600, dataVerified: true, applicationVerified: true, notes: 'Email server restored and validated. All mailboxes intact.' },
+  { id: '3', name: 'Weekly App Server Test', jobId: '2', jobName: 'Application Servers Backup', status: 'scheduled', lastRun: '2024-01-08T06:00:00Z', nextRun: '2024-01-15T18:00:00Z', duration: 0, dataVerified: false, applicationVerified: false, notes: 'Scheduled for maintenance window.' },
+  { id: '4', name: 'Annual Compliance DR Drill', jobId: '6', jobName: 'Continuous Database Replication', status: 'passed', lastRun: '2024-01-01T00:00:00Z', nextRun: '2025-01-01T00:00:00Z', duration: 7200, dataVerified: true, applicationVerified: true, notes: 'Annual disaster recovery drill completed successfully. Documented for compliance audit.' }
 ]
 
 export default function BackupsClient() {
@@ -290,7 +479,10 @@ export default function BackupsClient() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<BackupStatus | 'all'>('all')
   const [selectedJob, setSelectedJob] = useState<BackupJob | null>(null)
+  const [selectedVault, setSelectedVault] = useState<BackupVault | null>(null)
+  const [selectedCompliance, setSelectedCompliance] = useState<ComplianceReport | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showLegalHoldDialog, setShowLegalHoldDialog] = useState(false)
 
   // Filter jobs
   const filteredJobs = useMemo(() => {
@@ -311,7 +503,9 @@ export default function BackupsClient() {
     const totalSize = mockJobs.reduce((sum, j) => sum + j.sizeBytes, 0)
     const avgSuccess = mockJobs.reduce((sum, j) => sum + j.successRate, 0) / total
     const totalRestorePoints = mockJobs.reduce((sum, j) => sum + j.restorePoints, 0)
-    return { total, completed, running, failed, totalSize, avgSuccess, totalRestorePoints }
+    const vaultCount = mockVaults.length
+    const legalHoldCount = mockRecoveryPoints.filter(rp => rp.legalHold).length
+    return { total, completed, running, failed, totalSize, avgSuccess, totalRestorePoints, vaultCount, legalHoldCount }
   }, [])
 
   const statsCards = [
@@ -320,9 +514,9 @@ export default function BackupsClient() {
     { label: 'Running', value: stats.running.toString(), change: '', icon: Activity, color: 'from-amber-500 to-amber-600' },
     { label: 'Failed', value: stats.failed.toString(), change: '-1', icon: XCircle, color: 'from-red-500 to-red-600' },
     { label: 'Total Storage', value: formatSize(stats.totalSize), change: '+15%', icon: HardDrive, color: 'from-purple-500 to-purple-600' },
-    { label: 'Success Rate', value: `${stats.avgSuccess.toFixed(1)}%`, change: '+2.3%', icon: TrendingUp, color: 'from-cyan-500 to-cyan-600' },
     { label: 'Restore Points', value: stats.totalRestorePoints.toString(), change: '+28', icon: History, color: 'from-indigo-500 to-indigo-600' },
-    { label: 'Protected VMs', value: '47', change: '+5', icon: Server, color: 'from-emerald-500 to-emerald-600' }
+    { label: 'Backup Vaults', value: stats.vaultCount.toString(), change: '+1', icon: FolderLock, color: 'from-cyan-500 to-cyan-600' },
+    { label: 'Legal Holds', value: stats.legalHoldCount.toString(), change: '', icon: Gavel, color: 'from-rose-500 to-rose-600' }
   ]
 
   function formatSize(bytes: number): string {
@@ -357,7 +551,8 @@ export default function BackupsClient() {
       'failed': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
       'scheduled': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
       'cancelled': 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
-      'warning': 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300'
+      'warning': 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300',
+      'pending': 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'
     }
     return colors[status]
   }
@@ -369,9 +564,30 @@ export default function BackupsClient() {
       'differential': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
       'snapshot': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
       'synthetic': 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300',
-      'archive': 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+      'archive': 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+      'continuous': 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300'
     }
     return colors[type]
+  }
+
+  const getComplianceColor = (status: ComplianceStatus): string => {
+    const colors: Record<ComplianceStatus, string> = {
+      'compliant': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+      'non-compliant': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+      'in-progress': 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300',
+      'not-evaluated': 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+    }
+    return colors[status]
+  }
+
+  const getSeverityColor = (severity: string): string => {
+    const colors: Record<string, string> = {
+      'critical': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+      'high': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
+      'medium': 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300',
+      'low': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+    }
+    return colors[severity] || 'bg-gray-100 text-gray-800'
   }
 
   const getStorageIcon = (type: StorageType) => {
@@ -381,7 +597,8 @@ export default function BackupsClient() {
       'azure-blob': Cloud,
       'google-cloud': Cloud,
       'wasabi': Archive,
-      'nfs': Server
+      'nfs': Server,
+      'glacier': Archive
     }
     return icons[type] || Database
   }
@@ -396,7 +613,7 @@ export default function BackupsClient() {
               <Database className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Backup & Recovery</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">AWS Backup Manager</h1>
               <p className="text-gray-500 dark:text-gray-400">Enterprise data protection and disaster recovery</p>
             </div>
           </div>
@@ -463,6 +680,14 @@ export default function BackupsClient() {
               <History className="h-4 w-4 mr-2" />
               Recovery Points
             </TabsTrigger>
+            <TabsTrigger value="vaults" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
+              <FolderLock className="h-4 w-4 mr-2" />
+              Vaults
+            </TabsTrigger>
+            <TabsTrigger value="compliance" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
+              <ShieldCheck className="h-4 w-4 mr-2" />
+              Compliance
+            </TabsTrigger>
             <TabsTrigger value="storage" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
               <HardDrive className="h-4 w-4 mr-2" />
               Storage
@@ -520,8 +745,12 @@ export default function BackupsClient() {
                             <span>{job.destination}</span>
                           </div>
                         </div>
-                        <Badge className={getStatusColor(job.status)}>{job.status}</Badge>
-                        <Badge className={getTypeColor(job.type)}>{job.type}</Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge className={getStatusColor(job.status)}>{job.status}</Badge>
+                          <Badge className={getTypeColor(job.type)}>{job.type}</Badge>
+                          {job.legalHold && <Badge className="bg-rose-100 text-rose-700"><Gavel className="h-3 w-3 mr-1" />Hold</Badge>}
+                          {job.crossRegionEnabled && <Badge variant="outline"><Globe className="h-3 w-3 mr-1" />Cross-Region</Badge>}
+                        </div>
                         <div className="text-right">
                           <p className="font-medium">{formatSize(job.sizeBytes)}</p>
                           <p className="text-xs text-gray-500">{formatTime(job.lastRun)}</p>
@@ -532,34 +761,32 @@ export default function BackupsClient() {
                 </CardContent>
               </Card>
 
-              {/* Storage Overview */}
+              {/* Compliance Overview */}
               <Card className="col-span-4 border-gray-200 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle>Storage Repositories</CardTitle>
+                  <CardTitle>Compliance Status</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockRepositories.slice(0, 4).map(repo => {
-                    const usedPercent = (repo.used / repo.capacity) * 100
-                    const StorageIcon = getStorageIcon(repo.type)
-                    return (
-                      <div key={repo.id} className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <StorageIcon className="h-4 w-4 text-gray-500" />
-                            <span className="text-sm font-medium">{repo.name}</span>
-                          </div>
-                          <Badge className={repo.status === 'online' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}>
-                            {repo.status}
-                          </Badge>
-                        </div>
-                        <Progress value={usedPercent} className="h-2" />
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>{formatSize(repo.used)} used</span>
-                          <span>{formatSize(repo.free)} free</span>
-                        </div>
+                  {mockComplianceReports.slice(0, 4).map(report => (
+                    <div key={report.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => setSelectedCompliance(report)}>
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        report.status === 'compliant' ? 'bg-green-100' : report.status === 'non-compliant' ? 'bg-red-100' : 'bg-amber-100'
+                      }`}>
+                        {report.status === 'compliant' ? (
+                          <ShieldCheck className="h-5 w-5 text-green-600" />
+                        ) : report.status === 'non-compliant' ? (
+                          <ShieldAlert className="h-5 w-5 text-red-600" />
+                        ) : (
+                          <Shield className="h-5 w-5 text-amber-600" />
+                        )}
                       </div>
-                    )
-                  })}
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{report.frameworkName}</p>
+                        <p className="text-xs text-gray-500">{report.controlsPassed}/{report.controlsTotal} controls passed</p>
+                      </div>
+                      <Badge className={getComplianceColor(report.status)}>{report.score}%</Badge>
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
 
@@ -596,10 +823,10 @@ export default function BackupsClient() {
                   <CardTitle>Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-4 gap-4">
                     <Button variant="outline" className="h-20 flex-col">
                       <Play className="h-6 w-6 mb-2 text-green-600" />
-                      Run Backup Now
+                      Run Backup
                     </Button>
                     <Button variant="outline" className="h-20 flex-col">
                       <Download className="h-6 w-6 mb-2 text-blue-600" />
@@ -609,6 +836,40 @@ export default function BackupsClient() {
                       <ShieldCheck className="h-6 w-6 mb-2 text-purple-600" />
                       Verify Backups
                     </Button>
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => setShowLegalHoldDialog(true)}>
+                      <Gavel className="h-6 w-6 mb-2 text-rose-600" />
+                      Legal Hold
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recovery Tests */}
+              <Card className="col-span-12 border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Recovery Testing Schedule</CardTitle>
+                    <Button size="sm"><Plus className="h-4 w-4 mr-2" />Schedule Test</Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-4 gap-4">
+                    {mockRecoveryTests.map(test => (
+                      <div key={test.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-sm">{test.name}</h4>
+                          <Badge className={test.status === 'passed' ? 'bg-green-100 text-green-700' : test.status === 'failed' ? 'bg-red-100 text-red-700' : test.status === 'running' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}>
+                            {test.status}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-gray-500 mb-3">{test.jobName}</p>
+                        <div className="flex items-center gap-2 text-xs">
+                          {test.dataVerified && <Badge variant="outline" className="text-xs"><FileCheck className="h-3 w-3 mr-1" />Data</Badge>}
+                          {test.applicationVerified && <Badge variant="outline" className="text-xs"><CheckCheck className="h-3 w-3 mr-1" />App</Badge>}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-2">Next: {new Date(test.nextRun).toLocaleDateString()}</p>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -644,6 +905,7 @@ export default function BackupsClient() {
                       <div className="flex items-center gap-2">
                         <Badge className={getStatusColor(job.status)}>{job.status}</Badge>
                         <Badge className={getTypeColor(job.type)}>{job.type}</Badge>
+                        {job.legalHold && <Badge className="bg-rose-100 text-rose-700"><Gavel className="h-3 w-3" /></Badge>}
                       </div>
                       {job.status === 'running' && (
                         <div className="w-32">
@@ -658,6 +920,7 @@ export default function BackupsClient() {
                       <div className="flex items-center gap-2">
                         {job.encrypted && <Lock className="h-4 w-4 text-green-600" />}
                         {job.verified && <ShieldCheck className="h-4 w-4 text-blue-600" />}
+                        {job.crossRegionEnabled && <Globe className="h-4 w-4 text-purple-600" />}
                       </div>
                       <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
@@ -673,10 +936,16 @@ export default function BackupsClient() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Available Recovery Points</CardTitle>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    <Download className="h-4 w-4 mr-2" />
-                    Start Recovery
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={() => setShowLegalHoldDialog(true)}>
+                      <Gavel className="h-4 w-4 mr-2" />
+                      Apply Legal Hold
+                    </Button>
+                    <Button className="bg-blue-600 hover:bg-blue-700">
+                      <Download className="h-4 w-4 mr-2" />
+                      Start Recovery
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
@@ -694,17 +963,143 @@ export default function BackupsClient() {
                       <Badge className={point.status === 'available' ? 'bg-green-100 text-green-700' : point.status === 'locked' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}>
                         {point.status}
                       </Badge>
+                      {point.legalHold && <Badge className="bg-rose-100 text-rose-700"><Gavel className="h-3 w-3 mr-1" />Legal Hold</Badge>}
                       <div className="text-right">
                         <p className="font-medium">{formatSize(point.size)}</p>
                         <p className="text-xs text-gray-500">Until {point.retentionUntil}</p>
                       </div>
-                      {point.verified && <ShieldCheck className="h-5 w-5 text-green-600" />}
+                      <div className="flex items-center gap-2">
+                        {point.verified && <ShieldCheck className="h-5 w-5 text-green-600" />}
+                        {point.recoveryTested && <CheckCheck className="h-5 w-5 text-blue-600" title={`Last tested: ${point.lastTestedDate}`} />}
+                      </div>
                       <Button size="sm" variant="outline">Restore</Button>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Vaults Tab */}
+          <TabsContent value="vaults" className="mt-6">
+            <div className="grid grid-cols-2 gap-6">
+              {mockVaults.map(vault => (
+                <Card key={vault.id} className="border-gray-200 dark:border-gray-700 cursor-pointer hover:border-blue-300" onClick={() => setSelectedVault(vault)}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-12 h-12 rounded-lg ${vault.locked ? 'bg-amber-100 dark:bg-amber-900' : 'bg-blue-100 dark:bg-blue-900'} flex items-center justify-center`}>
+                          {vault.locked ? <Lock className="h-6 w-6 text-amber-600" /> : <FolderLock className="h-6 w-6 text-blue-600" />}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">{vault.name}</h3>
+                          <p className="text-sm text-gray-500">{vault.region}</p>
+                        </div>
+                      </div>
+                      <Badge className={vault.status === 'active' ? 'bg-green-100 text-green-700' : vault.status === 'locked' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700'}>
+                        {vault.status}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-4">{vault.description}</p>
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className="text-lg font-bold">{vault.recoveryPointCount}</p>
+                        <p className="text-xs text-gray-500">Recovery Points</p>
+                      </div>
+                      <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className="text-lg font-bold">{formatSize(vault.totalSizeBytes)}</p>
+                        <p className="text-xs text-gray-500">Total Size</p>
+                      </div>
+                      <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className="text-lg font-bold">{vault.legalHoldCount}</p>
+                        <p className="text-xs text-gray-500">Legal Holds</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-4">
+                        <span className="text-gray-500">Retention: {vault.minRetentionDays}-{vault.maxRetentionDays} days</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {vault.locked && <Badge variant="outline"><Lock className="h-3 w-3 mr-1" />Vault Lock</Badge>}
+                        <Badge variant="outline"><Key className="h-3 w-3 mr-1" />{vault.encryptionKey}</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Compliance Tab */}
+          <TabsContent value="compliance" className="mt-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Compliance Reports */}
+              <Card className="col-span-8 border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Compliance Reports</CardTitle>
+                    <Button size="sm"><RefreshCw className="h-4 w-4 mr-2" />Run Evaluation</Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                    {mockComplianceReports.map(report => (
+                      <div key={report.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => setSelectedCompliance(report)}>
+                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                          report.status === 'compliant' ? 'bg-green-100' : report.status === 'non-compliant' ? 'bg-red-100' : 'bg-amber-100'
+                        }`}>
+                          <Scale className={`h-6 w-6 ${
+                            report.status === 'compliant' ? 'text-green-600' : report.status === 'non-compliant' ? 'text-red-600' : 'text-amber-600'
+                          }`} />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900 dark:text-white">{report.name}</h4>
+                          <p className="text-sm text-gray-500">{report.resources.length} resources evaluated</p>
+                        </div>
+                        <Badge className={getComplianceColor(report.status)}>{report.status}</Badge>
+                        <div className="text-center">
+                          <p className="text-2xl font-bold">{report.score}%</p>
+                          <p className="text-xs text-gray-500">Score</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm"><span className="text-green-600 font-medium">{report.controlsPassed}</span> / {report.controlsTotal}</p>
+                          <p className="text-xs text-gray-500">Controls Passed</p>
+                        </div>
+                        <Button variant="ghost" size="icon"><Eye className="h-4 w-4" /></Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Audit Trail */}
+              <Card className="col-span-4 border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <CardTitle>Audit Trail</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-3">
+                      {mockAuditEvents.map(event => (
+                        <div key={event.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-medium">{event.eventType}</span>
+                            <Badge className={event.result === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} variant="outline">
+                              {event.result}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-900 dark:text-white">{event.action}</p>
+                          <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+                            <span>{event.userName}</span>
+                            <span>{new Date(event.timestamp).toLocaleTimeString()}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Storage Tab */}
@@ -726,18 +1121,22 @@ export default function BackupsClient() {
                             <p className="text-sm text-gray-500">{repo.region || 'Local'} • {repo.tier}</p>
                           </div>
                         </div>
-                        <Badge className={repo.status === 'online' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}>
-                          {repo.status}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          {repo.replicationEnabled && <Badge variant="outline"><Globe className="h-3 w-3 mr-1" />Replication</Badge>}
+                          <Badge className={repo.status === 'online' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}>
+                            {repo.status}
+                          </Badge>
+                        </div>
                       </div>
                       <Progress value={usedPercent} className="h-3 mb-2" />
                       <div className="flex justify-between text-sm mb-4">
                         <span className="text-gray-500">{formatSize(repo.used)} of {formatSize(repo.capacity)}</span>
                         <span className={usedPercent > 80 ? 'text-red-600 font-medium' : 'text-green-600'}>{usedPercent.toFixed(1)}% used</span>
                       </div>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="grid grid-cols-3 gap-4 text-sm">
                         <div><span className="text-gray-500">Backups:</span> <span className="font-medium">{repo.backupCount}</span></div>
                         <div><span className="text-gray-500">Last Backup:</span> <span className="font-medium">{repo.lastBackup}</span></div>
+                        {repo.encryptionKeyId && <div><span className="text-gray-500">Key:</span> <span className="font-medium">{repo.encryptionKeyId}</span></div>}
                       </div>
                     </CardContent>
                   </Card>
@@ -748,23 +1147,42 @@ export default function BackupsClient() {
 
           {/* Policies Tab */}
           <TabsContent value="policies" className="mt-6">
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 gap-6">
               {mockPolicies.map(policy => (
                 <Card key={policy.id} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-semibold text-gray-900 dark:text-white">{policy.name}</h3>
-                      {policy.isDefault && <Badge>Default</Badge>}
+                      <div className="flex items-center gap-2">
+                        {policy.isDefault && <Badge className="bg-blue-100 text-blue-700">Default</Badge>}
+                        <Badge variant="outline">{policy.jobCount} jobs</Badge>
+                      </div>
                     </div>
                     <p className="text-sm text-gray-500 mb-4">{policy.description}</p>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between"><span className="text-gray-500">Frequency:</span> <span className="font-medium capitalize">{policy.frequency}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-500">Retention:</span> <span className="font-medium">{policy.retentionDays} days</span></div>
-                      <div className="flex justify-between"><span className="text-gray-500">Jobs:</span> <span className="font-medium">{policy.jobCount}</span></div>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className="text-xs text-gray-500">Frequency</p>
+                        <p className="font-medium capitalize">{policy.frequency}</p>
+                      </div>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className="text-xs text-gray-500">Retention</p>
+                        <p className="font-medium">{policy.retentionDays} days</p>
+                      </div>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className="text-xs text-gray-500">Cold Storage After</p>
+                        <p className="font-medium">{policy.coldStorageAfter} days</p>
+                      </div>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className="text-xs text-gray-500">Delete After</p>
+                        <p className="font-medium">{policy.deleteAfter} days</p>
+                      </div>
                     </div>
-                    <div className="flex gap-2 mt-4">
+                    <div className="flex flex-wrap gap-2">
                       {policy.encryption && <Badge variant="outline"><Lock className="h-3 w-3 mr-1" />Encrypted</Badge>}
                       {policy.compression && <Badge variant="outline"><FileArchive className="h-3 w-3 mr-1" />Compressed</Badge>}
+                      {policy.verification && <Badge variant="outline"><ShieldCheck className="h-3 w-3 mr-1" />Verified</Badge>}
+                      {policy.crossRegionEnabled && <Badge variant="outline"><Globe className="h-3 w-3 mr-1" />Cross-Region</Badge>}
+                      {policy.crossAccountEnabled && <Badge variant="outline"><Building2 className="h-3 w-3 mr-1" />Cross-Account</Badge>}
                     </div>
                   </CardContent>
                 </Card>
@@ -783,11 +1201,15 @@ export default function BackupsClient() {
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Encryption at Rest</p><p className="text-sm text-gray-500">Encrypt all backup data</p></div>
+                    <div><p className="font-medium">Encryption at Rest</p><p className="text-sm text-gray-500">Encrypt all backup data using AWS KMS</p></div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div><p className="font-medium">Compression</p><p className="text-sm text-gray-500">Compress backups to save storage</p></div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div><p className="font-medium">Cross-Region Backup</p><p className="text-sm text-gray-500">Replicate backups to secondary region</p></div>
                     <Switch defaultChecked />
                   </div>
                 </CardContent>
@@ -796,7 +1218,7 @@ export default function BackupsClient() {
                 <CardHeader><CardTitle>Notification Settings</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Failure Alerts</p><p className="text-sm text-gray-500">Notify on backup failures</p></div>
+                    <div><p className="font-medium">Failure Alerts</p><p className="text-sm text-gray-500">Notify on backup failures via SNS</p></div>
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
@@ -804,7 +1226,45 @@ export default function BackupsClient() {
                     <Switch defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
-                    <div><p className="font-medium">Storage Warnings</p><p className="text-sm text-gray-500">Alert when storage is low</p></div>
+                    <div><p className="font-medium">Storage Warnings</p><p className="text-sm text-gray-500">Alert when storage is 80% full</p></div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div><p className="font-medium">Compliance Alerts</p><p className="text-sm text-gray-500">Notify on compliance violations</p></div>
+                    <Switch defaultChecked />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Security Settings</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div><p className="font-medium">Vault Lock</p><p className="text-sm text-gray-500">Enable WORM compliance mode</p></div>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div><p className="font-medium">MFA Delete</p><p className="text-sm text-gray-500">Require MFA for deletion</p></div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div><p className="font-medium">Access Logging</p><p className="text-sm text-gray-500">Log all vault access to CloudTrail</p></div>
+                    <Switch defaultChecked />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Recovery Settings</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div><p className="font-medium">Automatic Recovery Testing</p><p className="text-sm text-gray-500">Schedule quarterly DR tests</p></div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div><p className="font-medium">Point-in-Time Recovery</p><p className="text-sm text-gray-500">Enable continuous backups</p></div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div><p className="font-medium">Fast Restore</p><p className="text-sm text-gray-500">Keep recent backups in hot tier</p></div>
                     <Switch defaultChecked />
                   </div>
                 </CardContent>
@@ -830,28 +1290,177 @@ export default function BackupsClient() {
                       </div>
                     </div>
                   </DialogHeader>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="p-4 bg-gray-50 rounded-lg text-center">
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                       <p className="text-2xl font-bold">{formatSize(selectedJob.sizeBytes)}</p>
                       <p className="text-sm text-gray-500">Backup Size</p>
                     </div>
-                    <div className="p-4 bg-gray-50 rounded-lg text-center">
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                       <p className="text-2xl font-bold">{selectedJob.restorePoints}</p>
                       <p className="text-sm text-gray-500">Restore Points</p>
                     </div>
-                    <div className="p-4 bg-gray-50 rounded-lg text-center">
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                       <p className="text-2xl font-bold">{selectedJob.successRate}%</p>
                       <p className="text-sm text-gray-500">Success Rate</p>
                     </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold">{selectedJob.rpo}h / {selectedJob.rto}m</p>
+                      <p className="text-sm text-gray-500">RPO / RTO</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedJob.encrypted && <Badge variant="outline"><Lock className="h-3 w-3 mr-1" />Encrypted</Badge>}
+                    {selectedJob.compressed && <Badge variant="outline"><FileArchive className="h-3 w-3 mr-1" />Compressed</Badge>}
+                    {selectedJob.verified && <Badge variant="outline"><ShieldCheck className="h-3 w-3 mr-1" />Verified</Badge>}
+                    {selectedJob.crossRegionEnabled && <Badge variant="outline"><Globe className="h-3 w-3 mr-1" />Cross-Region</Badge>}
+                    {selectedJob.legalHold && <Badge className="bg-rose-100 text-rose-700"><Gavel className="h-3 w-3 mr-1" />Legal Hold</Badge>}
                   </div>
                   <div className="flex gap-3">
                     <Button className="bg-green-600 hover:bg-green-700"><Play className="h-4 w-4 mr-2" />Run Now</Button>
                     <Button variant="outline"><Download className="h-4 w-4 mr-2" />Restore</Button>
                     <Button variant="outline"><ShieldCheck className="h-4 w-4 mr-2" />Verify</Button>
+                    <Button variant="outline"><Gavel className="h-4 w-4 mr-2" />Legal Hold</Button>
                   </div>
                 </div>
               )}
             </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Vault Detail Dialog */}
+        <Dialog open={!!selectedVault} onOpenChange={() => setSelectedVault(null)}>
+          <DialogContent className="max-w-2xl">
+            <ScrollArea className="max-h-[80vh]">
+              {selectedVault && (
+                <div className="space-y-6">
+                  <DialogHeader>
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-lg ${selectedVault.locked ? 'bg-amber-100' : 'bg-blue-100'} flex items-center justify-center`}>
+                        {selectedVault.locked ? <Lock className="h-6 w-6 text-amber-600" /> : <FolderLock className="h-6 w-6 text-blue-600" />}
+                      </div>
+                      <div>
+                        <DialogTitle>{selectedVault.name}</DialogTitle>
+                        <p className="text-gray-500">{selectedVault.description}</p>
+                      </div>
+                    </div>
+                  </DialogHeader>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold">{selectedVault.recoveryPointCount}</p>
+                      <p className="text-sm text-gray-500">Recovery Points</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold">{formatSize(selectedVault.totalSizeBytes)}</p>
+                      <p className="text-sm text-gray-500">Total Size</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold">{selectedVault.legalHoldCount}</p>
+                      <p className="text-sm text-gray-500">Legal Holds</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between"><span className="text-gray-500">Region:</span><span className="font-medium">{selectedVault.region}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Encryption Key:</span><span className="font-medium">{selectedVault.encryptionKey}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Access Policy:</span><span className="font-medium">{selectedVault.accessPolicy}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Retention:</span><span className="font-medium">{selectedVault.minRetentionDays} - {selectedVault.maxRetentionDays} days</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Created By:</span><span className="font-medium">{selectedVault.createdBy}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Last Accessed:</span><span className="font-medium">{selectedVault.lastAccessedAt}</span></div>
+                  </div>
+                </div>
+              )}
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Compliance Detail Dialog */}
+        <Dialog open={!!selectedCompliance} onOpenChange={() => setSelectedCompliance(null)}>
+          <DialogContent className="max-w-3xl">
+            <ScrollArea className="max-h-[80vh]">
+              {selectedCompliance && (
+                <div className="space-y-6">
+                  <DialogHeader>
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-lg ${selectedCompliance.status === 'compliant' ? 'bg-green-100' : 'bg-red-100'} flex items-center justify-center`}>
+                        <Scale className={`h-6 w-6 ${selectedCompliance.status === 'compliant' ? 'text-green-600' : 'text-red-600'}`} />
+                      </div>
+                      <div>
+                        <DialogTitle>{selectedCompliance.name}</DialogTitle>
+                        <p className="text-gray-500">{selectedCompliance.frameworkName} Framework</p>
+                      </div>
+                    </div>
+                  </DialogHeader>
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold">{selectedCompliance.score}%</p>
+                      <p className="text-sm text-gray-500">Score</p>
+                    </div>
+                    <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-green-600">{selectedCompliance.controlsPassed}</p>
+                      <p className="text-sm text-gray-500">Passed</p>
+                    </div>
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
+                      <p className="text-2xl font-bold text-red-600">{selectedCompliance.controlsFailed}</p>
+                      <p className="text-sm text-gray-500">Failed</p>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                      <p className="text-2xl font-bold">{selectedCompliance.controlsTotal}</p>
+                      <p className="text-sm text-gray-500">Total Controls</p>
+                    </div>
+                  </div>
+                  {selectedCompliance.findings.length > 0 && (
+                    <div>
+                      <h4 className="font-medium mb-3">Findings</h4>
+                      <div className="space-y-3">
+                        {selectedCompliance.findings.map(finding => (
+                          <div key={finding.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <h5 className="font-medium">{finding.title}</h5>
+                              <Badge className={getSeverityColor(finding.severity)}>{finding.severity}</Badge>
+                            </div>
+                            <p className="text-sm text-gray-500 mb-2">{finding.description}</p>
+                            <p className="text-sm"><span className="text-gray-500">Recommendation:</span> {finding.recommendation}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Legal Hold Dialog */}
+        <Dialog open={showLegalHoldDialog} onOpenChange={setShowLegalHoldDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Gavel className="h-5 w-5" />Apply Legal Hold</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Select Recovery Points</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Choose recovery points" /></SelectTrigger>
+                  <SelectContent>
+                    {mockRecoveryPoints.filter(rp => !rp.legalHold).map(rp => (
+                      <SelectItem key={rp.id} value={rp.id}>{rp.jobName} - {new Date(rp.timestamp).toLocaleDateString()}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Legal Hold Reason</Label>
+                <Input placeholder="e.g., Litigation hold - Case #12345" />
+              </div>
+              <div>
+                <Label>Authorized By</Label>
+                <Input placeholder="Legal department contact" />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowLegalHoldDialog(false)}>Cancel</Button>
+                <Button className="bg-rose-600 hover:bg-rose-700">Apply Legal Hold</Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
