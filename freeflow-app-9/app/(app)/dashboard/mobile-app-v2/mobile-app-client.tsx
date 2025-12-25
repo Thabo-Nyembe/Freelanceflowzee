@@ -9,13 +9,24 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Smartphone, Download, Star, TrendingUp, Users, Activity,
   Package, Upload, Play, AlertCircle, CheckCircle, Clock,
   Settings, Globe, Bell, Shield, Zap, BarChart3, Target,
   Bug, Cpu, HardDrive, Battery, Wifi, Apple, Monitor,
-  RefreshCw, Send, Eye, MessageSquare, ChevronRight, Layers
+  RefreshCw, Send, Eye, MessageSquare, ChevronRight, Layers,
+  Key, Webhook, Mail, Database, Lock, AlertOctagon, Trash2,
+  Copy, Code, GitBranch, FileText, Image, Link2
 } from 'lucide-react'
 
 // Types
@@ -145,6 +156,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const [selectedReview, setSelectedReview] = useState<AppReview | null>(null)
   const [showReviewDialog, setShowReviewDialog] = useState(false)
   const [responseText, setResponseText] = useState('')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const builds = mockBuilds
   const reviews = mockReviews
@@ -279,6 +291,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="push">Push Notifications</TabsTrigger>
             <TabsTrigger value="iap">In-App Purchases</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -889,6 +902,564 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - App Store Connect Level with 6 Sub-tabs */}
+          <TabsContent value="settings">
+            <div className="flex gap-6">
+              {/* Settings Sidebar */}
+              <div className="w-64 shrink-0">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 px-3">Settings</h3>
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General' },
+                      { id: 'distribution', icon: Package, label: 'Distribution' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications' },
+                      { id: 'api', icon: Key, label: 'API & Integrations' },
+                      { id: 'testers', icon: Users, label: 'Testers' },
+                      { id: 'advanced', icon: Lock, label: 'Advanced' }
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                        }`}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {item.label}
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              </div>
+
+              {/* Settings Content */}
+              <div className="flex-1 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                            <Smartphone className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                          </div>
+                          <div>
+                            <CardTitle>App Information</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Basic app settings</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">App Name</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">FreeFlow Mobile</p>
+                          </div>
+                          <Button variant="outline" size="sm">Edit</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Bundle ID</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">com.freeflow.app</p>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Primary Language</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Select app default language</p>
+                          </div>
+                          <Select defaultValue="en">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="en">English</SelectItem>
+                              <SelectItem value="es">Spanish</SelectItem>
+                              <SelectItem value="fr">French</SelectItem>
+                              <SelectItem value="de">German</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Content Rating</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">App content rating</p>
+                          </div>
+                          <Badge>4+ / Everyone</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                            <Image className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Store Presence</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">App Store listing settings</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Show in Search</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Allow app to appear in search</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Pre-order Enabled</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Allow pre-orders for new versions</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Made for Kids</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">App is designed for children</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Distribution Settings */}
+                {settingsTab === 'distribution' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                            <Globe className="h-5 w-5 text-green-600 dark:text-green-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Availability</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Where your app is available</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Available Territories</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Countries where app is available</p>
+                          </div>
+                          <Badge>175 countries</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Release Type</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Default release strategy</p>
+                          </div>
+                          <Select defaultValue="manual">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="manual">Manual</SelectItem>
+                              <SelectItem value="auto">Automatic</SelectItem>
+                              <SelectItem value="phased">Phased</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Phased Release</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Gradually roll out to users</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                            <Apple className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                          </div>
+                          <div>
+                            <CardTitle>TestFlight</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Beta testing configuration</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">TestFlight Enabled</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable beta testing</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Public Link</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Allow public test invites</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Auto-distribute Builds</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically send to testers</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                            <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Email Notifications</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">App Store notifications</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Review Status</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Get notified on review updates</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">New Ratings</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Daily summary of new ratings</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Crash Reports</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert on crash spikes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Sales Reports</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Weekly sales summary</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                            <Webhook className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Webhook Notifications</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Send alerts to external services</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Slack Integration</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Post updates to Slack</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Discord</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Send to Discord channels</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <Label className="text-gray-900 dark:text-white font-medium mb-2 block">Custom Webhook</Label>
+                          <div className="flex gap-2">
+                            <Input placeholder="https://your-webhook-url.com" className="flex-1" />
+                            <Button variant="outline">Test</Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* API & Integrations */}
+                {settingsTab === 'api' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                            <Key className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                          </div>
+                          <div>
+                            <CardTitle>API Keys</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Manage API access tokens</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <Label className="text-gray-900 dark:text-white font-medium">App Store Connect API Key</Label>
+                            <Button variant="outline" size="sm">
+                              <Copy className="h-4 w-4 mr-2" />
+                              Copy
+                            </Button>
+                          </div>
+                          <code className="text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded block font-mono">
+                            asc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                          </code>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Regenerate API Key
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <GitBranch className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                          </div>
+                          <div>
+                            <CardTitle>CI/CD Integration</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Connect build pipelines</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          {[
+                            { name: 'GitHub Actions', connected: true },
+                            { name: 'Bitrise', connected: false },
+                            { name: 'CircleCI', connected: false },
+                            { name: 'Fastlane', connected: true }
+                          ].map(ci => (
+                            <div key={ci.name} className="flex items-center justify-between p-4 border dark:border-gray-600 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Cpu className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                                <span className="font-medium text-gray-900 dark:text-white">{ci.name}</span>
+                              </div>
+                              <Button variant={ci.connected ? 'outline' : 'default'} size="sm">
+                                {ci.connected ? 'Configure' : 'Connect'}
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Testers */}
+                {settingsTab === 'testers' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg">
+                            <Users className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Tester Groups</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Manage beta tester groups</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Internal Team', testers: 25, active: true },
+                          { name: 'Beta Testers', testers: 150, active: true },
+                          { name: 'Public Beta', testers: 1000, active: false }
+                        ].map(group => (
+                          <div key={group.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">{group.name}</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">{group.testers} testers</p>
+                            </div>
+                            <Switch defaultChecked={group.active} />
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Users className="h-4 w-4 mr-2" />
+                          Create New Group
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                            <Mail className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Tester Invitations</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Invite settings</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Auto-invite on Build</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Invite testers when new build is ready</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Require NDA</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Testers must accept NDA</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <Shield className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Security</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">App security settings</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">App Transport Security</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Require HTTPS connections</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Encryption Export</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Uses encryption requiring export compliance</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                            <Database className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                          </div>
+                          <div>
+                            <CardTitle>Data & Analytics</CardTitle>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Data collection settings</p>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Crash Reporting</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Collect crash reports</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">App Analytics</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Share data with analytics</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="h-4 w-4 mr-2" />
+                            Export Analytics
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <BarChart3 className="h-4 w-4 mr-2" />
+                            View Reports
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <div className="bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-200 dark:border-red-800 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                          <AlertOctagon className="h-5 w-5 text-red-600 dark:text-red-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-red-700 dark:text-red-400">Danger Zone</h3>
+                          <p className="text-sm text-red-600/70 dark:text-red-400/70">Destructive actions</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Remove from App Store</h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Temporarily remove app from sale</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20">
+                            Remove
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Delete App</h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Permanently delete this app</p>
+                          </div>
+                          <Button variant="destructive">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
