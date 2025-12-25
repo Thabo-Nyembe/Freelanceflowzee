@@ -307,6 +307,9 @@ export default function NotificationsClient() {
   const [showCreateAutomation, setShowCreateAutomation] = useState(false)
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
+  const [settingsTab, setSettingsTab] = useState('channels')
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false)
 
   // Filter notifications
   const filteredNotifications = useMemo(() => {
@@ -753,44 +756,236 @@ export default function NotificationsClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-2 gap-6">
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Channel Settings</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Push Notifications</p><p className="text-sm text-gray-500">Send via Firebase Cloud Messaging</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Email Notifications</p><p className="text-sm text-gray-500">Send via SendGrid</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">SMS Notifications</p><p className="text-sm text-gray-500">Send via Twilio</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Slack Integration</p><p className="text-sm text-gray-500">Send to Slack channels</p></div><Switch defaultChecked /></div>
-                </CardContent>
-              </Card>
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Delivery Settings</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Smart Delivery</p><p className="text-sm text-gray-500">Optimize send time per user</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Frequency Capping</p><p className="text-sm text-gray-500">Limit notifications per day</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Quiet Hours</p><p className="text-sm text-gray-500">Respect user time zones</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Fallback Channels</p><p className="text-sm text-gray-500">Try alternate channels on failure</p></div><Switch /></div>
-                </CardContent>
-              </Card>
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Analytics Settings</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Track Opens</p><p className="text-sm text-gray-500">Track email and push opens</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Track Clicks</p><p className="text-sm text-gray-500">Track link clicks</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Conversion Tracking</p><p className="text-sm text-gray-500">Track goal completions</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Revenue Attribution</p><p className="text-sm text-gray-500">Track revenue from campaigns</p></div><Switch /></div>
-                </CardContent>
-              </Card>
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Advanced Settings</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">A/B Testing</p><p className="text-sm text-gray-500">Enable split testing</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Personalization</p><p className="text-sm text-gray-500">Use AI for content personalization</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Predictive Send</p><p className="text-sm text-gray-500">AI-optimized delivery times</p></div><Switch /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Debug Mode</p><p className="text-sm text-gray-500">Log all delivery attempts</p></div><Switch /></div>
-                </CardContent>
-              </Card>
-            </div>
+            <Tabs value={settingsTab} onValueChange={setSettingsTab}>
+              <TabsList className="mb-4">
+                <TabsTrigger value="channels"><Smartphone className="h-4 w-4 mr-2" />Channels</TabsTrigger>
+                <TabsTrigger value="delivery"><Send className="h-4 w-4 mr-2" />Delivery</TabsTrigger>
+                <TabsTrigger value="analytics"><BarChart3 className="h-4 w-4 mr-2" />Analytics</TabsTrigger>
+                <TabsTrigger value="preferences"><BellRing className="h-4 w-4 mr-2" />Preferences</TabsTrigger>
+                <TabsTrigger value="integrations"><Link className="h-4 w-4 mr-2" />Integrations</TabsTrigger>
+                <TabsTrigger value="advanced"><Settings className="h-4 w-4 mr-2" />Advanced</TabsTrigger>
+              </TabsList>
+
+              {/* Channels Settings */}
+              <TabsContent value="channels">
+                <div className="grid grid-cols-2 gap-6">
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Push Notifications</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Enable Push</p><p className="text-sm text-gray-500">Send via Firebase Cloud Messaging</p></div><Switch defaultChecked /></div>
+                      <div><Label>FCM Server Key</Label><Input type="password" placeholder="Enter server key" className="mt-1" /></div>
+                      <div><Label>iOS Certificate</Label><div className="mt-1 flex items-center gap-2"><Input placeholder="Upload .p12 file" disabled /><Button variant="outline" size="sm"><Upload className="h-4 w-4" /></Button></div></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Rich Push</p><p className="text-sm text-gray-500">Include images in notifications</p></div><Switch defaultChecked /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Email Notifications</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Enable Email</p><p className="text-sm text-gray-500">Send via SendGrid</p></div><Switch defaultChecked /></div>
+                      <div><Label>SendGrid API Key</Label><Input type="password" placeholder="Enter API key" className="mt-1" /></div>
+                      <div><Label>From Email</Label><Input placeholder="noreply@company.com" className="mt-1" /></div>
+                      <div><Label>From Name</Label><Input placeholder="Company Name" className="mt-1" /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>SMS Notifications</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Enable SMS</p><p className="text-sm text-gray-500">Send via Twilio</p></div><Switch defaultChecked /></div>
+                      <div><Label>Twilio Account SID</Label><Input placeholder="Enter Account SID" className="mt-1" /></div>
+                      <div><Label>Auth Token</Label><Input type="password" placeholder="Enter Auth Token" className="mt-1" /></div>
+                      <div><Label>Phone Number</Label><Input placeholder="+1234567890" className="mt-1" /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Slack Integration</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Enable Slack</p><p className="text-sm text-gray-500">Send to Slack channels</p></div><Switch defaultChecked /></div>
+                      <div><Label>Webhook URL</Label><Input placeholder="https://hooks.slack.com/..." className="mt-1" /></div>
+                      <div><Label>Default Channel</Label><Input placeholder="#notifications" className="mt-1" /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Thread Replies</p><p className="text-sm text-gray-500">Group related messages</p></div><Switch /></div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Delivery Settings */}
+              <TabsContent value="delivery">
+                <div className="grid grid-cols-2 gap-6">
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Timing Optimization</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Smart Delivery</p><p className="text-sm text-gray-500">Optimize send time per user</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Timezone Aware</p><p className="text-sm text-gray-500">Respect user timezones</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Predictive Send</p><p className="text-sm text-gray-500">AI-optimized delivery times</p></div><Switch /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Frequency Control</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Frequency Capping</p><p className="text-sm text-gray-500">Limit notifications per day</p></div><Switch defaultChecked /></div>
+                      <div><Label>Max per Day</Label><Select defaultValue="5"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="3">3 notifications</SelectItem><SelectItem value="5">5 notifications</SelectItem><SelectItem value="10">10 notifications</SelectItem><SelectItem value="unlimited">Unlimited</SelectItem></SelectContent></Select></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Priority Override</p><p className="text-sm text-gray-500">Urgent bypasses limits</p></div><Switch defaultChecked /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Quiet Hours</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Enable Quiet Hours</p><p className="text-sm text-gray-500">Pause non-urgent notifications</p></div><Switch defaultChecked /></div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><Label>Start</Label><Input type="time" defaultValue="22:00" className="mt-1" /></div>
+                        <div><Label>End</Label><Input type="time" defaultValue="08:00" className="mt-1" /></div>
+                      </div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Weekend Quiet</p><p className="text-sm text-gray-500">Apply quiet hours on weekends</p></div><Switch /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Fallback Settings</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Fallback Channels</p><p className="text-sm text-gray-500">Try alternate channels on failure</p></div><Switch /></div>
+                      <div><Label>Primary Channel</Label><Select defaultValue="push"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="push">Push</SelectItem><SelectItem value="email">Email</SelectItem><SelectItem value="sms">SMS</SelectItem></SelectContent></Select></div>
+                      <div><Label>Fallback Order</Label><Select defaultValue="email_sms"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="email_sms">Email → SMS</SelectItem><SelectItem value="sms_email">SMS → Email</SelectItem></SelectContent></Select></div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Analytics Settings */}
+              <TabsContent value="analytics">
+                <div className="grid grid-cols-2 gap-6">
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Tracking</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Track Opens</p><p className="text-sm text-gray-500">Track email and push opens</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Track Clicks</p><p className="text-sm text-gray-500">Track link clicks</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Track Conversions</p><p className="text-sm text-gray-500">Track goal completions</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Revenue Attribution</p><p className="text-sm text-gray-500">Track revenue from campaigns</p></div><Switch /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Data Export</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div><Label>Export Format</Label><Select defaultValue="csv"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="csv">CSV</SelectItem><SelectItem value="json">JSON</SelectItem><SelectItem value="xlsx">Excel</SelectItem></SelectContent></Select></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Auto Export</p><p className="text-sm text-gray-500">Daily automated exports</p></div><Switch /></div>
+                      <Button variant="outline" className="w-full"><Download className="h-4 w-4 mr-2" />Export All Data</Button>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Third-Party Analytics</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Google Analytics</p><p className="text-sm text-gray-500">Send events to GA</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Mixpanel</p><p className="text-sm text-gray-500">Send events to Mixpanel</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Amplitude</p><p className="text-sm text-gray-500">Send events to Amplitude</p></div><Switch /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Reporting</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div><Label>Report Frequency</Label><Select defaultValue="weekly"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="daily">Daily</SelectItem><SelectItem value="weekly">Weekly</SelectItem><SelectItem value="monthly">Monthly</SelectItem></SelectContent></Select></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Email Reports</p><p className="text-sm text-gray-500">Send reports via email</p></div><Switch defaultChecked /></div>
+                      <div><Label>Recipients</Label><Input placeholder="team@company.com" className="mt-1" /></div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Preferences Settings */}
+              <TabsContent value="preferences">
+                <div className="grid grid-cols-2 gap-6">
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>User Preferences</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Allow Opt-out</p><p className="text-sm text-gray-500">Let users manage preferences</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Category Selection</p><p className="text-sm text-gray-500">Per-category opt-out</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Channel Selection</p><p className="text-sm text-gray-500">Per-channel opt-out</p></div><Switch defaultChecked /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Default Preferences</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div><Label>Default Push</Label><Select defaultValue="on"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="on">Enabled</SelectItem><SelectItem value="off">Disabled</SelectItem></SelectContent></Select></div>
+                      <div><Label>Default Email</Label><Select defaultValue="on"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="on">Enabled</SelectItem><SelectItem value="off">Disabled</SelectItem></SelectContent></Select></div>
+                      <div><Label>Default SMS</Label><Select defaultValue="off"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="on">Enabled</SelectItem><SelectItem value="off">Disabled</SelectItem></SelectContent></Select></div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Integrations Settings */}
+              <TabsContent value="integrations">
+                <div className="grid grid-cols-2 gap-6">
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Connected Services</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      {[
+                        { name: 'Slack', status: 'connected', icon: Slack },
+                        { name: 'Discord', status: 'disconnected', icon: MessageSquare },
+                        { name: 'MS Teams', status: 'connected', icon: Users },
+                        { name: 'Intercom', status: 'disconnected', icon: MessageSquare },
+                      ].map(service => (
+                        <div key={service.name} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${service.status === 'connected' ? 'bg-green-100' : 'bg-gray-100'}`}>
+                              <service.icon className={`h-4 w-4 ${service.status === 'connected' ? 'text-green-600' : 'text-gray-500'}`} />
+                            </div>
+                            <div><p className="font-medium">{service.name}</p><p className="text-xs text-gray-500">{service.status}</p></div>
+                          </div>
+                          <Button variant="outline" size="sm">{service.status === 'connected' ? 'Configure' : 'Connect'}</Button>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>API Access</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div><Label>API Key</Label><div className="flex items-center gap-2 mt-1"><Input value="sk_live_xxxxxxxxxxxxxxxx" disabled /><Button variant="outline" size="icon"><Copy className="h-4 w-4" /></Button></div></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Enable API</p><p className="text-sm text-gray-500">Allow API access</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Rate Limiting</p><p className="text-sm text-gray-500">1000 requests/min</p></div><Switch defaultChecked /></div>
+                      <Button variant="outline" className="w-full"><RefreshCw className="h-4 w-4 mr-2" />Regenerate API Key</Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Advanced Settings */}
+              <TabsContent value="advanced">
+                <div className="grid grid-cols-2 gap-6">
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Testing & Debug</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Debug Mode</p><p className="text-sm text-gray-500">Log all delivery attempts</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Test Mode</p><p className="text-sm text-gray-500">Send only to test users</p></div><Switch /></div>
+                      <div><Label>Test Email</Label><Input placeholder="test@company.com" className="mt-1" /></div>
+                      <Button variant="outline" className="w-full"><TestTube className="h-4 w-4 mr-2" />Send Test Notification</Button>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>AI Features</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">A/B Testing</p><p className="text-sm text-gray-500">Enable split testing</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Personalization</p><p className="text-sm text-gray-500">AI-powered content</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Smart Segments</p><p className="text-sm text-gray-500">Auto-segment users</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Churn Prediction</p><p className="text-sm text-gray-500">Predict user churn</p></div><Switch /></div>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Data Retention</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div><Label>Notification History</Label><Select defaultValue="90"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="30">30 days</SelectItem><SelectItem value="60">60 days</SelectItem><SelectItem value="90">90 days</SelectItem><SelectItem value="365">1 year</SelectItem></SelectContent></Select></div>
+                      <div><Label>Analytics Data</Label><Select defaultValue="365"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="90">90 days</SelectItem><SelectItem value="180">180 days</SelectItem><SelectItem value="365">1 year</SelectItem><SelectItem value="forever">Forever</SelectItem></SelectContent></Select></div>
+                      <Button variant="outline" className="w-full text-red-600"><Trash2 className="h-4 w-4 mr-2" />Purge Old Data</Button>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Security</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">IP Allowlist</p><p className="text-sm text-gray-500">Restrict API access</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Webhook Signing</p><p className="text-sm text-gray-500">Sign all webhooks</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Audit Logging</p><p className="text-sm text-gray-500">Log all actions</p></div><Switch defaultChecked /></div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
 
