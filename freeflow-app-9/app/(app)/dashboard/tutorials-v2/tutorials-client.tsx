@@ -12,7 +12,11 @@ import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useTutorials, Tutorial, TutorialStats } from '@/lib/hooks/use-tutorials'
 import { createTutorial, deleteTutorial, publishTutorial, archiveTutorial, enrollInTutorial } from '@/app/actions/tutorials'
-import { Search, Play, BookOpen, Clock, Users, Star, Award, CheckCircle, Lock, PlayCircle, FileText, Video, Code, MessageSquare, Bookmark, BookmarkCheck, ChevronRight, Trophy, Target, TrendingUp, BarChart3, GraduationCap, Zap, Filter, Grid3X3, List, Heart, Share2, Download, Plus, ArrowRight, Circle, Check } from 'lucide-react'
+import { Search, Play, BookOpen, Clock, Users, Star, Award, CheckCircle, Lock, PlayCircle, FileText, Video, Code, MessageSquare, Bookmark, BookmarkCheck, ChevronRight, Trophy, Target, TrendingUp, BarChart3, GraduationCap, Zap, Filter, Grid3X3, List, Heart, Share2, Download, Plus, ArrowRight, Circle, Check, Settings, Bell, CreditCard, Shield, Palette, Globe, Flame, Medal, Crown, Sparkles, Calendar, Mail, Smartphone, Monitor, Volume2, VolumeX, Eye, EyeOff, Moon, Sun, MoreHorizontal, Trash2, Edit, RefreshCw } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DialogFooter } from '@/components/ui/dialog'
 
 // Pluralsight/Udemy Level Types
 interface Course {
@@ -134,6 +138,46 @@ interface Review {
   content: string
   helpful: number
   date: string
+}
+
+interface Achievement {
+  id: string
+  name: string
+  description: string
+  icon: string
+  progress: number
+  maxProgress: number
+  unlockedAt?: string
+  category: 'learning' | 'social' | 'streak' | 'milestone'
+  points: number
+}
+
+interface Subscription {
+  id: string
+  name: string
+  price: number
+  interval: 'monthly' | 'yearly'
+  features: string[]
+  isCurrent: boolean
+  coursesIncluded: number | 'unlimited'
+}
+
+interface LearningGoal {
+  id: string
+  name: string
+  targetHours: number
+  completedHours: number
+  deadline: string
+  status: 'on_track' | 'behind' | 'completed'
+}
+
+interface LearningNotification {
+  id: string
+  type: 'course_update' | 'reminder' | 'achievement' | 'promotion' | 'instructor'
+  title: string
+  message: string
+  isRead: boolean
+  createdAt: string
 }
 
 type CourseLevel = 'beginner' | 'intermediate' | 'advanced' | 'all-levels'
@@ -315,6 +359,34 @@ const mockReviews: Review[] = [
   { id: 'r-2', courseId: 'c-1', user: { name: 'Emily S.', avatar: 'ES' }, rating: 5, title: 'Comprehensive and practical', content: 'Loved the hands-on projects. I built 5 real apps during this course!', helpful: 189, date: '2024-01-12' },
 ]
 
+const mockAchievements: Achievement[] = [
+  { id: 'a-1', name: 'Fast Learner', description: 'Complete 5 courses in a month', icon: 'zap', progress: 3, maxProgress: 5, category: 'learning', points: 500 },
+  { id: 'a-2', name: 'First Steps', description: 'Enroll in your first course', icon: 'trophy', progress: 1, maxProgress: 1, unlockedAt: '2024-01-10', category: 'milestone', points: 100 },
+  { id: 'a-3', name: 'Study Streak', description: 'Learn for 7 days in a row', icon: 'flame', progress: 5, maxProgress: 7, category: 'streak', points: 250 },
+  { id: 'a-4', name: 'Knowledge Sharer', description: 'Leave 10 helpful reviews', icon: 'heart', progress: 4, maxProgress: 10, category: 'social', points: 300 },
+  { id: 'a-5', name: 'Course Completionist', description: 'Complete your first course', icon: 'award', progress: 1, maxProgress: 1, unlockedAt: '2024-01-15', category: 'milestone', points: 200 },
+  { id: 'a-6', name: 'Deep Dive', description: 'Watch 100 hours of content', icon: 'clock', progress: 68, maxProgress: 100, category: 'learning', points: 1000 },
+]
+
+const mockSubscriptions: Subscription[] = [
+  { id: 'sub-1', name: 'Free', price: 0, interval: 'monthly', features: ['Access to free courses', 'Community forums', 'Basic certificates'], isCurrent: false, coursesIncluded: 10 },
+  { id: 'sub-2', name: 'Pro', price: 29.99, interval: 'monthly', features: ['Unlimited course access', 'Offline downloads', 'Priority support', 'Premium certificates', 'Exercise files'], isCurrent: true, coursesIncluded: 'unlimited' },
+  { id: 'sub-3', name: 'Team', price: 49.99, interval: 'monthly', features: ['Everything in Pro', 'Team analytics', 'Admin dashboard', 'Custom learning paths', 'SSO integration'], isCurrent: false, coursesIncluded: 'unlimited' },
+]
+
+const mockGoals: LearningGoal[] = [
+  { id: 'g-1', name: 'Complete React Course', targetHours: 42, completedHours: 18, deadline: '2024-02-28', status: 'on_track' },
+  { id: 'g-2', name: 'Learn Python Basics', targetHours: 20, completedHours: 5, deadline: '2024-03-15', status: 'behind' },
+  { id: 'g-3', name: 'UX Design Certification', targetHours: 28, completedHours: 28, deadline: '2024-01-20', status: 'completed' },
+]
+
+const mockNotifications: LearningNotification[] = [
+  { id: 'n-1', type: 'course_update', title: 'New Content Available', message: 'React Developer Course has 3 new lessons!', isRead: false, createdAt: '2024-01-22T10:00:00Z' },
+  { id: 'n-2', type: 'achievement', title: 'Achievement Unlocked!', message: 'You earned the "First Steps" badge!', isRead: true, createdAt: '2024-01-20T15:30:00Z' },
+  { id: 'n-3', type: 'reminder', title: 'Learning Reminder', message: 'You haven\'t learned today. Keep your streak!', isRead: false, createdAt: '2024-01-22T09:00:00Z' },
+  { id: 'n-4', type: 'promotion', title: 'Flash Sale!', message: 'All courses 85% off for the next 24 hours', isRead: false, createdAt: '2024-01-21T12:00:00Z' },
+]
+
 const categories: { id: CourseCategory; name: string; icon: React.ReactNode; count: number }[] = [
   { id: 'development', name: 'Development', icon: <Code className="w-4 h-4" />, count: 156 },
   { id: 'design', name: 'Design', icon: <BookOpen className="w-4 h-4" />, count: 89 },
@@ -333,6 +405,9 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
   const [activeChapter, setActiveChapter] = useState<string | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
+  const [showGoalDialog, setShowGoalDialog] = useState(false)
+  const [showAchievementDialog, setShowAchievementDialog] = useState(false)
 
   const filteredCourses = useMemo(() => {
     let filtered = [...mockCourses]
@@ -504,6 +579,10 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
               <TabsTrigger value="my-learning" className="gap-2"><Play className="w-4 h-4" />My Learning</TabsTrigger>
               <TabsTrigger value="paths" className="gap-2"><Target className="w-4 h-4" />Learning Paths</TabsTrigger>
               <TabsTrigger value="certificates" className="gap-2"><Trophy className="w-4 h-4" />Certificates</TabsTrigger>
+              <TabsTrigger value="achievements" className="gap-2"><Medal className="w-4 h-4" />Achievements</TabsTrigger>
+              <TabsTrigger value="goals" className="gap-2"><Target className="w-4 h-4" />Goals</TabsTrigger>
+              <TabsTrigger value="notifications" className="gap-2"><Bell className="w-4 h-4" />Notifications</TabsTrigger>
+              <TabsTrigger value="settings" className="gap-2"><Settings className="w-4 h-4" />Settings</TabsTrigger>
             </TabsList>
 
             <div className="flex items-center gap-3">
@@ -618,6 +697,225 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
           {/* Certificates Tab */}
           <TabsContent value="certificates" className="space-y-6">
             <Card><CardContent className="p-12 text-center"><Trophy className="w-12 h-12 text-yellow-400 mx-auto mb-4" /><h3 className="text-lg font-semibold text-gray-900 mb-2">Your Certificates</h3><p className="text-gray-500 mb-4">Complete courses to earn certificates</p><Button className="bg-rose-600" onClick={() => setActiveTab('browse')}>Find Courses</Button></CardContent></Card>
+          </TabsContent>
+
+          {/* Achievements Tab */}
+          <TabsContent value="achievements" className="space-y-6">
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-rose-600">{mockAchievements.filter(a => a.unlockedAt).length}</div><div className="text-sm text-gray-500">Unlocked</div></CardContent></Card>
+              <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-amber-600">{mockAchievements.reduce((acc, a) => acc + (a.unlockedAt ? a.points : 0), 0)}</div><div className="text-sm text-gray-500">Total Points</div></CardContent></Card>
+              <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-blue-600">{mockAchievements.filter(a => !a.unlockedAt).length}</div><div className="text-sm text-gray-500">In Progress</div></CardContent></Card>
+              <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-green-600">5</div><div className="text-sm text-gray-500">Day Streak</div></CardContent></Card>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {mockAchievements.map(achievement => (
+                <Card key={achievement.id} className={`${achievement.unlockedAt ? 'border-amber-300 bg-amber-50' : 'opacity-75'}`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center ${achievement.unlockedAt ? 'bg-amber-100' : 'bg-gray-100'}`}>
+                        {achievement.icon === 'zap' && <Zap className={`w-6 h-6 ${achievement.unlockedAt ? 'text-amber-600' : 'text-gray-400'}`} />}
+                        {achievement.icon === 'trophy' && <Trophy className={`w-6 h-6 ${achievement.unlockedAt ? 'text-amber-600' : 'text-gray-400'}`} />}
+                        {achievement.icon === 'flame' && <Flame className={`w-6 h-6 ${achievement.unlockedAt ? 'text-amber-600' : 'text-gray-400'}`} />}
+                        {achievement.icon === 'heart' && <Heart className={`w-6 h-6 ${achievement.unlockedAt ? 'text-amber-600' : 'text-gray-400'}`} />}
+                        {achievement.icon === 'award' && <Award className={`w-6 h-6 ${achievement.unlockedAt ? 'text-amber-600' : 'text-gray-400'}`} />}
+                        {achievement.icon === 'clock' && <Clock className={`w-6 h-6 ${achievement.unlockedAt ? 'text-amber-600' : 'text-gray-400'}`} />}
+                      </div>
+                      <div>
+                        <h4 className="font-semibold">{achievement.name}</h4>
+                        <Badge variant="outline" className="text-xs">{achievement.points} pts</Badge>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-2">{achievement.description}</p>
+                    {!achievement.unlockedAt && (
+                      <div className="mt-2">
+                        <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                          <span>Progress</span><span>{achievement.progress}/{achievement.maxProgress}</span>
+                        </div>
+                        <Progress value={(achievement.progress / achievement.maxProgress) * 100} className="h-2" />
+                      </div>
+                    )}
+                    {achievement.unlockedAt && (
+                      <div className="flex items-center gap-1 text-xs text-amber-600 mt-2"><CheckCircle className="w-3 h-3" />Unlocked {achievement.unlockedAt}</div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Goals Tab */}
+          <TabsContent value="goals" className="space-y-6">
+            <div className="flex justify-end mb-4">
+              <Button className="bg-rose-600" onClick={() => setShowGoalDialog(true)}><Plus className="w-4 h-4 mr-2" />Set New Goal</Button>
+            </div>
+            <div className="space-y-4">
+              {mockGoals.map(goal => (
+                <Card key={goal.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${goal.status === 'completed' ? 'bg-green-100' : goal.status === 'behind' ? 'bg-red-100' : 'bg-blue-100'}`}>
+                          <Target className={`w-5 h-5 ${goal.status === 'completed' ? 'text-green-600' : goal.status === 'behind' ? 'text-red-600' : 'text-blue-600'}`} />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold">{goal.name}</h4>
+                          <p className="text-sm text-gray-500">Due: {goal.deadline}</p>
+                        </div>
+                      </div>
+                      <Badge className={goal.status === 'completed' ? 'bg-green-100 text-green-700' : goal.status === 'behind' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}>{goal.status.replace('_', ' ')}</Badge>
+                    </div>
+                    <div className="mt-3">
+                      <div className="flex items-center justify-between text-sm text-gray-500 mb-1">
+                        <span>{goal.completedHours}h of {goal.targetHours}h</span><span>{Math.round((goal.completedHours / goal.targetHours) * 100)}%</span>
+                      </div>
+                      <Progress value={(goal.completedHours / goal.targetHours) * 100} className="h-2" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Notifications Tab */}
+          <TabsContent value="notifications" className="space-y-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Recent Notifications</CardTitle>
+                <Button variant="outline" size="sm">Mark All Read</Button>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="divide-y">
+                  {mockNotifications.map(notification => (
+                    <div key={notification.id} className={`flex items-start gap-4 p-4 ${!notification.isRead ? 'bg-blue-50' : ''}`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${notification.type === 'achievement' ? 'bg-amber-100' : notification.type === 'promotion' ? 'bg-green-100' : 'bg-blue-100'}`}>
+                        {notification.type === 'course_update' && <RefreshCw className="w-5 h-5 text-blue-600" />}
+                        {notification.type === 'achievement' && <Trophy className="w-5 h-5 text-amber-600" />}
+                        {notification.type === 'reminder' && <Bell className="w-5 h-5 text-blue-600" />}
+                        {notification.type === 'promotion' && <Sparkles className="w-5 h-5 text-green-600" />}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2"><h4 className="font-semibold">{notification.title}</h4>{!notification.isRead && <span className="w-2 h-2 bg-blue-500 rounded-full" />}</div>
+                        <p className="text-sm text-gray-500">{notification.message}</p>
+                        <p className="text-xs text-gray-400 mt-1">{notification.createdAt}</p>
+                      </div>
+                      <Button variant="ghost" size="icon"><MoreHorizontal className="w-4 h-4" /></Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <Tabs value={settingsTab} onValueChange={setSettingsTab}>
+              <TabsList className="mb-4">
+                <TabsTrigger value="general"><Settings className="w-4 h-4 mr-2" />General</TabsTrigger>
+                <TabsTrigger value="notifications"><Bell className="w-4 h-4 mr-2" />Notifications</TabsTrigger>
+                <TabsTrigger value="subscription"><CreditCard className="w-4 h-4 mr-2" />Subscription</TabsTrigger>
+                <TabsTrigger value="privacy"><Shield className="w-4 h-4 mr-2" />Privacy</TabsTrigger>
+                <TabsTrigger value="appearance"><Palette className="w-4 h-4 mr-2" />Appearance</TabsTrigger>
+                <TabsTrigger value="learning"><GraduationCap className="w-4 h-4 mr-2" />Learning</TabsTrigger>
+              </TabsList>
+
+              {/* General Settings */}
+              <TabsContent value="general">
+                <div className="grid grid-cols-2 gap-6">
+                  <Card><CardHeader><CardTitle>Profile</CardTitle></CardHeader><CardContent className="space-y-4">
+                    <div className="flex items-center gap-4"><Avatar className="w-16 h-16"><AvatarFallback className="text-xl">JD</AvatarFallback></Avatar><Button variant="outline">Change Photo</Button></div>
+                    <div><Label>Display Name</Label><Input defaultValue="John Doe" className="mt-1" /></div>
+                    <div><Label>Email</Label><Input defaultValue="john@example.com" className="mt-1" /></div>
+                    <div><Label>Bio</Label><Input defaultValue="Passionate learner" className="mt-1" /></div>
+                  </CardContent></Card>
+                  <Card><CardHeader><CardTitle>Preferences</CardTitle></CardHeader><CardContent className="space-y-4">
+                    <div><Label>Language</Label><Select defaultValue="en"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="en">English</SelectItem><SelectItem value="es">Spanish</SelectItem><SelectItem value="fr">French</SelectItem></SelectContent></Select></div>
+                    <div><Label>Timezone</Label><Select defaultValue="utc"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="utc">UTC</SelectItem><SelectItem value="est">Eastern Time</SelectItem><SelectItem value="pst">Pacific Time</SelectItem></SelectContent></Select></div>
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Show Profile Publicly</p><p className="text-sm text-gray-500">Others can view your profile</p></div><Switch defaultChecked /></div>
+                  </CardContent></Card>
+                </div>
+              </TabsContent>
+
+              {/* Notifications Settings */}
+              <TabsContent value="notifications">
+                <div className="grid grid-cols-2 gap-6">
+                  <Card><CardHeader><CardTitle>Email Notifications</CardTitle></CardHeader><CardContent className="space-y-4">
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Course Updates</p><p className="text-sm text-gray-500">New content in enrolled courses</p></div><Switch defaultChecked /></div>
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Weekly Digest</p><p className="text-sm text-gray-500">Summary of your learning</p></div><Switch defaultChecked /></div>
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Promotions</p><p className="text-sm text-gray-500">Sales and special offers</p></div><Switch /></div>
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Instructor Messages</p><p className="text-sm text-gray-500">Messages from instructors</p></div><Switch defaultChecked /></div>
+                  </CardContent></Card>
+                  <Card><CardHeader><CardTitle>Push Notifications</CardTitle></CardHeader><CardContent className="space-y-4">
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Learning Reminders</p><p className="text-sm text-gray-500">Daily study reminders</p></div><Switch defaultChecked /></div>
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Achievement Alerts</p><p className="text-sm text-gray-500">When you earn badges</p></div><Switch defaultChecked /></div>
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Live Sessions</p><p className="text-sm text-gray-500">Upcoming live events</p></div><Switch defaultChecked /></div>
+                  </CardContent></Card>
+                </div>
+              </TabsContent>
+
+              {/* Subscription Settings */}
+              <TabsContent value="subscription">
+                <Card><CardHeader><CardTitle>Your Plan</CardTitle></CardHeader><CardContent>
+                  <div className="grid grid-cols-3 gap-4">
+                    {mockSubscriptions.map(sub => (
+                      <div key={sub.id} className={`p-4 border rounded-lg ${sub.isCurrent ? 'border-rose-500 bg-rose-50' : ''}`}>
+                        <div className="flex items-center justify-between mb-2"><h4 className="font-semibold text-lg">{sub.name}</h4>{sub.isCurrent && <Badge className="bg-rose-600">Current</Badge>}</div>
+                        <div className="text-2xl font-bold mb-2">${sub.price}<span className="text-sm text-gray-500 font-normal">/{sub.interval}</span></div>
+                        <p className="text-sm text-gray-500 mb-3">{sub.coursesIncluded === 'unlimited' ? 'Unlimited courses' : `${sub.coursesIncluded} courses`}</p>
+                        <ul className="space-y-1 mb-4">{sub.features.map((f, i) => (<li key={i} className="text-sm flex items-center gap-2"><Check className="w-4 h-4 text-green-500" />{f}</li>))}</ul>
+                        {!sub.isCurrent && <Button variant="outline" className="w-full">Upgrade</Button>}
+                      </div>
+                    ))}
+                  </div>
+                </CardContent></Card>
+              </TabsContent>
+
+              {/* Privacy Settings */}
+              <TabsContent value="privacy">
+                <div className="grid grid-cols-2 gap-6">
+                  <Card><CardHeader><CardTitle>Profile Privacy</CardTitle></CardHeader><CardContent className="space-y-4">
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Show Progress</p><p className="text-sm text-gray-500">Display learning progress publicly</p></div><Switch /></div>
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Show Certificates</p><p className="text-sm text-gray-500">Display earned certificates</p></div><Switch defaultChecked /></div>
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Show Achievements</p><p className="text-sm text-gray-500">Display badges on profile</p></div><Switch defaultChecked /></div>
+                  </CardContent></Card>
+                  <Card><CardHeader><CardTitle>Data & Security</CardTitle></CardHeader><CardContent className="space-y-4">
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Two-Factor Auth</p><p className="text-sm text-gray-500">Extra security for login</p></div><Switch /></div>
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Login Alerts</p><p className="text-sm text-gray-500">Email on new login</p></div><Switch defaultChecked /></div>
+                    <Button variant="outline" className="w-full"><Download className="w-4 h-4 mr-2" />Download My Data</Button>
+                  </CardContent></Card>
+                </div>
+              </TabsContent>
+
+              {/* Appearance Settings */}
+              <TabsContent value="appearance">
+                <div className="grid grid-cols-2 gap-6">
+                  <Card><CardHeader><CardTitle>Theme</CardTitle></CardHeader><CardContent className="space-y-4">
+                    <div><Label>Color Theme</Label><Select defaultValue="system"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="light">Light</SelectItem><SelectItem value="dark">Dark</SelectItem><SelectItem value="system">System</SelectItem></SelectContent></Select></div>
+                    <div><Label>Accent Color</Label><div className="flex gap-2 mt-2">{['#F43F5E', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'].map(c => (<button key={c} className="w-8 h-8 rounded-full border-2 border-white shadow-md" style={{ backgroundColor: c }} />))}</div></div>
+                  </CardContent></Card>
+                  <Card><CardHeader><CardTitle>Display</CardTitle></CardHeader><CardContent className="space-y-4">
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Compact Mode</p><p className="text-sm text-gray-500">Reduce spacing</p></div><Switch /></div>
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Animations</p><p className="text-sm text-gray-500">Enable animations</p></div><Switch defaultChecked /></div>
+                    <div><Label>Font Size</Label><Select defaultValue="medium"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="small">Small</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="large">Large</SelectItem></SelectContent></Select></div>
+                  </CardContent></Card>
+                </div>
+              </TabsContent>
+
+              {/* Learning Settings */}
+              <TabsContent value="learning">
+                <div className="grid grid-cols-2 gap-6">
+                  <Card><CardHeader><CardTitle>Video Preferences</CardTitle></CardHeader><CardContent className="space-y-4">
+                    <div><Label>Default Quality</Label><Select defaultValue="auto"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="auto">Auto</SelectItem><SelectItem value="1080p">1080p</SelectItem><SelectItem value="720p">720p</SelectItem><SelectItem value="480p">480p</SelectItem></SelectContent></Select></div>
+                    <div><Label>Playback Speed</Label><Select defaultValue="1x"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="0.5x">0.5x</SelectItem><SelectItem value="1x">1x</SelectItem><SelectItem value="1.5x">1.5x</SelectItem><SelectItem value="2x">2x</SelectItem></SelectContent></Select></div>
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Autoplay</p><p className="text-sm text-gray-500">Auto-play next lesson</p></div><Switch defaultChecked /></div>
+                  </CardContent></Card>
+                  <Card><CardHeader><CardTitle>Learning Goals</CardTitle></CardHeader><CardContent className="space-y-4">
+                    <div><Label>Daily Goal</Label><Select defaultValue="30"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="15">15 minutes</SelectItem><SelectItem value="30">30 minutes</SelectItem><SelectItem value="60">1 hour</SelectItem><SelectItem value="120">2 hours</SelectItem></SelectContent></Select></div>
+                    <div><Label>Reminder Time</Label><Input type="time" defaultValue="09:00" className="mt-1" /></div>
+                    <div className="flex items-center justify-between"><div><p className="font-medium">Weekend Reminders</p><p className="text-sm text-gray-500">Remind on weekends</p></div><Switch /></div>
+                  </CardContent></Card>
+                </div>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </div>
@@ -749,6 +1047,31 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
               </ScrollArea>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Goal Dialog */}
+      <Dialog open={showGoalDialog} onOpenChange={setShowGoalDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Set New Learning Goal</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-4">
+            <div><Label>Goal Name</Label><Input placeholder="Complete React Course" className="mt-1" /></div>
+            <div><Label>Target Hours</Label><Input type="number" placeholder="40" className="mt-1" /></div>
+            <div><Label>Deadline</Label><Input type="date" className="mt-1" /></div>
+            <div><Label>Related Course</Label>
+              <Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select a course" /></SelectTrigger><SelectContent>
+                {mockCourses.map(c => (<SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>))}
+              </SelectContent></Select>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-2"><Bell className="w-4 h-4 text-gray-500" /><span className="text-sm">Enable reminder notifications</span></div>
+              <Switch defaultChecked />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGoalDialog(false)}>Cancel</Button>
+            <Button className="bg-rose-600 hover:bg-rose-700">Create Goal</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
