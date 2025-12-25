@@ -6,10 +6,12 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
 import {
   Code,
   Key,
@@ -70,7 +72,30 @@ import {
   Braces,
   FileCode,
   Variable,
-  Webhook
+  Webhook,
+  FlaskConical,
+  ListChecks,
+  RotateCcw,
+  Sparkles,
+  Cog,
+  Bell,
+  Palette,
+  Languages,
+  ShieldCheck,
+  UserCog,
+  Wand2,
+  FileText,
+  Bug,
+  CheckSquare,
+  Square,
+  PlayCircle,
+  StopCircle,
+  FastForward,
+  Repeat,
+  Target,
+  Workflow,
+  Moon,
+  Sun
 } from 'lucide-react'
 
 // Types
@@ -154,19 +179,36 @@ interface Monitor {
   region: string
 }
 
-interface TestResult {
+interface TestSuite {
   id: string
   name: string
-  status: TestStatus
-  duration: number
-  assertions: number
+  description: string
+  tests: number
   passed: number
   failed: number
-  timestamp: string
+  skipped: number
+  duration: number
+  lastRun: string
+  status: TestStatus
   environment: Environment
+  coverage: number
 }
 
-interface Webhook {
+interface TestCase {
+  id: string
+  name: string
+  description: string
+  status: TestStatus
+  assertions: number
+  passedAssertions: number
+  duration: number
+  method: HttpMethod
+  endpoint: string
+  expectedStatus: number
+  actualStatus: number | null
+}
+
+interface WebhookConfig {
   id: string
   name: string
   url: string
@@ -175,6 +217,17 @@ interface Webhook {
   lastTriggered: string
   successRate: number
   totalDeliveries: number
+}
+
+interface MockServer {
+  id: string
+  name: string
+  url: string
+  collection: string
+  isActive: boolean
+  requests: number
+  latency: number
+  createdAt: string
 }
 
 // Mock Data
@@ -221,10 +274,33 @@ const mockMonitors: Monitor[] = [
   { id: '4', name: 'Analytics Service', endpoint: '/api/v1/analytics', status: 'down', uptime: 95.2, avgResponseTime: 0, lastCheck: '2024-01-15T12:25:00Z', interval: 300, alerts: 12, region: 'ap-southeast-1' }
 ]
 
-const mockWebhooks: Webhook[] = [
+const mockTestSuites: TestSuite[] = [
+  { id: '1', name: 'User API Tests', description: 'Complete user endpoint test suite', tests: 45, passed: 42, failed: 2, skipped: 1, duration: 12500, lastRun: '2024-01-15T10:30:00Z', status: 'passed', environment: 'staging', coverage: 92 },
+  { id: '2', name: 'Order Flow Tests', description: 'End-to-end order processing tests', tests: 28, passed: 28, failed: 0, skipped: 0, duration: 8200, lastRun: '2024-01-15T09:00:00Z', status: 'passed', environment: 'staging', coverage: 88 },
+  { id: '3', name: 'Authentication Tests', description: 'OAuth and JWT validation tests', tests: 18, passed: 15, failed: 3, skipped: 0, duration: 4500, lastRun: '2024-01-15T08:45:00Z', status: 'failed', environment: 'development', coverage: 78 },
+  { id: '4', name: 'Integration Tests', description: 'Third-party service integration', tests: 32, passed: 30, failed: 1, skipped: 1, duration: 25000, lastRun: '2024-01-14T22:00:00Z', status: 'passed', environment: 'production', coverage: 85 },
+  { id: '5', name: 'Performance Tests', description: 'Load and stress testing suite', tests: 12, passed: 10, failed: 2, skipped: 0, duration: 180000, lastRun: '2024-01-14T02:00:00Z', status: 'failed', environment: 'staging', coverage: 65 }
+]
+
+const mockTestCases: TestCase[] = [
+  { id: '1', name: 'Get all users returns 200', description: 'Verify GET /users returns success', status: 'passed', assertions: 5, passedAssertions: 5, duration: 125, method: 'GET', endpoint: '/api/v1/users', expectedStatus: 200, actualStatus: 200 },
+  { id: '2', name: 'Create user with valid data', description: 'POST /users creates new user', status: 'passed', assertions: 8, passedAssertions: 8, duration: 230, method: 'POST', endpoint: '/api/v1/users', expectedStatus: 201, actualStatus: 201 },
+  { id: '3', name: 'Update user returns updated data', description: 'PUT /users/:id updates user', status: 'passed', assertions: 6, passedAssertions: 6, duration: 180, method: 'PUT', endpoint: '/api/v1/users/:id', expectedStatus: 200, actualStatus: 200 },
+  { id: '4', name: 'Delete user returns 204', description: 'DELETE /users/:id soft deletes', status: 'passed', assertions: 3, passedAssertions: 3, duration: 95, method: 'DELETE', endpoint: '/api/v1/users/:id', expectedStatus: 204, actualStatus: 204 },
+  { id: '5', name: 'Invalid auth returns 401', description: 'Verify auth error handling', status: 'failed', assertions: 4, passedAssertions: 2, duration: 45, method: 'GET', endpoint: '/api/v1/users', expectedStatus: 401, actualStatus: 403 },
+  { id: '6', name: 'Rate limit returns 429', description: 'Verify rate limiting works', status: 'running', assertions: 3, passedAssertions: 0, duration: 0, method: 'GET', endpoint: '/api/v1/users', expectedStatus: 429, actualStatus: null }
+]
+
+const mockWebhooks: WebhookConfig[] = [
   { id: '1', name: 'Order Notifications', url: 'https://webhook.example.com/orders', events: ['order.created', 'order.updated', 'order.completed'], isActive: true, lastTriggered: '2024-01-15T12:28:00Z', successRate: 99.5, totalDeliveries: 45000 },
   { id: '2', name: 'User Events', url: 'https://webhook.example.com/users', events: ['user.created', 'user.updated'], isActive: true, lastTriggered: '2024-01-15T12:30:00Z', successRate: 98.2, totalDeliveries: 12000 },
   { id: '3', name: 'Payment Callbacks', url: 'https://payments.example.com/callback', events: ['payment.success', 'payment.failed'], isActive: false, lastTriggered: '2024-01-10T14:00:00Z', successRate: 95.0, totalDeliveries: 8500 }
+]
+
+const mockMockServers: MockServer[] = [
+  { id: '1', name: 'User API Mock', url: 'https://mock.api.example.com/users', collection: 'User Management', isActive: true, requests: 15000, latency: 50, createdAt: '2024-01-01T00:00:00Z' },
+  { id: '2', name: 'Payment Mock', url: 'https://mock.api.example.com/payments', collection: 'E-Commerce API', isActive: true, requests: 8500, latency: 75, createdAt: '2024-01-05T00:00:00Z' },
+  { id: '3', name: 'Auth Mock', url: 'https://mock.api.example.com/auth', collection: 'Authentication Flow', isActive: false, requests: 2000, latency: 25, createdAt: '2024-01-10T00:00:00Z' }
 ]
 
 export default function ApiClient() {
@@ -233,12 +309,32 @@ export default function ApiClient() {
   const [collections] = useState<Collection[]>(mockCollections)
   const [history] = useState<RequestHistory[]>(mockHistory)
   const [monitors] = useState<Monitor[]>(mockMonitors)
-  const [webhooks] = useState<Webhook[]>(mockWebhooks)
+  const [testSuites] = useState<TestSuite[]>(mockTestSuites)
+  const [testCases] = useState<TestCase[]>(mockTestCases)
+  const [webhooks] = useState<WebhookConfig[]>(mockWebhooks)
+  const [mockServers] = useState<MockServer[]>(mockMockServers)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedEndpoint, setSelectedEndpoint] = useState<ApiEndpoint | null>(null)
-  const [selectedKey, setSelectedKey] = useState<ApiKey | null>(null)
+  const [selectedTestSuite, setSelectedTestSuite] = useState<TestSuite | null>(null)
   const [methodFilter, setMethodFilter] = useState<HttpMethod | 'all'>('all')
   const [showApiKey, setShowApiKey] = useState<Record<string, boolean>>({})
+  const [runningTests, setRunningTests] = useState(false)
+
+  // Settings state
+  const [settings, setSettings] = useState({
+    autoSave: true,
+    sslVerification: true,
+    followRedirects: true,
+    timeout: 30000,
+    retryOnFailure: true,
+    maxRetries: 3,
+    notifications: true,
+    darkMode: false,
+    codeGenLanguage: 'javascript',
+    defaultEnvironment: 'development',
+    proxyEnabled: false,
+    proxyUrl: ''
+  })
 
   // Stats
   const stats = useMemo(() => {
@@ -250,8 +346,10 @@ export default function ApiClient() {
     const activeKeys = apiKeys.filter(k => k.status === 'active').length
     const totalMonitors = monitors.length
     const healthyMonitors = monitors.filter(m => m.status === 'healthy').length
-    return { totalRequests, avgLatency, activeEndpoints, avgErrorRate, totalKeys, activeKeys, totalMonitors, healthyMonitors }
-  }, [endpoints, apiKeys, monitors])
+    const totalTests = testSuites.reduce((sum, s) => sum + s.tests, 0)
+    const passedTests = testSuites.reduce((sum, s) => sum + s.passed, 0)
+    return { totalRequests, avgLatency, activeEndpoints, avgErrorRate, totalKeys, activeKeys, totalMonitors, healthyMonitors, totalTests, passedTests }
+  }, [endpoints, apiKeys, monitors, testSuites])
 
   // Filtered endpoints
   const filteredEndpoints = useMemo(() => {
@@ -317,6 +415,16 @@ export default function ApiClient() {
     return colors[status]
   }
 
+  const getTestStatusColor = (status: TestStatus) => {
+    const colors: Record<TestStatus, string> = {
+      passed: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      failed: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+      skipped: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+      running: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+    }
+    return colors[status]
+  }
+
   const getHttpStatusColor = (status: number) => {
     if (status >= 200 && status < 300) return 'text-green-600'
     if (status >= 300 && status < 400) return 'text-blue-600'
@@ -357,15 +465,21 @@ export default function ApiClient() {
     return `${diffDays}d ago`
   }
 
+  const formatDuration = (ms: number) => {
+    if (ms >= 60000) return `${(ms / 60000).toFixed(1)}m`
+    if (ms >= 1000) return `${(ms / 1000).toFixed(1)}s`
+    return `${ms}ms`
+  }
+
   const statCards = [
-    { label: 'Total Requests', value: formatNumber(stats.totalRequests), change: 42.3, icon: Zap, color: 'from-indigo-500 to-blue-500' },
-    { label: 'Avg Latency', value: formatLatency(stats.avgLatency), change: -18.5, icon: Clock, color: 'from-green-500 to-emerald-500' },
-    { label: 'Active Endpoints', value: stats.activeEndpoints.toString(), change: 15.7, icon: Server, color: 'from-purple-500 to-pink-500' },
-    { label: 'Error Rate', value: `${stats.avgErrorRate.toFixed(2)}%`, change: -8.2, icon: AlertTriangle, color: 'from-red-500 to-orange-500' },
-    { label: 'API Keys', value: `${stats.activeKeys}/${stats.totalKeys}`, change: 5.0, icon: Key, color: 'from-yellow-500 to-amber-500' },
-    { label: 'Uptime', value: '99.98%', change: 0.02, icon: Activity, color: 'from-cyan-500 to-teal-500' },
-    { label: 'Monitors', value: `${stats.healthyMonitors}/${stats.totalMonitors}`, change: 0, icon: Gauge, color: 'from-blue-500 to-indigo-500' },
-    { label: 'Webhooks', value: webhooks.filter(w => w.isActive).length.toString(), change: 12.0, icon: Webhook, color: 'from-pink-500 to-rose-500' }
+    { label: 'Total Requests', value: formatNumber(stats.totalRequests), change: 42.3, icon: Zap, gradient: 'from-indigo-500 to-blue-500' },
+    { label: 'Avg Latency', value: formatLatency(stats.avgLatency), change: -18.5, icon: Clock, gradient: 'from-green-500 to-emerald-500' },
+    { label: 'Active Endpoints', value: stats.activeEndpoints.toString(), change: 15.7, icon: Server, gradient: 'from-purple-500 to-pink-500' },
+    { label: 'Error Rate', value: `${stats.avgErrorRate.toFixed(2)}%`, change: -8.2, icon: AlertTriangle, gradient: 'from-red-500 to-orange-500' },
+    { label: 'API Keys', value: `${stats.activeKeys}/${stats.totalKeys}`, change: 5.0, icon: Key, gradient: 'from-yellow-500 to-amber-500' },
+    { label: 'Test Pass Rate', value: `${Math.round((stats.passedTests / stats.totalTests) * 100)}%`, change: 2.5, icon: TestTube, gradient: 'from-cyan-500 to-teal-500' },
+    { label: 'Monitors', value: `${stats.healthyMonitors}/${stats.totalMonitors}`, change: 0, icon: Gauge, gradient: 'from-blue-500 to-indigo-500' },
+    { label: 'Webhooks', value: webhooks.filter(w => w.isActive).length.toString(), change: 12.0, icon: Webhook, gradient: 'from-pink-500 to-rose-500' }
   ]
 
   return (
@@ -408,7 +522,7 @@ export default function ApiClient() {
             <Card key={index} className="border-0 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.gradient} flex items-center justify-center`}>
                     <stat.icon className="w-4 h-4 text-white" />
                   </div>
                   <div className={`flex items-center gap-1 text-xs ${stat.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -449,6 +563,14 @@ export default function ApiClient() {
             <TabsTrigger value="webhooks" className="flex items-center gap-2">
               <Webhook className="w-4 h-4" />
               Webhooks
+            </TabsTrigger>
+            <TabsTrigger value="tests" className="flex items-center gap-2">
+              <TestTube className="w-4 h-4" />
+              Tests
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -849,6 +971,404 @@ export default function ApiClient() {
               ))}
             </div>
           </TabsContent>
+
+          {/* Tests Tab */}
+          <TabsContent value="tests" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Test Suites</h3>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" onClick={() => setRunningTests(!runningTests)}>
+                  {runningTests ? (
+                    <>
+                      <StopCircle className="w-4 h-4 mr-2" />
+                      Stop Tests
+                    </>
+                  ) : (
+                    <>
+                      <PlayCircle className="w-4 h-4 mr-2" />
+                      Run All Tests
+                    </>
+                  )}
+                </Button>
+                <Button>
+                  <Plus className="w-4 h-4 mr-2" />
+                  New Test Suite
+                </Button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                {testSuites.map(suite => (
+                  <Card key={suite.id} className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedTestSuite(suite)}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                            suite.status === 'passed' ? 'bg-gradient-to-br from-green-500 to-emerald-500' :
+                            suite.status === 'failed' ? 'bg-gradient-to-br from-red-500 to-orange-500' :
+                            suite.status === 'running' ? 'bg-gradient-to-br from-blue-500 to-indigo-500' :
+                            'bg-gray-300'
+                          }`}>
+                            {suite.status === 'passed' && <CheckCircle className="w-5 h-5 text-white" />}
+                            {suite.status === 'failed' && <XCircle className="w-5 h-5 text-white" />}
+                            {suite.status === 'running' && <RefreshCw className="w-5 h-5 text-white animate-spin" />}
+                            {suite.status === 'skipped' && <Square className="w-5 h-5 text-white" />}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-gray-900 dark:text-white">{suite.name}</h4>
+                            <p className="text-xs text-gray-500">{suite.description}</p>
+                          </div>
+                        </div>
+                        <Badge className={getTestStatusColor(suite.status)}>{suite.status}</Badge>
+                      </div>
+
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                          <span>Test Progress</span>
+                          <span>{suite.passed}/{suite.tests} passed</span>
+                        </div>
+                        <Progress value={(suite.passed / suite.tests) * 100} className="h-2" />
+                      </div>
+
+                      <div className="grid grid-cols-5 gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-3">
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-gray-900 dark:text-white">{suite.tests}</p>
+                          <p className="text-xs text-gray-500">Total</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-green-600">{suite.passed}</p>
+                          <p className="text-xs text-gray-500">Passed</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-red-600">{suite.failed}</p>
+                          <p className="text-xs text-gray-500">Failed</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-gray-500">{suite.skipped}</p>
+                          <p className="text-xs text-gray-500">Skipped</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-lg font-bold text-gray-900 dark:text-white">{formatDuration(suite.duration)}</p>
+                          <p className="text-xs text-gray-500">Duration</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <div className="flex items-center gap-2">
+                          <Badge className={getEnvironmentColor(suite.environment)}>{suite.environment}</Badge>
+                          <span>Coverage: {suite.coverage}%</span>
+                        </div>
+                        <span>Last run {formatTimeAgo(suite.lastRun)}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="space-y-6">
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FlaskConical className="w-5 h-5" />
+                      Test Runner
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <CheckCircle className="w-6 h-6 text-green-600 mx-auto mb-1" />
+                        <p className="text-2xl font-bold text-green-600">{stats.passedTests}</p>
+                        <p className="text-xs text-gray-500">Passed</p>
+                      </div>
+                      <div className="text-center p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <XCircle className="w-6 h-6 text-red-600 mx-auto mb-1" />
+                        <p className="text-2xl font-bold text-red-600">{stats.totalTests - stats.passedTests}</p>
+                        <p className="text-xs text-gray-500">Failed</p>
+                      </div>
+                    </div>
+                    <Button className="w-full" variant="outline">
+                      <Repeat className="w-4 h-4 mr-2" />
+                      Rerun Failed Tests
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <ListChecks className="w-5 h-5" />
+                      Recent Test Cases
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-64">
+                      <div className="space-y-2">
+                        {testCases.slice(0, 6).map(test => (
+                          <div key={test.id} className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
+                            {test.status === 'passed' && <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />}
+                            {test.status === 'failed' && <XCircle className="w-4 h-4 text-red-600 flex-shrink-0" />}
+                            {test.status === 'running' && <RefreshCw className="w-4 h-4 text-blue-600 animate-spin flex-shrink-0" />}
+                            {test.status === 'skipped' && <Square className="w-4 h-4 text-gray-400 flex-shrink-0" />}
+                            <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1">{test.name}</span>
+                            <span className="text-xs text-gray-500">{formatDuration(test.duration)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Server className="w-5 h-5" />
+                      Mock Servers
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {mockServers.map(server => (
+                      <div key={server.id} className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${server.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                          <span className="text-sm font-medium">{server.name}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">{formatNumber(server.requests)} req</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Cog className="w-5 h-5" />
+                    General Settings
+                  </CardTitle>
+                  <CardDescription>Configure your API client preferences</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">Auto Save</Label>
+                      <p className="text-xs text-gray-500">Automatically save request changes</p>
+                    </div>
+                    <Switch checked={settings.autoSave} onCheckedChange={(checked) => setSettings({ ...settings, autoSave: checked })} />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">SSL Verification</Label>
+                      <p className="text-xs text-gray-500">Verify SSL certificates</p>
+                    </div>
+                    <Switch checked={settings.sslVerification} onCheckedChange={(checked) => setSettings({ ...settings, sslVerification: checked })} />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">Follow Redirects</Label>
+                      <p className="text-xs text-gray-500">Automatically follow HTTP redirects</p>
+                    </div>
+                    <Switch checked={settings.followRedirects} onCheckedChange={(checked) => setSettings({ ...settings, followRedirects: checked })} />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">Retry on Failure</Label>
+                      <p className="text-xs text-gray-500">Retry failed requests automatically</p>
+                    </div>
+                    <Switch checked={settings.retryOnFailure} onCheckedChange={(checked) => setSettings({ ...settings, retryOnFailure: checked })} />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="font-medium">Request Timeout (ms)</Label>
+                    <Input type="number" value={settings.timeout} onChange={(e) => setSettings({ ...settings, timeout: parseInt(e.target.value) })} />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="font-medium">Max Retries</Label>
+                    <Input type="number" value={settings.maxRetries} onChange={(e) => setSettings({ ...settings, maxRetries: parseInt(e.target.value) })} />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Palette className="w-5 h-5" />
+                    Appearance & Preferences
+                  </CardTitle>
+                  <CardDescription>Customize your workspace</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {settings.darkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                      <div>
+                        <Label className="font-medium">Dark Mode</Label>
+                        <p className="text-xs text-gray-500">Toggle dark theme</p>
+                      </div>
+                    </div>
+                    <Switch checked={settings.darkMode} onCheckedChange={(checked) => setSettings({ ...settings, darkMode: checked })} />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Bell className="w-4 h-4" />
+                      <div>
+                        <Label className="font-medium">Notifications</Label>
+                        <p className="text-xs text-gray-500">Enable desktop notifications</p>
+                      </div>
+                    </div>
+                    <Switch checked={settings.notifications} onCheckedChange={(checked) => setSettings({ ...settings, notifications: checked })} />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="font-medium">Code Generation Language</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {['javascript', 'python', 'go', 'php', 'ruby', 'curl'].map(lang => (
+                        <Button
+                          key={lang}
+                          variant={settings.codeGenLanguage === lang ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setSettings({ ...settings, codeGenLanguage: lang })}
+                        >
+                          {lang.charAt(0).toUpperCase() + lang.slice(1)}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="font-medium">Default Environment</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {['development', 'staging', 'production'].map(env => (
+                        <Button
+                          key={env}
+                          variant={settings.defaultEnvironment === env ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setSettings({ ...settings, defaultEnvironment: env as Environment })}
+                          className={settings.defaultEnvironment !== env ? getEnvironmentColor(env as Environment) : ''}
+                        >
+                          {env.charAt(0).toUpperCase() + env.slice(1)}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Globe className="w-5 h-5" />
+                    Proxy Settings
+                  </CardTitle>
+                  <CardDescription>Configure proxy for API requests</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="font-medium">Enable Proxy</Label>
+                      <p className="text-xs text-gray-500">Route requests through proxy</p>
+                    </div>
+                    <Switch checked={settings.proxyEnabled} onCheckedChange={(checked) => setSettings({ ...settings, proxyEnabled: checked })} />
+                  </div>
+
+                  {settings.proxyEnabled && (
+                    <div className="space-y-2">
+                      <Label className="font-medium">Proxy URL</Label>
+                      <Input
+                        placeholder="http://proxy.example.com:8080"
+                        value={settings.proxyUrl}
+                        onChange={(e) => setSettings({ ...settings, proxyUrl: e.target.value })}
+                      />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5" />
+                    Security & Auth
+                  </CardTitle>
+                  <CardDescription>Manage authentication settings</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                      <Lock className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">OAuth 2.0</p>
+                      <p className="text-xs text-gray-500">Connected</p>
+                    </div>
+                    <Button variant="outline" size="sm">Configure</Button>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                      <Key className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">API Keys</p>
+                      <p className="text-xs text-gray-500">{apiKeys.filter(k => k.status === 'active').length} active</p>
+                    </div>
+                    <Button variant="outline" size="sm">Manage</Button>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                      <UserCog className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">Team Access</p>
+                      <p className="text-xs text-gray-500">5 members</p>
+                    </div>
+                    <Button variant="outline" size="sm">Invite</Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-sm lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Download className="w-5 h-5" />
+                    Export & Import
+                  </CardTitle>
+                  <CardDescription>Backup and restore your workspace</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                      <FileJson className="w-6 h-6" />
+                      <span>Export Collections</span>
+                    </Button>
+                    <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                      <Upload className="w-6 h-6" />
+                      <span>Import Collections</span>
+                    </Button>
+                    <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                      <Variable className="w-6 h-6" />
+                      <span>Export Environments</span>
+                    </Button>
+                    <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                      <FileText className="w-6 h-6" />
+                      <span>Generate Docs</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
         </Tabs>
 
         {/* Endpoint Detail Dialog */}
@@ -914,6 +1434,82 @@ export default function ApiClient() {
                     </Button>
                     <Button variant="outline">
                       <Code className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </ScrollArea>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Test Suite Detail Dialog */}
+        <Dialog open={!!selectedTestSuite} onOpenChange={() => setSelectedTestSuite(null)}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FlaskConical className="w-5 h-5" />
+                {selectedTestSuite?.name}
+              </DialogTitle>
+              <DialogDescription>{selectedTestSuite?.description}</DialogDescription>
+            </DialogHeader>
+            {selectedTestSuite && (
+              <ScrollArea className="max-h-[500px]">
+                <div className="space-y-4 pr-4">
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
+                      <p className="text-xs text-gray-500">Passed</p>
+                      <p className="text-2xl font-bold text-green-600">{selectedTestSuite.passed}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20">
+                      <p className="text-xs text-gray-500">Failed</p>
+                      <p className="text-2xl font-bold text-red-600">{selectedTestSuite.failed}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <p className="text-xs text-gray-500">Skipped</p>
+                      <p className="text-2xl font-bold text-gray-500">{selectedTestSuite.skipped}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                      <p className="text-xs text-gray-500">Coverage</p>
+                      <p className="text-2xl font-bold text-blue-600">{selectedTestSuite.coverage}%</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium mb-3">Test Cases</h4>
+                    <div className="space-y-2">
+                      {testCases.map(test => (
+                        <div key={test.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                          {test.status === 'passed' && <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />}
+                          {test.status === 'failed' && <XCircle className="w-5 h-5 text-red-600 flex-shrink-0" />}
+                          {test.status === 'running' && <RefreshCw className="w-5 h-5 text-blue-600 animate-spin flex-shrink-0" />}
+                          {test.status === 'skipped' && <Square className="w-5 h-5 text-gray-400 flex-shrink-0" />}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{test.name}</p>
+                            <p className="text-xs text-gray-500">{test.description}</p>
+                          </div>
+                          <Badge className={`${getMethodColor(test.method)} font-mono`}>{test.method}</Badge>
+                          <div className="text-right">
+                            <p className="text-sm font-medium">{test.passedAssertions}/{test.assertions}</p>
+                            <p className="text-xs text-gray-500">assertions</p>
+                          </div>
+                          <span className="text-sm text-gray-500 w-16 text-right">{formatDuration(test.duration)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button className="flex-1 bg-gradient-to-r from-indigo-500 to-blue-500 text-white">
+                      <PlayCircle className="w-4 h-4 mr-2" />
+                      Run Suite
+                    </Button>
+                    <Button variant="outline">
+                      <Repeat className="w-4 h-4 mr-2" />
+                      Rerun Failed
+                    </Button>
+                    <Button variant="outline">
+                      <FileText className="w-4 h-4 mr-2" />
+                      Export Report
                     </Button>
                   </div>
                 </div>
