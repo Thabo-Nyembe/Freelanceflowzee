@@ -40,7 +40,14 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { usePerformanceAnalytics, type PerformanceAnalytic } from '@/lib/hooks/use-performance-analytics'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Progress } from '@/components/ui/progress'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 // Types
 interface ServiceHealth {
@@ -202,6 +209,52 @@ const sloStatusColors: Record<string, string> = {
   breached: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
 }
 
+// Dashboard interface
+interface Dashboard {
+  id: string
+  name: string
+  description: string
+  widgets: number
+  owner: string
+  shared: boolean
+  createdAt: string
+  updatedAt: string
+  views: number
+  isFavorite: boolean
+}
+
+// Integration interface
+interface Integration {
+  id: string
+  name: string
+  type: 'cloud' | 'database' | 'messaging' | 'monitoring' | 'logging'
+  status: 'connected' | 'disconnected' | 'error'
+  lastSync: string
+  dataPoints: number
+  icon: string
+}
+
+// Mock Dashboards
+const mockDashboards: Dashboard[] = [
+  { id: 'd1', name: 'Production Overview', description: 'Real-time production metrics and health', widgets: 12, owner: 'Platform Team', shared: true, createdAt: '2024-01-15T00:00:00Z', updatedAt: '2024-12-23T10:00:00Z', views: 1250, isFavorite: true },
+  { id: 'd2', name: 'API Performance', description: 'API latency, throughput, and error rates', widgets: 8, owner: 'API Team', shared: true, createdAt: '2024-02-20T00:00:00Z', updatedAt: '2024-12-22T15:30:00Z', views: 890, isFavorite: true },
+  { id: 'd3', name: 'Database Metrics', description: 'PostgreSQL and Redis performance', widgets: 10, owner: 'Data Team', shared: true, createdAt: '2024-03-10T00:00:00Z', updatedAt: '2024-12-21T09:15:00Z', views: 654, isFavorite: false },
+  { id: 'd4', name: 'Error Analysis', description: 'Error tracking and exception monitoring', widgets: 6, owner: 'Engineering', shared: false, createdAt: '2024-04-05T00:00:00Z', updatedAt: '2024-12-20T14:45:00Z', views: 432, isFavorite: false },
+  { id: 'd5', name: 'Infrastructure Cost', description: 'Cloud resource utilization and costs', widgets: 9, owner: 'FinOps', shared: true, createdAt: '2024-05-12T00:00:00Z', updatedAt: '2024-12-19T11:20:00Z', views: 321, isFavorite: false },
+]
+
+// Mock Integrations
+const mockIntegrations: Integration[] = [
+  { id: 'i1', name: 'AWS CloudWatch', type: 'cloud', status: 'connected', lastSync: '2024-12-23T10:30:00Z', dataPoints: 125000, icon: '☁️' },
+  { id: 'i2', name: 'PostgreSQL', type: 'database', status: 'connected', lastSync: '2024-12-23T10:29:00Z', dataPoints: 85000, icon: '🐘' },
+  { id: 'i3', name: 'Redis', type: 'database', status: 'connected', lastSync: '2024-12-23T10:30:00Z', dataPoints: 42000, icon: '⚡' },
+  { id: 'i4', name: 'Kafka', type: 'messaging', status: 'connected', lastSync: '2024-12-23T10:28:00Z', dataPoints: 256000, icon: '📨' },
+  { id: 'i5', name: 'Prometheus', type: 'monitoring', status: 'connected', lastSync: '2024-12-23T10:30:00Z', dataPoints: 890000, icon: '📊' },
+  { id: 'i6', name: 'Elasticsearch', type: 'logging', status: 'error', lastSync: '2024-12-23T09:45:00Z', dataPoints: 1250000, icon: '🔍' },
+  { id: 'i7', name: 'Kubernetes', type: 'cloud', status: 'connected', lastSync: '2024-12-23T10:30:00Z', dataPoints: 156000, icon: '☸️' },
+  { id: 'i8', name: 'MongoDB', type: 'database', status: 'disconnected', lastSync: '2024-12-22T18:00:00Z', dataPoints: 0, icon: '🍃' },
+]
+
 const statusColors: Record<string, string> = {
   healthy: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
   degraded: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
@@ -224,7 +277,7 @@ const severityColors: Record<string, string> = {
   critical: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
 }
 
-export default function PerformanceAnalyticsClient({ initialPerformanceAnalytics }: { initialPerformanceAnalytics: PerformanceAnalytic[] }) {
+export default function PerformanceAnalyticsClient() {
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedTimeRange, setSelectedTimeRange] = useState('1h')
   const [searchQuery, setSearchQuery] = useState('')
@@ -232,15 +285,52 @@ export default function PerformanceAnalyticsClient({ initialPerformanceAnalytics
   const [showAlertDialog, setShowAlertDialog] = useState(false)
   const [selectedTrace, setSelectedTrace] = useState<Trace | null>(null)
   const [showTraceDialog, setShowTraceDialog] = useState(false)
-
-  const { performanceAnalytics } = usePerformanceAnalytics({})
-  const displayMetrics = performanceAnalytics.length > 0 ? performanceAnalytics : initialPerformanceAnalytics
+  const [settingsTab, setSettingsTab] = useState('general')
+  const [showCreateDashboardDialog, setShowCreateDashboardDialog] = useState(false)
+  const [showCreateAlertDialog, setShowCreateAlertDialog] = useState(false)
 
   // Calculate stats
   const healthyServices = mockServices.filter(s => s.status === 'healthy').length
   const avgLatency = mockServices.reduce((sum, s) => sum + s.latency, 0) / mockServices.length
   const overallErrorRate = mockServices.reduce((sum, s) => sum + s.errorRate, 0) / mockServices.length
   const firingAlerts = mockAlerts.filter(a => a.status === 'firing').length
+  const totalThroughput = mockServices.reduce((sum, s) => sum + s.throughput, 0)
+  const slosMet = mockSLOs.filter(s => s.status === 'met').length
+  const activeHosts = mockHosts.filter(h => h.status === 'running').length
+  const connectedIntegrations = mockIntegrations.filter(i => i.status === 'connected').length
+
+  const stats = {
+    totalServices: mockServices.length,
+    healthyServices,
+    avgLatency: Math.round(avgLatency),
+    errorRate: overallErrorRate.toFixed(2),
+    firingAlerts,
+    acknowledgedAlerts: mockAlerts.filter(a => a.status === 'acknowledged').length,
+    totalThroughput,
+    slosMet,
+    totalSLOs: mockSLOs.length,
+    activeHosts,
+    totalHosts: mockHosts.length,
+    connectedIntegrations,
+    totalIntegrations: mockIntegrations.length,
+    totalTraces: mockTraces.length,
+    errorTraces: mockTraces.filter(t => t.status === 'error' || t.status === 'timeout').length,
+    totalLogs: mockLogs.length,
+    errorLogs: mockLogs.filter(l => l.level === 'error' || l.level === 'fatal').length,
+    totalDashboards: mockDashboards.length,
+    favoriteDashboards: mockDashboards.filter(d => d.isFavorite).length,
+  }
+
+  const statCards = [
+    { label: 'Service Health', value: `${stats.healthyServices}/${stats.totalServices}`, change: ((stats.healthyServices / stats.totalServices) * 100).toFixed(0) + '% healthy', icon: Activity, gradient: 'from-green-500 to-emerald-500' },
+    { label: 'Avg Latency P99', value: `${stats.avgLatency}ms`, change: '+12% vs last hour', icon: Timer, gradient: 'from-blue-500 to-cyan-500' },
+    { label: 'Error Rate', value: `${stats.errorRate}%`, change: '-0.3% vs last hour', icon: AlertTriangle, gradient: 'from-red-500 to-rose-500' },
+    { label: 'Active Alerts', value: stats.firingAlerts.toString(), change: `${stats.acknowledgedAlerts} acknowledged`, icon: Bell, gradient: 'from-orange-500 to-amber-500' },
+    { label: 'Total Throughput', value: (stats.totalThroughput / 1000).toFixed(1) + 'K/min', change: '+8.5% vs last hour', icon: Zap, gradient: 'from-purple-500 to-violet-500' },
+    { label: 'SLOs Met', value: `${stats.slosMet}/${stats.totalSLOs}`, change: '75% budget remaining', icon: Target, gradient: 'from-indigo-500 to-blue-500' },
+    { label: 'Active Hosts', value: `${stats.activeHosts}/${stats.totalHosts}`, change: '100% uptime', icon: Server, gradient: 'from-teal-500 to-cyan-500' },
+    { label: 'Integrations', value: `${stats.connectedIntegrations}/${stats.totalIntegrations}`, change: '1 requires attention', icon: Globe, gradient: 'from-pink-500 to-rose-500' },
+  ]
 
   const filteredMetrics = useMemo(() => {
     return mockMetrics.filter(m => {
@@ -310,73 +400,24 @@ export default function PerformanceAnalyticsClient({ initialPerformanceAnalytics
           ))}
         </div>
 
-        {/* Quick Stats */}
+        {/* Gradient Stat Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Service Health</p>
-                <p className="text-3xl font-bold text-green-600 mt-1">{healthyServices}/{mockServices.length}</p>
-                <div className="flex items-center gap-1 mt-2 text-green-600">
-                  <CheckCircle className="w-4 h-4" />
-                  <span className="text-sm font-medium">
-                    {((healthyServices / mockServices.length) * 100).toFixed(0)}% healthy
-                  </span>
+          {statCards.map((stat, index) => (
+            <Card key={index} className={`bg-gradient-to-br ${stat.gradient} text-white border-0 shadow-lg`}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-white/80">{stat.label}</p>
+                    <p className="text-3xl font-bold mt-1">{stat.value}</p>
+                    <p className="text-sm text-white/70 mt-1">{stat.change}</p>
+                  </div>
+                  <div className="p-3 bg-white/20 rounded-xl">
+                    <stat.icon className="w-6 h-6 text-white" />
+                  </div>
                 </div>
-              </div>
-              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
-                <Activity className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Avg Latency P99</p>
-                <p className="text-3xl font-bold text-blue-600 mt-1">{avgLatency.toFixed(0)}ms</p>
-                <div className="flex items-center gap-1 mt-2 text-yellow-600">
-                  <TrendingUp className="w-4 h-4" />
-                  <span className="text-sm font-medium">+12% vs last hour</span>
-                </div>
-              </div>
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                <Timer className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Error Rate</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{overallErrorRate.toFixed(2)}%</p>
-                <div className="flex items-center gap-1 mt-2 text-green-600">
-                  <TrendingDown className="w-4 h-4" />
-                  <span className="text-sm font-medium">-0.3% vs last hour</span>
-                </div>
-              </div>
-              <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl">
-                <AlertTriangle className="w-6 h-6 text-red-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Active Alerts</p>
-                <p className={`text-3xl font-bold mt-1 ${firingAlerts > 0 ? 'text-red-600' : 'text-green-600'}`}>{firingAlerts}</p>
-                <div className="flex items-center gap-1 mt-2 text-gray-500">
-                  <Bell className="w-4 h-4" />
-                  <span className="text-sm font-medium">{mockAlerts.filter(a => a.status === 'acknowledged').length} acknowledged</span>
-                </div>
-              </div>
-              <div className={`p-3 rounded-xl ${firingAlerts > 0 ? 'bg-red-100 dark:bg-red-900/30' : 'bg-green-100 dark:bg-green-900/30'}`}>
-                <Bell className={`w-6 h-6 ${firingAlerts > 0 ? 'text-red-600' : 'text-green-600'}`} />
-              </div>
-            </div>
-          </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Main Content Tabs */}
@@ -413,6 +454,14 @@ export default function PerformanceAnalyticsClient({ initialPerformanceAnalytics
             <TabsTrigger value="alerts" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-3 py-2">
               <Bell className="w-4 h-4 mr-2" />
               Alerts
+            </TabsTrigger>
+            <TabsTrigger value="dashboards" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-3 py-2">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Dashboards
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 dark:data-[state=active]:bg-blue-900/30 dark:data-[state=active]:text-blue-300 rounded-lg px-3 py-2">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -890,7 +939,369 @@ export default function PerformanceAnalyticsClient({ initialPerformanceAnalytics
               </div>
             </div>
           </TabsContent>
+
+          {/* Dashboards Tab */}
+          <TabsContent value="dashboards" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Custom Dashboards</h3>
+                <p className="text-sm text-gray-500">Create and manage your observability dashboards</p>
+              </div>
+              <Button onClick={() => setShowCreateDashboardDialog(true)} className="bg-blue-600 hover:bg-blue-700">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Dashboard
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mockDashboards.map((dashboard) => (
+                <Card key={dashboard.id} className="bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{dashboard.name}</CardTitle>
+                      <div className="flex items-center gap-2">
+                        {dashboard.isFavorite && (
+                          <Badge variant="outline" className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 border-0">
+                            ★
+                          </Badge>
+                        )}
+                        {dashboard.shared && (
+                          <Badge variant="outline" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-0">
+                            Shared
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{dashboard.description}</p>
+                    <div className="flex items-center justify-between text-xs text-gray-400">
+                      <div className="flex items-center gap-4">
+                        <span className="flex items-center gap-1">
+                          <Layers className="w-3 h-3" />
+                          {dashboard.widgets} widgets
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-3 h-3" />
+                          {dashboard.views} views
+                        </span>
+                      </div>
+                      <span>{dashboard.owner}</span>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                      <p className="text-xs text-gray-400">
+                        Updated {formatDate(dashboard.updatedAt)}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Dashboard Templates */}
+            <Card className="bg-white dark:bg-gray-800">
+              <CardHeader>
+                <CardTitle className="text-lg">Dashboard Templates</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {['APM Overview', 'Infrastructure Health', 'Error Analysis', 'Business Metrics', 'Security Dashboard', 'Cost Optimization'].map((template) => (
+                    <div key={template} className="p-4 border border-dashed border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer transition-colors">
+                      <p className="font-medium text-gray-900 dark:text-white">{template}</p>
+                      <p className="text-xs text-gray-500 mt-1">Pre-built template</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <Card className="bg-white dark:bg-gray-800">
+              <CardContent className="p-0">
+                <div className="flex border-b border-gray-200 dark:border-gray-700">
+                  {['general', 'integrations', 'alerting', 'retention', 'access'].map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setSettingsTab(tab)}
+                      className={`px-6 py-4 text-sm font-medium capitalize ${
+                        settingsTab === tab
+                          ? 'border-b-2 border-blue-600 text-blue-600'
+                          : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                      }`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="p-6">
+                  {settingsTab === 'general' && (
+                    <div className="space-y-6">
+                      <div>
+                        <h4 className="font-semibold text-gray-900 dark:text-white mb-4">General Settings</h4>
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Time Zone</p>
+                              <p className="text-sm text-gray-500">Set the default timezone for all dashboards</p>
+                            </div>
+                            <Select defaultValue="utc">
+                              <SelectTrigger className="w-48">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="local">Local Time</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Default Time Range</p>
+                              <p className="text-sm text-gray-500">Default time window for queries</p>
+                            </div>
+                            <Select defaultValue="1h">
+                              <SelectTrigger className="w-48">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="15m">Last 15 minutes</SelectItem>
+                                <SelectItem value="1h">Last 1 hour</SelectItem>
+                                <SelectItem value="24h">Last 24 hours</SelectItem>
+                                <SelectItem value="7d">Last 7 days</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Auto-refresh</p>
+                              <p className="text-sm text-gray-500">Automatically refresh data</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between py-3">
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">Compact Mode</p>
+                              <p className="text-sm text-gray-500">Show more data in less space</p>
+                            </div>
+                            <Switch />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {settingsTab === 'integrations' && (
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="font-semibold text-gray-900 dark:text-white">Connected Integrations</h4>
+                        <Button variant="outline" size="sm">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Integration
+                        </Button>
+                      </div>
+                      <div className="space-y-3">
+                        {mockIntegrations.map((integration) => (
+                          <div key={integration.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <span className="text-2xl">{integration.icon}</span>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{integration.name}</p>
+                                <p className="text-xs text-gray-500">{integration.dataPoints.toLocaleString()} data points</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <Badge variant="outline" className={
+                                integration.status === 'connected' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
+                                integration.status === 'error' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
+                                'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                              }>
+                                {integration.status}
+                              </Badge>
+                              <Button variant="ghost" size="sm">
+                                <Settings className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {settingsTab === 'alerting' && (
+                    <div className="space-y-6">
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Alert Configuration</h4>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Email Notifications</p>
+                            <p className="text-sm text-gray-500">Send alerts via email</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Slack Notifications</p>
+                            <p className="text-sm text-gray-500">Send alerts to Slack channels</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">PagerDuty Integration</p>
+                            <p className="text-sm text-gray-500">Escalate critical alerts</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Alert Grouping</p>
+                            <p className="text-sm text-gray-500">Group similar alerts to reduce noise</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {settingsTab === 'retention' && (
+                    <div className="space-y-6">
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Data Retention</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-3 mb-4">
+                            <LineChart className="w-5 h-5 text-blue-600" />
+                            <p className="font-medium text-gray-900 dark:text-white">Metrics Data</p>
+                          </div>
+                          <Progress value={65} className="h-2 mb-2" />
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-500">65% used</span>
+                            <span className="text-gray-900 dark:text-white">13 months</span>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-3 mb-4">
+                            <Terminal className="w-5 h-5 text-purple-600" />
+                            <p className="font-medium text-gray-900 dark:text-white">Log Data</p>
+                          </div>
+                          <Progress value={82} className="h-2 mb-2" />
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-500">82% used</span>
+                            <span className="text-gray-900 dark:text-white">30 days</span>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-3 mb-4">
+                            <Layers className="w-5 h-5 text-green-600" />
+                            <p className="font-medium text-gray-900 dark:text-white">Trace Data</p>
+                          </div>
+                          <Progress value={45} className="h-2 mb-2" />
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-500">45% used</span>
+                            <span className="text-gray-900 dark:text-white">14 days</span>
+                          </div>
+                        </div>
+                        <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                          <div className="flex items-center gap-3 mb-4">
+                            <Database className="w-5 h-5 text-orange-600" />
+                            <p className="font-medium text-gray-900 dark:text-white">Alert History</p>
+                          </div>
+                          <Progress value={28} className="h-2 mb-2" />
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-500">28% used</span>
+                            <span className="text-gray-900 dark:text-white">90 days</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {settingsTab === 'access' && (
+                    <div className="space-y-6">
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Access Control</h4>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">API Keys</p>
+                            <p className="text-sm text-gray-500">Manage API access tokens</p>
+                          </div>
+                          <Button variant="outline" size="sm">Manage Keys</Button>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">SSO Configuration</p>
+                            <p className="text-sm text-gray-500">Configure single sign-on</p>
+                          </div>
+                          <Badge variant="outline" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">Enabled</Badge>
+                        </div>
+                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Two-Factor Auth</p>
+                            <p className="text-sm text-gray-500">Require 2FA for all users</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between py-3">
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">Audit Logging</p>
+                            <p className="text-sm text-gray-500">Log all user actions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
+
+        {/* Create Dashboard Dialog */}
+        <Dialog open={showCreateDashboardDialog} onOpenChange={setShowCreateDashboardDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Dashboard</DialogTitle>
+              <DialogDescription>Configure your custom observability dashboard</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Dashboard Name</Label>
+                <Input placeholder="My Dashboard" />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input placeholder="Dashboard description..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Template</Label>
+                <Select defaultValue="blank">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blank">Blank Dashboard</SelectItem>
+                    <SelectItem value="apm">APM Overview</SelectItem>
+                    <SelectItem value="infrastructure">Infrastructure</SelectItem>
+                    <SelectItem value="errors">Error Analysis</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch id="shared" />
+                <Label htmlFor="shared">Share with team</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateDashboardDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700">Create Dashboard</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Trace Detail Dialog */}
         <Dialog open={showTraceDialog} onOpenChange={setShowTraceDialog}>
