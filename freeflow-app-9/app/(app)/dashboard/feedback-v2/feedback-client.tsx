@@ -3,11 +3,14 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -47,7 +50,20 @@ import {
   LayoutGrid,
   List,
   Zap,
-  Award
+  Award,
+  Bell,
+  Webhook,
+  Key,
+  Shield,
+  HardDrive,
+  AlertOctagon,
+  CreditCard,
+  Sliders,
+  Mail,
+  Globe,
+  Download,
+  Copy,
+  RefreshCw
 } from 'lucide-react'
 
 // Types
@@ -412,6 +428,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filter and sort ideas
   const filteredIdeas = useMemo(() => {
@@ -586,6 +603,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             <TabsTrigger value="analytics" className="gap-2">
               <BarChart3 className="w-4 h-4" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -953,6 +974,804 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3 space-y-2">
+                <nav className="space-y-1">
+                  {[
+                    { id: 'general', label: 'General', icon: Settings },
+                    { id: 'portal', label: 'Portal', icon: Globe },
+                    { id: 'notifications', label: 'Notifications', icon: Bell },
+                    { id: 'voting', label: 'Voting', icon: ThumbsUp },
+                    { id: 'integrations', label: 'Integrations', icon: Webhook },
+                    { id: 'advanced', label: 'Advanced', icon: Sliders }
+                  ].map((item) => (
+                    <Button
+                      key={item.id}
+                      variant={settingsTab === item.id ? 'secondary' : 'ghost'}
+                      className="w-full justify-start gap-2"
+                      onClick={() => setSettingsTab(item.id)}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      {item.label}
+                    </Button>
+                  ))}
+                </nav>
+
+                {/* Feedback Stats */}
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm mt-4">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">Portal Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Total Ideas</span>
+                      <Badge variant="secondary">{stats.totalIdeas}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Total Votes</span>
+                      <Badge variant="secondary">{stats.totalVotes.toLocaleString()}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">NPS Score</span>
+                      <Badge className={npsScore >= 50 ? 'bg-green-100 text-green-700' : npsScore >= 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}>{npsScore}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Shipped</span>
+                      <Badge className="bg-green-100 text-green-700">{stats.shipped}</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Portal Settings</CardTitle>
+                        <CardDescription>Configure your feedback portal basics</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Portal Name</Label>
+                            <Input defaultValue="Feedback Portal" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Portal URL Slug</Label>
+                            <Input defaultValue="feedback" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Portal Description</Label>
+                          <Input defaultValue="Share your ideas and help us improve" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Language</Label>
+                            <Select defaultValue="en">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="es">Spanish</SelectItem>
+                                <SelectItem value="fr">French</SelectItem>
+                                <SelectItem value="de">German</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Timezone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                                <SelectItem value="cet">Central European</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Idea Categories</CardTitle>
+                        <CardDescription>Manage categories for idea submissions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          {['Feature Request', 'Improvement', 'Bug Report', 'Integration', 'UX/UI', 'Performance'].map((cat) => (
+                            <div key={cat} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                              <span className="font-medium">{cat}</span>
+                              <div className="flex items-center gap-2">
+                                <Switch defaultChecked />
+                                <Button variant="ghost" size="sm">Edit</Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Category
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Status Workflow</CardTitle>
+                        <CardDescription>Configure idea status options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          {[
+                            { status: 'New', color: 'blue' },
+                            { status: 'Under Review', color: 'purple' },
+                            { status: 'Planned', color: 'indigo' },
+                            { status: 'In Progress', color: 'amber' },
+                            { status: 'Shipped', color: 'green' },
+                            { status: 'Declined', color: 'red' }
+                          ].map((item) => (
+                            <div key={item.status} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-3 h-3 rounded-full bg-${item.color}-500`} />
+                                <span className="font-medium">{item.status}</span>
+                              </div>
+                              <Button variant="ghost" size="sm">Configure</Button>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Portal Settings */}
+                {settingsTab === 'portal' && (
+                  <div className="space-y-6">
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Portal Branding</CardTitle>
+                        <CardDescription>Customize your feedback portal appearance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Primary Color</Label>
+                            <div className="flex gap-2">
+                              <Input defaultValue="#f97316" type="color" className="w-16 h-10" />
+                              <Input defaultValue="#f97316" className="flex-1" />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Accent Color</Label>
+                            <div className="flex gap-2">
+                              <Input defaultValue="#d97706" type="color" className="w-16 h-10" />
+                              <Input defaultValue="#d97706" className="flex-1" />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Logo</Label>
+                          <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                            <p className="text-sm text-gray-500">Drag and drop or click to upload</p>
+                            <p className="text-xs text-gray-400">Recommended: 200x50px PNG or SVG</p>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Portal Header</Label>
+                          <Input defaultValue="Help us build what you need" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Welcome Message</Label>
+                          <textarea className="w-full p-3 rounded-lg border resize-none h-24 dark:bg-gray-800 dark:border-gray-700" defaultValue="Share your ideas, vote on suggestions, and help shape our product roadmap." />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Portal Access</CardTitle>
+                        <CardDescription>Control who can access the feedback portal</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Public Portal</Label>
+                            <p className="text-sm text-gray-500">Anyone can view and submit ideas</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Require Authentication</Label>
+                            <p className="text-sm text-gray-500">Users must log in to submit or vote</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>SSO Only</Label>
+                            <p className="text-sm text-gray-500">Only allow SSO authentication</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Moderated Submissions</Label>
+                            <p className="text-sm text-gray-500">Require approval before publishing</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Custom Domain</CardTitle>
+                        <CardDescription>Use your own domain for the feedback portal</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Custom Domain</Label>
+                          <Input placeholder="feedback.yourcompany.com" />
+                        </div>
+                        <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                          <p className="text-sm text-amber-800 dark:text-amber-300">
+                            Add a CNAME record pointing to portal.feedback.app
+                          </p>
+                        </div>
+                        <Button variant="outline">Verify Domain</Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Email Notifications</CardTitle>
+                        <CardDescription>Configure when to send email notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>New Idea Submitted</Label>
+                            <p className="text-sm text-gray-500">Notify when a new idea is submitted</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Idea Status Changed</Label>
+                            <p className="text-sm text-gray-500">Notify subscribers of status changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>New Comment</Label>
+                            <p className="text-sm text-gray-500">Notify idea author of new comments</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Vote Milestone</Label>
+                            <p className="text-sm text-gray-500">Notify when ideas reach vote thresholds</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Weekly Digest</Label>
+                            <p className="text-sm text-gray-500">Send weekly summary of activity</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Admin Notifications</CardTitle>
+                        <CardDescription>Configure notifications for administrators</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Notification Recipients</Label>
+                          <Input placeholder="admin@company.com, product@company.com" />
+                          <p className="text-xs text-gray-500">Comma-separated email addresses</p>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Daily Summary</Label>
+                            <p className="text-sm text-gray-500">Receive daily activity summary</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Critical Alerts</Label>
+                            <p className="text-sm text-gray-500">Immediate alerts for high-priority items</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>NPS Detractor Alerts</Label>
+                            <p className="text-sm text-gray-500">Alert when detractor responses received</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Slack Notifications</CardTitle>
+                        <CardDescription>Send notifications to Slack channels</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Slack Webhook URL</Label>
+                          <Input type="password" defaultValue="https://hooks.slack.com/services/..." />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Default Channel</Label>
+                          <Input defaultValue="#product-feedback" />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="flex-1">
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Test Connection
+                          </Button>
+                          <Button className="flex-1">Connect Slack</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Voting Settings */}
+                {settingsTab === 'voting' && (
+                  <div className="space-y-6">
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Voting Configuration</CardTitle>
+                        <CardDescription>Configure how voting works on your portal</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Votes Per User</Label>
+                            <Select defaultValue="unlimited">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="3">3 votes</SelectItem>
+                                <SelectItem value="5">5 votes</SelectItem>
+                                <SelectItem value="10">10 votes</SelectItem>
+                                <SelectItem value="unlimited">Unlimited</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Vote Reset Period</Label>
+                            <Select defaultValue="never">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="weekly">Weekly</SelectItem>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                                <SelectItem value="quarterly">Quarterly</SelectItem>
+                                <SelectItem value="never">Never</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Allow Vote Changes</Label>
+                            <p className="text-sm text-gray-500">Users can remove their votes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Show Vote Count</Label>
+                            <p className="text-sm text-gray-500">Display vote counts publicly</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Show Voter Names</Label>
+                            <p className="text-sm text-gray-500">Display who voted on ideas</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Vote Weighting</CardTitle>
+                        <CardDescription>Configure vote weights by user segment</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Enable Vote Weighting</Label>
+                            <p className="text-sm text-gray-500">Weight votes by user plan or segment</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          {[
+                            { plan: 'Enterprise', weight: '3x', users: 156 },
+                            { plan: 'Pro', weight: '2x', users: 423 },
+                            { plan: 'Free', weight: '1x', users: 1245 }
+                          ].map((item) => (
+                            <div key={item.plan} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                              <div>
+                                <span className="font-medium">{item.plan}</span>
+                                <span className="text-sm text-gray-500 ml-2">({item.users} users)</span>
+                              </div>
+                              <Badge variant="secondary">{item.weight}</Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>NPS Surveys</CardTitle>
+                        <CardDescription>Configure NPS survey settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Enable NPS Surveys</Label>
+                            <p className="text-sm text-gray-500">Collect NPS scores from users</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Survey Frequency</Label>
+                            <Select defaultValue="quarterly">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="monthly">Monthly</SelectItem>
+                                <SelectItem value="quarterly">Quarterly</SelectItem>
+                                <SelectItem value="biannual">Bi-annual</SelectItem>
+                                <SelectItem value="annual">Annual</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Follow-up Delay</Label>
+                            <Select defaultValue="24h">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="immediate">Immediate</SelectItem>
+                                <SelectItem value="24h">24 hours</SelectItem>
+                                <SelectItem value="48h">48 hours</SelectItem>
+                                <SelectItem value="1w">1 week</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Manage API keys and access tokens</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" defaultValue="fb_live_xxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono" />
+                            <Button variant="outline" size="icon">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                            <Button variant="outline" size="icon">
+                              <RefreshCw className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Enable API Access</Label>
+                            <p className="text-sm text-gray-500">Allow external API access</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Rate Limit</Label>
+                          <Select defaultValue="1000">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="100">100 requests/minute</SelectItem>
+                              <SelectItem value="500">500 requests/minute</SelectItem>
+                              <SelectItem value="1000">1,000 requests/minute</SelectItem>
+                              <SelectItem value="5000">5,000 requests/minute</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Webhooks</CardTitle>
+                        <CardDescription>Configure webhook endpoints for events</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Webhook URL</Label>
+                          <Input placeholder="https://api.yourcompany.com/webhooks/feedback" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Webhook Secret</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" defaultValue="whsec_xxxxxxxxxx" className="flex-1 font-mono" />
+                            <Button variant="outline" size="icon">
+                              <RefreshCw className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Events</Label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {['idea.created', 'idea.voted', 'idea.status_changed', 'comment.created', 'nps.submitted'].map((event) => (
+                              <div key={event} className="flex items-center gap-2">
+                                <Switch defaultChecked />
+                                <span className="text-sm font-mono">{event}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <Button variant="outline">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Test Webhook
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Third-Party Integrations</CardTitle>
+                        <CardDescription>Connect with external tools and services</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          {[
+                            { name: 'Jira', connected: true, description: 'Sync ideas with Jira issues' },
+                            { name: 'Linear', connected: false, description: 'Connect to Linear projects' },
+                            { name: 'Intercom', connected: true, description: 'Link with Intercom conversations' },
+                            { name: 'Segment', connected: false, description: 'Send events to Segment' },
+                            { name: 'Zendesk', connected: false, description: 'Sync with support tickets' },
+                            { name: 'HubSpot', connected: true, description: 'Sync with HubSpot contacts' }
+                          ].map((integration) => (
+                            <div key={integration.name} className="p-4 rounded-lg border dark:border-gray-700">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium">{integration.name}</span>
+                                <Badge variant={integration.connected ? 'default' : 'outline'}>
+                                  {integration.connected ? 'Connected' : 'Not Connected'}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-gray-500 mb-3">{integration.description}</p>
+                              <Button variant="outline" size="sm" className="w-full">
+                                {integration.connected ? 'Configure' : 'Connect'}
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Data Management</CardTitle>
+                        <CardDescription>Configure data retention and exports</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Auto-Archive Old Ideas</Label>
+                            <p className="text-sm text-gray-500">Archive ideas with no activity</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Archive After</Label>
+                            <Select defaultValue="12m">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="6m">6 months</SelectItem>
+                                <SelectItem value="12m">12 months</SelectItem>
+                                <SelectItem value="24m">24 months</SelectItem>
+                                <SelectItem value="never">Never</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Data Retention</Label>
+                            <Select defaultValue="forever">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1y">1 year</SelectItem>
+                                <SelectItem value="3y">3 years</SelectItem>
+                                <SelectItem value="5y">5 years</SelectItem>
+                                <SelectItem value="forever">Forever</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export All Data
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export Analytics
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Advanced Features</CardTitle>
+                        <CardDescription>Enable experimental and advanced features</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>AI-Powered Insights</Label>
+                            <p className="text-sm text-gray-500">Use AI to analyze feedback trends</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Sentiment Analysis</Label>
+                            <p className="text-sm text-gray-500">Automatically analyze idea sentiment</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Duplicate Detection</Label>
+                            <p className="text-sm text-gray-500">Flag potential duplicate ideas</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Debug Mode</Label>
+                            <p className="text-sm text-gray-500">Enable detailed logging</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle>Security</CardTitle>
+                        <CardDescription>Configure security settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Two-Factor Authentication</Label>
+                            <p className="text-sm text-gray-500">Require 2FA for admin access</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>IP Allowlist</Label>
+                            <p className="text-sm text-gray-500">Restrict API access by IP</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Allowed IPs</Label>
+                          <Input placeholder="192.168.1.0/24, 10.0.0.0/8" disabled />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="text-red-600 flex items-center gap-2">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible and destructive actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg border border-red-200 dark:border-red-900">
+                          <div>
+                            <div className="font-medium">Reset All Votes</div>
+                            <p className="text-sm text-gray-500">Clear all votes from all ideas</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                            Reset Votes
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg border border-red-200 dark:border-red-900">
+                          <div>
+                            <div className="font-medium">Archive All Ideas</div>
+                            <p className="text-sm text-gray-500">Archive all existing ideas</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                            Archive All
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg border border-red-200 dark:border-red-900">
+                          <div>
+                            <div className="font-medium">Delete Portal</div>
+                            <p className="text-sm text-gray-500">Permanently delete this feedback portal</p>
+                          </div>
+                          <Button variant="destructive">
+                            Delete Portal
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
