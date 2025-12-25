@@ -1,41 +1,26 @@
 'use client'
 import { useState, useMemo } from 'react'
-import { useSystemInsights, type SystemInsight, type InsightType, type InsightSeverity, type InsightStatus } from '@/lib/hooks/use-system-insights'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Progress } from '@/components/ui/progress'
+import {
+  Activity, AlertTriangle, Server, Database, Cpu, HardDrive, Network,
+  Clock, TrendingUp, TrendingDown, RefreshCw, Settings, Search, Filter,
+  Bell, Eye, Terminal, Layers, Zap, GitBranch, Box, Workflow, Globe,
+  FileText, BarChart3, ArrowUpRight, ArrowDownRight, CheckCircle, XCircle,
+  AlertCircle, Play, Pause, ChevronRight, MoreVertical, Download, Share2,
+  Plus, Trash2, Edit3, Copy, ExternalLink, Link, Mail, Webhook, Shield
+} from 'lucide-react'
 
-// Grafana / Prometheus / Kibana level interfaces
-interface Dashboard {
-  id: string
-  name: string
-  description: string
-  panels: Panel[]
-  variables: Variable[]
-  timeRange: { from: string; to: string }
-  refreshInterval: number
-  starred: boolean
-  createdAt: string
-  updatedAt: string
-}
-
-interface Panel {
-  id: string
-  title: string
-  type: 'graph' | 'stat' | 'gauge' | 'table' | 'heatmap' | 'logs' | 'alert'
-  query: string
-  visualization: string
-  thresholds: { value: number; color: string }[]
-  position: { x: number; y: number; w: number; h: number }
-}
-
-interface Variable {
-  name: string
-  type: 'query' | 'custom' | 'interval'
-  current: string
-  options: string[]
-}
-
+// Type definitions
 interface Metric {
   id: string
   name: string
@@ -47,21 +32,21 @@ interface Metric {
   sparkline: number[]
   thresholds: { warning: number; critical: number }
   status: 'normal' | 'warning' | 'critical'
+  host?: string
 }
 
 interface Alert {
   id: string
   name: string
   severity: 'info' | 'warning' | 'error' | 'critical'
-  status: 'firing' | 'pending' | 'resolved'
+  status: 'firing' | 'pending' | 'resolved' | 'muted'
   message: string
   metric: string
   value: number
   threshold: number
   startedAt: string
   resolvedAt?: string
-  annotations: { key: string; value: string }[]
-  labels: { key: string; value: string }[]
+  tags: Record<string, string>
 }
 
 interface LogEntry {
@@ -69,6 +54,7 @@ interface LogEntry {
   timestamp: string
   level: 'debug' | 'info' | 'warn' | 'error' | 'fatal'
   service: string
+  host: string
   message: string
   metadata: Record<string, string>
   traceId?: string
@@ -82,11 +68,11 @@ interface ServiceHealth {
   latency: number
   errorRate: number
   requestsPerSecond: number
+  apdex: number
   lastChecked: string
   dependencies: { name: string; status: 'healthy' | 'degraded' | 'down' }[]
 }
 
-// Additional Grafana features
 interface Trace {
   id: string
   traceId: string
@@ -96,6 +82,7 @@ interface Trace {
   status: 'ok' | 'error'
   timestamp: string
   spans: Span[]
+  resource: string
 }
 
 interface Span {
@@ -105,23 +92,40 @@ interface Span {
   duration: number
   startTime: number
   status: 'ok' | 'error'
+  resource: string
   tags: Record<string, string>
 }
 
-interface SavedQuery {
+interface Host {
   id: string
   name: string
-  query: string
-  description: string
-  lastRun: string
-  starred: boolean
+  status: 'running' | 'warning' | 'critical' | 'offline'
+  cpu: number
+  memory: number
+  disk: number
+  network: { in: number; out: number }
+  apps: number
+  os: string
+  uptime: string
 }
 
-// Mock data for Grafana level features
+interface APMService {
+  id: string
+  name: string
+  language: string
+  requestCount: number
+  errorRate: number
+  avgLatency: number
+  p99Latency: number
+  apdex: number
+  status: 'healthy' | 'degraded' | 'critical'
+}
+
+// Mock data
 const mockMetrics: Metric[] = [
-  { id: 'm1', name: 'CPU Usage', value: 67.5, unit: '%', change: 5.2, changePercent: 8.3, trend: 'up', sparkline: [55, 58, 62, 65, 68, 70, 65, 67.5], thresholds: { warning: 75, critical: 90 }, status: 'normal' },
-  { id: 'm2', name: 'Memory Usage', value: 82.3, unit: '%', change: 3.1, changePercent: 3.9, trend: 'up', sparkline: [75, 76, 78, 80, 79, 81, 83, 82.3], thresholds: { warning: 80, critical: 95 }, status: 'warning' },
-  { id: 'm3', name: 'Disk I/O', value: 245, unit: 'MB/s', change: -12, changePercent: -4.7, trend: 'down', sparkline: [280, 265, 258, 250, 248, 252, 240, 245], thresholds: { warning: 400, critical: 500 }, status: 'normal' },
+  { id: 'm1', name: 'CPU Usage', value: 67.5, unit: '%', change: 5.2, changePercent: 8.3, trend: 'up', sparkline: [55, 58, 62, 65, 68, 70, 65, 67.5], thresholds: { warning: 75, critical: 90 }, status: 'normal', host: 'web-01' },
+  { id: 'm2', name: 'Memory Usage', value: 82.3, unit: '%', change: 3.1, changePercent: 3.9, trend: 'up', sparkline: [75, 76, 78, 80, 79, 81, 83, 82.3], thresholds: { warning: 80, critical: 95 }, status: 'warning', host: 'web-01' },
+  { id: 'm3', name: 'Disk I/O', value: 245, unit: 'MB/s', change: -12, changePercent: -4.7, trend: 'down', sparkline: [280, 265, 258, 250, 248, 252, 240, 245], thresholds: { warning: 400, critical: 500 }, status: 'normal', host: 'db-01' },
   { id: 'm4', name: 'Network In', value: 1.24, unit: 'GB/s', change: 0.08, changePercent: 6.9, trend: 'up', sparkline: [1.1, 1.15, 1.18, 1.2, 1.22, 1.21, 1.23, 1.24], thresholds: { warning: 2, critical: 3 }, status: 'normal' },
   { id: 'm5', name: 'Network Out', value: 0.89, unit: 'GB/s', change: 0.05, changePercent: 5.9, trend: 'up', sparkline: [0.8, 0.82, 0.84, 0.86, 0.85, 0.87, 0.88, 0.89], thresholds: { warning: 2, critical: 3 }, status: 'normal' },
   { id: 'm6', name: 'Active Connections', value: 12450, unit: '', change: 890, changePercent: 7.7, trend: 'up', sparkline: [10500, 11000, 11400, 11800, 12100, 12300, 12400, 12450], thresholds: { warning: 15000, critical: 20000 }, status: 'normal' },
@@ -130,90 +134,83 @@ const mockMetrics: Metric[] = [
 ]
 
 const mockAlerts: Alert[] = [
-  { id: 'a1', name: 'High Memory Usage', severity: 'warning', status: 'firing', message: 'Memory usage exceeded 80% threshold', metric: 'memory_usage_percent', value: 82.3, threshold: 80, startedAt: '2024-12-20T14:30:00Z', annotations: [{ key: 'summary', value: 'Memory usage is high' }, { key: 'description', value: 'Consider scaling up or optimizing memory usage' }], labels: [{ key: 'service', value: 'api-gateway' }, { key: 'env', value: 'production' }] },
-  { id: 'a2', name: 'API Latency Spike', severity: 'warning', status: 'firing', message: 'API response time increased significantly', metric: 'http_request_duration_seconds', value: 145, threshold: 120, startedAt: '2024-12-20T15:15:00Z', annotations: [{ key: 'summary', value: 'API is slow' }], labels: [{ key: 'service', value: 'api-gateway' }] },
-  { id: 'a3', name: 'Database Connection Pool', severity: 'info', status: 'pending', message: 'Connection pool usage above 60%', metric: 'db_connection_pool_usage', value: 65, threshold: 60, startedAt: '2024-12-20T15:45:00Z', annotations: [], labels: [{ key: 'database', value: 'primary' }] },
-  { id: 'a4', name: 'Disk Space Low', severity: 'critical', status: 'resolved', message: 'Disk space was critically low', metric: 'disk_usage_percent', value: 95, threshold: 90, startedAt: '2024-12-20T10:00:00Z', resolvedAt: '2024-12-20T11:30:00Z', annotations: [{ key: 'summary', value: 'Disk cleanup completed' }], labels: [{ key: 'mount', value: '/data' }] },
-  { id: 'a5', name: 'SSL Certificate Expiry', severity: 'warning', status: 'firing', message: 'SSL certificate expires in 7 days', metric: 'ssl_cert_expiry_days', value: 7, threshold: 14, startedAt: '2024-12-20T00:00:00Z', annotations: [{ key: 'domain', value: 'api.example.com' }], labels: [] }
+  { id: 'a1', name: 'High Memory Usage', severity: 'warning', status: 'firing', message: 'Memory usage exceeded 80% threshold on web-01', metric: 'system.memory.usage', value: 82.3, threshold: 80, startedAt: '2024-12-20T14:30:00Z', tags: { service: 'api-gateway', env: 'production', host: 'web-01' } },
+  { id: 'a2', name: 'API Latency Spike', severity: 'warning', status: 'firing', message: 'P99 latency exceeded threshold', metric: 'trace.http.request.duration', value: 450, threshold: 300, startedAt: '2024-12-20T15:15:00Z', tags: { service: 'api-gateway', endpoint: '/api/orders' } },
+  { id: 'a3', name: 'Database Connection Pool', severity: 'info', status: 'pending', message: 'Connection pool usage above 60%', metric: 'postgresql.connections.active', value: 65, threshold: 60, startedAt: '2024-12-20T15:45:00Z', tags: { database: 'primary' } },
+  { id: 'a4', name: 'Disk Space Critical', severity: 'critical', status: 'resolved', message: 'Disk space was critically low', metric: 'system.disk.usage', value: 95, threshold: 90, startedAt: '2024-12-20T10:00:00Z', resolvedAt: '2024-12-20T11:30:00Z', tags: { mount: '/data', host: 'db-01' } },
+  { id: 'a5', name: 'SSL Certificate Expiry', severity: 'warning', status: 'muted', message: 'SSL certificate expires in 7 days', metric: 'tls.certificate.expiry_days', value: 7, threshold: 14, startedAt: '2024-12-20T00:00:00Z', tags: { domain: 'api.example.com' } }
 ]
 
 const mockLogs: LogEntry[] = [
-  { id: 'l1', timestamp: '2024-12-20T15:59:45Z', level: 'error', service: 'api-gateway', message: 'Connection timeout to database after 30s', metadata: { requestId: 'req-abc123', userId: 'user-456' }, traceId: 'trace-789' },
-  { id: 'l2', timestamp: '2024-12-20T15:59:30Z', level: 'warn', service: 'auth-service', message: 'Failed login attempt from suspicious IP', metadata: { ip: '192.168.1.100', attempts: '5' } },
-  { id: 'l3', timestamp: '2024-12-20T15:59:15Z', level: 'info', service: 'user-service', message: 'User profile updated successfully', metadata: { userId: 'user-123' } },
-  { id: 'l4', timestamp: '2024-12-20T15:59:00Z', level: 'error', service: 'payment-service', message: 'Payment processing failed: insufficient funds', metadata: { orderId: 'ord-xyz', amount: '150.00' } },
-  { id: 'l5', timestamp: '2024-12-20T15:58:45Z', level: 'info', service: 'notification-service', message: 'Email sent successfully', metadata: { to: 'user@example.com', template: 'welcome' } },
-  { id: 'l6', timestamp: '2024-12-20T15:58:30Z', level: 'debug', service: 'cache-service', message: 'Cache hit for key user:123:profile', metadata: { ttl: '3600' } },
-  { id: 'l7', timestamp: '2024-12-20T15:58:15Z', level: 'warn', service: 'api-gateway', message: 'Rate limit approaching for client', metadata: { clientId: 'client-abc', remaining: '10' } },
-  { id: 'l8', timestamp: '2024-12-20T15:58:00Z', level: 'fatal', service: 'worker-service', message: 'Worker process crashed unexpectedly', metadata: { pid: '12345', signal: 'SIGSEGV' } }
+  { id: 'l1', timestamp: '2024-12-20T15:59:45Z', level: 'error', service: 'api-gateway', host: 'web-01', message: 'Connection timeout to database after 30s', metadata: { requestId: 'req-abc123', userId: 'user-456', db: 'primary' }, traceId: 'trace-789' },
+  { id: 'l2', timestamp: '2024-12-20T15:59:30Z', level: 'warn', service: 'auth-service', host: 'web-02', message: 'Failed login attempt from suspicious IP', metadata: { ip: '192.168.1.100', attempts: '5', country: 'RU' } },
+  { id: 'l3', timestamp: '2024-12-20T15:59:15Z', level: 'info', service: 'user-service', host: 'web-01', message: 'User profile updated successfully', metadata: { userId: 'user-123', changes: 'email,name' } },
+  { id: 'l4', timestamp: '2024-12-20T15:59:00Z', level: 'error', service: 'payment-service', host: 'web-03', message: 'Payment processing failed: insufficient funds', metadata: { orderId: 'ord-xyz', amount: '150.00', currency: 'USD' } },
+  { id: 'l5', timestamp: '2024-12-20T15:58:45Z', level: 'info', service: 'notification-service', host: 'worker-01', message: 'Email sent successfully', metadata: { to: 'user@example.com', template: 'welcome' } },
+  { id: 'l6', timestamp: '2024-12-20T15:58:30Z', level: 'debug', service: 'cache-service', host: 'cache-01', message: 'Cache hit for key user:123:profile', metadata: { ttl: '3600' } },
+  { id: 'l7', timestamp: '2024-12-20T15:58:15Z', level: 'warn', service: 'api-gateway', host: 'web-01', message: 'Rate limit approaching for client', metadata: { clientId: 'client-abc', remaining: '10' } },
+  { id: 'l8', timestamp: '2024-12-20T15:58:00Z', level: 'fatal', service: 'worker-service', host: 'worker-02', message: 'Worker process crashed unexpectedly', metadata: { pid: '12345', signal: 'SIGSEGV' } }
 ]
 
 const mockServices: ServiceHealth[] = [
-  { id: 's1', name: 'API Gateway', status: 'healthy', uptime: 99.98, latency: 45, errorRate: 0.02, requestsPerSecond: 2500, lastChecked: '2024-12-20T15:59:00Z', dependencies: [{ name: 'Auth Service', status: 'healthy' }, { name: 'Cache', status: 'healthy' }] },
-  { id: 's2', name: 'Auth Service', status: 'healthy', uptime: 99.99, latency: 12, errorRate: 0.01, requestsPerSecond: 1200, lastChecked: '2024-12-20T15:59:00Z', dependencies: [{ name: 'Database', status: 'healthy' }] },
-  { id: 's3', name: 'User Service', status: 'degraded', uptime: 99.5, latency: 156, errorRate: 0.8, requestsPerSecond: 850, lastChecked: '2024-12-20T15:59:00Z', dependencies: [{ name: 'Database', status: 'healthy' }, { name: 'Cache', status: 'degraded' }] },
-  { id: 's4', name: 'Payment Service', status: 'healthy', uptime: 99.95, latency: 230, errorRate: 0.15, requestsPerSecond: 320, lastChecked: '2024-12-20T15:59:00Z', dependencies: [{ name: 'Stripe API', status: 'healthy' }] },
-  { id: 's5', name: 'Notification Service', status: 'healthy', uptime: 99.9, latency: 89, errorRate: 0.05, requestsPerSecond: 450, lastChecked: '2024-12-20T15:59:00Z', dependencies: [{ name: 'Email Provider', status: 'healthy' }, { name: 'SMS Provider', status: 'healthy' }] },
-  { id: 's6', name: 'Worker Service', status: 'down', uptime: 98.5, latency: 0, errorRate: 100, requestsPerSecond: 0, lastChecked: '2024-12-20T15:58:00Z', dependencies: [{ name: 'Queue', status: 'healthy' }] }
+  { id: 's1', name: 'API Gateway', status: 'healthy', uptime: 99.98, latency: 45, errorRate: 0.02, requestsPerSecond: 2500, apdex: 0.95, lastChecked: '2024-12-20T15:59:00Z', dependencies: [{ name: 'Auth Service', status: 'healthy' }, { name: 'Redis', status: 'healthy' }] },
+  { id: 's2', name: 'Auth Service', status: 'healthy', uptime: 99.99, latency: 12, errorRate: 0.01, requestsPerSecond: 1200, apdex: 0.98, lastChecked: '2024-12-20T15:59:00Z', dependencies: [{ name: 'PostgreSQL', status: 'healthy' }] },
+  { id: 's3', name: 'User Service', status: 'degraded', uptime: 99.5, latency: 156, errorRate: 0.8, requestsPerSecond: 850, apdex: 0.82, lastChecked: '2024-12-20T15:59:00Z', dependencies: [{ name: 'PostgreSQL', status: 'healthy' }, { name: 'Redis', status: 'degraded' }] },
+  { id: 's4', name: 'Payment Service', status: 'healthy', uptime: 99.95, latency: 230, errorRate: 0.15, requestsPerSecond: 320, apdex: 0.91, lastChecked: '2024-12-20T15:59:00Z', dependencies: [{ name: 'Stripe API', status: 'healthy' }] },
+  { id: 's5', name: 'Notification Service', status: 'healthy', uptime: 99.9, latency: 89, errorRate: 0.05, requestsPerSecond: 450, apdex: 0.94, lastChecked: '2024-12-20T15:59:00Z', dependencies: [{ name: 'SendGrid', status: 'healthy' }, { name: 'Twilio', status: 'healthy' }] },
+  { id: 's6', name: 'Worker Service', status: 'down', uptime: 98.5, latency: 0, errorRate: 100, requestsPerSecond: 0, apdex: 0, lastChecked: '2024-12-20T15:58:00Z', dependencies: [{ name: 'RabbitMQ', status: 'healthy' }] }
 ]
 
 const mockTraces: Trace[] = [
-  {
-    id: 't1', traceId: 'trace-abc123', name: 'POST /api/orders', service: 'api-gateway', duration: 342, status: 'ok', timestamp: '2024-12-20T15:59:45Z',
+  { id: 't1', traceId: 'trace-abc123', name: 'POST /api/orders', service: 'api-gateway', duration: 342, status: 'ok', timestamp: '2024-12-20T15:59:45Z', resource: '/api/orders',
     spans: [
-      { id: 'sp1', name: 'HTTP Request', service: 'api-gateway', duration: 342, startTime: 0, status: 'ok', tags: { method: 'POST', path: '/api/orders' } },
-      { id: 'sp2', name: 'Auth Check', service: 'auth-service', duration: 12, startTime: 5, status: 'ok', tags: { userId: 'user-123' } },
-      { id: 'sp3', name: 'DB Query', service: 'order-service', duration: 156, startTime: 20, status: 'ok', tags: { query: 'INSERT orders' } },
-      { id: 'sp4', name: 'Payment Process', service: 'payment-service', duration: 230, startTime: 180, status: 'ok', tags: { provider: 'stripe' } },
-      { id: 'sp5', name: 'Send Notification', service: 'notification-service', duration: 45, startTime: 290, status: 'ok', tags: { type: 'email' } }
+      { id: 'sp1', name: 'http.request', service: 'api-gateway', duration: 342, startTime: 0, status: 'ok', resource: 'POST /api/orders', tags: { 'http.method': 'POST', 'http.status_code': '201' } },
+      { id: 'sp2', name: 'auth.validate', service: 'auth-service', duration: 12, startTime: 5, status: 'ok', resource: 'validate_token', tags: { userId: 'user-123' } },
+      { id: 'sp3', name: 'postgresql.query', service: 'order-service', duration: 156, startTime: 20, status: 'ok', resource: 'INSERT orders', tags: { 'db.type': 'postgresql' } },
+      { id: 'sp4', name: 'stripe.charge', service: 'payment-service', duration: 230, startTime: 180, status: 'ok', resource: 'create_charge', tags: { provider: 'stripe' } }
     ]
   },
-  {
-    id: 't2', traceId: 'trace-def456', name: 'GET /api/users/:id', service: 'api-gateway', duration: 89, status: 'ok', timestamp: '2024-12-20T15:59:30Z',
+  { id: 't2', traceId: 'trace-def456', name: 'GET /api/users/:id', service: 'api-gateway', duration: 89, status: 'ok', timestamp: '2024-12-20T15:59:30Z', resource: '/api/users/{id}',
     spans: [
-      { id: 'sp6', name: 'HTTP Request', service: 'api-gateway', duration: 89, startTime: 0, status: 'ok', tags: { method: 'GET' } },
-      { id: 'sp7', name: 'Cache Lookup', service: 'cache-service', duration: 3, startTime: 5, status: 'ok', tags: { hit: 'true' } },
-      { id: 'sp8', name: 'Response', service: 'api-gateway', duration: 2, startTime: 85, status: 'ok', tags: {} }
+      { id: 'sp6', name: 'http.request', service: 'api-gateway', duration: 89, startTime: 0, status: 'ok', resource: 'GET /api/users/{id}', tags: { 'http.method': 'GET' } },
+      { id: 'sp7', name: 'redis.get', service: 'cache-service', duration: 3, startTime: 5, status: 'ok', resource: 'GET user:*', tags: { hit: 'true' } }
     ]
   },
-  {
-    id: 't3', traceId: 'trace-ghi789', name: 'POST /api/payments', service: 'api-gateway', duration: 1250, status: 'error', timestamp: '2024-12-20T15:58:15Z',
+  { id: 't3', traceId: 'trace-ghi789', name: 'POST /api/payments', service: 'api-gateway', duration: 1250, status: 'error', timestamp: '2024-12-20T15:58:15Z', resource: '/api/payments',
     spans: [
-      { id: 'sp9', name: 'HTTP Request', service: 'api-gateway', duration: 1250, startTime: 0, status: 'error', tags: { method: 'POST' } },
-      { id: 'sp10', name: 'Validate Request', service: 'payment-service', duration: 15, startTime: 10, status: 'ok', tags: {} },
-      { id: 'sp11', name: 'Process Payment', service: 'payment-service', duration: 1200, startTime: 30, status: 'error', tags: { error: 'timeout' } }
-    ]
-  },
-  {
-    id: 't4', traceId: 'trace-jkl012', name: 'GET /api/products', service: 'api-gateway', duration: 156, status: 'ok', timestamp: '2024-12-20T15:57:00Z',
-    spans: [
-      { id: 'sp12', name: 'HTTP Request', service: 'api-gateway', duration: 156, startTime: 0, status: 'ok', tags: { method: 'GET' } },
-      { id: 'sp13', name: 'DB Query', service: 'product-service', duration: 120, startTime: 15, status: 'ok', tags: { query: 'SELECT products' } },
-      { id: 'sp14', name: 'Transform Response', service: 'api-gateway', duration: 8, startTime: 140, status: 'ok', tags: {} }
+      { id: 'sp9', name: 'http.request', service: 'api-gateway', duration: 1250, startTime: 0, status: 'error', resource: 'POST /api/payments', tags: { 'http.status_code': '504' } },
+      { id: 'sp10', name: 'stripe.charge', service: 'payment-service', duration: 1200, startTime: 30, status: 'error', resource: 'create_charge', tags: { error: 'timeout' } }
     ]
   }
 ]
 
-const mockSavedQueries: SavedQuery[] = [
-  { id: 'q1', name: 'High Latency Requests', query: 'histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))', description: 'P99 latency for all HTTP requests', lastRun: '2024-12-20T15:30:00Z', starred: true },
-  { id: 'q2', name: 'Error Rate by Service', query: 'sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)', description: 'HTTP 5xx errors grouped by service', lastRun: '2024-12-20T14:45:00Z', starred: true },
-  { id: 'q3', name: 'Memory Usage', query: 'container_memory_usage_bytes / container_spec_memory_limit_bytes * 100', description: 'Memory utilization percentage', lastRun: '2024-12-20T15:00:00Z', starred: false },
-  { id: 'q4', name: 'Active Connections', query: 'sum(pg_stat_activity_count) by (datname)', description: 'Database connections by database', lastRun: '2024-12-20T13:20:00Z', starred: false },
-  { id: 'q5', name: 'Request Rate', query: 'sum(rate(http_requests_total[1m])) by (service)', description: 'Requests per second by service', lastRun: '2024-12-20T15:55:00Z', starred: true }
+const mockHosts: Host[] = [
+  { id: 'h1', name: 'web-01', status: 'running', cpu: 67.5, memory: 82.3, disk: 45, network: { in: 1.24, out: 0.89 }, apps: 5, os: 'Ubuntu 22.04', uptime: '45d 12h' },
+  { id: 'h2', name: 'web-02', status: 'running', cpu: 45.2, memory: 68.1, disk: 52, network: { in: 0.98, out: 0.76 }, apps: 5, os: 'Ubuntu 22.04', uptime: '45d 12h' },
+  { id: 'h3', name: 'web-03', status: 'warning', cpu: 78.9, memory: 85.4, disk: 71, network: { in: 1.56, out: 1.12 }, apps: 5, os: 'Ubuntu 22.04', uptime: '30d 8h' },
+  { id: 'h4', name: 'db-01', status: 'running', cpu: 42.1, memory: 76.5, disk: 68, network: { in: 0.45, out: 0.32 }, apps: 2, os: 'Ubuntu 22.04', uptime: '90d 4h' },
+  { id: 'h5', name: 'cache-01', status: 'running', cpu: 23.4, memory: 45.2, disk: 12, network: { in: 2.34, out: 2.01 }, apps: 1, os: 'Alpine 3.18', uptime: '60d 16h' },
+  { id: 'h6', name: 'worker-01', status: 'running', cpu: 56.7, memory: 62.3, disk: 34, network: { in: 0.12, out: 0.08 }, apps: 3, os: 'Ubuntu 22.04', uptime: '15d 2h' },
+  { id: 'h7', name: 'worker-02', status: 'critical', cpu: 0, memory: 0, disk: 34, network: { in: 0, out: 0 }, apps: 0, os: 'Ubuntu 22.04', uptime: '0h' }
 ]
 
-export default function SystemInsightsClient({ initialInsights }: { initialInsights: SystemInsight[] }) {
+const mockAPMServices: APMService[] = [
+  { id: 'apm1', name: 'api-gateway', language: 'Node.js', requestCount: 125000, errorRate: 0.02, avgLatency: 45, p99Latency: 180, apdex: 0.95, status: 'healthy' },
+  { id: 'apm2', name: 'auth-service', language: 'Go', requestCount: 89000, errorRate: 0.01, avgLatency: 12, p99Latency: 45, apdex: 0.98, status: 'healthy' },
+  { id: 'apm3', name: 'user-service', language: 'Python', requestCount: 67000, errorRate: 0.8, avgLatency: 156, p99Latency: 450, apdex: 0.82, status: 'degraded' },
+  { id: 'apm4', name: 'payment-service', language: 'Java', requestCount: 23000, errorRate: 0.15, avgLatency: 230, p99Latency: 890, apdex: 0.91, status: 'healthy' },
+  { id: 'apm5', name: 'notification-service', language: 'Node.js', requestCount: 45000, errorRate: 0.05, avgLatency: 89, p99Latency: 250, apdex: 0.94, status: 'healthy' },
+  { id: 'apm6', name: 'order-service', language: 'Go', requestCount: 34000, errorRate: 0.08, avgLatency: 78, p99Latency: 320, apdex: 0.93, status: 'healthy' }
+]
+
+export default function SystemInsightsClient() {
   const [activeTab, setActiveTab] = useState('overview')
-  const [typeFilter, setTypeFilter] = useState<InsightType | 'all'>('all')
-  const [severityFilter, setSeverityFilter] = useState<InsightSeverity | 'all'>('all')
-  const [statusFilter, setStatusFilter] = useState<InsightStatus | 'all'>('all')
   const [timeRange, setTimeRange] = useState('1h')
   const [logLevel, setLogLevel] = useState<string>('all')
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null)
-  const [exploreQuery, setExploreQuery] = useState('')
   const [selectedTrace, setSelectedTrace] = useState<Trace | null>(null)
-  const { insights, loading, error } = useSystemInsights({ insightType: typeFilter, severity: severityFilter, status: statusFilter })
-  const displayInsights = insights.length > 0 ? insights : initialInsights
+  const [isLive, setIsLive] = useState(true)
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -222,6 +219,7 @@ export default function SystemInsightsClient({ initialInsights }: { initialInsig
     const healthyServices = mockServices.filter(s => s.status === 'healthy').length
     const avgUptime = mockServices.reduce((sum, s) => sum + s.uptime, 0) / mockServices.length
     const totalRps = mockServices.reduce((sum, s) => sum + s.requestsPerSecond, 0)
+    const avgApdex = mockServices.reduce((sum, s) => sum + s.apdex, 0) / mockServices.length
 
     return {
       firingAlerts: firing,
@@ -231,26 +229,18 @@ export default function SystemInsightsClient({ initialInsights }: { initialInsig
       avgUptime: avgUptime.toFixed(2),
       totalRps,
       errorLogs: mockLogs.filter(l => l.level === 'error' || l.level === 'fatal').length,
-      warningMetrics: mockMetrics.filter(m => m.status === 'warning').length
+      warningMetrics: mockMetrics.filter(m => m.status === 'warning').length,
+      totalHosts: mockHosts.length,
+      healthyHosts: mockHosts.filter(h => h.status === 'running').length,
+      avgApdex: avgApdex.toFixed(2)
     }
   }, [])
 
-  const getLogLevelColor = (level: string) => {
-    switch (level) {
-      case 'debug': return 'text-gray-500 dark:text-gray-400'
-      case 'info': return 'text-blue-600 dark:text-blue-400'
-      case 'warn': return 'text-amber-600 dark:text-amber-400'
-      case 'error': return 'text-red-600 dark:text-red-400'
-      case 'fatal': return 'text-red-800 dark:text-red-300 font-bold'
-      default: return 'text-gray-600 dark:text-gray-400'
-    }
-  }
-
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'healthy': return 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
-      case 'degraded': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400'
-      case 'down': return 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
+      case 'healthy': case 'running': case 'ok': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400'
+      case 'degraded': case 'warning': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400'
+      case 'down': case 'critical': case 'error': case 'offline': return 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
       default: return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
     }
   }
@@ -261,176 +251,250 @@ export default function SystemInsightsClient({ initialInsights }: { initialInsig
       case 'warning': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400'
       case 'error': return 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-400'
       case 'critical': return 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
-      default: return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+      default: return 'bg-gray-100 text-gray-700'
     }
   }
 
-  if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">Error: {error.message}</div></div>
+  const getLogLevelColor = (level: string) => {
+    switch (level) {
+      case 'debug': return 'bg-gray-600 text-gray-100'
+      case 'info': return 'bg-blue-600 text-blue-100'
+      case 'warn': return 'bg-amber-600 text-amber-100'
+      case 'error': return 'bg-red-600 text-red-100'
+      case 'fatal': return 'bg-red-800 text-red-100'
+      default: return 'bg-gray-600 text-gray-100'
+    }
+  }
+
+  // Key metrics for header cards
+  const keyMetrics = [
+    { label: 'Firing Alerts', value: stats.firingAlerts, icon: AlertTriangle, gradient: 'from-red-500 to-red-600', positive: stats.firingAlerts === 0 },
+    { label: 'Healthy Services', value: `${stats.healthyServices}/${stats.totalServices}`, icon: CheckCircle, gradient: 'from-emerald-500 to-emerald-600', positive: true },
+    { label: 'Avg Uptime', value: `${stats.avgUptime}%`, icon: Activity, gradient: 'from-blue-500 to-blue-600', positive: true },
+    { label: 'Total RPS', value: stats.totalRps.toLocaleString(), icon: Zap, gradient: 'from-purple-500 to-purple-600', positive: true },
+    { label: 'CPU Usage', value: `${mockMetrics[0].value}%`, icon: Cpu, gradient: 'from-indigo-500 to-indigo-600', positive: mockMetrics[0].status === 'normal' },
+    { label: 'Memory', value: `${mockMetrics[1].value}%`, icon: Server, gradient: 'from-amber-500 to-amber-600', positive: mockMetrics[1].status === 'normal' },
+    { label: 'Hosts', value: `${stats.healthyHosts}/${stats.totalHosts}`, icon: Box, gradient: 'from-cyan-500 to-cyan-600', positive: true },
+    { label: 'Apdex', value: stats.avgApdex, icon: TrendingUp, gradient: 'from-pink-500 to-pink-600', positive: parseFloat(stats.avgApdex) >= 0.9 }
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <span className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-medium rounded-full">Grafana Level</span>
-              <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-full">Prometheus Style</span>
+      <div className="max-w-[1800px] mx-auto space-y-8">
+        {/* Premium Header */}
+        <div className="relative overflow-hidden bg-gradient-to-r from-slate-700 via-gray-700 to-zinc-700 rounded-2xl p-8 text-white">
+          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <Activity className="h-10 w-10" />
+                  <Badge className="bg-white/20 text-white border-0">Datadog Level</Badge>
+                  {isLive && (
+                    <Badge className="bg-emerald-500/30 text-white border-0 animate-pulse">
+                      <span className="h-2 w-2 bg-emerald-400 rounded-full mr-1.5 inline-block"></span>
+                      Live
+                    </Badge>
+                  )}
+                </div>
+                <h1 className="text-4xl font-bold mb-2">System Insights</h1>
+                <p className="text-white/80">Infrastructure monitoring • APM • Logs • Traces • Alerts</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Select value={timeRange} onValueChange={setTimeRange}>
+                  <SelectTrigger className="w-[140px] bg-white/20 border-0 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5m">Last 5 min</SelectItem>
+                    <SelectItem value="15m">Last 15 min</SelectItem>
+                    <SelectItem value="1h">Last 1 hour</SelectItem>
+                    <SelectItem value="6h">Last 6 hours</SelectItem>
+                    <SelectItem value="24h">Last 24 hours</SelectItem>
+                    <SelectItem value="7d">Last 7 days</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={() => setIsLive(!isLive)}>
+                  {isLive ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                </Button>
+                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0">
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-600 to-gray-600 bg-clip-text text-transparent">System Insights</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">Real-time infrastructure monitoring, logs & alerting</p>
-          </div>
-          <div className="flex gap-3">
-            <select
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-              className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm"
-            >
-              <option value="5m">Last 5 minutes</option>
-              <option value="15m">Last 15 minutes</option>
-              <option value="1h">Last 1 hour</option>
-              <option value="6h">Last 6 hours</option>
-              <option value="24h">Last 24 hours</option>
-              <option value="7d">Last 7 days</option>
-            </select>
-            <button className="px-4 py-2 bg-slate-600 text-white rounded-lg text-sm hover:bg-slate-700 transition-colors">
-              Refresh
-            </button>
+
+            {/* 8 Gradient Stat Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+              {keyMetrics.map((metric, idx) => (
+                <div key={idx} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 hover:bg-white/20 transition-all cursor-pointer">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${metric.gradient}`}>
+                      <metric.icon className="h-4 w-4 text-white" />
+                    </div>
+                    {typeof metric.value === 'number' && metric.value > 0 && !metric.positive ? (
+                      <AlertCircle className="h-4 w-4 text-red-300" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4 text-emerald-300" />
+                    )}
+                  </div>
+                  <div className="text-xl font-bold">{metric.value}</div>
+                  <div className="text-xs text-white/70">{metric.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Firing Alerts</div>
-            <div className={`text-2xl font-bold ${stats.firingAlerts > 0 ? 'text-amber-600' : 'text-green-600'}`}>{stats.firingAlerts}</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Critical</div>
-            <div className={`text-2xl font-bold ${stats.criticalAlerts > 0 ? 'text-red-600' : 'text-green-600'}`}>{stats.criticalAlerts}</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Services</div>
-            <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.healthyServices}/{stats.totalServices}</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Avg Uptime</div>
-            <div className="text-2xl font-bold text-green-600">{stats.avgUptime}%</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Total RPS</div>
-            <div className="text-2xl font-bold text-blue-600">{stats.totalRps.toLocaleString()}</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">CPU</div>
-            <div className="text-2xl font-bold text-purple-600">{mockMetrics[0].value}%</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Memory</div>
-            <div className={`text-2xl font-bold ${mockMetrics[1].status === 'warning' ? 'text-amber-600' : 'text-purple-600'}`}>{mockMetrics[1].value}%</div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Error Logs</div>
-            <div className={`text-2xl font-bold ${stats.errorLogs > 0 ? 'text-red-600' : 'text-green-600'}`}>{stats.errorLogs}</div>
-          </div>
-        </div>
-
-        {/* Tabs */}
+        {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-lg border border-gray-200 dark:border-gray-700">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-slate-300">Overview</TabsTrigger>
-            <TabsTrigger value="metrics" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-slate-300">Metrics</TabsTrigger>
-            <TabsTrigger value="alerts" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-slate-300">Alerts</TabsTrigger>
-            <TabsTrigger value="logs" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-slate-300">Logs</TabsTrigger>
-            <TabsTrigger value="traces" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-slate-300">Traces</TabsTrigger>
-            <TabsTrigger value="explore" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-slate-300">Explore</TabsTrigger>
-            <TabsTrigger value="services" className="data-[state=active]:bg-slate-100 data-[state=active]:text-slate-700 dark:data-[state=active]:bg-slate-800 dark:data-[state=active]:text-slate-300">Services</TabsTrigger>
+          <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm border h-auto flex-wrap">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-lg px-4 py-2">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="metrics" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-lg px-4 py-2">
+              <Activity className="h-4 w-4 mr-2" />
+              Metrics
+            </TabsTrigger>
+            <TabsTrigger value="alerts" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-lg px-4 py-2">
+              <Bell className="h-4 w-4 mr-2" />
+              Alerts
+              {stats.firingAlerts > 0 && (
+                <span className="ml-2 px-1.5 py-0.5 bg-red-500 text-white text-xs rounded-full">{stats.firingAlerts}</span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="logs" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-lg px-4 py-2">
+              <FileText className="h-4 w-4 mr-2" />
+              Logs
+            </TabsTrigger>
+            <TabsTrigger value="traces" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-lg px-4 py-2">
+              <GitBranch className="h-4 w-4 mr-2" />
+              Traces
+            </TabsTrigger>
+            <TabsTrigger value="apm" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-lg px-4 py-2">
+              <Layers className="h-4 w-4 mr-2" />
+              APM
+            </TabsTrigger>
+            <TabsTrigger value="infrastructure" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-lg px-4 py-2">
+              <Server className="h-4 w-4 mr-2" />
+              Infrastructure
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-lg px-4 py-2">
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Service Health Map */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Service Health</h3>
-                <div className="grid grid-cols-3 gap-3">
-                  {mockServices.map(service => (
-                    <div key={service.id} className={`p-3 rounded-lg border ${
-                      service.status === 'healthy' ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' :
-                      service.status === 'degraded' ? 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20' :
-                      'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
-                    }`}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">{service.name}</span>
-                        <span className={`w-2 h-2 rounded-full ${
-                          service.status === 'healthy' ? 'bg-green-500' :
-                          service.status === 'degraded' ? 'bg-amber-500' :
-                          'bg-red-500'
-                        } animate-pulse`} />
+              <Card>
+                <CardHeader>
+                  <CardTitle>Service Health Map</CardTitle>
+                  <CardDescription>Real-time service status and dependencies</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-3">
+                    {mockServices.map(service => (
+                      <div key={service.id} className={`p-3 rounded-lg border ${
+                        service.status === 'healthy' ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20' :
+                        service.status === 'degraded' ? 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20' :
+                        'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
+                      }`}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium">{service.name}</span>
+                          <span className={`w-2 h-2 rounded-full ${
+                            service.status === 'healthy' ? 'bg-emerald-500' :
+                            service.status === 'degraded' ? 'bg-amber-500' :
+                            'bg-red-500'
+                          } animate-pulse`} />
+                        </div>
+                        <div className="text-xs text-gray-500">{service.latency}ms • {service.apdex} apdex</div>
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{service.latency}ms • {service.uptime}%</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* Active Alerts */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Active Alerts</h3>
-                <div className="space-y-3">
-                  {mockAlerts.filter(a => a.status === 'firing').map(alert => (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    Active Alerts
+                    {stats.firingAlerts > 0 && (
+                      <Badge variant="destructive">{stats.firingAlerts}</Badge>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {mockAlerts.filter(a => a.status === 'firing').slice(0, 4).map(alert => (
                     <div key={alert.id} className={`p-3 rounded-lg border ${
                       alert.severity === 'critical' ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20' :
-                      alert.severity === 'error' ? 'border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-900/20' :
                       'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'
                     }`}>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium text-gray-900 dark:text-white">{alert.name}</span>
-                        <span className={`px-2 py-0.5 rounded text-xs ${getSeverityColor(alert.severity)}`}>{alert.severity}</span>
+                        <span className="font-medium">{alert.name}</span>
+                        <Badge className={getSeverityColor(alert.severity)}>{alert.severity}</Badge>
                       </div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">{alert.message}</p>
                     </div>
                   ))}
                   {mockAlerts.filter(a => a.status === 'firing').length === 0 && (
-                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">No active alerts</div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Key Metrics */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Key Metrics</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {mockMetrics.slice(0, 4).map(metric => (
-                  <div key={metric.id} className={`p-4 rounded-lg ${
-                    metric.status === 'critical' ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' :
-                    metric.status === 'warning' ? 'bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800' :
-                    'bg-gray-50 dark:bg-gray-700/50'
-                  }`}>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">{metric.name}</div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{metric.value}{metric.unit}</div>
-                    <div className={`text-sm mt-1 ${metric.trend === 'up' ? 'text-red-600' : metric.trend === 'down' ? 'text-green-600' : 'text-gray-500'}`}>
-                      {metric.trend === 'up' ? '↑' : metric.trend === 'down' ? '↓' : '→'} {Math.abs(metric.changePercent)}%
+                    <div className="text-center py-8 text-gray-500">
+                      <CheckCircle className="h-8 w-8 mx-auto mb-2 text-emerald-500" />
+                      No active alerts
                     </div>
-                  </div>
-                ))}
-              </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Recent Logs */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Logs</h3>
-              <div className="space-y-2 font-mono text-sm">
-                {mockLogs.slice(0, 5).map(log => (
-                  <div key={log.id} className="flex items-start gap-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded">
-                    <span className="text-gray-400 dark:text-gray-500 text-xs">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                    <span className={`px-2 py-0.5 rounded text-xs uppercase ${getLogLevelColor(log.level)} bg-gray-100 dark:bg-gray-700`}>{log.level}</span>
-                    <span className="text-blue-600 dark:text-blue-400">[{log.service}]</span>
-                    <span className="text-gray-700 dark:text-gray-300 flex-1">{log.message}</span>
+            {/* Key Metrics & Logs Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Key Metrics</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    {mockMetrics.slice(0, 4).map(metric => (
+                      <div key={metric.id} className={`p-4 rounded-lg ${
+                        metric.status === 'critical' ? 'bg-red-50 dark:bg-red-900/20' :
+                        metric.status === 'warning' ? 'bg-amber-50 dark:bg-amber-900/20' :
+                        'bg-gray-50 dark:bg-gray-800'
+                      }`}>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">{metric.name}</div>
+                        <div className="text-2xl font-bold">{metric.value}{metric.unit}</div>
+                        <div className={`text-sm mt-1 flex items-center gap-1 ${
+                          metric.trend === 'up' ? 'text-red-600' : metric.trend === 'down' ? 'text-emerald-600' : 'text-gray-500'
+                        }`}>
+                          {metric.trend === 'up' ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                          {Math.abs(metric.changePercent)}%
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Logs</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 font-mono text-sm">
+                    {mockLogs.slice(0, 5).map(log => (
+                      <div key={log.id} className="flex items-start gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
+                        <span className="text-gray-400 text-xs">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                        <Badge className={`${getLogLevelColor(log.level)} text-xs`}>{log.level}</Badge>
+                        <span className="text-blue-600 dark:text-blue-400">[{log.service}]</span>
+                        <span className="text-gray-700 dark:text-gray-300 truncate flex-1">{log.message}</span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
@@ -438,469 +502,555 @@ export default function SystemInsightsClient({ initialInsights }: { initialInsig
           <TabsContent value="metrics" className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {mockMetrics.map(metric => (
-                <div key={metric.id} className={`bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border ${
-                  metric.status === 'critical' ? 'border-red-300 dark:border-red-800' :
-                  metric.status === 'warning' ? 'border-amber-300 dark:border-amber-800' :
-                  'border-gray-100 dark:border-gray-700'
-                }`}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">{metric.name}</span>
-                    <span className={`px-2 py-0.5 rounded text-xs ${
-                      metric.status === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' :
-                      metric.status === 'warning' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400' :
-                      'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
-                    }`}>{metric.status}</span>
-                  </div>
-                  <div className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    {metric.value}<span className="text-lg text-gray-500 dark:text-gray-400">{metric.unit}</span>
-                  </div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className={`text-sm ${metric.trend === 'up' ? 'text-red-600' : metric.trend === 'down' ? 'text-green-600' : 'text-gray-500'}`}>
-                      {metric.trend === 'up' ? '↑' : metric.trend === 'down' ? '↓' : '→'} {metric.change > 0 ? '+' : ''}{metric.change}{metric.unit}
-                    </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">({metric.changePercent}%)</span>
-                  </div>
-                  <div className="flex items-end gap-1 h-12">
-                    {metric.sparkline.map((val, idx) => (
-                      <div
-                        key={idx}
-                        className={`flex-1 rounded-t ${
-                          val >= metric.thresholds.critical ? 'bg-red-500' :
-                          val >= metric.thresholds.warning ? 'bg-amber-500' :
-                          'bg-blue-500'
-                        }`}
-                        style={{ height: `${(val / Math.max(...metric.sparkline)) * 100}%` }}
-                      />
-                    ))}
-                  </div>
-                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                    Warning: {metric.thresholds.warning}{metric.unit} • Critical: {metric.thresholds.critical}{metric.unit}
-                  </div>
-                </div>
+                <Card key={metric.id} className={metric.status !== 'normal' ? 'border-amber-300 dark:border-amber-700' : ''}>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{metric.name}</span>
+                      <Badge className={getStatusColor(metric.status)}>{metric.status}</Badge>
+                    </div>
+                    <div className="text-3xl font-bold mb-2">
+                      {metric.value}<span className="text-lg text-gray-500">{metric.unit}</span>
+                    </div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className={`text-sm flex items-center ${metric.trend === 'up' ? 'text-red-600' : 'text-emerald-600'}`}>
+                        {metric.trend === 'up' ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+                        {metric.change > 0 ? '+' : ''}{metric.change}{metric.unit}
+                      </span>
+                    </div>
+                    <div className="flex items-end gap-1 h-12">
+                      {metric.sparkline.map((val, idx) => (
+                        <div
+                          key={idx}
+                          className={`flex-1 rounded-t ${
+                            val >= metric.thresholds.critical ? 'bg-red-500' :
+                            val >= metric.thresholds.warning ? 'bg-amber-500' :
+                            'bg-blue-500'
+                          }`}
+                          style={{ height: `${(val / Math.max(...metric.sparkline)) * 100}%` }}
+                        />
+                      ))}
+                    </div>
+                    <div className="mt-2 text-xs text-gray-500">
+                      Warn: {metric.thresholds.warning}{metric.unit} • Crit: {metric.thresholds.critical}{metric.unit}
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </TabsContent>
 
           {/* Alerts Tab */}
-          <TabsContent value="alerts" className="space-y-4">
-            <div className="flex gap-3 mb-4">
-              <select
-                className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm"
-                defaultValue="all"
-              >
-                <option value="all">All Severities</option>
-                <option value="critical">Critical</option>
-                <option value="error">Error</option>
-                <option value="warning">Warning</option>
-                <option value="info">Info</option>
-              </select>
-              <select
-                className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm"
-                defaultValue="all"
-              >
-                <option value="all">All Status</option>
-                <option value="firing">Firing</option>
-                <option value="pending">Pending</option>
-                <option value="resolved">Resolved</option>
-              </select>
+          <TabsContent value="alerts" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Select defaultValue="all">
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Severity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Severities</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="error">Error</SelectItem>
+                    <SelectItem value="warning">Warning</SelectItem>
+                    <SelectItem value="info">Info</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select defaultValue="all">
+                  <SelectTrigger className="w-[150px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="firing">Firing</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="resolved">Resolved</SelectItem>
+                    <SelectItem value="muted">Muted</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Alert
+              </Button>
             </div>
 
-            {mockAlerts.map(alert => (
-              <Dialog key={alert.id}>
-                <DialogTrigger asChild>
-                  <div className={`bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border cursor-pointer hover:shadow-md transition-all ${
-                    alert.status === 'firing' ? (
-                      alert.severity === 'critical' ? 'border-red-300 dark:border-red-800' :
-                      alert.severity === 'error' ? 'border-orange-300 dark:border-orange-800' :
-                      'border-amber-300 dark:border-amber-800'
-                    ) : 'border-gray-100 dark:border-gray-700'
-                  }`}>
+            <div className="space-y-4">
+              {mockAlerts.map(alert => (
+                <Card key={alert.id} className={
+                  alert.status === 'firing' ? (
+                    alert.severity === 'critical' ? 'border-red-300 dark:border-red-700' : 'border-amber-300 dark:border-amber-700'
+                  ) : ''
+                }>
+                  <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${getSeverityColor(alert.severity)}`}>{alert.severity}</span>
-                          <span className={`px-2 py-1 rounded text-xs ${
-                            alert.status === 'firing' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400' :
-                            alert.status === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400' :
-                            'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
-                          }`}>{alert.status}</span>
+                          <Badge className={getSeverityColor(alert.severity)}>{alert.severity}</Badge>
+                          <Badge className={getStatusColor(alert.status)}>{alert.status}</Badge>
                         </div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">{alert.name}</h3>
+                        <h3 className="font-semibold text-lg">{alert.name}</h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{alert.message}</p>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">{new Date(alert.startedAt).toLocaleString()}</div>
-                        <div className="text-sm font-mono mt-1">{alert.value} / {alert.threshold}</div>
-                      </div>
-                    </div>
-                  </div>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>{alert.name}</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">Current Value</div>
-                        <div className="text-2xl font-bold text-gray-900 dark:text-white">{alert.value}</div>
-                      </div>
-                      <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">Threshold</div>
-                        <div className="text-2xl font-bold text-gray-900 dark:text-white">{alert.threshold}</div>
-                      </div>
-                    </div>
-                    {alert.annotations.length > 0 && (
-                      <div>
-                        <h4 className="font-medium mb-2">Annotations</h4>
-                        <div className="space-y-2">
-                          {alert.annotations.map((ann, idx) => (
-                            <div key={idx} className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded">
-                              <span className="font-mono text-sm text-gray-600 dark:text-gray-400">{ann.key}:</span>
-                              <span className="ml-2 text-gray-900 dark:text-white">{ann.value}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {alert.labels.length > 0 && (
-                      <div>
-                        <h4 className="font-medium mb-2">Labels</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {alert.labels.map((label, idx) => (
-                            <span key={idx} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-sm">
-                              {label.key}={label.value}
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          {Object.entries(alert.tags).map(([key, value]) => (
+                            <span key={key} className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs">
+                              {key}:{value}
                             </span>
                           ))}
                         </div>
                       </div>
-                    )}
-                  </div>
-                </DialogContent>
-              </Dialog>
-            ))}
-          </TabsContent>
-
-          {/* Logs Tab */}
-          <TabsContent value="logs" className="space-y-4">
-            <div className="flex gap-3 mb-4">
-              <input
-                type="text"
-                placeholder="Search logs..."
-                className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-              />
-              <select
-                value={logLevel}
-                onChange={(e) => setLogLevel(e.target.value)}
-                className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm"
-              >
-                <option value="all">All Levels</option>
-                <option value="debug">Debug</option>
-                <option value="info">Info</option>
-                <option value="warn">Warning</option>
-                <option value="error">Error</option>
-                <option value="fatal">Fatal</option>
-              </select>
-            </div>
-
-            <div className="bg-gray-900 rounded-xl p-4 font-mono text-sm">
-              <ScrollArea className="h-[600px]">
-                <div className="space-y-1">
-                  {mockLogs.filter(log => logLevel === 'all' || log.level === logLevel).map(log => (
-                    <div key={log.id} className="flex items-start gap-3 hover:bg-gray-800 p-2 rounded">
-                      <span className="text-gray-500 text-xs whitespace-nowrap">{new Date(log.timestamp).toLocaleString()}</span>
-                      <span className={`px-2 py-0.5 rounded text-xs uppercase font-bold ${
-                        log.level === 'debug' ? 'bg-gray-700 text-gray-400' :
-                        log.level === 'info' ? 'bg-blue-900 text-blue-300' :
-                        log.level === 'warn' ? 'bg-amber-900 text-amber-300' :
-                        log.level === 'error' ? 'bg-red-900 text-red-300' :
-                        'bg-red-800 text-red-200'
-                      }`}>{log.level}</span>
-                      <span className="text-cyan-400">[{log.service}]</span>
-                      <span className="text-gray-300 flex-1">{log.message}</span>
-                      {log.traceId && (
-                        <span className="text-purple-400 text-xs">{log.traceId}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-          </TabsContent>
-
-          {/* Traces Tab */}
-          <TabsContent value="traces" className="space-y-6">
-            <div className="flex items-center gap-4 mb-4">
-              <input
-                type="text"
-                placeholder="Search traces by ID, name, or service..."
-                className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
-              />
-              <select className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm">
-                <option value="all">All Services</option>
-                <option value="api-gateway">API Gateway</option>
-                <option value="auth-service">Auth Service</option>
-                <option value="payment-service">Payment Service</option>
-              </select>
-              <select className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm">
-                <option value="all">All Status</option>
-                <option value="ok">OK</option>
-                <option value="error">Error</option>
-              </select>
-            </div>
-
-            <div className="space-y-4">
-              {mockTraces.map(trace => (
-                <Dialog key={trace.id}>
-                  <DialogTrigger asChild>
-                    <div className={`bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border cursor-pointer hover:shadow-md transition-all ${trace.status === 'error' ? 'border-red-200 dark:border-red-800' : 'border-gray-100 dark:border-gray-700'}`}>
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-4">
-                          <span className={`w-3 h-3 rounded-full ${trace.status === 'ok' ? 'bg-green-500' : 'bg-red-500'}`} />
-                          <div>
-                            <h3 className="font-semibold text-gray-900 dark:text-white">{trace.name}</h3>
-                            <div className="text-sm text-gray-500 dark:text-gray-400 font-mono">{trace.traceId}</div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-lg font-semibold text-gray-900 dark:text-white">{trace.duration}ms</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">{new Date(trace.timestamp).toLocaleTimeString()}</div>
-                        </div>
-                      </div>
-                      <div className="relative h-8 bg-gray-100 dark:bg-gray-700 rounded overflow-hidden">
-                        {trace.spans.map((span, idx) => (
-                          <div
-                            key={span.id}
-                            className={`absolute h-6 top-1 rounded ${span.status === 'ok' ? 'bg-blue-500' : 'bg-red-500'}`}
-                            style={{
-                              left: `${(span.startTime / trace.duration) * 100}%`,
-                              width: `${Math.max((span.duration / trace.duration) * 100, 2)}%`
-                            }}
-                            title={`${span.name} - ${span.duration}ms`}
-                          />
-                        ))}
-                      </div>
-                      <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
-                        <span>{trace.spans.length} spans</span>
-                        <span>{trace.service}</span>
+                      <div className="text-right">
+                        <div className="text-sm text-gray-500">{new Date(alert.startedAt).toLocaleString()}</div>
+                        <div className="text-lg font-mono mt-1">{alert.value} / {alert.threshold}</div>
                       </div>
                     </div>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-4xl max-h-[90vh]">
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-3">
-                        <span className={`w-3 h-3 rounded-full ${trace.status === 'ok' ? 'bg-green-500' : 'bg-red-500'}`} />
-                        {trace.name}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <ScrollArea className="max-h-[70vh]">
-                      <div className="space-y-4 p-4">
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Trace ID</div>
-                            <div className="font-mono text-gray-900 dark:text-white">{trace.traceId}</div>
-                          </div>
-                          <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Duration</div>
-                            <div className="text-2xl font-bold text-gray-900 dark:text-white">{trace.duration}ms</div>
-                          </div>
-                          <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Spans</div>
-                            <div className="text-2xl font-bold text-gray-900 dark:text-white">{trace.spans.length}</div>
-                          </div>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900 dark:text-white mb-3">Spans</h4>
-                          <div className="space-y-2">
-                            {trace.spans.map((span, idx) => (
-                              <div key={span.id} className="relative">
-                                <div className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg" style={{ marginLeft: `${idx * 20}px` }}>
-                                  <span className={`w-2 h-2 rounded-full ${span.status === 'ok' ? 'bg-green-500' : 'bg-red-500'}`} />
-                                  <div className="flex-1">
-                                    <div className="font-medium text-gray-900 dark:text-white">{span.name}</div>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">{span.service}</div>
-                                  </div>
-                                  <div className="text-right">
-                                    <div className="font-mono text-gray-900 dark:text-white">{span.duration}ms</div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400">+{span.startTime}ms</div>
-                                  </div>
-                                </div>
-                                {Object.keys(span.tags).length > 0 && (
-                                  <div className="flex flex-wrap gap-1 mt-1" style={{ marginLeft: `${idx * 20 + 12}px` }}>
-                                    {Object.entries(span.tags).map(([key, value]) => (
-                                      <span key={key} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-600 rounded text-xs">
-                                        {key}={value}
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </ScrollArea>
-                  </DialogContent>
-                </Dialog>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </TabsContent>
 
-          {/* Explore Tab */}
-          <TabsContent value="explore" className="space-y-6">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Query Explorer</h3>
-              <div className="space-y-4">
-                <div className="flex gap-3">
-                  <select className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-sm">
-                    <option value="prometheus">Prometheus</option>
-                    <option value="loki">Loki</option>
-                    <option value="tempo">Tempo</option>
-                  </select>
-                  <input
-                    type="text"
-                    value={exploreQuery}
-                    onChange={(e) => setExploreQuery(e.target.value)}
-                    placeholder="Enter PromQL query..."
-                    className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono"
-                  />
-                  <button className="px-6 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors">
-                    Run Query
-                  </button>
-                </div>
-                <div className="h-64 bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-300">
-                  <div className="text-gray-500 mb-2"># Query results will appear here</div>
-                  {exploreQuery ? (
-                    <div>
-                      <div className="text-green-400">Query: {exploreQuery}</div>
-                      <div className="mt-2 text-gray-400">Execute query to see results...</div>
+          {/* Logs Tab */}
+          <TabsContent value="logs" className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input placeholder="Search logs..." className="pl-10" />
+              </div>
+              <Select value={logLevel} onValueChange={setLogLevel}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Log Level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  <SelectItem value="debug">Debug</SelectItem>
+                  <SelectItem value="info">Info</SelectItem>
+                  <SelectItem value="warn">Warning</SelectItem>
+                  <SelectItem value="error">Error</SelectItem>
+                  <SelectItem value="fatal">Fatal</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+            </div>
+
+            <Card className="bg-gray-900">
+              <CardContent className="p-0">
+                <ScrollArea className="h-[600px]">
+                  <div className="p-4 font-mono text-sm space-y-1">
+                    {mockLogs.filter(log => logLevel === 'all' || log.level === logLevel).map(log => (
+                      <div key={log.id} className="flex items-start gap-3 hover:bg-gray-800 p-2 rounded">
+                        <span className="text-gray-500 text-xs whitespace-nowrap">{new Date(log.timestamp).toLocaleString()}</span>
+                        <Badge className={`${getLogLevelColor(log.level)} text-xs uppercase`}>{log.level}</Badge>
+                        <span className="text-cyan-400">[{log.service}]</span>
+                        <span className="text-purple-400">@{log.host}</span>
+                        <span className="text-gray-300 flex-1">{log.message}</span>
+                        {log.traceId && (
+                          <span className="text-indigo-400 text-xs cursor-pointer hover:underline">{log.traceId}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Traces Tab */}
+          <TabsContent value="traces" className="space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input placeholder="Search by trace ID, service, or resource..." className="pl-10" />
+              </div>
+              <Select defaultValue="all">
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Service" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Services</SelectItem>
+                  <SelectItem value="api-gateway">API Gateway</SelectItem>
+                  <SelectItem value="auth-service">Auth Service</SelectItem>
+                  <SelectItem value="payment-service">Payment Service</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select defaultValue="all">
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="ok">OK</SelectItem>
+                  <SelectItem value="error">Error</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-4">
+              {mockTraces.map(trace => (
+                <Card key={trace.id} className={trace.status === 'error' ? 'border-red-300 dark:border-red-700' : ''}>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-4">
+                        <span className={`w-3 h-3 rounded-full ${trace.status === 'ok' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                        <div>
+                          <h3 className="font-semibold">{trace.name}</h3>
+                          <div className="text-sm text-gray-500 font-mono">{trace.traceId}</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-semibold">{trace.duration}ms</div>
+                        <div className="text-sm text-gray-500">{new Date(trace.timestamp).toLocaleTimeString()}</div>
+                      </div>
                     </div>
-                  ) : (
-                    <div className="text-gray-500">Enter a query above to explore your metrics</div>
-                  )}
-                </div>
+                    <div className="relative h-8 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden">
+                      {trace.spans.map((span) => (
+                        <div
+                          key={span.id}
+                          className={`absolute h-6 top-1 rounded ${span.status === 'ok' ? 'bg-blue-500' : 'bg-red-500'}`}
+                          style={{
+                            left: `${(span.startTime / trace.duration) * 100}%`,
+                            width: `${Math.max((span.duration / trace.duration) * 100, 2)}%`
+                          }}
+                          title={`${span.name} - ${span.duration}ms`}
+                        />
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                      <span>{trace.spans.length} spans</span>
+                      <span>{trace.service}</span>
+                      <span>{trace.resource}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* APM Tab */}
+          <TabsContent value="apm" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Application Performance Monitoring</h2>
+                <p className="text-gray-500">Real-time service performance and health</p>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Saved Queries</h3>
-                <button className="px-4 py-2 bg-slate-600 text-white rounded-lg text-sm hover:bg-slate-700 transition-colors">
-                  + Save Current Query
-                </button>
-              </div>
-              <div className="space-y-3">
-                {mockSavedQueries.map(query => (
-                  <div key={query.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        {query.starred && <span className="text-amber-500">★</span>}
-                        <span className="font-medium text-gray-900 dark:text-white">{query.name}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mockAPMServices.map(service => (
+                <Card key={service.id} className={service.status !== 'healthy' ? 'border-amber-300 dark:border-amber-700' : ''}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{service.name}</CardTitle>
+                      <Badge className={getStatusColor(service.status)}>{service.status}</Badge>
+                    </div>
+                    <CardDescription>{service.language}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <div className="text-xs text-gray-500">Requests</div>
+                        <div className="text-lg font-semibold">{(service.requestCount / 1000).toFixed(0)}K</div>
                       </div>
-                      <button
-                        onClick={() => setExploreQuery(query.query)}
-                        className="px-3 py-1 text-sm text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-                      >
-                        Run →
-                      </button>
+                      <div>
+                        <div className="text-xs text-gray-500">Error Rate</div>
+                        <div className={`text-lg font-semibold ${service.errorRate > 0.5 ? 'text-red-600' : 'text-emerald-600'}`}>
+                          {service.errorRate}%
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">Avg Latency</div>
+                        <div className="text-lg font-semibold">{service.avgLatency}ms</div>
+                      </div>
+                      <div>
+                        <div className="text-xs text-gray-500">P99 Latency</div>
+                        <div className="text-lg font-semibold">{service.p99Latency}ms</div>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{query.description}</p>
-                    <code className="block text-xs bg-gray-100 dark:bg-gray-600 p-2 rounded font-mono text-gray-700 dark:text-gray-300 overflow-x-auto">
-                      {query.query}
-                    </code>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                      Last run: {new Date(query.lastRun).toLocaleString()}
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500">Apdex</span>
+                      <div className="flex items-center gap-2">
+                        <Progress value={service.apdex * 100} className="w-24 h-2" />
+                        <span className={`font-semibold ${service.apdex >= 0.9 ? 'text-emerald-600' : service.apdex >= 0.7 ? 'text-amber-600' : 'text-red-600'}`}>
+                          {service.apdex}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Infrastructure Tab */}
+          <TabsContent value="infrastructure" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Infrastructure</h2>
+                <p className="text-gray-500">Host monitoring and resource utilization</p>
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mockHosts.map(host => (
+                <Card key={host.id} className={
+                  host.status === 'critical' || host.status === 'offline' ? 'border-red-300 dark:border-red-700' :
+                  host.status === 'warning' ? 'border-amber-300 dark:border-amber-700' : ''
+                }>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Server className="h-5 w-5 text-gray-400" />
+                        <CardTitle className="text-lg">{host.name}</CardTitle>
+                      </div>
+                      <Badge className={getStatusColor(host.status)}>{host.status}</Badge>
+                    </div>
+                    <CardDescription>{host.os} • Uptime: {host.uptime}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-gray-500">CPU</span>
+                          <span className={host.cpu > 80 ? 'text-red-600' : ''}>{host.cpu}%</span>
+                        </div>
+                        <Progress value={host.cpu} className={`h-2 ${host.cpu > 80 ? '[&>div]:bg-red-500' : ''}`} />
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-gray-500">Memory</span>
+                          <span className={host.memory > 85 ? 'text-red-600' : ''}>{host.memory}%</span>
+                        </div>
+                        <Progress value={host.memory} className={`h-2 ${host.memory > 85 ? '[&>div]:bg-red-500' : ''}`} />
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between text-sm mb-1">
+                          <span className="text-gray-500">Disk</span>
+                          <span className={host.disk > 80 ? 'text-amber-600' : ''}>{host.disk}%</span>
+                        </div>
+                        <Progress value={host.disk} className={`h-2 ${host.disk > 80 ? '[&>div]:bg-amber-500' : ''}`} />
+                      </div>
+                      <div className="flex items-center justify-between text-sm pt-2 border-t">
+                        <span className="text-gray-500">Network</span>
+                        <span>↓{host.network.in}GB/s ↑{host.network.out}GB/s</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Applications</span>
+                        <span>{host.apps} running</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-6">Monitoring Settings</h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Query History</h3>
-                <div className="space-y-2">
-                  {['rate(http_requests_total[5m])', 'up{job="prometheus"}', 'node_memory_Active_bytes'].map((q, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded">
-                      <code className="text-sm font-mono text-gray-700 dark:text-gray-300">{q}</code>
-                      <button
-                        onClick={() => setExploreQuery(q)}
-                        className="text-sm text-slate-600 hover:text-slate-800 dark:text-slate-400"
-                      >
-                        Use
-                      </button>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Data Collection</CardTitle>
+                  <CardDescription>Configure what data to collect</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Infrastructure Metrics</Label>
+                      <p className="text-sm text-gray-500">CPU, memory, disk, network</p>
                     </div>
-                  ))}
-                </div>
-              </div>
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Metrics</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {['CPU Usage', 'Memory', 'Disk I/O', 'Network', 'Requests/s', 'Error Rate'].map(metric => (
-                    <button
-                      key={metric}
-                      className="p-3 text-left bg-gray-50 dark:bg-gray-700/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">{metric}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </TabsContent>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>APM Traces</Label>
+                      <p className="text-sm text-gray-500">Distributed tracing data</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Log Collection</Label>
+                      <p className="text-sm text-gray-500">Application and system logs</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Real User Monitoring</Label>
+                      <p className="text-sm text-gray-500">Browser and mobile performance</p>
+                    </div>
+                    <Switch />
+                  </div>
+                </CardContent>
+              </Card>
 
-          {/* Services Tab */}
-          <TabsContent value="services" className="space-y-4">
-            {mockServices.map(service => (
-              <div key={service.id} className={`bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border ${
-                service.status === 'healthy' ? 'border-green-200 dark:border-green-800' :
-                service.status === 'degraded' ? 'border-amber-200 dark:border-amber-800' :
-                'border-red-200 dark:border-red-800'
-              }`}>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-3 mb-2">
-                      <span className={`w-3 h-3 rounded-full ${
-                        service.status === 'healthy' ? 'bg-green-500' :
-                        service.status === 'degraded' ? 'bg-amber-500' :
-                        'bg-red-500'
-                      } animate-pulse`} />
-                      <h3 className="font-semibold text-gray-900 dark:text-white">{service.name}</h3>
-                      <span className={`px-2 py-0.5 rounded text-xs ${getStatusColor(service.status)}`}>{service.status}</span>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Alert Notifications</CardTitle>
+                  <CardDescription>Configure how alerts are delivered</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Mail className="h-5 w-5 text-gray-400" />
+                      <div>
+                        <Label>Email</Label>
+                        <p className="text-sm text-gray-500">team@company.com</p>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
-                      <span>Latency: {service.latency}ms</span>
-                      <span>Uptime: {service.uptime}%</span>
-                      <span>Error Rate: {service.errorRate}%</span>
-                      <span>RPS: {service.requestsPerSecond.toLocaleString()}</span>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Webhook className="h-5 w-5 text-gray-400" />
+                      <div>
+                        <Label>Slack</Label>
+                        <p className="text-sm text-gray-500">#alerts-production</p>
+                      </div>
                     </div>
+                    <Switch defaultChecked />
                   </div>
-                  <div className="text-right text-sm text-gray-500 dark:text-gray-400">
-                    Last checked: {new Date(service.lastChecked).toLocaleTimeString()}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Bell className="h-5 w-5 text-gray-400" />
+                      <div>
+                        <Label>PagerDuty</Label>
+                        <p className="text-sm text-gray-500">On-call rotation</p>
+                      </div>
+                    </div>
+                    <Switch defaultChecked />
                   </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Webhook className="h-5 w-5 text-gray-400" />
+                      <div>
+                        <Label>Webhook</Label>
+                        <p className="text-sm text-gray-500">Custom endpoint</p>
+                      </div>
+                    </div>
+                    <Switch />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Retention Policy</CardTitle>
+                  <CardDescription>Configure data retention periods</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <Label>Metrics Retention</Label>
+                    <Select defaultValue="30">
+                      <SelectTrigger className="w-[150px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="7">7 days</SelectItem>
+                        <SelectItem value="15">15 days</SelectItem>
+                        <SelectItem value="30">30 days</SelectItem>
+                        <SelectItem value="90">90 days</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Logs Retention</Label>
+                    <Select defaultValue="15">
+                      <SelectTrigger className="w-[150px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="7">7 days</SelectItem>
+                        <SelectItem value="15">15 days</SelectItem>
+                        <SelectItem value="30">30 days</SelectItem>
+                        <SelectItem value="90">90 days</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>Traces Retention</Label>
+                    <Select defaultValue="7">
+                      <SelectTrigger className="w-[150px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="3">3 days</SelectItem>
+                        <SelectItem value="7">7 days</SelectItem>
+                        <SelectItem value="15">15 days</SelectItem>
+                        <SelectItem value="30">30 days</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Integrations</CardTitle>
+                  <CardDescription>Connect with external services</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[
+                    { name: 'AWS CloudWatch', connected: true },
+                    { name: 'Kubernetes', connected: true },
+                    { name: 'Docker', connected: true },
+                    { name: 'Prometheus', connected: false },
+                    { name: 'Grafana', connected: false }
+                  ].map((integration, idx) => (
+                    <div key={idx} className="flex items-center justify-between py-2">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                          <Box className="h-4 w-4" />
+                        </div>
+                        <span className="font-medium">{integration.name}</span>
+                      </div>
+                      <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                        {integration.connected ? 'Connected' : 'Connect'}
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Agent Installation</CardTitle>
+                <CardDescription>Install the monitoring agent on your hosts</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                  <pre>{`# Install the Kazi monitoring agent
+curl -sL https://install.kazi.app/agent | bash -s -- --api-key=KAZI-XXXXXXXX
+
+# Or using Docker
+docker run -d --name kazi-agent \\
+  -e KAZI_API_KEY=KAZI-XXXXXXXX \\
+  -v /var/run/docker.sock:/var/run/docker.sock \\
+  -v /proc/:/host/proc/:ro \\
+  -v /sys/:/host/sys/:ro \\
+  kazi/agent:latest`}</pre>
                 </div>
-                {service.dependencies.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">Dependencies:</span>
-                    <div className="flex gap-2 mt-2">
-                      {service.dependencies.map(dep => (
-                        <span key={dep.name} className={`px-2 py-1 rounded text-xs ${getStatusColor(dep.status)}`}>
-                          {dep.name}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                <div className="mt-4 flex items-center gap-2">
+                  <Button variant="outline" size="sm">
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy Command
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Documentation
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
-
-        {loading && (
-          <div className="text-center py-8">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-slate-600 border-r-transparent" />
-          </div>
-        )}
       </div>
     </div>
   )
