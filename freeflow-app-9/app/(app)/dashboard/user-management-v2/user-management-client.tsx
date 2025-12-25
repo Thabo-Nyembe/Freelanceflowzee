@@ -6,7 +6,8 @@ import {
   Lock, Unlock, UserPlus, UserMinus, Edit, Trash2, Download, Upload, RefreshCw,
   Eye, EyeOff, Smartphone, Globe, Monitor, Activity, Filter, ChevronDown, ChevronRight,
   ShieldCheck, ShieldAlert, UserCheck, UserX, Fingerprint, QrCode, LogIn, LogOut,
-  AlertCircle, CheckCircle, Info, ArrowUpRight, Copy, ExternalLink
+  AlertCircle, CheckCircle, Info, ArrowUpRight, Copy, ExternalLink, Bell, Palette,
+  Database, Server, Zap, Languages, Mail, MessageSquare, Webhook
 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -14,6 +15,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useUserManagement, type ManagedUser, type UserRole, type UserStatus } from '@/lib/hooks/use-user-management'
 
 interface Role {
@@ -60,7 +64,7 @@ interface AuditLog {
 }
 
 export default function UserManagementClient({ initialUsers }: { initialUsers: ManagedUser[] }) {
-  const [activeView, setActiveView] = useState<'users' | 'roles' | 'connections' | 'security' | 'logs'>('users')
+  const [activeView, setActiveView] = useState<'users' | 'roles' | 'connections' | 'security' | 'logs' | 'settings'>('users')
   const [searchQuery, setSearchQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<UserStatus | 'all'>('all')
@@ -69,6 +73,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
   const [selectedUser, setSelectedUser] = useState<ManagedUser | null>(null)
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [showRoleModal, setShowRoleModal] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const { users, loading, error } = useUserManagement({ role: roleFilter, status: statusFilter })
   const displayUsers = users.length > 0 ? users : initialUsers
@@ -141,6 +146,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     { id: 'connections' as const, name: 'Connections', icon: Link2, count: connections.length },
     { id: 'security' as const, name: 'Security', icon: Lock, count: securityPolicies.filter(p => p.enabled).length },
     { id: 'logs' as const, name: 'Audit Logs', icon: FileText, count: auditLogs.length },
+    { id: 'settings' as const, name: 'Settings', icon: Settings, count: null },
   ]
 
   const toggleUserSelection = (userId: string) => {
@@ -306,13 +312,15 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                 >
                   <view.icon className="w-4 h-4" />
                   {view.name}
-                  <span className={`px-2 py-0.5 rounded-full text-xs ${
-                    activeView === view.id
-                      ? 'bg-blue-200 dark:bg-blue-800'
-                      : 'bg-gray-200 dark:bg-gray-600'
-                  }`}>
-                    {view.count}
-                  </span>
+                  {view.count !== null && (
+                    <span className={`px-2 py-0.5 rounded-full text-xs ${
+                      activeView === view.id
+                        ? 'bg-blue-200 dark:bg-blue-800'
+                        : 'bg-gray-200 dark:bg-gray-600'
+                    }`}>
+                      {view.count}
+                    </span>
+                  )}
                 </button>
               ))}
             </nav>
@@ -773,6 +781,797 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Settings View - Auth0 Level */}
+          {activeView === 'settings' && (
+            <div className="p-6">
+              <Tabs value={settingsTab} onValueChange={setSettingsTab}>
+                <TabsList className="grid w-full grid-cols-6 mb-6">
+                  <TabsTrigger value="general" className="gap-2">
+                    <Settings className="w-4 h-4" />
+                    General
+                  </TabsTrigger>
+                  <TabsTrigger value="authentication" className="gap-2">
+                    <Key className="w-4 h-4" />
+                    Authentication
+                  </TabsTrigger>
+                  <TabsTrigger value="branding" className="gap-2">
+                    <Palette className="w-4 h-4" />
+                    Branding
+                  </TabsTrigger>
+                  <TabsTrigger value="notifications" className="gap-2">
+                    <Bell className="w-4 h-4" />
+                    Notifications
+                  </TabsTrigger>
+                  <TabsTrigger value="apis" className="gap-2">
+                    <Zap className="w-4 h-4" />
+                    APIs
+                  </TabsTrigger>
+                  <TabsTrigger value="advanced" className="gap-2">
+                    <Shield className="w-4 h-4" />
+                    Advanced
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* General Settings */}
+                <TabsContent value="general" className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <Building className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Tenant Settings</h3>
+                          <p className="text-sm text-gray-500">Configure your Auth0 tenant</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Tenant Name</Label>
+                          <Input defaultValue="freeflow-production" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Environment</Label>
+                          <Select defaultValue="production">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="development">Development</SelectItem>
+                              <SelectItem value="staging">Staging</SelectItem>
+                              <SelectItem value="production">Production</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Friendly Name</Label>
+                          <Input defaultValue="FreeFlow Platform" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Support Email</Label>
+                          <Input type="email" defaultValue="support@freeflow.com" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <Globe className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Regional Settings</h3>
+                          <p className="text-sm text-gray-500">Localization preferences</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Default Language</Label>
+                          <Select defaultValue="en">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="en">English</SelectItem>
+                              <SelectItem value="es">Spanish</SelectItem>
+                              <SelectItem value="fr">French</SelectItem>
+                              <SelectItem value="de">German</SelectItem>
+                              <SelectItem value="pt">Portuguese</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Timezone</Label>
+                          <Select defaultValue="utc">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="utc">UTC</SelectItem>
+                              <SelectItem value="est">Eastern Time</SelectItem>
+                              <SelectItem value="pst">Pacific Time</SelectItem>
+                              <SelectItem value="cet">Central European</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Force User Locale</Label>
+                            <p className="text-xs text-gray-500">Override browser settings</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 border rounded-xl dark:border-gray-700">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                        <Link2 className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Default Callbacks</h3>
+                        <p className="text-sm text-gray-500">Configure callback URLs</p>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Allowed Callback URLs</Label>
+                        <Input defaultValue="https://app.freeflow.com/callback" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Allowed Logout URLs</Label>
+                        <Input defaultValue="https://app.freeflow.com" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Allowed Web Origins</Label>
+                        <Input defaultValue="https://app.freeflow.com" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Allowed Origins (CORS)</Label>
+                        <Input defaultValue="https://*.freeflow.com" />
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Authentication Settings */}
+                <TabsContent value="authentication" className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <Key className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Password Policy</h3>
+                          <p className="text-sm text-gray-500">Password requirements</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Minimum Length</Label>
+                          <Select defaultValue="12">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="8">8 characters</SelectItem>
+                              <SelectItem value="10">10 characters</SelectItem>
+                              <SelectItem value="12">12 characters</SelectItem>
+                              <SelectItem value="16">16 characters</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Require Lowercase</Label>
+                            <p className="text-xs text-gray-500">At least one lowercase letter</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Require Uppercase</Label>
+                            <p className="text-xs text-gray-500">At least one uppercase letter</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Require Numbers</Label>
+                            <p className="text-xs text-gray-500">At least one number</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Require Special Characters</Label>
+                            <p className="text-xs text-gray-500">At least one special character</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <Smartphone className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Multi-Factor Authentication</h3>
+                          <p className="text-sm text-gray-500">Second factor options</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>MFA Policy</Label>
+                          <Select defaultValue="adaptive">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="never">Never</SelectItem>
+                              <SelectItem value="always">Always Required</SelectItem>
+                              <SelectItem value="adaptive">Adaptive (Risk-Based)</SelectItem>
+                              <SelectItem value="admins">Admins Only</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>TOTP (Authenticator Apps)</Label>
+                            <p className="text-xs text-gray-500">Google Authenticator, Authy</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>SMS OTP</Label>
+                            <p className="text-xs text-gray-500">One-time codes via SMS</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Email OTP</Label>
+                            <p className="text-xs text-gray-500">One-time codes via email</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>WebAuthn / Passkeys</Label>
+                            <p className="text-xs text-gray-500">Biometric authentication</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 border rounded-xl dark:border-gray-700">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                        <Clock className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Session Settings</h3>
+                        <p className="text-sm text-gray-500">Token and session configuration</p>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-4 gap-4">
+                      <div className="space-y-2">
+                        <Label>Access Token Lifetime</Label>
+                        <Select defaultValue="86400">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="3600">1 hour</SelectItem>
+                            <SelectItem value="28800">8 hours</SelectItem>
+                            <SelectItem value="86400">24 hours</SelectItem>
+                            <SelectItem value="604800">7 days</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Refresh Token Lifetime</Label>
+                        <Select defaultValue="2592000">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="604800">7 days</SelectItem>
+                            <SelectItem value="2592000">30 days</SelectItem>
+                            <SelectItem value="7776000">90 days</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Idle Session Timeout</Label>
+                        <Select defaultValue="1800">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="900">15 minutes</SelectItem>
+                            <SelectItem value="1800">30 minutes</SelectItem>
+                            <SelectItem value="3600">1 hour</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-600">
+                        <div>
+                          <Label>Rotate Refresh Tokens</Label>
+                          <p className="text-xs text-gray-500">Enhanced security</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Branding Settings */}
+                <TabsContent value="branding" className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <Palette className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Login Page</h3>
+                          <p className="text-sm text-gray-500">Customize authentication UI</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Logo URL</Label>
+                          <Input placeholder="https://cdn.freeflow.com/logo.png" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Primary Color</Label>
+                          <div className="flex gap-2">
+                            <Input defaultValue="#3B82F6" className="flex-1" />
+                            <div className="w-10 h-10 rounded-lg bg-blue-500 border" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Background Color</Label>
+                          <div className="flex gap-2">
+                            <Input defaultValue="#F8FAFC" className="flex-1" />
+                            <div className="w-10 h-10 rounded-lg bg-slate-50 border" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Show Social Connections</Label>
+                            <p className="text-xs text-gray-500">Display social login buttons</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <Mail className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Email Templates</h3>
+                          <p className="text-sm text-gray-500">Customize email branding</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>From Email</Label>
+                          <Input defaultValue="noreply@freeflow.com" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>From Name</Label>
+                          <Input defaultValue="FreeFlow" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Email Header Logo</Label>
+                          <Input placeholder="https://cdn.freeflow.com/email-logo.png" />
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit Email Templates
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 border rounded-xl dark:border-gray-700">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                        <Globe className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Custom Domain</h3>
+                        <p className="text-sm text-gray-500">Use your own domain for authentication</p>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Custom Domain</Label>
+                        <Input placeholder="auth.yourdomain.com" defaultValue="auth.freeflow.com" />
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Verified
+                        </Badge>
+                        <Badge variant="outline">SSL Active</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Notifications Settings */}
+                <TabsContent value="notifications" className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <Bell className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Admin Alerts</h3>
+                          <p className="text-sm text-gray-500">Security notifications</p>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        {[
+                          { label: 'Suspicious Login Detected', desc: 'Unusual login patterns', enabled: true },
+                          { label: 'Brute Force Attack', desc: 'Multiple failed attempts', enabled: true },
+                          { label: 'New Admin Added', desc: 'Admin role assignments', enabled: true },
+                          { label: 'Connection Changes', desc: 'SSO/SAML modifications', enabled: true },
+                          { label: 'API Rate Limit Exceeded', desc: 'Rate limiting triggered', enabled: false },
+                          { label: 'User Blocked', desc: 'Account locked/blocked', enabled: true },
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <div>
+                              <Label className="font-medium">{item.label}</Label>
+                              <p className="text-xs text-gray-500">{item.desc}</p>
+                            </div>
+                            <Switch defaultChecked={item.enabled} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <Mail className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">User Emails</h3>
+                          <p className="text-sm text-gray-500">Transactional emails</p>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        {[
+                          { label: 'Welcome Email', desc: 'New user signup', enabled: true },
+                          { label: 'Email Verification', desc: 'Verify email address', enabled: true },
+                          { label: 'Password Reset', desc: 'Reset password link', enabled: true },
+                          { label: 'Password Changed', desc: 'Confirmation notification', enabled: true },
+                          { label: 'MFA Enrolled', desc: 'MFA setup confirmation', enabled: true },
+                          { label: 'Blocked Account', desc: 'Account locked notice', enabled: true },
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <div>
+                              <Label className="font-medium">{item.label}</Label>
+                              <p className="text-xs text-gray-500">{item.desc}</p>
+                            </div>
+                            <Switch defaultChecked={item.enabled} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 border rounded-xl dark:border-gray-700">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                        <Webhook className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Webhooks</h3>
+                        <p className="text-sm text-gray-500">Event notifications</p>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Webhook URL</Label>
+                        <Input placeholder="https://api.yourapp.com/webhooks/auth" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Events</Label>
+                        <Select defaultValue="all">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Events</SelectItem>
+                            <SelectItem value="login">Login Events</SelectItem>
+                            <SelectItem value="signup">Signup Events</SelectItem>
+                            <SelectItem value="security">Security Events</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* APIs Settings */}
+                <TabsContent value="apis" className="space-y-6">
+                  <div className="p-6 border rounded-xl dark:border-gray-700">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                        <Zap className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Registered APIs</h3>
+                        <p className="text-sm text-gray-500">APIs protected by Auth0</p>
+                      </div>
+                      <Button className="ml-auto gap-2">
+                        <Plus className="w-4 h-4" />
+                        Register API
+                      </Button>
+                    </div>
+                    <div className="space-y-3">
+                      {[
+                        { name: 'FreeFlow Management API', identifier: 'https://api.freeflow.com/v1', audience: 'freeflow-api', scopes: 12 },
+                        { name: 'FreeFlow User API', identifier: 'https://api.freeflow.com/users', audience: 'freeflow-users', scopes: 8 },
+                        { name: 'FreeFlow Webhooks API', identifier: 'https://webhooks.freeflow.com', audience: 'freeflow-webhooks', scopes: 4 },
+                      ].map((api, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                              <Server className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">{api.name}</div>
+                              <div className="text-sm text-gray-500 font-mono">{api.identifier}</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <Badge variant="outline">{api.scopes} scopes</Badge>
+                            <Button size="sm" variant="outline">Configure</Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <Key className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Token Settings</h3>
+                          <p className="text-sm text-gray-500">JWT configuration</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Signing Algorithm</Label>
+                          <Select defaultValue="rs256">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="rs256">RS256</SelectItem>
+                              <SelectItem value="hs256">HS256</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>RBAC</Label>
+                            <p className="text-xs text-gray-500">Include permissions in token</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Add Permissions to Token</Label>
+                            <p className="text-xs text-gray-500">Include user permissions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                          <Activity className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Rate Limiting</h3>
+                          <p className="text-sm text-gray-500">API rate limits</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Requests per Minute</Label>
+                          <Select defaultValue="1000">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="100">100/min</SelectItem>
+                              <SelectItem value="500">500/min</SelectItem>
+                              <SelectItem value="1000">1000/min</SelectItem>
+                              <SelectItem value="5000">5000/min</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Enable Rate Limiting</Label>
+                            <p className="text-xs text-gray-500">Prevent API abuse</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Log Rate Limit Events</Label>
+                            <p className="text-xs text-gray-500">Track in audit logs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Advanced Settings */}
+                <TabsContent value="advanced" className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <Shield className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Attack Protection</h3>
+                          <p className="text-sm text-gray-500">Security features</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Bot Detection</Label>
+                            <p className="text-xs text-gray-500">Block automated attacks</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Breached Password Detection</Label>
+                            <p className="text-xs text-gray-500">Check against known breaches</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Suspicious IP Throttling</Label>
+                            <p className="text-xs text-gray-500">Rate limit suspicious IPs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Adaptive MFA</Label>
+                            <p className="text-xs text-gray-500">Risk-based challenges</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <Database className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Data Management</h3>
+                          <p className="text-sm text-gray-500">User data settings</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Log Retention</Label>
+                          <Select defaultValue="30">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="7">7 days</SelectItem>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>GDPR Compliance Mode</Label>
+                            <p className="text-xs text-gray-500">Enable data export/deletion</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>IP Address Logging</Label>
+                            <p className="text-xs text-gray-500">Store user IP addresses</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 border border-red-200 dark:border-red-800 rounded-xl bg-red-50 dark:bg-red-900/20">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                        <AlertTriangle className="w-5 h-5 text-red-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-red-700 dark:text-red-400">Danger Zone</h3>
+                        <p className="text-sm text-red-600 dark:text-red-400">Irreversible actions</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-700 rounded-lg bg-white dark:bg-gray-800">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Rotate Signing Key</div>
+                          <p className="text-sm text-gray-500">Invalidates all existing tokens</p>
+                        </div>
+                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Rotate Key
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-700 rounded-lg bg-white dark:bg-gray-800">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Revoke All Sessions</div>
+                          <p className="text-sm text-gray-500">Force all users to re-authenticate</p>
+                        </div>
+                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Revoke All
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-700 rounded-lg bg-white dark:bg-gray-800">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Delete Tenant</div>
+                          <p className="text-sm text-gray-500">Permanently delete all data</p>
+                        </div>
+                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete Tenant
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           )}
         </div>
