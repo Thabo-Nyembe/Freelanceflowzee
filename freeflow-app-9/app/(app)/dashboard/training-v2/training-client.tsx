@@ -9,7 +9,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
@@ -53,7 +62,38 @@ import {
   PlayCircle,
   PauseCircle,
   RotateCcw,
-  ExternalLink
+  ExternalLink,
+  Key,
+  Webhook,
+  Database,
+  Trash2,
+  RefreshCw,
+  Palette,
+  AlertOctagon,
+  Link2,
+  Mail,
+  Bell,
+  Globe,
+  Upload,
+  Copy,
+  Archive,
+  BellRing,
+  Slack,
+  MessageCircle,
+  Layers,
+  Package,
+  Inbox,
+  Layout,
+  Type,
+  FileQuestion,
+  Timer,
+  Volume2,
+  Subtitles,
+  Monitor,
+  Smartphone,
+  PenTool,
+  Gauge,
+  AlertTriangle,
 } from 'lucide-react'
 
 // Types
@@ -461,6 +501,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyLevel | 'all'>('all')
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filter courses
   const filteredCourses = useMemo(() => {
@@ -622,6 +663,10 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
             <TabsTrigger value="leaderboard" className="gap-2">
               <Trophy className="w-4 h-4" />
               Leaderboard
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -913,6 +958,918 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Learning Settings</h2>
+                <p className="text-sm text-gray-500">Configure your learning platform preferences</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Settings, label: 'General' },
+                        { id: 'learning', icon: BookOpen, label: 'Learning' },
+                        { id: 'notifications', icon: Bell, label: 'Notifications' },
+                        { id: 'integrations', icon: Link2, label: 'Integrations' },
+                        { id: 'gamification', icon: Trophy, label: 'Gamification' },
+                        { id: 'advanced', icon: Gauge, label: 'Advanced' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Layout className="h-5 w-5" />
+                          Display Preferences
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default View</Label>
+                            <Select defaultValue="grid">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="grid">Grid View</SelectItem>
+                                <SelectItem value="list">List View</SelectItem>
+                                <SelectItem value="compact">Compact View</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Courses Per Page</Label>
+                            <Select defaultValue="12">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="6">6 courses</SelectItem>
+                                <SelectItem value="12">12 courses</SelectItem>
+                                <SelectItem value="24">24 courses</SelectItem>
+                                <SelectItem value="48">48 courses</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Show Progress Bars</div>
+                            <div className="text-sm text-gray-500">Display course progress on cards</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Show Difficulty Badges</div>
+                            <div className="text-sm text-gray-500">Display difficulty level on course cards</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Dark Mode for Player</div>
+                            <div className="text-sm text-gray-500">Use dark theme in video player</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="h-5 w-5" />
+                          Language & Region
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Language</Label>
+                            <Select defaultValue="en">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="es">Spanish</SelectItem>
+                                <SelectItem value="fr">French</SelectItem>
+                                <SelectItem value="de">German</SelectItem>
+                                <SelectItem value="ja">Japanese</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Timezone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="est">Eastern Time (ET)</SelectItem>
+                                <SelectItem value="pst">Pacific Time (PT)</SelectItem>
+                                <SelectItem value="cet">Central European Time (CET)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Auto-Translate Content</div>
+                            <div className="text-sm text-gray-500">Automatically translate course descriptions</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Monitor className="h-5 w-5" />
+                          Accessibility
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">High Contrast Mode</div>
+                            <div className="text-sm text-gray-500">Increase visual contrast for better readability</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Keyboard Navigation</div>
+                            <div className="text-sm text-gray-500">Enable enhanced keyboard shortcuts</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Screen Reader Optimization</div>
+                            <div className="text-sm text-gray-500">Optimize interface for screen readers</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Learning Settings */}
+                {settingsTab === 'learning' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Video className="h-5 w-5" />
+                          Video Player
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Playback Speed</Label>
+                            <Select defaultValue="1">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0.5">0.5x</SelectItem>
+                                <SelectItem value="0.75">0.75x</SelectItem>
+                                <SelectItem value="1">1x (Normal)</SelectItem>
+                                <SelectItem value="1.25">1.25x</SelectItem>
+                                <SelectItem value="1.5">1.5x</SelectItem>
+                                <SelectItem value="2">2x</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Video Quality</Label>
+                            <Select defaultValue="auto">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="auto">Auto</SelectItem>
+                                <SelectItem value="1080p">1080p HD</SelectItem>
+                                <SelectItem value="720p">720p</SelectItem>
+                                <SelectItem value="480p">480p</SelectItem>
+                                <SelectItem value="360p">360p</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Subtitles className="h-5 w-5 text-blue-500" />
+                            <div>
+                              <div className="font-medium">Auto-Enable Subtitles</div>
+                              <div className="text-sm text-gray-500">Show captions automatically when available</div>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <PlayCircle className="h-5 w-5 text-green-500" />
+                            <div>
+                              <div className="font-medium">Autoplay Next Lesson</div>
+                              <div className="text-sm text-gray-500">Automatically play the next lesson</div>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Volume2 className="h-5 w-5 text-purple-500" />
+                            <div>
+                              <div className="font-medium">Remember Volume</div>
+                              <div className="text-sm text-gray-500">Remember volume level across sessions</div>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Timer className="h-5 w-5" />
+                          Progress & Tracking
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Completion Threshold</Label>
+                            <Select defaultValue="90">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="80">80% watched</SelectItem>
+                                <SelectItem value="90">90% watched</SelectItem>
+                                <SelectItem value="95">95% watched</SelectItem>
+                                <SelectItem value="100">100% watched</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Session Timeout</Label>
+                            <Select defaultValue="30">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="15">15 minutes</SelectItem>
+                                <SelectItem value="30">30 minutes</SelectItem>
+                                <SelectItem value="60">1 hour</SelectItem>
+                                <SelectItem value="never">Never</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Track Offline Learning</div>
+                            <div className="text-sm text-gray-500">Sync offline progress when back online</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Resume Where Left Off</div>
+                            <div className="text-sm text-gray-500">Automatically resume from last position</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <FileQuestion className="h-5 w-5" />
+                          Assessments
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Quiz Attempts</Label>
+                            <Select defaultValue="3">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 attempt</SelectItem>
+                                <SelectItem value="3">3 attempts</SelectItem>
+                                <SelectItem value="5">5 attempts</SelectItem>
+                                <SelectItem value="unlimited">Unlimited</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Passing Score</Label>
+                            <Select defaultValue="70">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="60">60%</SelectItem>
+                                <SelectItem value="70">70%</SelectItem>
+                                <SelectItem value="80">80%</SelectItem>
+                                <SelectItem value="90">90%</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Show Correct Answers</div>
+                            <div className="text-sm text-gray-500">Display correct answers after quiz completion</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Randomize Questions</div>
+                            <div className="text-sm text-gray-500">Shuffle question order for each attempt</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="h-5 w-5" />
+                          Email Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Course Updates</div>
+                            <div className="text-sm text-gray-500">New lessons, content updates</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Due Date Reminders</div>
+                            <div className="text-sm text-gray-500">Reminders for mandatory training deadlines</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Certification Expiry</div>
+                            <div className="text-sm text-gray-500">Alerts when certifications are about to expire</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Weekly Progress Digest</div>
+                            <div className="text-sm text-gray-500">Summary of your learning progress</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">New Course Recommendations</div>
+                            <div className="text-sm text-gray-500">Personalized course suggestions</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <BellRing className="h-5 w-5" />
+                          Push Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Learning Reminders</div>
+                            <div className="text-sm text-gray-500">Daily reminders to continue learning</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Achievement Unlocked</div>
+                            <div className="text-sm text-gray-500">Notify when you earn badges or certificates</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Streak Alerts</div>
+                            <div className="text-sm text-gray-500">Reminders to maintain your learning streak</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Reminder Time</Label>
+                          <Select defaultValue="9am">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="8am">8:00 AM</SelectItem>
+                              <SelectItem value="9am">9:00 AM</SelectItem>
+                              <SelectItem value="12pm">12:00 PM</SelectItem>
+                              <SelectItem value="6pm">6:00 PM</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Slack className="h-5 w-5" />
+                          Slack Integration
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                              <Slack className="h-6 w-6 text-emerald-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium">Slack Connected</div>
+                              <div className="text-sm text-gray-500">#learning channel</div>
+                            </div>
+                            <Badge className="ml-auto bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <Button variant="outline" size="sm">Configure Channel</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Share Completions</div>
+                            <div className="text-sm text-gray-500">Post to Slack when you complete courses</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Share Certificates</div>
+                            <div className="text-sm text-gray-500">Post to Slack when you earn certificates</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Link2 className="h-5 w-5" />
+                          Connected Services
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'LinkedIn Learning', icon: Layers, description: 'Import completed courses', connected: true, color: 'text-blue-500' },
+                          { name: 'Coursera', icon: GraduationCap, description: 'Sync course progress', connected: false, color: 'text-blue-600' },
+                          { name: 'Udemy Business', icon: BookOpen, description: 'Import course catalog', connected: true, color: 'text-purple-500' },
+                          { name: 'Zoom', icon: Video, description: 'Webinar integration', connected: true, color: 'text-blue-400' },
+                          { name: 'Google Workspace', icon: Globe, description: 'Calendar & SSO', connected: true, color: 'text-green-500' },
+                        ].map((integration) => (
+                          <div key={integration.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <integration.icon className={`h-6 w-6 ${integration.color}`} />
+                              <div>
+                                <div className="font-medium">{integration.name}</div>
+                                <div className="text-sm text-gray-500">{integration.description}</div>
+                              </div>
+                            </div>
+                            {integration.connected ? (
+                              <div className="flex items-center gap-2">
+                                <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                                <Button variant="ghost" size="sm">Configure</Button>
+                              </div>
+                            ) : (
+                              <Button variant="outline" size="sm">Connect</Button>
+                            )}
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="h-5 w-5" />
+                          API Access
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="font-medium">API Key</div>
+                            <Button variant="outline" size="sm">
+                              <RefreshCw className="h-4 w-4 mr-2" />
+                              Regenerate
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm">
+                              lms_live_•••••••••••••••••••••••
+                            </code>
+                            <Button variant="outline" size="sm">
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="text-2xl font-bold">8,234</div>
+                            <div className="text-sm text-gray-500">API Calls (30 days)</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="text-2xl font-bold">32ms</div>
+                            <div className="text-sm text-gray-500">Avg Response Time</div>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          View API Documentation
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="h-5 w-5" />
+                          Webhooks
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="border rounded-lg divide-y">
+                          {[
+                            { url: 'https://api.company.com/webhooks/lms', events: ['course.completed', 'cert.earned'], status: 'active' },
+                            { url: 'https://hr.company.com/training-sync', events: ['enrollment.created'], status: 'active' },
+                          ].map((webhook, i) => (
+                            <div key={i} className="p-4 flex items-center justify-between">
+                              <div>
+                                <code className="text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{webhook.url}</code>
+                                <div className="flex items-center gap-2 mt-2">
+                                  {webhook.events.map(event => (
+                                    <Badge key={event} variant="secondary" className="text-xs">{event}</Badge>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge className="bg-green-100 text-green-700">{webhook.status}</Badge>
+                                <Button variant="ghost" size="sm">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Webhook
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Gamification Settings */}
+                {settingsTab === 'gamification' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Trophy className="h-5 w-5" />
+                          Points & Rewards
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Enable Points System</div>
+                            <div className="text-sm text-gray-500">Earn points for completing courses and activities</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Course Completion Points</Label>
+                            <Select defaultValue="100">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="50">50 points</SelectItem>
+                                <SelectItem value="100">100 points</SelectItem>
+                                <SelectItem value="200">200 points</SelectItem>
+                                <SelectItem value="500">500 points</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Quiz Perfect Score Bonus</Label>
+                            <Select defaultValue="50">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="25">25 bonus</SelectItem>
+                                <SelectItem value="50">50 bonus</SelectItem>
+                                <SelectItem value="100">100 bonus</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Flame className="h-5 w-5" />
+                          Streaks
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Enable Streak Tracking</div>
+                            <div className="text-sm text-gray-500">Track consecutive days of learning</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Minimum Daily Activity</Label>
+                            <Select defaultValue="5">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 minute</SelectItem>
+                                <SelectItem value="5">5 minutes</SelectItem>
+                                <SelectItem value="10">10 minutes</SelectItem>
+                                <SelectItem value="30">30 minutes</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Streak Freeze Days</Label>
+                            <Select defaultValue="2">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0">0 days</SelectItem>
+                                <SelectItem value="1">1 day</SelectItem>
+                                <SelectItem value="2">2 days</SelectItem>
+                                <SelectItem value="3">3 days</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                              <Flame className="h-6 w-6 text-orange-600" />
+                            </div>
+                            <div>
+                              <div className="font-medium">Current Streak</div>
+                              <div className="text-sm text-gray-500">{mockStats.currentStreak} days</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-orange-100 text-orange-700">Active</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Medal className="h-5 w-5" />
+                          Leaderboards
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Show on Leaderboard</div>
+                            <div className="text-sm text-gray-500">Display your progress on public leaderboard</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Display Name</div>
+                            <div className="text-sm text-gray-500">Show real name instead of username</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Compete in Team Challenges</div>
+                            <div className="text-sm text-gray-500">Participate in team-based competitions</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Database className="h-5 w-5" />
+                          Data Management
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold">{mockStats.enrolledCourses}</div>
+                            <div className="text-sm text-gray-500">Enrollments</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold">{mockStats.completedCourses}</div>
+                            <div className="text-sm text-gray-500">Completed</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold">4.8 GB</div>
+                            <div className="text-sm text-gray-500">Downloaded</div>
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="h-4 w-4 mr-2" />
+                            Export Learning Data
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <Upload className="h-4 w-4 mr-2" />
+                            Import Transcript
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Smartphone className="h-5 w-5" />
+                          Offline Access
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Enable Offline Downloads</div>
+                            <div className="text-sm text-gray-500">Download courses for offline viewing</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Download Quality</Label>
+                          <Select defaultValue="720p">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="480p">480p (Save space)</SelectItem>
+                              <SelectItem value="720p">720p (Balanced)</SelectItem>
+                              <SelectItem value="1080p">1080p (Best quality)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Max Storage</Label>
+                          <Select defaultValue="10gb">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="2gb">2 GB</SelectItem>
+                              <SelectItem value="5gb">5 GB</SelectItem>
+                              <SelectItem value="10gb">10 GB</SelectItem>
+                              <SelectItem value="unlimited">Unlimited</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Clear Downloaded Content
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="h-5 w-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-600">Reset Progress</div>
+                            <div className="text-sm text-gray-500">Reset all course progress (keeps certificates)</div>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <RotateCcw className="h-4 w-4 mr-2" />
+                            Reset
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-600">Delete Learning History</div>
+                            <div className="text-sm text-gray-500">Permanently delete all learning data</div>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-600">Revoke All Certificates</div>
+                            <div className="text-sm text-gray-500">Remove all earned certifications</div>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Archive className="h-4 w-4 mr-2" />
+                            Revoke
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 
