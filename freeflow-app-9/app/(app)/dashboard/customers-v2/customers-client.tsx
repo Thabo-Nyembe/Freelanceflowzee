@@ -29,7 +29,8 @@ import {
   ArrowDownRight, Hash, Percent, CircleDot, GitBranch, Workflow, Bot,
   Gauge, TrendingUp as Forecast, Megaphone, UserCheck, UsersRound, Timer,
   Receipt, Scale, Handshake, Trophy, AlertCircle, Inbox, Archive, Settings,
-  Lock, Unlock, Share2, Play, Pause, MoreVertical
+  Lock, Unlock, Share2, Play, Pause, MoreVertical,
+  Key, Webhook, Shield, AlertOctagon, Sliders, Network, Server, HardDrive, Cpu, Bell
 } from 'lucide-react'
 import { useCustomers, type Customer, type CustomerSegment } from '@/lib/hooks/use-customers'
 
@@ -409,6 +410,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   const [showAddContact, setShowAddContact] = useState(false)
   const [showAddOpportunity, setShowAddOpportunity] = useState(false)
   const [stageFilter, setStageFilter] = useState<DealStage | 'all'>('all')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const { customers, loading, error } = useCustomers({ segment: 'all' })
 
@@ -544,6 +546,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <TabsTrigger value="tasks"><CheckCircle className="h-4 w-4 mr-2" />Tasks</TabsTrigger>
               <TabsTrigger value="campaigns"><Megaphone className="h-4 w-4 mr-2" />Campaigns</TabsTrigger>
               <TabsTrigger value="forecasts"><Forecast className="h-4 w-4 mr-2" />Forecasts</TabsTrigger>
+              <TabsTrigger value="settings"><Settings className="h-4 w-4 mr-2" />Settings</TabsTrigger>
             </TabsList>
 
             <div className="relative">
@@ -927,6 +930,854 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Settings Tab - Salesforce CRM Level Configuration */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur sticky top-4">
+                  <CardContent className="p-4">
+                    <nav className="space-y-2">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'pipeline', label: 'Pipeline', icon: Layers },
+                        { id: 'scoring', label: 'Lead Scoring', icon: Target },
+                        { id: 'automation', label: 'Automation', icon: Zap },
+                        { id: 'integrations', label: 'Integrations', icon: Network },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-lg'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+
+                    {/* CRM Stats */}
+                    <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                      <h4 className="font-semibold text-sm text-gray-600 dark:text-gray-400">CRM Health</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">Data Quality</span>
+                          <span className="font-medium text-green-600">92%</span>
+                        </div>
+                        <Progress value={92} className="h-2" />
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">Lead Coverage</span>
+                          <span className="font-medium text-blue-600">78%</span>
+                        </div>
+                        <Progress value={78} className="h-2" />
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">Activity Score</span>
+                          <span className="font-medium text-purple-600">85%</span>
+                        </div>
+                        <Progress value={85} className="h-2" />
+                      </div>
+                    </div>
+
+                    {/* Quota Info */}
+                    <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                      <h4 className="font-semibold text-sm text-gray-600 dark:text-gray-400 mb-3">Current Quarter</h4>
+                      <div className="space-y-2 text-xs text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center justify-between">
+                          <span>Quota</span>
+                          <span className="font-medium">{formatCurrency(750000)}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Closed</span>
+                          <span className="font-medium text-green-600">{formatCurrency(45000)}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Pipeline</span>
+                          <span className="font-medium text-blue-600">{formatCurrency(294000)}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Attainment</span>
+                          <Badge variant="outline" className="text-xs">6%</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="h-5 w-5 text-violet-600" />
+                          General CRM Settings
+                        </CardTitle>
+                        <CardDescription>Configure your CRM preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Currency</Label>
+                            <Select defaultValue="usd">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="usd">USD - US Dollar</SelectItem>
+                                <SelectItem value="eur">EUR - Euro</SelectItem>
+                                <SelectItem value="gbp">GBP - British Pound</SelectItem>
+                                <SelectItem value="jpy">JPY - Japanese Yen</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Fiscal Year Start</Label>
+                            <Select defaultValue="january">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="january">January</SelectItem>
+                                <SelectItem value="april">April</SelectItem>
+                                <SelectItem value="july">July</SelectItem>
+                                <SelectItem value="october">October</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Date Format</Label>
+                            <Select defaultValue="mdy">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="mdy">MM/DD/YYYY</SelectItem>
+                                <SelectItem value="dmy">DD/MM/YYYY</SelectItem>
+                                <SelectItem value="ymd">YYYY-MM-DD</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Time Zone</Label>
+                            <Select defaultValue="est">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pst">Pacific Time (PT)</SelectItem>
+                                <SelectItem value="mst">Mountain Time (MT)</SelectItem>
+                                <SelectItem value="cst">Central Time (CT)</SelectItem>
+                                <SelectItem value="est">Eastern Time (ET)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Show Currency Symbol</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Display currency symbols in all monetary fields</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Compact Number Display</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Show large numbers as 1M, 500K etc.</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="h-5 w-5 text-blue-600" />
+                          Contact & Account Settings
+                        </CardTitle>
+                        <CardDescription>Configure contact and account defaults</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Auto-create Account</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically create account when adding contact with company</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Require Email</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Email is required for all new contacts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Duplicate Detection</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Warn when creating contacts with similar email or name</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Default Lead Source</Label>
+                          <Select defaultValue="website">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="website">Website</SelectItem>
+                              <SelectItem value="referral">Referral</SelectItem>
+                              <SelectItem value="cold-call">Cold Call</SelectItem>
+                              <SelectItem value="email-campaign">Email Campaign</SelectItem>
+                              <SelectItem value="event">Event</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Pipeline Settings */}
+                {settingsTab === 'pipeline' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Layers className="h-5 w-5 text-orange-600" />
+                          Pipeline Stages
+                        </CardTitle>
+                        <CardDescription>Configure your sales pipeline stages</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {PIPELINE_STAGES.map((stage, index) => (
+                          <div key={stage.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div className={`w-4 h-4 rounded-full ${stage.color}`} />
+                            <div className="flex-1">
+                              <Input defaultValue={stage.name} className="font-medium" />
+                            </div>
+                            <div className="w-24">
+                              <Input type="number" defaultValue={stage.probability} min={0} max={100} className="text-center" />
+                            </div>
+                            <span className="text-sm text-gray-500">% Probability</span>
+                            <Button size="sm" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Stage
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <DollarSign className="h-5 w-5 text-green-600" />
+                          Opportunity Settings
+                        </CardTitle>
+                        <CardDescription>Configure opportunity defaults and rules</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Close Date (Days from Now)</Label>
+                            <Input type="number" defaultValue="30" min={1} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Stale Opportunity Days</Label>
+                            <Input type="number" defaultValue="14" min={1} />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Require Products</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Opportunities must have at least one product</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Track Competitors</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable competitor tracking on opportunities</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Auto-calculate Weighted Value</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically calculate weighted pipeline value</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Forecast className="h-5 w-5 text-purple-600" />
+                          Forecasting Settings
+                        </CardTitle>
+                        <CardDescription>Configure sales forecasting options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                          <Label>Forecast Period</Label>
+                          <Select defaultValue="quarterly">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="monthly">Monthly</SelectItem>
+                              <SelectItem value="quarterly">Quarterly</SelectItem>
+                              <SelectItem value="yearly">Yearly</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Enable Forecast Categories</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Use Commit, Best Case, Pipeline categories</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Show Quota Attainment</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Display quota progress in forecasts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Lead Scoring Settings */}
+                {settingsTab === 'scoring' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Target className="h-5 w-5 text-red-600" />
+                          Lead Scoring Configuration
+                        </CardTitle>
+                        <CardDescription>Configure automatic lead scoring rules</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Enable Lead Scoring</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically score leads based on rules</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Hot Lead Threshold</Label>
+                            <Input type="number" defaultValue="80" min={0} max={100} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Warm Lead Threshold</Label>
+                            <Input type="number" defaultValue="50" min={0} max={100} />
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <Label>Scoring Rules</Label>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div className="flex-1">
+                                <div className="font-medium">Job Title Contains "VP" or "Director"</div>
+                                <div className="text-sm text-gray-500">Decision maker identification</div>
+                              </div>
+                              <Input type="number" defaultValue="15" className="w-20 text-center" />
+                              <span className="text-sm text-gray-500">points</span>
+                              <Switch defaultChecked />
+                            </div>
+
+                            <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div className="flex-1">
+                                <div className="font-medium">Company Size > 100 employees</div>
+                                <div className="text-sm text-gray-500">Enterprise prospect</div>
+                              </div>
+                              <Input type="number" defaultValue="10" className="w-20 text-center" />
+                              <span className="text-sm text-gray-500">points</span>
+                              <Switch defaultChecked />
+                            </div>
+
+                            <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div className="flex-1">
+                                <div className="font-medium">Email Opened (Last 7 Days)</div>
+                                <div className="text-sm text-gray-500">Engagement signal</div>
+                              </div>
+                              <Input type="number" defaultValue="5" className="w-20 text-center" />
+                              <span className="text-sm text-gray-500">points</span>
+                              <Switch defaultChecked />
+                            </div>
+
+                            <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div className="flex-1">
+                                <div className="font-medium">Website Visit (Last 30 Days)</div>
+                                <div className="text-sm text-gray-500">Intent signal</div>
+                              </div>
+                              <Input type="number" defaultValue="8" className="w-20 text-center" />
+                              <span className="text-sm text-gray-500">points</span>
+                              <Switch defaultChecked />
+                            </div>
+                          </div>
+                          <Button variant="outline" className="w-full">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Scoring Rule
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Award className="h-5 w-5 text-amber-600" />
+                          Score Decay Settings
+                        </CardTitle>
+                        <CardDescription>Configure how scores decrease over time</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Enable Score Decay</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Reduce scores for inactive leads</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Decay After (Days)</Label>
+                            <Input type="number" defaultValue="30" min={1} />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Decay Rate (%/Day)</Label>
+                            <Input type="number" defaultValue="2" min={0} max={10} />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Automation Settings */}
+                {settingsTab === 'automation' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Zap className="h-5 w-5 text-yellow-600" />
+                          Workflow Automation
+                        </CardTitle>
+                        <CardDescription>Configure automatic actions and triggers</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Auto-assign Leads</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically assign new leads using round-robin</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Follow-up Reminders</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Create tasks for stale opportunities</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Win/Loss Notifications</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify team when deals close</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Stage Change Alerts</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify managers when deals advance</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="h-5 w-5 text-blue-600" />
+                          Email Automation
+                        </CardTitle>
+                        <CardDescription>Configure email sequences and templates</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Welcome Email</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Send welcome email to new contacts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Birthday Emails</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Send personalized birthday greetings</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Renewal Reminders</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Send reminders before contract expiration</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Renewal Reminder Days Before</Label>
+                          <Input type="number" defaultValue="30" min={1} />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="h-5 w-5 text-purple-600" />
+                          Notification Settings
+                        </CardTitle>
+                        <CardDescription>Configure when to receive notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="flex items-center gap-2">
+                            <Switch defaultChecked />
+                            <Label className="font-normal">New Lead Assigned</Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Switch defaultChecked />
+                            <Label className="font-normal">Deal Won</Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Switch defaultChecked />
+                            <Label className="font-normal">Deal Lost</Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Switch />
+                            <Label className="font-normal">Task Due</Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Switch defaultChecked />
+                            <Label className="font-normal">Meeting Reminder</Label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Switch />
+                            <Label className="font-normal">Email Opened</Label>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Network className="h-5 w-5 text-cyan-600" />
+                          Connected Applications
+                        </CardTitle>
+                        <CardDescription>Manage third-party integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-white rounded-lg">📧</div>
+                            <div>
+                              <div className="font-medium">Gmail / Outlook</div>
+                              <div className="text-sm text-gray-500">Email sync and tracking</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-white rounded-lg">📅</div>
+                            <div>
+                              <div className="font-medium">Google Calendar</div>
+                              <div className="text-sm text-gray-500">Meeting sync</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-white rounded-lg">💬</div>
+                            <div>
+                              <div className="font-medium">Slack</div>
+                              <div className="text-sm text-gray-500">Team notifications</div>
+                            </div>
+                          </div>
+                          <Button size="sm">Connect</Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-white rounded-lg">📊</div>
+                            <div>
+                              <div className="font-medium">Zapier</div>
+                              <div className="text-sm text-gray-500">Workflow automation</div>
+                            </div>
+                          </div>
+                          <Button size="sm">Connect</Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="p-2 bg-white rounded-lg">🔗</div>
+                            <div>
+                              <div className="font-medium">LinkedIn Sales Navigator</div>
+                              <div className="text-sm text-gray-500">Social selling integration</div>
+                            </div>
+                          </div>
+                          <Button size="sm">Connect</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="h-5 w-5 text-purple-600" />
+                          API Access
+                        </CardTitle>
+                        <CardDescription>Manage API keys and webhooks</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <Label className="text-base">API Key</Label>
+                              <p className="text-xs text-gray-500">Use this key for API access</p>
+                            </div>
+                            <Button size="sm" variant="outline">
+                              <RefreshCw className="h-4 w-4 mr-2" />
+                              Regenerate
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="password"
+                              defaultValue="crm_api_key_xxxxxxxxxxxxxxxxxxxxx"
+                              readOnly
+                              className="font-mono"
+                            />
+                            <Button size="sm" variant="ghost">
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Webhook URL</Label>
+                          <Input placeholder="https://your-app.com/webhook/crm" />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Enable Webhooks</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Send events to external endpoints</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="h-5 w-5 text-green-600" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Configure access and security options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Two-Factor Authentication</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Require 2FA for all users</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">IP Restrictions</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Limit access to specific IP ranges</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Audit Logging</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Log all user actions for compliance</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Session Timeout (minutes)</Label>
+                          <Input type="number" defaultValue="60" min={5} max={480} />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HardDrive className="h-5 w-5 text-blue-600" />
+                          Data Management
+                        </CardTitle>
+                        <CardDescription>Configure data retention and exports</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                          <Label>Activity Log Retention</Label>
+                          <Select defaultValue="365">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="90">90 Days</SelectItem>
+                              <SelectItem value="180">180 Days</SelectItem>
+                              <SelectItem value="365">1 Year</SelectItem>
+                              <SelectItem value="730">2 Years</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Automatic Backups</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Daily backup of all CRM data</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="h-4 w-4 mr-2" />
+                            Export All Data
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <Upload className="h-4 w-4 mr-2" />
+                            Import Data
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="h-5 w-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible and destructive actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <Label className="text-base text-red-700 dark:text-red-400">Delete All Contacts</Label>
+                            <p className="text-sm text-red-600/70 dark:text-red-400/70">Permanently remove all contacts</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete All
+                          </Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <Label className="text-base text-red-700 dark:text-red-400">Clear Activity History</Label>
+                            <p className="text-sm text-red-600/70 dark:text-red-400/70">Delete all activity logs and history</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400">
+                            <Archive className="h-4 w-4 mr-2" />
+                            Clear History
+                          </Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <Label className="text-base text-red-700 dark:text-red-400">Reset CRM</Label>
+                            <p className="text-sm text-red-600/70 dark:text-red-400/70">Reset all settings to defaults</p>
+                          </div>
+                          <Button variant="destructive">
+                            <AlertOctagon className="h-4 w-4 mr-2" />
+                            Factory Reset
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 
