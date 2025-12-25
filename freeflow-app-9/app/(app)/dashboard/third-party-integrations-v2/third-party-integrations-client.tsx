@@ -14,7 +14,11 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Plug,
   Zap,
@@ -66,6 +70,11 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  Bell,
+  Lock,
+  RefreshCw,
+  Palette,
+  Info,
 } from 'lucide-react'
 
 // Types
@@ -315,6 +324,7 @@ export default function ThirdPartyIntegrationsClient() {
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null)
   const [selectedZap, setSelectedZap] = useState<Zap | null>(null)
   const [activeTab, setActiveTab] = useState('zaps')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats
   const stats = useMemo(() => ({
@@ -445,6 +455,10 @@ export default function ThirdPartyIntegrationsClient() {
             <TabsTrigger value="history" className="gap-2">
               <History className="h-4 w-4" />
               History
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="h-4 w-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -781,6 +795,722 @@ export default function ThirdPartyIntegrationsClient() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+              {/* Settings Sub-tabs */}
+              <div className="border-b border-gray-200 dark:border-gray-700">
+                <div className="flex gap-1 p-2 overflow-x-auto">
+                  {[
+                    { id: 'general', label: 'General', icon: Settings },
+                    { id: 'execution', label: 'Execution', icon: Zap },
+                    { id: 'security', label: 'Security', icon: Shield },
+                    { id: 'notifications', label: 'Notifications', icon: Bell },
+                    { id: 'api', label: 'API & Webhooks', icon: Webhook },
+                    { id: 'advanced', label: 'Advanced', icon: Database }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setSettingsTab(tab.id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                        settingsTab === tab.id
+                          ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      <tab.icon className="w-4 h-4" />
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">General Settings</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Workflow className="w-5 h-5 text-orange-600" />
+                          Default Zap Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Timezone</Label>
+                            <Select defaultValue="utc-5">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc-8">Pacific Time (UTC-8)</SelectItem>
+                                <SelectItem value="utc-5">Eastern Time (UTC-5)</SelectItem>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="utc+1">Central European (UTC+1)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Date Format</Label>
+                            <Select defaultValue="mdy">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="mdy">MM/DD/YYYY</SelectItem>
+                                <SelectItem value="dmy">DD/MM/YYYY</SelectItem>
+                                <SelectItem value="ymd">YYYY-MM-DD</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Auto-activate New Zaps</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Start zaps immediately after creation</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Duplicate Detection</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Skip duplicate triggers</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-blue-600" />
+                          Account Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Organization Name</Label>
+                          <Input defaultValue="Kazi Technologies" className="mt-1" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Plan Type</Label>
+                            <div className="mt-1 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <Badge className="bg-orange-100 text-orange-700">Professional</Badge>
+                                <Button variant="link" size="sm" className="text-orange-600">Upgrade</Button>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Monthly Task Limit</Label>
+                            <div className="mt-1 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium">45,230 / 100,000</span>
+                                <span className="text-sm text-gray-500">45%</span>
+                              </div>
+                              <Progress value={45} className="h-1.5 mt-2" />
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Palette className="w-5 h-5 text-purple-600" />
+                          Appearance
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Compact View</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Show more zaps per page</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Show Run Previews</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Preview data in execution logs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Execution Settings */}
+                {settingsTab === 'execution' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Execution Settings</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Timer className="w-5 h-5 text-orange-600" />
+                          Timing & Delays
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Polling Interval</Label>
+                          <Select defaultValue="15">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">1 minute</SelectItem>
+                              <SelectItem value="5">5 minutes</SelectItem>
+                              <SelectItem value="15">15 minutes</SelectItem>
+                              <SelectItem value="30">30 minutes</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-gray-500 mt-1">How often to check for new triggers</p>
+                        </div>
+                        <div>
+                          <Label>Default Delay Between Actions</Label>
+                          <Select defaultValue="0">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="0">No delay</SelectItem>
+                              <SelectItem value="1">1 second</SelectItem>
+                              <SelectItem value="5">5 seconds</SelectItem>
+                              <SelectItem value="10">10 seconds</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Rate Limit Protection</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Auto-throttle to prevent API limits</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <AlertCircle className="w-5 h-5 text-red-600" />
+                          Error Handling
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Retry Failed Tasks</Label>
+                          <Select defaultValue="3">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="0">No retries</SelectItem>
+                              <SelectItem value="1">1 retry</SelectItem>
+                              <SelectItem value="3">3 retries</SelectItem>
+                              <SelectItem value="5">5 retries</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Auto-pause After Errors</Label>
+                          <Select defaultValue="10">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="5">5 consecutive errors</SelectItem>
+                              <SelectItem value="10">10 consecutive errors</SelectItem>
+                              <SelectItem value="25">25 consecutive errors</SelectItem>
+                              <SelectItem value="never">Never auto-pause</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Send Error Notifications</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Email on task failures</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Activity className="w-5 h-5 text-green-600" />
+                          Performance
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Parallel Execution</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Run multiple actions simultaneously</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Smart Batching</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Group similar API calls</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Security Settings */}
+                {settingsTab === 'security' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Security Settings</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Lock className="w-5 h-5 text-red-600" />
+                          Authentication
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Two-Factor Authentication</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Require 2FA for team members</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>SSO Only</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Require single sign-on</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div>
+                          <Label>Session Timeout</Label>
+                          <Select defaultValue="24">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">1 hour</SelectItem>
+                              <SelectItem value="8">8 hours</SelectItem>
+                              <SelectItem value="24">24 hours</SelectItem>
+                              <SelectItem value="168">7 days</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Key className="w-5 h-5 text-amber-600" />
+                          Credentials
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Encrypt Stored Credentials</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">AES-256 encryption for API keys</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Auto-refresh OAuth Tokens</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically renew expiring tokens</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Credential Expiration Warning</Label>
+                          <Select defaultValue="7">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="3">3 days before</SelectItem>
+                              <SelectItem value="7">7 days before</SelectItem>
+                              <SelectItem value="14">14 days before</SelectItem>
+                              <SelectItem value="30">30 days before</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Eye className="w-5 h-5 text-blue-600" />
+                          Audit & Compliance
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Audit Logging</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Log all configuration changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Log Retention</Label>
+                          <Select defaultValue="90">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notification Preferences</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-orange-600" />
+                          Zap Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Task Failures</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when zaps fail</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Auto-pause Events</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert when zaps are auto-paused</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Rate Limit Warnings</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Warn when approaching limits</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Weekly Summary</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Weekly digest of zap activity</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Plug className="w-5 h-5 text-blue-600" />
+                          Connection Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Connection Errors</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert on disconnections</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Token Expiration</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Remind before tokens expire</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Delivery Channels</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                              <Bell className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <div>
+                              <Label>In-App Notifications</Label>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+                              <Mail className="w-4 h-4 text-green-600" />
+                            </div>
+                            <div>
+                              <Label>Email Notifications</Label>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center">
+                              <MessageSquare className="w-4 h-4 text-purple-600" />
+                            </div>
+                            <div>
+                              <Label>Slack Notifications</Label>
+                            </div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* API & Webhooks Settings */}
+                {settingsTab === 'api' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">API & Webhooks</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Key className="w-5 h-5 text-orange-600" />
+                          API Keys
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <Label>Production API Key</Label>
+                            <Button variant="ghost" size="sm">Regenerate</Button>
+                          </div>
+                          <Input type="password" value="zap_live_••••••••••••••••" readOnly className="font-mono" />
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <Label>Test API Key</Label>
+                            <Button variant="ghost" size="sm">Regenerate</Button>
+                          </div>
+                          <Input type="password" value="zap_test_••••••••••••••••" readOnly className="font-mono" />
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <Button variant="outline" className="flex items-center gap-2">
+                            <FileText className="w-4 h-4" />
+                            API Docs
+                          </Button>
+                          <Button variant="outline" className="flex items-center gap-2">
+                            <Code className="w-4 h-4" />
+                            SDKs
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-blue-600" />
+                          Webhooks
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Task Completed', url: 'https://api.kazi.io/webhooks/task-complete', active: true },
+                            { name: 'Zap Error', url: 'https://api.kazi.io/webhooks/zap-error', active: true },
+                            { name: 'Connection Lost', url: 'https://api.kazi.io/webhooks/connection-lost', active: false }
+                          ].map((webhook, i) => (
+                            <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">{webhook.name}</span>
+                                  {webhook.active && <Badge className="bg-green-100 text-green-700">Active</Badge>}
+                                </div>
+                                <p className="text-xs text-gray-500 font-mono">{webhook.url}</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm">Test</Button>
+                                <Button variant="ghost" size="sm">Edit</Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline" className="mt-4 w-full">
+                          <Webhook className="w-4 h-4 mr-2" />
+                          Add Webhook
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <GitBranch className="w-5 h-5 text-purple-600" />
+                          Custom Integrations
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Developer Mode</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Build custom integrations</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Create Custom Integration
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Advanced Settings</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Database className="w-5 h-5 text-blue-600" />
+                          Data Management
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Execution History Retention</Label>
+                          <Select defaultValue="30">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="7">7 days</SelectItem>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Auto-cleanup Old Data</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Remove data past retention period</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <Button variant="outline" className="flex items-center gap-2">
+                            <FileText className="w-4 h-4" />
+                            Export All Data
+                          </Button>
+                          <Button variant="outline" className="flex items-center gap-2">
+                            <Copy className="w-4 h-4" />
+                            Clone Configuration
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Info className="w-5 h-5 text-green-600" />
+                          Debug Mode
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Verbose Logging</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Log detailed execution info</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Test Mode</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Run zaps without side effects</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-base text-red-600 dark:text-red-400 flex items-center gap-2">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <Label className="text-red-700 dark:text-red-400">Pause All Zaps</Label>
+                            <p className="text-sm text-red-600 dark:text-red-500">Immediately stop all active zaps</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Pause All</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <Label className="text-red-700 dark:text-red-400">Delete All Connections</Label>
+                            <p className="text-sm text-red-600 dark:text-red-500">Remove all app connections</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <Label className="text-red-700 dark:text-red-400">Reset All Settings</Label>
+                            <p className="text-sm text-red-600 dark:text-red-500">Restore factory defaults</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
