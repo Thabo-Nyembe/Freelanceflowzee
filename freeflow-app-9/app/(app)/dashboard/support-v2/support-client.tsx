@@ -61,8 +61,20 @@ import {
   Globe,
   UserCheck,
   ClipboardList,
-  BookOpen
+  BookOpen,
+  Key,
+  Sliders,
+  Webhook,
+  Shield,
+  HardDrive,
+  Download,
+  AlertOctagon,
+  CreditCard
 } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CardDescription } from '@/components/ui/card'
 
 // Types
 type TicketStatus = 'open' | 'pending' | 'in_progress' | 'waiting_on_customer' | 'resolved' | 'closed'
@@ -393,6 +405,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
   const [priorityFilter, setPriorityFilter] = useState<TicketPriority | 'all'>('all')
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
   const [replyContent, setReplyContent] = useState('')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filter tickets
   const filteredTickets = useMemo(() => {
@@ -573,6 +586,10 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
             <TabsTrigger value="reports" className="gap-2">
               <BarChart3 className="w-4 h-4" />
               Reports
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -900,6 +917,699 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Zendesk Level */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-2">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'channels', label: 'Channels', icon: MessageSquare },
+                        { id: 'automation', label: 'Automation', icon: Bot },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+
+                {/* Support Stats Sidebar */}
+                <Card className="bg-gradient-to-br from-teal-500 to-cyan-600 text-white border-0">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium opacity-90">Helpdesk Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <div className="text-2xl font-bold">4.8/5.0</div>
+                      <div className="text-xs opacity-80">CSAT Score</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-center">
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-semibold">1.2h</div>
+                        <div className="text-xs opacity-80">Avg Response</div>
+                      </div>
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-semibold">8.4h</div>
+                        <div className="text-xs opacity-80">Avg Resolution</div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span>SLA Compliance</span>
+                        <span>94.2%</span>
+                      </div>
+                      <Progress value={94.2} className="h-2 bg-white/20" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="w-5 h-5 text-teal-600" />
+                          Helpdesk Settings
+                        </CardTitle>
+                        <CardDescription>Configure your helpdesk profile and preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Helpdesk Name</Label>
+                            <Input defaultValue="FreeFlow Support" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Support Email</Label>
+                            <Input defaultValue="support@freeflow.app" type="email" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Language</Label>
+                            <Select defaultValue="en">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="es">Spanish</SelectItem>
+                                <SelectItem value="fr">French</SelectItem>
+                                <SelectItem value="de">German</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Timezone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                                <SelectItem value="gmt">GMT</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Business Hours Mode</div>
+                            <div className="text-sm text-gray-500">Apply SLA only during business hours</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <ClipboardList className="w-5 h-5 text-purple-600" />
+                          Ticket Settings
+                        </CardTitle>
+                        <CardDescription>Configure ticket behavior and defaults</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Priority</Label>
+                            <Select defaultValue="medium">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="low">Low</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="high">High</SelectItem>
+                                <SelectItem value="urgent">Urgent</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Auto-close After</Label>
+                            <Select defaultValue="7">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="3">3 days</SelectItem>
+                                <SelectItem value="7">7 days</SelectItem>
+                                <SelectItem value="14">14 days</SelectItem>
+                                <SelectItem value="30">30 days</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Require Ticket Subject</div>
+                            <div className="text-sm text-gray-500">All tickets must have a subject line</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Enable Ticket Merging</div>
+                            <div className="text-sm text-gray-500">Allow agents to merge duplicate tickets</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'channels' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-blue-600" />
+                          Email Channel
+                        </CardTitle>
+                        <CardDescription>Configure email support settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center gap-3">
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                            <div>
+                              <div className="font-medium text-green-800 dark:text-green-400">Email Channel Active</div>
+                              <div className="text-sm text-green-600 dark:text-green-500">support@freeflow.app</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Email Parser Mode</Label>
+                            <Select defaultValue="smart">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="smart">Smart (AI-powered)</SelectItem>
+                                <SelectItem value="standard">Standard</SelectItem>
+                                <SelectItem value="strict">Strict</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Spam Filter Level</Label>
+                            <Select defaultValue="medium">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="low">Low</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="high">High</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MessageCircle className="w-5 h-5 text-cyan-600" />
+                          Live Chat Widget
+                        </CardTitle>
+                        <CardDescription>Configure the live chat widget for your website</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Enable Live Chat</div>
+                            <div className="text-sm text-gray-500">Show chat widget on your website</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Widget Color</Label>
+                            <div className="flex gap-2">
+                              {['#0ea5e9', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444'].map(color => (
+                                <button
+                                  key={color}
+                                  className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
+                                  style={{ backgroundColor: color }}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Widget Position</Label>
+                            <Select defaultValue="right">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="right">Bottom Right</SelectItem>
+                                <SelectItem value="left">Bottom Left</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Show Agent Photos</div>
+                            <div className="text-sm text-gray-500">Display agent avatars in chat</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-indigo-600" />
+                          Social Channels
+                        </CardTitle>
+                        <CardDescription>Connect social media support channels</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div className="flex items-center gap-3">
+                            <Twitter className="w-5 h-5 text-blue-400" />
+                            <div>
+                              <div className="font-medium">Twitter / X</div>
+                              <div className="text-sm text-gray-500">@freeflow_app</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div className="flex items-center gap-3">
+                            <Facebook className="w-5 h-5 text-blue-600" />
+                            <div>
+                              <div className="font-medium">Facebook Messenger</div>
+                              <div className="text-sm text-gray-500">Not connected</div>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Connect</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'automation' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bot className="w-5 h-5 text-purple-600" />
+                          AI Automation
+                        </CardTitle>
+                        <CardDescription>Configure AI-powered automation rules</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+                          <div className="flex items-center gap-3">
+                            <Sparkles className="w-5 h-5 text-purple-600" />
+                            <div>
+                              <div className="font-medium text-purple-800 dark:text-purple-400">AI Agent Assist</div>
+                              <div className="text-sm text-purple-600 dark:text-purple-500">Suggest responses based on ticket content</div>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Auto-categorization</div>
+                            <div className="text-sm text-gray-500">Automatically categorize incoming tickets</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Sentiment Analysis</div>
+                            <div className="text-sm text-gray-500">Detect customer sentiment from messages</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Priority Detection</div>
+                            <div className="text-sm text-gray-500">Auto-prioritize urgent tickets</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Zap className="w-5 h-5 text-yellow-600" />
+                          Workflow Rules
+                        </CardTitle>
+                        <CardDescription>Configure ticket assignment and routing</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Auto-assignment Mode</Label>
+                          <Select defaultValue="roundrobin">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="roundrobin">Round Robin</SelectItem>
+                              <SelectItem value="loadbalanced">Load Balanced</SelectItem>
+                              <SelectItem value="skills">Skills-based</SelectItem>
+                              <SelectItem value="manual">Manual Only</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Auto-escalation</div>
+                            <div className="text-sm text-gray-500">Escalate tickets nearing SLA breach</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Customer Satisfaction Survey</div>
+                            <div className="text-sm text-gray-500">Send CSAT survey after ticket resolution</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-orange-600" />
+                          Agent Notifications
+                        </CardTitle>
+                        <CardDescription>Configure notifications for support agents</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">New Ticket Assigned</div>
+                            <div className="text-sm text-gray-500">Notify when a ticket is assigned</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Customer Reply</div>
+                            <div className="text-sm text-gray-500">Notify when customer responds</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">SLA Warning</div>
+                            <div className="text-sm text-gray-500">Notify before SLA breach</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Ticket Escalation</div>
+                            <div className="text-sm text-gray-500">Notify when ticket is escalated</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="w-5 h-5 text-blue-600" />
+                          Customer Notifications
+                        </CardTitle>
+                        <CardDescription>Configure notifications for customers</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Ticket Confirmation</div>
+                            <div className="text-sm text-gray-500">Send confirmation when ticket created</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Agent Reply</div>
+                            <div className="text-sm text-gray-500">Notify when agent responds</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Ticket Resolved</div>
+                            <div className="text-sm text-gray-500">Notify when ticket is resolved</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-indigo-600" />
+                          Connected Services
+                        </CardTitle>
+                        <CardDescription>Manage third-party integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-[#4A154B] flex items-center justify-center">
+                              <span className="text-white font-bold">S</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">Slack</div>
+                              <div className="text-sm text-gray-500">#support-tickets channel</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-[#2684FF] flex items-center justify-center">
+                              <span className="text-white font-bold">J</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">Jira</div>
+                              <div className="text-sm text-gray-500">Auto-create issues from tickets</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-[#00A4EF] flex items-center justify-center">
+                              <span className="text-white font-bold">T</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">Microsoft Teams</div>
+                              <div className="text-sm text-gray-500">Not connected</div>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Connect</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-amber-600" />
+                          API Access
+                        </CardTitle>
+                        <CardDescription>Manage API keys and webhooks</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
+                            <Button variant="outline">Copy</Button>
+                            <Button variant="outline">Regenerate</Button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Webhook URL</Label>
+                          <Input placeholder="https://your-server.com/webhooks/support" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Webhook Events</div>
+                            <div className="text-sm text-gray-500">ticket.created, ticket.updated, ticket.resolved</div>
+                          </div>
+                          <Button variant="outline" size="sm">Configure</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HardDrive className="w-5 h-5 text-gray-600" />
+                          Data Management
+                        </CardTitle>
+                        <CardDescription>Configure data retention and storage</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Ticket Retention Period</Label>
+                          <Select defaultValue="365">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="180">180 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                              <SelectItem value="730">2 years</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Attachment Retention</Label>
+                          <Select defaultValue="180">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="180">180 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export All Data
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <Archive className="w-4 h-4 mr-2" />
+                            Archive Old Tickets
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Configure security and compliance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Two-Factor Authentication</div>
+                            <div className="text-sm text-gray-500">Require 2FA for all agents</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">IP Allowlisting</div>
+                            <div className="text-sm text-gray-500">Restrict access to specific IPs</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Audit Logging</div>
+                            <div className="text-sm text-gray-500">Log all agent actions</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-700 dark:text-red-400">Delete All Tickets</div>
+                            <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all tickets and data</div>
+                          </div>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete All
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-700 dark:text-red-400">Reset Helpdesk</div>
+                            <div className="text-sm text-red-600 dark:text-red-500">Reset all settings to default</div>
+                          </div>
+                          <Button variant="destructive" size="sm">
+                            <RotateCcw className="w-4 h-4 mr-2" />
+                            Reset
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
