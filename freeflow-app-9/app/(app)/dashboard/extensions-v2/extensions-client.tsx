@@ -16,7 +16,16 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import {
   Puzzle,
   Download,
@@ -61,7 +70,43 @@ import {
   Award,
   Verified,
   Store,
-  Tag
+  Tag,
+  Key,
+  Webhook,
+  Database,
+  Bell,
+  BellRing,
+  Mail,
+  AlertOctagon,
+  Link2,
+  RefreshCcw,
+  Palette,
+  Copy,
+  Archive,
+  Slack,
+  MessageCircle,
+  Inbox,
+  Layout,
+  Gauge,
+  Rss,
+  Monitor,
+  Smartphone,
+  Columns,
+  Upload,
+  Play,
+  Pause,
+  History,
+  Timer,
+  Cpu,
+  HardDrive,
+  CloudOff,
+  CircleDot,
+  ToggleLeft,
+  ToggleRight,
+  Fingerprint,
+  ScanEye,
+  Network,
+  Unplug
 } from 'lucide-react'
 
 // ============================================================================
@@ -399,6 +444,7 @@ export default function ExtensionsClient() {
   const [selectedExtension, setSelectedExtension] = useState<Extension | null>(null)
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats calculations
   const stats = useMemo(() => {
@@ -838,42 +884,751 @@ export default function ExtensionsClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Extension Settings</CardTitle>
-                <CardDescription>Configure extension behavior</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-lg border">
-                  <div>
-                    <p className="font-medium">Auto-update extensions</p>
-                    <p className="text-sm text-muted-foreground">Automatically install extension updates</p>
-                  </div>
-                  <Switch checked={true} />
-                </div>
-                <div className="flex items-center justify-between p-4 rounded-lg border">
-                  <div>
-                    <p className="font-medium">Developer mode</p>
-                    <p className="text-sm text-muted-foreground">Enable loading unpacked extensions</p>
-                  </div>
-                  <Switch checked={false} />
-                </div>
-                <div className="flex items-center justify-between p-4 rounded-lg border">
-                  <div>
-                    <p className="font-medium">Site access warnings</p>
-                    <p className="text-sm text-muted-foreground">Show warnings when extensions access sensitive sites</p>
-                  </div>
-                  <Switch checked={true} />
-                </div>
-                <div className="flex items-center justify-between p-4 rounded-lg border">
-                  <div>
-                    <p className="font-medium">Extension analytics</p>
-                    <p className="text-sm text-muted-foreground">Help improve extensions by sharing usage data</p>
-                  </div>
-                  <Switch checked={false} />
-                </div>
-              </CardContent>
-            </Card>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Extension Settings</h2>
+                <p className="text-sm text-gray-500">Configure your extension platform preferences</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Settings, label: 'General' },
+                        { id: 'permissions', icon: Shield, label: 'Permissions' },
+                        { id: 'notifications', icon: Bell, label: 'Notifications' },
+                        { id: 'performance', icon: Gauge, label: 'Performance' },
+                        { id: 'developer', icon: Code, label: 'Developer' },
+                        { id: 'advanced', icon: Cpu, label: 'Advanced' },
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Layout className="h-5 w-5" />
+                          Display Preferences
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default View</Label>
+                            <Select defaultValue="grid">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="grid">Grid View</SelectItem>
+                                <SelectItem value="list">List View</SelectItem>
+                                <SelectItem value="compact">Compact View</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Extensions Per Page</Label>
+                            <Select defaultValue="20">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="10">10 extensions</SelectItem>
+                                <SelectItem value="20">20 extensions</SelectItem>
+                                <SelectItem value="50">50 extensions</SelectItem>
+                                <SelectItem value="100">100 extensions</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Show Ratings</div>
+                            <div className="text-sm text-gray-500">Display star ratings on extension cards</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Show Install Counts</div>
+                            <div className="text-sm text-gray-500">Display user counts on extension cards</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Show Verified Badges</div>
+                            <div className="text-sm text-gray-500">Display developer verification badges</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Download className="h-5 w-5" />
+                          Update Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Auto-update Extensions</div>
+                            <div className="text-sm text-gray-500">Automatically install extension updates</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Update Check Frequency</Label>
+                          <Select defaultValue="daily">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="hourly">Every Hour</SelectItem>
+                              <SelectItem value="daily">Daily</SelectItem>
+                              <SelectItem value="weekly">Weekly</SelectItem>
+                              <SelectItem value="manual">Manual Only</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Pre-release Updates</div>
+                            <div className="text-sm text-gray-500">Receive beta and pre-release updates</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="h-5 w-5" />
+                          Regional Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Language</Label>
+                            <Select defaultValue="en">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="es">Spanish</SelectItem>
+                                <SelectItem value="fr">French</SelectItem>
+                                <SelectItem value="de">German</SelectItem>
+                                <SelectItem value="ja">Japanese</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Store Region</Label>
+                            <Select defaultValue="us">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="us">United States</SelectItem>
+                                <SelectItem value="uk">United Kingdom</SelectItem>
+                                <SelectItem value="eu">Europe</SelectItem>
+                                <SelectItem value="asia">Asia Pacific</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Permissions Settings */}
+                {settingsTab === 'permissions' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="h-5 w-5" />
+                          Site Access Controls
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Click to Activate</div>
+                            <div className="text-sm text-gray-500">Require manual activation on each site</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Site Access Warnings</div>
+                            <div className="text-sm text-gray-500">Show warnings when accessing sensitive sites</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Block Extensions on Secure Sites</div>
+                            <div className="text-sm text-gray-500">Disable extensions on banking and payment sites</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Default Site Access</Label>
+                          <Select defaultValue="on_click">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all_sites">All Sites</SelectItem>
+                              <SelectItem value="on_click">On Click Only</SelectItem>
+                              <SelectItem value="specific">Specific Sites</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Lock className="h-5 w-5" />
+                          Permission Management
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Review Permissions on Update</div>
+                            <div className="text-sm text-gray-500">Show permission changes when extensions update</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Block High-Risk Permissions</div>
+                            <div className="text-sm text-gray-500">Warn before installing extensions with sensitive permissions</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Incognito Mode Access</div>
+                            <div className="text-sm text-gray-500">Allow extensions to run in incognito mode</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Fingerprint className="h-5 w-5" />
+                          Privacy Controls
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Block Data Collection</div>
+                            <div className="text-sm text-gray-500">Prevent extensions from collecting browsing data</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Extension Analytics</div>
+                            <div className="text-sm text-gray-500">Share anonymous usage data to improve extensions</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="h-5 w-5" />
+                          Extension Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Update Available</div>
+                            <div className="text-sm text-gray-500">Notify when extension updates are available</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Permission Changes</div>
+                            <div className="text-sm text-gray-500">Alert when extensions request new permissions</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Security Alerts</div>
+                            <div className="text-sm text-gray-500">Warn about compromised or malicious extensions</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">New Featured Extensions</div>
+                            <div className="text-sm text-gray-500">Get notified about editor's picks</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="h-5 w-5" />
+                          Email Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Weekly Store Digest</div>
+                            <div className="text-sm text-gray-500">Receive weekly roundup of new extensions</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Developer Updates</div>
+                            <div className="text-sm text-gray-500">News about your published extensions</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Review Responses</div>
+                            <div className="text-sm text-gray-500">When developers reply to your reviews</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <BellRing className="h-5 w-5" />
+                          Push Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                          <div className="flex items-center gap-3">
+                            <BellRing className="h-6 w-6 text-purple-600" />
+                            <div>
+                              <div className="font-medium">Push Notifications</div>
+                              <div className="text-sm text-gray-500">Enabled for this browser</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Enabled</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Critical Alerts Only</div>
+                            <div className="text-sm text-gray-500">Only receive security-related notifications</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Performance Settings */}
+                {settingsTab === 'performance' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Cpu className="h-5 w-5" />
+                          Resource Management
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4 mb-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold">{installedExtensions.length}</div>
+                            <div className="text-sm text-gray-500">Active</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold">45 MB</div>
+                            <div className="text-sm text-gray-500">Memory Used</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold">12%</div>
+                            <div className="text-sm text-gray-500">CPU Impact</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Lazy Loading</div>
+                            <div className="text-sm text-gray-500">Only load extensions when needed</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Suspend Inactive Extensions</div>
+                            <div className="text-sm text-gray-500">Pause extensions not used in 30 minutes</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Hardware Acceleration</div>
+                            <div className="text-sm text-gray-500">Use GPU for extension rendering</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HardDrive className="h-5 w-5" />
+                          Storage
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex justify-between mb-2">
+                            <span className="text-sm font-medium">Extension Storage</span>
+                            <span className="text-sm text-gray-500">156 MB of 500 MB</span>
+                          </div>
+                          <Progress value={31} className="h-2" />
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Clear Cache
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <Archive className="h-4 w-4 mr-2" />
+                            Export Data
+                          </Button>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Storage Limit</Label>
+                          <Select defaultValue="500">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="100">100 MB</SelectItem>
+                              <SelectItem value="250">250 MB</SelectItem>
+                              <SelectItem value="500">500 MB</SelectItem>
+                              <SelectItem value="unlimited">Unlimited</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Network className="h-5 w-5" />
+                          Network
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Limit Background Data</div>
+                            <div className="text-sm text-gray-500">Restrict extension network usage</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Offline Mode</div>
+                            <div className="text-sm text-gray-500">Allow extensions to work without internet</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Developer Settings */}
+                {settingsTab === 'developer' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Code className="h-5 w-5" />
+                          Developer Mode
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                          <div className="flex items-center gap-3">
+                            <Code className="h-6 w-6 text-yellow-600" />
+                            <div>
+                              <div className="font-medium">Developer Mode</div>
+                              <div className="text-sm text-gray-500">Load unpacked extensions</div>
+                            </div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Load Unpacked</div>
+                            <div className="text-sm text-gray-500">Load extensions from local directory</div>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            <Upload className="h-4 w-4 mr-2" />
+                            Select Folder
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Pack Extension</div>
+                            <div className="text-sm text-gray-500">Create distributable package</div>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            <Package className="h-4 w-4 mr-2" />
+                            Pack
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <ScanEye className="h-5 w-5" />
+                          Debugging
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Service Worker Logging</div>
+                            <div className="text-sm text-gray-500">Log background script activity</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Error Reporting</div>
+                            <div className="text-sm text-gray-500">Show extension errors in console</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Network Inspection</div>
+                            <div className="text-sm text-gray-500">Monitor extension network requests</div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="h-5 w-5" />
+                          API Access
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="font-medium">Developer API Key</div>
+                            <Button variant="outline" size="sm">
+                              <RefreshCw className="h-4 w-4 mr-2" />
+                              Regenerate
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm">
+                              ext_dev_•••••••••••••••••••••••
+                            </code>
+                            <Button variant="outline" size="sm">
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          View API Documentation
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Database className="h-5 w-5" />
+                          Data Management
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold">{mockExtensions.length}</div>
+                            <div className="text-sm text-gray-500">Extensions</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold">{installedExtensions.length}</div>
+                            <div className="text-sm text-gray-500">Installed</div>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <div className="text-2xl font-bold">156 MB</div>
+                            <div className="text-sm text-gray-500">Storage</div>
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="h-4 w-4 mr-2" />
+                            Export Settings
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <Upload className="h-4 w-4 mr-2" />
+                            Import Settings
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <History className="h-5 w-5" />
+                          Extension History
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <div className="font-medium">Keep Installation History</div>
+                            <div className="text-sm text-gray-500">Track installed and removed extensions</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>History Retention</Label>
+                          <Select defaultValue="90">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <History className="h-4 w-4 mr-2" />
+                          View Full History
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="h-5 w-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-600">Disable All Extensions</div>
+                            <div className="text-sm text-gray-500">Temporarily disable all installed extensions</div>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Unplug className="h-4 w-4 mr-2" />
+                            Disable
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-600">Remove All Extensions</div>
+                            <div className="text-sm text-gray-500">Uninstall all extensions permanently</div>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Remove All
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-600">Reset to Defaults</div>
+                            <div className="text-sm text-gray-500">Reset all extension settings to defaults</div>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Reset
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
