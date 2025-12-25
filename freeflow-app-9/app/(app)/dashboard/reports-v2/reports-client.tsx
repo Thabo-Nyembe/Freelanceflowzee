@@ -65,8 +65,18 @@ import {
   Send,
   Bell,
   Lock,
-  Unlock
+  Unlock,
+  Key,
+  Webhook,
+  Shield,
+  HardDrive,
+  AlertOctagon,
+  CreditCard,
+  Sliders
 } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CardDescription } from '@/components/ui/card'
 
 // Types
 type ReportStatus = 'published' | 'draft' | 'scheduled' | 'generating' | 'error' | 'archived'
@@ -304,6 +314,7 @@ export default function ReportsClient() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Filter reports
   const filteredReports = useMemo(() => {
@@ -857,66 +868,682 @@ export default function ReportsClient() {
             </Card>
           </TabsContent>
 
-          {/* Settings Tab */}
+          {/* Settings Tab - Tableau Level */}
           <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-2 gap-6">
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle>Report Defaults</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Auto-refresh dashboards</p>
-                      <p className="text-sm text-gray-500">Keep data up to date automatically</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Enable comments</p>
-                      <p className="text-sm text-gray-500">Allow team members to add comments</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Email notifications</p>
-                      <p className="text-sm text-gray-500">Get notified on report updates</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-2">
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'visualization', label: 'Visualization', icon: BarChart3 },
+                        { id: 'data', label: 'Data Settings', icon: Database },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
 
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle>Sharing & Security</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
+                {/* Analytics Stats Sidebar */}
+                <Card className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white border-0">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium opacity-90">Analytics Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
                     <div>
-                      <p className="font-medium">Public sharing</p>
-                      <p className="text-sm text-gray-500">Allow sharing reports externally</p>
+                      <div className="text-2xl font-bold">48</div>
+                      <div className="text-xs opacity-80">Total Reports</div>
                     </div>
-                    <Switch />
-                  </div>
-                  <div className="flex items-center justify-between">
+                    <div className="grid grid-cols-2 gap-2 text-center">
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-semibold">125K</div>
+                        <div className="text-xs opacity-80">Views</div>
+                      </div>
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-semibold">12</div>
+                        <div className="text-xs opacity-80">Data Sources</div>
+                      </div>
+                    </div>
                     <div>
-                      <p className="font-medium">Require authentication</p>
-                      <p className="text-sm text-gray-500">Users must log in to view reports</p>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span>Storage Used</span>
+                        <span>14.2 GB</span>
+                      </div>
+                      <Progress value={71} className="h-2 bg-white/20" />
                     </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Watermark exports</p>
-                      <p className="text-sm text-gray-500">Add company logo to exported PDFs</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="w-5 h-5 text-purple-600" />
+                          Report Defaults
+                        </CardTitle>
+                        <CardDescription>Configure default settings for new reports</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default View Mode</Label>
+                            <Select defaultValue="dashboard">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="dashboard">Dashboard</SelectItem>
+                                <SelectItem value="full">Full Screen</SelectItem>
+                                <SelectItem value="presentation">Presentation</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Date Range Default</Label>
+                            <Select defaultValue="30">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="7">Last 7 days</SelectItem>
+                                <SelectItem value="30">Last 30 days</SelectItem>
+                                <SelectItem value="90">Last 90 days</SelectItem>
+                                <SelectItem value="365">Last year</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Timezone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="local">Browser Local</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Number Format</Label>
+                            <Select defaultValue="us">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="us">US (1,234.56)</SelectItem>
+                                <SelectItem value="eu">EU (1.234,56)</SelectItem>
+                                <SelectItem value="swiss">Swiss (1'234.56)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Auto-refresh Dashboards</div>
+                            <div className="text-sm text-gray-500">Keep data up to date automatically</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Share2 className="w-5 h-5 text-blue-600" />
+                          Sharing Settings
+                        </CardTitle>
+                        <CardDescription>Configure how reports can be shared</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Public Sharing</div>
+                            <div className="text-sm text-gray-500">Allow sharing reports externally</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Enable Comments</div>
+                            <div className="text-sm text-gray-500">Allow team members to add comments</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Require Authentication</div>
+                            <div className="text-sm text-gray-500">Users must log in to view reports</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'visualization' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Palette className="w-5 h-5 text-pink-600" />
+                          Theme & Branding
+                        </CardTitle>
+                        <CardDescription>Customize the look of your reports</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Color Palette</Label>
+                          <Select defaultValue="default">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="default">Default (Purple)</SelectItem>
+                              <SelectItem value="professional">Professional (Blue)</SelectItem>
+                              <SelectItem value="vibrant">Vibrant (Multi)</SelectItem>
+                              <SelectItem value="dark">Dark Theme</SelectItem>
+                              <SelectItem value="custom">Custom</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Primary Color</Label>
+                          <div className="flex gap-2">
+                            {['#7c3aed', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'].map(color => (
+                              <button
+                                key={color}
+                                className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
+                                style={{ backgroundColor: color }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Show Company Logo</div>
+                            <div className="text-sm text-gray-500">Display logo in reports and exports</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Watermark Exports</div>
+                            <div className="text-sm text-gray-500">Add logo watermark to exported PDFs</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <BarChart3 className="w-5 h-5 text-indigo-600" />
+                          Chart Defaults
+                        </CardTitle>
+                        <CardDescription>Default settings for chart visualizations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Chart Type</Label>
+                            <Select defaultValue="bar">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="bar">Bar Chart</SelectItem>
+                                <SelectItem value="line">Line Chart</SelectItem>
+                                <SelectItem value="pie">Pie Chart</SelectItem>
+                                <SelectItem value="area">Area Chart</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Animation Speed</Label>
+                            <Select defaultValue="normal">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">None</SelectItem>
+                                <SelectItem value="fast">Fast</SelectItem>
+                                <SelectItem value="normal">Normal</SelectItem>
+                                <SelectItem value="slow">Slow</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Show Data Labels</div>
+                            <div className="text-sm text-gray-500">Display values on charts by default</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Enable Tooltips</div>
+                            <div className="text-sm text-gray-500">Show details on hover</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'data' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Database className="w-5 h-5 text-cyan-600" />
+                          Data Refresh
+                        </CardTitle>
+                        <CardDescription>Configure data refresh and caching</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Default Refresh Interval</Label>
+                          <Select defaultValue="hourly">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="realtime">Real-time</SelectItem>
+                              <SelectItem value="5min">Every 5 minutes</SelectItem>
+                              <SelectItem value="hourly">Hourly</SelectItem>
+                              <SelectItem value="daily">Daily</SelectItem>
+                              <SelectItem value="manual">Manual only</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Enable Query Caching</div>
+                            <div className="text-sm text-gray-500">Cache results for faster loading</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Show Last Updated</div>
+                            <div className="text-sm text-gray-500">Display data refresh timestamp</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HardDrive className="w-5 h-5 text-gray-600" />
+                          Data Extract
+                        </CardTitle>
+                        <CardDescription>Configure data extract and storage</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Extract Schedule</Label>
+                          <Select defaultValue="daily">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="hourly">Hourly</SelectItem>
+                              <SelectItem value="daily">Daily</SelectItem>
+                              <SelectItem value="weekly">Weekly</SelectItem>
+                              <SelectItem value="monthly">Monthly</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Incremental Refresh</div>
+                            <div className="text-sm text-gray-500">Only update new and changed data</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Compress Extracts</div>
+                            <div className="text-sm text-gray-500">Reduce storage size</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-orange-600" />
+                          Report Notifications
+                        </CardTitle>
+                        <CardDescription>Configure report update notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Report Published</div>
+                            <div className="text-sm text-gray-500">Notify when reports are published</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Report Updated</div>
+                            <div className="text-sm text-gray-500">Notify when reports are modified</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Scheduled Report Ready</div>
+                            <div className="text-sm text-gray-500">Notify when scheduled reports complete</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Data Refresh Errors</div>
+                            <div className="text-sm text-gray-500">Notify when data refresh fails</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-blue-600" />
+                          Email Delivery
+                        </CardTitle>
+                        <CardDescription>Configure email report delivery</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Email Format</Label>
+                          <Select defaultValue="pdf">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pdf">PDF Attachment</SelectItem>
+                              <SelectItem value="inline">Inline in Email</SelectItem>
+                              <SelectItem value="link">Link to Report</SelectItem>
+                              <SelectItem value="both">PDF + Link</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Include Summary</div>
+                            <div className="text-sm text-gray-500">Add key metrics in email body</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Compress Large Attachments</div>
+                            <div className="text-sm text-gray-500">Zip files over 10MB</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-indigo-600" />
+                          Connected Services
+                        </CardTitle>
+                        <CardDescription>Manage data source integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                              <span className="text-white font-bold">S</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">Snowflake</div>
+                              <div className="text-sm text-gray-500">Cloud data warehouse</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-orange-600 flex items-center justify-center">
+                              <span className="text-white font-bold">G</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">Google Analytics</div>
+                              <div className="text-sm text-gray-500">Web analytics data</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
+                              <span className="text-white font-bold">SF</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">Salesforce</div>
+                              <div className="text-sm text-gray-500">CRM data</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center">
+                              <span className="text-white font-bold">R</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">Redshift</div>
+                              <div className="text-sm text-gray-500">Not connected</div>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Connect</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-amber-600" />
+                          API Access
+                        </CardTitle>
+                        <CardDescription>Manage API credentials and embed codes</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="tb_live_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline">Copy</Button>
+                            <Button variant="outline">Regenerate</Button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Embed Secret</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="embed_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline">Copy</Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Enable Embedded Analytics</div>
+                            <div className="text-sm text-gray-500">Allow embedding reports in other sites</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Configure security and access controls</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Row-Level Security</div>
+                            <div className="text-sm text-gray-500">Filter data based on user permissions</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Data Masking</div>
+                            <div className="text-sm text-gray-500">Hide sensitive fields from certain users</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Audit Logging</div>
+                            <div className="text-sm text-gray-500">Log all report access and actions</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">SSO Enforcement</div>
+                            <div className="text-sm text-gray-500">Require single sign-on for all users</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <CreditCard className="w-5 h-5 text-purple-600" />
+                          Performance
+                        </CardTitle>
+                        <CardDescription>Configure performance and limits</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Query Timeout</Label>
+                          <Select defaultValue="5">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">1 minute</SelectItem>
+                              <SelectItem value="5">5 minutes</SelectItem>
+                              <SelectItem value="10">10 minutes</SelectItem>
+                              <SelectItem value="30">30 minutes</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Max Rows Per Query</Label>
+                          <Select defaultValue="1m">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="100k">100,000</SelectItem>
+                              <SelectItem value="500k">500,000</SelectItem>
+                              <SelectItem value="1m">1,000,000</SelectItem>
+                              <SelectItem value="unlimited">Unlimited</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-gray-200 dark:border-gray-700 border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-700 dark:text-red-400">Delete All Reports</div>
+                            <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all reports and data</div>
+                          </div>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete All
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-700 dark:text-red-400">Clear All Caches</div>
+                            <div className="text-sm text-red-600 dark:text-red-500">Force refresh all cached data</div>
+                          </div>
+                          <Button variant="destructive" size="sm">
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Clear
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
