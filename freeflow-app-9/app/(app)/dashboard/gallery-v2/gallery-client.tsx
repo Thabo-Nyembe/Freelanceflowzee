@@ -43,8 +43,25 @@ import {
   ZoomIn,
   Edit,
   Trash2,
-  LayoutList
+  LayoutList,
+  Sliders,
+  AlertOctagon,
+  Bell,
+  Webhook,
+  Key,
+  Shield,
+  HardDrive,
+  Globe,
+  Mail
 } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Progress } from '@/components/ui/progress'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -385,6 +402,7 @@ export default function GalleryClient() {
   const [viewMode, setViewMode] = useState<'masonry' | 'grid'>('masonry')
   const [showUploadDialog, setShowUploadDialog] = useState(false)
   const [showCreateCollection, setShowCreateCollection] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
   const [copiedLink, setCopiedLink] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
@@ -581,6 +599,7 @@ export default function GalleryClient() {
             <TabsTrigger value="collections" className="rounded-lg">Collections</TabsTrigger>
             <TabsTrigger value="contributors" className="rounded-lg">Contributors</TabsTrigger>
             <TabsTrigger value="topics" className="rounded-lg">Topics</TabsTrigger>
+            <TabsTrigger value="settings" className="rounded-lg">Settings</TabsTrigger>
           </TabsList>
 
           {/* Browse Tab */}
@@ -793,6 +812,646 @@ export default function GalleryClient() {
                   )}
                 </div>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Unsplash Level Photo Platform */}
+          <TabsContent value="settings" className="mt-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 lg:col-span-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Settings</CardTitle>
+                    <CardDescription>Configure your gallery</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'uploads', label: 'Uploads', icon: Upload },
+                        { id: 'downloads', label: 'Downloads', icon: Download },
+                        { id: 'privacy', label: 'Privacy', icon: Shield },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-amber-500 text-white'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+
+                {/* Storage Stats Sidebar */}
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Storage</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Used</span>
+                        <span className="font-medium">24.5 GB / 50 GB</span>
+                      </div>
+                      <Progress value={49} className="h-2" />
+                    </div>
+                    <div className="pt-4 border-t space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Photos</span>
+                        <span className="font-medium">2,458</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Collections</span>
+                        <span className="font-medium text-amber-600">24</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Downloads</span>
+                        <span className="font-medium text-emerald-600">12.4K</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 lg:col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Profile Settings</CardTitle>
+                        <CardDescription>Manage your public profile</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Display Name</Label>
+                            <Input defaultValue="John Doe" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Username</Label>
+                            <Input defaultValue="@johndoe" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Bio</Label>
+                          <Input defaultValue="Photographer & Visual Artist" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Location</Label>
+                            <Input placeholder="City, Country" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Website</Label>
+                            <Input placeholder="https://yourwebsite.com" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Display Preferences</CardTitle>
+                        <CardDescription>Customize how content is displayed</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Default View</Label>
+                            <p className="text-sm text-gray-500">Choose masonry or grid layout</p>
+                          </div>
+                          <Select defaultValue="masonry">
+                            <SelectTrigger className="w-[150px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="masonry">Masonry</SelectItem>
+                              <SelectItem value="grid">Grid</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Images per Page</Label>
+                            <p className="text-sm text-gray-500">Number of photos to load</p>
+                          </div>
+                          <Select defaultValue="30">
+                            <SelectTrigger className="w-[150px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="20">20</SelectItem>
+                              <SelectItem value="30">30</SelectItem>
+                              <SelectItem value="50">50</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Show EXIF Data</Label>
+                            <p className="text-sm text-gray-500">Display camera info on photos</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Auto-load More</Label>
+                            <p className="text-sm text-gray-500">Infinite scroll loading</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Upload Settings */}
+                {settingsTab === 'uploads' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Upload Preferences</CardTitle>
+                        <CardDescription>Configure how photos are uploaded</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Auto-optimize Images</Label>
+                            <p className="text-sm text-gray-500">Compress images for faster loading</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Max Upload Size</Label>
+                            <Select defaultValue="50">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="25">25 MB</SelectItem>
+                                <SelectItem value="50">50 MB</SelectItem>
+                                <SelectItem value="100">100 MB</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Upload Quality</Label>
+                            <Select defaultValue="high">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="original">Original</SelectItem>
+                                <SelectItem value="high">High (90%)</SelectItem>
+                                <SelectItem value="medium">Medium (75%)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Preserve EXIF Data</Label>
+                            <p className="text-sm text-gray-500">Keep camera info in uploaded photos</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Strip Location Data</Label>
+                            <p className="text-sm text-gray-500">Remove GPS coordinates for privacy</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Default Upload Settings</CardTitle>
+                        <CardDescription>Set defaults for new uploads</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default License</Label>
+                            <Select defaultValue="unsplash">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="unsplash">Unsplash License</SelectItem>
+                                <SelectItem value="cc0">CC0 (Public Domain)</SelectItem>
+                                <SelectItem value="cc-by">CC BY 4.0</SelectItem>
+                                <SelectItem value="all-rights">All Rights Reserved</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Collection</Label>
+                            <Select defaultValue="none">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">No Collection</SelectItem>
+                                <SelectItem value="nature">Nature</SelectItem>
+                                <SelectItem value="travel">Travel</SelectItem>
+                                <SelectItem value="portraits">Portraits</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Auto-tag with AI</Label>
+                            <p className="text-sm text-gray-500">Automatically generate tags</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Allow Downloads</Label>
+                            <p className="text-sm text-gray-500">Let others download your photos</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Download Settings */}
+                {settingsTab === 'downloads' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Download Options</CardTitle>
+                        <CardDescription>Configure download settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Resolution</Label>
+                            <Select defaultValue="large">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="small">Small (640px)</SelectItem>
+                                <SelectItem value="medium">Medium (1920px)</SelectItem>
+                                <SelectItem value="large">Large (2400px)</SelectItem>
+                                <SelectItem value="original">Original</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>File Format</Label>
+                            <Select defaultValue="jpg">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="jpg">JPEG</SelectItem>
+                                <SelectItem value="png">PNG</SelectItem>
+                                <SelectItem value="webp">WebP</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Include Watermark</Label>
+                            <p className="text-sm text-gray-500">Add watermark to downloads</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Track Downloads</Label>
+                            <p className="text-sm text-gray-500">Get notified when photos are downloaded</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Attribution Settings</CardTitle>
+                        <CardDescription>Configure how attribution is displayed</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Require Attribution</Label>
+                            <p className="text-sm text-gray-500">Downloaders must credit you</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Attribution Text</Label>
+                          <Input defaultValue="Photo by @johndoe on Kazi Gallery" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Copy Attribution Button</Label>
+                            <p className="text-sm text-gray-500">Show one-click copy for attribution</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Privacy Settings */}
+                {settingsTab === 'privacy' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Profile Privacy</CardTitle>
+                        <CardDescription>Control who can see your content</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Public Profile</Label>
+                            <p className="text-sm text-gray-500">Anyone can view your profile</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Show Statistics</Label>
+                            <p className="text-sm text-gray-500">Display download and view counts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Show Location</Label>
+                            <p className="text-sm text-gray-500">Display where photos were taken</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Allow Messages</Label>
+                            <p className="text-sm text-gray-500">Receive messages from other users</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Content Visibility</CardTitle>
+                        <CardDescription>Control who can interact with your photos</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Allow Comments</Label>
+                            <p className="text-sm text-gray-500">Let others comment on photos</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Allow Likes</Label>
+                            <p className="text-sm text-gray-500">Let others like your photos</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Allow Collections</Label>
+                            <p className="text-sm text-gray-500">Let others add to collections</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>NSFW Content Filter</Label>
+                            <p className="text-sm text-gray-500">Flag mature content</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Connected Services</CardTitle>
+                        <CardDescription>Link external accounts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Instagram', status: 'connected', username: '@johndoe' },
+                          { name: 'Twitter/X', status: 'not_connected', username: null },
+                          { name: 'Facebook', status: 'not_connected', username: null },
+                          { name: 'Pinterest', status: 'connected', username: 'johndoe' },
+                          { name: 'Behance', status: 'not_connected', username: null }
+                        ].map((service, idx) => (
+                          <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg ${service.status === 'connected' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                                <Globe className={`h-4 w-4 ${service.status === 'connected' ? 'text-emerald-600' : 'text-gray-400'}`} />
+                              </div>
+                              <div>
+                                <p className="font-medium">{service.name}</p>
+                                {service.username && (
+                                  <p className="text-sm text-gray-500">{service.username}</p>
+                                )}
+                              </div>
+                            </div>
+                            <Button variant={service.status === 'connected' ? 'outline' : 'default'} size="sm">
+                              {service.status === 'connected' ? 'Disconnect' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Developer API settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex items-center gap-2">
+                            <Input type="password" value="kazi-gallery-xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline" size="sm">
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <p className="text-xs text-gray-500">Use this key to access the Gallery API</p>
+                        </div>
+                        <div className="flex items-center justify-between pt-4 border-t">
+                          <div>
+                            <Label>Enable API Access</Label>
+                            <p className="text-sm text-gray-500">Allow programmatic access</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Rate Limiting</Label>
+                            <p className="text-sm text-gray-500">5000 requests/hour</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Key className="h-4 w-4 mr-2" />
+                          Regenerate API Key
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Storage Management</CardTitle>
+                        <CardDescription>Manage your storage quota</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                          <div className="flex items-center gap-3">
+                            <HardDrive className="h-5 w-5 text-amber-600" />
+                            <div>
+                              <p className="font-medium text-amber-800 dark:text-amber-300">Storage Usage</p>
+                              <p className="text-sm text-amber-600 dark:text-amber-400">24.5 GB of 50 GB used (49%)</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Auto-delete Trash</Label>
+                            <p className="text-sm text-gray-500">Permanently delete after 30 days</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Compress Old Photos</Label>
+                            <p className="text-sm text-gray-500">Reduce storage for older uploads</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Empty Trash
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Export</CardTitle>
+                        <CardDescription>Download your data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Export Format</Label>
+                            <Select defaultValue="zip">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="zip">ZIP Archive</SelectItem>
+                                <SelectItem value="json">JSON (metadata only)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Resolution</Label>
+                            <Select defaultValue="original">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="original">Original</SelectItem>
+                                <SelectItem value="high">High (2400px)</SelectItem>
+                                <SelectItem value="medium">Medium (1200px)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Download className="h-4 w-4 mr-2" />
+                          Request Data Export
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600 flex items-center gap-2">
+                          <AlertOctagon className="h-5 w-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-3 px-4 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Delete All Photos</p>
+                            <p className="text-sm text-gray-500">Remove all uploaded photos</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                            Delete Photos
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between py-3 px-4 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Delete All Collections</p>
+                            <p className="text-sm text-gray-500">Remove all collections</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                            Delete Collections
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between py-3 px-4 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Delete Account</p>
+                            <p className="text-sm text-gray-500">Permanently delete your account</p>
+                          </div>
+                          <Button variant="destructive">
+                            Delete Account
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
