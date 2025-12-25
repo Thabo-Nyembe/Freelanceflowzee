@@ -65,9 +65,25 @@ import {
   Workflow,
   Code,
   Send,
-  UserCheck
+  UserCheck,
+  Webhook,
+  Key,
+  Shield,
+  HardDrive,
+  AlertOctagon,
+  Bell,
+  CreditCard,
+  Sliders
 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Progress } from '@/components/ui/progress'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
@@ -483,6 +499,7 @@ export default function PollsClient() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedQuestionType, setSelectedQuestionType] = useState<string | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const filteredForms = useMemo(() => {
     return forms.filter(form => {
@@ -612,6 +629,10 @@ export default function PollsClient() {
               <TabsTrigger value="integrations" className="flex items-center gap-2">
                 <Zap className="w-4 h-4" />
                 Integrations
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
               </TabsTrigger>
             </TabsList>
 
@@ -946,6 +967,877 @@ export default function PollsClient() {
                   </button>
                 </div>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - SurveyMonkey Level */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-2">
+                <nav className="space-y-1">
+                  {[
+                    { id: 'general', label: 'General', icon: Settings },
+                    { id: 'form-defaults', label: 'Form Defaults', icon: ClipboardList },
+                    { id: 'notifications', label: 'Notifications', icon: Bell },
+                    { id: 'branding', label: 'Branding', icon: Palette },
+                    { id: 'integrations', label: 'Integrations', icon: Webhook },
+                    { id: 'advanced', label: 'Advanced', icon: Sliders }
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => setSettingsTab(item.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                        settingsTab === item.id
+                          ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 font-medium'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5" />
+                      {item.label}
+                    </button>
+                  ))}
+                </nav>
+
+                {/* Survey Stats */}
+                <Card className="mt-6">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Survey Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Total Responses</span>
+                      <Badge variant="secondary">{stats.totalResponses.toLocaleString()}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Completion Rate</span>
+                      <span className="text-sm font-medium text-emerald-600">{stats.avgCompletionRate.toFixed(1)}%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Active Forms</span>
+                      <span className="text-sm font-medium">{stats.activeForms}</span>
+                    </div>
+                    <Progress value={stats.avgCompletionRate} className="h-2 mt-2" />
+                    <p className="text-xs text-gray-500 mt-1">Overall completion rate</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="w-5 h-5 text-emerald-600" />
+                          General Settings
+                        </CardTitle>
+                        <CardDescription>Configure your survey workspace settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Workspace Name</Label>
+                            <Input defaultValue="My Survey Workspace" />
+                            <p className="text-xs text-gray-500">Name visible to team members</p>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Language</Label>
+                            <Select defaultValue="en">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="es">Spanish</SelectItem>
+                                <SelectItem value="fr">French</SelectItem>
+                                <SelectItem value="de">German</SelectItem>
+                                <SelectItem value="pt">Portuguese</SelectItem>
+                                <SelectItem value="ja">Japanese</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Time Zone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC (Coordinated Universal Time)</SelectItem>
+                                <SelectItem value="est">Eastern Time (EST/EDT)</SelectItem>
+                                <SelectItem value="pst">Pacific Time (PST/PDT)</SelectItem>
+                                <SelectItem value="cet">Central European Time (CET)</SelectItem>
+                                <SelectItem value="gmt">Greenwich Mean Time (GMT)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Date Format</Label>
+                            <Select defaultValue="mdy">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="mdy">MM/DD/YYYY</SelectItem>
+                                <SelectItem value="dmy">DD/MM/YYYY</SelectItem>
+                                <SelectItem value="ymd">YYYY-MM-DD</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-save Drafts</p>
+                            <p className="text-sm text-gray-500">Automatically save form changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Public Profile</p>
+                            <p className="text-sm text-gray-500">Allow respondents to view your profile</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-blue-600" />
+                          Localization
+                        </CardTitle>
+                        <CardDescription>Multi-language and regional settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Multi-language Support</p>
+                            <p className="text-sm text-gray-500">Enable translations for surveys</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Auto-detect Language</p>
+                            <p className="text-sm text-gray-500">Show surveys in respondent's language</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">RTL Support</p>
+                            <p className="text-sm text-gray-500">Enable right-to-left text direction</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Form Defaults Settings */}
+                {settingsTab === 'form-defaults' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <ClipboardList className="w-5 h-5 text-emerald-600" />
+                          Default Form Settings
+                        </CardTitle>
+                        <CardDescription>Configure default behavior for new forms</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Progress Bar</p>
+                            <p className="text-sm text-gray-500">Display progress indicator to respondents</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Show Question Numbers</p>
+                            <p className="text-sm text-gray-500">Number each question automatically</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Back Navigation</p>
+                            <p className="text-sm text-gray-500">Let respondents go back to previous questions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Required by Default</p>
+                            <p className="text-sm text-gray-500">Make new questions required automatically</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6 pt-4">
+                          <div className="space-y-2">
+                            <Label>Default Animation</Label>
+                            <Select defaultValue="slide">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="slide">Slide</SelectItem>
+                                <SelectItem value="fade">Fade</SelectItem>
+                                <SelectItem value="none">None</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Progress Bar Position</Label>
+                            <Select defaultValue="top">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="top">Top</SelectItem>
+                                <SelectItem value="bottom">Bottom</SelectItem>
+                                <SelectItem value="none">Hidden</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Target className="w-5 h-5 text-purple-600" />
+                          Response Collection
+                        </CardTitle>
+                        <CardDescription>Default settings for collecting responses</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Multiple Responses</p>
+                            <p className="text-sm text-gray-500">Let same person respond multiple times</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Save Partial Responses</p>
+                            <p className="text-sm text-gray-500">Store incomplete survey submissions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Anonymous Responses</p>
+                            <p className="text-sm text-gray-500">Don't collect identifying information</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="space-y-2 pt-4">
+                          <Label>Default Response Limit</Label>
+                          <Input type="number" placeholder="Unlimited" />
+                          <p className="text-xs text-gray-500">Leave empty for unlimited responses</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-amber-500" />
+                          Email Notifications
+                        </CardTitle>
+                        <CardDescription>Configure email alerts for responses</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">New Response Notifications</p>
+                            <p className="text-sm text-gray-500">Get notified for each new submission</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Daily Digest</p>
+                            <p className="text-sm text-gray-500">Receive daily summary of responses</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Weekly Report</p>
+                            <p className="text-sm text-gray-500">Get weekly analytics summary</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Completion Milestone Alerts</p>
+                            <p className="text-sm text-gray-500">Notify at 100, 500, 1000 responses</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="space-y-2 pt-4">
+                          <Label>Notification Email</Label>
+                          <Input type="email" placeholder="team@company.com" defaultValue="team@company.com" />
+                          <p className="text-xs text-gray-500">Where to send email notifications</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-blue-600" />
+                          Respondent Emails
+                        </CardTitle>
+                        <CardDescription>Email settings for survey respondents</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Confirmation Emails</p>
+                            <p className="text-sm text-gray-500">Send confirmation when form is submitted</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Response Copy</p>
+                            <p className="text-sm text-gray-500">Send respondent a copy of their answers</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Reminder Emails</p>
+                            <p className="text-sm text-gray-500">Send reminders for incomplete surveys</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="space-y-2 pt-4">
+                          <Label>Custom Sender Name</Label>
+                          <Input placeholder="Your Company Name" />
+                          <p className="text-xs text-gray-500">Name shown in From field</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sparkles className="w-5 h-5 text-purple-600" />
+                          Smart Alerts
+                        </CardTitle>
+                        <CardDescription>AI-powered notification triggers</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Low Score Alert</p>
+                            <p className="text-sm text-gray-500">Alert when NPS or rating is below threshold</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Sentiment Detection</p>
+                            <p className="text-sm text-gray-500">Alert for negative text responses</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Drop-off Alert</p>
+                            <p className="text-sm text-gray-500">Notify when completion rate drops</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Branding Settings */}
+                {settingsTab === 'branding' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Palette className="w-5 h-5 text-pink-600" />
+                          Brand Identity
+                        </CardTitle>
+                        <CardDescription>Customize forms with your brand</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                          <Label>Logo Upload</Label>
+                          <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+                            <Image className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                            <p className="text-sm text-gray-500">Drag and drop or click to upload</p>
+                            <p className="text-xs text-gray-400">PNG, JPG up to 5MB</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Primary Color</Label>
+                            <div className="flex gap-2">
+                              <Input type="color" defaultValue="#10b981" className="w-16 h-10 p-1" />
+                              <Input defaultValue="#10b981" />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Secondary Color</Label>
+                            <div className="flex gap-2">
+                              <Input type="color" defaultValue="#0ea5e9" className="w-16 h-10 p-1" />
+                              <Input defaultValue="#0ea5e9" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Brand Font</Label>
+                          <Select defaultValue="inter">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="inter">Inter</SelectItem>
+                              <SelectItem value="poppins">Poppins</SelectItem>
+                              <SelectItem value="roboto">Roboto</SelectItem>
+                              <SelectItem value="opensans">Open Sans</SelectItem>
+                              <SelectItem value="lato">Lato</SelectItem>
+                              <SelectItem value="montserrat">Montserrat</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Remove Powered By</p>
+                            <p className="text-sm text-gray-500">Hide branding on forms (Pro feature)</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Layout className="w-5 h-5 text-indigo-600" />
+                          Default Theme
+                        </CardTitle>
+                        <CardDescription>Set default theme for new forms</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-4 gap-4">
+                          {mockThemes.map(theme => (
+                            <button
+                              key={theme.id}
+                              className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-500 transition-all"
+                            >
+                              <div
+                                className="h-20 rounded-lg mb-2"
+                                style={{ backgroundColor: theme.backgroundColor }}
+                              />
+                              <p className="text-sm font-medium text-center">{theme.name}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Link className="w-5 h-5 text-cyan-600" />
+                          Custom Domain
+                        </CardTitle>
+                        <CardDescription>Use your own domain for surveys</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Custom Domain</Label>
+                          <Input placeholder="surveys.yourdomain.com" />
+                          <p className="text-xs text-gray-500">Point your CNAME to surveys.platform.com</p>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <AlertCircle className="w-5 h-5 text-amber-600" />
+                            <div>
+                              <p className="font-medium text-amber-800 dark:text-amber-400">SSL Certificate</p>
+                              <p className="text-sm text-amber-600 dark:text-amber-500">Auto-provisioned after domain verification</p>
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="border-amber-500 text-amber-600">Pending</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-orange-600" />
+                          Webhooks
+                        </CardTitle>
+                        <CardDescription>Send form data to external services</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Webhook URL</Label>
+                          <Input placeholder="https://your-service.com/webhook" />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Trigger Event</Label>
+                            <Select defaultValue="submit">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="submit">On Submit</SelectItem>
+                                <SelectItem value="start">On Start</SelectItem>
+                                <SelectItem value="complete">On Complete</SelectItem>
+                                <SelectItem value="abandon">On Abandon</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Data Format</Label>
+                            <Select defaultValue="json">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="json">JSON</SelectItem>
+                                <SelectItem value="form">Form Data</SelectItem>
+                                <SelectItem value="xml">XML</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Webhook Endpoint
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-violet-600" />
+                          API Access
+                        </CardTitle>
+                        <CardDescription>Manage API keys and access tokens</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly />
+                            <Button variant="outline">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                            <Button variant="outline">
+                              <RefreshCw className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          <p className="text-xs text-gray-500">Use this key to authenticate API requests</p>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">API Access</p>
+                            <p className="text-sm text-gray-500">Enable programmatic access to forms</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Rate Limit</Label>
+                          <Select defaultValue="1000">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="100">100 requests/minute</SelectItem>
+                              <SelectItem value="1000">1,000 requests/minute</SelectItem>
+                              <SelectItem value="10000">10,000 requests/minute</SelectItem>
+                              <SelectItem value="unlimited">Unlimited</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Code className="w-5 h-5 text-gray-600" />
+                          Embed Settings
+                        </CardTitle>
+                        <CardDescription>Configure embedded form behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Allow Embedding</p>
+                            <p className="text-sm text-gray-500">Let forms be embedded on external sites</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Allowed Domains</Label>
+                          <Input placeholder="yourdomain.com, subdomain.yourdomain.com" />
+                          <p className="text-xs text-gray-500">Comma-separated list of allowed domains</p>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Popup Mode</p>
+                            <p className="text-sm text-gray-500">Enable popup/modal form display</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Protect your forms and data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">CAPTCHA Protection</p>
+                            <p className="text-sm text-gray-500">Prevent spam submissions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Honeypot Fields</p>
+                            <p className="text-sm text-gray-500">Hidden anti-bot protection</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">IP Tracking</p>
+                            <p className="text-sm text-gray-500">Log respondent IP addresses</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Data Encryption</p>
+                            <p className="text-sm text-gray-500">Encrypt responses at rest</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HardDrive className="w-5 h-5 text-blue-600" />
+                          Data Management
+                        </CardTitle>
+                        <CardDescription>Response storage and retention</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Data Retention Period</Label>
+                          <Select defaultValue="forever">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-gray-500">Auto-delete responses after this period</p>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">GDPR Compliance Mode</p>
+                            <p className="text-sm text-gray-500">Enable GDPR-compliant data handling</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Data Export Format</p>
+                            <p className="text-sm text-gray-500">Default format for exports</p>
+                          </div>
+                          <Select defaultValue="csv">
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="csv">CSV</SelectItem>
+                              <SelectItem value="xlsx">Excel</SelectItem>
+                              <SelectItem value="json">JSON</SelectItem>
+                              <SelectItem value="pdf">PDF</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <Button variant="outline" className="w-full">
+                          <Download className="w-4 h-4 mr-2" />
+                          Export All Data
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <CreditCard className="w-5 h-5 text-indigo-600" />
+                          Subscription & Billing
+                        </CardTitle>
+                        <CardDescription>Manage your plan and payments</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-emerald-800 dark:text-emerald-400">Professional Plan</p>
+                            <p className="text-sm text-emerald-600 dark:text-emerald-500">Unlimited forms • 10,000 responses/mo</p>
+                          </div>
+                          <Badge className="bg-emerald-600">Active</Badge>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-emerald-600">{stats.totalForms}</p>
+                            <p className="text-xs text-gray-500">Forms Created</p>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-blue-600">{stats.totalResponses.toLocaleString()}</p>
+                            <p className="text-xs text-gray-500">Responses Used</p>
+                          </div>
+                          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                            <p className="text-2xl font-bold text-purple-600">87%</p>
+                            <p className="text-xs text-gray-500">Quota Used</p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="flex-1">
+                            Manage Subscription
+                          </Button>
+                          <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700">
+                            Upgrade Plan
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete All Responses</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Remove all response data permanently</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete All</Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Reset Workspace</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Delete all forms and start fresh</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-700 dark:text-red-400">Delete Account</p>
+                            <p className="text-sm text-red-600 dark:text-red-500">Permanently delete your account</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete Account</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
