@@ -58,7 +58,21 @@ import {
   Unlock,
   Plus,
   Minus,
-  X
+  X,
+  Key,
+  Webhook,
+  Mail,
+  Cpu,
+  Palette,
+  AlertOctagon,
+  Trash2,
+  Link2,
+  HardDrive,
+  FileText,
+  Sliders,
+  Archive,
+  History,
+  Gauge
 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -68,6 +82,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Progress } from '@/components/ui/progress'
 
 // Type definitions for Datadog-level logging
 type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'critical'
@@ -359,6 +380,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
   const [isLiveMode, setIsLiveMode] = useState(true)
   const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set())
   const [timeRange, setTimeRange] = useState('1h')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const filteredLogs = useMemo(() => {
     return mockLogs.filter(log => {
@@ -521,6 +543,10 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
               <TabsTrigger value="saved" className="rounded-lg data-[state=active]:bg-purple-50 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30">
                 <Bookmark className="w-4 h-4 mr-2" />
                 Saved Views
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-purple-50 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
               </TabsTrigger>
             </TabsList>
 
@@ -895,6 +921,633 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                   </button>
                 </div>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Datadog-level configuration */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="w-5 h-5" />
+                      Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Sliders, label: 'General' },
+                        { id: 'parsing', icon: Code, label: 'Parsing' },
+                        { id: 'alerts', icon: Bell, label: 'Alerts' },
+                        { id: 'archiving', icon: Archive, label: 'Archiving' },
+                        { id: 'integrations', icon: Zap, label: 'Integrations' },
+                        { id: 'advanced', icon: Lock, label: 'Advanced' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-purple-500" />
+                          General Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Log Retention Period</Label>
+                            <Select defaultValue="30d">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="7d">7 Days</SelectItem>
+                                <SelectItem value="15d">15 Days</SelectItem>
+                                <SelectItem value="30d">30 Days</SelectItem>
+                                <SelectItem value="90d">90 Days</SelectItem>
+                                <SelectItem value="1y">1 Year</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Timezone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="local">Local Time</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Log Level</Label>
+                            <Select defaultValue="info">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="debug">Debug</SelectItem>
+                                <SelectItem value="info">Info</SelectItem>
+                                <SelectItem value="warn">Warning</SelectItem>
+                                <SelectItem value="error">Error</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Logs per Query</Label>
+                            <Input type="number" defaultValue="10000" />
+                          </div>
+                        </div>
+                        <div className="border-t pt-4 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Live Tail Mode</p>
+                              <p className="text-sm text-muted-foreground">Stream logs in real-time</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Preserve Log Context</p>
+                              <p className="text-sm text-muted-foreground">Keep surrounding log lines when filtering</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Auto-refresh Dashboard</p>
+                              <p className="text-sm text-muted-foreground">Automatically update analytics</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Gauge className="w-5 h-5 text-blue-500" />
+                          Sampling Configuration
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Enable Log Sampling</p>
+                            <p className="text-sm text-muted-foreground">Sample logs to reduce storage costs</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Sample Rate (%)</Label>
+                          <div className="flex items-center gap-4">
+                            <Input type="range" min="1" max="100" defaultValue="100" className="flex-1" />
+                            <span className="text-sm font-medium w-12">100%</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Always Keep Errors</p>
+                            <p className="text-sm text-muted-foreground">Never sample error and critical logs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'parsing' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Code className="w-5 h-5 text-green-500" />
+                          Log Parsers
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <p className="text-sm text-muted-foreground">Configure how logs are parsed and indexed</p>
+                        <div className="space-y-3">
+                          {[
+                            { name: 'JSON Parser', description: 'Parse JSON formatted logs', enabled: true },
+                            { name: 'Nginx Parser', description: 'Parse Nginx access logs', enabled: true },
+                            { name: 'Apache Parser', description: 'Parse Apache access/error logs', enabled: false },
+                            { name: 'Syslog Parser', description: 'Parse RFC 5424 syslog format', enabled: true },
+                            { name: 'Custom Regex', description: 'User-defined regex patterns', enabled: true }
+                          ].map(parser => (
+                            <div key={parser.name} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Terminal className="w-4 h-4 text-muted-foreground" />
+                                <div>
+                                  <p className="font-medium">{parser.name}</p>
+                                  <p className="text-sm text-muted-foreground">{parser.description}</p>
+                                </div>
+                              </div>
+                              <Switch checked={parser.enabled} />
+                            </div>
+                          ))}
+                        </div>
+                        <button className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-purple-300 transition-colors">
+                          <Plus className="w-4 h-4 inline-block mr-2" />
+                          Add Custom Parser
+                        </button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Tag className="w-5 h-5 text-orange-500" />
+                          Field Extraction
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Auto-extract Fields</p>
+                            <p className="text-sm text-muted-foreground">Automatically detect and extract fields</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Index All Fields</p>
+                            <p className="text-sm text-muted-foreground">Make all extracted fields searchable</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Max Fields per Log</Label>
+                          <Input type="number" defaultValue="100" className="w-32" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'alerts' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-yellow-500" />
+                          Alert Rules
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { name: 'High Error Rate', condition: 'error_rate > 5%', severity: 'critical', enabled: true },
+                            { name: 'Slow Response Time', condition: 'avg(duration) > 2000ms', severity: 'warning', enabled: true },
+                            { name: 'Service Down', condition: 'count(status=500) > 10/min', severity: 'critical', enabled: true },
+                            { name: 'Memory Pressure', condition: 'memory_usage > 90%', severity: 'warning', enabled: false },
+                            { name: 'Disk Full', condition: 'disk_usage > 95%', severity: 'critical', enabled: true }
+                          ].map(rule => (
+                            <div key={rule.name} className="flex items-center justify-between p-4 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <AlertTriangle className={`w-4 h-4 ${rule.severity === 'critical' ? 'text-red-500' : 'text-yellow-500'}`} />
+                                <div>
+                                  <p className="font-medium">{rule.name}</p>
+                                  <p className="text-sm text-muted-foreground font-mono">{rule.condition}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <Badge variant={rule.severity === 'critical' ? 'destructive' : 'secondary'}>
+                                  {rule.severity}
+                                </Badge>
+                                <Switch checked={rule.enabled} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <button className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-purple-300 transition-colors">
+                          <Plus className="w-4 h-4 inline-block mr-2" />
+                          Create Alert Rule
+                        </button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-blue-500" />
+                          Notification Channels
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Email', description: 'ops-team@freeflow.io', connected: true },
+                            { name: 'Slack', description: '#ops-alerts', connected: true },
+                            { name: 'PagerDuty', description: 'Escalation service', connected: true },
+                            { name: 'Opsgenie', description: 'On-call management', connected: false },
+                            { name: 'Webhook', description: 'Custom HTTP endpoint', connected: false }
+                          ].map(channel => (
+                            <div key={channel.name} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Link2 className="w-4 h-4" />
+                                <div>
+                                  <p className="font-medium">{channel.name}</p>
+                                  <p className="text-sm text-muted-foreground">{channel.description}</p>
+                                </div>
+                              </div>
+                              <Badge variant={channel.connected ? 'default' : 'outline'}>
+                                {channel.connected ? 'Connected' : 'Connect'}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'archiving' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Archive className="w-5 h-5 text-indigo-500" />
+                          Log Archiving
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Enable Archiving</p>
+                            <p className="text-sm text-muted-foreground">Archive logs to cold storage</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Archive After (days)</Label>
+                            <Input type="number" defaultValue="30" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Delete After (days)</Label>
+                            <Input type="number" defaultValue="365" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Compress Archives</p>
+                            <p className="text-sm text-muted-foreground">Use gzip compression for storage</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HardDrive className="w-5 h-5 text-green-500" />
+                          Storage Destinations
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Amazon S3', description: 's3://freeflow-logs/archive/', connected: true },
+                            { name: 'Google Cloud Storage', description: 'gs://freeflow-logs/', connected: false },
+                            { name: 'Azure Blob Storage', description: 'Azure container', connected: false },
+                            { name: 'Local Storage', description: '/var/log/archive/', connected: true }
+                          ].map(storage => (
+                            <div key={storage.name} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Database className="w-4 h-4" />
+                                <div>
+                                  <p className="font-medium">{storage.name}</p>
+                                  <p className="text-sm text-muted-foreground font-mono">{storage.description}</p>
+                                </div>
+                              </div>
+                              <Badge variant={storage.connected ? 'default' : 'secondary'}>
+                                {storage.connected ? 'Active' : 'Configure'}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <History className="w-5 h-5 text-orange-500" />
+                          Rehydration
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Enable Rehydration</p>
+                            <p className="text-sm text-muted-foreground">Restore archived logs on demand</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Max Rehydration Size (GB)</Label>
+                          <Input type="number" defaultValue="100" className="w-32" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Auto-delete Rehydrated</p>
+                            <p className="text-sm text-muted-foreground">Remove rehydrated logs after 7 days</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Server className="w-5 h-5 text-blue-500" />
+                          Log Sources
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Docker', description: 'Container logs via daemon', enabled: true },
+                            { name: 'Kubernetes', description: 'Pod and cluster logs', enabled: true },
+                            { name: 'AWS CloudWatch', description: 'Import from CloudWatch Logs', enabled: true },
+                            { name: 'Fluentd', description: 'Forward via Fluentd agent', enabled: false },
+                            { name: 'Filebeat', description: 'Elastic Filebeat forwarder', enabled: false }
+                          ].map(source => (
+                            <div key={source.name} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Upload className="w-4 h-4" />
+                                <div>
+                                  <p className="font-medium">{source.name}</p>
+                                  <p className="text-sm text-muted-foreground">{source.description}</p>
+                                </div>
+                              </div>
+                              <Switch checked={source.enabled} />
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-purple-500" />
+                          Webhooks & Exports
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Webhook Endpoint</Label>
+                          <Input placeholder="https://your-app.com/webhooks/logs" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Events to Send</Label>
+                          <div className="flex flex-wrap gap-2">
+                            {['error', 'critical', 'alert_triggered', 'anomaly_detected'].map(event => (
+                              <Badge key={event} variant="secondary" className="cursor-pointer hover:bg-purple-100">
+                                {event}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Batch Requests</p>
+                            <p className="text-sm text-muted-foreground">Group events before sending</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <BarChart3 className="w-5 h-5 text-green-500" />
+                          Analytics Integrations
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Grafana', description: 'Dashboards and visualization', connected: true },
+                            { name: 'Prometheus', description: 'Metrics from logs', connected: true },
+                            { name: 'OpenTelemetry', description: 'Distributed tracing', connected: false },
+                            { name: 'Jaeger', description: 'Trace visualization', connected: false }
+                          ].map(tool => (
+                            <div key={tool.name} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <LineChart className="w-4 h-4" />
+                                <div>
+                                  <p className="font-medium">{tool.name}</p>
+                                  <p className="text-sm text-muted-foreground">{tool.description}</p>
+                                </div>
+                              </div>
+                              <Badge variant={tool.connected ? 'default' : 'outline'}>
+                                {tool.connected ? 'Connected' : 'Connect'}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-blue-500" />
+                          API Access
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="log_api_••••••••••••••••••••" readOnly className="font-mono" />
+                            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <Copy className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Rate Limiting</p>
+                            <p className="text-sm text-muted-foreground">Requests per minute</p>
+                          </div>
+                          <Input type="number" defaultValue="1000" className="w-24" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Enable Query API</p>
+                            <p className="text-sm text-muted-foreground">Allow external log queries</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-500" />
+                          Security & Compliance
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">PII Masking</p>
+                            <p className="text-sm text-muted-foreground">Automatically mask sensitive data</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Encryption at Rest</p>
+                            <p className="text-sm text-muted-foreground">Encrypt stored logs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Audit Logging</p>
+                            <p className="text-sm text-muted-foreground">Log all access to logs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">RBAC Enforcement</p>
+                            <p className="text-sm text-muted-foreground">Role-based access control</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-600">Purge All Logs</p>
+                            <p className="text-sm text-muted-foreground">Permanently delete all log data</p>
+                          </div>
+                          <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2">
+                            <Trash2 className="w-4 h-4" />
+                            Purge
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-600">Reset All Parsers</p>
+                            <p className="text-sm text-muted-foreground">Reset parsing rules to defaults</p>
+                          </div>
+                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                            <RefreshCw className="w-4 h-4" />
+                            Reset
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-600">Export All Data</p>
+                            <p className="text-sm text-muted-foreground">Download complete log archive</p>
+                          </div>
+                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                            <Download className="w-4 h-4" />
+                            Export
+                          </button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
