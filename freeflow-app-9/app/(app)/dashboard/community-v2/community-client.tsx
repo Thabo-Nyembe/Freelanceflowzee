@@ -1,246 +1,500 @@
 'use client'
 
 import { useState, useCallback, useMemo } from 'react'
-import { useCommunity, type Community, type CommunityType, type CommunityStatus } from '@/lib/hooks/use-community'
-import { BentoCard } from '@/components/ui/bento-grid-advanced'
-import { StatGrid, MiniKPI } from '@/components/ui/results-display'
-import { ModernButton, GradientButton, PillButton } from '@/components/ui/modern-buttons'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
+import { Textarea } from '@/components/ui/textarea'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+  DialogFooter, DialogTrigger
+} from '@/components/ui/dialog'
 import {
   Users, Plus, MessageSquare, ThumbsUp, Share2, TrendingUp, Award, Star, Heart, Eye,
   Hash, Volume2, Video, Settings, Bell, Pin, Smile, Send, Paperclip, AtSign,
   Search, Filter, MoreHorizontal, ChevronDown, ChevronRight, Lock, Globe, Shield,
   UserPlus, UserMinus, Crown, Mic, MicOff, Headphones, Phone, Camera, ScreenShare,
   Reply, Edit3, Trash2, Flag, Bookmark, Link2, Image as ImageIcon, Gift, Sparkles,
-  Circle, CheckCircle, Clock, Zap, MessageCircle, Radio, Megaphone, Calendar
+  Circle, CheckCircle, Clock, Zap, MessageCircle, Radio, Megaphone, Calendar,
+  AlertTriangle, Ban, Timer, Activity, BarChart3, PieChart, UserCheck, UserX,
+  VolumeX, Gavel, FileText, ExternalLink, Copy, Rocket, Gem, Palette, Folder,
+  FolderPlus, Tag, SlidersHorizontal, ShieldCheck, ShieldAlert, Mail, Bot,
+  Webhook, PuzzlePiece, Download, Upload, RefreshCw, History, Eye as EyeIcon,
+  MoreVertical, ChevronUp, X, Check, AlertCircle, Info, HelpCircle
 } from 'lucide-react'
 
-// Discord/Slack-style interfaces
+// ============== DISCORD-LEVEL INTERFACES ==============
+
+type ChannelType = 'text' | 'voice' | 'video' | 'announcement' | 'stage' | 'forum' | 'rules'
+type MemberStatus = 'online' | 'idle' | 'dnd' | 'offline' | 'invisible'
+type MemberRole = 'owner' | 'admin' | 'moderator' | 'vip' | 'member' | 'new'
+type BoostLevel = 0 | 1 | 2 | 3
+type ModActionType = 'warn' | 'mute' | 'kick' | 'ban' | 'timeout' | 'unmute' | 'unban'
+
 interface Channel {
   id: string
   name: string
-  type: 'text' | 'voice' | 'announcement' | 'stage' | 'forum'
+  type: ChannelType
   description?: string
+  topic?: string
   isPrivate: boolean
+  isNsfw: boolean
+  slowMode: number
+  position: number
+  parentId?: string
   memberCount: number
   unreadCount: number
-  lastActivity: string
-  category?: string
+  mentionCount: number
+  lastActivity: Date
+  permissions: string[]
+}
+
+interface ChannelCategory {
+  id: string
+  name: string
+  position: number
+  channels: Channel[]
+  isCollapsed: boolean
 }
 
 interface Thread {
   id: string
   channelId: string
-  title: string
-  author: string
-  authorAvatar: string
+  name: string
+  ownerId: string
+  ownerName: string
+  ownerAvatar: string
   messageCount: number
-  participantCount: number
-  lastReply: string
-  isPinned: boolean
+  memberCount: number
   isLocked: boolean
+  isPinned: boolean
+  isArchived: boolean
+  autoArchiveDuration: number
+  createdAt: Date
+  lastActivity: Date
 }
 
 interface Message {
   id: string
-  author: string
+  channelId: string
+  authorId: string
+  authorName: string
   authorAvatar: string
+  authorRole: MemberRole
   content: string
-  timestamp: string
-  reactions: { emoji: string; count: number; reacted: boolean }[]
-  isEdited: boolean
+  timestamp: Date
+  editedTimestamp?: Date
+  reactions: Reaction[]
   isPinned: boolean
-  replyTo?: { author: string; content: string }
-  attachments?: string[]
+  isSystemMessage: boolean
+  replyTo?: {
+    id: string
+    authorName: string
+    content: string
+  }
+  attachments: Attachment[]
+  embeds: Embed[]
+  mentions: string[]
+}
+
+interface Reaction {
+  emoji: string
+  count: number
+  users: string[]
+  me: boolean
+}
+
+interface Attachment {
+  id: string
+  name: string
+  size: number
+  url: string
+  contentType: string
+}
+
+interface Embed {
+  title?: string
+  description?: string
+  url?: string
+  color?: string
+  thumbnail?: string
+  image?: string
 }
 
 interface Member {
   id: string
-  name: string
+  username: string
+  displayName: string
   avatar: string
-  status: 'online' | 'idle' | 'dnd' | 'offline'
-  role: 'owner' | 'admin' | 'moderator' | 'member'
-  joinedAt: string
-  lastSeen: string
-  nickname?: string
+  banner?: string
+  status: MemberStatus
+  customStatus?: string
+  roles: string[]
+  highestRole: MemberRole
+  joinedAt: Date
+  premiumSince?: Date
+  isBot: boolean
+  isOwner: boolean
+  isBoosting: boolean
+  lastSeen: Date
+  messageCount: number
+  voiceMinutes: number
 }
 
 interface Role {
   id: string
   name: string
   color: string
+  position: number
   memberCount: number
   permissions: string[]
+  isHoisted: boolean
+  isMentionable: boolean
+  isManaged: boolean
 }
 
-// Mock channels
-const mockChannels: Channel[] = [
-  { id: '1', name: 'general', type: 'text', description: 'General discussion', isPrivate: false, memberCount: 1250, unreadCount: 12, lastActivity: '2 min ago', category: 'Text Channels' },
-  { id: '2', name: 'announcements', type: 'announcement', description: 'Important updates', isPrivate: false, memberCount: 1250, unreadCount: 1, lastActivity: '1 hour ago', category: 'Text Channels' },
-  { id: '3', name: 'help', type: 'text', description: 'Get help from the community', isPrivate: false, memberCount: 980, unreadCount: 5, lastActivity: '5 min ago', category: 'Text Channels' },
-  { id: '4', name: 'showcase', type: 'forum', description: 'Share your projects', isPrivate: false, memberCount: 750, unreadCount: 0, lastActivity: '30 min ago', category: 'Text Channels' },
-  { id: '5', name: 'lounge', type: 'voice', description: 'Voice chat', isPrivate: false, memberCount: 45, unreadCount: 0, lastActivity: 'Live', category: 'Voice Channels' },
-  { id: '6', name: 'team-chat', type: 'text', description: 'Team members only', isPrivate: true, memberCount: 25, unreadCount: 3, lastActivity: '10 min ago', category: 'Private' },
+interface ServerEmoji {
+  id: string
+  name: string
+  url: string
+  animated: boolean
+  createdBy: string
+  usageCount: number
+}
+
+interface ServerSticker {
+  id: string
+  name: string
+  description: string
+  url: string
+  formatType: 'png' | 'apng' | 'lottie'
+  tags: string[]
+}
+
+interface Invite {
+  code: string
+  creatorId: string
+  creatorName: string
+  channelId: string
+  channelName: string
+  uses: number
+  maxUses?: number
+  maxAge?: number
+  isTemporary: boolean
+  createdAt: Date
+  expiresAt?: Date
+}
+
+interface ModAction {
+  id: string
+  type: ModActionType
+  targetId: string
+  targetName: string
+  moderatorId: string
+  moderatorName: string
+  reason?: string
+  duration?: number
+  timestamp: Date
+}
+
+interface AuditLogEntry {
+  id: string
+  actionType: string
+  targetType: 'member' | 'channel' | 'role' | 'message' | 'server'
+  targetId: string
+  targetName: string
+  userId: string
+  userName: string
+  changes?: { key: string; oldValue?: string; newValue?: string }[]
+  reason?: string
+  timestamp: Date
+}
+
+interface Event {
+  id: string
+  name: string
+  description: string
+  channelId?: string
+  scheduledStart: Date
+  scheduledEnd?: Date
+  entityType: 'stage' | 'voice' | 'external'
+  location?: string
+  image?: string
+  interestedCount: number
+  creatorId: string
+  creatorName: string
+  status: 'scheduled' | 'active' | 'completed' | 'cancelled'
+}
+
+interface BotIntegration {
+  id: string
+  name: string
+  avatar: string
+  description: string
+  prefix?: string
+  isEnabled: boolean
+  permissions: string[]
+  commands: number
+  usageCount: number
+  addedBy: string
+  addedAt: Date
+}
+
+interface ServerBoost {
+  level: BoostLevel
+  boostCount: number
+  boostersCount: number
+  perks: string[]
+  nextLevel?: { required: number; perks: string[] }
+}
+
+interface ServerStats {
+  totalMembers: number
+  onlineMembers: number
+  totalChannels: number
+  totalMessages: number
+  messagesThisWeek: number
+  newMembersThisWeek: number
+  activeMembers: number
+  boostLevel: BoostLevel
+}
+
+// ============== MOCK DATA ==============
+
+const mockChannelCategories: ChannelCategory[] = [
+  {
+    id: 'cat1', name: 'INFORMATION', position: 1, isCollapsed: false,
+    channels: [
+      { id: 'ch1', name: 'rules', type: 'rules', description: 'Server rules and guidelines', isPrivate: false, isNsfw: false, slowMode: 0, position: 1, parentId: 'cat1', memberCount: 1250, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] },
+      { id: 'ch2', name: 'announcements', type: 'announcement', description: 'Important updates', isPrivate: false, isNsfw: false, slowMode: 0, position: 2, parentId: 'cat1', memberCount: 1250, unreadCount: 2, mentionCount: 0, lastActivity: new Date(), permissions: [] },
+      { id: 'ch3', name: 'welcome', type: 'text', description: 'Say hello!', isPrivate: false, isNsfw: false, slowMode: 0, position: 3, parentId: 'cat1', memberCount: 1250, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] }
+    ]
+  },
+  {
+    id: 'cat2', name: 'GENERAL', position: 2, isCollapsed: false,
+    channels: [
+      { id: 'ch4', name: 'general', type: 'text', description: 'General discussion', isPrivate: false, isNsfw: false, slowMode: 0, position: 1, parentId: 'cat2', memberCount: 1250, unreadCount: 12, mentionCount: 3, lastActivity: new Date(), permissions: [] },
+      { id: 'ch5', name: 'off-topic', type: 'text', description: 'Random chatter', isPrivate: false, isNsfw: false, slowMode: 5, position: 2, parentId: 'cat2', memberCount: 980, unreadCount: 5, mentionCount: 0, lastActivity: new Date(), permissions: [] },
+      { id: 'ch6', name: 'media', type: 'text', description: 'Share images and videos', isPrivate: false, isNsfw: false, slowMode: 10, position: 3, parentId: 'cat2', memberCount: 750, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] }
+    ]
+  },
+  {
+    id: 'cat3', name: 'COMMUNITY', position: 3, isCollapsed: false,
+    channels: [
+      { id: 'ch7', name: 'showcase', type: 'forum', description: 'Share your projects', isPrivate: false, isNsfw: false, slowMode: 0, position: 1, parentId: 'cat3', memberCount: 890, unreadCount: 3, mentionCount: 0, lastActivity: new Date(), permissions: [] },
+      { id: 'ch8', name: 'help', type: 'text', description: 'Get help from the community', isPrivate: false, isNsfw: false, slowMode: 0, position: 2, parentId: 'cat3', memberCount: 1100, unreadCount: 8, mentionCount: 1, lastActivity: new Date(), permissions: [] },
+      { id: 'ch9', name: 'feedback', type: 'forum', description: 'Submit feedback and suggestions', isPrivate: false, isNsfw: false, slowMode: 0, position: 3, parentId: 'cat3', memberCount: 650, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] }
+    ]
+  },
+  {
+    id: 'cat4', name: 'VOICE CHANNELS', position: 4, isCollapsed: false,
+    channels: [
+      { id: 'ch10', name: 'Lounge', type: 'voice', description: 'Hang out', isPrivate: false, isNsfw: false, slowMode: 0, position: 1, parentId: 'cat4', memberCount: 8, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] },
+      { id: 'ch11', name: 'Gaming', type: 'voice', description: 'Gaming voice chat', isPrivate: false, isNsfw: false, slowMode: 0, position: 2, parentId: 'cat4', memberCount: 4, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] },
+      { id: 'ch12', name: 'Music', type: 'voice', description: 'Listen together', isPrivate: false, isNsfw: false, slowMode: 0, position: 3, parentId: 'cat4', memberCount: 2, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] },
+      { id: 'ch13', name: 'Stage', type: 'stage', description: 'Community events', isPrivate: false, isNsfw: false, slowMode: 0, position: 4, parentId: 'cat4', memberCount: 0, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] }
+    ]
+  },
+  {
+    id: 'cat5', name: 'STAFF', position: 5, isCollapsed: false,
+    channels: [
+      { id: 'ch14', name: 'staff-chat', type: 'text', description: 'Staff only', isPrivate: true, isNsfw: false, slowMode: 0, position: 1, parentId: 'cat5', memberCount: 12, unreadCount: 1, mentionCount: 0, lastActivity: new Date(), permissions: [] },
+      { id: 'ch15', name: 'mod-log', type: 'text', description: 'Moderation actions', isPrivate: true, isNsfw: false, slowMode: 0, position: 2, parentId: 'cat5', memberCount: 8, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] }
+    ]
+  }
 ]
 
-// Mock threads
-const mockThreads: Thread[] = [
-  { id: '1', channelId: '4', title: 'My new SaaS project', author: 'John Developer', authorAvatar: 'john', messageCount: 45, participantCount: 12, lastReply: '5 min ago', isPinned: true, isLocked: false },
-  { id: '2', channelId: '4', title: 'Looking for feedback on UI', author: 'Sarah Designer', authorAvatar: 'sarah', messageCount: 23, participantCount: 8, lastReply: '1 hour ago', isPinned: false, isLocked: false },
-  { id: '3', channelId: '3', title: 'How to integrate API?', author: 'Mike Engineer', authorAvatar: 'mike', messageCount: 15, participantCount: 5, lastReply: '30 min ago', isPinned: false, isLocked: false },
-]
-
-// Mock messages
 const mockMessages: Message[] = [
   {
-    id: '1',
-    author: 'John Developer',
-    authorAvatar: 'john',
-    content: 'Hey everyone! Just shipped a new feature. Check it out and let me know what you think! 🚀',
-    timestamp: '10:30 AM',
-    reactions: [{ emoji: '🚀', count: 5, reacted: true }, { emoji: '👍', count: 3, reacted: false }],
-    isEdited: false,
-    isPinned: false
+    id: 'm1', channelId: 'ch4', authorId: 'u1', authorName: 'John Developer', authorAvatar: 'john', authorRole: 'admin',
+    content: 'Hey everyone! Just shipped a new feature. Check it out! 🚀',
+    timestamp: new Date('2024-01-15T10:30:00'), reactions: [{ emoji: '🚀', count: 12, users: [], me: true }, { emoji: '👍', count: 8, users: [], me: false }],
+    isPinned: false, isSystemMessage: false, attachments: [], embeds: [], mentions: []
   },
   {
-    id: '2',
-    author: 'Sarah Designer',
-    authorAvatar: 'sarah',
-    content: 'That looks amazing! Love the new dashboard design.',
-    timestamp: '10:32 AM',
-    reactions: [{ emoji: '❤️', count: 2, reacted: false }],
-    isEdited: false,
-    isPinned: false,
-    replyTo: { author: 'John Developer', content: 'Hey everyone! Just shipped a new feature...' }
+    id: 'm2', channelId: 'ch4', authorId: 'u2', authorName: 'Sarah Designer', authorAvatar: 'sarah', authorRole: 'moderator',
+    content: 'That looks amazing! The new dashboard design is clean 🎨',
+    timestamp: new Date('2024-01-15T10:32:00'), reactions: [{ emoji: '❤️', count: 5, users: [], me: false }],
+    isPinned: false, isSystemMessage: false, attachments: [], embeds: [], mentions: [],
+    replyTo: { id: 'm1', authorName: 'John Developer', content: 'Hey everyone! Just shipped...' }
   },
   {
-    id: '3',
-    author: 'Mike Engineer',
-    authorAvatar: 'mike',
-    content: 'Nice work! I noticed there might be a performance issue on mobile. Want me to take a look?',
-    timestamp: '10:35 AM',
-    reactions: [],
-    isEdited: true,
-    isPinned: false
+    id: 'm3', channelId: 'ch4', authorId: 'u3', authorName: 'Mike Engineer', authorAvatar: 'mike', authorRole: 'vip',
+    content: 'Nice work! I found a small issue on mobile though. @John Developer check DMs',
+    timestamp: new Date('2024-01-15T10:35:00'), editedTimestamp: new Date('2024-01-15T10:36:00'),
+    reactions: [], isPinned: false, isSystemMessage: false, attachments: [], embeds: [], mentions: ['u1']
   },
   {
-    id: '4',
-    author: 'Emily PM',
-    authorAvatar: 'emily',
-    content: 'Great collaboration everyone! Let\'s schedule a quick sync to discuss next steps.',
-    timestamp: '10:40 AM',
-    reactions: [{ emoji: '✅', count: 4, reacted: true }],
-    isEdited: false,
-    isPinned: true
+    id: 'm4', channelId: 'ch4', authorId: 'u4', authorName: 'Emily PM', authorAvatar: 'emily', authorRole: 'member',
+    content: 'Great collaboration everyone! Let\'s schedule a sync to discuss next steps.',
+    timestamp: new Date('2024-01-15T10:40:00'), reactions: [{ emoji: '✅', count: 6, users: [], me: true }],
+    isPinned: true, isSystemMessage: false, attachments: [], embeds: [], mentions: []
   },
+  {
+    id: 'm5', channelId: 'ch4', authorId: 'bot1', authorName: 'FreeFlow Bot', authorAvatar: 'bot', authorRole: 'member',
+    content: '📊 **Daily Stats Update**\n• New members: 23\n• Messages: 847\n• Active users: 156',
+    timestamp: new Date('2024-01-15T11:00:00'), reactions: [],
+    isPinned: false, isSystemMessage: true, attachments: [], embeds: [], mentions: []
+  }
 ]
 
-// Mock members
 const mockMembers: Member[] = [
-  { id: '1', name: 'John Developer', avatar: 'john', status: 'online', role: 'owner', joinedAt: '2023-01-15', lastSeen: 'now' },
-  { id: '2', name: 'Sarah Designer', avatar: 'sarah', status: 'online', role: 'admin', joinedAt: '2023-02-20', lastSeen: 'now' },
-  { id: '3', name: 'Mike Engineer', avatar: 'mike', status: 'idle', role: 'moderator', joinedAt: '2023-03-10', lastSeen: '5 min ago' },
-  { id: '4', name: 'Emily PM', avatar: 'emily', status: 'dnd', role: 'member', joinedAt: '2023-04-01', lastSeen: '2 min ago' },
-  { id: '5', name: 'Alex Frontend', avatar: 'alex', status: 'offline', role: 'member', joinedAt: '2023-05-15', lastSeen: '2 hours ago' },
-  { id: '6', name: 'Lisa Backend', avatar: 'lisa', status: 'online', role: 'member', joinedAt: '2023-06-01', lastSeen: 'now' },
+  { id: 'u1', username: 'john_dev', displayName: 'John Developer', avatar: 'john', status: 'online', roles: ['admin', 'vip'], highestRole: 'admin', joinedAt: new Date('2023-01-15'), isBot: false, isOwner: true, isBoosting: true, lastSeen: new Date(), messageCount: 2340, voiceMinutes: 12500 },
+  { id: 'u2', username: 'sarah_design', displayName: 'Sarah Designer', avatar: 'sarah', status: 'online', customStatus: 'Working on UI', roles: ['moderator', 'vip'], highestRole: 'moderator', joinedAt: new Date('2023-02-20'), isBot: false, isOwner: false, isBoosting: true, lastSeen: new Date(), messageCount: 1890, voiceMinutes: 8900 },
+  { id: 'u3', username: 'mike_eng', displayName: 'Mike Engineer', avatar: 'mike', status: 'idle', roles: ['vip'], highestRole: 'vip', joinedAt: new Date('2023-03-10'), isBot: false, isOwner: false, isBoosting: false, lastSeen: new Date(), messageCount: 1456, voiceMinutes: 5600 },
+  { id: 'u4', username: 'emily_pm', displayName: 'Emily PM', avatar: 'emily', status: 'dnd', customStatus: 'In a meeting', roles: ['member'], highestRole: 'member', joinedAt: new Date('2023-04-01'), isBot: false, isOwner: false, isBoosting: false, lastSeen: new Date(), messageCount: 890, voiceMinutes: 3400 },
+  { id: 'u5', username: 'alex_fe', displayName: 'Alex Frontend', avatar: 'alex', status: 'offline', roles: ['member'], highestRole: 'member', joinedAt: new Date('2023-05-15'), isBot: false, isOwner: false, isBoosting: false, lastSeen: new Date(), messageCount: 567, voiceMinutes: 1200 },
+  { id: 'u6', username: 'lisa_be', displayName: 'Lisa Backend', avatar: 'lisa', status: 'online', roles: ['member'], highestRole: 'member', joinedAt: new Date('2023-06-01'), isBot: false, isOwner: false, isBoosting: true, lastSeen: new Date(), messageCount: 678, voiceMinutes: 2300 },
+  { id: 'bot1', username: 'freeflow_bot', displayName: 'FreeFlow Bot', avatar: 'bot', status: 'online', roles: ['member'], highestRole: 'member', joinedAt: new Date('2023-01-01'), isBot: true, isOwner: false, isBoosting: false, lastSeen: new Date(), messageCount: 5670, voiceMinutes: 0 }
 ]
 
-// Mock roles
 const mockRoles: Role[] = [
-  { id: '1', name: 'Owner', color: 'text-yellow-500', memberCount: 1, permissions: ['all'] },
-  { id: '2', name: 'Admin', color: 'text-red-500', memberCount: 2, permissions: ['manage_members', 'manage_channels', 'moderate'] },
-  { id: '3', name: 'Moderator', color: 'text-green-500', memberCount: 5, permissions: ['moderate', 'kick', 'mute'] },
-  { id: '4', name: 'Member', color: 'text-blue-500', memberCount: 1242, permissions: ['read', 'write', 'react'] },
+  { id: 'r1', name: 'Owner', color: '#f59e0b', position: 5, memberCount: 1, permissions: ['all'], isHoisted: true, isMentionable: false, isManaged: false },
+  { id: 'r2', name: 'Admin', color: '#ef4444', position: 4, memberCount: 2, permissions: ['manage_server', 'manage_channels', 'manage_roles', 'ban_members'], isHoisted: true, isMentionable: true, isManaged: false },
+  { id: 'r3', name: 'Moderator', color: '#22c55e', position: 3, memberCount: 5, permissions: ['kick_members', 'mute_members', 'manage_messages'], isHoisted: true, isMentionable: true, isManaged: false },
+  { id: 'r4', name: 'VIP', color: '#a855f7', position: 2, memberCount: 15, permissions: ['create_instant_invite', 'embed_links', 'attach_files'], isHoisted: true, isMentionable: true, isManaged: false },
+  { id: 'r5', name: 'Booster', color: '#ec4899', position: 1, memberCount: 8, permissions: ['use_external_emojis', 'use_external_stickers'], isHoisted: true, isMentionable: false, isManaged: true },
+  { id: 'r6', name: 'Member', color: '#6b7280', position: 0, memberCount: 1219, permissions: ['read', 'send_messages', 'add_reactions'], isHoisted: false, isMentionable: false, isManaged: false }
 ]
 
-export default function CommunityClient({ initialCommunities }: { initialCommunities: Community[] }) {
-  const [communityTypeFilter, setCommunityTypeFilter] = useState<CommunityType | 'all'>('all')
-  const [statusFilter, setStatusFilter] = useState<CommunityStatus | 'all'>('all')
+const mockEvents: Event[] = [
+  { id: 'e1', name: 'Weekly Community Hangout', description: 'Join us for casual chat and games!', channelId: 'ch10', scheduledStart: new Date('2024-01-20T19:00:00'), scheduledEnd: new Date('2024-01-20T21:00:00'), entityType: 'voice', interestedCount: 45, creatorId: 'u1', creatorName: 'John Developer', status: 'scheduled' },
+  { id: 'e2', name: 'Product Launch Stream', description: 'Watch the live reveal of our new features', channelId: 'ch13', scheduledStart: new Date('2024-01-25T18:00:00'), entityType: 'stage', interestedCount: 234, creatorId: 'u2', creatorName: 'Sarah Designer', status: 'scheduled' },
+  { id: 'e3', name: 'Game Night: Among Us', description: 'Social deduction gaming night', scheduledStart: new Date('2024-01-22T20:00:00'), entityType: 'external', location: 'Among Us Lobby', interestedCount: 28, creatorId: 'u3', creatorName: 'Mike Engineer', status: 'scheduled' }
+]
+
+const mockBots: BotIntegration[] = [
+  { id: 'bot1', name: 'FreeFlow Bot', avatar: 'bot', description: 'Official server bot for moderation and utilities', prefix: '!', isEnabled: true, permissions: ['manage_messages', 'ban_members', 'manage_roles'], commands: 45, usageCount: 12340, addedBy: 'John Developer', addedAt: new Date('2023-01-01') },
+  { id: 'bot2', name: 'Music Bot', avatar: 'music', description: 'Play music in voice channels', prefix: '!m ', isEnabled: true, permissions: ['connect', 'speak'], commands: 15, usageCount: 5670, addedBy: 'Sarah Designer', addedAt: new Date('2023-03-15') },
+  { id: 'bot3', name: 'Level Bot', avatar: 'level', description: 'XP and leveling system', prefix: '!lv ', isEnabled: true, permissions: ['manage_roles', 'send_messages'], commands: 12, usageCount: 8900, addedBy: 'John Developer', addedAt: new Date('2023-02-01') }
+]
+
+const mockModActions: ModAction[] = [
+  { id: 'ma1', type: 'warn', targetId: 'u99', targetName: 'SpamUser123', moderatorId: 'u2', moderatorName: 'Sarah Designer', reason: 'Spamming in general chat', timestamp: new Date('2024-01-14T15:30:00') },
+  { id: 'ma2', type: 'timeout', targetId: 'u98', targetName: 'ToxicPlayer', moderatorId: 'u3', moderatorName: 'Mike Engineer', reason: 'Harassment', duration: 3600, timestamp: new Date('2024-01-14T12:00:00') },
+  { id: 'ma3', type: 'kick', targetId: 'u97', targetName: 'Advertiser', moderatorId: 'u2', moderatorName: 'Sarah Designer', reason: 'Unsolicited advertising', timestamp: new Date('2024-01-13T18:45:00') },
+  { id: 'ma4', type: 'ban', targetId: 'u96', targetName: 'HackerAccount', moderatorId: 'u1', moderatorName: 'John Developer', reason: 'Phishing links', timestamp: new Date('2024-01-12T09:00:00') }
+]
+
+const serverBoost: ServerBoost = {
+  level: 2,
+  boostCount: 8,
+  boostersCount: 6,
+  perks: ['Animated Icon', '1080p Streaming', '50 Emoji Slots', '150 Sticker Slots', '50MB Upload Limit'],
+  nextLevel: { required: 14, perks: ['Banner', 'Vanity URL', '100 Emoji Slots', '300 Sticker Slots'] }
+}
+
+// ============== HELPER FUNCTIONS ==============
+
+const getStatusColor = (status: MemberStatus): string => {
+  const colors: Record<MemberStatus, string> = {
+    online: 'bg-green-500',
+    idle: 'bg-yellow-500',
+    dnd: 'bg-red-500',
+    offline: 'bg-gray-400',
+    invisible: 'bg-gray-400'
+  }
+  return colors[status]
+}
+
+const getRoleColor = (role: MemberRole): string => {
+  const colors: Record<MemberRole, string> = {
+    owner: 'text-amber-500',
+    admin: 'text-red-500',
+    moderator: 'text-green-500',
+    vip: 'text-purple-500',
+    member: 'text-gray-500',
+    new: 'text-blue-500'
+  }
+  return colors[role]
+}
+
+const getRoleIcon = (role: MemberRole) => {
+  switch (role) {
+    case 'owner': return <Crown className="w-4 h-4 text-amber-500" />
+    case 'admin': return <ShieldCheck className="w-4 h-4 text-red-500" />
+    case 'moderator': return <Shield className="w-4 h-4 text-green-500" />
+    case 'vip': return <Star className="w-4 h-4 text-purple-500" />
+    default: return null
+  }
+}
+
+const getChannelIcon = (type: ChannelType, isPrivate: boolean = false) => {
+  if (isPrivate) return <Lock className="w-4 h-4" />
+  switch (type) {
+    case 'text': return <Hash className="w-4 h-4" />
+    case 'voice': return <Volume2 className="w-4 h-4" />
+    case 'video': return <Video className="w-4 h-4" />
+    case 'announcement': return <Megaphone className="w-4 h-4" />
+    case 'stage': return <Radio className="w-4 h-4" />
+    case 'forum': return <MessageCircle className="w-4 h-4" />
+    case 'rules': return <FileText className="w-4 h-4" />
+  }
+}
+
+const formatTimeAgo = (date: Date): string => {
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(minutes / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
+}
+
+const getModActionColor = (type: ModActionType): string => {
+  const colors: Record<ModActionType, string> = {
+    warn: 'bg-yellow-100 text-yellow-700',
+    mute: 'bg-orange-100 text-orange-700',
+    kick: 'bg-red-100 text-red-700',
+    ban: 'bg-red-200 text-red-800',
+    timeout: 'bg-amber-100 text-amber-700',
+    unmute: 'bg-green-100 text-green-700',
+    unban: 'bg-green-100 text-green-700'
+  }
+  return colors[type]
+}
+
+// ============== MAIN COMPONENT ==============
+
+export default function CommunityClient() {
   const [activeTab, setActiveTab] = useState('chat')
-  const [selectedChannel, setSelectedChannel] = useState<Channel>(mockChannels[0])
-  const [selectedThread, setSelectedThread] = useState<Thread | null>(null)
+  const [selectedChannel, setSelectedChannel] = useState<Channel>(mockChannelCategories[1].channels[0])
   const [messageInput, setMessageInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(mockChannelCategories.map(c => c.id))
   const [showCreateChannel, setShowCreateChannel] = useState(false)
   const [showMemberProfile, setShowMemberProfile] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
+  const [showServerSettings, setShowServerSettings] = useState(false)
+  const [showEventDialog, setShowEventDialog] = useState(false)
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [expandedCategories, setExpandedCategories] = useState<string[]>(['Text Channels', 'Voice Channels', 'Private'])
 
-  const { communities, loading } = useCommunity({ communityType: communityTypeFilter, status: statusFilter })
-  const displayCommunities = communities.length > 0 ? communities : initialCommunities
+  const stats: ServerStats = useMemo(() => ({
+    totalMembers: 1250,
+    onlineMembers: mockMembers.filter(m => m.status === 'online').length,
+    totalChannels: mockChannelCategories.reduce((sum, cat) => sum + cat.channels.length, 0),
+    totalMessages: mockMembers.reduce((sum, m) => sum + m.messageCount, 0),
+    messagesThisWeek: 2847,
+    newMembersThisWeek: 45,
+    activeMembers: 156,
+    boostLevel: serverBoost.level
+  }), [])
 
-  const stats = useMemo(() => [
-    {
-      label: 'Members',
-      value: displayCommunities.reduce((sum, c) => sum + c.member_count, 0).toLocaleString(),
-      change: 12.5,
-      icon: <Users className="w-5 h-5" />
-    },
-    {
-      label: 'Online Now',
-      value: mockMembers.filter(m => m.status === 'online').length.toString(),
-      change: 25.3,
-      icon: <Circle className="w-5 h-5 fill-green-500 text-green-500" />
-    },
-    {
-      label: 'Messages Today',
-      value: '2,847',
-      change: 15.2,
-      icon: <MessageSquare className="w-5 h-5" />
-    },
-    {
-      label: 'Active Threads',
-      value: mockThreads.length.toString(),
-      change: 8.7,
-      icon: <MessageCircle className="w-5 h-5" />
-    }
-  ], [displayCommunities])
-
-  const getStatusColor = (status: Member['status']) => {
-    switch (status) {
-      case 'online': return 'bg-green-500'
-      case 'idle': return 'bg-yellow-500'
-      case 'dnd': return 'bg-red-500'
-      case 'offline': return 'bg-gray-400'
-    }
-  }
-
-  const getRoleIcon = (role: Member['role']) => {
-    switch (role) {
-      case 'owner': return <Crown className="w-4 h-4 text-yellow-500" />
-      case 'admin': return <Shield className="w-4 h-4 text-red-500" />
-      case 'moderator': return <Shield className="w-4 h-4 text-green-500" />
-      default: return null
-    }
-  }
-
-  const getChannelIcon = (type: Channel['type']) => {
-    switch (type) {
-      case 'text': return <Hash className="w-4 h-4" />
-      case 'voice': return <Volume2 className="w-4 h-4" />
-      case 'announcement': return <Megaphone className="w-4 h-4" />
-      case 'stage': return <Radio className="w-4 h-4" />
-      case 'forum': return <MessageCircle className="w-4 h-4" />
-    }
-  }
-
-  const toggleCategory = (category: string) => {
+  const toggleCategory = (categoryId: string) => {
     setExpandedCategories(prev =>
-      prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]
+      prev.includes(categoryId) ? prev.filter(c => c !== categoryId) : [...prev, categoryId]
     )
   }
 
   const handleSendMessage = useCallback(() => {
     if (!messageInput.trim()) return
-    console.log('Sending message:', messageInput)
     setMessageInput('')
   }, [messageInput])
 
@@ -249,75 +503,77 @@ export default function CommunityClient({ initialCommunities }: { initialCommuni
     setShowMemberProfile(true)
   }
 
-  const groupedChannels = useMemo(() => {
-    const groups: Record<string, Channel[]> = {}
-    mockChannels.forEach(channel => {
-      const cat = channel.category || 'Other'
-      if (!groups[cat]) groups[cat] = []
-      groups[cat].push(channel)
-    })
-    return groups
-  }, [])
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50/30 to-yellow-50/40 dark:bg-none dark:bg-gray-900 flex">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900 flex">
       {/* Sidebar - Channel List */}
-      <div className="w-64 bg-white dark:bg-gray-800 border-r flex flex-col">
-        {/* Community Header */}
-        <div className="p-4 border-b">
-          <div className="flex items-center justify-between">
+      <div className="w-60 bg-white dark:bg-gray-800 border-r flex flex-col">
+        {/* Server Header */}
+        <div className="p-4 border-b bg-gradient-to-r from-orange-500 to-amber-500">
+          <div className="flex items-center justify-between text-white">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white">
+              <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
                 <Users className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="font-semibold">FreeFlow Community</h2>
-                <p className="text-xs text-muted-foreground">{mockMembers.length} members</p>
+                <h2 className="font-bold">FreeFlow Community</h2>
+                <div className="flex items-center gap-1 text-xs">
+                  <Gem className="w-3 h-3 text-pink-300" />
+                  <span>Level {serverBoost.level}</span>
+                </div>
               </div>
             </div>
-            <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+            <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => setShowServerSettings(true)}>
               <ChevronDown className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
         </div>
+
+        {/* Events Banner */}
+        {mockEvents.filter(e => e.status === 'scheduled').length > 0 && (
+          <div className="p-2 bg-violet-100 dark:bg-violet-900/30 border-b cursor-pointer hover:bg-violet-200 dark:hover:bg-violet-900/50" onClick={() => setShowEventDialog(true)}>
+            <div className="flex items-center gap-2 text-sm">
+              <Calendar className="w-4 h-4 text-violet-600" />
+              <span className="font-medium text-violet-700 dark:text-violet-400">
+                {mockEvents.filter(e => e.status === 'scheduled').length} Upcoming Events
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Channel List */}
         <ScrollArea className="flex-1">
           <div className="p-2">
-            {Object.entries(groupedChannels).map(([category, channels]) => (
-              <div key={category} className="mb-2">
+            {mockChannelCategories.map(category => (
+              <div key={category.id} className="mb-2">
                 <button
-                  onClick={() => toggleCategory(category)}
-                  className="w-full flex items-center gap-1 px-2 py-1 text-xs font-semibold text-muted-foreground uppercase hover:text-foreground"
+                  onClick={() => toggleCategory(category.id)}
+                  className="w-full flex items-center gap-1 px-1 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase hover:text-gray-700 dark:hover:text-gray-300"
                 >
-                  {expandedCategories.includes(category) ? (
-                    <ChevronDown className="w-3 h-3" />
-                  ) : (
-                    <ChevronRight className="w-3 h-3" />
-                  )}
-                  {category}
+                  {expandedCategories.includes(category.id) ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+                  {category.name}
                 </button>
-                {expandedCategories.includes(category) && (
+                {expandedCategories.includes(category.id) && (
                   <div className="space-y-0.5 mt-1">
-                    {channels.map(channel => (
+                    {category.channels.map(channel => (
                       <button
                         key={channel.id}
                         onClick={() => setSelectedChannel(channel)}
                         className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-sm ${
                           selectedChannel.id === channel.id
                             ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400'
-                            : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-foreground'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-200'
                         }`}
                       >
-                        {channel.isPrivate ? <Lock className="w-4 h-4" /> : getChannelIcon(channel.type)}
+                        {getChannelIcon(channel.type, channel.isPrivate)}
                         <span className="flex-1 truncate">{channel.name}</span>
                         {channel.unreadCount > 0 && (
-                          <Badge className="bg-orange-500 text-white text-xs px-1.5 py-0.5">
-                            {channel.unreadCount}
-                          </Badge>
+                          <Badge className="bg-orange-500 text-white text-xs px-1.5 py-0">{channel.unreadCount}</Badge>
+                        )}
+                        {channel.mentionCount > 0 && (
+                          <Badge className="bg-red-500 text-white text-xs px-1.5 py-0">@{channel.mentionCount}</Badge>
                         )}
                         {channel.type === 'voice' && channel.memberCount > 0 && (
-                          <span className="text-xs text-green-500">{channel.memberCount}</span>
+                          <span className="text-xs text-green-600 font-medium">{channel.memberCount}</span>
                         )}
                       </button>
                     ))}
@@ -326,18 +582,15 @@ export default function CommunityClient({ initialCommunities }: { initialCommuni
               </div>
             ))}
 
-            <button
-              onClick={() => setShowCreateChannel(true)}
-              className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground mt-2"
-            >
-              <Plus className="w-4 h-4" />
+            <Button variant="ghost" className="w-full justify-start text-gray-500 mt-2" onClick={() => setShowCreateChannel(true)}>
+              <Plus className="w-4 h-4 mr-2" />
               Add Channel
-            </button>
+            </Button>
           </div>
         </ScrollArea>
 
         {/* User Panel */}
-        <div className="p-3 border-t bg-gray-50 dark:bg-gray-800/50">
+        <div className="p-2 border-t bg-gray-50 dark:bg-gray-800/50">
           <div className="flex items-center gap-2">
             <div className="relative">
               <Avatar className="w-8 h-8">
@@ -348,18 +601,12 @@ export default function CommunityClient({ initialCommunities }: { initialCommuni
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">You</p>
-              <p className="text-xs text-muted-foreground">Online</p>
+              <p className="text-xs text-gray-500">Online</p>
             </div>
-            <div className="flex items-center gap-1">
-              <button className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
-                <Mic className="w-4 h-4" />
-              </button>
-              <button className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
-                <Headphones className="w-4 h-4" />
-              </button>
-              <button onClick={() => setShowSettings(true)} className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
-                <Settings className="w-4 h-4" />
-              </button>
+            <div className="flex items-center gap-0.5">
+              <Button variant="ghost" size="icon" className="h-8 w-8"><Mic className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8"><Headphones className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8"><Settings className="w-4 h-4" /></Button>
             </div>
           </div>
         </div>
@@ -368,240 +615,153 @@ export default function CommunityClient({ initialCommunities }: { initialCommuni
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
         {/* Channel Header */}
-        <div className="p-4 border-b bg-white dark:bg-gray-800 flex items-center justify-between">
+        <div className="h-12 px-4 border-b bg-white dark:bg-gray-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {getChannelIcon(selectedChannel.type)}
+            {getChannelIcon(selectedChannel.type, selectedChannel.isPrivate)}
             <div>
               <h2 className="font-semibold">{selectedChannel.name}</h2>
-              <p className="text-xs text-muted-foreground">{selectedChannel.description}</p>
             </div>
+            {selectedChannel.topic && (
+              <>
+                <span className="text-gray-300 dark:text-gray-600">|</span>
+                <p className="text-sm text-gray-500 truncate max-w-xs">{selectedChannel.description}</p>
+              </>
+            )}
           </div>
-          <div className="flex items-center gap-2">
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-              <Bell className="w-4 h-4" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-              <Pin className="w-4 h-4" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-              <Users className="w-4 h-4" />
-            </button>
-            <div className="relative w-48">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder="Search" className="pl-9 h-8" />
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="icon"><Bell className="w-4 h-4" /></Button>
+            <Button variant="ghost" size="icon"><Pin className="w-4 h-4" /></Button>
+            <Button variant="ghost" size="icon"><Users className="w-4 h-4" /></Button>
+            <div className="relative w-40 ml-2">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input placeholder="Search" className="pl-8 h-8 text-sm" />
             </div>
           </div>
         </div>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <div className="px-4 pt-2 border-b bg-white dark:bg-gray-800">
-            <TabsList className="bg-transparent p-0 h-auto">
-              <TabsTrigger value="chat" className="data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none pb-2">
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Chat
-              </TabsTrigger>
-              <TabsTrigger value="threads" className="data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none pb-2">
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Threads
-              </TabsTrigger>
-              <TabsTrigger value="members" className="data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none pb-2">
-                <Users className="w-4 h-4 mr-2" />
-                Members
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none pb-2">
-                <TrendingUp className="w-4 h-4 mr-2" />
-                Analytics
-              </TabsTrigger>
+          <div className="px-4 border-b bg-white dark:bg-gray-800">
+            <TabsList className="bg-transparent h-10 p-0">
+              <TabsTrigger value="chat" className="data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none"><MessageSquare className="w-4 h-4 mr-2" />Chat</TabsTrigger>
+              <TabsTrigger value="members" className="data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none"><Users className="w-4 h-4 mr-2" />Members</TabsTrigger>
+              <TabsTrigger value="events" className="data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none"><Calendar className="w-4 h-4 mr-2" />Events</TabsTrigger>
+              <TabsTrigger value="roles" className="data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none"><Shield className="w-4 h-4 mr-2" />Roles</TabsTrigger>
+              <TabsTrigger value="moderation" className="data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none"><Gavel className="w-4 h-4 mr-2" />Moderation</TabsTrigger>
+              <TabsTrigger value="analytics" className="data-[state=active]:border-b-2 data-[state=active]:border-orange-500 rounded-none"><BarChart3 className="w-4 h-4 mr-2" />Analytics</TabsTrigger>
             </TabsList>
           </div>
 
           {/* Chat Tab */}
-          <TabsContent value="chat" className="flex-1 flex flex-col m-0">
-            <div className="flex flex-1">
-              {/* Messages Area */}
-              <div className="flex-1 flex flex-col">
-                <ScrollArea className="flex-1 p-4">
-                  <div className="space-y-4">
-                    {mockMessages.map(message => (
-                      <div key={message.id} className="group flex gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 p-2 rounded-lg -mx-2">
-                        <Avatar className="w-10 h-10">
-                          <AvatarImage src={`https://avatar.vercel.sh/${message.authorAvatar}`} />
-                          <AvatarFallback>{message.author.slice(0, 2)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold">{message.author}</span>
-                            <span className="text-xs text-muted-foreground">{message.timestamp}</span>
-                            {message.isEdited && <span className="text-xs text-muted-foreground">(edited)</span>}
-                            {message.isPinned && <Pin className="w-3 h-3 text-orange-500" />}
-                          </div>
-                          {message.replyTo && (
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1 p-1.5 bg-gray-100 dark:bg-gray-800 rounded border-l-2 border-orange-500">
-                              <Reply className="w-3 h-3" />
-                              <span className="font-medium">{message.replyTo.author}</span>
-                              <span className="truncate">{message.replyTo.content}</span>
-                            </div>
-                          )}
-                          <p className="text-sm">{message.content}</p>
-                          {message.reactions.length > 0 && (
-                            <div className="flex gap-1 mt-2">
-                              {message.reactions.map((reaction, i) => (
-                                <button
-                                  key={i}
-                                  className={`px-2 py-0.5 rounded-full text-xs flex items-center gap-1 ${
-                                    reaction.reacted
-                                      ? 'bg-orange-100 dark:bg-orange-900/30 border border-orange-300'
-                                      : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200'
-                                  }`}
-                                >
-                                  <span>{reaction.emoji}</span>
-                                  <span>{reaction.count}</span>
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <div className="opacity-0 group-hover:opacity-100 flex items-start gap-1">
-                          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
-                            <Smile className="w-4 h-4" />
-                          </button>
-                          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
-                            <Reply className="w-4 h-4" />
-                          </button>
-                          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-
-                {/* Message Input */}
-                <div className="p-4 border-t">
-                  <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-2">
-                    <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
-                      <Plus className="w-5 h-5" />
-                    </button>
-                    <Input
-                      placeholder={`Message #${selectedChannel.name}`}
-                      value={messageInput}
-                      onChange={(e) => setMessageInput(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                      className="flex-1 border-0 bg-transparent focus-visible:ring-0"
-                    />
-                    <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
-                      <Gift className="w-5 h-5" />
-                    </button>
-                    <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
-                      <ImageIcon className="w-5 h-5" />
-                    </button>
-                    <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
-                      <Smile className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Member List Sidebar */}
-              <div className="w-60 border-l bg-gray-50 dark:bg-gray-800/50 hidden lg:block">
-                <ScrollArea className="h-full p-3">
-                  {/* Online Members */}
-                  <div className="mb-4">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2">
-                      Online — {mockMembers.filter(m => m.status === 'online').length}
-                    </h4>
-                    <div className="space-y-1">
-                      {mockMembers.filter(m => m.status === 'online').map(member => (
-                        <button
-                          key={member.id}
-                          onClick={() => handleViewMember(member)}
-                          className="w-full flex items-center gap-2 p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                          <div className="relative">
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage src={`https://avatar.vercel.sh/${member.avatar}`} />
-                              <AvatarFallback>{member.name.slice(0, 2)}</AvatarFallback>
-                            </Avatar>
-                            <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 ${getStatusColor(member.status)} rounded-full border-2 border-white dark:border-gray-800`} />
-                          </div>
-                          <span className="text-sm truncate flex-1">{member.name}</span>
-                          {getRoleIcon(member.role)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Offline Members */}
-                  <div>
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2">
-                      Offline — {mockMembers.filter(m => m.status === 'offline').length}
-                    </h4>
-                    <div className="space-y-1">
-                      {mockMembers.filter(m => m.status === 'offline').map(member => (
-                        <button
-                          key={member.id}
-                          onClick={() => handleViewMember(member)}
-                          className="w-full flex items-center gap-2 p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700 opacity-60"
-                        >
-                          <div className="relative">
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage src={`https://avatar.vercel.sh/${member.avatar}`} />
-                              <AvatarFallback>{member.name.slice(0, 2)}</AvatarFallback>
-                            </Avatar>
-                            <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 ${getStatusColor(member.status)} rounded-full border-2 border-white dark:border-gray-800`} />
-                          </div>
-                          <span className="text-sm truncate flex-1">{member.name}</span>
-                          {getRoleIcon(member.role)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </ScrollArea>
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Threads Tab */}
-          <TabsContent value="threads" className="flex-1 p-4 m-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mockThreads.map(thread => (
-                <Card key={thread.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <Avatar>
-                        <AvatarImage src={`https://avatar.vercel.sh/${thread.authorAvatar}`} />
-                        <AvatarFallback>{thread.author.slice(0, 2)}</AvatarFallback>
+          <TabsContent value="chat" className="flex-1 flex m-0">
+            <div className="flex-1 flex flex-col">
+              <ScrollArea className="flex-1 p-4">
+                <div className="space-y-4">
+                  {mockMessages.map(message => (
+                    <div key={message.id} className="group flex gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 p-2 rounded-lg -mx-2">
+                      <Avatar className="w-10 h-10">
+                        <AvatarImage src={`https://avatar.vercel.sh/${message.authorAvatar}`} />
+                        <AvatarFallback>{message.authorName.slice(0, 2)}</AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          {thread.isPinned && <Pin className="w-4 h-4 text-orange-500" />}
-                          {thread.isLocked && <Lock className="w-4 h-4 text-red-500" />}
-                          <h4 className="font-semibold truncate">{thread.title}</h4>
+                        <div className="flex items-center gap-2">
+                          <span className={`font-semibold ${getRoleColor(message.authorRole)}`}>{message.authorName}</span>
+                          {getRoleIcon(message.authorRole)}
+                          <span className="text-xs text-gray-500">{formatTimeAgo(message.timestamp)}</span>
+                          {message.editedTimestamp && <span className="text-xs text-gray-400">(edited)</span>}
+                          {message.isPinned && <Pin className="w-3 h-3 text-orange-500" />}
                         </div>
-                        <p className="text-sm text-muted-foreground">by {thread.author}</p>
-                        <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <MessageSquare className="w-3 h-3" />
-                            {thread.messageCount}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Users className="w-3 h-3" />
-                            {thread.participantCount}
-                          </span>
-                          <span>{thread.lastReply}</span>
-                        </div>
+                        {message.replyTo && (
+                          <div className="flex items-center gap-2 text-xs text-gray-500 mb-1 p-1.5 bg-gray-100 dark:bg-gray-800 rounded border-l-2 border-orange-500">
+                            <Reply className="w-3 h-3" />
+                            <span className="font-medium">{message.replyTo.authorName}</span>
+                            <span className="truncate">{message.replyTo.content}</span>
+                          </div>
+                        )}
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                        {message.reactions.length > 0 && (
+                          <div className="flex gap-1 mt-2">
+                            {message.reactions.map((reaction, i) => (
+                              <button key={i} className={`px-2 py-0.5 rounded-full text-xs flex items-center gap-1 ${reaction.me ? 'bg-orange-100 dark:bg-orange-900/30 border border-orange-300' : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200'}`}>
+                                <span>{reaction.emoji}</span>
+                                <span>{reaction.count}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="opacity-0 group-hover:opacity-100 flex items-start gap-1">
+                        <Button variant="ghost" size="icon" className="h-7 w-7"><Smile className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7"><Reply className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="w-4 h-4" /></Button>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  ))}
+                </div>
+              </ScrollArea>
+
+              {/* Message Input */}
+              <div className="p-4 border-t">
+                <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-lg p-2">
+                  <Button variant="ghost" size="icon"><Plus className="w-5 h-5" /></Button>
+                  <Input
+                    placeholder={`Message #${selectedChannel.name}`}
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                    className="flex-1 border-0 bg-transparent focus-visible:ring-0"
+                  />
+                  <Button variant="ghost" size="icon"><Gift className="w-5 h-5" /></Button>
+                  <Button variant="ghost" size="icon"><ImageIcon className="w-5 h-5" /></Button>
+                  <Button variant="ghost" size="icon"><Smile className="w-5 h-5" /></Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Member Sidebar */}
+            <div className="w-56 border-l bg-gray-50 dark:bg-gray-800/50 hidden lg:block">
+              <ScrollArea className="h-full p-3">
+                <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">Online — {mockMembers.filter(m => m.status === 'online').length}</h4>
+                <div className="space-y-1 mb-4">
+                  {mockMembers.filter(m => m.status === 'online').map(member => (
+                    <button key={member.id} onClick={() => handleViewMember(member)} className="w-full flex items-center gap-2 p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+                      <div className="relative">
+                        <Avatar className="w-7 h-7">
+                          <AvatarImage src={`https://avatar.vercel.sh/${member.avatar}`} />
+                          <AvatarFallback>{member.displayName.slice(0, 2)}</AvatarFallback>
+                        </Avatar>
+                        <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 ${getStatusColor(member.status)} rounded-full border-2 border-white dark:border-gray-800`} />
+                      </div>
+                      <span className={`text-sm truncate flex-1 ${getRoleColor(member.highestRole)}`}>{member.displayName}</span>
+                      {member.isBoosting && <Rocket className="w-3 h-3 text-pink-500" />}
+                    </button>
+                  ))}
+                </div>
+                <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">Offline — {mockMembers.filter(m => m.status === 'offline').length}</h4>
+                <div className="space-y-1 opacity-60">
+                  {mockMembers.filter(m => m.status === 'offline').map(member => (
+                    <button key={member.id} onClick={() => handleViewMember(member)} className="w-full flex items-center gap-2 p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
+                      <Avatar className="w-7 h-7">
+                        <AvatarImage src={`https://avatar.vercel.sh/${member.avatar}`} />
+                        <AvatarFallback>{member.displayName.slice(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm truncate">{member.displayName}</span>
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
             </div>
           </TabsContent>
 
           {/* Members Tab */}
-          <TabsContent value="members" className="flex-1 p-4 m-0">
+          <TabsContent value="members" className="flex-1 p-4 m-0 overflow-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input placeholder="Search members..." className="pl-9" />
+              </div>
+              <Button><UserPlus className="w-4 h-4 mr-2" />Invite Members</Button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mockMembers.map(member => (
                 <Card key={member.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleViewMember(member)}>
@@ -610,17 +770,19 @@ export default function CommunityClient({ initialCommunities }: { initialCommuni
                       <div className="relative">
                         <Avatar className="w-12 h-12">
                           <AvatarImage src={`https://avatar.vercel.sh/${member.avatar}`} />
-                          <AvatarFallback>{member.name.slice(0, 2)}</AvatarFallback>
+                          <AvatarFallback>{member.displayName.slice(0, 2)}</AvatarFallback>
                         </Avatar>
                         <span className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 ${getStatusColor(member.status)} rounded-full border-2 border-white dark:border-gray-800`} />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          <h4 className="font-semibold">{member.name}</h4>
-                          {getRoleIcon(member.role)}
+                          <h4 className={`font-semibold ${getRoleColor(member.highestRole)}`}>{member.displayName}</h4>
+                          {getRoleIcon(member.highestRole)}
+                          {member.isBoosting && <Rocket className="w-4 h-4 text-pink-500" />}
+                          {member.isBot && <Bot className="w-4 h-4 text-blue-500" />}
                         </div>
-                        <p className="text-sm text-muted-foreground capitalize">{member.role}</p>
-                        <p className="text-xs text-muted-foreground">Last seen: {member.lastSeen}</p>
+                        <p className="text-sm text-gray-500">@{member.username}</p>
+                        <p className="text-xs text-gray-400">Joined {formatTimeAgo(member.joinedAt)}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -629,169 +791,300 @@ export default function CommunityClient({ initialCommunities }: { initialCommuni
             </div>
           </TabsContent>
 
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="flex-1 p-4 m-0">
-            <StatGrid columns={4} stats={stats} />
+          {/* Events Tab */}
+          <TabsContent value="events" className="flex-1 p-4 m-0 overflow-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Community Events</h2>
+              <Button><Plus className="w-4 h-4 mr-2" />Create Event</Button>
+            </div>
+            <div className="grid gap-4">
+              {mockEvents.map(event => (
+                <Card key={event.id}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-6">
+                      <div className="w-20 h-20 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        {event.entityType === 'voice' && <Volume2 className="w-8 h-8 text-white" />}
+                        {event.entityType === 'stage' && <Radio className="w-8 h-8 text-white" />}
+                        {event.entityType === 'external' && <ExternalLink className="w-8 h-8 text-white" />}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="font-semibold text-lg">{event.name}</h3>
+                            <p className="text-sm text-gray-500">{event.description}</p>
+                          </div>
+                          <Badge className={event.status === 'scheduled' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}>{event.status}</Badge>
+                        </div>
+                        <div className="flex items-center gap-4 mt-4 text-sm text-gray-500">
+                          <span className="flex items-center gap-1"><Calendar className="w-4 h-4" />{event.scheduledStart.toLocaleDateString()}</span>
+                          <span className="flex items-center gap-1"><Clock className="w-4 h-4" />{event.scheduledStart.toLocaleTimeString()}</span>
+                          <span className="flex items-center gap-1"><Users className="w-4 h-4" />{event.interestedCount} interested</span>
+                        </div>
+                      </div>
+                      <Button variant="outline">Interested</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          {/* Roles Tab */}
+          <TabsContent value="roles" className="flex-1 p-4 m-0 overflow-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Server Roles</h2>
+              <Button><Plus className="w-4 h-4 mr-2" />Create Role</Button>
+            </div>
+            <div className="space-y-3">
+              {mockRoles.map(role => (
+                <Card key={role.id}>
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-4 h-4 rounded-full" style={{ backgroundColor: role.color }} />
+                      <div>
+                        <h4 className="font-semibold" style={{ color: role.color }}>{role.name}</h4>
+                        <p className="text-sm text-gray-500">{role.memberCount} members</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        {role.isHoisted && <Badge variant="outline">Hoisted</Badge>}
+                        {role.isMentionable && <Badge variant="outline">Mentionable</Badge>}
+                        {role.isManaged && <Badge variant="outline">Managed</Badge>}
+                      </div>
+                      <Button variant="ghost" size="icon"><Settings className="w-4 h-4" /></Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Moderation Tab */}
+          <TabsContent value="moderation" className="flex-1 p-4 m-0 overflow-auto">
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="w-8 h-8 text-yellow-500" />
+                  <div>
+                    <p className="text-2xl font-bold">{mockModActions.filter(a => a.type === 'warn').length}</p>
+                    <p className="text-sm text-gray-500">Warnings</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <VolumeX className="w-8 h-8 text-orange-500" />
+                  <div>
+                    <p className="text-2xl font-bold">{mockModActions.filter(a => a.type === 'mute' || a.type === 'timeout').length}</p>
+                    <p className="text-sm text-gray-500">Mutes</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <UserX className="w-8 h-8 text-red-500" />
+                  <div>
+                    <p className="text-2xl font-bold">{mockModActions.filter(a => a.type === 'kick').length}</p>
+                    <p className="text-sm text-gray-500">Kicks</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4">
+                <div className="flex items-center gap-3">
+                  <Ban className="w-8 h-8 text-red-600" />
+                  <div>
+                    <p className="text-2xl font-bold">{mockModActions.filter(a => a.type === 'ban').length}</p>
+                    <p className="text-sm text-gray-500">Bans</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader><CardTitle>Recent Moderation Actions</CardTitle></CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {mockModActions.map(action => (
+                    <div key={action.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center gap-4">
+                        <Badge className={getModActionColor(action.type)}>{action.type}</Badge>
+                        <div>
+                          <p className="font-medium">{action.targetName}</p>
+                          <p className="text-sm text-gray-500">by {action.moderatorName}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">{action.reason}</p>
+                        <p className="text-xs text-gray-400">{formatTimeAgo(action.timestamp)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="flex-1 p-4 m-0 overflow-auto">
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              <Card className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
+                <div className="flex items-center gap-3">
+                  <Users className="w-8 h-8 text-blue-500" />
+                  <div>
+                    <p className="text-2xl font-bold">{stats.totalMembers.toLocaleString()}</p>
+                    <p className="text-sm text-gray-600">Total Members</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20">
+                <div className="flex items-center gap-3">
+                  <Circle className="w-8 h-8 text-green-500 fill-green-500" />
+                  <div>
+                    <p className="text-2xl font-bold">{stats.onlineMembers}</p>
+                    <p className="text-sm text-gray-600">Online Now</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20">
+                <div className="flex items-center gap-3">
+                  <MessageSquare className="w-8 h-8 text-orange-500" />
+                  <div>
+                    <p className="text-2xl font-bold">{stats.messagesThisWeek.toLocaleString()}</p>
+                    <p className="text-sm text-gray-600">Messages This Week</p>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-4 bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20">
+                <div className="flex items-center gap-3">
+                  <Gem className="w-8 h-8 text-pink-500" />
+                  <div>
+                    <p className="text-2xl font-bold">Level {stats.boostLevel}</p>
+                    <p className="text-sm text-gray-600">{serverBoost.boostCount} Boosts</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
               <Card>
-                <CardHeader>
-                  <CardTitle>Member Activity</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle>Member Growth</CardTitle></CardHeader>
                 <CardContent>
                   <div className="h-48 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-lg flex items-center justify-center">
                     <TrendingUp className="w-12 h-12 text-orange-300" />
                   </div>
                 </CardContent>
               </Card>
-
               <Card>
-                <CardHeader>
-                  <CardTitle>Top Contributors</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle>Message Activity</CardTitle></CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {mockMembers.slice(0, 5).map((member, i) => (
-                      <div key={member.id} className="flex items-center gap-3">
-                        <span className="text-lg font-bold text-muted-foreground w-6">{i + 1}</span>
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={`https://avatar.vercel.sh/${member.avatar}`} />
-                          <AvatarFallback>{member.name.slice(0, 2)}</AvatarFallback>
-                        </Avatar>
-                        <span className="flex-1 font-medium">{member.name}</span>
-                        <Badge variant="secondary">{Math.floor(Math.random() * 500) + 100} msgs</Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Channel Activity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {mockChannels.filter(c => c.type === 'text').slice(0, 5).map(channel => (
-                      <div key={channel.id} className="flex items-center gap-3">
-                        <Hash className="w-4 h-4 text-muted-foreground" />
-                        <span className="flex-1">{channel.name}</span>
-                        <span className="text-sm text-muted-foreground">{channel.memberCount} members</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Roles Distribution</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {mockRoles.map(role => (
-                      <div key={role.id} className="flex items-center gap-3">
-                        <span className={`w-3 h-3 rounded-full ${role.color.replace('text-', 'bg-')}`} />
-                        <span className="flex-1">{role.name}</span>
-                        <Badge variant="secondary">{role.memberCount}</Badge>
-                      </div>
-                    ))}
+                  <div className="h-48 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg flex items-center justify-center">
+                    <BarChart3 className="w-12 h-12 text-blue-300" />
                   </div>
                 </CardContent>
               </Card>
             </div>
+
+            {/* Boost Progress */}
+            <Card className="mt-6">
+              <CardHeader><CardTitle className="flex items-center gap-2"><Gem className="w-5 h-5 text-pink-500" />Server Boost Progress</CardTitle></CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="text-4xl font-bold text-pink-500">Level {serverBoost.level}</div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between text-sm mb-1">
+                      <span>{serverBoost.boostCount} / {serverBoost.nextLevel?.required} Boosts</span>
+                      <span>Level {serverBoost.level + 1}</span>
+                    </div>
+                    <Progress value={(serverBoost.boostCount / (serverBoost.nextLevel?.required || 1)) * 100} className="h-3" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-medium mb-2">Current Perks</h4>
+                    <div className="space-y-1">
+                      {serverBoost.perks.map((perk, i) => (
+                        <div key={i} className="flex items-center gap-2 text-sm text-gray-600">
+                          <CheckCircle className="w-4 h-4 text-green-500" />
+                          {perk}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  {serverBoost.nextLevel && (
+                    <div>
+                      <h4 className="font-medium mb-2">Next Level Perks</h4>
+                      <div className="space-y-1">
+                        {serverBoost.nextLevel.perks.map((perk, i) => (
+                          <div key={i} className="flex items-center gap-2 text-sm text-gray-400">
+                            <Circle className="w-4 h-4" />
+                            {perk}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
 
-      {/* Create Channel Dialog */}
-      <Dialog open={showCreateChannel} onOpenChange={setShowCreateChannel}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create Channel</DialogTitle>
-            <DialogDescription>Add a new channel to the community</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label>Channel Type</Label>
-              <div className="grid grid-cols-2 gap-2 mt-2">
-                {[
-                  { type: 'text', icon: <Hash />, label: 'Text' },
-                  { type: 'voice', icon: <Volume2 />, label: 'Voice' },
-                  { type: 'forum', icon: <MessageCircle />, label: 'Forum' },
-                  { type: 'announcement', icon: <Megaphone />, label: 'Announcement' },
-                ].map(item => (
-                  <button
-                    key={item.type}
-                    className="p-3 border rounded-lg hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-2"
-                  >
-                    {item.icon}
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <Label>Channel Name</Label>
-              <Input placeholder="new-channel" className="mt-1" />
-            </div>
-            <div className="flex items-center gap-2">
-              <input type="checkbox" id="private" className="rounded" />
-              <Label htmlFor="private">Private Channel</Label>
-            </div>
-          </div>
-          <DialogFooter>
-            <ModernButton variant="outline" onClick={() => setShowCreateChannel(false)}>Cancel</ModernButton>
-            <GradientButton from="orange" to="amber">Create Channel</GradientButton>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* Member Profile Dialog */}
       <Dialog open={showMemberProfile} onOpenChange={setShowMemberProfile}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Member Profile</DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Member Profile</DialogTitle></DialogHeader>
           {selectedMember && (
             <div className="space-y-4">
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <Avatar className="w-20 h-20">
                     <AvatarImage src={`https://avatar.vercel.sh/${selectedMember.avatar}`} />
-                    <AvatarFallback>{selectedMember.name.slice(0, 2)}</AvatarFallback>
+                    <AvatarFallback>{selectedMember.displayName.slice(0, 2)}</AvatarFallback>
                   </Avatar>
                   <span className={`absolute bottom-0 right-0 w-5 h-5 ${getStatusColor(selectedMember.status)} rounded-full border-3 border-white dark:border-gray-800`} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold flex items-center gap-2">
-                    {selectedMember.name}
-                    {getRoleIcon(selectedMember.role)}
+                  <h2 className={`text-xl font-bold flex items-center gap-2 ${getRoleColor(selectedMember.highestRole)}`}>
+                    {selectedMember.displayName}
+                    {getRoleIcon(selectedMember.highestRole)}
+                    {selectedMember.isBoosting && <Rocket className="w-4 h-4 text-pink-500" />}
                   </h2>
-                  <p className="text-muted-foreground capitalize">{selectedMember.role}</p>
+                  <p className="text-gray-500">@{selectedMember.username}</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                  <p className="text-sm text-muted-foreground">Status</p>
-                  <p className="font-medium capitalize">{selectedMember.status}</p>
-                </div>
-                <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                  <p className="text-sm text-muted-foreground">Joined</p>
-                  <p className="font-medium">{new Date(selectedMember.joinedAt).toLocaleDateString()}</p>
-                </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-sm text-gray-500">Status</p><p className="font-medium capitalize">{selectedMember.status}</p></div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-sm text-gray-500">Joined</p><p className="font-medium">{selectedMember.joinedAt.toLocaleDateString()}</p></div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-sm text-gray-500">Messages</p><p className="font-medium">{selectedMember.messageCount.toLocaleString()}</p></div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-sm text-gray-500">Voice Time</p><p className="font-medium">{Math.floor(selectedMember.voiceMinutes / 60)}h</p></div>
               </div>
               <div className="flex gap-2">
-                <ModernButton variant="primary" className="flex-1">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Message
-                </ModernButton>
-                <ModernButton variant="outline">
-                  <UserPlus className="w-4 h-4" />
-                </ModernButton>
+                <Button className="flex-1"><MessageSquare className="w-4 h-4 mr-2" />Message</Button>
+                <Button variant="outline"><UserPlus className="w-4 h-4" /></Button>
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Channel Dialog */}
+      <Dialog open={showCreateChannel} onOpenChange={setShowCreateChannel}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Create Channel</DialogTitle><DialogDescription>Add a new channel to the server</DialogDescription></DialogHeader>
+          <div className="space-y-4 py-4">
+            <div><Label>Channel Type</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {[{ type: 'text', icon: <Hash />, label: 'Text' }, { type: 'voice', icon: <Volume2 />, label: 'Voice' }, { type: 'forum', icon: <MessageCircle />, label: 'Forum' }, { type: 'announcement', icon: <Megaphone />, label: 'Announcement' }].map(item => (
+                  <button key={item.type} className="p-3 border rounded-lg hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-2">{item.icon}{item.label}</button>
+                ))}
+              </div>
+            </div>
+            <div><Label>Channel Name</Label><Input placeholder="new-channel" className="mt-1" /></div>
+            <div className="flex items-center gap-2"><Switch id="private" /><Label htmlFor="private">Private Channel</Label></div>
+          </div>
+          <DialogFooter><Button variant="outline" onClick={() => setShowCreateChannel(false)}>Cancel</Button><Button className="bg-orange-500 hover:bg-orange-600">Create Channel</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
