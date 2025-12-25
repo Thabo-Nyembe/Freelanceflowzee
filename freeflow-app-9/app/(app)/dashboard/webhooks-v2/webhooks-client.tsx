@@ -52,8 +52,21 @@ import {
   Plug,
   Sparkles,
   Download,
-  Upload
+  Upload,
+  Bell,
+  HardDrive,
+  AlertOctagon,
+  CreditCard,
+  Sliders
 } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Progress } from '@/components/ui/progress'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Dialog,
@@ -346,6 +359,7 @@ export default function WebhooksClient({
   const [showLogDialog, setShowLogDialog] = useState(false)
   const [showTestDialog, setShowTestDialog] = useState(false)
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Users', 'Orders', 'Payments']))
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const filteredEndpoints = useMemo(() => {
     return mockEndpoints.filter(endpoint => {
@@ -512,6 +526,10 @@ export default function WebhooksClient({
             <TabsTrigger value="templates" className="rounded-lg data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-600 dark:data-[state=active]:bg-emerald-900/30">
               <Sparkles className="w-4 h-4 mr-2" />
               Templates
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-600 dark:data-[state=active]:bg-emerald-900/30">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -845,6 +863,675 @@ export default function WebhooksClient({
                   </button>
                 </div>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Zapier Level */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-2">
+                <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'delivery', label: 'Delivery', icon: Send },
+                        { id: 'security', label: 'Security', icon: Shield },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'api', label: 'API Settings', icon: Code },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+
+                {/* Webhook Stats Sidebar */}
+                <Card className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white border-0">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium opacity-90">Webhook Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <div className="text-2xl font-bold">{mockStats.successRate}%</div>
+                      <div className="text-xs opacity-80">Success Rate</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-center">
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-semibold">{mockStats.totalEndpoints}</div>
+                        <div className="text-xs opacity-80">Endpoints</div>
+                      </div>
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-semibold">{mockStats.avgResponseTime}ms</div>
+                        <div className="text-xs opacity-80">Avg Latency</div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span>Daily Quota</span>
+                        <span>12.5K / 50K</span>
+                      </div>
+                      <Progress value={25} className="h-2 bg-white/20" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="w-5 h-5 text-emerald-600" />
+                          Webhook Defaults
+                        </CardTitle>
+                        <CardDescription>Configure default settings for new webhooks</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Timeout</Label>
+                            <Select defaultValue="30">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="10">10 seconds</SelectItem>
+                                <SelectItem value="30">30 seconds</SelectItem>
+                                <SelectItem value="60">60 seconds</SelectItem>
+                                <SelectItem value="120">2 minutes</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Content Type</Label>
+                            <Select defaultValue="json">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="json">application/json</SelectItem>
+                                <SelectItem value="form">application/x-www-form-urlencoded</SelectItem>
+                                <SelectItem value="xml">application/xml</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Active Webhook Limit</div>
+                            <div className="text-sm text-gray-500">Maximum concurrent active webhooks</div>
+                          </div>
+                          <Select defaultValue="100">
+                            <SelectTrigger className="w-24">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="25">25</SelectItem>
+                              <SelectItem value="50">50</SelectItem>
+                              <SelectItem value="100">100</SelectItem>
+                              <SelectItem value="unlimited">Unlimited</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Include Metadata</div>
+                            <div className="text-sm text-gray-500">Add metadata to webhook payloads</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Workflow className="w-5 h-5 text-blue-600" />
+                          Event Settings
+                        </CardTitle>
+                        <CardDescription>Configure event handling behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Event Batching</div>
+                            <div className="text-sm text-gray-500">Batch multiple events in single delivery</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Event Ordering</div>
+                            <div className="text-sm text-gray-500">Guarantee event delivery order</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Deduplicate Events</div>
+                            <div className="text-sm text-gray-500">Prevent duplicate event deliveries</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'delivery' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <RefreshCw className="w-5 h-5 text-orange-600" />
+                          Retry Policy
+                        </CardTitle>
+                        <CardDescription>Configure automatic retry behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Max Retry Attempts</Label>
+                            <Select defaultValue="5">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0">No retries</SelectItem>
+                                <SelectItem value="3">3 attempts</SelectItem>
+                                <SelectItem value="5">5 attempts</SelectItem>
+                                <SelectItem value="10">10 attempts</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Backoff Strategy</Label>
+                            <Select defaultValue="exponential">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="linear">Linear</SelectItem>
+                                <SelectItem value="exponential">Exponential</SelectItem>
+                                <SelectItem value="fixed">Fixed Interval</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Initial Delay</Label>
+                            <Select defaultValue="1000">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="500">500ms</SelectItem>
+                                <SelectItem value="1000">1 second</SelectItem>
+                                <SelectItem value="5000">5 seconds</SelectItem>
+                                <SelectItem value="30000">30 seconds</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Delay</Label>
+                            <Select defaultValue="3600000">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="60000">1 minute</SelectItem>
+                                <SelectItem value="300000">5 minutes</SelectItem>
+                                <SelectItem value="3600000">1 hour</SelectItem>
+                                <SelectItem value="86400000">24 hours</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Timer className="w-5 h-5 text-purple-600" />
+                          Rate Limiting
+                        </CardTitle>
+                        <CardDescription>Control delivery rate to prevent overwhelming endpoints</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Enable Rate Limiting</div>
+                            <div className="text-sm text-gray-500">Limit requests per endpoint</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Requests per Minute</Label>
+                            <Input type="number" defaultValue="60" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Burst Limit</Label>
+                            <Input type="number" defaultValue="100" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Queue Overflow Action</div>
+                            <div className="text-sm text-gray-500">What to do when queue is full</div>
+                          </div>
+                          <Select defaultValue="queue">
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="queue">Queue</SelectItem>
+                              <SelectItem value="drop">Drop</SelectItem>
+                              <SelectItem value="error">Error</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'security' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Signature Verification
+                        </CardTitle>
+                        <CardDescription>Configure webhook signing and verification</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center gap-3">
+                            <CheckCircle className="w-5 h-5 text-green-600" />
+                            <div>
+                              <div className="font-medium text-green-800 dark:text-green-400">HMAC Signing Enabled</div>
+                              <div className="text-sm text-green-600 dark:text-green-500">All payloads are signed with SHA-256</div>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Signing Algorithm</Label>
+                          <Select defaultValue="sha256">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="sha256">SHA-256 (Recommended)</SelectItem>
+                              <SelectItem value="sha512">SHA-512</SelectItem>
+                              <SelectItem value="sha1">SHA-1 (Legacy)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Signature Header Name</Label>
+                          <Input defaultValue="X-Webhook-Signature" className="font-mono" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Include Timestamp</div>
+                            <div className="text-sm text-gray-500">Add timestamp to prevent replay attacks</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Lock className="w-5 h-5 text-amber-600" />
+                          Secret Management
+                        </CardTitle>
+                        <CardDescription>Manage webhook secrets and rotation</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Signing Secret</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="whsec_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline">Copy</Button>
+                            <Button variant="outline">Rotate</Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Auto-rotate Secrets</div>
+                            <div className="text-sm text-gray-500">Automatically rotate secrets periodically</div>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Secret Expiration Warning</div>
+                            <div className="text-sm text-gray-500">Notify before secrets expire</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-orange-600" />
+                          Delivery Alerts
+                        </CardTitle>
+                        <CardDescription>Configure alerts for webhook events</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Failed Delivery Alert</div>
+                            <div className="text-sm text-gray-500">Notify when deliveries fail</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Endpoint Disabled Alert</div>
+                            <div className="text-sm text-gray-500">Notify when endpoint is auto-disabled</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Success Rate Drop Alert</div>
+                            <div className="text-sm text-gray-500">Notify when success rate drops below threshold</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Success Rate Threshold</Label>
+                          <Select defaultValue="95">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="99">99%</SelectItem>
+                              <SelectItem value="95">95%</SelectItem>
+                              <SelectItem value="90">90%</SelectItem>
+                              <SelectItem value="80">80%</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Activity className="w-5 h-5 text-blue-600" />
+                          Health Reports
+                        </CardTitle>
+                        <CardDescription>Configure periodic health reports</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Daily Health Summary</div>
+                            <div className="text-sm text-gray-500">Receive daily webhook health report</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Weekly Analytics Report</div>
+                            <div className="text-sm text-gray-500">Detailed weekly analytics email</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Report Recipients</Label>
+                          <Input placeholder="email@example.com, team@example.com" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'api' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-amber-600" />
+                          API Credentials
+                        </CardTitle>
+                        <CardDescription>Manage API keys for webhook management</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="wh_api_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline">Copy</Button>
+                            <Button variant="outline">Regenerate</Button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>API Secret</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="wh_secret_xxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline">Copy</Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">API Rate Limit</div>
+                            <div className="text-sm text-gray-500">Requests per minute for management API</div>
+                          </div>
+                          <Badge variant="outline">1000 req/min</Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Terminal className="w-5 h-5 text-purple-600" />
+                          API Settings
+                        </CardTitle>
+                        <CardDescription>Configure API behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">API Versioning</div>
+                            <div className="text-sm text-gray-500">Include version in API responses</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Default API Version</Label>
+                          <Select defaultValue="v2">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="v1">v1 (Legacy)</SelectItem>
+                              <SelectItem value="v2">v2 (Current)</SelectItem>
+                              <SelectItem value="v3">v3 (Beta)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Verbose Error Messages</div>
+                            <div className="text-sm text-gray-500">Return detailed error information</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HardDrive className="w-5 h-5 text-gray-600" />
+                          Data Retention
+                        </CardTitle>
+                        <CardDescription>Configure log retention and storage</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Delivery Log Retention</Label>
+                          <Select defaultValue="30">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="7">7 days</SelectItem>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Failed Delivery Retention</Label>
+                          <Select defaultValue="90">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="180">180 days</SelectItem>
+                              <SelectItem value="365">1 year</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export Logs
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <Upload className="w-4 h-4 mr-2" />
+                            Import Config
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-indigo-600" />
+                          Performance
+                        </CardTitle>
+                        <CardDescription>Configure performance settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Parallel Delivery</div>
+                            <div className="text-sm text-gray-500">Enable concurrent webhook deliveries</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Max Concurrent Deliveries</Label>
+                          <Select defaultValue="10">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="5">5</SelectItem>
+                              <SelectItem value="10">10</SelectItem>
+                              <SelectItem value="25">25</SelectItem>
+                              <SelectItem value="50">50</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Connection Pooling</div>
+                            <div className="text-sm text-gray-500">Reuse connections for better performance</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-700 dark:text-red-400">Delete All Webhooks</div>
+                            <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all webhook endpoints</div>
+                          </div>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete All
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-700 dark:text-red-400">Clear All Logs</div>
+                            <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all delivery logs</div>
+                          </div>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Clear Logs
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-700 dark:text-red-400">Reset Configuration</div>
+                            <div className="text-sm text-red-600 dark:text-red-500">Reset all settings to defaults</div>
+                          </div>
+                          <Button variant="destructive" size="sm">
+                            <RotateCcw className="w-4 h-4 mr-2" />
+                            Reset
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
