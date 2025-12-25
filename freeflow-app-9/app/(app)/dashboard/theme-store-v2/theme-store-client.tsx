@@ -9,12 +9,17 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Palette, Download, Star, Heart, Eye, Search, Filter, Grid, List,
   Check, X, Sparkles, Layout, Moon, Sun, Monitor, Smartphone,
   Tablet, Zap, Shield, Clock, Users, TrendingUp, Package,
-  Settings, Code, Paintbrush, Type, Layers, ChevronRight
+  Settings, Code, Paintbrush, Type, Layers, ChevronRight,
+  Bell, Lock, Key, Globe, RefreshCw, Upload, Link2, AlertTriangle,
+  CreditCard, Wallet, FileText, Info, Database, Server
 } from 'lucide-react'
 
 // Types
@@ -206,6 +211,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
   const [previewMode, setPreviewMode] = useState<'light' | 'dark'>('light')
   const [customizerOpen, setCustomizerOpen] = useState(false)
   const [customColors, setCustomColors] = useState<Partial<ColorPalette>>({})
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const themes = mockThemes
   const collections = mockCollections
@@ -309,6 +315,10 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
             <TabsTrigger value="installed">Installed</TabsTrigger>
             <TabsTrigger value="collections">Collections</TabsTrigger>
             <TabsTrigger value="customizer">Customizer</TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-1.5">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Browse Tab */}
@@ -762,6 +772,647 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                     Reset
                   </Button>
                 </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+              {/* Settings Sub-tabs */}
+              <div className="border-b border-gray-200 dark:border-gray-700">
+                <div className="flex gap-1 p-2 overflow-x-auto">
+                  {[
+                    { id: 'general', label: 'General', icon: Settings },
+                    { id: 'appearance', label: 'Appearance', icon: Palette },
+                    { id: 'licensing', label: 'Licensing', icon: Key },
+                    { id: 'notifications', label: 'Notifications', icon: Bell },
+                    { id: 'integrations', label: 'Integrations', icon: Link2 },
+                    { id: 'advanced', label: 'Advanced', icon: Zap }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setSettingsTab(tab.id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                        settingsTab === tab.id
+                          ? 'bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      <tab.icon className="w-4 h-4" />
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">General Settings</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Package className="w-5 h-5 text-rose-600" />
+                          Theme Defaults
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Framework</Label>
+                            <Select defaultValue="nextjs">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="react">React</SelectItem>
+                                <SelectItem value="nextjs">Next.js</SelectItem>
+                                <SelectItem value="vue">Vue</SelectItem>
+                                <SelectItem value="nuxt">Nuxt</SelectItem>
+                                <SelectItem value="angular">Angular</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Default License</Label>
+                            <Select defaultValue="standard">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="standard">Standard</SelectItem>
+                                <SelectItem value="extended">Extended</SelectItem>
+                                <SelectItem value="unlimited">Unlimited</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Auto-update Themes</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically install theme updates</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Backup Before Update</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Create backup before applying updates</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Database className="w-5 h-5 text-blue-600" />
+                          Storage & Cache
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">Theme Cache</span>
+                            <Badge variant="secondary">245 MB</Badge>
+                          </div>
+                          <Progress value={45} className="h-2" />
+                          <p className="text-xs text-gray-500 mt-2">45% of 500 MB limit used</p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <Button variant="outline" className="flex items-center gap-2">
+                            <RefreshCw className="w-4 h-4" />
+                            Clear Cache
+                          </Button>
+                          <Button variant="outline" className="flex items-center gap-2">
+                            <Database className="w-4 h-4" />
+                            Optimize Storage
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-green-600" />
+                          Localization
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Store Language</Label>
+                            <Select defaultValue="en">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="es">Spanish</SelectItem>
+                                <SelectItem value="fr">French</SelectItem>
+                                <SelectItem value="de">German</SelectItem>
+                                <SelectItem value="ja">Japanese</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Currency</Label>
+                            <Select defaultValue="usd">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="usd">USD ($)</SelectItem>
+                                <SelectItem value="eur">EUR (€)</SelectItem>
+                                <SelectItem value="gbp">GBP (£)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Appearance Settings */}
+                {settingsTab === 'appearance' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Appearance Settings</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Palette className="w-5 h-5 text-rose-600" />
+                          Store Theme
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Color Scheme</Label>
+                          <div className="flex gap-3 mt-2">
+                            {['rose', 'blue', 'green', 'purple', 'orange', 'gray'].map(color => (
+                              <button
+                                key={color}
+                                className={`w-10 h-10 rounded-full border-2 hover:scale-110 transition-transform bg-${color}-500`}
+                                style={{ backgroundColor: color === 'rose' ? '#f43f5e' : color === 'blue' ? '#3b82f6' : color === 'green' ? '#22c55e' : color === 'purple' ? '#a855f7' : color === 'orange' ? '#f97316' : '#6b7280' }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Dark Mode</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Use dark theme for store</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Animated Backgrounds</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable gradient animations</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Layout className="w-5 h-5 text-blue-600" />
+                          Browse Layout
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Default View</Label>
+                          <Select defaultValue="grid">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="grid">Grid View</SelectItem>
+                              <SelectItem value="list">List View</SelectItem>
+                              <SelectItem value="masonry">Masonry View</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Themes Per Page</Label>
+                          <Select defaultValue="12">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="12">12 themes</SelectItem>
+                              <SelectItem value="24">24 themes</SelectItem>
+                              <SelectItem value="48">48 themes</SelectItem>
+                              <SelectItem value="100">100 themes</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Show Sidebar Filters</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Display filters in sidebar</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Eye className="w-5 h-5 text-purple-600" />
+                          Preview Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Default Preview Device</Label>
+                          <Select defaultValue="desktop">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="desktop">Desktop</SelectItem>
+                              <SelectItem value="tablet">Tablet</SelectItem>
+                              <SelectItem value="mobile">Mobile</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Auto-play Previews</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically load preview on hover</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Licensing Settings */}
+                {settingsTab === 'licensing' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Licensing & Purchases</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Key className="w-5 h-5 text-amber-600" />
+                          License Keys
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <Label>Envato Purchase Code</Label>
+                            <Button variant="ghost" size="sm">Verify</Button>
+                          </div>
+                          <Input type="password" value="••••••••-••••-••••-••••-••••••••••••" readOnly className="font-mono" />
+                        </div>
+                        <div className="space-y-2">
+                          {[
+                            { theme: 'Aurora Dashboard', license: 'Extended', expires: '2025-01-15', status: 'active' },
+                            { theme: 'Commerce Pro', license: 'Unlimited', expires: 'Lifetime', status: 'active' },
+                            { theme: 'Minimal Portfolio', license: 'Free', expires: 'N/A', status: 'active' }
+                          ].map((item, i) => (
+                            <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div>
+                                <span className="font-medium">{item.theme}</span>
+                                <p className="text-xs text-gray-500">{item.license} • Expires: {item.expires}</p>
+                              </div>
+                              <Badge className="bg-green-100 text-green-700">{item.status}</Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <CreditCard className="w-5 h-5 text-blue-600" />
+                          Payment Methods
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-6 bg-gradient-to-r from-blue-600 to-blue-800 rounded flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">VISA</span>
+                            </div>
+                            <div>
+                              <span className="font-medium">•••• •••• •••• 4242</span>
+                              <p className="text-xs text-gray-500">Expires 12/25</p>
+                            </div>
+                          </div>
+                          <Badge>Default</Badge>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <CreditCard className="w-4 h-4 mr-2" />
+                          Add Payment Method
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <FileText className="w-5 h-5 text-purple-600" />
+                          Purchase History
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {[
+                            { theme: 'Aurora Dashboard', date: '2024-01-15', amount: '$59', invoice: 'INV-001' },
+                            { theme: 'Commerce Pro', date: '2024-01-10', amount: '$149', invoice: 'INV-002' }
+                          ].map((purchase, i) => (
+                            <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div>
+                                <span className="font-medium">{purchase.theme}</span>
+                                <p className="text-xs text-gray-500">{purchase.date} • {purchase.invoice}</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{purchase.amount}</span>
+                                <Button variant="ghost" size="sm">Receipt</Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notification Preferences</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-rose-600" />
+                          Theme Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Update Alerts</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when theme updates are available</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>New Theme Releases</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Get notified about new themes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Sale & Discount Alerts</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify about special offers</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>License Expiration</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Remind before licenses expire</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Star className="w-5 h-5 text-amber-600" />
+                          Wishlist & Favorites
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Price Drop Alerts</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when wishlist items go on sale</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Back in Stock</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when limited themes return</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Delivery Channels</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                              <Bell className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <div>
+                              <Label>In-App Notifications</Label>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+                              <Globe className="w-4 h-4 text-green-600" />
+                            </div>
+                            <div>
+                              <Label>Email Notifications</Label>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Integrations</h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[
+                        { name: 'GitHub', description: 'Deploy themes directly', icon: Code, connected: true, color: 'gray' },
+                        { name: 'Figma', description: 'Import design files', icon: Layers, connected: true, color: 'purple' },
+                        { name: 'VS Code', description: 'Install themes in editor', icon: Code, connected: false, color: 'blue' },
+                        { name: 'Vercel', description: 'Auto-deploy previews', icon: Server, connected: true, color: 'black' },
+                        { name: 'Netlify', description: 'Deploy to Netlify', icon: Globe, connected: false, color: 'teal' },
+                        { name: 'Slack', description: 'Update notifications', icon: Bell, connected: false, color: 'purple' }
+                      ].map(integration => (
+                        <Card key={integration.name}>
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-3">
+                                <div className={`w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center`}>
+                                  <integration.icon className="w-5 h-5 text-gray-600" />
+                                </div>
+                                <div>
+                                  <h4 className="font-medium text-gray-900 dark:text-white">{integration.name}</h4>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">{integration.description}</p>
+                                </div>
+                              </div>
+                              {integration.connected ? (
+                                <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400">Connected</Badge>
+                              ) : (
+                                <Button size="sm" variant="outline">Connect</Button>
+                              )}
+                            </div>
+                            {integration.connected && (
+                              <div className="mt-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                <RefreshCw className="w-3 h-3" />
+                                Last synced 5 minutes ago
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">API Access</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <Label>API Key</Label>
+                            <Button variant="ghost" size="sm">Regenerate</Button>
+                          </div>
+                          <Input type="password" value="ts_live_••••••••••••••••" readOnly className="font-mono" />
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <Button variant="outline" className="flex items-center gap-2">
+                            <FileText className="w-4 h-4" />
+                            View Docs
+                          </Button>
+                          <Button variant="outline" className="flex items-center gap-2">
+                            <Download className="w-4 h-4" />
+                            Download SDK
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Advanced Settings</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Zap className="w-5 h-5 text-amber-600" />
+                          Performance
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Lazy Load Images</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Load thumbnails on scroll</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Prefetch Theme Data</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Load theme details in background</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Enable Analytics</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Help improve the store experience</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Security
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Verify Theme Signatures</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Check theme integrity before install</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Sandbox Preview</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Run previews in isolated environment</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-base text-red-600 dark:text-red-400 flex items-center gap-2">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <Label className="text-red-700 dark:text-red-400">Remove All Installed Themes</Label>
+                            <p className="text-sm text-red-600 dark:text-red-500">Uninstall all themes from your account</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Remove All</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <Label className="text-red-700 dark:text-red-400">Reset Store Preferences</Label>
+                            <p className="text-sm text-red-600 dark:text-red-500">Reset all settings to defaults</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>
