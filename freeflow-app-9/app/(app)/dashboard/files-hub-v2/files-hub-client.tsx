@@ -4,7 +4,10 @@ import { useState, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -57,7 +60,19 @@ import {
   Tag,
   Bell,
   HelpCircle,
-  Info
+  Info,
+  Key,
+  Shield,
+  Database,
+  Palette,
+  Webhook,
+  Mail,
+  Globe,
+  Smartphone,
+  Monitor,
+  AlertOctagon,
+  ShieldCheck,
+  Fingerprint
 } from 'lucide-react'
 
 // Types
@@ -373,6 +388,7 @@ export default function FilesHubClient() {
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<SortBy>('modified')
   const [filterType, setFilterType] = useState<FileType | 'all'>('all')
+  const [settingsTab, setSettingsTab] = useState('storage')
 
   // Stats
   const stats: StorageStats = useMemo(() => ({
@@ -876,58 +892,932 @@ export default function FilesHubClient() {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Cloud className="w-5 h-5 text-cyan-500" />
-                    Sync Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Auto-sync</div>
-                      <div className="text-sm text-gray-500">Sync files automatically</div>
-                    </div>
-                    <input type="checkbox" defaultChecked className="toggle" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Sync on Wi-Fi only</div>
-                      <div className="text-sm text-gray-500">Save mobile data</div>
-                    </div>
-                    <input type="checkbox" className="toggle" />
-                  </div>
-                </CardContent>
-              </Card>
+          <TabsContent value="settings" className="space-y-6">
+            <Tabs value={settingsTab} onValueChange={setSettingsTab}>
+              <TabsList className="grid w-full grid-cols-6 mb-6">
+                <TabsTrigger value="storage" className="gap-2">
+                  <HardDrive className="w-4 h-4" />
+                  Storage
+                </TabsTrigger>
+                <TabsTrigger value="sharing" className="gap-2">
+                  <Share2 className="w-4 h-4" />
+                  Sharing
+                </TabsTrigger>
+                <TabsTrigger value="notifications" className="gap-2">
+                  <Bell className="w-4 h-4" />
+                  Notifications
+                </TabsTrigger>
+                <TabsTrigger value="integrations" className="gap-2">
+                  <Link2 className="w-4 h-4" />
+                  Integrations
+                </TabsTrigger>
+                <TabsTrigger value="security" className="gap-2">
+                  <Shield className="w-4 h-4" />
+                  Security
+                </TabsTrigger>
+                <TabsTrigger value="advanced" className="gap-2">
+                  <Settings className="w-4 h-4" />
+                  Advanced
+                </TabsTrigger>
+              </TabsList>
 
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bell className="w-5 h-5 text-yellow-500" />
-                    Notifications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">File changes</div>
-                      <div className="text-sm text-gray-500">Notify when files change</div>
-                    </div>
-                    <input type="checkbox" defaultChecked className="toggle" />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">Share notifications</div>
-                      <div className="text-sm text-gray-500">When files are shared</div>
-                    </div>
-                    <input type="checkbox" defaultChecked className="toggle" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+              {/* Storage Settings */}
+              <TabsContent value="storage" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Cloud className="w-5 h-5 text-cyan-500" />
+                        Sync Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Auto-sync Enabled</p>
+                          <p className="text-sm text-gray-500">Sync files automatically</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Smart Sync</p>
+                          <p className="text-sm text-gray-500">Only download files when accessed</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Sync on Wi-Fi Only</p>
+                          <p className="text-sm text-gray-500">Save mobile data</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Sync Frequency</Label>
+                        <Select defaultValue="realtime">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="realtime">Real-time</SelectItem>
+                            <SelectItem value="5min">Every 5 minutes</SelectItem>
+                            <SelectItem value="15min">Every 15 minutes</SelectItem>
+                            <SelectItem value="hourly">Hourly</SelectItem>
+                            <SelectItem value="manual">Manual only</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <HardDrive className="w-5 h-5 text-cyan-500" />
+                        Storage Management
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium">Storage Used</span>
+                          <span className="text-sm text-gray-500">{formatSize(stats.usedSpace)} / {formatSize(stats.totalSpace)}</span>
+                        </div>
+                        <Progress value={(stats.usedSpace / stats.totalSpace) * 100} className="h-2" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Cache Size Limit</Label>
+                        <Select defaultValue="5gb">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1gb">1 GB</SelectItem>
+                            <SelectItem value="2gb">2 GB</SelectItem>
+                            <SelectItem value="5gb">5 GB</SelectItem>
+                            <SelectItem value="10gb">10 GB</SelectItem>
+                            <SelectItem value="unlimited">Unlimited</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Clear Local Cache
+                      </Button>
+                      <Button className="w-full bg-gradient-to-r from-cyan-500 to-blue-600">
+                        Upgrade Storage Plan
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Smartphone className="w-5 h-5 text-cyan-500" />
+                        Offline Access
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Enable Offline Access</p>
+                          <p className="text-sm text-gray-500">Access files without internet</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Auto-download Starred</p>
+                          <p className="text-sm text-gray-500">Keep starred files offline</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Auto-download Shared</p>
+                          <p className="text-sm text-gray-500">Keep shared files offline</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                        <p className="text-sm text-blue-800 dark:text-blue-200">
+                          <strong>5 files</strong> currently available offline ({formatSize(125000000)})
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Monitor className="w-5 h-5 text-cyan-500" />
+                        Connected Devices
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {[
+                        { name: 'MacBook Pro', type: 'Desktop', lastSync: '2 min ago', icon: Monitor },
+                        { name: 'iPhone 15', type: 'Mobile', lastSync: '15 min ago', icon: Smartphone },
+                        { name: 'iPad Pro', type: 'Tablet', lastSync: '1 hour ago', icon: Monitor }
+                      ].map((device, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <device.icon className="w-5 h-5 text-gray-500" />
+                            <div>
+                              <p className="font-medium text-gray-900 dark:text-white">{device.name}</p>
+                              <p className="text-xs text-gray-500">{device.type} • Last sync: {device.lastSync}</p>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="sm" className="text-red-600">Unlink</Button>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Sharing Settings */}
+              <TabsContent value="sharing" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Share2 className="w-5 h-5 text-cyan-500" />
+                        Default Share Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Default Link Access</Label>
+                        <Select defaultValue="view">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="view">View only</SelectItem>
+                            <SelectItem value="comment">Can comment</SelectItem>
+                            <SelectItem value="edit">Can edit</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Default Link Expiration</Label>
+                        <Select defaultValue="never">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1day">1 day</SelectItem>
+                            <SelectItem value="7days">7 days</SelectItem>
+                            <SelectItem value="30days">30 days</SelectItem>
+                            <SelectItem value="90days">90 days</SelectItem>
+                            <SelectItem value="never">Never</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Require Password</p>
+                          <p className="text-sm text-gray-500">Password protect shared links</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Allow Downloads</p>
+                          <p className="text-sm text-gray-500">Let viewers download files</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="w-5 h-5 text-cyan-500" />
+                        Team Sharing
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Team Folder Access</p>
+                          <p className="text-sm text-gray-500">Allow team members to view folders</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Request Access</p>
+                          <p className="text-sm text-gray-500">Allow requesting access to files</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">External Sharing</p>
+                          <p className="text-sm text-gray-500">Share with people outside team</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">External Domain Whitelist</Label>
+                        <Input placeholder="example.com, partner.org" />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm lg:col-span-2">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Link2 className="w-5 h-5 text-cyan-500" />
+                        Active Shared Links
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {mockSharedLinks.map((link) => (
+                          <div key={link.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <FileText className="w-8 h-8 text-blue-500" />
+                              <div>
+                                <h4 className="font-medium text-gray-900 dark:text-white">{link.fileName}</h4>
+                                <div className="flex items-center gap-3 text-xs text-gray-500">
+                                  <span>{link.viewCount} views</span>
+                                  <span>{link.downloadCount} downloads</span>
+                                  {link.expiresAt && <span>Expires {formatDate(link.expiresAt)}</span>}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {link.isPasswordProtected && <Lock className="w-4 h-4 text-gray-400" />}
+                              <Badge className={link.access === 'edit' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}>
+                                {link.access}
+                              </Badge>
+                              <Button variant="ghost" size="sm"><Copy className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="sm" className="text-red-600"><Trash2 className="w-4 h-4" /></Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Notifications Settings */}
+              <TabsContent value="notifications" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Mail className="w-5 h-5 text-cyan-500" />
+                        Email Notifications
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">File Changes</p>
+                          <p className="text-sm text-gray-500">When files are modified</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">New Shares</p>
+                          <p className="text-sm text-gray-500">When files are shared with you</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Comments & Mentions</p>
+                          <p className="text-sm text-gray-500">When you're mentioned in comments</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Weekly Summary</p>
+                          <p className="text-sm text-gray-500">Weekly activity digest</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Email Frequency</Label>
+                        <Select defaultValue="instant">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="instant">Instant</SelectItem>
+                            <SelectItem value="hourly">Hourly digest</SelectItem>
+                            <SelectItem value="daily">Daily digest</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bell className="w-5 h-5 text-cyan-500" />
+                        Push Notifications
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Desktop Notifications</p>
+                          <p className="text-sm text-gray-500">Show desktop alerts</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Mobile Notifications</p>
+                          <p className="text-sm text-gray-500">Push to mobile devices</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Sync Complete</p>
+                          <p className="text-sm text-gray-500">Notify when sync finishes</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Storage Alerts</p>
+                          <p className="text-sm text-gray-500">When storage is nearly full</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Quiet Hours</Label>
+                        <div className="flex gap-2">
+                          <Input type="time" defaultValue="22:00" className="flex-1" />
+                          <span className="self-center">to</span>
+                          <Input type="time" defaultValue="08:00" className="flex-1" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <FolderOpen className="w-5 h-5 text-cyan-500" />
+                        Folder-Specific Alerts
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {mockFolders.slice(0, 4).map((folder) => (
+                        <div key={folder.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <FolderOpen className="w-5 h-5 text-blue-500" />
+                            <span className="font-medium text-gray-900 dark:text-white">{folder.name}</span>
+                          </div>
+                          <Select defaultValue="all">
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All changes</SelectItem>
+                              <SelectItem value="important">Important only</SelectItem>
+                              <SelectItem value="none">None</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <ExternalLink className="w-5 h-5 text-cyan-500" />
+                        Slack Integration
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="w-10 h-10 bg-[#4A154B] rounded flex items-center justify-center">
+                          <span className="text-white font-bold">#</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900 dark:text-white">Slack Workspace</p>
+                          <p className="text-sm text-green-600">Connected to #files-notifications</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-700">Active</Badge>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">File Uploads</p>
+                          <p className="text-sm text-gray-500">Notify on new uploads</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Share Activity</p>
+                          <p className="text-sm text-gray-500">Post when files are shared</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Integrations Settings */}
+              <TabsContent value="integrations" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm lg:col-span-2">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Link2 className="w-5 h-5 text-cyan-500" />
+                        Connected Apps
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {[
+                          { name: 'Google Drive', status: 'connected', icon: '📁', desc: 'Sync Google Docs' },
+                          { name: 'Microsoft 365', status: 'connected', icon: '📊', desc: 'Office integration' },
+                          { name: 'Slack', status: 'connected', icon: '#', desc: 'File sharing' },
+                          { name: 'Zoom', status: 'not_connected', icon: '📹', desc: 'Meeting files' },
+                          { name: 'Notion', status: 'not_connected', icon: '📝', desc: 'Docs sync' },
+                          { name: 'Figma', status: 'connected', icon: '🎨', desc: 'Design files' }
+                        ].map((app, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-xl">
+                                {app.icon}
+                              </div>
+                              <div>
+                                <p className="font-medium text-gray-900 dark:text-white">{app.name}</p>
+                                <p className="text-xs text-gray-500">{app.desc}</p>
+                              </div>
+                            </div>
+                            {app.status === 'connected' ? (
+                              <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                            ) : (
+                              <Button variant="outline" size="sm">Connect</Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Webhook className="w-5 h-5 text-cyan-500" />
+                        Webhooks
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium text-gray-900 dark:text-white">File Upload Webhook</span>
+                          <Badge className="bg-green-100 text-green-700">Active</Badge>
+                        </div>
+                        <code className="text-xs text-gray-500 break-all">https://api.yourapp.com/webhooks/files</code>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Webhook
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Key className="w-5 h-5 text-cyan-500" />
+                        API Access
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">API Key</Label>
+                        <div className="flex gap-2">
+                          <Input value="fh_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" type="password" />
+                          <Button variant="outline" size="icon"><Eye className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="icon"><Copy className="w-4 h-4" /></Button>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                        <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                          Keep your API key secure. Never share it in public repositories.
+                        </p>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Regenerate API Key
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Security Settings */}
+              <TabsContent value="security" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Lock className="w-5 h-5 text-cyan-500" />
+                        Access Controls
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Two-Factor Authentication</p>
+                          <p className="text-sm text-gray-500">Extra security for your account</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">SSO Enforcement</p>
+                          <p className="text-sm text-gray-500">Require SSO login</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Session Timeout</Label>
+                        <Select defaultValue="24h">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1h">1 hour</SelectItem>
+                            <SelectItem value="8h">8 hours</SelectItem>
+                            <SelectItem value="24h">24 hours</SelectItem>
+                            <SelectItem value="7d">7 days</SelectItem>
+                            <SelectItem value="30d">30 days</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Remote Wipe</p>
+                          <p className="text-sm text-gray-500">Allow wiping devices remotely</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <ShieldCheck className="w-5 h-5 text-cyan-500" />
+                        Encryption
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">End-to-End Encryption</p>
+                          <p className="text-sm text-gray-500">Encrypt files before upload</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Zero-Knowledge</p>
+                          <p className="text-sm text-gray-500">Only you can decrypt files</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-green-600" />
+                          <p className="text-sm text-green-800 dark:text-green-200">
+                            AES-256 encryption enabled for all files
+                          </p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Encryption Key</Label>
+                        <div className="flex gap-2">
+                          <Input value="•••••••••••••••••••••" readOnly className="flex-1 font-mono" />
+                          <Button variant="outline" size="icon"><Eye className="w-4 h-4" /></Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <History className="w-5 h-5 text-cyan-500" />
+                        Audit Log
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Enable Audit Logging</p>
+                          <p className="text-sm text-gray-500">Track all file activities</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Log Retention</Label>
+                        <Select defaultValue="1year">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="30days">30 days</SelectItem>
+                            <SelectItem value="90days">90 days</SelectItem>
+                            <SelectItem value="1year">1 year</SelectItem>
+                            <SelectItem value="7years">7 years</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <Download className="w-4 h-4 mr-2" />
+                        Export Audit Log
+                      </Button>
+                      <Button variant="outline" className="w-full">
+                        <Eye className="w-4 h-4 mr-2" />
+                        View Full Audit Log
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Globe className="w-5 h-5 text-cyan-500" />
+                        IP & Location Restrictions
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">IP Whitelist</p>
+                          <p className="text-sm text-gray-500">Restrict access by IP</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Allowed IP Ranges</Label>
+                        <Input placeholder="192.168.1.0/24, 10.0.0.0/8" />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Geo-Restrictions</p>
+                          <p className="text-sm text-gray-500">Limit by country</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Allowed Countries</Label>
+                        <Select defaultValue="all">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All countries</SelectItem>
+                            <SelectItem value="us-only">US only</SelectItem>
+                            <SelectItem value="eu-only">EU only</SelectItem>
+                            <SelectItem value="custom">Custom list</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Advanced Settings */}
+              <TabsContent value="advanced" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Database className="w-5 h-5 text-cyan-500" />
+                        Data Management
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Version History</Label>
+                        <Select defaultValue="30">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="7">Keep 7 versions</SelectItem>
+                            <SelectItem value="30">Keep 30 versions</SelectItem>
+                            <SelectItem value="90">Keep 90 versions</SelectItem>
+                            <SelectItem value="unlimited">Unlimited</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Deleted File Retention</Label>
+                        <Select defaultValue="30days">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="7days">7 days</SelectItem>
+                            <SelectItem value="30days">30 days</SelectItem>
+                            <SelectItem value="90days">90 days</SelectItem>
+                            <SelectItem value="1year">1 year</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <Download className="w-4 h-4 mr-2" />
+                        Export All Data
+                      </Button>
+                      <Button variant="outline" className="w-full">
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Empty Trash Now
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <RefreshCw className="w-5 h-5 text-cyan-500" />
+                        Backup Settings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Automatic Backups</p>
+                          <p className="text-sm text-gray-500">Backup files automatically</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Backup Frequency</Label>
+                        <Select defaultValue="daily">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="hourly">Hourly</SelectItem>
+                            <SelectItem value="daily">Daily</SelectItem>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                        <p className="text-sm text-green-800 dark:text-green-200">
+                          Last backup: Today at 3:00 AM
+                        </p>
+                      </div>
+                      <Button variant="outline" className="w-full">
+                        <Download className="w-4 h-4 mr-2" />
+                        Create Backup Now
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Palette className="w-5 h-5 text-cyan-500" />
+                        Appearance
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Default View</Label>
+                        <Select defaultValue="grid">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="grid">Grid view</SelectItem>
+                            <SelectItem value="list">List view</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">Default Sort</Label>
+                        <Select defaultValue="modified">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="name">Name</SelectItem>
+                            <SelectItem value="modified">Last modified</SelectItem>
+                            <SelectItem value="size">Size</SelectItem>
+                            <SelectItem value="type">Type</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Show File Extensions</p>
+                          <p className="text-sm text-gray-500">Display file extensions</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">Show Hidden Files</p>
+                          <p className="text-sm text-gray-500">Display hidden files</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm border-red-200 dark:border-red-800">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-red-600">
+                        <AlertOctagon className="w-5 h-5" />
+                        Danger Zone
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <p className="text-sm text-red-800 dark:text-red-200">
+                          These actions are irreversible. Please proceed with caution.
+                        </p>
+                      </div>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete All Files
+                      </Button>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                        <Link2 className="w-4 h-4 mr-2" />
+                        Revoke All Shared Links
+                      </Button>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Reset All Settings
+                      </Button>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                        <Lock className="w-4 h-4 mr-2" />
+                        Disable Files Hub
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
 
