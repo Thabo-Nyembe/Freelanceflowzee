@@ -86,6 +86,86 @@ interface Goal {
   unit: string
 }
 
+interface Client {
+  id: string
+  name: string
+  email: string
+  phone: string
+  address: string
+  currency: string
+  projects: number
+  totalBilled: number
+  outstandingBalance: number
+  status: 'active' | 'inactive' | 'archived'
+  createdAt: string
+  color: string
+}
+
+interface Tag {
+  id: string
+  name: string
+  color: string
+  usageCount: number
+  createdAt: string
+}
+
+interface TimeOffRequest {
+  id: string
+  userId: string
+  userName: string
+  type: 'vacation' | 'sick' | 'personal' | 'holiday' | 'other'
+  startDate: string
+  endDate: string
+  hours: number
+  status: 'pending' | 'approved' | 'rejected'
+  notes: string
+  createdAt: string
+}
+
+interface SavedReport {
+  id: string
+  name: string
+  type: 'summary' | 'detailed' | 'weekly' | 'project' | 'client' | 'team'
+  dateRange: 'week' | 'month' | 'quarter' | 'year' | 'custom'
+  filters: string[]
+  schedule?: string
+  lastRun: string
+  createdAt: string
+  createdBy: string
+}
+
+interface Automation {
+  id: string
+  name: string
+  trigger: 'daily' | 'weekly' | 'monthly' | 'on_entry'
+  actions: string[]
+  conditions: string[]
+  isActive: boolean
+  lastTriggered?: string
+  createdAt: string
+}
+
+interface Integration {
+  id: string
+  name: string
+  type: 'calendar' | 'project' | 'crm' | 'accounting' | 'communication'
+  icon: string
+  status: 'connected' | 'disconnected' | 'error'
+  lastSync: string
+  syncedItems: number
+}
+
+interface Workspace {
+  id: string
+  name: string
+  slug: string
+  members: number
+  projects: number
+  totalHours: number
+  plan: 'free' | 'starter' | 'premium' | 'enterprise'
+  createdAt: string
+}
+
 // Mock Data
 const mockProjects: Project[] = [
   { id: '1', name: 'Website Redesign', client: 'Acme Corp', color: 'indigo', status: 'active', billable: true, hourlyRate: 150, budget: 20000, spent: 12500, totalHours: 83.3 },
@@ -124,6 +204,59 @@ const mockGoals: Goal[] = [
   { id: '4', label: 'Monthly Revenue', target: 15000, current: 12500, unit: '$' }
 ]
 
+const mockClients: Client[] = [
+  { id: '1', name: 'Acme Corp', email: 'billing@acme.com', phone: '+1 555-0101', address: '123 Business Ave, NYC', currency: 'USD', projects: 3, totalBilled: 125000, outstandingBalance: 12500, status: 'active', createdAt: '2023-01-15', color: 'blue' },
+  { id: '2', name: 'TechStart', email: 'finance@techstart.io', phone: '+1 555-0102', address: '456 Innovation Blvd, SF', currency: 'USD', projects: 2, totalBilled: 85000, outstandingBalance: 28000, status: 'active', createdAt: '2023-03-22', color: 'purple' },
+  { id: '3', name: 'Global Inc', email: 'accounts@global.com', phone: '+1 555-0103', address: '789 Enterprise Dr, LA', currency: 'USD', projects: 1, totalBilled: 45000, outstandingBalance: 8000, status: 'active', createdAt: '2023-06-10', color: 'green' },
+  { id: '4', name: 'StartupXYZ', email: 'hello@startupxyz.com', phone: '+1 555-0104', address: '321 Launch St, Austin', currency: 'USD', projects: 1, totalBilled: 15000, outstandingBalance: 0, status: 'inactive', createdAt: '2022-11-05', color: 'orange' }
+]
+
+const mockTags: Tag[] = [
+  { id: '1', name: 'design', color: 'pink', usageCount: 45, createdAt: '2023-01-10' },
+  { id: '2', name: 'development', color: 'blue', usageCount: 128, createdAt: '2023-01-10' },
+  { id: '3', name: 'meeting', color: 'purple', usageCount: 67, createdAt: '2023-01-10' },
+  { id: '4', name: 'review', color: 'amber', usageCount: 34, createdAt: '2023-01-15' },
+  { id: '5', name: 'bug-fix', color: 'red', usageCount: 89, createdAt: '2023-02-01' },
+  { id: '6', name: 'research', color: 'green', usageCount: 23, createdAt: '2023-02-15' },
+  { id: '7', name: 'planning', color: 'indigo', usageCount: 56, createdAt: '2023-03-01' },
+  { id: '8', name: 'documentation', color: 'cyan', usageCount: 41, createdAt: '2023-03-10' }
+]
+
+const mockTimeOff: TimeOffRequest[] = [
+  { id: '1', userId: '1', userName: 'Sarah Chen', type: 'vacation', startDate: '2024-02-15', endDate: '2024-02-20', hours: 40, status: 'approved', notes: 'Family vacation', createdAt: '2024-01-10' },
+  { id: '2', userId: '2', userName: 'Mike Johnson', type: 'sick', startDate: '2024-01-18', endDate: '2024-01-19', hours: 16, status: 'approved', notes: 'Medical appointment', createdAt: '2024-01-17' },
+  { id: '3', userId: '3', userName: 'Emily Davis', type: 'personal', startDate: '2024-02-01', endDate: '2024-02-01', hours: 8, status: 'pending', notes: 'Personal matter', createdAt: '2024-01-16' },
+  { id: '4', userId: '4', userName: 'Alex Kim', type: 'holiday', startDate: '2024-02-19', endDate: '2024-02-19', hours: 8, status: 'approved', notes: 'Presidents Day', createdAt: '2024-01-05' }
+]
+
+const mockSavedReports: SavedReport[] = [
+  { id: '1', name: 'Weekly Team Summary', type: 'weekly', dateRange: 'week', filters: ['all-projects'], schedule: 'Monday 9am', lastRun: '2024-01-15', createdAt: '2023-06-01', createdBy: 'Admin' },
+  { id: '2', name: 'Monthly Client Billing', type: 'client', dateRange: 'month', filters: ['billable-only'], schedule: '1st of month', lastRun: '2024-01-01', createdAt: '2023-07-15', createdBy: 'Admin' },
+  { id: '3', name: 'Project Budget Analysis', type: 'project', dateRange: 'quarter', filters: ['active-projects'], lastRun: '2024-01-10', createdAt: '2023-08-20', createdBy: 'Sarah Chen' },
+  { id: '4', name: 'Team Utilization Report', type: 'team', dateRange: 'month', filters: ['all-members'], lastRun: '2024-01-12', createdAt: '2023-09-01', createdBy: 'Alex Kim' }
+]
+
+const mockAutomations: Automation[] = [
+  { id: '1', name: 'Auto-stop timer at midnight', trigger: 'daily', actions: ['Stop running timers', 'Send notification'], conditions: ['Timer running > 8 hours'], isActive: true, lastTriggered: '2024-01-15', createdAt: '2023-06-15' },
+  { id: '2', name: 'Weekly reminder to submit hours', trigger: 'weekly', actions: ['Email reminder', 'Slack notification'], conditions: ['Friday 4pm'], isActive: true, lastTriggered: '2024-01-12', createdAt: '2023-07-01' },
+  { id: '3', name: 'Auto-tag based on project', trigger: 'on_entry', actions: ['Add project default tags'], conditions: ['New time entry created'], isActive: false, createdAt: '2023-08-10' },
+  { id: '4', name: 'Monthly invoice generation', trigger: 'monthly', actions: ['Generate draft invoices', 'Notify admin'], conditions: ['Last day of month'], isActive: true, lastTriggered: '2024-01-31', createdAt: '2023-09-20' }
+]
+
+const mockIntegrations: Integration[] = [
+  { id: '1', name: 'Google Calendar', type: 'calendar', icon: 'calendar', status: 'connected', lastSync: '2024-01-16 09:00', syncedItems: 156 },
+  { id: '2', name: 'Jira', type: 'project', icon: 'folder', status: 'connected', lastSync: '2024-01-16 08:45', syncedItems: 89 },
+  { id: '3', name: 'QuickBooks', type: 'accounting', icon: 'receipt', status: 'connected', lastSync: '2024-01-15 18:00', syncedItems: 234 },
+  { id: '4', name: 'Slack', type: 'communication', icon: 'message', status: 'connected', lastSync: '2024-01-16 09:15', syncedItems: 45 },
+  { id: '5', name: 'Salesforce', type: 'crm', icon: 'users', status: 'disconnected', lastSync: '2024-01-10 12:00', syncedItems: 0 },
+  { id: '6', name: 'Asana', type: 'project', icon: 'check', status: 'error', lastSync: '2024-01-14 15:30', syncedItems: 67 }
+]
+
+const mockWorkspaces: Workspace[] = [
+  { id: '1', name: 'Main Workspace', slug: 'main', members: 12, projects: 8, totalHours: 4560, plan: 'premium', createdAt: '2023-01-01' },
+  { id: '2', name: 'Design Team', slug: 'design', members: 4, projects: 3, totalHours: 1200, plan: 'starter', createdAt: '2023-03-15' }
+]
+
 export default function TimeTrackingClient() {
   const [activeTab, setActiveTab] = useState('timer')
   const [isTimerRunning, setIsTimerRunning] = useState(false)
@@ -134,7 +267,14 @@ export default function TimeTrackingClient() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [showEntryDialog, setShowEntryDialog] = useState(false)
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false)
+  const [showClientDialog, setShowClientDialog] = useState(false)
+  const [showTagDialog, setShowTagDialog] = useState(false)
+  const [showReportDialog, setShowReportDialog] = useState(false)
   const [selectedEntry, setSelectedEntry] = useState<TimeEntry | null>(null)
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
+  const [reportsTab, setReportsTab] = useState('overview')
+  const [teamTab, setTeamTab] = useState('activity')
 
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -376,58 +516,143 @@ export default function TimeTrackingClient() {
           </TabsContent>
 
           {/* Reports Tab */}
-          <TabsContent value="reports" className="mt-6">
-            <div className="grid grid-cols-2 gap-6">
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Hours by Project</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  {mockProjects.map(project => {
-                    const percentage = (project.totalHours / 160) * 100
-                    return (
-                      <div key={project.id}>
-                        <div className="flex items-center justify-between mb-1"><div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full bg-${project.color}-500`}></div><span className="text-sm font-medium">{project.name}</span></div><span className="text-sm font-bold">{project.totalHours}h</span></div>
-                        <Progress value={percentage} className="h-2" />
-                      </div>
-                    )
-                  })}
-                </CardContent>
-              </Card>
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Goals Progress</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  {mockGoals.map(goal => {
-                    const percentage = (goal.current / goal.target) * 100
-                    return (
-                      <div key={goal.id}>
-                        <div className="flex items-center justify-between mb-1"><span className="text-sm font-medium">{goal.label}</span><div className="flex items-center gap-2"><span className="text-sm">{goal.current}{goal.unit} / {goal.target}{goal.unit}</span>{percentage >= 100 && <CheckCircle className="h-4 w-4 text-green-500" />}</div></div>
-                        <Progress value={Math.min(percentage, 100)} className="h-3" />
-                      </div>
-                    )
-                  })}
-                </CardContent>
-              </Card>
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Weekly Trend</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="flex items-end justify-between h-40 gap-2">
-                    {weekDays.map((day, idx) => {
-                      const hours = Math.random() * 8 + 2
-                      return <div key={idx} className="flex-1 flex flex-col items-center gap-2"><div className={`w-full rounded-t-lg ${day.toDateString() === new Date().toDateString() ? 'bg-amber-500' : 'bg-amber-200'}`} style={{ height: `${(hours / 10) * 100}%` }}></div><span className="text-xs text-gray-500">{day.toLocaleDateString('en-US', { weekday: 'short' })}</span></div>
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle>Billable Breakdown</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-center gap-8">
-                    <div className="text-center"><div className="text-4xl font-bold text-emerald-600">{stats.billableHours}h</div><p className="text-sm text-gray-500">Billable</p></div>
-                    <div className="h-32 w-32 rounded-full border-8 border-emerald-500 flex items-center justify-center"><span className="text-2xl font-bold">{stats.billablePercent}%</span></div>
-                    <div className="text-center"><div className="text-4xl font-bold text-gray-400">{(parseFloat(stats.totalHours) - parseFloat(stats.billableHours)).toFixed(1)}h</div><p className="text-sm text-gray-500">Non-Billable</p></div>
-                  </div>
-                </CardContent>
-              </Card>
+          <TabsContent value="reports" className="mt-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex gap-2">
+                {['overview', 'saved', 'clients', 'tags'].map(tab => (
+                  <Button key={tab} variant={reportsTab === tab ? 'default' : 'outline'} size="sm" onClick={() => setReportsTab(tab)} className={reportsTab === tab ? 'bg-amber-500 hover:bg-amber-600' : ''}>
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </Button>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setShowReportDialog(true)}><Plus className="h-4 w-4 mr-2" />New Report</Button>
+                <Button variant="outline"><Download className="h-4 w-4 mr-2" />Export</Button>
+              </div>
             </div>
+
+            {reportsTab === 'overview' && (
+              <div className="grid grid-cols-2 gap-6">
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader><CardTitle>Hours by Project</CardTitle></CardHeader>
+                  <CardContent className="space-y-4">
+                    {mockProjects.map(project => {
+                      const percentage = (project.totalHours / 160) * 100
+                      return (
+                        <div key={project.id}>
+                          <div className="flex items-center justify-between mb-1"><div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full bg-${project.color}-500`}></div><span className="text-sm font-medium">{project.name}</span></div><span className="text-sm font-bold">{project.totalHours}h</span></div>
+                          <Progress value={percentage} className="h-2" />
+                        </div>
+                      )
+                    })}
+                  </CardContent>
+                </Card>
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader><CardTitle>Goals Progress</CardTitle></CardHeader>
+                  <CardContent className="space-y-4">
+                    {mockGoals.map(goal => {
+                      const percentage = (goal.current / goal.target) * 100
+                      return (
+                        <div key={goal.id}>
+                          <div className="flex items-center justify-between mb-1"><span className="text-sm font-medium">{goal.label}</span><div className="flex items-center gap-2"><span className="text-sm">{goal.current}{goal.unit} / {goal.target}{goal.unit}</span>{percentage >= 100 && <CheckCircle className="h-4 w-4 text-green-500" />}</div></div>
+                          <Progress value={Math.min(percentage, 100)} className="h-3" />
+                        </div>
+                      )
+                    })}
+                  </CardContent>
+                </Card>
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader><CardTitle>Weekly Trend</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="flex items-end justify-between h-40 gap-2">
+                      {weekDays.map((day, idx) => {
+                        const hours = Math.random() * 8 + 2
+                        return <div key={idx} className="flex-1 flex flex-col items-center gap-2"><div className={`w-full rounded-t-lg ${day.toDateString() === new Date().toDateString() ? 'bg-amber-500' : 'bg-amber-200'}`} style={{ height: `${(hours / 10) * 100}%` }}></div><span className="text-xs text-gray-500">{day.toLocaleDateString('en-US', { weekday: 'short' })}</span></div>
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader><CardTitle>Billable Breakdown</CardTitle></CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-center gap-8">
+                      <div className="text-center"><div className="text-4xl font-bold text-emerald-600">{stats.billableHours}h</div><p className="text-sm text-gray-500">Billable</p></div>
+                      <div className="h-32 w-32 rounded-full border-8 border-emerald-500 flex items-center justify-center"><span className="text-2xl font-bold">{stats.billablePercent}%</span></div>
+                      <div className="text-center"><div className="text-4xl font-bold text-gray-400">{(parseFloat(stats.totalHours) - parseFloat(stats.billableHours)).toFixed(1)}h</div><p className="text-sm text-gray-500">Non-Billable</p></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {reportsTab === 'saved' && (
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Saved Reports</CardTitle></CardHeader>
+                <CardContent className="p-0">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Report Name</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date Range</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Schedule</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Run</th><th className="px-4 py-3"></th></tr></thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                      {mockSavedReports.map(report => (
+                        <tr key={report.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                          <td className="px-4 py-4"><div className="flex items-center gap-2"><FileText className="h-4 w-4 text-amber-500" /><span className="font-medium">{report.name}</span></div></td>
+                          <td className="px-4 py-4"><Badge variant="outline">{report.type}</Badge></td>
+                          <td className="px-4 py-4 text-gray-500">{report.dateRange}</td>
+                          <td className="px-4 py-4">{report.schedule || <span className="text-gray-400">Manual</span>}</td>
+                          <td className="px-4 py-4 text-gray-500">{report.lastRun}</td>
+                          <td className="px-4 py-4"><div className="flex gap-1"><Button variant="ghost" size="icon"><Play className="h-4 w-4" /></Button><Button variant="ghost" size="icon"><Download className="h-4 w-4" /></Button><Button variant="ghost" size="icon"><Edit2 className="h-4 w-4" /></Button></div></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </CardContent>
+              </Card>
+            )}
+
+            {reportsTab === 'clients' && (
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Client Reports</CardTitle><Button onClick={() => setShowClientDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Client</Button></CardHeader>
+                <CardContent className="p-0">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Projects</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Billed</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Outstanding</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                      {mockClients.map(client => (
+                        <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                          <td className="px-4 py-4"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-lg bg-${client.color}-100 dark:bg-${client.color}-900/30 flex items-center justify-center`}><Building2 className={`h-5 w-5 text-${client.color}-600`} /></div><div><h4 className="font-medium">{client.name}</h4><p className="text-sm text-gray-500">{client.email}</p></div></div></td>
+                          <td className="px-4 py-4 font-medium">{client.projects}</td>
+                          <td className="px-4 py-4"><span className="font-bold text-emerald-600">${client.totalBilled.toLocaleString()}</span></td>
+                          <td className="px-4 py-4">{client.outstandingBalance > 0 ? <span className="font-medium text-amber-600">${client.outstandingBalance.toLocaleString()}</span> : <span className="text-gray-400">$0</span>}</td>
+                          <td className="px-4 py-4"><Badge className={getStatusColor(client.status)}>{client.status}</Badge></td>
+                          <td className="px-4 py-4"><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </CardContent>
+              </Card>
+            )}
+
+            {reportsTab === 'tags' && (
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Tags Usage</CardTitle><Button onClick={() => setShowTagDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Tag</Button></CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-4 gap-4">
+                    {mockTags.map(tag => (
+                      <div key={tag.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full bg-${tag.color}-500`}></div><span className="font-medium">{tag.name}</span></div>
+                          <Button variant="ghost" size="icon" className="h-6 w-6"><Edit2 className="h-3 w-3" /></Button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-2xl font-bold">{tag.usageCount}</span>
+                          <span className="text-xs text-gray-500">entries</span>
+                        </div>
+                        <Progress value={(tag.usageCount / 150) * 100} className="h-1 mt-2" />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Projects Tab */}
@@ -456,28 +681,103 @@ export default function TimeTrackingClient() {
           </TabsContent>
 
           {/* Team Tab */}
-          <TabsContent value="team" className="mt-6">
-            <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader><CardTitle>Team Activity</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
-                {mockTeam.map(member => (
-                  <div key={member.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="relative">
-                      <Avatar className="h-12 w-12"><AvatarFallback className="bg-amber-100 text-amber-700">{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
-                      <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${member.isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2"><h4 className="font-medium">{member.name}</h4>{member.activeProject && <Badge variant="outline" className="text-xs">{member.activeProject}</Badge>}</div>
-                      <p className="text-sm text-gray-500">{member.role}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-amber-600">{member.todayHours}h today</p>
-                      <p className="text-sm text-gray-500">{member.weekHours}h this week</p>
-                    </div>
-                  </div>
+          <TabsContent value="team" className="mt-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex gap-2">
+                {['activity', 'timeoff', 'utilization'].map(tab => (
+                  <Button key={tab} variant={teamTab === tab ? 'default' : 'outline'} size="sm" onClick={() => setTeamTab(tab)} className={teamTab === tab ? 'bg-amber-500 hover:bg-amber-600' : ''}>
+                    {tab === 'timeoff' ? 'Time Off' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </Button>
                 ))}
-              </CardContent>
-            </Card>
+              </div>
+              <Button variant="outline"><Users className="h-4 w-4 mr-2" />Manage Team</Button>
+            </div>
+
+            {teamTab === 'activity' && (
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Team Activity</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  {mockTeam.map(member => (
+                    <div key={member.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="relative">
+                        <Avatar className="h-12 w-12"><AvatarFallback className="bg-amber-100 text-amber-700">{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
+                        <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${member.isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2"><h4 className="font-medium">{member.name}</h4>{member.activeProject && <Badge variant="outline" className="text-xs">{member.activeProject}</Badge>}</div>
+                        <p className="text-sm text-gray-500">{member.role}</p>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1"><span className="text-sm text-gray-500">Utilization</span><span className="text-sm font-medium">{((member.weekHours / 40) * 100).toFixed(0)}%</span></div>
+                        <Progress value={(member.weekHours / 40) * 100} className="h-2" />
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-amber-600">{member.todayHours}h today</p>
+                        <p className="text-sm text-gray-500">{member.weekHours}h this week</p>
+                      </div>
+                      <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {teamTab === 'timeoff' && (
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
+                <CardContent className="p-0">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dates</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                      {mockTimeOff.map(request => (
+                        <tr key={request.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+                          <td className="px-4 py-4"><div className="flex items-center gap-3"><Avatar className="h-8 w-8"><AvatarFallback className="bg-amber-100 text-amber-700 text-xs">{request.userName.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar><span className="font-medium">{request.userName}</span></div></td>
+                          <td className="px-4 py-4"><Badge variant="outline" className={request.type === 'vacation' ? 'bg-blue-50 text-blue-700' : request.type === 'sick' ? 'bg-red-50 text-red-700' : 'bg-gray-50'}>{request.type}</Badge></td>
+                          <td className="px-4 py-4 text-gray-500">{request.startDate} - {request.endDate}</td>
+                          <td className="px-4 py-4 font-medium">{request.hours}h</td>
+                          <td className="px-4 py-4"><Badge className={getStatusColor(request.status)}>{request.status}</Badge></td>
+                          <td className="px-4 py-4">{request.status === 'pending' && <div className="flex gap-1"><Button variant="ghost" size="icon" className="text-green-600"><Check className="h-4 w-4" /></Button><Button variant="ghost" size="icon" className="text-red-600"><X className="h-4 w-4" /></Button></div>}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </CardContent>
+              </Card>
+            )}
+
+            {teamTab === 'utilization' && (
+              <div className="grid grid-cols-2 gap-6">
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader><CardTitle>Team Utilization</CardTitle></CardHeader>
+                  <CardContent className="space-y-4">
+                    {mockTeam.map(member => {
+                      const utilization = (member.weekHours / 40) * 100
+                      return (
+                        <div key={member.id}>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2"><Avatar className="h-6 w-6"><AvatarFallback className="text-xs bg-amber-100 text-amber-700">{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar><span className="text-sm font-medium">{member.name}</span></div>
+                            <div className="flex items-center gap-2"><span className={`text-sm font-bold ${utilization >= 100 ? 'text-green-600' : utilization >= 80 ? 'text-amber-600' : 'text-red-600'}`}>{utilization.toFixed(0)}%</span>{utilization >= 100 && <CheckCircle className="h-4 w-4 text-green-500" />}</div>
+                          </div>
+                          <Progress value={Math.min(utilization, 100)} className="h-2" />
+                        </div>
+                      )
+                    })}
+                  </CardContent>
+                </Card>
+                <Card className="border-gray-200 dark:border-gray-700">
+                  <CardHeader><CardTitle>Team Summary</CardTitle></CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-amber-600">{mockTeam.length}</p><p className="text-sm text-gray-500">Team Members</p></div>
+                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-green-600">{mockTeam.filter(m => m.isOnline).length}</p><p className="text-sm text-gray-500">Currently Online</p></div>
+                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-blue-600">{mockTeam.reduce((sum, m) => sum + m.weekHours, 0)}h</p><p className="text-sm text-gray-500">Total Week Hours</p></div>
+                      <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-purple-600">{((mockTeam.reduce((sum, m) => sum + m.weekHours, 0) / (mockTeam.length * 40)) * 100).toFixed(0)}%</p><p className="text-sm text-gray-500">Avg Utilization</p></div>
+                    </div>
+                    <div><h4 className="font-medium mb-2">Time Off This Week</h4><div className="flex items-center gap-2">{mockTimeOff.filter(t => t.status === 'approved').length > 0 ? mockTimeOff.filter(t => t.status === 'approved').map(t => <Badge key={t.id} variant="outline">{t.userName.split(' ')[0]}: {t.type}</Badge>) : <span className="text-gray-500">No time off scheduled</span>}</div></div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </TabsContent>
 
           {/* Invoices Tab */}
@@ -507,23 +807,158 @@ export default function TimeTrackingClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-2 gap-6">
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle className="flex items-center gap-2"><Settings className="h-5 w-5" />General</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Default Billable</p><p className="text-sm text-gray-500">New entries are billable by default</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Round Time Entries</p><p className="text-sm text-gray-500">Round to nearest interval</p></div><Select defaultValue="none"><SelectTrigger className="w-32"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">No rounding</SelectItem><SelectItem value="5">5 minutes</SelectItem><SelectItem value="15">15 minutes</SelectItem><SelectItem value="30">30 minutes</SelectItem></SelectContent></Select></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Week Starts On</p><p className="text-sm text-gray-500">First day of the week</p></div><Select defaultValue="sunday"><SelectTrigger className="w-32"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="sunday">Sunday</SelectItem><SelectItem value="monday">Monday</SelectItem></SelectContent></Select></div>
+            <div className="flex gap-6">
+              <Card className="w-64 h-fit border-gray-200 dark:border-gray-700">
+                <CardContent className="p-2">
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications' },
+                      { id: 'integrations', icon: Zap, label: 'Integrations' },
+                      { id: 'automations', icon: RefreshCw, label: 'Automations' },
+                      { id: 'permissions', icon: Shield, label: 'Permissions' },
+                      { id: 'billing', icon: Receipt, label: 'Billing' }
+                    ].map(item => (
+                      <button key={item.id} onClick={() => setSettingsTab(item.id)} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${settingsTab === item.id ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                        <item.icon className="h-4 w-4" />{item.label}
+                      </button>
+                    ))}
+                  </nav>
                 </CardContent>
               </Card>
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle className="flex items-center gap-2"><Bell className="h-5 w-5" />Reminders</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Daily Reminder</p><p className="text-sm text-gray-500">Remind to log time at 5:00 PM</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Idle Detection</p><p className="text-sm text-gray-500">Detect when you're idle</p></div><Switch /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Weekly Summary</p><p className="text-sm text-gray-500">Email summary every Monday</p></div><Switch defaultChecked /></div>
-                </CardContent>
-              </Card>
+              <div className="flex-1 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle>Time Tracking Preferences</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Default Billable</p><p className="text-sm text-gray-500">New entries are billable by default</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Round Time Entries</p><p className="text-sm text-gray-500">Round to nearest interval</p></div><Select defaultValue="none"><SelectTrigger className="w-32"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">No rounding</SelectItem><SelectItem value="5">5 minutes</SelectItem><SelectItem value="15">15 minutes</SelectItem><SelectItem value="30">30 minutes</SelectItem></SelectContent></Select></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Week Starts On</p><p className="text-sm text-gray-500">First day of the week</p></div><Select defaultValue="sunday"><SelectTrigger className="w-32"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="sunday">Sunday</SelectItem><SelectItem value="monday">Monday</SelectItem></SelectContent></Select></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Time Format</p><p className="text-sm text-gray-500">Display time format</p></div><Select defaultValue="24"><SelectTrigger className="w-32"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="12">12-hour</SelectItem><SelectItem value="24">24-hour</SelectItem></SelectContent></Select></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Date Format</p><p className="text-sm text-gray-500">Display date format</p></div><Select defaultValue="mdy"><SelectTrigger className="w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="mdy">MM/DD/YYYY</SelectItem><SelectItem value="dmy">DD/MM/YYYY</SelectItem><SelectItem value="ymd">YYYY-MM-DD</SelectItem></SelectContent></Select></div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle>Timer Behavior</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Pomodoro Mode</p><p className="text-sm text-gray-500">25 min work, 5 min break</p></div><Switch /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Stop Timer on Close</p><p className="text-sm text-gray-500">Stop when browser closes</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Keep Timer on Top</p><p className="text-sm text-gray-500">Mini timer stays visible</p></div><Switch /></div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+                {settingsTab === 'notifications' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Notification Preferences</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Daily Reminder</p><p className="text-sm text-gray-500">Remind to log time at 5:00 PM</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Idle Detection</p><p className="text-sm text-gray-500">Detect when you're idle</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Weekly Summary</p><p className="text-sm text-gray-500">Email summary every Monday</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Project Budget Alerts</p><p className="text-sm text-gray-500">Alert when budget reaches 80%</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Approval Notifications</p><p className="text-sm text-gray-500">Notify when entries are approved</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Invoice Reminders</p><p className="text-sm text-gray-500">Alert for overdue invoices</p></div><Switch defaultChecked /></div>
+                    </CardContent>
+                  </Card>
+                )}
+                {settingsTab === 'integrations' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Connected Integrations</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Add Integration</Button></CardHeader>
+                    <CardContent className="space-y-4">
+                      {mockIntegrations.map(integration => (
+                        <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.status === 'connected' ? 'bg-green-100 dark:bg-green-900/30' : integration.status === 'error' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                              {integration.type === 'calendar' && <Calendar className="h-5 w-5" />}
+                              {integration.type === 'project' && <Briefcase className="h-5 w-5" />}
+                              {integration.type === 'accounting' && <Receipt className="h-5 w-5" />}
+                              {integration.type === 'communication' && <Mail className="h-5 w-5" />}
+                              {integration.type === 'crm' && <Users className="h-5 w-5" />}
+                            </div>
+                            <div>
+                              <h4 className="font-medium">{integration.name}</h4>
+                              <p className="text-sm text-gray-500">Last sync: {integration.lastSync} • {integration.syncedItems} items</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <Badge className={getStatusColor(integration.status)}>{integration.status}</Badge>
+                            <Button variant="ghost" size="sm"><RefreshCw className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" className="text-red-500"><X className="h-4 w-4" /></Button>
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+                {settingsTab === 'automations' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Automation Rules</CardTitle><Button><Plus className="h-4 w-4 mr-2" />New Automation</Button></CardHeader>
+                    <CardContent className="space-y-4">
+                      {mockAutomations.map(automation => (
+                        <div key={automation.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <Switch checked={automation.isActive} />
+                            <div>
+                              <h4 className="font-medium">{automation.name}</h4>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="outline" className="text-xs">{automation.trigger}</Badge>
+                                {automation.actions.map((action, i) => <Badge key={i} variant="outline" className="text-xs bg-amber-50 dark:bg-amber-900/20">{action}</Badge>)}
+                              </div>
+                              {automation.lastTriggered && <p className="text-xs text-gray-500 mt-1">Last triggered: {automation.lastTriggered}</p>}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="icon"><Edit2 className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="text-red-500"><Trash2 className="h-4 w-4" /></Button>
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+                {settingsTab === 'permissions' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Permission Settings</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Members Can Create Projects</p><p className="text-sm text-gray-500">Allow team members to create new projects</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Members Can See Others' Time</p><p className="text-sm text-gray-500">View team member time entries</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Require Approval</p><p className="text-sm text-gray-500">Time entries require manager approval</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Lock Approved Entries</p><p className="text-sm text-gray-500">Prevent edits to approved entries</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Members Can Create Clients</p><p className="text-sm text-gray-500">Allow creating new clients</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Members Can View Rates</p><p className="text-sm text-gray-500">See billable rates and amounts</p></div><Switch /></div>
+                    </CardContent>
+                  </Card>
+                )}
+                {settingsTab === 'billing' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle>Current Plan</CardTitle></CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-700">
+                          <div>
+                            <div className="flex items-center gap-2"><h3 className="text-xl font-bold">Premium Plan</h3><Badge className="bg-amber-500">Current</Badge></div>
+                            <p className="text-gray-600 dark:text-gray-400 mt-1">Unlimited users • Unlimited projects • All integrations</p>
+                          </div>
+                          <div className="text-right"><p className="text-3xl font-bold">$15<span className="text-lg text-gray-500">/user/mo</span></p><Button variant="outline" className="mt-2">Change Plan</Button></div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle>Billing Information</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><Label>Company Name</Label><Input defaultValue="Acme Inc" className="mt-1" /></div>
+                          <div><Label>Billing Email</Label><Input defaultValue="billing@acme.com" className="mt-1" /></div>
+                          <div><Label>Address</Label><Input defaultValue="123 Business Ave" className="mt-1" /></div>
+                          <div><Label>City, State ZIP</Label><Input defaultValue="New York, NY 10001" className="mt-1" /></div>
+                        </div>
+                        <Button>Update Billing Info</Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
@@ -552,6 +987,64 @@ export default function TimeTrackingClient() {
               <div><Label>Due Date</Label><Input type="date" className="mt-1" /></div>
             </div>
             <DialogFooter><Button variant="outline" onClick={() => setShowInvoiceDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600">Generate Invoice</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Client Dialog */}
+        <Dialog open={showClientDialog} onOpenChange={setShowClientDialog}>
+          <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Add New Client</DialogTitle><DialogDescription>Create a new client for billing and project tracking</DialogDescription></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4"><div><Label>Client Name</Label><Input placeholder="Company name" className="mt-1" /></div><div><Label>Email</Label><Input type="email" placeholder="billing@company.com" className="mt-1" /></div></div>
+              <div className="grid grid-cols-2 gap-4"><div><Label>Phone</Label><Input placeholder="+1 555-0100" className="mt-1" /></div><div><Label>Currency</Label><Select defaultValue="USD"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="EUR">EUR</SelectItem><SelectItem value="GBP">GBP</SelectItem><SelectItem value="CAD">CAD</SelectItem></SelectContent></Select></div></div>
+              <div><Label>Address</Label><Input placeholder="123 Business Ave, City, State ZIP" className="mt-1" /></div>
+              <div><Label>Notes</Label><Input placeholder="Additional notes about this client" className="mt-1" /></div>
+              <div><Label>Default Hourly Rate</Label><Input type="number" placeholder="150" className="mt-1" /></div>
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowClientDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600">Create Client</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Tag Dialog */}
+        <Dialog open={showTagDialog} onOpenChange={setShowTagDialog}>
+          <DialogContent><DialogHeader><DialogTitle>Create New Tag</DialogTitle><DialogDescription>Add a tag to categorize time entries</DialogDescription></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Tag Name</Label><Input placeholder="e.g., development, meeting, review" className="mt-1" /></div>
+              <div><Label>Color</Label>
+                <div className="flex gap-2 mt-2">
+                  {['red', 'orange', 'amber', 'green', 'blue', 'indigo', 'purple', 'pink'].map(color => (
+                    <button key={color} className={`w-8 h-8 rounded-full bg-${color}-500 hover:ring-2 hover:ring-${color}-300 transition-all`} />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowTagDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600">Create Tag</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Report Builder Dialog */}
+        <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+          <DialogContent className="max-w-xl"><DialogHeader><DialogTitle>Create New Report</DialogTitle><DialogDescription>Build a custom report with your preferred filters</DialogDescription></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Report Name</Label><Input placeholder="My Custom Report" className="mt-1" /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Report Type</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger><SelectContent><SelectItem value="summary">Summary</SelectItem><SelectItem value="detailed">Detailed</SelectItem><SelectItem value="weekly">Weekly</SelectItem><SelectItem value="project">By Project</SelectItem><SelectItem value="client">By Client</SelectItem><SelectItem value="team">Team</SelectItem></SelectContent></Select></div>
+                <div><Label>Date Range</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select range" /></SelectTrigger><SelectContent><SelectItem value="week">This Week</SelectItem><SelectItem value="month">This Month</SelectItem><SelectItem value="quarter">This Quarter</SelectItem><SelectItem value="year">This Year</SelectItem><SelectItem value="custom">Custom Range</SelectItem></SelectContent></Select></div>
+              </div>
+              <div><Label>Filters</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <Badge variant="outline" className="cursor-pointer hover:bg-amber-50">All Projects</Badge>
+                  <Badge variant="outline" className="cursor-pointer hover:bg-amber-50">Billable Only</Badge>
+                  <Badge variant="outline" className="cursor-pointer hover:bg-amber-50">All Team Members</Badge>
+                  <Badge variant="outline" className="cursor-pointer hover:bg-amber-50">Active Clients</Badge>
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div><p className="font-medium">Schedule Report</p><p className="text-sm text-gray-500">Automatically run and email this report</p></div>
+                <Switch />
+              </div>
+              <div><Label>Group By</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select grouping" /></SelectTrigger><SelectContent><SelectItem value="day">Day</SelectItem><SelectItem value="week">Week</SelectItem><SelectItem value="project">Project</SelectItem><SelectItem value="client">Client</SelectItem><SelectItem value="member">Team Member</SelectItem></SelectContent></Select></div>
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowReportDialog(false)}>Cancel</Button><Button variant="outline"><Eye className="h-4 w-4 mr-2" />Preview</Button><Button className="bg-amber-500 hover:bg-amber-600">Save Report</Button></DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
