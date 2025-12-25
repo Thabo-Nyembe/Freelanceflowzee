@@ -82,7 +82,20 @@ import {
   Package,
   CheckCircle2,
   AlertTriangle,
-  XCircle
+  XCircle,
+  Bell,
+  Key,
+  Webhook,
+  Shield,
+  AlertOctagon,
+  Link2,
+  Database,
+  Zap,
+  Code,
+  Archive,
+  Keyboard,
+  Mouse,
+  Gamepad2
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -93,6 +106,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 // Types
 type ModelStatus = 'draft' | 'published' | 'rendering' | 'archived'
@@ -342,6 +358,7 @@ export default function ThreeDModelingClient() {
   const [statusFilter, setStatusFilter] = useState<ModelStatus | 'all'>('all')
   const [showRenderDialog, setShowRenderDialog] = useState(false)
   const [viewportMode, setViewportMode] = useState<'solid' | 'wireframe' | 'material'>('solid')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats calculation
   const stats = useMemo(() => {
@@ -594,6 +611,10 @@ export default function ThreeDModelingClient() {
             <TabsTrigger value="render" className="gap-2">
               <Cpu className="w-4 h-4" />
               Render Queue
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -978,6 +999,650 @@ export default function ThreeDModelingClient() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Blender-level configuration */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="w-5 h-5" />
+                      Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Sliders, label: 'General' },
+                        { id: 'viewport', icon: Monitor, label: 'Viewport' },
+                        { id: 'rendering', icon: Cpu, label: 'Rendering' },
+                        { id: 'shortcuts', icon: Keyboard, label: 'Shortcuts' },
+                        { id: 'plugins', icon: Package, label: 'Plugins' },
+                        { id: 'advanced', icon: Lock, label: 'Advanced' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-blue-500" />
+                          General Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Unit System</Label>
+                            <Select defaultValue="metric">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="metric">Metric (m, cm, mm)</SelectItem>
+                                <SelectItem value="imperial">Imperial (ft, in)</SelectItem>
+                                <SelectItem value="blender">Blender Units</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Scale</Label>
+                            <Input type="number" defaultValue="1.0" step="0.1" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Auto-save Interval (minutes)</Label>
+                            <Input type="number" defaultValue="5" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Undo Steps</Label>
+                            <Input type="number" defaultValue="32" />
+                          </div>
+                        </div>
+                        <div className="border-t pt-4 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Auto-save</p>
+                              <p className="text-sm text-muted-foreground">Automatically save projects</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Show Splash Screen</p>
+                              <p className="text-sm text-muted-foreground">Display splash on startup</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Load Last Project</p>
+                              <p className="text-sm text-muted-foreground">Open last project on start</p>
+                            </div>
+                            <Switch />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Grid3X3 className="w-5 h-5 text-purple-500" />
+                          Grid Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Grid Size</Label>
+                            <Input type="number" defaultValue="10" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Subdivisions</Label>
+                            <Input type="number" defaultValue="10" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Show Grid</p>
+                            <p className="text-sm text-muted-foreground">Display grid in viewport</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Snap to Grid</p>
+                            <p className="text-sm text-muted-foreground">Snap objects to grid points</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'viewport' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Monitor className="w-5 h-5 text-green-500" />
+                          Display Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default View Mode</Label>
+                            <Select defaultValue="solid">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="wireframe">Wireframe</SelectItem>
+                                <SelectItem value="solid">Solid</SelectItem>
+                                <SelectItem value="material">Material</SelectItem>
+                                <SelectItem value="rendered">Rendered</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Background Color</Label>
+                            <div className="flex gap-2">
+                              <Input defaultValue="#1a1a1a" className="flex-1" />
+                              <div className="w-10 h-10 rounded-lg bg-gray-800 border" />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="border-t pt-4 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Show Floor Grid</p>
+                              <p className="text-sm text-muted-foreground">Display ground plane grid</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Show Axis Gizmo</p>
+                              <p className="text-sm text-muted-foreground">Display XYZ orientation</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Backface Culling</p>
+                              <p className="text-sm text-muted-foreground">Hide faces facing away</p>
+                            </div>
+                            <Switch />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Camera className="w-5 h-5 text-blue-500" />
+                          Camera Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Field of View</Label>
+                            <Input type="number" defaultValue="50" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Clip Distance (Near)</Label>
+                            <Input type="number" defaultValue="0.1" step="0.01" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Lock Camera to View</p>
+                            <p className="text-sm text-muted-foreground">Sync camera with viewport</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Auto Focus</p>
+                            <p className="text-sm text-muted-foreground">Focus on selected object</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Lightbulb className="w-5 h-5 text-yellow-500" />
+                          Lighting
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Viewport Lighting</p>
+                            <p className="text-sm text-muted-foreground">Enable default lights</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">HDRI Preview</p>
+                            <p className="text-sm text-muted-foreground">Show environment map</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Light Intensity</Label>
+                          <Slider defaultValue={[50]} max={100} step={1} className="w-full" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'rendering' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Cpu className="w-5 h-5 text-red-500" />
+                          Render Engine
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Render Engine</Label>
+                            <Select defaultValue="cycles">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="eevee">Eevee (Real-time)</SelectItem>
+                                <SelectItem value="cycles">Cycles (Path Tracing)</SelectItem>
+                                <SelectItem value="workbench">Workbench (Preview)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Device</Label>
+                            <Select defaultValue="gpu">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="cpu">CPU</SelectItem>
+                                <SelectItem value="gpu">GPU (CUDA)</SelectItem>
+                                <SelectItem value="optix">GPU (OptiX)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Samples</Label>
+                            <Input type="number" defaultValue="128" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Bounces</Label>
+                            <Input type="number" defaultValue="12" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Denoising</p>
+                            <p className="text-sm text-muted-foreground">Apply noise reduction</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Film className="w-5 h-5 text-purple-500" />
+                          Output Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Resolution X</Label>
+                            <Input type="number" defaultValue="1920" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Resolution Y</Label>
+                            <Input type="number" defaultValue="1080" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Output Format</Label>
+                            <Select defaultValue="png">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="png">PNG</SelectItem>
+                                <SelectItem value="jpg">JPEG</SelectItem>
+                                <SelectItem value="exr">OpenEXR</SelectItem>
+                                <SelectItem value="tiff">TIFF</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Frame Rate</Label>
+                            <Input type="number" defaultValue="24" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Alpha Channel</p>
+                            <p className="text-sm text-muted-foreground">Include transparency</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'shortcuts' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Keyboard className="w-5 h-5 text-blue-500" />
+                          Keyboard Shortcuts
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { action: 'Select', keys: ['Right Click'] },
+                            { action: 'Move', keys: ['G'] },
+                            { action: 'Rotate', keys: ['R'] },
+                            { action: 'Scale', keys: ['S'] },
+                            { action: 'Delete', keys: ['X'] },
+                            { action: 'Duplicate', keys: ['Shift', 'D'] },
+                            { action: 'Undo', keys: ['Ctrl', 'Z'] },
+                            { action: 'Redo', keys: ['Ctrl', 'Shift', 'Z'] },
+                            { action: 'Save', keys: ['Ctrl', 'S'] },
+                            { action: 'Render', keys: ['F12'] }
+                          ].map(shortcut => (
+                            <div key={shortcut.action} className="flex items-center justify-between p-3 border rounded-lg">
+                              <span className="font-medium">{shortcut.action}</span>
+                              <div className="flex gap-1">
+                                {shortcut.keys.map((key, i) => (
+                                  <kbd key={i} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-sm font-mono">
+                                    {key}
+                                  </kbd>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          Reset to Defaults
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mouse className="w-5 h-5 text-green-500" />
+                          Mouse & Navigation
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Navigation Style</Label>
+                          <Select defaultValue="blender">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="blender">Blender</SelectItem>
+                              <SelectItem value="maya">Maya</SelectItem>
+                              <SelectItem value="3dsmax">3ds Max</SelectItem>
+                              <SelectItem value="cinema4d">Cinema 4D</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Invert Zoom</p>
+                            <p className="text-sm text-muted-foreground">Reverse scroll wheel zoom</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Orbit Around Selection</p>
+                            <p className="text-sm text-muted-foreground">Rotate view around selected</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Zoom Speed</Label>
+                          <Slider defaultValue={[50]} max={100} step={1} className="w-full" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'plugins' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Package className="w-5 h-5 text-purple-500" />
+                          Installed Plugins
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Node Wrangler', description: 'Enhanced node workflow', enabled: true, version: '3.5.0' },
+                            { name: 'Hard Ops', description: 'Hard surface modeling', enabled: true, version: '9.8.1' },
+                            { name: 'BoxCutter', description: 'Boolean cutting tools', enabled: true, version: '7.1.8' },
+                            { name: 'Animation Nodes', description: 'Procedural animation', enabled: false, version: '2.3.0' },
+                            { name: 'Auto Rig Pro', description: 'Character rigging', enabled: false, version: '3.6.2' }
+                          ].map(plugin => (
+                            <div key={plugin.name} className="flex items-center justify-between p-4 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Zap className="w-5 h-5 text-muted-foreground" />
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-medium">{plugin.name}</p>
+                                    <Badge variant="secondary" className="text-xs">v{plugin.version}</Badge>
+                                  </div>
+                                  <p className="text-sm text-muted-foreground">{plugin.description}</p>
+                                </div>
+                              </div>
+                              <Switch checked={plugin.enabled} />
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Install Plugin
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <RefreshCw className="w-5 h-5 text-blue-500" />
+                          Updates
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Auto-update Plugins</p>
+                            <p className="text-sm text-muted-foreground">Automatically install updates</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Beta Updates</p>
+                            <p className="text-sm text-muted-foreground">Receive beta versions</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          Check for Updates
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HardDrive className="w-5 h-5 text-blue-500" />
+                          System & Memory
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Memory Limit (GB)</Label>
+                            <Input type="number" defaultValue="16" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Texture Cache (GB)</Label>
+                            <Input type="number" defaultValue="4" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">GPU Compute</p>
+                            <p className="text-sm text-muted-foreground">Use GPU for calculations</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Subdivision Limit</p>
+                            <p className="text-sm text-muted-foreground">Limit viewport subdivisions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Database className="w-5 h-5 text-green-500" />
+                          File Paths
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Temp Files Location</Label>
+                          <div className="flex gap-2">
+                            <Input defaultValue="/tmp/3d-studio" readOnly className="flex-1" />
+                            <Button variant="outline">Browse</Button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Assets Library</Label>
+                          <div className="flex gap-2">
+                            <Input defaultValue="~/Documents/3D Assets" readOnly className="flex-1" />
+                            <Button variant="outline">Browse</Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Compress Files</p>
+                            <p className="text-sm text-muted-foreground">Compress saved files</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-900 bg-white dark:bg-gray-800 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-600">Clear Cache</p>
+                            <p className="text-sm text-muted-foreground">Remove all cached data</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Clear
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-600">Reset All Preferences</p>
+                            <p className="text-sm text-muted-foreground">Restore factory defaults</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Reset
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-600">Purge Orphan Data</p>
+                            <p className="text-sm text-muted-foreground">Remove unused data blocks</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                            <Archive className="w-4 h-4 mr-2" />
+                            Purge
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
