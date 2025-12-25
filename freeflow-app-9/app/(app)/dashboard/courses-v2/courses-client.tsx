@@ -4,6 +4,20 @@ import { useState, useMemo } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Progress } from '@/components/ui/progress'
+import {
+  Settings, BookOpen, Users, BarChart3, Star, GraduationCap, PlayCircle,
+  FileText, Award, Bell, Key, Webhook, Mail, Shield, Lock, Cpu, Palette,
+  Globe, CreditCard, DollarSign, Percent, Clock, Calendar, Video, Image,
+  Upload, Download, Trash2, Copy, AlertOctagon, RefreshCw, Zap, Link2,
+  MessageSquare, CheckCircle, XCircle, Eye, Edit, Plus, Search, Filter
+} from 'lucide-react'
 
 // ============================================================================
 // UDEMY/COURSERA-LEVEL LMS - Learning Management System
@@ -504,6 +518,7 @@ export default function CoursesClient() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats
   const stats = useMemo(() => {
@@ -649,6 +664,10 @@ export default function CoursesClient() {
             </TabsTrigger>
             <TabsTrigger value="reviews" className="data-[state=active]:bg-yellow-100 dark:data-[state=active]:bg-yellow-900/30">
               ⭐ Reviews
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-gray-700">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -1027,6 +1046,744 @@ export default function CoursesClient() {
                     )}
                   </div>
                 ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Coursera/Udemy-level LMS configuration */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="w-5 h-5" />
+                      Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: BookOpen, label: 'General' },
+                        { id: 'pricing', icon: DollarSign, label: 'Pricing' },
+                        { id: 'certificates', icon: Award, label: 'Certificates' },
+                        { id: 'notifications', icon: Bell, label: 'Notifications' },
+                        { id: 'integrations', icon: Zap, label: 'Integrations' },
+                        { id: 'advanced', icon: Lock, label: 'Advanced' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+                              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <BookOpen className="w-5 h-5 text-indigo-500" />
+                          Platform Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Platform Name</Label>
+                            <Input defaultValue="FreeFlow Academy" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Support Email</Label>
+                            <Input defaultValue="learning@freeflow.io" type="email" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Language</Label>
+                            <Select defaultValue="en">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="es">Spanish</SelectItem>
+                                <SelectItem value="fr">French</SelectItem>
+                                <SelectItem value="de">German</SelectItem>
+                                <SelectItem value="pt">Portuguese</SelectItem>
+                                <SelectItem value="zh">Chinese</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Timezone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                                <SelectItem value="gmt">GMT</SelectItem>
+                                <SelectItem value="cet">Central European</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="border-t pt-4 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Allow Course Pre-orders</p>
+                              <p className="text-sm text-muted-foreground">Let students purchase courses before release</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Show Course Progress</p>
+                              <p className="text-sm text-muted-foreground">Display progress bars on course cards</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Enable Course Reviews</p>
+                              <p className="text-sm text-muted-foreground">Allow students to rate and review courses</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Video className="w-5 h-5 text-purple-500" />
+                          Content Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Video Quality</Label>
+                            <Select defaultValue="1080p">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="480p">480p</SelectItem>
+                                <SelectItem value="720p">720p HD</SelectItem>
+                                <SelectItem value="1080p">1080p Full HD</SelectItem>
+                                <SelectItem value="4k">4K Ultra HD</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Upload Size (MB)</Label>
+                            <Input type="number" defaultValue="500" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Enable Video Autoplay</p>
+                            <p className="text-sm text-muted-foreground">Auto-play next lecture when current ends</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Allow Content Download</p>
+                            <p className="text-sm text-muted-foreground">Let students download videos for offline viewing</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'pricing' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <DollarSign className="w-5 h-5 text-green-500" />
+                          Pricing Configuration
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Currency</Label>
+                            <Select defaultValue="usd">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="usd">USD ($)</SelectItem>
+                                <SelectItem value="eur">EUR (€)</SelectItem>
+                                <SelectItem value="gbp">GBP (£)</SelectItem>
+                                <SelectItem value="inr">INR (₹)</SelectItem>
+                                <SelectItem value="brl">BRL (R$)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Minimum Course Price</Label>
+                            <Input type="number" defaultValue="9.99" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Platform Commission (%)</Label>
+                            <Input type="number" defaultValue="30" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Payment Processing Fee (%)</Label>
+                            <Input type="number" defaultValue="2.9" />
+                          </div>
+                        </div>
+                        <div className="border-t pt-4 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Enable Coupons</p>
+                              <p className="text-sm text-muted-foreground">Allow instructors to create discount coupons</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Enable Bundles</p>
+                              <p className="text-sm text-muted-foreground">Allow course bundle sales at discounted prices</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <CreditCard className="w-5 h-5 text-blue-500" />
+                          Payment Gateways
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Stripe', description: 'Credit cards, Apple Pay, Google Pay', connected: true },
+                            { name: 'PayPal', description: 'PayPal balance and cards', connected: true },
+                            { name: 'Razorpay', description: 'UPI, Net Banking, Cards (India)', connected: false },
+                            { name: 'Crypto', description: 'Bitcoin, Ethereum, USDC', connected: false }
+                          ].map(gateway => (
+                            <div key={gateway.name} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <CreditCard className="w-4 h-4" />
+                                <div>
+                                  <p className="font-medium">{gateway.name}</p>
+                                  <p className="text-sm text-muted-foreground">{gateway.description}</p>
+                                </div>
+                              </div>
+                              <Badge variant={gateway.connected ? 'default' : 'secondary'}>
+                                {gateway.connected ? 'Connected' : 'Connect'}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <RefreshCw className="w-5 h-5 text-orange-500" />
+                          Refund Policy
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Refund Window (days)</Label>
+                            <Input type="number" defaultValue="30" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Completion Threshold (%)</Label>
+                            <Input type="number" defaultValue="20" />
+                            <p className="text-xs text-muted-foreground">No refund if progress exceeds this</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Auto-approve Refunds</p>
+                            <p className="text-sm text-muted-foreground">Automatically approve refunds within policy</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'certificates' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Award className="w-5 h-5 text-yellow-500" />
+                          Certificate Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Enable Certificates</p>
+                            <p className="text-sm text-muted-foreground">Issue completion certificates to students</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Require Quiz Completion</p>
+                            <p className="text-sm text-muted-foreground">Students must pass all quizzes to get certificate</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Digital Signatures</p>
+                            <p className="text-sm text-muted-foreground">Add instructor signatures to certificates</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Minimum Passing Score (%)</Label>
+                          <Input type="number" defaultValue="70" className="w-32" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <FileText className="w-5 h-5 text-purple-500" />
+                          Certificate Templates
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-3 gap-4">
+                          {['Classic', 'Modern', 'Professional', 'Minimal', 'Academic', 'Custom'].map(template => (
+                            <div key={template} className={`p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                              template === 'Modern' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                            }`}>
+                              <div className="h-20 bg-gray-100 dark:bg-gray-800 rounded mb-2 flex items-center justify-center">
+                                <Award className="w-8 h-8 text-gray-400" />
+                              </div>
+                              <p className="text-sm font-medium text-center">{template}</p>
+                            </div>
+                          ))}
+                        </div>
+                        <button className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-indigo-300 transition-colors">
+                          <Upload className="w-4 h-4 inline-block mr-2" />
+                          Upload Custom Template
+                        </button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-500" />
+                          Verification
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Public Verification Page</p>
+                            <p className="text-sm text-muted-foreground">Allow employers to verify certificates</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">LinkedIn Integration</p>
+                            <p className="text-sm text-muted-foreground">Let students add to LinkedIn profile</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">QR Code Verification</p>
+                            <p className="text-sm text-muted-foreground">Include QR code for instant verification</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <GraduationCap className="w-5 h-5 text-blue-500" />
+                          Student Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Course Enrollment</p>
+                            <p className="text-sm text-muted-foreground">Notify when enrolled in a new course</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">New Content Available</p>
+                            <p className="text-sm text-muted-foreground">Notify when instructor adds new lectures</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Quiz Reminders</p>
+                            <p className="text-sm text-muted-foreground">Remind to complete pending quizzes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Certificate Ready</p>
+                            <p className="text-sm text-muted-foreground">Notify when certificate is available</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Course Completion</p>
+                            <p className="text-sm text-muted-foreground">Celebrate course completion with email</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="w-5 h-5 text-purple-500" />
+                          Instructor Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">New Enrollment</p>
+                            <p className="text-sm text-muted-foreground">Notify when student enrolls in course</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">New Review</p>
+                            <p className="text-sm text-muted-foreground">Notify when student leaves a review</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">New Question</p>
+                            <p className="text-sm text-muted-foreground">Notify when student asks a question</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Revenue Reports</p>
+                            <p className="text-sm text-muted-foreground">Weekly/monthly revenue summaries</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MessageSquare className="w-5 h-5 text-green-500" />
+                          Email Templates
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {['Welcome Email', 'Enrollment Confirmation', 'Course Completion', 'Certificate Issued', 'Review Request', 'Refund Processed'].map(template => (
+                            <div key={template} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Mail className="w-4 h-4 text-muted-foreground" />
+                                <span>{template}</span>
+                              </div>
+                              <button className="text-indigo-600 hover:text-indigo-700 text-sm font-medium">Edit</button>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Video className="w-5 h-5 text-red-500" />
+                          Video Hosting
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Native Hosting', description: 'Host videos on FreeFlow servers', connected: true },
+                            { name: 'Vimeo', description: 'Professional video hosting', connected: true },
+                            { name: 'YouTube', description: 'Unlisted YouTube videos', connected: false },
+                            { name: 'Wistia', description: 'Business video platform', connected: false }
+                          ].map(host => (
+                            <div key={host.name} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <PlayCircle className="w-4 h-4" />
+                                <div>
+                                  <p className="font-medium">{host.name}</p>
+                                  <p className="text-sm text-muted-foreground">{host.description}</p>
+                                </div>
+                              </div>
+                              <Badge variant={host.connected ? 'default' : 'secondary'}>
+                                {host.connected ? 'Active' : 'Connect'}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <BarChart3 className="w-5 h-5 text-blue-500" />
+                          Analytics & Marketing
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Google Analytics', description: 'Track student behavior', connected: true },
+                            { name: 'Facebook Pixel', description: 'Retargeting and ads', connected: true },
+                            { name: 'Mailchimp', description: 'Email marketing automation', connected: false },
+                            { name: 'ConvertKit', description: 'Creator email marketing', connected: false },
+                            { name: 'Hotjar', description: 'Heatmaps and recordings', connected: false }
+                          ].map(tool => (
+                            <div key={tool.name} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Link2 className="w-4 h-4" />
+                                <div>
+                                  <p className="font-medium">{tool.name}</p>
+                                  <p className="text-sm text-muted-foreground">{tool.description}</p>
+                                </div>
+                              </div>
+                              <Badge variant={tool.connected ? 'default' : 'outline'}>
+                                {tool.connected ? 'Connected' : 'Connect'}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-purple-500" />
+                          Webhooks
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <p className="text-sm text-muted-foreground">Send real-time notifications to external services</p>
+                        <div className="space-y-2">
+                          <Label>Webhook URL</Label>
+                          <Input placeholder="https://your-app.com/webhooks/courses" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Events to Send</Label>
+                          <div className="flex flex-wrap gap-2">
+                            {['enrollment', 'completion', 'review', 'refund', 'certificate'].map(event => (
+                              <Badge key={event} variant="secondary" className="cursor-pointer hover:bg-indigo-100">
+                                {event}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-blue-500" />
+                          API Access
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="lms_live_••••••••••••••••••••" readOnly className="font-mono" />
+                            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <Copy className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Enable API Access</p>
+                            <p className="text-sm text-muted-foreground">Allow external applications to access data</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Rate Limiting</p>
+                            <p className="text-sm text-muted-foreground">Limit API requests per minute</p>
+                          </div>
+                          <Input type="number" defaultValue="1000" className="w-24" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Cpu className="w-5 h-5 text-green-500" />
+                          SCORM & xAPI
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">SCORM Support</p>
+                            <p className="text-sm text-muted-foreground">Import SCORM 1.2 and 2004 packages</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">xAPI (Tin Can)</p>
+                            <p className="text-sm text-muted-foreground">Track learning experiences with xAPI</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>LRS Endpoint</Label>
+                          <Input placeholder="https://your-lrs.com/xapi" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-purple-500" />
+                          Security & Privacy
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Video DRM Protection</p>
+                            <p className="text-sm text-muted-foreground">Protect videos with DRM encryption</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Watermark Videos</p>
+                            <p className="text-sm text-muted-foreground">Add student email as watermark</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">IP-based Restrictions</p>
+                            <p className="text-sm text-muted-foreground">Limit access by geographic location</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Data Retention (months)</Label>
+                          <Input type="number" defaultValue="24" className="w-32" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-600">Archive All Courses</p>
+                            <p className="text-sm text-muted-foreground">Move all courses to archive</p>
+                          </div>
+                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                            Archive
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-600">Reset All Progress</p>
+                            <p className="text-sm text-muted-foreground">Clear all student progress data</p>
+                          </div>
+                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                            <RefreshCw className="w-4 h-4" />
+                            Reset
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-600">Export All Data</p>
+                            <p className="text-sm text-muted-foreground">Download courses, students, and analytics</p>
+                          </div>
+                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                            <Download className="w-4 h-4" />
+                            Export
+                          </button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
               </div>
             </div>
           </TabsContent>
