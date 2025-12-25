@@ -74,8 +74,16 @@ import {
   PhoneCall,
   MessageCircle,
   Slack,
-  Send
+  Send,
+  Key,
+  Sliders,
+  Archive,
+  CreditCard,
+  Download
 } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CardDescription } from '@/components/ui/card'
 
 // Types
 type AlertSeverity = 'critical' | 'high' | 'medium' | 'low' | 'info'
@@ -330,6 +338,7 @@ export default function AlertsClient() {
   const [selectedSeverity, setSelectedSeverity] = useState<AlertSeverity | 'all'>('all')
   const [selectedStatus, setSelectedStatus] = useState<AlertStatus | 'all'>('all')
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null)
+  const [settingsTab, setSettingsTab] = useState('general')
   const [showCreateDialog, setShowCreateDialog] = useState(false)
 
   // Filter alerts
@@ -867,79 +876,863 @@ export default function AlertsClient() {
           </TabsContent>
 
           {/* Settings Tab */}
+          {/* Settings Tab - PagerDuty Level Incident Management */}
           <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-2 gap-6">
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle>Notification Settings</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Push Notifications</p>
-                      <p className="text-sm text-gray-500">Receive mobile push notifications</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Email Alerts</p>
-                      <p className="text-sm text-gray-500">Send critical alerts via email</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">SMS Notifications</p>
-                      <p className="text-sm text-gray-500">Receive SMS for critical incidents</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Slack Integration</p>
-                      <p className="text-sm text-gray-500">Post alerts to Slack channels</p>
-                    </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 lg:col-span-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Settings</CardTitle>
+                    <CardDescription>Configure alert management</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'escalations', label: 'Escalations', icon: ArrowUp },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'rules', label: 'Rules & Routing', icon: Target },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-red-600 text-white'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
 
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader>
-                  <CardTitle>Alert Behavior</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Auto-Acknowledge</p>
-                      <p className="text-sm text-gray-500">Auto-acknowledge after investigation</p>
+                {/* Alert Stats Sidebar */}
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Alert Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">MTTA</span>
+                        <span className="font-medium">4.2 min</span>
+                      </div>
+                      <Progress value={75} className="h-2" />
                     </div>
-                    <Switch />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Smart Grouping</p>
-                      <p className="text-sm text-gray-500">Group related alerts automatically</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">MTTR</span>
+                        <span className="font-medium">18.5 min</span>
+                      </div>
+                      <Progress value={62} className="h-2" />
                     </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Noise Reduction</p>
-                      <p className="text-sm text-gray-500">Suppress duplicate alerts</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Resolution Rate</span>
+                        <span className="font-medium">94.2%</span>
+                      </div>
+                      <Progress value={94} className="h-2" />
                     </div>
-                    <Switch defaultChecked />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Incident Creation</p>
-                      <p className="text-sm text-gray-500">Auto-create incidents for critical alerts</p>
+                    <div className="pt-4 border-t space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Active Alerts</span>
+                        <span className="font-medium text-red-600">12</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">This Week</span>
+                        <span className="font-medium">156</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Noise Reduction</span>
+                        <span className="font-medium text-emerald-600">67%</span>
+                      </div>
                     </div>
-                    <Switch defaultChecked />
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 lg:col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>General Settings</CardTitle>
+                        <CardDescription>Basic alert configuration</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Alert Priority</Label>
+                            <Select defaultValue="high">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="critical">Critical</SelectItem>
+                                <SelectItem value="high">High</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="low">Low</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Timezone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                                <SelectItem value="cet">Central European</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between py-4 border-t">
+                          <div>
+                            <Label>Auto-Acknowledge</Label>
+                            <p className="text-sm text-gray-500">Auto-acknowledge after investigation starts</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Smart Grouping</Label>
+                            <p className="text-sm text-gray-500">Group related alerts automatically</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Noise Reduction</Label>
+                            <p className="text-sm text-gray-500">Suppress duplicate alerts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Incident Creation</CardTitle>
+                        <CardDescription>Configure automatic incident creation</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Auto-Create Incidents</Label>
+                            <p className="text-sm text-gray-500">Automatically create incidents for critical alerts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Incident Threshold</Label>
+                            <Select defaultValue="critical">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="critical">Critical Only</SelectItem>
+                                <SelectItem value="high">High and Above</SelectItem>
+                                <SelectItem value="medium">Medium and Above</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Merge Window</Label>
+                            <Select defaultValue="15">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="5">5 minutes</SelectItem>
+                                <SelectItem value="15">15 minutes</SelectItem>
+                                <SelectItem value="30">30 minutes</SelectItem>
+                                <SelectItem value="60">1 hour</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Include Runbook Links</Label>
+                            <p className="text-sm text-gray-500">Attach relevant runbooks to incidents</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notification Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Notification Channels</CardTitle>
+                        <CardDescription>Configure how alerts are delivered</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Push Notifications', icon: Smartphone, config: 'Mobile app', enabled: true },
+                          { name: 'Email', icon: Mail, config: 'team@company.com', enabled: true },
+                          { name: 'SMS', icon: MessageSquare, config: '+1 (555) 123-4567', enabled: true },
+                          { name: 'Phone Call', icon: PhoneCall, config: 'Critical only', enabled: false },
+                          { name: 'Slack', icon: Slack, config: '#alerts-production', enabled: true },
+                          { name: 'Microsoft Teams', icon: MessageCircle, config: 'DevOps Team', enabled: false }
+                        ].map((channel, idx) => (
+                          <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg ${channel.enabled ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                                <channel.icon className={`h-4 w-4 ${channel.enabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`} />
+                              </div>
+                              <div>
+                                <p className="font-medium">{channel.name}</p>
+                                <p className="text-sm text-gray-500">{channel.config}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Button variant="ghost" size="sm">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Switch defaultChecked={channel.enabled} />
+                            </div>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full mt-4">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Notification Channel
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Notification Preferences</CardTitle>
+                        <CardDescription>Configure notification behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Notification Urgency</Label>
+                            <Select defaultValue="high">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="critical">Critical Only</SelectItem>
+                                <SelectItem value="high">High and Above</SelectItem>
+                                <SelectItem value="all">All Alerts</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Repeat Interval</Label>
+                            <Select defaultValue="5">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0">Don't repeat</SelectItem>
+                                <SelectItem value="5">Every 5 min</SelectItem>
+                                <SelectItem value="15">Every 15 min</SelectItem>
+                                <SelectItem value="30">Every 30 min</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Sound Notifications</Label>
+                            <p className="text-sm text-gray-500">Play sound for new alerts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Rich Notifications</Label>
+                            <p className="text-sm text-gray-500">Include charts and context in notifications</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Quiet Hours</CardTitle>
+                        <CardDescription>Suppress non-critical notifications during off hours</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Enable Quiet Hours</Label>
+                            <p className="text-sm text-gray-500">Reduce notifications during specified hours</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Start Time</Label>
+                            <Input type="time" defaultValue="22:00" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>End Time</Label>
+                            <Input type="time" defaultValue="08:00" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Allow Critical Alerts</Label>
+                            <p className="text-sm text-gray-500">Critical alerts bypass quiet hours</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Escalation Settings */}
+                {settingsTab === 'escalations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Escalation Policies</CardTitle>
+                        <CardDescription>Configure multi-tier alert escalation</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { tier: 'Tier 1', team: 'On-call Engineer', delay: 'Immediate', channels: ['Push', 'Slack'] },
+                          { tier: 'Tier 2', team: 'Senior Engineer', delay: '15 min', channels: ['Push', 'SMS'] },
+                          { tier: 'Tier 3', team: 'Team Lead', delay: '30 min', channels: ['Phone', 'SMS'] },
+                          { tier: 'Tier 4', team: 'Engineering Manager', delay: '45 min', channels: ['Phone'] }
+                        ].map((policy, idx) => (
+                          <div key={idx} className="flex items-center justify-between py-3 px-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium">{policy.tier}: {policy.team}</p>
+                              <p className="text-sm text-gray-500">
+                                After {policy.delay} → {policy.channels.join(', ')}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button variant="ghost" size="sm">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" className="text-red-600">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Escalation Tier
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>On-Call Schedules</CardTitle>
+                        <CardDescription>Configure on-call rotation</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Primary On-Call', current: 'John Smith', next: 'Jane Doe', rotation: 'Weekly' },
+                          { name: 'Secondary On-Call', current: 'Bob Wilson', next: 'Alice Chen', rotation: 'Weekly' },
+                          { name: 'Weekend On-Call', current: 'Mike Brown', next: 'Sarah Lee', rotation: 'Bi-weekly' }
+                        ].map((schedule, idx) => (
+                          <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                            <div>
+                              <p className="font-medium">{schedule.name}</p>
+                              <p className="text-sm text-gray-500">
+                                Current: {schedule.current} • Next: {schedule.next}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Badge variant="outline">{schedule.rotation}</Badge>
+                              <Button variant="ghost" size="sm">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Schedule
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Escalation Rules</CardTitle>
+                        <CardDescription>Configure when to escalate</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Escalate After</Label>
+                            <Select defaultValue="15">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="5">5 minutes</SelectItem>
+                                <SelectItem value="15">15 minutes</SelectItem>
+                                <SelectItem value="30">30 minutes</SelectItem>
+                                <SelectItem value="60">1 hour</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Escalations</Label>
+                            <Select defaultValue="3">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="2">2 levels</SelectItem>
+                                <SelectItem value="3">3 levels</SelectItem>
+                                <SelectItem value="4">4 levels</SelectItem>
+                                <SelectItem value="5">5 levels</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Round-Robin Assignment</Label>
+                            <p className="text-sm text-gray-500">Distribute alerts evenly across team</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Acknowledge Stops Escalation</Label>
+                            <p className="text-sm text-gray-500">Stop escalating when acknowledged</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Monitoring Integrations</CardTitle>
+                        <CardDescription>Connect to monitoring tools</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Datadog', status: 'connected', lastSync: '2 min ago' },
+                          { name: 'New Relic', status: 'connected', lastSync: '5 min ago' },
+                          { name: 'Prometheus', status: 'connected', lastSync: '1 min ago' },
+                          { name: 'CloudWatch', status: 'not_connected', lastSync: null },
+                          { name: 'Splunk', status: 'not_connected', lastSync: null }
+                        ].map((integration, idx) => (
+                          <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg ${integration.status === 'connected' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                                <Activity className={`h-4 w-4 ${integration.status === 'connected' ? 'text-emerald-600' : 'text-gray-400'}`} />
+                              </div>
+                              <div>
+                                <p className="font-medium">{integration.name}</p>
+                                {integration.lastSync && (
+                                  <p className="text-sm text-gray-500">Last sync: {integration.lastSync}</p>
+                                )}
+                              </div>
+                            </div>
+                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm">
+                              {integration.status === 'connected' ? 'Configure' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Ticketing & ITSM</CardTitle>
+                        <CardDescription>Connect to ticketing systems</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Jira', status: 'connected', project: 'OPS' },
+                          { name: 'ServiceNow', status: 'not_connected', project: null },
+                          { name: 'Zendesk', status: 'not_connected', project: null },
+                          { name: 'Freshdesk', status: 'not_connected', project: null }
+                        ].map((integration, idx) => (
+                          <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg ${integration.status === 'connected' ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                                <Layers className={`h-4 w-4 ${integration.status === 'connected' ? 'text-blue-600' : 'text-gray-400'}`} />
+                              </div>
+                              <div>
+                                <p className="font-medium">{integration.name}</p>
+                                {integration.project && (
+                                  <p className="text-sm text-gray-500">Project: {integration.project}</p>
+                                )}
+                              </div>
+                            </div>
+                            <Button variant={integration.status === 'connected' ? 'outline' : 'default'} size="sm">
+                              {integration.status === 'connected' ? 'Configure' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API & Webhooks</CardTitle>
+                        <CardDescription>External integrations via API</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex items-center gap-2">
+                            <Input type="password" value="kazi-alerts-xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline" size="sm">
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <RefreshCw className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="pt-4 border-t space-y-4">
+                          {[
+                            { url: 'https://api.company.com/alerts', events: ['triggered', 'resolved'] },
+                            { url: 'https://slack-webhook.company.com', events: ['critical'] }
+                          ].map((webhook, idx) => (
+                            <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                              <div>
+                                <p className="font-mono text-sm">{webhook.url}</p>
+                                <p className="text-sm text-gray-500">Events: {webhook.events.join(', ')}</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm">
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="sm" className="text-red-600">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Webhook
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Rules & Routing */}
+                {settingsTab === 'rules' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Alert Rules</CardTitle>
+                        <CardDescription>Configure alert processing rules</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'CPU Critical', condition: 'cpu_usage > 90%', action: 'Escalate immediately', enabled: true },
+                          { name: 'Memory Warning', condition: 'memory_usage > 80%', action: 'Group for 5 min', enabled: true },
+                          { name: 'Disk Space Low', condition: 'disk_usage > 85%', action: 'Create ticket', enabled: true },
+                          { name: 'API Latency', condition: 'p99_latency > 500ms', action: 'Notify on-call', enabled: false }
+                        ].map((rule, idx) => (
+                          <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg ${rule.enabled ? 'bg-purple-100 dark:bg-purple-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
+                                <Target className={`h-4 w-4 ${rule.enabled ? 'text-purple-600' : 'text-gray-400'}`} />
+                              </div>
+                              <div>
+                                <p className="font-medium">{rule.name}</p>
+                                <p className="text-sm text-gray-500">{rule.condition} → {rule.action}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Button variant="ghost" size="sm">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Switch defaultChecked={rule.enabled} />
+                            </div>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Rule
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Alert Routing</CardTitle>
+                        <CardDescription>Route alerts to appropriate teams</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { service: 'api-gateway', team: 'Platform Team', schedule: 'Primary On-Call' },
+                          { service: 'database-*', team: 'Data Team', schedule: 'DBA On-Call' },
+                          { service: 'frontend-*', team: 'Frontend Team', schedule: 'Web On-Call' },
+                          { service: 'payment-*', team: 'Payments Team', schedule: 'Payments On-Call' }
+                        ].map((route, idx) => (
+                          <div key={idx} className="flex items-center justify-between py-3 px-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <p className="font-medium font-mono">{route.service}</p>
+                              <p className="text-sm text-gray-500">{route.team} • {route.schedule}</p>
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Routing Rule
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Suppression Rules</CardTitle>
+                        <CardDescription>Suppress alerts during maintenance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Enable Maintenance Windows</Label>
+                            <p className="text-sm text-gray-500">Suppress alerts during scheduled maintenance</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Suppress Flapping Alerts</Label>
+                            <p className="text-sm text-gray-500">Reduce noise from unstable services</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Flap Detection Window</Label>
+                            <Select defaultValue="10">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="5">5 minutes</SelectItem>
+                                <SelectItem value="10">10 minutes</SelectItem>
+                                <SelectItem value="30">30 minutes</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Flap Threshold</Label>
+                            <Select defaultValue="3">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="2">2 state changes</SelectItem>
+                                <SelectItem value="3">3 state changes</SelectItem>
+                                <SelectItem value="5">5 state changes</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data Retention</CardTitle>
+                        <CardDescription>Configure alert history retention</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Alert History</Label>
+                            <Select defaultValue="90">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="30">30 days</SelectItem>
+                                <SelectItem value="90">90 days</SelectItem>
+                                <SelectItem value="180">180 days</SelectItem>
+                                <SelectItem value="365">1 year</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Incident History</Label>
+                            <Select defaultValue="365">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="90">90 days</SelectItem>
+                                <SelectItem value="180">180 days</SelectItem>
+                                <SelectItem value="365">1 year</SelectItem>
+                                <SelectItem value="730">2 years</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Archive Resolved Alerts</Label>
+                            <p className="text-sm text-gray-500">Move old alerts to cold storage</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Export & Reporting</CardTitle>
+                        <CardDescription>Export alert data and reports</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Export Format</Label>
+                            <Select defaultValue="csv">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="csv">CSV</SelectItem>
+                                <SelectItem value="json">JSON</SelectItem>
+                                <SelectItem value="pdf">PDF Report</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Time Range</Label>
+                            <Select defaultValue="30d">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="7d">Last 7 days</SelectItem>
+                                <SelectItem value="30d">Last 30 days</SelectItem>
+                                <SelectItem value="90d">Last 90 days</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Download className="h-4 w-4 mr-2" />
+                          Export Alert Data
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Security</CardTitle>
+                        <CardDescription>Security and access settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Two-Factor for Actions</Label>
+                            <p className="text-sm text-gray-500">Require 2FA for critical actions</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Audit Logging</Label>
+                            <p className="text-sm text-gray-500">Log all alert actions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>IP Allowlist</Label>
+                            <p className="text-sm text-gray-500">Restrict API access by IP</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-red-600 flex items-center gap-2">
+                          <AlertOctagon className="h-5 w-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between py-3 px-4 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Clear All Alerts</p>
+                            <p className="text-sm text-gray-500">Delete all alert history</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                            Clear Alerts
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between py-3 px-4 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Reset All Rules</p>
+                            <p className="text-sm text-gray-500">Restore default alert rules</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                            Reset Rules
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between py-3 px-4 border border-red-200 dark:border-red-800 rounded-lg">
+                          <div>
+                            <p className="font-medium">Delete All Integrations</p>
+                            <p className="text-sm text-gray-500">Remove all connected services</p>
+                          </div>
+                          <Button variant="destructive">
+                            Delete All
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
