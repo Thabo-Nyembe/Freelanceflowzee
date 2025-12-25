@@ -59,7 +59,21 @@ import {
   Terminal,
   Lock,
   Unlock,
-  Share2
+  Share2,
+  Key,
+  Shield,
+  AlertOctagon,
+  Sliders,
+  HardDrive,
+  Archive,
+  Bell,
+  Server,
+  Cpu,
+  MemoryStick,
+  Network,
+  Download,
+  Upload,
+  Gauge
 } from 'lucide-react'
 import { useAutomation, type Automation, type AutomationType, type AutomationStatus } from '@/lib/hooks/use-automation'
 
@@ -180,6 +194,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
   const [searchQuery, setSearchQuery] = useState('')
   const [automationTypeFilter, setAutomationTypeFilter] = useState<AutomationType | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<AutomationStatus | 'all'>('all')
+  const [settingsTab, setSettingsTab] = useState('general')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
@@ -435,6 +450,10 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -856,6 +875,1015 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                   </div>
                 </CardContent>
               </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - n8n Level Configuration */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur sticky top-4">
+                  <CardContent className="p-4">
+                    <nav className="space-y-2">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'triggers', label: 'Triggers', icon: Webhook },
+                        { id: 'executions', label: 'Executions', icon: Play },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'connections', label: 'Connections', icon: Network },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+
+                    {/* Quick Stats */}
+                    <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                      <h4 className="font-semibold text-sm text-gray-600 dark:text-gray-400">System Health</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">API Quota</span>
+                          <span className="font-medium text-green-600">87%</span>
+                        </div>
+                        <Progress value={87} className="h-2" />
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">Queue Size</span>
+                          <span className="font-medium text-blue-600">23 jobs</span>
+                        </div>
+                        <Progress value={45} className="h-2" />
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">Memory</span>
+                          <span className="font-medium text-amber-600">65%</span>
+                        </div>
+                        <Progress value={65} className="h-2" />
+                      </div>
+                    </div>
+
+                    {/* Environment Info */}
+                    <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                      <h4 className="font-semibold text-sm text-gray-600 dark:text-gray-400 mb-3">Environment</h4>
+                      <div className="space-y-2 text-xs text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center justify-between">
+                          <span>Version</span>
+                          <Badge variant="outline" className="text-xs">v2.1.0</Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Node</span>
+                          <span>18.18.0</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Workers</span>
+                          <span>4 active</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Uptime</span>
+                          <span>15d 7h 23m</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="h-5 w-5 text-orange-600" />
+                          General Settings
+                        </CardTitle>
+                        <CardDescription>Configure your automation platform preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Workspace Name</Label>
+                            <Input defaultValue="Production Workspace" placeholder="Enter workspace name" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Timezone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC (Coordinated Universal Time)</SelectItem>
+                                <SelectItem value="est">EST (Eastern Standard Time)</SelectItem>
+                                <SelectItem value="pst">PST (Pacific Standard Time)</SelectItem>
+                                <SelectItem value="cet">CET (Central European Time)</SelectItem>
+                                <SelectItem value="jst">JST (Japan Standard Time)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Date Format</Label>
+                            <Select defaultValue="iso">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="iso">ISO 8601 (2024-01-28)</SelectItem>
+                                <SelectItem value="us">US Format (01/28/2024)</SelectItem>
+                                <SelectItem value="eu">EU Format (28/01/2024)</SelectItem>
+                                <SelectItem value="long">Long Format (January 28, 2024)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Language</Label>
+                            <Select defaultValue="en">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="en">English</SelectItem>
+                                <SelectItem value="es">Spanish</SelectItem>
+                                <SelectItem value="de">German</SelectItem>
+                                <SelectItem value="fr">French</SelectItem>
+                                <SelectItem value="ja">Japanese</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Auto-save Workflows</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically save changes while editing</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Show Workflow Hints</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Display helpful tips in the workflow editor</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="h-5 w-5 text-purple-600" />
+                          API Access
+                        </CardTitle>
+                        <CardDescription>Manage API keys and access tokens</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <Label className="text-base">API Key</Label>
+                              <p className="text-xs text-gray-500">Use this key for programmatic access</p>
+                            </div>
+                            <Button size="sm" variant="outline">
+                              <RefreshCw className="h-4 w-4 mr-2" />
+                              Regenerate
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="password"
+                              defaultValue="n8n_api_key_xxxxxxxxxxxxxxxxxxxxx"
+                              readOnly
+                              className="font-mono"
+                            />
+                            <Button size="sm" variant="ghost">
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <Label className="text-base">Webhook URL Base</Label>
+                              <p className="text-xs text-gray-500">Base URL for all incoming webhooks</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              defaultValue="https://automation.yourapp.com/webhook/"
+                              readOnly
+                              className="font-mono"
+                            />
+                            <Button size="sm" variant="ghost">
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Allow External Webhooks</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Accept webhook requests from external sources</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Triggers Settings */}
+                {settingsTab === 'triggers' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="h-5 w-5 text-blue-600" />
+                          Webhook Settings
+                        </CardTitle>
+                        <CardDescription>Configure incoming webhook behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Request Timeout (seconds)</Label>
+                            <Input type="number" defaultValue="30" min="5" max="300" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Payload Size (MB)</Label>
+                            <Input type="number" defaultValue="16" min="1" max="100" />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Webhook Authentication</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Require authentication for webhook endpoints</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">IP Whitelist</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Only accept requests from whitelisted IPs</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Log All Requests</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Store all incoming webhook payloads for debugging</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Calendar className="h-5 w-5 text-green-600" />
+                          Schedule Settings
+                        </CardTitle>
+                        <CardDescription>Configure scheduled trigger behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Scheduler Timezone</Label>
+                            <Select defaultValue="utc">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="local">Local Timezone</SelectItem>
+                                <SelectItem value="custom">Custom per Workflow</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Minimum Interval (minutes)</Label>
+                            <Input type="number" defaultValue="1" min="1" max="60" />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Skip Missed Executions</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Skip executions that were missed during downtime</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Catch Up Mode</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Run all missed schedules upon restart</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Activity className="h-5 w-5 text-purple-600" />
+                          Polling Triggers
+                        </CardTitle>
+                        <CardDescription>Configure polling-based triggers</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Poll Interval (seconds)</Label>
+                            <Input type="number" defaultValue="60" min="10" max="3600" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Concurrent Polls</Label>
+                            <Input type="number" defaultValue="10" min="1" max="50" />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Deduplication</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Prevent processing duplicate items</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Executions Settings */}
+                {settingsTab === 'executions' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Play className="h-5 w-5 text-green-600" />
+                          Execution Settings
+                        </CardTitle>
+                        <CardDescription>Configure workflow execution behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Timeout (minutes)</Label>
+                            <Input type="number" defaultValue="60" min="1" max="1440" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Concurrent Executions</Label>
+                            <Input type="number" defaultValue="20" min="1" max="100" />
+                          </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Retry Attempts on Failure</Label>
+                            <Select defaultValue="3">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0">No Retries</SelectItem>
+                                <SelectItem value="1">1 Retry</SelectItem>
+                                <SelectItem value="3">3 Retries</SelectItem>
+                                <SelectItem value="5">5 Retries</SelectItem>
+                                <SelectItem value="10">10 Retries</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Retry Delay Strategy</Label>
+                            <Select defaultValue="exponential">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="fixed">Fixed Delay</SelectItem>
+                                <SelectItem value="linear">Linear Backoff</SelectItem>
+                                <SelectItem value="exponential">Exponential Backoff</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Error Workflow</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Run a specific workflow when errors occur</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Continue on Error</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Continue execution even if some nodes fail</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Archive className="h-5 w-5 text-amber-600" />
+                          Execution History
+                        </CardTitle>
+                        <CardDescription>Configure execution data retention</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Execution Data Retention</Label>
+                            <Select defaultValue="30">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="7">7 Days</SelectItem>
+                                <SelectItem value="14">14 Days</SelectItem>
+                                <SelectItem value="30">30 Days</SelectItem>
+                                <SelectItem value="90">90 Days</SelectItem>
+                                <SelectItem value="365">1 Year</SelectItem>
+                                <SelectItem value="forever">Forever</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Executions to Keep</Label>
+                            <Input type="number" defaultValue="10000" min="100" max="1000000" />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Save Execution Data</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Store input/output data for each execution</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Save Successful Executions</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Keep history of successful runs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Prune Data on Success</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Delete execution data after successful completion</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Gauge className="h-5 w-5 text-blue-600" />
+                          Rate Limiting
+                        </CardTitle>
+                        <CardDescription>Configure execution rate limits</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Max Executions per Minute</Label>
+                            <Input type="number" defaultValue="100" min="1" max="10000" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Max Executions per Hour</Label>
+                            <Input type="number" defaultValue="1000" min="1" max="100000" />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Queue Excess Executions</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Queue requests when rate limit is reached instead of rejecting</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="h-5 w-5 text-amber-600" />
+                          Email Notifications
+                        </CardTitle>
+                        <CardDescription>Configure email alert settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                          <Label>Notification Email</Label>
+                          <Input type="email" defaultValue="alerts@yourcompany.com" placeholder="Enter email address" />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Workflow Failures</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Email when a workflow execution fails</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Connection Issues</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Email when app connections fail or expire</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Daily Summary</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Receive daily execution summary</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Weekly Report</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Receive weekly automation analytics report</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MessageSquare className="h-5 w-5 text-purple-600" />
+                          Slack Notifications
+                        </CardTitle>
+                        <CardDescription>Configure Slack integration for alerts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                          <Label>Slack Webhook URL</Label>
+                          <Input
+                            type="password"
+                            defaultValue="https://hooks.slack.com/services/xxx"
+                            placeholder="Enter Slack webhook URL"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Default Channel</Label>
+                          <Input defaultValue="#automation-alerts" placeholder="#channel-name" />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Send to Slack</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable Slack notifications</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Error Threshold for Alert</Label>
+                          <Select defaultValue="3">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">Every Error</SelectItem>
+                              <SelectItem value="3">After 3 Consecutive Errors</SelectItem>
+                              <SelectItem value="5">After 5 Consecutive Errors</SelectItem>
+                              <SelectItem value="10">After 10 Consecutive Errors</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="h-5 w-5 text-blue-600" />
+                          Webhook Notifications
+                        </CardTitle>
+                        <CardDescription>Send alerts to custom endpoints</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                          <Label>Notification Webhook URL</Label>
+                          <Input placeholder="https://your-endpoint.com/webhook" />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Enable Webhook Alerts</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Send execution events to webhook</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Events to Send</Label>
+                          <div className="grid grid-cols-2 gap-4 mt-2">
+                            <div className="flex items-center gap-2">
+                              <Switch defaultChecked />
+                              <Label className="font-normal">Execution Started</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Switch defaultChecked />
+                              <Label className="font-normal">Execution Completed</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Switch defaultChecked />
+                              <Label className="font-normal">Execution Failed</Label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Switch />
+                              <Label className="font-normal">Workflow Activated</Label>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Connections Settings */}
+                {settingsTab === 'connections' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Network className="h-5 w-5 text-blue-600" />
+                          Connection Management
+                        </CardTitle>
+                        <CardDescription>Configure app connection settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Auto-refresh OAuth Tokens</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically refresh expired OAuth tokens</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Test Connections on Startup</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Verify all connections when system starts</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Encrypt Credentials</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Encrypt all stored credentials at rest</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Connection Timeout (seconds)</Label>
+                          <Input type="number" defaultValue="30" min="5" max="120" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Lock className="h-5 w-5 text-green-600" />
+                          Credential Storage
+                        </CardTitle>
+                        <CardDescription>Configure how credentials are stored</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                          <Label>Encryption Key</Label>
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="password"
+                              defaultValue="••••••••••••••••••••••••"
+                              readOnly
+                            />
+                            <Button size="sm" variant="outline">
+                              <RefreshCw className="h-4 w-4 mr-2" />
+                              Rotate
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Storage Backend</Label>
+                          <Select defaultValue="database">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="database">Database (Default)</SelectItem>
+                              <SelectItem value="vault">HashiCorp Vault</SelectItem>
+                              <SelectItem value="aws">AWS Secrets Manager</SelectItem>
+                              <SelectItem value="azure">Azure Key Vault</SelectItem>
+                              <SelectItem value="gcp">GCP Secret Manager</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Audit Credential Access</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Log all credential access for security</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="h-5 w-5 text-purple-600" />
+                          External Services
+                        </CardTitle>
+                        <CardDescription>Configure external service connections</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                          <Label>HTTP Proxy (Optional)</Label>
+                          <Input placeholder="http://proxy.example.com:8080" />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>HTTPS Proxy (Optional)</Label>
+                          <Input placeholder="https://proxy.example.com:8080" />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Verify SSL Certificates</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Validate SSL certificates for all connections</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Server className="h-5 w-5 text-blue-600" />
+                          Worker Configuration
+                        </CardTitle>
+                        <CardDescription>Configure execution workers</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Number of Workers</Label>
+                            <Input type="number" defaultValue="4" min="1" max="32" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Worker Memory Limit (MB)</Label>
+                            <Input type="number" defaultValue="512" min="128" max="8192" />
+                          </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Queue Mode</Label>
+                            <Select defaultValue="redis">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="memory">In-Memory</SelectItem>
+                                <SelectItem value="redis">Redis</SelectItem>
+                                <SelectItem value="rabbitmq">RabbitMQ</SelectItem>
+                                <SelectItem value="sqs">AWS SQS</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Concurrency Mode</Label>
+                            <Select defaultValue="parallel">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="sequential">Sequential</SelectItem>
+                                <SelectItem value="parallel">Parallel</SelectItem>
+                                <SelectItem value="mixed">Mixed</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Auto-scale Workers</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically adjust worker count based on load</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Terminal className="h-5 w-5 text-green-600" />
+                          Debug Settings
+                        </CardTitle>
+                        <CardDescription>Configure debugging and logging</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                          <Label>Log Level</Label>
+                          <Select defaultValue="info">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="error">Error Only</SelectItem>
+                              <SelectItem value="warn">Warning</SelectItem>
+                              <SelectItem value="info">Info</SelectItem>
+                              <SelectItem value="debug">Debug</SelectItem>
+                              <SelectItem value="verbose">Verbose</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Debug Mode</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable detailed debug logging</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Log to File</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Write logs to local file system</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Include Stack Traces</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Include full stack traces in error logs</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="h-5 w-5 text-purple-600" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Configure security options</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Two-Factor Authentication</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Require 2FA for all users</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">IP-based Access Control</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Restrict access to specific IP ranges</p>
+                          </div>
+                          <Switch />
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label className="text-base">Audit Logging</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Log all user actions for compliance</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Session Timeout (minutes)</Label>
+                          <Input type="number" defaultValue="60" min="5" max="1440" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="h-5 w-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible and destructive actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <Label className="text-base text-red-700 dark:text-red-400">Clear Execution History</Label>
+                            <p className="text-sm text-red-600/70 dark:text-red-400/70">Delete all execution logs and history</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Clear History
+                          </Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <Label className="text-base text-red-700 dark:text-red-400">Reset All Credentials</Label>
+                            <p className="text-sm text-red-600/70 dark:text-red-400/70">Disconnect all apps and clear credentials</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30">
+                            <Lock className="h-4 w-4 mr-2" />
+                            Reset Credentials
+                          </Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <Label className="text-base text-red-700 dark:text-red-400">Delete All Workflows</Label>
+                            <p className="text-sm text-red-600/70 dark:text-red-400/70">Permanently delete all automations</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete All
+                          </Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <Label className="text-base text-red-700 dark:text-red-400">Factory Reset</Label>
+                            <p className="text-sm text-red-600/70 dark:text-red-400/70">Reset everything to default settings</p>
+                          </div>
+                          <Button variant="destructive">
+                            <AlertOctagon className="h-4 w-4 mr-2" />
+                            Factory Reset
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
