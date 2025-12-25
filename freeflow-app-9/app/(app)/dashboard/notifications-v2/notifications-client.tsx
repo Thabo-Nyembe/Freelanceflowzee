@@ -1,6 +1,3 @@
-// Notifications V2 - OneSignal Level Push Notification Platform
-// Upgraded with: Campaigns, Segments, Analytics, A/B Testing, Multi-channel
-
 'use client'
 
 import { useState, useCallback, useMemo } from 'react'
@@ -17,6 +14,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Bell,
   Send,
@@ -25,6 +23,7 @@ import {
   Filter,
   Users,
   CheckCircle,
+  CheckCircle2,
   XCircle,
   Clock,
   Mail,
@@ -33,6 +32,7 @@ import {
   MessageSquare,
   BarChart3,
   TrendingUp,
+  TrendingDown,
   Target,
   Settings,
   Zap,
@@ -53,19 +53,48 @@ import {
   ChevronRight,
   Activity,
   MousePointer,
-  Inbox
+  Inbox,
+  Webhook,
+  Bot,
+  Workflow,
+  Timer,
+  GitBranch,
+  Hash,
+  AtSign,
+  Slack,
+  BellRing,
+  BellOff,
+  Volume2,
+  VolumeX,
+  Star,
+  MoreHorizontal,
+  ExternalLink,
+  Download,
+  Upload,
+  Archive,
+  Bookmark,
+  Flag,
+  Link,
+  Image,
+  FileText,
+  Code,
+  Terminal
 } from 'lucide-react'
-import { useNotifications, type Notification, type NotificationStatus, type NotificationType, type NotificationPriority } from '@/lib/hooks/use-notifications'
 
 // ============================================================================
-// TYPES - ONESIGNAL LEVEL NOTIFICATION SYSTEM
+// TYPES - SLACK NOTIFICATIONS LEVEL
 // ============================================================================
+
+type CampaignStatus = 'draft' | 'scheduled' | 'sending' | 'sent' | 'paused' | 'failed'
+type ChannelType = 'push' | 'email' | 'sms' | 'in_app' | 'slack' | 'webhook'
+type AutomationStatus = 'active' | 'paused' | 'draft'
+type WebhookStatus = 'active' | 'inactive' | 'failed'
 
 interface Campaign {
   id: string
   name: string
-  status: 'draft' | 'scheduled' | 'sending' | 'sent' | 'paused'
-  channel: 'push' | 'email' | 'sms' | 'in_app'
+  status: CampaignStatus
+  channel: ChannelType
   segment: string
   title: string
   message: string
@@ -74,6 +103,8 @@ interface Campaign {
   stats: CampaignStats
   abTest?: ABTest
   createdAt: string
+  createdBy: string
+  priority: 'low' | 'normal' | 'high' | 'urgent'
 }
 
 interface CampaignStats {
@@ -83,13 +114,19 @@ interface CampaignStats {
   clicked: number
   converted: number
   unsubscribed: number
+  bounced: number
+  complained: number
 }
 
 interface ABTest {
   id: string
+  name: string
   variants: ABVariant[]
   winner?: string
-  status: 'running' | 'completed'
+  status: 'running' | 'completed' | 'scheduled'
+  confidenceLevel: number
+  startDate: string
+  endDate?: string
 }
 
 interface ABVariant {
@@ -108,189 +145,210 @@ interface Segment {
   filters: SegmentFilter[]
   userCount: number
   createdAt: string
+  isDefault: boolean
+  lastUpdated: string
 }
 
 interface SegmentFilter {
   field: string
-  operator: 'equals' | 'contains' | 'gt' | 'lt' | 'in'
+  operator: 'equals' | 'contains' | 'gt' | 'lt' | 'in' | 'not_in' | 'between'
   value: string | number | string[]
 }
 
 interface Template {
   id: string
   name: string
-  channel: 'push' | 'email' | 'sms' | 'in_app'
+  channel: ChannelType
   title: string
   message: string
   variables: string[]
   usageCount: number
+  category: string
+  isDefault: boolean
+}
+
+interface Automation {
+  id: string
+  name: string
+  description: string
+  status: AutomationStatus
+  trigger: AutomationTrigger
+  actions: AutomationAction[]
+  stats: AutomationStats
+  createdAt: string
+  lastTriggered?: string
+}
+
+interface AutomationTrigger {
+  type: 'event' | 'schedule' | 'segment_entry' | 'segment_exit' | 'api'
+  config: Record<string, any>
+}
+
+interface AutomationAction {
+  id: string
+  type: 'send_notification' | 'wait' | 'condition' | 'update_user' | 'webhook'
+  config: Record<string, any>
+}
+
+interface AutomationStats {
+  totalTriggered: number
+  totalCompleted: number
+  totalFailed: number
+  conversionRate: number
+}
+
+interface WebhookEndpoint {
+  id: string
+  name: string
+  url: string
+  events: string[]
+  status: WebhookStatus
+  secret: string
+  createdAt: string
+  lastDelivery?: string
+  successRate: number
 }
 
 interface NotificationPreference {
-  channel: 'push' | 'email' | 'sms' | 'in_app'
-  enabled: boolean
-  frequency: 'instant' | 'daily' | 'weekly' | 'never'
+  category: string
+  push: boolean
+  email: boolean
+  sms: boolean
+  inApp: boolean
+  frequency: 'instant' | 'hourly' | 'daily' | 'weekly'
+}
+
+interface Notification {
+  id: string
+  title: string
+  message: string
+  type: 'info' | 'success' | 'warning' | 'error' | 'system'
+  priority: 'low' | 'normal' | 'high' | 'urgent'
+  status: 'unread' | 'read' | 'dismissed' | 'archived'
+  channel: ChannelType
+  createdAt: string
+  readAt?: string
+  actionUrl?: string
+  actionLabel?: string
+  sender?: string
+  category: string
+  isStarred: boolean
 }
 
 // ============================================================================
-// MOCK DATA - ONESIGNAL LEVEL
+// MOCK DATA
 // ============================================================================
 
-const CAMPAIGNS: Campaign[] = [
-  {
-    id: 'c1', name: 'Product Launch Announcement', status: 'sent', channel: 'push', segment: 'All Users',
-    title: 'New Feature Alert!', message: 'Check out our amazing new dashboard features',
-    sentAt: '2024-01-28T10:00:00Z', createdAt: '2024-01-27T15:00:00Z',
-    stats: { sent: 15420, delivered: 14890, opened: 8234, clicked: 3456, converted: 892, unsubscribed: 12 }
-  },
-  {
-    id: 'c2', name: 'Weekly Digest', status: 'scheduled', channel: 'email', segment: 'Active Users',
-    title: 'Your Weekly Summary', message: 'Here\'s what happened this week...',
-    scheduledAt: '2024-01-29T09:00:00Z', createdAt: '2024-01-28T14:00:00Z',
-    stats: { sent: 0, delivered: 0, opened: 0, clicked: 0, converted: 0, unsubscribed: 0 }
-  },
-  {
-    id: 'c3', name: 'Re-engagement Campaign', status: 'sending', channel: 'push', segment: 'Inactive 30 Days',
-    title: 'We miss you!', message: 'Come back and see what\'s new',
-    createdAt: '2024-01-28T08:00:00Z',
-    stats: { sent: 5234, delivered: 4890, opened: 1234, clicked: 567, converted: 89, unsubscribed: 23 }
-  },
-  {
-    id: 'c4', name: 'Flash Sale Alert', status: 'draft', channel: 'sms', segment: 'Premium Users',
-    title: '50% Off Today Only!', message: 'Use code FLASH50 for 50% off',
-    createdAt: '2024-01-28T16:00:00Z',
-    stats: { sent: 0, delivered: 0, opened: 0, clicked: 0, converted: 0, unsubscribed: 0 }
-  },
+const mockNotifications: Notification[] = [
+  { id: '1', title: 'New Team Message', message: 'Sarah mentioned you in #design-team', type: 'info', priority: 'normal', status: 'unread', channel: 'slack', createdAt: '2024-01-28T14:30:00Z', sender: 'Sarah Chen', category: 'mentions', isStarred: false, actionUrl: '/messages', actionLabel: 'View Message' },
+  { id: '2', title: 'Deployment Complete', message: 'Production deployment v2.4.0 succeeded', type: 'success', priority: 'high', status: 'unread', channel: 'push', createdAt: '2024-01-28T14:15:00Z', category: 'system', isStarred: true },
+  { id: '3', title: 'Payment Received', message: 'Invoice #INV-2024-0042 paid - $2,450.00', type: 'success', priority: 'normal', status: 'read', channel: 'email', createdAt: '2024-01-28T12:00:00Z', category: 'billing', isStarred: false },
+  { id: '4', title: 'Storage Warning', message: 'You have used 85% of your storage quota', type: 'warning', priority: 'high', status: 'unread', channel: 'in_app', createdAt: '2024-01-28T10:00:00Z', category: 'system', isStarred: false, actionUrl: '/settings/storage', actionLabel: 'Upgrade Storage' },
+  { id: '5', title: 'Security Alert', message: 'New login from unknown device in New York', type: 'error', priority: 'urgent', status: 'unread', channel: 'push', createdAt: '2024-01-28T09:30:00Z', category: 'security', isStarred: true, actionUrl: '/security', actionLabel: 'Review Activity' },
+  { id: '6', title: 'Weekly Report Ready', message: 'Your team performance report is ready to view', type: 'info', priority: 'low', status: 'read', channel: 'email', createdAt: '2024-01-27T08:00:00Z', category: 'reports', isStarred: false },
+  { id: '7', title: 'Task Assigned', message: 'Mike assigned you to "Update API documentation"', type: 'info', priority: 'normal', status: 'read', channel: 'in_app', createdAt: '2024-01-26T16:00:00Z', sender: 'Mike Johnson', category: 'tasks', isStarred: false },
+  { id: '8', title: 'Comment on PR #234', message: 'Alex commented: "LGTM, ready to merge"', type: 'info', priority: 'normal', status: 'archived', channel: 'slack', createdAt: '2024-01-26T14:00:00Z', sender: 'Alex Kim', category: 'code', isStarred: false }
 ]
 
-const SEGMENTS: Segment[] = [
-  { id: 's1', name: 'All Users', description: 'All registered users', filters: [], userCount: 25430, createdAt: '2024-01-01' },
-  { id: 's2', name: 'Active Users', description: 'Users active in last 7 days', filters: [{ field: 'last_seen', operator: 'gt', value: '7d' }], userCount: 18920, createdAt: '2024-01-15' },
-  { id: 's3', name: 'Premium Users', description: 'Users with premium subscription', filters: [{ field: 'plan', operator: 'equals', value: 'premium' }], userCount: 4560, createdAt: '2024-01-10' },
-  { id: 's4', name: 'Inactive 30 Days', description: 'Users inactive for 30+ days', filters: [{ field: 'last_seen', operator: 'lt', value: '30d' }], userCount: 3210, createdAt: '2024-01-20' },
-  { id: 's5', name: 'New Users', description: 'Users registered in last 7 days', filters: [{ field: 'created_at', operator: 'gt', value: '7d' }], userCount: 1250, createdAt: '2024-01-25' },
+const mockCampaigns: Campaign[] = [
+  { id: 'c1', name: 'Product Launch Announcement', status: 'sent', channel: 'push', segment: 'All Users', title: 'New Feature Alert!', message: 'Check out our amazing new dashboard features', sentAt: '2024-01-28T10:00:00Z', createdAt: '2024-01-27T15:00:00Z', createdBy: 'admin@company.com', priority: 'high', stats: { sent: 15420, delivered: 14890, opened: 8234, clicked: 3456, converted: 892, unsubscribed: 12, bounced: 45, complained: 3 } },
+  { id: 'c2', name: 'Weekly Digest', status: 'scheduled', channel: 'email', segment: 'Active Users', title: 'Your Weekly Summary', message: 'Here\'s what happened this week...', scheduledAt: '2024-01-29T09:00:00Z', createdAt: '2024-01-28T14:00:00Z', createdBy: 'marketing@company.com', priority: 'normal', stats: { sent: 0, delivered: 0, opened: 0, clicked: 0, converted: 0, unsubscribed: 0, bounced: 0, complained: 0 } },
+  { id: 'c3', name: 'Re-engagement Campaign', status: 'sending', channel: 'push', segment: 'Inactive 30 Days', title: 'We miss you!', message: 'Come back and see what\'s new', createdAt: '2024-01-28T08:00:00Z', createdBy: 'growth@company.com', priority: 'normal', stats: { sent: 5234, delivered: 4890, opened: 1234, clicked: 567, converted: 89, unsubscribed: 23, bounced: 12, complained: 1 } },
+  { id: 'c4', name: 'Flash Sale Alert', status: 'draft', channel: 'sms', segment: 'Premium Users', title: '50% Off Today Only!', message: 'Use code FLASH50 for 50% off', createdAt: '2024-01-28T16:00:00Z', createdBy: 'sales@company.com', priority: 'urgent', stats: { sent: 0, delivered: 0, opened: 0, clicked: 0, converted: 0, unsubscribed: 0, bounced: 0, complained: 0 } },
+  { id: 'c5', name: 'Security Update Notice', status: 'sent', channel: 'email', segment: 'All Users', title: 'Important Security Update', message: 'We have updated our security protocols', sentAt: '2024-01-25T14:00:00Z', createdAt: '2024-01-25T10:00:00Z', createdBy: 'security@company.com', priority: 'high', stats: { sent: 25430, delivered: 24890, opened: 18234, clicked: 5456, converted: 0, unsubscribed: 8, bounced: 120, complained: 0 } }
 ]
 
-const TEMPLATES: Template[] = [
-  { id: 't1', name: 'Welcome Message', channel: 'push', title: 'Welcome to {{app_name}}!', message: 'Hey {{name}}, great to have you!', variables: ['app_name', 'name'], usageCount: 15420 },
-  { id: 't2', name: 'Order Confirmation', channel: 'email', title: 'Order #{{order_id}} Confirmed', message: 'Your order has been confirmed and will ship soon.', variables: ['order_id'], usageCount: 8900 },
-  { id: 't3', name: 'Reminder', channel: 'push', title: 'Don\'t forget!', message: '{{task_name}} is due {{due_date}}', variables: ['task_name', 'due_date'], usageCount: 5670 },
-  { id: 't4', name: 'Promotion', channel: 'sms', title: '{{discount}}% Off!', message: 'Use code {{code}} for {{discount}}% off. Ends {{expiry}}.', variables: ['discount', 'code', 'expiry'], usageCount: 3450 },
+const mockSegments: Segment[] = [
+  { id: 's1', name: 'All Users', description: 'All registered users', filters: [], userCount: 25430, createdAt: '2024-01-01', isDefault: true, lastUpdated: '2024-01-28' },
+  { id: 's2', name: 'Active Users', description: 'Users active in last 7 days', filters: [{ field: 'last_seen', operator: 'gt', value: '7d' }], userCount: 18920, createdAt: '2024-01-15', isDefault: false, lastUpdated: '2024-01-28' },
+  { id: 's3', name: 'Premium Users', description: 'Users with premium subscription', filters: [{ field: 'plan', operator: 'equals', value: 'premium' }], userCount: 4560, createdAt: '2024-01-10', isDefault: false, lastUpdated: '2024-01-27' },
+  { id: 's4', name: 'Inactive 30 Days', description: 'Users inactive for 30+ days', filters: [{ field: 'last_seen', operator: 'lt', value: '30d' }], userCount: 3210, createdAt: '2024-01-20', isDefault: false, lastUpdated: '2024-01-28' },
+  { id: 's5', name: 'New Users', description: 'Users registered in last 7 days', filters: [{ field: 'created_at', operator: 'gt', value: '7d' }], userCount: 1250, createdAt: '2024-01-25', isDefault: false, lastUpdated: '2024-01-28' },
+  { id: 's6', name: 'Mobile Users', description: 'Users primarily on mobile devices', filters: [{ field: 'device_type', operator: 'equals', value: 'mobile' }], userCount: 12340, createdAt: '2024-01-18', isDefault: false, lastUpdated: '2024-01-26' }
+]
+
+const mockTemplates: Template[] = [
+  { id: 't1', name: 'Welcome Message', channel: 'push', title: 'Welcome to {{app_name}}!', message: 'Hey {{name}}, great to have you!', variables: ['app_name', 'name'], usageCount: 15420, category: 'Onboarding', isDefault: true },
+  { id: 't2', name: 'Order Confirmation', channel: 'email', title: 'Order #{{order_id}} Confirmed', message: 'Your order has been confirmed and will ship soon.', variables: ['order_id'], usageCount: 8900, category: 'Transactional', isDefault: false },
+  { id: 't3', name: 'Reminder', channel: 'push', title: 'Don\'t forget!', message: '{{task_name}} is due {{due_date}}', variables: ['task_name', 'due_date'], usageCount: 5670, category: 'Reminders', isDefault: false },
+  { id: 't4', name: 'Promotion', channel: 'sms', title: '{{discount}}% Off!', message: 'Use code {{code}} for {{discount}}% off. Ends {{expiry}}.', variables: ['discount', 'code', 'expiry'], usageCount: 3450, category: 'Marketing', isDefault: false },
+  { id: 't5', name: 'Security Alert', channel: 'email', title: 'Security Alert: {{alert_type}}', message: 'We detected {{alert_type}} on your account from {{location}}.', variables: ['alert_type', 'location'], usageCount: 2340, category: 'Security', isDefault: true },
+  { id: 't6', name: 'Slack Notification', channel: 'slack', title: '{{channel}} Update', message: '{{user}} posted in #{{channel}}: {{preview}}', variables: ['channel', 'user', 'preview'], usageCount: 45000, category: 'Collaboration', isDefault: false }
+]
+
+const mockAutomations: Automation[] = [
+  { id: 'a1', name: 'Welcome Series', description: 'Send welcome emails over 7 days', status: 'active', trigger: { type: 'event', config: { event: 'user.created' } }, actions: [{ id: 'a1-1', type: 'send_notification', config: { template: 't1' } }, { id: 'a1-2', type: 'wait', config: { duration: '1d' } }, { id: 'a1-3', type: 'send_notification', config: { template: 't2' } }], stats: { totalTriggered: 5420, totalCompleted: 4890, totalFailed: 45, conversionRate: 32.5 }, createdAt: '2024-01-01', lastTriggered: '2024-01-28T14:30:00Z' },
+  { id: 'a2', name: 'Cart Abandonment', description: 'Remind users about abandoned carts', status: 'active', trigger: { type: 'event', config: { event: 'cart.abandoned' } }, actions: [{ id: 'a2-1', type: 'wait', config: { duration: '1h' } }, { id: 'a2-2', type: 'send_notification', config: { channel: 'email' } }], stats: { totalTriggered: 2340, totalCompleted: 2100, totalFailed: 12, conversionRate: 18.5 }, createdAt: '2024-01-10', lastTriggered: '2024-01-28T12:00:00Z' },
+  { id: 'a3', name: 'Re-engagement Flow', description: 'Win back inactive users', status: 'paused', trigger: { type: 'segment_entry', config: { segment: 's4' } }, actions: [{ id: 'a3-1', type: 'send_notification', config: { channel: 'push' } }], stats: { totalTriggered: 890, totalCompleted: 756, totalFailed: 23, conversionRate: 8.2 }, createdAt: '2024-01-15' },
+  { id: 'a4', name: 'Daily Digest', description: 'Send daily activity summary', status: 'active', trigger: { type: 'schedule', config: { cron: '0 9 * * *' } }, actions: [{ id: 'a4-1', type: 'send_notification', config: { template: 't6' } }], stats: { totalTriggered: 12500, totalCompleted: 12450, totalFailed: 5, conversionRate: 45.2 }, createdAt: '2024-01-05', lastTriggered: '2024-01-28T09:00:00Z' }
+]
+
+const mockWebhooks: WebhookEndpoint[] = [
+  { id: 'w1', name: 'Slack Integration', url: 'https://hooks.slack.com/services/xxx', events: ['notification.sent', 'notification.failed'], status: 'active', secret: 'whsec_xxx', createdAt: '2024-01-10', lastDelivery: '2024-01-28T14:30:00Z', successRate: 99.8 },
+  { id: 'w2', name: 'Analytics Webhook', url: 'https://analytics.example.com/webhook', events: ['campaign.completed', 'user.converted'], status: 'active', secret: 'whsec_yyy', createdAt: '2024-01-15', lastDelivery: '2024-01-28T10:00:00Z', successRate: 98.5 },
+  { id: 'w3', name: 'CRM Sync', url: 'https://crm.example.com/api/notifications', events: ['notification.opened', 'notification.clicked'], status: 'failed', secret: 'whsec_zzz', createdAt: '2024-01-20', lastDelivery: '2024-01-27T16:00:00Z', successRate: 45.2 }
+]
+
+const mockABTests: ABTest[] = [
+  { id: 'ab1', name: 'Subject Line Test', variants: [{ id: 'v1', name: 'Variant A', title: 'Don\'t miss out!', message: 'Check our latest features', percentage: 50, stats: { sent: 5000, delivered: 4890, opened: 1956, clicked: 489, converted: 98, unsubscribed: 2, bounced: 10, complained: 0 } }, { id: 'v2', name: 'Variant B', title: 'New features just for you', message: 'Check our latest features', percentage: 50, stats: { sent: 5000, delivered: 4895, opened: 2203, clicked: 551, converted: 132, unsubscribed: 1, bounced: 8, complained: 0 } }], winner: 'v2', status: 'completed', confidenceLevel: 95.2, startDate: '2024-01-20', endDate: '2024-01-25' },
+  { id: 'ab2', name: 'CTA Button Test', variants: [{ id: 'v3', name: 'Get Started', title: 'Welcome!', message: 'Click to get started', percentage: 50, stats: { sent: 2500, delivered: 2450, opened: 980, clicked: 245, converted: 49, unsubscribed: 0, bounced: 5, complained: 0 } }, { id: 'v4', name: 'Learn More', title: 'Welcome!', message: 'Click to learn more', percentage: 50, stats: { sent: 2500, delivered: 2455, opened: 982, clicked: 196, converted: 39, unsubscribed: 1, bounced: 4, complained: 0 } }], status: 'running', confidenceLevel: 78.5, startDate: '2024-01-26' }
 ]
 
 // ============================================================================
-// MAIN COMPONENT - ONESIGNAL LEVEL NOTIFICATIONS
+// MAIN COMPONENT
 // ============================================================================
 
-interface NotificationsClientProps {
-  initialNotifications: Notification[]
-}
-
-export default function NotificationsClient({ initialNotifications }: NotificationsClientProps) {
-  // State
+export default function NotificationsClient() {
   const [activeTab, setActiveTab] = useState('inbox')
-  const [statusFilter, setStatusFilter] = useState<NotificationStatus | 'all'>('all')
-  const [typeFilter, setTypeFilter] = useState<NotificationType | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [channelFilter, setChannelFilter] = useState<string>('all')
   const [showCreateCampaign, setShowCreateCampaign] = useState(false)
-  const [showCreateSegment, setShowCreateSegment] = useState(false)
+  const [showCreateAutomation, setShowCreateAutomation] = useState(false)
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
-  const [showABTest, setShowABTest] = useState(false)
-
-  // Campaign form state
-  const [campaignName, setCampaignName] = useState('')
-  const [campaignChannel, setCampaignChannel] = useState<'push' | 'email' | 'sms' | 'in_app'>('push')
-  const [campaignSegment, setCampaignSegment] = useState('')
-  const [campaignTitle, setCampaignTitle] = useState('')
-  const [campaignMessage, setCampaignMessage] = useState('')
-  const [scheduleDelivery, setScheduleDelivery] = useState(false)
-
-  // Hook for notification data
-  const { notifications, loading, error } = useNotifications({
-    status: statusFilter,
-    notificationType: typeFilter,
-    limit: 50
-  })
-
-  const displayNotifications = notifications.length > 0 ? notifications : initialNotifications
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
 
   // Filter notifications
   const filteredNotifications = useMemo(() => {
-    return displayNotifications.filter(notification => {
-      if (statusFilter !== 'all' && notification.status !== statusFilter) return false
-      if (typeFilter !== 'all' && notification.notification_type !== typeFilter) return false
+    return mockNotifications.filter(n => {
+      if (statusFilter !== 'all' && n.status !== statusFilter) return false
+      if (channelFilter !== 'all' && n.channel !== channelFilter) return false
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
-        if (!notification.title.toLowerCase().includes(query) &&
-            !notification.message.toLowerCase().includes(query)) {
-          return false
-        }
+        return n.title.toLowerCase().includes(query) || n.message.toLowerCase().includes(query)
       }
       return true
     })
-  }, [displayNotifications, statusFilter, typeFilter, searchQuery])
+  }, [statusFilter, channelFilter, searchQuery])
 
-  // Calculate comprehensive stats
+  // Calculate stats
   const stats = useMemo(() => {
-    const totalSent = CAMPAIGNS.reduce((sum, c) => sum + c.stats.sent, 0)
-    const totalDelivered = CAMPAIGNS.reduce((sum, c) => sum + c.stats.delivered, 0)
-    const totalOpened = CAMPAIGNS.reduce((sum, c) => sum + c.stats.opened, 0)
-    const totalClicked = CAMPAIGNS.reduce((sum, c) => sum + c.stats.clicked, 0)
-
+    const totalSent = mockCampaigns.reduce((sum, c) => sum + c.stats.sent, 0)
+    const totalDelivered = mockCampaigns.reduce((sum, c) => sum + c.stats.delivered, 0)
+    const totalOpened = mockCampaigns.reduce((sum, c) => sum + c.stats.opened, 0)
+    const totalClicked = mockCampaigns.reduce((sum, c) => sum + c.stats.clicked, 0)
     return {
-      totalNotifications: displayNotifications.length,
-      unread: displayNotifications.filter(n => !n.is_read).length,
+      totalNotifications: mockNotifications.length,
+      unread: mockNotifications.filter(n => n.status === 'unread').length,
+      starred: mockNotifications.filter(n => n.isStarred).length,
       totalSent,
-      totalDelivered,
       deliveryRate: totalSent > 0 ? ((totalDelivered / totalSent) * 100).toFixed(1) : '0',
       openRate: totalDelivered > 0 ? ((totalOpened / totalDelivered) * 100).toFixed(1) : '0',
       clickRate: totalOpened > 0 ? ((totalClicked / totalOpened) * 100).toFixed(1) : '0',
-      activeCampaigns: CAMPAIGNS.filter(c => c.status === 'sending' || c.status === 'scheduled').length,
-      totalSegments: SEGMENTS.length,
-      totalSubscribers: SEGMENTS.find(s => s.name === 'All Users')?.userCount || 0
+      activeAutomations: mockAutomations.filter(a => a.status === 'active').length
     }
-  }, [displayNotifications])
-
-  // Handlers
-  const handleCreateCampaign = useCallback(() => {
-    if (!campaignName.trim() || !campaignTitle.trim()) {
-      toast.error('Please fill in required fields')
-      return
-    }
-
-    toast.success('Campaign Created', {
-      description: `"${campaignName}" is ready to send`
-    })
-
-    setShowCreateCampaign(false)
-    setCampaignName('')
-    setCampaignTitle('')
-    setCampaignMessage('')
-  }, [campaignName, campaignTitle])
-
-  const handleSendCampaign = useCallback((campaign: Campaign) => {
-    toast.success('Campaign Sending', {
-      description: `"${campaign.name}" is now being delivered`
-    })
   }, [])
 
-  const handlePauseCampaign = useCallback((campaign: Campaign) => {
-    toast.success('Campaign Paused', {
-      description: `"${campaign.name}" has been paused`
-    })
-  }, [])
-
-  const handleDuplicateCampaign = useCallback((campaign: Campaign) => {
-    toast.success('Campaign Duplicated', {
-      description: `Copy of "${campaign.name}" created`
-    })
-  }, [])
-
-  const handleMarkAllRead = useCallback(() => {
-    toast.success('All Marked as Read', {
-      description: `${stats.unread} notifications marked as read`
-    })
-  }, [stats.unread])
+  const statsCards = [
+    { label: 'Total', value: stats.totalNotifications.toString(), icon: Bell, color: 'from-violet-500 to-purple-600' },
+    { label: 'Unread', value: stats.unread.toString(), icon: BellRing, color: 'from-blue-500 to-blue-600' },
+    { label: 'Starred', value: stats.starred.toString(), icon: Star, color: 'from-amber-500 to-amber-600' },
+    { label: 'Sent', value: `${(stats.totalSent / 1000).toFixed(1)}k`, icon: Send, color: 'from-green-500 to-green-600' },
+    { label: 'Delivered', value: `${stats.deliveryRate}%`, icon: CheckCircle2, color: 'from-emerald-500 to-emerald-600' },
+    { label: 'Open Rate', value: `${stats.openRate}%`, icon: Eye, color: 'from-cyan-500 to-cyan-600' },
+    { label: 'Click Rate', value: `${stats.clickRate}%`, icon: MousePointer, color: 'from-purple-500 to-purple-600' },
+    { label: 'Automations', value: stats.activeAutomations.toString(), icon: Workflow, color: 'from-rose-500 to-rose-600' }
+  ]
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString)
@@ -299,376 +357,240 @@ export default function NotificationsClient({ initialNotifications }: Notificati
     const minutes = Math.floor(diff / 60000)
     const hours = Math.floor(minutes / 60)
     const days = Math.floor(hours / 24)
-
     if (minutes < 60) return `${minutes}m ago`
     if (hours < 24) return `${hours}h ago`
     return `${days}d ago`
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'sent': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-      case 'sending': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-      case 'scheduled': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-      case 'draft': return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-      case 'paused': return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-      default: return 'bg-gray-100 text-gray-700'
+  const getStatusColor = (status: string): string => {
+    const colors: Record<string, string> = {
+      'sent': 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+      'sending': 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+      'scheduled': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300',
+      'draft': 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+      'paused': 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
+      'failed': 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+      'active': 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+      'inactive': 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+      'unread': 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+      'read': 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+      'completed': 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+      'running': 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
     }
+    return colors[status] || 'bg-gray-100 text-gray-700'
   }
 
-  const getChannelIcon = (channel: string) => {
-    switch (channel) {
-      case 'push': return <Smartphone className="h-4 w-4" />
-      case 'email': return <Mail className="h-4 w-4" />
-      case 'sms': return <MessageSquare className="h-4 w-4" />
-      case 'in_app': return <Bell className="h-4 w-4" />
-      default: return <Bell className="h-4 w-4" />
+  const getChannelIcon = (channel: ChannelType) => {
+    const icons: Record<ChannelType, any> = {
+      'push': Smartphone,
+      'email': Mail,
+      'sms': MessageSquare,
+      'in_app': Bell,
+      'slack': Slack,
+      'webhook': Webhook
     }
+    return icons[channel] || Bell
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-8">
-        <Card className="max-w-md mx-auto">
-          <CardContent className="p-6 text-center">
-            <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Error Loading Notifications</h3>
-            <p className="text-gray-600 dark:text-gray-400">{error.message}</p>
-            <Button className="mt-4" onClick={() => window.location.reload()}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Retry
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
+  const getPriorityColor = (priority: string): string => {
+    const colors: Record<string, string> = {
+      'urgent': 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+      'high': 'bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300',
+      'normal': 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+      'low': 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+    }
+    return colors[priority] || 'bg-gray-100 text-gray-700'
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-6">
+      <div className="max-w-[1600px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl">
-                <Bell className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
-                  OneSignal Level
-                </Badge>
-                <Badge variant="outline" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                  {stats.totalSubscribers.toLocaleString()} Subscribers
-                </Badge>
-              </div>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center">
+              <Bell className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-              Notification Center
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Multi-channel messaging platform
-            </p>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Notification Center</h1>
+              <p className="text-gray-500 dark:text-gray-400">Slack-level multi-channel messaging platform</p>
+            </div>
           </div>
-
           <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={handleMarkAllRead}>
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Mark All Read
-            </Button>
-            <Button
-              className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
-              onClick={() => setShowCreateCampaign(true)}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Campaign
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input placeholder="Search notifications..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            </div>
+            <Button variant="outline"><Filter className="h-4 w-4 mr-2" />Filters</Button>
+            <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => setShowCreateCampaign(true)}>
+              <Plus className="h-4 w-4 mr-2" />New Campaign
             </Button>
           </div>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-violet-600">{stats.totalNotifications}</div>
-              <div className="text-xs text-gray-500">Total</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600">{stats.unread}</div>
-              <div className="text-xs text-gray-500">Unread</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">{(stats.totalSent / 1000).toFixed(1)}k</div>
-              <div className="text-xs text-gray-500">Sent</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-emerald-600">{stats.deliveryRate}%</div>
-              <div className="text-xs text-gray-500">Delivered</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-cyan-600">{stats.openRate}%</div>
-              <div className="text-xs text-gray-500">Open Rate</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-purple-600">{stats.clickRate}%</div>
-              <div className="text-xs text-gray-500">Click Rate</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-orange-600">{stats.activeCampaigns}</div>
-              <div className="text-xs text-gray-500">Active</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-pink-600">{stats.totalSegments}</div>
-              <div className="text-xs text-gray-500">Segments</div>
-            </CardContent>
-          </Card>
+          {statsCards.map((stat, i) => (
+            <Card key={i} className="border-gray-200 dark:border-gray-700">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                    <stat.icon className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Main Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-1">
-            <TabsTrigger value="inbox" className="flex items-center gap-2">
-              <Inbox className="h-4 w-4" />
-              Inbox
-              {stats.unread > 0 && (
-                <Badge className="bg-red-500 text-white text-xs ml-1">{stats.unread}</Badge>
-              )}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-1">
+            <TabsTrigger value="inbox" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700">
+              <Inbox className="h-4 w-4 mr-2" />Inbox
+              {stats.unread > 0 && <Badge className="ml-2 bg-red-500">{stats.unread}</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="campaigns" className="flex items-center gap-2">
-              <Send className="h-4 w-4" />
-              Campaigns
+            <TabsTrigger value="campaigns" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700">
+              <Send className="h-4 w-4 mr-2" />Campaigns
             </TabsTrigger>
-            <TabsTrigger value="segments" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Segments
+            <TabsTrigger value="segments" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700">
+              <Users className="h-4 w-4 mr-2" />Segments
             </TabsTrigger>
-            <TabsTrigger value="templates" className="flex items-center gap-2">
-              <Layers className="h-4 w-4" />
-              Templates
+            <TabsTrigger value="templates" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700">
+              <Layers className="h-4 w-4 mr-2" />Templates
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Analytics
+            <TabsTrigger value="automation" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700">
+              <Workflow className="h-4 w-4 mr-2" />Automation
+            </TabsTrigger>
+            <TabsTrigger value="ab-testing" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700">
+              <Split className="h-4 w-4 mr-2" />A/B Testing
+            </TabsTrigger>
+            <TabsTrigger value="webhooks" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700">
+              <Webhook className="h-4 w-4 mr-2" />Webhooks
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-violet-100 data-[state=active]:text-violet-700">
+              <Settings className="h-4 w-4 mr-2" />Settings
             </TabsTrigger>
           </TabsList>
 
           {/* Inbox Tab */}
-          <TabsContent value="inbox" className="space-y-6">
-            {/* Search and Filter */}
-            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-              <CardContent className="p-4">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      placeholder="Search notifications..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
-                    <SelectTrigger className="w-[150px]">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="unread">Unread</SelectItem>
-                      <SelectItem value="read">Read</SelectItem>
-                      <SelectItem value="dismissed">Dismissed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as any)}>
-                    <SelectTrigger className="w-[150px]">
-                      <SelectValue placeholder="Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Types</SelectItem>
-                      <SelectItem value="info">Info</SelectItem>
-                      <SelectItem value="success">Success</SelectItem>
-                      <SelectItem value="warning">Warning</SelectItem>
-                      <SelectItem value="error">Error</SelectItem>
-                      <SelectItem value="system">System</SelectItem>
-                    </SelectContent>
-                  </Select>
+          <TabsContent value="inbox" className="mt-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Button variant={statusFilter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('all')}>All</Button>
+              <Button variant={statusFilter === 'unread' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('unread')}>Unread</Button>
+              <Button variant={statusFilter === 'read' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('read')}>Read</Button>
+              <Button variant={statusFilter === 'archived' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('archived')}>Archived</Button>
+            </div>
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardContent className="p-0">
+                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {filteredNotifications.map(notification => {
+                    const ChannelIcon = getChannelIcon(notification.channel)
+                    return (
+                      <div key={notification.id} className={`flex items-start gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer ${notification.status === 'unread' ? 'bg-violet-50/50 dark:bg-violet-900/10' : ''}`} onClick={() => setSelectedNotification(notification)}>
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${notification.type === 'error' ? 'bg-red-100' : notification.type === 'warning' ? 'bg-amber-100' : notification.type === 'success' ? 'bg-green-100' : 'bg-blue-100'}`}>
+                          <ChannelIcon className={`h-5 w-5 ${notification.type === 'error' ? 'text-red-600' : notification.type === 'warning' ? 'text-amber-600' : notification.type === 'success' ? 'text-green-600' : 'text-blue-600'}`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium text-gray-900 dark:text-white truncate">{notification.title}</h4>
+                            {notification.isStarred && <Star className="h-4 w-4 text-amber-500 fill-amber-500" />}
+                            <Badge className={getPriorityColor(notification.priority)}>{notification.priority}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-500 truncate">{notification.message}</p>
+                          {notification.sender && <p className="text-xs text-gray-400 mt-1">From: {notification.sender}</p>}
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-gray-500">{formatTimeAgo(notification.createdAt)}</p>
+                          <Badge variant="outline" className="mt-1">{notification.category}</Badge>
+                        </div>
+                        <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                      </div>
+                    )
+                  })}
                 </div>
               </CardContent>
             </Card>
-
-            {/* Notifications List */}
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-600 border-r-transparent" />
-              </div>
-            ) : filteredNotifications.length === 0 ? (
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-                <CardContent className="p-12 text-center">
-                  <Bell className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Notifications</h3>
-                  <p className="text-gray-500">You're all caught up!</p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-3">
-                {filteredNotifications.map(notification => (
-                  <Card key={notification.id} className={`bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-md transition-all ${!notification.is_read ? 'border-l-4 border-l-violet-500' : ''}`}>
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-4">
-                        <div className={`p-2 rounded-lg ${notification.priority === 'high' || notification.priority === 'urgent' ? 'bg-red-100' : notification.priority === 'normal' ? 'bg-yellow-100' : 'bg-green-100'}`}>
-                          <Bell className={`h-5 w-5 ${notification.priority === 'high' || notification.priority === 'urgent' ? 'text-red-600' : notification.priority === 'normal' ? 'text-yellow-600' : 'text-green-600'}`} />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge className={getStatusColor(notification.status)}>{notification.status}</Badge>
-                            <Badge variant="outline">{notification.notification_type}</Badge>
-                            <span className="text-xs text-gray-500">{formatTimeAgo(notification.created_at)}</span>
-                          </div>
-                          <h4 className="font-semibold">{notification.title}</h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{notification.message}</p>
-                          {notification.action_url && (
-                            <Button size="sm" variant="link" className="px-0 mt-2 text-violet-600">
-                              {notification.action_label || 'View Details'} <ChevronRight className="h-4 w-4 ml-1" />
-                            </Button>
-                          )}
-                        </div>
-                        <Button size="sm" variant="ghost">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
           </TabsContent>
 
           {/* Campaigns Tab */}
-          <TabsContent value="campaigns" className="space-y-6">
-            <div className="space-y-4">
-              {CAMPAIGNS.map(campaign => (
-                <Card key={campaign.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge className={getStatusColor(campaign.status)}>{campaign.status}</Badge>
-                          <Badge variant="outline" className="flex items-center gap-1">
-                            {getChannelIcon(campaign.channel)}
-                            {campaign.channel}
-                          </Badge>
-                          <Badge variant="outline">{campaign.segment}</Badge>
+          <TabsContent value="campaigns" className="mt-6">
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardContent className="p-0">
+                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {mockCampaigns.map(campaign => {
+                    const ChannelIcon = getChannelIcon(campaign.channel)
+                    return (
+                      <div key={campaign.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 flex items-center justify-center">
+                              <ChannelIcon className="h-6 w-6 text-violet-600" />
+                            </div>
+                            <div>
+                              <h3 className="font-semibold text-gray-900 dark:text-white">{campaign.name}</h3>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge className={getStatusColor(campaign.status)}>{campaign.status}</Badge>
+                                <Badge variant="outline">{campaign.segment}</Badge>
+                                <Badge className={getPriorityColor(campaign.priority)}>{campaign.priority}</Badge>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {campaign.status === 'draft' && <Button size="sm"><Send className="h-4 w-4 mr-1" />Send</Button>}
+                            {campaign.status === 'sending' && <Button size="sm" variant="outline"><Pause className="h-4 w-4 mr-1" />Pause</Button>}
+                            <Button size="sm" variant="ghost"><Copy className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost"><BarChart3 className="h-4 w-4" /></Button>
+                          </div>
                         </div>
-
-                        <h3 className="text-lg font-semibold mb-1">{campaign.name}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                          <strong>{campaign.title}</strong> - {campaign.message}
-                        </p>
-
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4"><strong>{campaign.title}</strong> - {campaign.message}</p>
                         {campaign.status === 'sent' && (
-                          <div className="grid grid-cols-6 gap-4 text-center">
-                            <div>
-                              <div className="text-lg font-bold text-gray-900 dark:text-white">{campaign.stats.sent.toLocaleString()}</div>
-                              <div className="text-xs text-gray-500">Sent</div>
-                            </div>
-                            <div>
-                              <div className="text-lg font-bold text-green-600">{campaign.stats.delivered.toLocaleString()}</div>
-                              <div className="text-xs text-gray-500">Delivered</div>
-                            </div>
-                            <div>
-                              <div className="text-lg font-bold text-blue-600">{campaign.stats.opened.toLocaleString()}</div>
-                              <div className="text-xs text-gray-500">Opened</div>
-                            </div>
-                            <div>
-                              <div className="text-lg font-bold text-purple-600">{campaign.stats.clicked.toLocaleString()}</div>
-                              <div className="text-xs text-gray-500">Clicked</div>
-                            </div>
-                            <div>
-                              <div className="text-lg font-bold text-emerald-600">{campaign.stats.converted.toLocaleString()}</div>
-                              <div className="text-xs text-gray-500">Converted</div>
-                            </div>
-                            <div>
-                              <div className="text-lg font-bold text-red-600">{((campaign.stats.opened / campaign.stats.delivered) * 100).toFixed(1)}%</div>
-                              <div className="text-xs text-gray-500">Open Rate</div>
-                            </div>
+                          <div className="grid grid-cols-8 gap-4 text-center">
+                            <div><p className="text-lg font-bold">{campaign.stats.sent.toLocaleString()}</p><p className="text-xs text-gray-500">Sent</p></div>
+                            <div><p className="text-lg font-bold text-green-600">{campaign.stats.delivered.toLocaleString()}</p><p className="text-xs text-gray-500">Delivered</p></div>
+                            <div><p className="text-lg font-bold text-blue-600">{campaign.stats.opened.toLocaleString()}</p><p className="text-xs text-gray-500">Opened</p></div>
+                            <div><p className="text-lg font-bold text-purple-600">{campaign.stats.clicked.toLocaleString()}</p><p className="text-xs text-gray-500">Clicked</p></div>
+                            <div><p className="text-lg font-bold text-emerald-600">{campaign.stats.converted.toLocaleString()}</p><p className="text-xs text-gray-500">Converted</p></div>
+                            <div><p className="text-lg font-bold text-amber-600">{campaign.stats.bounced}</p><p className="text-xs text-gray-500">Bounced</p></div>
+                            <div><p className="text-lg font-bold text-red-600">{campaign.stats.unsubscribed}</p><p className="text-xs text-gray-500">Unsub</p></div>
+                            <div><p className="text-lg font-bold text-cyan-600">{((campaign.stats.opened / campaign.stats.delivered) * 100).toFixed(1)}%</p><p className="text-xs text-gray-500">Open Rate</p></div>
                           </div>
                         )}
-
-                        {campaign.status === 'scheduled' && campaign.scheduledAt && (
-                          <div className="flex items-center gap-2 text-sm text-gray-500">
-                            <Calendar className="h-4 w-4" />
-                            Scheduled for {new Date(campaign.scheduledAt).toLocaleString()}
-                          </div>
-                        )}
+                        {campaign.scheduledAt && <p className="text-sm text-gray-500 mt-2"><Calendar className="h-4 w-4 inline mr-1" />Scheduled: {new Date(campaign.scheduledAt).toLocaleString()}</p>}
                       </div>
-
-                      <div className="flex items-center gap-2">
-                        {campaign.status === 'draft' && (
-                          <Button size="sm" onClick={() => handleSendCampaign(campaign)}>
-                            <Send className="h-4 w-4 mr-1" />
-                            Send
-                          </Button>
-                        )}
-                        {campaign.status === 'sending' && (
-                          <Button size="sm" variant="outline" onClick={() => handlePauseCampaign(campaign)}>
-                            <Pause className="h-4 w-4 mr-1" />
-                            Pause
-                          </Button>
-                        )}
-                        <Button size="sm" variant="ghost" onClick={() => handleDuplicateCampaign(campaign)}>
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                        <Button size="sm" variant="ghost">
-                          <BarChart3 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    )
+                  })}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Segments Tab */}
-          <TabsContent value="segments" className="space-y-6">
-            <div className="flex justify-end">
-              <Button onClick={() => setShowCreateSegment(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Segment
-              </Button>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {SEGMENTS.map(segment => (
-                <Card key={segment.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all">
+          <TabsContent value="segments" className="mt-6">
+            <div className="grid grid-cols-3 gap-6">
+              {mockSegments.map(segment => (
+                <Card key={segment.id} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
-                      <Users className="h-8 w-8 text-violet-600" />
-                      <Badge variant="outline">{segment.filters.length} filters</Badge>
-                    </div>
-
-                    <h3 className="font-semibold mb-1">{segment.name}</h3>
-                    <p className="text-sm text-gray-500 mb-4">{segment.description}</p>
-
-                    <div className="flex items-center justify-between">
-                      <div className="text-2xl font-bold text-violet-600">
-                        {segment.userCount.toLocaleString()}
+                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center">
+                        <Users className="h-6 w-6 text-violet-600" />
                       </div>
-                      <span className="text-xs text-gray-500">users</span>
+                      <div className="flex items-center gap-2">
+                        {segment.isDefault && <Badge>Default</Badge>}
+                        <Badge variant="outline">{segment.filters.length} filters</Badge>
+                      </div>
                     </div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{segment.name}</h3>
+                    <p className="text-sm text-gray-500 mb-4">{segment.description}</p>
+                    <div className="flex items-center justify-between">
+                      <div className="text-3xl font-bold text-violet-600">{segment.userCount.toLocaleString()}</div>
+                      <span className="text-sm text-gray-500">users</span>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-2">Updated {segment.lastUpdated}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -676,30 +598,118 @@ export default function NotificationsClient({ initialNotifications }: Notificati
           </TabsContent>
 
           {/* Templates Tab */}
-          <TabsContent value="templates" className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-4">
-              {TEMPLATES.map(template => (
-                <Card key={template.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all">
+          <TabsContent value="templates" className="mt-6">
+            <div className="grid grid-cols-2 gap-6">
+              {mockTemplates.map(template => {
+                const ChannelIcon = getChannelIcon(template.channel)
+                return (
+                  <Card key={template.id} className="border-gray-200 dark:border-gray-700">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <Badge variant="outline" className="flex items-center gap-1"><ChannelIcon className="h-3 w-3" />{template.channel}</Badge>
+                        <div className="flex items-center gap-2">
+                          {template.isDefault && <Badge className="bg-violet-100 text-violet-700">Default</Badge>}
+                          <span className="text-xs text-gray-500">{template.usageCount.toLocaleString()} uses</span>
+                        </div>
+                      </div>
+                      <h3 className="font-semibold mb-2">{template.name}</h3>
+                      <Badge variant="outline" className="mb-3">{template.category}</Badge>
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-3">
+                        <p className="font-medium text-sm mb-1">{template.title}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{template.message}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {template.variables.map(v => <Badge key={v} variant="outline" className="text-xs">{`{{${v}}}`}</Badge>)}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          </TabsContent>
+
+          {/* Automation Tab */}
+          <TabsContent value="automation" className="mt-6">
+            <div className="flex justify-end mb-4">
+              <Button onClick={() => setShowCreateAutomation(true)}><Plus className="h-4 w-4 mr-2" />Create Automation</Button>
+            </div>
+            <div className="space-y-4">
+              {mockAutomations.map(automation => (
+                <Card key={automation.id} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
-                      <Badge variant="outline" className="flex items-center gap-1">
-                        {getChannelIcon(template.channel)}
-                        {template.channel}
-                      </Badge>
-                      <span className="text-xs text-gray-500">{template.usageCount.toLocaleString()} uses</span>
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-100 to-blue-100 flex items-center justify-center">
+                          <Workflow className="h-6 w-6 text-cyan-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">{automation.name}</h3>
+                          <p className="text-sm text-gray-500">{automation.description}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className={getStatusColor(automation.status)}>{automation.status}</Badge>
+                        {automation.status === 'active' && <Button size="sm" variant="outline"><Pause className="h-4 w-4 mr-1" />Pause</Button>}
+                        {automation.status === 'paused' && <Button size="sm"><Play className="h-4 w-4 mr-1" />Resume</Button>}
+                      </div>
                     </div>
-
-                    <h3 className="font-semibold mb-2">{template.name}</h3>
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg mb-3">
-                      <div className="font-medium text-sm mb-1">{template.title}</div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{template.message}</p>
+                    <div className="flex items-center gap-4 mb-4">
+                      <Badge variant="outline"><Zap className="h-3 w-3 mr-1" />Trigger: {automation.trigger.type}</Badge>
+                      <Badge variant="outline">{automation.actions.length} actions</Badge>
                     </div>
+                    <div className="grid grid-cols-4 gap-4 text-center">
+                      <div><p className="text-lg font-bold">{automation.stats.totalTriggered.toLocaleString()}</p><p className="text-xs text-gray-500">Triggered</p></div>
+                      <div><p className="text-lg font-bold text-green-600">{automation.stats.totalCompleted.toLocaleString()}</p><p className="text-xs text-gray-500">Completed</p></div>
+                      <div><p className="text-lg font-bold text-red-600">{automation.stats.totalFailed}</p><p className="text-xs text-gray-500">Failed</p></div>
+                      <div><p className="text-lg font-bold text-violet-600">{automation.stats.conversionRate}%</p><p className="text-xs text-gray-500">Conversion</p></div>
+                    </div>
+                    {automation.lastTriggered && <p className="text-xs text-gray-500 mt-4">Last triggered: {formatTimeAgo(automation.lastTriggered)}</p>}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
 
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {template.variables.map(v => (
-                        <Badge key={v} variant="outline" className="text-xs">
-                          {`{{${v}}}`}
-                        </Badge>
+          {/* A/B Testing Tab */}
+          <TabsContent value="ab-testing" className="mt-6">
+            <div className="space-y-6">
+              {mockABTests.map(test => (
+                <Card key={test.id} className="border-gray-200 dark:border-gray-700">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2"><Split className="h-5 w-5" />{test.name}</CardTitle>
+                        <CardDescription>Started {new Date(test.startDate).toLocaleDateString()}</CardDescription>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className={getStatusColor(test.status)}>{test.status}</Badge>
+                        {test.status === 'completed' && test.winner && <Badge className="bg-green-100 text-green-700">Winner: {test.variants.find(v => v.id === test.winner)?.name}</Badge>}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm">Confidence Level</span>
+                        <span className="font-bold">{test.confidenceLevel}%</span>
+                      </div>
+                      <Progress value={test.confidenceLevel} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-6">
+                      {test.variants.map(variant => (
+                        <div key={variant.id} className={`p-4 rounded-lg ${test.winner === variant.id ? 'bg-green-50 dark:bg-green-900/20 border-2 border-green-500' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="font-semibold">{variant.name}</h4>
+                            {test.winner === variant.id && <Badge className="bg-green-500">Winner</Badge>}
+                          </div>
+                          <p className="text-sm font-medium mb-1">{variant.title}</p>
+                          <p className="text-sm text-gray-500 mb-4">{variant.message}</p>
+                          <div className="grid grid-cols-3 gap-2 text-center">
+                            <div><p className="font-bold">{variant.stats.sent.toLocaleString()}</p><p className="text-xs text-gray-500">Sent</p></div>
+                            <div><p className="font-bold text-blue-600">{variant.stats.opened.toLocaleString()}</p><p className="text-xs text-gray-500">Opened</p></div>
+                            <div><p className="font-bold text-green-600">{variant.stats.clicked.toLocaleString()}</p><p className="text-xs text-gray-500">Clicked</p></div>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   </CardContent>
@@ -708,152 +718,146 @@ export default function NotificationsClient({ initialNotifications }: Notificati
             </div>
           </TabsContent>
 
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-green-600" />
-                    Delivery Performance
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold text-green-600 mb-2">{stats.deliveryRate}%</div>
-                  <Progress value={parseFloat(stats.deliveryRate)} className="mb-4" />
-                  <div className="text-sm text-gray-500">
-                    {stats.totalDelivered.toLocaleString()} of {stats.totalSent.toLocaleString()} delivered
-                  </div>
+          {/* Webhooks Tab */}
+          <TabsContent value="webhooks" className="mt-6">
+            <div className="flex justify-end mb-4">
+              <Button><Plus className="h-4 w-4 mr-2" />Add Webhook</Button>
+            </div>
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardContent className="p-0">
+                <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {mockWebhooks.map(webhook => (
+                    <div key={webhook.id} className="flex items-center gap-4 p-4">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${webhook.status === 'active' ? 'bg-green-100' : webhook.status === 'failed' ? 'bg-red-100' : 'bg-gray-100'}`}>
+                        <Webhook className={`h-5 w-5 ${webhook.status === 'active' ? 'text-green-600' : webhook.status === 'failed' ? 'text-red-600' : 'text-gray-600'}`} />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium">{webhook.name}</h4>
+                        <p className="text-sm text-gray-500 font-mono">{webhook.url}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {webhook.events.map(e => <Badge key={e} variant="outline" className="text-xs">{e}</Badge>)}
+                      </div>
+                      <Badge className={getStatusColor(webhook.status)}>{webhook.status}</Badge>
+                      <div className="text-right">
+                        <p className="font-medium">{webhook.successRate}%</p>
+                        <p className="text-xs text-gray-500">Success rate</p>
+                      </div>
+                      <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6">
+            <div className="grid grid-cols-2 gap-6">
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Channel Settings</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Push Notifications</p><p className="text-sm text-gray-500">Send via Firebase Cloud Messaging</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Email Notifications</p><p className="text-sm text-gray-500">Send via SendGrid</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">SMS Notifications</p><p className="text-sm text-gray-500">Send via Twilio</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Slack Integration</p><p className="text-sm text-gray-500">Send to Slack channels</p></div><Switch defaultChecked /></div>
                 </CardContent>
               </Card>
-
-              <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Eye className="h-5 w-5 text-blue-600" />
-                    Open Rate
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold text-blue-600 mb-2">{stats.openRate}%</div>
-                  <Progress value={parseFloat(stats.openRate)} className="mb-4" />
-                  <div className="text-sm text-gray-500">
-                    Industry average: 20-25%
-                  </div>
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Delivery Settings</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Smart Delivery</p><p className="text-sm text-gray-500">Optimize send time per user</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Frequency Capping</p><p className="text-sm text-gray-500">Limit notifications per day</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Quiet Hours</p><p className="text-sm text-gray-500">Respect user time zones</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Fallback Channels</p><p className="text-sm text-gray-500">Try alternate channels on failure</p></div><Switch /></div>
                 </CardContent>
               </Card>
-
-              <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MousePointer className="h-5 w-5 text-purple-600" />
-                    Click Rate
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold text-purple-600 mb-2">{stats.clickRate}%</div>
-                  <Progress value={parseFloat(stats.clickRate)} className="mb-4" />
-                  <div className="text-sm text-gray-500">
-                    Industry average: 2-5%
-                  </div>
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Analytics Settings</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Track Opens</p><p className="text-sm text-gray-500">Track email and push opens</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Track Clicks</p><p className="text-sm text-gray-500">Track link clicks</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Conversion Tracking</p><p className="text-sm text-gray-500">Track goal completions</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Revenue Attribution</p><p className="text-sm text-gray-500">Track revenue from campaigns</p></div><Switch /></div>
+                </CardContent>
+              </Card>
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader><CardTitle>Advanced Settings</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">A/B Testing</p><p className="text-sm text-gray-500">Enable split testing</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Personalization</p><p className="text-sm text-gray-500">Use AI for content personalization</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Predictive Send</p><p className="text-sm text-gray-500">AI-optimized delivery times</p></div><Switch /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Debug Mode</p><p className="text-sm text-gray-500">Log all delivery attempts</p></div><Switch /></div>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
         </Tabs>
 
+        {/* Notification Detail Dialog */}
+        <Dialog open={!!selectedNotification} onOpenChange={() => setSelectedNotification(null)}>
+          <DialogContent className="max-w-lg">
+            <ScrollArea className="max-h-[80vh]">
+              {selectedNotification && (
+                <div className="space-y-4">
+                  <DialogHeader>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${selectedNotification.type === 'error' ? 'bg-red-100' : selectedNotification.type === 'warning' ? 'bg-amber-100' : 'bg-blue-100'}`}>
+                        <Bell className={`h-5 w-5 ${selectedNotification.type === 'error' ? 'text-red-600' : selectedNotification.type === 'warning' ? 'text-amber-600' : 'text-blue-600'}`} />
+                      </div>
+                      <div>
+                        <DialogTitle>{selectedNotification.title}</DialogTitle>
+                        <DialogDescription>{formatTimeAgo(selectedNotification.createdAt)}</DialogDescription>
+                      </div>
+                    </div>
+                  </DialogHeader>
+                  <div className="flex gap-2">
+                    <Badge className={getPriorityColor(selectedNotification.priority)}>{selectedNotification.priority}</Badge>
+                    <Badge variant="outline">{selectedNotification.channel}</Badge>
+                    <Badge variant="outline">{selectedNotification.category}</Badge>
+                  </div>
+                  <p className="text-gray-600 dark:text-gray-400">{selectedNotification.message}</p>
+                  {selectedNotification.sender && <p className="text-sm text-gray-500">From: {selectedNotification.sender}</p>}
+                  {selectedNotification.actionUrl && (
+                    <Button className="w-full">
+                      {selectedNotification.actionLabel || 'View Details'}
+                      <ExternalLink className="h-4 w-4 ml-2" />
+                    </Button>
+                  )}
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="flex-1"><Archive className="h-4 w-4 mr-2" />Archive</Button>
+                    <Button variant="outline" className="flex-1"><Star className="h-4 w-4 mr-2" />Star</Button>
+                    <Button variant="outline" className="flex-1"><Trash2 className="h-4 w-4 mr-2" />Delete</Button>
+                  </div>
+                </div>
+              )}
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
         {/* Create Campaign Dialog */}
         <Dialog open={showCreateCampaign} onOpenChange={setShowCreateCampaign}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Send className="h-5 w-5 text-violet-600" />
-                Create Campaign
-              </DialogTitle>
-              <DialogDescription>
-                Send notifications to your audience
-              </DialogDescription>
+              <DialogTitle>Create Campaign</DialogTitle>
+              <DialogDescription>Send notifications to your audience</DialogDescription>
             </DialogHeader>
-
             <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Campaign Name *</Label>
-                <Input
-                  placeholder="e.g., Product Launch"
-                  value={campaignName}
-                  onChange={(e) => setCampaignName(e.target.value)}
-                />
-              </div>
-
+              <div><Label>Campaign Name</Label><Input placeholder="e.g., Product Launch" /></div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Channel</Label>
-                  <Select value={campaignChannel} onValueChange={(v) => setCampaignChannel(v as any)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="push">Push</SelectItem>
-                      <SelectItem value="email">Email</SelectItem>
-                      <SelectItem value="sms">SMS</SelectItem>
-                      <SelectItem value="in_app">In-App</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Segment</Label>
-                  <Select value={campaignSegment} onValueChange={setCampaignSegment}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select segment" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SEGMENTS.map(s => (
-                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <div><Label>Channel</Label><Select><SelectTrigger><SelectValue placeholder="Select channel" /></SelectTrigger><SelectContent><SelectItem value="push">Push</SelectItem><SelectItem value="email">Email</SelectItem><SelectItem value="sms">SMS</SelectItem><SelectItem value="slack">Slack</SelectItem></SelectContent></Select></div>
+                <div><Label>Segment</Label><Select><SelectTrigger><SelectValue placeholder="Select segment" /></SelectTrigger><SelectContent>{mockSegments.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select></div>
               </div>
-
-              <div className="space-y-2">
-                <Label>Title *</Label>
-                <Input
-                  placeholder="Notification title"
-                  value={campaignTitle}
-                  onChange={(e) => setCampaignTitle(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Message</Label>
-                <Textarea
-                  placeholder="Notification message..."
-                  value={campaignMessage}
-                  onChange={(e) => setCampaignMessage(e.target.value)}
-                  rows={3}
-                />
-              </div>
-
+              <div><Label>Title</Label><Input placeholder="Notification title" /></div>
+              <div><Label>Message</Label><Textarea placeholder="Notification message..." rows={3} /></div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm">Schedule for later</span>
-                </div>
-                <Switch checked={scheduleDelivery} onCheckedChange={setScheduleDelivery} />
+                <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-gray-500" /><span className="text-sm">Schedule for later</span></div>
+                <Switch />
               </div>
             </div>
-
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowCreateCampaign(false)}>
-                Cancel
-              </Button>
-              <Button
-                className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
-                onClick={handleCreateCampaign}
-              >
-                <Send className="h-4 w-4 mr-2" />
-                {scheduleDelivery ? 'Schedule' : 'Send Now'}
-              </Button>
+              <Button variant="outline" onClick={() => setShowCreateCampaign(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600"><Send className="h-4 w-4 mr-2" />Send Now</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
