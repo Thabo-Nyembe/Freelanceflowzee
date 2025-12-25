@@ -7,8 +7,10 @@ import {
   RefreshCw, TrendingUp, Users, CreditCard, Mail, Eye, Edit,
   Trash2, Copy, ChevronDown, ArrowUpRight, ArrowDownRight, Sparkles,
   Globe, Percent, Receipt, Timer, Bell, Settings, BarChart3,
-  PieChart, Zap, Crown, Star, FileSpreadsheet, Printer, Share2
+  PieChart, Zap, Crown, Star, FileSpreadsheet, Printer, Share2,
+  Webhook, Key, Shield, HardDrive, AlertOctagon, Sliders
 } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -85,6 +87,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [activeTab, setActiveTab] = useState('all')
+  const [settingsTab, setSettingsTab] = useState('general')
   const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
 
   // Invoice creation state
@@ -421,7 +424,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
 
         {/* Tabs and Invoice List */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-5 w-full max-w-2xl">
+          <TabsList className="grid grid-cols-6 w-full max-w-3xl">
             <TabsTrigger value="all" className="gap-2">
               All <Badge variant="secondary">{stats.total}</Badge>
             </TabsTrigger>
@@ -436,6 +439,10 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
             </TabsTrigger>
             <TabsTrigger value="overdue" className="gap-2">
               Overdue <Badge variant="secondary">{stats.overdue}</Badge>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -569,6 +576,726 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-4">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3 space-y-2">
+                <nav className="space-y-1">
+                  {[
+                    { id: 'general', label: 'General', icon: Settings },
+                    { id: 'branding', label: 'Branding', icon: FileText },
+                    { id: 'notifications', label: 'Notifications', icon: Bell },
+                    { id: 'payments', label: 'Payments', icon: CreditCard },
+                    { id: 'integrations', label: 'Integrations', icon: Webhook },
+                    { id: 'advanced', label: 'Advanced', icon: Sliders }
+                  ].map((item) => (
+                    <Button
+                      key={item.id}
+                      variant={settingsTab === item.id ? 'secondary' : 'ghost'}
+                      className="w-full justify-start gap-2"
+                      onClick={() => setSettingsTab(item.id)}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      {item.label}
+                    </Button>
+                  ))}
+                </nav>
+
+                {/* Invoice Stats */}
+                <Card className="mt-4">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm">Invoice Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Total Revenue</span>
+                      <Badge className="bg-emerald-100 text-emerald-700">${stats.totalRevenue.toLocaleString()}</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Collection Rate</span>
+                      <Badge variant="secondary">{stats.collectionRate.toFixed(1)}%</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Avg Payment</span>
+                      <Badge variant="secondary">{stats.avgPaymentDays} days</Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Total Invoices</span>
+                      <Badge variant="secondary">{stats.total}</Badge>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Business Information</CardTitle>
+                        <CardDescription>Your business details that appear on invoices</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Business Name</Label>
+                            <Input defaultValue="Your Company Name" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Tax ID / VAT Number</Label>
+                            <Input placeholder="Enter tax ID" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Business Address</Label>
+                          <Input placeholder="Street Address" />
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="space-y-2">
+                            <Label>City</Label>
+                            <Input placeholder="City" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>State/Province</Label>
+                            <Input placeholder="State" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Postal Code</Label>
+                            <Input placeholder="Postal code" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Email</Label>
+                            <Input type="email" placeholder="billing@company.com" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Phone</Label>
+                            <Input placeholder="+1 (555) 123-4567" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Invoice Defaults</CardTitle>
+                        <CardDescription>Default settings for new invoices</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Currency</Label>
+                            <Select defaultValue="USD">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {currencies.map(c => (
+                                  <SelectItem key={c.code} value={c.code}>{c.symbol} {c.code} - {c.name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Payment Terms</Label>
+                            <Select defaultValue="30">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="0">Due on receipt</SelectItem>
+                                <SelectItem value="7">Net 7</SelectItem>
+                                <SelectItem value="14">Net 14</SelectItem>
+                                <SelectItem value="30">Net 30</SelectItem>
+                                <SelectItem value="60">Net 60</SelectItem>
+                                <SelectItem value="90">Net 90</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Invoice Number Prefix</Label>
+                            <Input defaultValue="INV-" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Next Invoice Number</Label>
+                            <Input type="number" defaultValue="1001" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Default Payment Terms Text</Label>
+                          <textarea className="w-full p-3 rounded-lg border resize-none h-20 dark:bg-gray-800 dark:border-gray-700" defaultValue="Payment is due within 30 days of invoice date. Late payments may incur additional fees." />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Tax Settings</CardTitle>
+                        <CardDescription>Configure default tax rates</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Enable Tax Calculations</Label>
+                            <p className="text-sm text-gray-500">Add tax line items to invoices</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Tax Rate</Label>
+                            <div className="flex items-center gap-2">
+                              <Input type="number" defaultValue="10" className="w-24" />
+                              <span className="text-gray-500">%</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Tax Label</Label>
+                            <Input defaultValue="Sales Tax" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Branding Settings */}
+                {settingsTab === 'branding' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Invoice Branding</CardTitle>
+                        <CardDescription>Customize the look of your invoices</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Company Logo</Label>
+                          <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                            <p className="text-sm text-gray-500">Drag and drop or click to upload</p>
+                            <p className="text-xs text-gray-400">Recommended: 200x50px PNG or SVG</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Primary Color</Label>
+                            <div className="flex gap-2">
+                              <Input defaultValue="#10b981" type="color" className="w-16 h-10" />
+                              <Input defaultValue="#10b981" className="flex-1" />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Accent Color</Label>
+                            <div className="flex gap-2">
+                              <Input defaultValue="#059669" type="color" className="w-16 h-10" />
+                              <Input defaultValue="#059669" className="flex-1" />
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Invoice Templates</CardTitle>
+                        <CardDescription>Choose your default invoice template</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-4 gap-3">
+                          {invoiceTemplates.map(template => (
+                            <button
+                              key={template.id}
+                              className="p-4 rounded-lg border-2 text-left transition-all hover:border-emerald-300 border-gray-200 dark:border-gray-700"
+                            >
+                              <div className={`h-16 rounded bg-gradient-to-r ${template.color} mb-2`} />
+                              <p className="font-medium text-sm">{template.name}</p>
+                              <p className="text-xs text-muted-foreground">{template.description}</p>
+                            </button>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Custom Footer</CardTitle>
+                        <CardDescription>Add a custom message to all invoices</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Footer Message</Label>
+                          <textarea className="w-full p-3 rounded-lg border resize-none h-24 dark:bg-gray-800 dark:border-gray-700" placeholder="Thank you for your business!" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Show Payment Instructions</Label>
+                            <p className="text-sm text-gray-500">Display payment details on invoice</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Notifications</CardTitle>
+                        <CardDescription>Configure when to send email notifications</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Invoice Sent</Label>
+                            <p className="text-sm text-gray-500">Notify when invoice is sent to client</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Payment Received</Label>
+                            <p className="text-sm text-gray-500">Notify when payment is received</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Invoice Overdue</Label>
+                            <p className="text-sm text-gray-500">Notify when invoice becomes overdue</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Invoice Viewed</Label>
+                            <p className="text-sm text-gray-500">Notify when client views invoice</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Payment Reminders</CardTitle>
+                        <CardDescription>Configure automatic payment reminders</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Enable Auto-Reminders</Label>
+                            <p className="text-sm text-gray-500">Automatically send payment reminders</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-3">
+                          <Label>Reminder Schedule</Label>
+                          {reminderSchedules.map(schedule => (
+                            <div key={schedule.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                              <span className="text-sm">{schedule.label}</span>
+                              <Switch defaultChecked={['3days', 'dueday', '7daysafter'].includes(schedule.id)} />
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Templates</CardTitle>
+                        <CardDescription>Customize email content</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Invoice Email Subject</Label>
+                          <Input defaultValue="Invoice #{{invoice_number}} from {{company_name}}" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Reminder Email Subject</Label>
+                          <Input defaultValue="Reminder: Invoice #{{invoice_number}} is due" />
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <Mail className="w-4 h-4 mr-2" />
+                          Customize Email Templates
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Payments Settings */}
+                {settingsTab === 'payments' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Payment Gateways</CardTitle>
+                        <CardDescription>Connect payment processors to accept online payments</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {[
+                          { name: 'Stripe', description: 'Accept credit cards and bank transfers', icon: CreditCard, connected: true, color: 'text-purple-500' },
+                          { name: 'PayPal', description: 'Accept PayPal payments', icon: DollarSign, connected: false, color: 'text-blue-500' },
+                          { name: 'Square', description: 'Accept Square payments', icon: CreditCard, connected: false, color: 'text-gray-700' },
+                          { name: 'Wise', description: 'International bank transfers', icon: Globe, connected: true, color: 'text-green-500' }
+                        ].map((gateway) => (
+                          <div key={gateway.name} className="flex items-center justify-between p-4 rounded-lg border dark:border-gray-700">
+                            <div className="flex items-center gap-3">
+                              <gateway.icon className={`h-8 w-8 ${gateway.color}`} />
+                              <div>
+                                <p className="font-medium">{gateway.name}</p>
+                                <p className="text-sm text-muted-foreground">{gateway.description}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {gateway.connected && <Badge className="bg-green-100 text-green-700">Connected</Badge>}
+                              <Button variant={gateway.connected ? 'outline' : 'default'} size="sm">
+                                {gateway.connected ? 'Configure' : 'Connect'}
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Late Fees</CardTitle>
+                        <CardDescription>Configure automatic late fee settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Enable Late Fees</Label>
+                            <p className="text-sm text-gray-500">Automatically apply late fees to overdue invoices</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Late Fee Type</Label>
+                            <Select defaultValue="percentage">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="percentage">Percentage</SelectItem>
+                                <SelectItem value="fixed">Fixed Amount</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Amount</Label>
+                            <div className="flex items-center gap-2">
+                              <Input type="number" defaultValue="5" className="flex-1" />
+                              <span className="text-gray-500">%</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Grace Period (Days)</Label>
+                          <Select defaultValue="3">
+                            <SelectTrigger className="w-48">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="0">No grace period</SelectItem>
+                              <SelectItem value="3">3 days</SelectItem>
+                              <SelectItem value="7">7 days</SelectItem>
+                              <SelectItem value="14">14 days</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Deposits & Partial Payments</CardTitle>
+                        <CardDescription>Configure deposit and partial payment settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Allow Partial Payments</Label>
+                            <p className="text-sm text-gray-500">Accept payments in installments</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Request Deposits</Label>
+                            <p className="text-sm text-gray-500">Require upfront deposits on invoices</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Default Deposit Percentage</Label>
+                          <div className="flex items-center gap-2">
+                            <Input type="number" defaultValue="50" className="w-24" />
+                            <span className="text-gray-500">%</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>API Access</CardTitle>
+                        <CardDescription>Manage API keys for external integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" defaultValue="inv_live_xxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono" />
+                            <Button variant="outline" size="icon">
+                              <Copy className="w-4 h-4" />
+                            </Button>
+                            <Button variant="outline" size="icon">
+                              <RefreshCw className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Enable API Access</Label>
+                            <p className="text-sm text-gray-500">Allow external API access</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Webhooks</CardTitle>
+                        <CardDescription>Send real-time notifications to external systems</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Webhook URL</Label>
+                          <Input placeholder="https://api.yourcompany.com/webhooks/invoices" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Events</Label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {['invoice.created', 'invoice.sent', 'invoice.paid', 'invoice.overdue', 'payment.received'].map((event) => (
+                              <div key={event} className="flex items-center gap-2">
+                                <Switch defaultChecked />
+                                <span className="text-sm font-mono">{event}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <Button variant="outline">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Test Webhook
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Accounting Software</CardTitle>
+                        <CardDescription>Sync invoices with your accounting tools</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          {[
+                            { name: 'QuickBooks', connected: true, description: 'Sync invoices and payments' },
+                            { name: 'Xero', connected: false, description: 'Two-way sync with Xero' },
+                            { name: 'FreshBooks', connected: false, description: 'Import/export invoices' },
+                            { name: 'Wave', connected: false, description: 'Free accounting sync' }
+                          ].map((app) => (
+                            <div key={app.name} className="p-4 rounded-lg border dark:border-gray-700">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="font-medium">{app.name}</span>
+                                <Badge variant={app.connected ? 'default' : 'outline'}>
+                                  {app.connected ? 'Connected' : 'Not Connected'}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-gray-500 mb-3">{app.description}</p>
+                              <Button variant="outline" size="sm" className="w-full">
+                                {app.connected ? 'Configure' : 'Connect'}
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Recurring Invoices</CardTitle>
+                        <CardDescription>Configure recurring invoice settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Auto-Generate Recurring Invoices</Label>
+                            <p className="text-sm text-gray-500">Automatically create invoices on schedule</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Auto-Send Recurring Invoices</Label>
+                            <p className="text-sm text-gray-500">Automatically email invoices when created</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Default Send Time</Label>
+                          <Select defaultValue="9am">
+                            <SelectTrigger className="w-48">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="6am">6:00 AM</SelectItem>
+                              <SelectItem value="9am">9:00 AM</SelectItem>
+                              <SelectItem value="12pm">12:00 PM</SelectItem>
+                              <SelectItem value="5pm">5:00 PM</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Data & Exports</CardTitle>
+                        <CardDescription>Export and manage your invoice data</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+                            <Download className="w-5 h-5 text-blue-600" />
+                            <span>Export All Invoices</span>
+                            <span className="text-xs text-gray-500">CSV format</span>
+                          </Button>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+                            <FileSpreadsheet className="w-5 h-5 text-green-600" />
+                            <span>Export Report</span>
+                            <span className="text-xs text-gray-500">Excel format</span>
+                          </Button>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Data Retention</Label>
+                          <Select defaultValue="forever">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1y">1 year</SelectItem>
+                              <SelectItem value="3y">3 years</SelectItem>
+                              <SelectItem value="7y">7 years</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Security</CardTitle>
+                        <CardDescription>Configure security settings</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Two-Factor Authentication</Label>
+                            <p className="text-sm text-gray-500">Require 2FA for invoice access</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Invoice Link Expiration</Label>
+                            <p className="text-sm text-gray-500">Expire public invoice links</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Link Expiration Period</Label>
+                          <Select defaultValue="30">
+                            <SelectTrigger className="w-48">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="7">7 days</SelectItem>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="never">Never</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="text-red-600 flex items-center gap-2">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible and destructive actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg border border-red-200 dark:border-red-900">
+                          <div>
+                            <div className="font-medium">Archive All Draft Invoices</div>
+                            <p className="text-sm text-gray-500">Move all drafts to archive</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                            Archive Drafts
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg border border-red-200 dark:border-red-900">
+                          <div>
+                            <div className="font-medium">Reset Invoice Numbering</div>
+                            <p className="text-sm text-gray-500">Reset invoice number sequence</p>
+                          </div>
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
+                            Reset Numbers
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg border border-red-200 dark:border-red-900">
+                          <div>
+                            <div className="font-medium">Delete All Data</div>
+                            <p className="text-sm text-gray-500">Permanently delete all invoice data</p>
+                          </div>
+                          <Button variant="destructive">
+                            Delete All Data
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 
