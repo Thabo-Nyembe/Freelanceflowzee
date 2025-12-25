@@ -116,6 +116,71 @@ interface MaintenanceSchedule {
   checklist: string[]
 }
 
+interface Technician {
+  id: string
+  name: string
+  email: string
+  phone: string
+  role: string
+  department: string
+  skills: string[]
+  certifications: string[]
+  status: 'available' | 'busy' | 'off_duty' | 'on_leave'
+  currentWorkOrder?: string
+  completedOrders: number
+  avgRating: number
+  avatar?: string
+}
+
+interface SparePartInventory {
+  id: string
+  partNumber: string
+  name: string
+  category: string
+  manufacturer: string
+  quantity: number
+  minQuantity: number
+  maxQuantity: number
+  unitCost: number
+  location: string
+  lastRestocked: string
+  status: 'in_stock' | 'low_stock' | 'out_of_stock' | 'on_order'
+  leadTime: number // days
+  supplier: string
+}
+
+interface Vendor {
+  id: string
+  name: string
+  contactPerson: string
+  email: string
+  phone: string
+  address: string
+  category: string
+  rating: number
+  contractStart: string
+  contractEnd: string
+  status: 'active' | 'inactive' | 'pending'
+  totalOrders: number
+  lastOrderDate: string
+}
+
+interface Incident {
+  id: string
+  incidentNumber: string
+  title: string
+  description: string
+  priority: Priority
+  status: 'new' | 'investigating' | 'resolved' | 'closed'
+  affectedAssets: string[]
+  reportedBy: string
+  reportedAt: string
+  resolvedAt?: string
+  rootCause?: string
+  resolution?: string
+  workOrderId?: string
+}
+
 // Mock Data
 const mockWorkOrders: WorkOrder[] = [
   {
@@ -301,6 +366,69 @@ const mockSchedules: MaintenanceSchedule[] = [
   { id: '4', name: 'Elevator Safety Inspection', description: 'Monthly safety inspection as per regulations', type: 'inspection', frequency: 'monthly', assets: ['AST-004'], lastRun: '2024-11-27', nextRun: '2024-12-27', duration: 180, active: true, assignedTeam: 'Elevator Contractor', checklist: ['Safety brake test', 'Door sensor test', 'Emergency phone test', 'Lubrication'] }
 ]
 
+const mockTechnicians: Technician[] = [
+  { id: '1', name: 'John Smith', email: 'john@company.com', phone: '555-0101', role: 'Maintenance Tech', department: 'Facilities', skills: ['HVAC', 'Electrical', 'Plumbing'], certifications: ['EPA 608', 'OSHA 10'], status: 'busy', currentWorkOrder: 'WO-2024-001', completedOrders: 156, avgRating: 4.8 },
+  { id: '2', name: 'Sarah Johnson', email: 'sarah@company.com', phone: '555-0102', role: 'HVAC Specialist', department: 'Facilities', skills: ['HVAC', 'Refrigeration', 'Controls'], certifications: ['EPA 608', 'NATE'], status: 'busy', currentWorkOrder: 'WO-2024-001', completedOrders: 203, avgRating: 4.9 },
+  { id: '3', name: 'Mike Wilson', email: 'mike@company.com', phone: '555-0103', role: 'Electrical Tech', department: 'Electrical', skills: ['Electrical', 'PLC', 'Motors'], certifications: ['Journeyman Electrician', 'OSHA 30'], status: 'available', completedOrders: 189, avgRating: 4.7 },
+  { id: '4', name: 'Emily Brown', email: 'emily@company.com', phone: '555-0104', role: 'IT Tech', department: 'IT', skills: ['Servers', 'Networking', 'UPS'], certifications: ['CompTIA A+', 'Network+'], status: 'available', completedOrders: 98, avgRating: 4.6 },
+  { id: '5', name: 'David Lee', email: 'david@company.com', phone: '555-0105', role: 'Mechanical Tech', department: 'Manufacturing', skills: ['Mechanical', 'Hydraulics', 'Conveyors'], certifications: ['CMRT', 'CRL'], status: 'on_leave', completedOrders: 234, avgRating: 4.8 },
+  { id: '6', name: 'Lisa Garcia', email: 'lisa@company.com', phone: '555-0106', role: 'Supervisor', department: 'Facilities', skills: ['Management', 'HVAC', 'Electrical'], certifications: ['CMRP', 'PMP'], status: 'available', completedOrders: 312, avgRating: 4.9 }
+]
+
+const mockInventory: SparePartInventory[] = [
+  { id: '1', partNumber: 'AF-2424-M', name: 'Air Filter 24x24', category: 'HVAC Filters', manufacturer: '3M', quantity: 48, minQuantity: 20, maxQuantity: 100, unitCost: 25.00, location: 'Warehouse A-1', lastRestocked: '2024-12-15', status: 'in_stock', leadTime: 3, supplier: 'HVAC Supply Co' },
+  { id: '2', partNumber: 'REF-410A-25', name: 'Refrigerant R-410A 25lb', category: 'Refrigerants', manufacturer: 'Honeywell', quantity: 8, minQuantity: 10, maxQuantity: 30, unitCost: 150.00, location: 'Warehouse A-2', lastRestocked: '2024-12-10', status: 'low_stock', leadTime: 5, supplier: 'Refrigerant Depot' },
+  { id: '3', partNumber: 'FP-GEN-100', name: 'Fuel Pump Assembly', category: 'Generator Parts', manufacturer: 'Caterpillar', quantity: 2, minQuantity: 1, maxQuantity: 5, unitCost: 450.00, location: 'Warehouse B-1', lastRestocked: '2024-11-20', status: 'in_stock', leadTime: 14, supplier: 'CAT Parts Direct' },
+  { id: '4', partNumber: 'BAT-UPS-3000', name: 'UPS Battery Pack', category: 'UPS Parts', manufacturer: 'APC', quantity: 12, minQuantity: 8, maxQuantity: 24, unitCost: 200.00, location: 'Warehouse C-1', lastRestocked: '2024-12-01', status: 'in_stock', leadTime: 7, supplier: 'APC Direct' },
+  { id: '5', partNumber: 'CB-100M-HD', name: 'Conveyor Belt 100m HD', category: 'Conveyor Parts', manufacturer: 'Dorner', quantity: 0, minQuantity: 1, maxQuantity: 3, unitCost: 2500.00, location: 'Warehouse D-1', lastRestocked: '2024-10-15', status: 'on_order', leadTime: 21, supplier: 'Industrial Belts Inc' },
+  { id: '6', partNumber: 'BRG-6205-2RS', name: 'Ball Bearing 6205-2RS', category: 'Bearings', manufacturer: 'SKF', quantity: 24, minQuantity: 20, maxQuantity: 50, unitCost: 15.00, location: 'Warehouse A-3', lastRestocked: '2024-12-18', status: 'in_stock', leadTime: 2, supplier: 'Bearing World' },
+  { id: '7', partNumber: 'OIL-10W30-5G', name: 'Motor Oil 10W-30 5gal', category: 'Lubricants', manufacturer: 'Mobil', quantity: 6, minQuantity: 8, maxQuantity: 20, unitCost: 85.00, location: 'Warehouse A-4', lastRestocked: '2024-12-05', status: 'low_stock', leadTime: 3, supplier: 'Lubricant Supply' },
+  { id: '8', partNumber: 'VBT-50MM', name: 'V-Belt 50mm', category: 'Belts', manufacturer: 'Gates', quantity: 15, minQuantity: 10, maxQuantity: 30, unitCost: 35.00, location: 'Warehouse A-5', lastRestocked: '2024-12-12', status: 'in_stock', leadTime: 4, supplier: 'Belt Masters' }
+]
+
+const mockVendors: Vendor[] = [
+  { id: '1', name: 'HVAC Supply Co', contactPerson: 'Robert Taylor', email: 'robert@hvacsupply.com', phone: '555-1001', address: '123 Industrial Blvd', category: 'HVAC Equipment', rating: 4.8, contractStart: '2024-01-01', contractEnd: '2025-12-31', status: 'active', totalOrders: 89, lastOrderDate: '2024-12-20' },
+  { id: '2', name: 'CAT Parts Direct', contactPerson: 'Amanda White', email: 'amanda@catparts.com', phone: '555-1002', address: '456 Equipment Way', category: 'Generator Parts', rating: 4.9, contractStart: '2023-06-01', contractEnd: '2025-05-31', status: 'active', totalOrders: 34, lastOrderDate: '2024-11-20' },
+  { id: '3', name: 'Industrial Belts Inc', contactPerson: 'James Brown', email: 'james@indbelts.com', phone: '555-1003', address: '789 Manufacturing St', category: 'Conveyor Parts', rating: 4.5, contractStart: '2024-03-01', contractEnd: '2025-02-28', status: 'active', totalOrders: 23, lastOrderDate: '2024-12-18' },
+  { id: '4', name: 'Elevator Services Ltd', contactPerson: 'Michelle Chen', email: 'michelle@elevatorsvcs.com', phone: '555-1004', address: '321 Tower Dr', category: 'Elevator Maintenance', rating: 4.7, contractStart: '2024-01-01', contractEnd: '2025-12-31', status: 'active', totalOrders: 12, lastOrderDate: '2024-11-27' }
+]
+
+const mockIncidents: Incident[] = [
+  { id: '1', incidentNumber: 'INC-2024-001', title: 'Generator Failed During Test', description: 'Backup generator failed to start during monthly load test', priority: 'critical', status: 'resolved', affectedAssets: ['AST-002'], reportedBy: 'Operations Manager', reportedAt: '2024-12-24T13:00:00Z', resolvedAt: '2024-12-24T17:45:00Z', rootCause: 'Fuel pump failure', resolution: 'Replaced fuel pump assembly', workOrderId: 'WO-2024-002' },
+  { id: '2', incidentNumber: 'INC-2024-002', title: 'Conveyor Belt Degradation', description: 'Visible cracks on production line 3 conveyor belt', priority: 'high', status: 'investigating', affectedAssets: ['AST-005'], reportedBy: 'Production Manager', reportedAt: '2024-12-22T11:00:00Z', workOrderId: 'WO-2024-005' },
+  { id: '3', incidentNumber: 'INC-2024-003', title: 'HVAC Temperature Fluctuation', description: 'Building A experiencing temperature inconsistencies', priority: 'medium', status: 'new', affectedAssets: ['AST-001'], reportedBy: 'Facilities Manager', reportedAt: '2024-12-25T08:00:00Z' }
+]
+
+const getInventoryStatusColor = (status: SparePartInventory['status']): string => {
+  const colors = {
+    in_stock: 'bg-green-100 text-green-700',
+    low_stock: 'bg-yellow-100 text-yellow-700',
+    out_of_stock: 'bg-red-100 text-red-700',
+    on_order: 'bg-blue-100 text-blue-700'
+  }
+  return colors[status]
+}
+
+const getTechnicianStatusColor = (status: Technician['status']): string => {
+  const colors = {
+    available: 'bg-green-100 text-green-700',
+    busy: 'bg-yellow-100 text-yellow-700',
+    off_duty: 'bg-gray-100 text-gray-700',
+    on_leave: 'bg-purple-100 text-purple-700'
+  }
+  return colors[status]
+}
+
+const getIncidentStatusColor = (status: Incident['status']): string => {
+  const colors = {
+    new: 'bg-blue-100 text-blue-700',
+    investigating: 'bg-yellow-100 text-yellow-700',
+    resolved: 'bg-green-100 text-green-700',
+    closed: 'bg-gray-100 text-gray-700'
+  }
+  return colors[status]
+}
+
 // Helper functions
 const getStatusColor = (status: MaintenanceStatus): string => {
   const colors: Record<MaintenanceStatus, string> = {
@@ -478,9 +606,13 @@ export default function MaintenanceClient() {
                 <Calendar className="w-4 h-4 mr-2" />
                 Schedules
               </TabsTrigger>
-              <TabsTrigger value="reports" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-600 data-[state=active]:text-white">
-                <FileText className="w-4 h-4 mr-2" />
-                Reports
+              <TabsTrigger value="inventory" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-600 data-[state=active]:text-white">
+                <Database className="w-4 h-4 mr-2" />
+                Inventory
+              </TabsTrigger>
+              <TabsTrigger value="team" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-600 data-[state=active]:text-white">
+                <Users className="w-4 h-4 mr-2" />
+                Team
               </TabsTrigger>
               <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-amber-600 data-[state=active]:text-white">
                 <Settings className="w-4 h-4 mr-2" />
@@ -870,6 +1002,325 @@ export default function MaintenanceClient() {
                         <div className="flex justify-between"><span className="text-gray-500">Budget Used</span><span className="font-semibold">78%</span></div>
                       </div>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Inventory Tab */}
+            <TabsContent value="inventory" className="space-y-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Spare Parts Inventory</h3>
+                  <p className="text-sm text-gray-500">Manage spare parts and supplies for maintenance operations</p>
+                </div>
+                <div className="flex gap-3">
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Download className="w-4 h-4" />
+                    Export
+                  </Button>
+                  <Button className="bg-gradient-to-r from-orange-600 to-amber-600 text-white flex items-center gap-2">
+                    <Plus className="w-4 h-4" />
+                    Add Part
+                  </Button>
+                </div>
+              </div>
+
+              {/* Inventory Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockInventory.filter(i => i.status === 'in_stock').length}</p>
+                        <p className="text-xs text-gray-500">In Stock</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg">
+                        <AlertTriangle className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockInventory.filter(i => i.status === 'low_stock').length}</p>
+                        <p className="text-xs text-gray-500">Low Stock</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg">
+                        <RotateCw className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockInventory.filter(i => i.status === 'on_order').length}</p>
+                        <p className="text-xs text-gray-500">On Order</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg">
+                        <Database className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">${mockInventory.reduce((sum, i) => sum + (i.quantity * i.unitCost), 0).toLocaleString()}</p>
+                        <p className="text-xs text-gray-500">Total Value</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Inventory Table */}
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardContent className="p-0">
+                  <ScrollArea className="h-[500px]">
+                    <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                      {mockInventory.map((part) => (
+                        <div key={part.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg">
+                                <Database className="w-5 h-5 text-white" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="font-semibold text-gray-900 dark:text-white">{part.name}</p>
+                                  <Badge className={getInventoryStatusColor(part.status)}>{part.status.replace('_', ' ')}</Badge>
+                                </div>
+                                <p className="text-sm text-gray-500">{part.partNumber} • {part.manufacturer}</p>
+                                <p className="text-xs text-gray-400">{part.category} • {part.location}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="flex items-center gap-4">
+                                <div>
+                                  <p className="font-semibold text-gray-900 dark:text-white">{part.quantity} units</p>
+                                  <p className="text-xs text-gray-500">Min: {part.minQuantity} / Max: {part.maxQuantity}</p>
+                                </div>
+                                <div>
+                                  <p className="font-semibold text-gray-900 dark:text-white">${part.unitCost.toFixed(2)}</p>
+                                  <p className="text-xs text-gray-500">per unit</p>
+                                </div>
+                                <div>
+                                  <p className="text-sm text-gray-500">Lead: {part.leadTime}d</p>
+                                  <p className="text-xs text-gray-400">{part.supplier}</p>
+                                </div>
+                              </div>
+                              {part.status === 'low_stock' && (
+                                <Button size="sm" variant="outline" className="mt-2">
+                                  <RefreshCw className="w-3 h-3 mr-1" />
+                                  Reorder
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              {/* Vendors Section */}
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-purple-600" />
+                    Approved Vendors
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {mockVendors.map((vendor) => (
+                      <div key={vendor.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <p className="font-semibold text-gray-900 dark:text-white">{vendor.name}</p>
+                            <p className="text-sm text-gray-500">{vendor.category}</p>
+                          </div>
+                          <Badge className={vendor.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{vendor.status}</Badge>
+                        </div>
+                        <div className="text-sm space-y-1">
+                          <p className="text-gray-600">{vendor.contactPerson}</p>
+                          <p className="text-gray-500">{vendor.email}</p>
+                          <div className="flex justify-between mt-2">
+                            <span className="text-gray-500">Rating: {'★'.repeat(Math.floor(vendor.rating))}</span>
+                            <span className="text-gray-500">{vendor.totalOrders} orders</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Team Tab */}
+            <TabsContent value="team" className="space-y-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Maintenance Team</h3>
+                  <p className="text-sm text-gray-500">Manage technicians, skills, and assignments</p>
+                </div>
+                <Button className="bg-gradient-to-r from-orange-600 to-amber-600 text-white flex items-center gap-2">
+                  <Plus className="w-4 h-4" />
+                  Add Technician
+                </Button>
+              </div>
+
+              {/* Team Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockTechnicians.filter(t => t.status === 'available').length}</p>
+                        <p className="text-xs text-gray-500">Available</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg">
+                        <Activity className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockTechnicians.filter(t => t.status === 'busy').length}</p>
+                        <p className="text-xs text-gray-500">Busy</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg">
+                        <Users className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockTechnicians.length}</p>
+                        <p className="text-xs text-gray-500">Total Team</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg">
+                        <Target className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{(mockTechnicians.reduce((sum, t) => sum + t.avgRating, 0) / mockTechnicians.length).toFixed(1)}</p>
+                        <p className="text-xs text-gray-500">Avg Rating</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Technicians List */}
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardContent className="p-0">
+                  <ScrollArea className="h-[500px]">
+                    <div className="divide-y divide-gray-100 dark:divide-gray-700">
+                      {mockTechnicians.map((tech) => (
+                        <div key={tech.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <Avatar className="w-12 h-12">
+                                <AvatarFallback className="bg-gradient-to-br from-orange-500 to-amber-600 text-white font-semibold">
+                                  {tech.name.split(' ').map(n => n[0]).join('')}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="font-semibold text-gray-900 dark:text-white">{tech.name}</p>
+                                  <Badge className={getTechnicianStatusColor(tech.status)}>{tech.status.replace('_', ' ')}</Badge>
+                                </div>
+                                <p className="text-sm text-gray-500">{tech.role} • {tech.department}</p>
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {tech.skills.map((skill, idx) => (
+                                    <Badge key={idx} variant="outline" className="text-xs">{skill}</Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="flex items-center gap-4">
+                                <div>
+                                  <p className="font-semibold text-gray-900 dark:text-white">{tech.completedOrders}</p>
+                                  <p className="text-xs text-gray-500">Completed</p>
+                                </div>
+                                <div>
+                                  <p className="font-semibold text-gray-900 dark:text-white">{'★'.repeat(Math.floor(tech.avgRating))}</p>
+                                  <p className="text-xs text-gray-500">{tech.avgRating} rating</p>
+                                </div>
+                              </div>
+                              {tech.currentWorkOrder && (
+                                <p className="text-xs text-blue-600 mt-2">Working on: {tech.currentWorkOrder}</p>
+                              )}
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {tech.certifications.map((cert, idx) => (
+                                  <Badge key={idx} className="bg-blue-100 text-blue-700 text-xs">{cert}</Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              {/* Incidents Section */}
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5 text-red-600" />
+                    Recent Incidents
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {mockIncidents.map((incident) => (
+                      <div key={incident.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <Badge className={getIncidentStatusColor(incident.status)}>{incident.status}</Badge>
+                            <Badge className={getPriorityColor(incident.priority)}>{incident.priority}</Badge>
+                          </div>
+                          <span className="text-xs text-gray-500">{incident.incidentNumber}</span>
+                        </div>
+                        <p className="font-semibold text-gray-900 dark:text-white">{incident.title}</p>
+                        <p className="text-sm text-gray-500 mt-1">{incident.description}</p>
+                        <div className="flex justify-between mt-3 text-xs text-gray-500">
+                          <span>Reported by: {incident.reportedBy}</span>
+                          <span>{formatDateTime(incident.reportedAt)}</span>
+                        </div>
+                        {incident.workOrderId && (
+                          <p className="text-xs text-blue-600 mt-2">Linked: {incident.workOrderId}</p>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
