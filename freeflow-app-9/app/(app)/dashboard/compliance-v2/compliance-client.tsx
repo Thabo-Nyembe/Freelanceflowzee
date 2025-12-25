@@ -8,7 +8,16 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   ShieldCheck, FileCheck, AlertTriangle, CheckCircle2, XCircle, Clock, Plus,
@@ -16,7 +25,9 @@ import {
   FileText, AlertCircle, TrendingUp, TrendingDown, Target, Clipboard,
   Settings, History, ExternalLink, Lock, Unlock, BarChart3, PieChart,
   ClipboardCheck, ClipboardList, FileWarning, Scale, Building, Globe,
-  Shield, Zap, RefreshCw, ChevronRight, X, Check, ArrowRight
+  Shield, Zap, RefreshCw, ChevronRight, X, Check, ArrowRight,
+  Key, Webhook, Mail, Database, AlertOctagon, Trash2, Copy, Bell,
+  GitBranch, FileCode, BookOpen, Cpu
 } from 'lucide-react'
 
 // ServiceNow GRC level interfaces
@@ -398,6 +409,7 @@ export default function ComplianceClient() {
   const [selectedControl, setSelectedControl] = useState<Control | null>(null)
   const [showControlDialog, setShowControlDialog] = useState(false)
   const [showEvidenceDialog, setShowEvidenceDialog] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const getFrameworkStatusColor = (status: ComplianceFramework['status']) => {
     switch (status) {
@@ -554,6 +566,10 @@ export default function ComplianceClient() {
             <TabsTrigger value="evidence" className="flex items-center gap-2">
               <Upload className="w-4 h-4" />
               Evidence
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -979,6 +995,511 @@ export default function ComplianceClient() {
                   </div>
                 </Card>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Vanta/Drata Level with 6 Sub-tabs */}
+          <TabsContent value="settings">
+            <div className="flex gap-6">
+              {/* Settings Sidebar */}
+              <div className="w-64 shrink-0">
+                <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 px-3">Settings</h3>
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General' },
+                      { id: 'frameworks', icon: ShieldCheck, label: 'Frameworks' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications' },
+                      { id: 'integrations', icon: Zap, label: 'Integrations' },
+                      { id: 'automation', icon: Cpu, label: 'Automation' },
+                      { id: 'advanced', icon: Lock, label: 'Advanced' }
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        onClick={() => setSettingsTab(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                          settingsTab === item.id
+                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                        }`}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {item.label}
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+              </div>
+
+              {/* Settings Content */}
+              <div className="flex-1 space-y-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <Card className="p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                          <Building className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Organization Settings</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Basic compliance configuration</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Organization Name</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">FreeFlow Inc.</p>
+                          </div>
+                          <Button variant="outline" size="sm">Edit</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Industry</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Software & Technology</p>
+                          </div>
+                          <Select defaultValue="tech">
+                            <SelectTrigger className="w-48">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="tech">Software & Technology</SelectItem>
+                              <SelectItem value="finance">Finance</SelectItem>
+                              <SelectItem value="healthcare">Healthcare</SelectItem>
+                              <SelectItem value="retail">Retail</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Fiscal Year Start</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">When your fiscal year begins</p>
+                          </div>
+                          <Select defaultValue="january">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="january">January</SelectItem>
+                              <SelectItem value="april">April</SelectItem>
+                              <SelectItem value="july">July</SelectItem>
+                              <SelectItem value="october">October</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </Card>
+
+                    <Card className="p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Assessment Schedule</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Configure assessment frequency</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Default Assessment Frequency</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">How often to run assessments</p>
+                          </div>
+                          <Select defaultValue="quarterly">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="monthly">Monthly</SelectItem>
+                              <SelectItem value="quarterly">Quarterly</SelectItem>
+                              <SelectItem value="biannual">Bi-Annual</SelectItem>
+                              <SelectItem value="annual">Annual</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Auto-Schedule Assessments</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically create assessment tasks</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Frameworks Settings */}
+                {settingsTab === 'frameworks' && (
+                  <div className="space-y-6">
+                    <Card className="p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <ShieldCheck className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Active Frameworks</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Manage compliance frameworks</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        {[
+                          { name: 'SOC 2 Type II', enabled: true },
+                          { name: 'ISO 27001', enabled: true },
+                          { name: 'GDPR', enabled: true },
+                          { name: 'HIPAA', enabled: false },
+                          { name: 'PCI DSS', enabled: false },
+                        ].map(framework => (
+                          <div key={framework.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <Label className="text-gray-900 dark:text-white font-medium">{framework.name}</Label>
+                            </div>
+                            <Switch defaultChecked={framework.enabled} />
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Framework
+                        </Button>
+                      </div>
+                    </Card>
+
+                    <Card className="p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                          <Scale className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Risk Thresholds</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Configure risk level definitions</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Critical Threshold</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Score above this is critical</p>
+                          </div>
+                          <Input type="number" defaultValue="90" className="w-24" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">High Threshold</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Score above this is high risk</p>
+                          </div>
+                          <Input type="number" defaultValue="70" className="w-24" />
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <Card className="p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Email Notifications</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Configure email alerts</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Control Failures</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert when controls fail</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Evidence Expiring</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify before evidence expires</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Audit Reminders</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Upcoming audit notifications</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Weekly Digest</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Weekly compliance summary</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </Card>
+
+                    <Card className="p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <Webhook className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Webhook Notifications</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Send alerts to external services</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Slack Integration</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Post compliance alerts to Slack</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">PagerDuty</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Critical failures trigger incidents</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <Label className="text-gray-900 dark:text-white font-medium mb-2 block">Custom Webhook</Label>
+                          <div className="flex gap-2">
+                            <Input placeholder="https://your-webhook-url.com" className="flex-1" />
+                            <Button variant="outline">Test</Button>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <Card className="p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                          <GitBranch className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Connected Services</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Integrate with your tools</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        {[
+                          { name: 'AWS', connected: true },
+                          { name: 'Azure', connected: true },
+                          { name: 'GCP', connected: false },
+                          { name: 'GitHub', connected: true },
+                          { name: 'Jira', connected: true },
+                          { name: 'Okta', connected: false }
+                        ].map(service => (
+                          <div key={service.name} className="flex items-center justify-between p-4 border dark:border-gray-600 rounded-lg">
+                            <span className="font-medium text-gray-900 dark:text-white">{service.name}</span>
+                            <Button variant={service.connected ? 'outline' : 'default'} size="sm">
+                              {service.connected ? 'Configure' : 'Connect'}
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+
+                    <Card className="p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                          <Key className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">API Access</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Manage API tokens</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <Label className="text-gray-900 dark:text-white font-medium">API Token</Label>
+                            <Button variant="outline" size="sm">
+                              <Copy className="h-4 w-4 mr-2" />
+                              Copy
+                            </Button>
+                          </div>
+                          <code className="text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded block font-mono">
+                            grc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                          </code>
+                        </div>
+                        <Button variant="outline" className="w-full">
+                          <RefreshCw className="h-4 w-4 mr-2" />
+                          Regenerate Token
+                        </Button>
+                      </div>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Automation Settings */}
+                {settingsTab === 'automation' && (
+                  <div className="space-y-6">
+                    <Card className="p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                          <Cpu className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Automated Controls</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Auto-verify control compliance</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Enable Automation</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically verify controls</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Check Frequency</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">How often to run checks</p>
+                          </div>
+                          <Select defaultValue="daily">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="hourly">Hourly</SelectItem>
+                              <SelectItem value="daily">Daily</SelectItem>
+                              <SelectItem value="weekly">Weekly</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Auto-collect Evidence</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically gather evidence</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </Card>
+
+                    <Card className="p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg">
+                          <FileCode className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Policy Automation</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Automatic policy management</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Auto-update Policies</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Update when frameworks change</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Policy Review Reminders</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Remind to review policies</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <Card className="p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                          <Database className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Data Management</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Manage compliance data</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div>
+                            <Label className="text-gray-900 dark:text-white font-medium">Evidence Retention</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">How long to keep evidence</p>
+                          </div>
+                          <Select defaultValue="7years">
+                            <SelectTrigger className="w-40">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="3years">3 years</SelectItem>
+                              <SelectItem value="5years">5 years</SelectItem>
+                              <SelectItem value="7years">7 years</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="h-4 w-4 mr-2" />
+                            Export All Data
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <FileText className="h-4 w-4 mr-2" />
+                            Generate Report
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Danger Zone */}
+                    <div className="bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-200 dark:border-red-800 p-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                          <AlertOctagon className="h-5 w-5 text-red-600 dark:text-red-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-red-700 dark:text-red-400">Danger Zone</h3>
+                          <p className="text-sm text-red-600/70 dark:text-red-400/70">Destructive actions</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Reset All Controls</h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Reset all control statuses</p>
+                          </div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20">
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Reset
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">Delete All Evidence</h4>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Permanently remove all evidence</p>
+                          </div>
+                          <Button variant="destructive">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
