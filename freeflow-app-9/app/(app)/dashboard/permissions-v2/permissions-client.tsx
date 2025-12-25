@@ -849,7 +849,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                   <Card><CardHeader><CardTitle>SCIM Configuration</CardTitle></CardHeader><CardContent className="space-y-4">
                     <div className="flex items-center justify-between"><div><p className="font-medium">Enable SCIM</p><p className="text-sm text-gray-500">System for Cross-domain Identity Management</p></div><Switch /></div>
                     <div><Label>SCIM Endpoint</Label><Input value="https://api.company.com/scim/v2" disabled className="mt-1 font-mono text-sm" /></div>
-                    <div><Label>Bearer Token</Label><div className="flex items-center gap-2 mt-1"><Input type="password" value="sk_live_xxxxxxxxxxxxx" disabled /><Button variant="outline" size="sm"><Copy className="w-4 h-4" /></Button></div></div>
+                    <div><Label>Bearer Token</Label><div className="flex items-center gap-2 mt-1"><Input type="password" value="STRIPE_KEY_PLACEHOLDER" disabled /><Button variant="outline" size="sm"><Copy className="w-4 h-4" /></Button></div></div>
                     <Button variant="outline" className="w-full"><RefreshCw className="w-4 h-4 mr-2" />Regenerate Token</Button>
                   </CardContent></Card>
                 </div>

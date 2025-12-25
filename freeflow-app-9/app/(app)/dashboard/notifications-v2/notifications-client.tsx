@@ -937,7 +937,7 @@ export default function NotificationsClient() {
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader><CardTitle>API Access</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
-                      <div><Label>API Key</Label><div className="flex items-center gap-2 mt-1"><Input value="sk_live_xxxxxxxxxxxxxxxx" disabled /><Button variant="outline" size="icon"><Copy className="h-4 w-4" /></Button></div></div>
+                      <div><Label>API Key</Label><div className="flex items-center gap-2 mt-1"><Input value="STRIPE_KEY_PLACEHOLDER" disabled /><Button variant="outline" size="icon"><Copy className="h-4 w-4" /></Button></div></div>
                       <div className="flex items-center justify-between"><div><p className="font-medium">Enable API</p><p className="text-sm text-gray-500">Allow API access</p></div><Switch defaultChecked /></div>
                       <div className="flex items-center justify-between"><div><p className="font-medium">Rate Limiting</p><p className="text-sm text-gray-500">1000 requests/min</p></div><Switch defaultChecked /></div>
                       <Button variant="outline" className="w-full"><RefreshCw className="h-4 w-4 mr-2" />Regenerate API Key</Button>

@@ -9,13 +9,18 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Receipt, DollarSign, CheckCircle, XCircle, Clock, Search, Filter,
   Upload, Camera, CreditCard, Plane, Car, Coffee, ShoppingBag, Briefcase,
   Building, Globe, TrendingUp, Calendar, FileText, Download, AlertTriangle,
   BarChart3, PieChart, Users, Send, Plus, MoreVertical, ChevronRight,
-  Banknote, MapPin, Percent, Shield, ArrowRight, Eye
+  Banknote, MapPin, Percent, Shield, ArrowRight, Eye, Settings, Bell, Link2,
+  Key, Database, Lock, RefreshCw, Mail, Webhook, Palette, Languages, Timer,
+  Wallet, CreditCard as CreditCardIcon, Building2, UserCog
 } from 'lucide-react'
 
 // Types
@@ -174,6 +179,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const [selectedReport, setSelectedReport] = useState<ExpenseReport | null>(null)
   const [showReportDialog, setShowReportDialog] = useState(false)
   const [showNewExpenseDialog, setShowNewExpenseDialog] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const reports = mockReports
   const policies = mockPolicies
@@ -305,6 +311,10 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
             <TabsTrigger value="per-diem">Per Diem</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="policies">Policies</TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Expense Reports Tab */}
@@ -820,6 +830,782 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                 </Card>
               ))}
             </div>
+          </TabsContent>
+
+          {/* Settings Tab - Expensify Level */}
+          <TabsContent value="settings">
+            <Tabs value={settingsTab} onValueChange={setSettingsTab}>
+              <TabsList className="grid w-full grid-cols-6 mb-6">
+                <TabsTrigger value="general" className="gap-2">
+                  <Settings className="w-4 h-4" />
+                  General
+                </TabsTrigger>
+                <TabsTrigger value="approvals" className="gap-2">
+                  <CheckCircle className="w-4 h-4" />
+                  Approvals
+                </TabsTrigger>
+                <TabsTrigger value="payments" className="gap-2">
+                  <Wallet className="w-4 h-4" />
+                  Payments
+                </TabsTrigger>
+                <TabsTrigger value="notifications" className="gap-2">
+                  <Bell className="w-4 h-4" />
+                  Notifications
+                </TabsTrigger>
+                <TabsTrigger value="integrations" className="gap-2">
+                  <Link2 className="w-4 h-4" />
+                  Integrations
+                </TabsTrigger>
+                <TabsTrigger value="advanced" className="gap-2">
+                  <Shield className="w-4 h-4" />
+                  Advanced
+                </TabsTrigger>
+              </TabsList>
+
+              {/* General Settings */}
+              <TabsContent value="general" className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                        <Building2 className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Company Settings</h3>
+                        <p className="text-sm text-gray-500">Organization configuration</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Company Name</Label>
+                        <Input defaultValue="FreeFlow Inc." />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Default Currency</Label>
+                        <Select defaultValue="usd">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="usd">USD ($)</SelectItem>
+                            <SelectItem value="eur">EUR (€)</SelectItem>
+                            <SelectItem value="gbp">GBP (£)</SelectItem>
+                            <SelectItem value="cad">CAD ($)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Fiscal Year Start</Label>
+                        <Select defaultValue="january">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="january">January</SelectItem>
+                            <SelectItem value="april">April</SelectItem>
+                            <SelectItem value="july">July</SelectItem>
+                            <SelectItem value="october">October</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <Receipt className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Expense Defaults</h3>
+                        <p className="text-sm text-gray-500">Default expense settings</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Auto-Categorize Expenses</Label>
+                          <p className="text-xs text-gray-500">Use AI to categorize</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Require Receipts</Label>
+                          <p className="text-xs text-gray-500">For all expenses over $25</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Enable Mileage Tracking</Label>
+                          <p className="text-xs text-gray-500">Track vehicle miles</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Enable Per Diem</Label>
+                          <p className="text-xs text-gray-500">GSA per diem rates</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+
+                <Card className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                      <Globe className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Localization</h3>
+                      <p className="text-sm text-gray-500">Regional preferences</p>
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label>Date Format</Label>
+                      <Select defaultValue="mdy">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="mdy">MM/DD/YYYY</SelectItem>
+                          <SelectItem value="dmy">DD/MM/YYYY</SelectItem>
+                          <SelectItem value="ymd">YYYY-MM-DD</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Number Format</Label>
+                      <Select defaultValue="us">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="us">1,234.56</SelectItem>
+                          <SelectItem value="eu">1.234,56</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Timezone</Label>
+                      <Select defaultValue="est">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="est">Eastern Time</SelectItem>
+                          <SelectItem value="pst">Pacific Time</SelectItem>
+                          <SelectItem value="utc">UTC</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </Card>
+              </TabsContent>
+
+              {/* Approvals Settings */}
+              <TabsContent value="approvals" className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Approval Workflow</h3>
+                        <p className="text-sm text-gray-500">Configure approval process</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Approval Mode</Label>
+                        <Select defaultValue="manager">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="manager">Manager Approval</SelectItem>
+                            <SelectItem value="department">Department Head</SelectItem>
+                            <SelectItem value="finance">Finance Team</SelectItem>
+                            <SelectItem value="custom">Custom Workflow</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Auto-Approve Threshold</Label>
+                        <Select defaultValue="50">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="0">No auto-approve</SelectItem>
+                            <SelectItem value="25">Under $25</SelectItem>
+                            <SelectItem value="50">Under $50</SelectItem>
+                            <SelectItem value="100">Under $100</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Multi-Level Approval</Label>
+                          <p className="text-xs text-gray-500">For large expenses</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Delegate Approval</Label>
+                          <p className="text-xs text-gray-500">Allow delegation</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                        <Timer className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Timing & Deadlines</h3>
+                        <p className="text-sm text-gray-500">Submission and approval windows</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Submission Deadline</Label>
+                        <Select defaultValue="30">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="7">Within 7 days</SelectItem>
+                            <SelectItem value="14">Within 14 days</SelectItem>
+                            <SelectItem value="30">Within 30 days</SelectItem>
+                            <SelectItem value="60">Within 60 days</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Approval SLA</Label>
+                        <Select defaultValue="3">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">1 business day</SelectItem>
+                            <SelectItem value="3">3 business days</SelectItem>
+                            <SelectItem value="5">5 business days</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Escalation</Label>
+                          <p className="text-xs text-gray-500">Auto-escalate overdue</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+
+                <Card className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                      <Users className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Approval Chain</h3>
+                      <p className="text-sm text-gray-500">Configure approval hierarchy</p>
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-4 gap-4">
+                    {[
+                      { level: 'Level 1', threshold: '$0 - $500', approver: 'Direct Manager' },
+                      { level: 'Level 2', threshold: '$500 - $2,000', approver: 'Department Head' },
+                      { level: 'Level 3', threshold: '$2,000 - $10,000', approver: 'Finance Director' },
+                      { level: 'Level 4', threshold: '$10,000+', approver: 'CFO' },
+                    ].map((item, idx) => (
+                      <div key={idx} className="p-4 border rounded-lg dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                        <Badge className="mb-2">{item.level}</Badge>
+                        <div className="text-lg font-semibold text-purple-600">{item.threshold}</div>
+                        <p className="text-sm text-gray-500">{item.approver}</p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              </TabsContent>
+
+              {/* Payments Settings */}
+              <TabsContent value="payments" className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                        <Banknote className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Reimbursement Settings</h3>
+                        <p className="text-sm text-gray-500">Configure payment options</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Reimbursement Method</Label>
+                        <Select defaultValue="ach">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="ach">ACH Direct Deposit</SelectItem>
+                            <SelectItem value="check">Check</SelectItem>
+                            <SelectItem value="payroll">Via Payroll</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Payment Schedule</Label>
+                        <Select defaultValue="weekly">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="daily">Daily</SelectItem>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                            <SelectItem value="biweekly">Bi-Weekly</SelectItem>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Auto-Reimburse</Label>
+                          <p className="text-xs text-gray-500">After approval</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <CreditCard className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Corporate Cards</h3>
+                        <p className="text-sm text-gray-500">Card integration settings</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Auto-Import Transactions</Label>
+                          <p className="text-xs text-gray-500">Sync card expenses</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Match Receipts</Label>
+                          <p className="text-xs text-gray-500">Auto-match with receipts</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Reconciliation Alerts</Label>
+                          <p className="text-xs text-gray-500">Missing receipt reminders</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <Button variant="outline" className="w-full gap-2">
+                        <Plus className="w-4 h-4" />
+                        Connect Corporate Card
+                      </Button>
+                    </div>
+                  </Card>
+                </div>
+
+                <Card className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                      <Car className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Mileage Rates</h3>
+                      <p className="text-sm text-gray-500">Configure mileage reimbursement</p>
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-4 gap-4">
+                    <div className="space-y-2">
+                      <Label>IRS Standard Rate</Label>
+                      <Input defaultValue="$0.67" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Company Rate</Label>
+                      <Input defaultValue="$0.67" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Unit</Label>
+                      <Select defaultValue="miles">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="miles">Miles</SelectItem>
+                          <SelectItem value="km">Kilometers</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-600">
+                      <div>
+                        <Label>GPS Tracking</Label>
+                        <p className="text-xs text-gray-500">Auto-track trips</p>
+                      </div>
+                      <Switch />
+                    </div>
+                  </div>
+                </Card>
+              </TabsContent>
+
+              {/* Notifications Settings */}
+              <TabsContent value="notifications" className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <Mail className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Email Notifications</h3>
+                        <p className="text-sm text-gray-500">Expense email alerts</p>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      {[
+                        { label: 'Expense Submitted', desc: 'When report is submitted', enabled: true },
+                        { label: 'Expense Approved', desc: 'When report is approved', enabled: true },
+                        { label: 'Expense Rejected', desc: 'When report is rejected', enabled: true },
+                        { label: 'Reimbursement Sent', desc: 'When payment is processed', enabled: true },
+                        { label: 'Pending Approval', desc: 'Awaiting your approval', enabled: true },
+                        { label: 'Policy Violation', desc: 'Expense exceeds policy', enabled: true },
+                      ].map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <div>
+                            <Label className="font-medium">{item.label}</Label>
+                            <p className="text-xs text-gray-500">{item.desc}</p>
+                          </div>
+                          <Switch defaultChecked={item.enabled} />
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+
+                  <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                        <UserCog className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Approver Notifications</h3>
+                        <p className="text-sm text-gray-500">Alerts for approvers</p>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      {[
+                        { label: 'New Expense Pending', desc: 'Report awaiting approval', enabled: true },
+                        { label: 'Daily Digest', desc: 'Summary of pending items', enabled: true },
+                        { label: 'Overdue Approvals', desc: 'Past SLA deadline', enabled: true },
+                        { label: 'Large Expense Alert', desc: 'Expenses over threshold', enabled: true },
+                      ].map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <div>
+                            <Label className="font-medium">{item.label}</Label>
+                            <p className="text-xs text-gray-500">{item.desc}</p>
+                          </div>
+                          <Switch defaultChecked={item.enabled} />
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                </div>
+
+                <Card className="p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                      <Bell className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Reminder Settings</h3>
+                      <p className="text-sm text-gray-500">Automatic reminders</p>
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label>Receipt Reminder</Label>
+                      <Select defaultValue="3">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">1 day after</SelectItem>
+                          <SelectItem value="3">3 days after</SelectItem>
+                          <SelectItem value="7">7 days after</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Submission Reminder</Label>
+                      <Select defaultValue="weekly">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Approval Reminder</Label>
+                      <Select defaultValue="2">
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="1">1 day pending</SelectItem>
+                          <SelectItem value="2">2 days pending</SelectItem>
+                          <SelectItem value="3">3 days pending</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </Card>
+              </TabsContent>
+
+              {/* Integrations Settings */}
+              <TabsContent value="integrations" className="space-y-6">
+                <Card className="p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                      <Link2 className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Connected Services</h3>
+                      <p className="text-sm text-gray-500">Third-party integrations</p>
+                    </div>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {[
+                      { name: 'QuickBooks', desc: 'Accounting sync', status: 'connected', icon: '📊' },
+                      { name: 'Xero', desc: 'Financial data', status: 'available', icon: '💰' },
+                      { name: 'NetSuite', desc: 'ERP integration', status: 'available', icon: '🔗' },
+                      { name: 'Slack', desc: 'Team notifications', status: 'connected', icon: '💬' },
+                      { name: 'Google Workspace', desc: 'Receipt scanning', status: 'connected', icon: '📧' },
+                      { name: 'SAP Concur', desc: 'Travel & expense', status: 'available', icon: '✈️' },
+                    ].map((integration, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{integration.icon}</span>
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">{integration.name}</div>
+                            <p className="text-sm text-gray-500">{integration.desc}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={
+                            integration.status === 'connected'
+                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                              : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
+                          }>
+                            {integration.status === 'connected' ? 'Connected' : 'Available'}
+                          </Badge>
+                          <Button size="sm" variant="outline">
+                            {integration.status === 'connected' ? 'Configure' : 'Connect'}
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                        <Webhook className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Webhooks</h3>
+                        <p className="text-sm text-gray-500">Real-time expense events</p>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <Label>Webhook URL</Label>
+                        <Input placeholder="https://api.yourapp.com/webhooks/expenses" />
+                      </div>
+                      <Button variant="outline" className="w-full gap-2">
+                        <Plus className="w-4 h-4" />
+                        Add Webhook
+                      </Button>
+                    </div>
+                  </Card>
+
+                  <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <Key className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">API Access</h3>
+                        <p className="text-sm text-gray-500">Developer API keys</p>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg font-mono text-sm">
+                        ••••••••••••••••••••
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" className="flex-1 gap-2">
+                          Copy Key
+                        </Button>
+                        <Button variant="outline" className="gap-2">
+                          <RefreshCw className="w-4 h-4" />
+                          Regenerate
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              {/* Advanced Settings */}
+              <TabsContent value="advanced" className="space-y-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <Shield className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Security</h3>
+                        <p className="text-sm text-gray-500">Security settings</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Two-Factor Authentication</Label>
+                          <p className="text-xs text-gray-500">Require 2FA for approvers</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>SSO Only</Label>
+                          <p className="text-xs text-gray-500">Require SSO login</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Audit Logging</Label>
+                          <p className="text-xs text-gray-500">Log all changes</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>IP Restriction</Label>
+                          <p className="text-xs text-gray-500">Limit by IP address</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </div>
+                  </Card>
+
+                  <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                        <Database className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Data Management</h3>
+                        <p className="text-sm text-gray-500">Data retention & export</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label>Data Retention</Label>
+                        <Select defaultValue="7">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="3">3 years</SelectItem>
+                            <SelectItem value="5">5 years</SelectItem>
+                            <SelectItem value="7">7 years</SelectItem>
+                            <SelectItem value="10">10 years</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Auto-Archive</Label>
+                          <p className="text-xs text-gray-500">Archive old reports</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <Button variant="outline" className="w-full gap-2">
+                        <Download className="w-4 h-4" />
+                        Export All Data
+                      </Button>
+                    </div>
+                  </Card>
+                </div>
+
+                <Card className="p-6 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                      <AlertTriangle className="w-5 h-5 text-red-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-red-700 dark:text-red-400">Danger Zone</h3>
+                      <p className="text-sm text-red-600 dark:text-red-400">Irreversible actions</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-700 rounded-lg bg-white dark:bg-gray-800">
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">Reset All Policies</div>
+                        <p className="text-sm text-gray-500">Restore default expense policies</p>
+                      </div>
+                      <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                        Reset
+                      </Button>
+                    </div>
+                    <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-700 rounded-lg bg-white dark:bg-gray-800">
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-white">Delete All Draft Reports</div>
+                        <p className="text-sm text-gray-500">Remove all unsubmitted reports</p>
+                      </div>
+                      <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </div>

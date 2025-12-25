@@ -1483,7 +1483,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                             <Label>API Key</Label>
                             <Button variant="ghost" size="sm">Regenerate</Button>
                           </div>
-                          <Input type="password" value="sk_live_••••••••••••••••" readOnly className="font-mono" />
+                          <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
                         </div>
                         <div className="flex items-center gap-4">
                           <Button variant="outline" className="flex items-center gap-2">
