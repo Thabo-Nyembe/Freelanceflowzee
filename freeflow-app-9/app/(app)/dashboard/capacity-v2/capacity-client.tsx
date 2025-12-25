@@ -1,9 +1,17 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { useCapacity, type Capacity, type ResourceType, type CapacityStatus } from '@/lib/hooks/use-capacity'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Settings, Bell, Calendar, Users, Clock, Briefcase, Globe, Zap, Download, Upload, RefreshCw, Plus, Link2, BarChart3, Shield, Palette, AlertTriangle } from 'lucide-react'
 
 // Resource Guru / Float level interfaces
 interface TeamMember {
@@ -293,6 +301,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [viewMode, setViewMode] = useState<'list' | 'timeline'>('list')
+  const [settingsTab, setSettingsTab] = useState('scheduling')
   const { capacity, loading, error } = useCapacity({ resourceType: resourceTypeFilter, status: statusFilter })
   const displayCapacity = capacity.length > 0 ? capacity : initialCapacity
 
@@ -387,6 +396,10 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
             <TabsTrigger value="projects" className="data-[state=active]:bg-indigo-100 data-[state=active]:text-indigo-700 dark:data-[state=active]:bg-indigo-900/40 dark:data-[state=active]:text-indigo-300">Projects</TabsTrigger>
             <TabsTrigger value="schedule" className="data-[state=active]:bg-indigo-100 data-[state=active]:text-indigo-700 dark:data-[state=active]:bg-indigo-900/40 dark:data-[state=active]:text-indigo-300">Schedule</TabsTrigger>
             <TabsTrigger value="forecast" className="data-[state=active]:bg-indigo-100 data-[state=active]:text-indigo-700 dark:data-[state=active]:bg-indigo-900/40 dark:data-[state=active]:text-indigo-300">Forecast</TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-indigo-100 data-[state=active]:text-indigo-700 dark:data-[state=active]:bg-indigo-900/40 dark:data-[state=active]:text-indigo-300">
+              <Settings className="w-4 h-4 mr-1" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -952,6 +965,650 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+              {/* Settings Sub-tabs */}
+              <div className="border-b border-gray-200 dark:border-gray-700">
+                <div className="flex gap-1 p-2 overflow-x-auto">
+                  {[
+                    { id: 'scheduling', label: 'Scheduling', icon: Calendar },
+                    { id: 'team', label: 'Team', icon: Users },
+                    { id: 'projects', label: 'Projects', icon: Briefcase },
+                    { id: 'notifications', label: 'Notifications', icon: Bell },
+                    { id: 'integrations', label: 'Integrations', icon: Link2 },
+                    { id: 'advanced', label: 'Advanced', icon: Zap }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setSettingsTab(tab.id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                        settingsTab === tab.id
+                          ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      <tab.icon className="w-4 h-4" />
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-6">
+                {/* Scheduling Settings */}
+                {settingsTab === 'scheduling' && (
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Scheduling Configuration</h3>
+
+                      <Card className="mb-6">
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <Clock className="w-5 h-5 text-indigo-600" />
+                            Work Hours
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label>Default Hours Per Day</Label>
+                              <Select defaultValue="8">
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="6">6 hours</SelectItem>
+                                  <SelectItem value="7">7 hours</SelectItem>
+                                  <SelectItem value="8">8 hours</SelectItem>
+                                  <SelectItem value="9">9 hours</SelectItem>
+                                  <SelectItem value="10">10 hours</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label>Hours Per Week</Label>
+                              <Select defaultValue="40">
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="35">35 hours</SelectItem>
+                                  <SelectItem value="37.5">37.5 hours</SelectItem>
+                                  <SelectItem value="40">40 hours</SelectItem>
+                                  <SelectItem value="45">45 hours</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Weekend Days</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Exclude weekends from capacity calculation</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Half-Day Fridays</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Enable summer hours or flex Fridays</p>
+                            </div>
+                            <Switch />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="mb-6">
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <Globe className="w-5 h-5 text-blue-600" />
+                            Time Zones
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div>
+                            <Label>Default Time Zone</Label>
+                            <Select defaultValue="utc-5">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc-8">Pacific Time (UTC-8)</SelectItem>
+                                <SelectItem value="utc-7">Mountain Time (UTC-7)</SelectItem>
+                                <SelectItem value="utc-6">Central Time (UTC-6)</SelectItem>
+                                <SelectItem value="utc-5">Eastern Time (UTC-5)</SelectItem>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="utc+1">Central European (UTC+1)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div>
+                              <Label>Show Team Time Zones</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Display local times for remote team members</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <AlertTriangle className="w-5 h-5 text-amber-600" />
+                            Utilization Thresholds
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label>Warning Threshold</Label>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Input type="number" defaultValue="85" className="w-20" />
+                                <span className="text-sm text-gray-500">%</span>
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1">Shows amber warning</p>
+                            </div>
+                            <div>
+                              <Label>Overbooked Threshold</Label>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Input type="number" defaultValue="100" className="w-20" />
+                                <span className="text-sm text-gray-500">%</span>
+                              </div>
+                              <p className="text-xs text-gray-500 mt-1">Shows red alert</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                )}
+
+                {/* Team Settings */}
+                {settingsTab === 'team' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Team Configuration</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Users className="w-5 h-5 text-indigo-600" />
+                          Default Team Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Default Hourly Rate</Label>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-gray-500">$</span>
+                              <Input type="number" defaultValue="100" className="w-24" />
+                              <span className="text-sm text-gray-500">/hour</span>
+                            </div>
+                          </div>
+                          <div>
+                            <Label>Default Capacity</Label>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Input type="number" defaultValue="40" className="w-20" />
+                              <span className="text-sm text-gray-500">hours/week</span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Permissions
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Managers Can Edit Allocations</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Allow managers to modify team allocations</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Team Members Can Request Time Off</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable self-service time off requests</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Show Financial Data</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Display hourly rates and budget information</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Departments</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {['Engineering', 'Design', 'Operations', 'Marketing', 'Sales'].map(dept => (
+                            <div key={dept} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <span className="font-medium">{dept}</span>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="secondary">Active</Badge>
+                                <Button variant="ghost" size="sm">Edit</Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline" className="mt-4 w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Department
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Projects Settings */}
+                {settingsTab === 'projects' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Project Configuration</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Briefcase className="w-5 h-5 text-indigo-600" />
+                          Project Defaults
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Default Project Color</Label>
+                          <div className="flex gap-2 mt-2">
+                            {['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#EC4899'].map(color => (
+                              <button
+                                key={color}
+                                className="w-8 h-8 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform"
+                                style={{ backgroundColor: color }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Auto-calculate Budget</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Calculate budget from hourly rates and hours</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Require Client Assignment</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">All projects must have a client assigned</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <BarChart3 className="w-5 h-5 text-blue-600" />
+                          Tracking & Reporting
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Track Milestones</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable milestone tracking for projects</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Budget Warnings</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert when budget exceeds threshold</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Budget Warning Threshold</Label>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Input type="number" defaultValue="80" className="w-20" />
+                            <span className="text-sm text-gray-500">% of total budget</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Project Statuses</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {[
+                            { name: 'Active', color: 'green' },
+                            { name: 'On Hold', color: 'gray' },
+                            { name: 'At Risk', color: 'red' },
+                            { name: 'Completed', color: 'blue' }
+                          ].map(status => (
+                            <div key={status.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div className="flex items-center gap-2">
+                                <div className={`w-3 h-3 rounded-full bg-${status.color}-500`} />
+                                <span className="font-medium">{status.name}</span>
+                              </div>
+                              <Button variant="ghost" size="sm">Edit</Button>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Notifications Settings */}
+                {settingsTab === 'notifications' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Notification Preferences</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-indigo-600" />
+                          Capacity Alerts
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Overbooking Alerts</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when team members are overbooked</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Low Utilization Alerts</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when team has significant availability</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Time Off Notifications</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert about upcoming team time off</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base">Project Notifications</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Milestone Reminders</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Remind before upcoming milestones</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Budget Alerts</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify when projects approach budget limit</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Project Status Changes</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert when project status is updated</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Delivery Channels</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                              <Bell className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <div>
+                              <Label>In-App Notifications</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Show in notification center</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+                              <Zap className="w-4 h-4 text-green-600" />
+                            </div>
+                            <div>
+                              <Label>Email Notifications</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Send to your email address</p>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center">
+                              <Link2 className="w-4 h-4 text-purple-600" />
+                            </div>
+                            <div>
+                              <Label>Slack Notifications</Label>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">Post to Slack channel</p>
+                            </div>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Integrations</h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[
+                        { name: 'Google Calendar', description: 'Sync time off and meetings', icon: Calendar, connected: true, color: 'blue' },
+                        { name: 'Jira', description: 'Import projects and track hours', icon: Briefcase, connected: true, color: 'indigo' },
+                        { name: 'Slack', description: 'Post capacity updates', icon: Bell, connected: false, color: 'purple' },
+                        { name: 'Microsoft Teams', description: 'Team collaboration', icon: Users, connected: false, color: 'blue' },
+                        { name: 'Harvest', description: 'Time tracking sync', icon: Clock, connected: true, color: 'orange' },
+                        { name: 'QuickBooks', description: 'Financial reporting', icon: BarChart3, connected: false, color: 'green' }
+                      ].map(integration => (
+                        <Card key={integration.name}>
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-3">
+                                <div className={`w-10 h-10 rounded-lg bg-${integration.color}-100 dark:bg-${integration.color}-900/40 flex items-center justify-center`}>
+                                  <integration.icon className={`w-5 h-5 text-${integration.color}-600`} />
+                                </div>
+                                <div>
+                                  <h4 className="font-medium text-gray-900 dark:text-white">{integration.name}</h4>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">{integration.description}</p>
+                                </div>
+                              </div>
+                              {integration.connected ? (
+                                <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400">Connected</Badge>
+                              ) : (
+                                <Button size="sm" variant="outline">Connect</Button>
+                              )}
+                            </div>
+                            {integration.connected && (
+                              <div className="mt-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                <RefreshCw className="w-3 h-3" />
+                                Last synced 5 minutes ago
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">API Access</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <Label>API Key</Label>
+                            <Button variant="ghost" size="sm">Regenerate</Button>
+                          </div>
+                          <Input type="password" value="sk_live_••••••••••••••••" readOnly className="font-mono" />
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <Button variant="outline" className="flex items-center gap-2">
+                            <Download className="w-4 h-4" />
+                            Export Data
+                          </Button>
+                          <Button variant="outline" className="flex items-center gap-2">
+                            <Upload className="w-4 h-4" />
+                            Import Data
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Advanced Settings</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Zap className="w-5 h-5 text-amber-600" />
+                          Performance
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Auto-refresh Dashboard</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically update data every 5 minutes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Cache Capacity Data</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Improve load times with local caching</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Forecast Range</Label>
+                          <Select defaultValue="12">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="4">4 weeks</SelectItem>
+                              <SelectItem value="8">8 weeks</SelectItem>
+                              <SelectItem value="12">12 weeks</SelectItem>
+                              <SelectItem value="24">24 weeks</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Palette className="w-5 h-5 text-pink-600" />
+                          Display Options
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Default View</Label>
+                          <Select defaultValue="overview">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="overview">Overview</SelectItem>
+                              <SelectItem value="team">Team</SelectItem>
+                              <SelectItem value="schedule">Schedule</SelectItem>
+                              <SelectItem value="forecast">Forecast</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Compact Mode</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Show more data in less space</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Show Avatars</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Display team member avatars</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-base text-red-600 dark:text-red-400 flex items-center gap-2">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <Label className="text-red-700 dark:text-red-400">Clear All Allocations</Label>
+                            <p className="text-sm text-red-600 dark:text-red-500">Remove all team allocations from projects</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Clear</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <Label className="text-red-700 dark:text-red-400">Reset Capacity Data</Label>
+                            <p className="text-sm text-red-600 dark:text-red-500">Reset all capacity planning data to defaults</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>
