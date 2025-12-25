@@ -17,8 +17,10 @@ import {
   Clock, Play, Pause, Square, Plus, Calendar, BarChart3, Settings, Download, ChevronLeft,
   ChevronRight, DollarSign, Target, TrendingUp, Users, Briefcase, Tag, Timer, Zap, Edit2,
   Trash2, FileText, Check, X, RefreshCw, Coffee, AlertCircle, ArrowUp, Receipt, Send,
-  CheckCircle, XCircle, Eye, MoreHorizontal, Building2, Mail, Bell, Shield, Lock, Filter
+  CheckCircle, XCircle, Eye, MoreHorizontal, Building2, Mail, Bell, Shield, Lock, Filter,
+  Key, Webhook, AlertOctagon, Sliders, Network, HardDrive, Cpu, Globe, CreditCard, Archive, Trash2 as TrashIcon
 } from 'lucide-react'
+import { CardDescription } from '@/components/ui/card'
 
 // Types
 type TimeEntryStatus = 'running' | 'stopped' | 'approved' | 'rejected'
@@ -805,155 +807,549 @@ export default function TimeTrackingClient() {
             </Card>
           </TabsContent>
 
-          {/* Settings Tab */}
+          {/* Settings Tab - Toggl Level Configuration */}
           <TabsContent value="settings" className="mt-6">
-            <div className="flex gap-6">
-              <Card className="w-64 h-fit border-gray-200 dark:border-gray-700">
-                <CardContent className="p-2">
-                  <nav className="space-y-1">
-                    {[
-                      { id: 'general', icon: Settings, label: 'General' },
-                      { id: 'notifications', icon: Bell, label: 'Notifications' },
-                      { id: 'integrations', icon: Zap, label: 'Integrations' },
-                      { id: 'automations', icon: RefreshCw, label: 'Automations' },
-                      { id: 'permissions', icon: Shield, label: 'Permissions' },
-                      { id: 'billing', icon: Receipt, label: 'Billing' }
-                    ].map(item => (
-                      <button key={item.id} onClick={() => setSettingsTab(item.id)} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${settingsTab === item.id ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
-                        <item.icon className="h-4 w-4" />{item.label}
-                      </button>
-                    ))}
-                  </nav>
-                </CardContent>
-              </Card>
-              <div className="flex-1 space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-12 md:col-span-3">
+                <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur sticky top-4">
+                  <CardContent className="p-4">
+                    <nav className="space-y-2">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'tracking', label: 'Tracking', icon: Clock },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Network },
+                        { id: 'billing', label: 'Billing', icon: CreditCard },
+                        { id: 'advanced', label: 'Advanced', icon: Sliders }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                            settingsTab === item.id
+                              ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          }`}
+                        >
+                          <item.icon className="h-5 w-5" />
+                          <span className="font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+
+                    {/* Usage Stats */}
+                    <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                      <h4 className="font-semibold text-sm text-gray-600 dark:text-gray-400">This Month</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">Tracked Hours</span>
+                          <span className="font-medium text-amber-600">164h</span>
+                        </div>
+                        <Progress value={82} className="h-2" />
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">Billable Rate</span>
+                          <span className="font-medium text-green-600">78%</span>
+                        </div>
+                        <Progress value={78} className="h-2" />
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600 dark:text-gray-400">Team Utilization</span>
+                          <span className="font-medium text-blue-600">85%</span>
+                        </div>
+                        <Progress value={85} className="h-2" />
+                      </div>
+                    </div>
+
+                    {/* Account Info */}
+                    <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                      <h4 className="font-semibold text-sm text-gray-600 dark:text-gray-400 mb-3">Account</h4>
+                      <div className="space-y-2 text-xs text-gray-500 dark:text-gray-400">
+                        <div className="flex items-center justify-between">
+                          <span>Plan</span>
+                          <Badge className="bg-amber-500 text-xs">Premium</Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Team Size</span>
+                          <span>12 members</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Projects</span>
+                          <span>24 active</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Storage</span>
+                          <span>2.4 GB / 10 GB</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-12 md:col-span-9 space-y-6">
+                {/* General Settings */}
                 {settingsTab === 'general' && (
                   <>
-                    <Card className="border-gray-200 dark:border-gray-700">
-                      <CardHeader><CardTitle>Time Tracking Preferences</CardTitle></CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Default Billable</p><p className="text-sm text-gray-500">New entries are billable by default</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Round Time Entries</p><p className="text-sm text-gray-500">Round to nearest interval</p></div><Select defaultValue="none"><SelectTrigger className="w-32"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">No rounding</SelectItem><SelectItem value="5">5 minutes</SelectItem><SelectItem value="15">15 minutes</SelectItem><SelectItem value="30">30 minutes</SelectItem></SelectContent></Select></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Week Starts On</p><p className="text-sm text-gray-500">First day of the week</p></div><Select defaultValue="sunday"><SelectTrigger className="w-32"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="sunday">Sunday</SelectItem><SelectItem value="monday">Monday</SelectItem></SelectContent></Select></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Time Format</p><p className="text-sm text-gray-500">Display time format</p></div><Select defaultValue="24"><SelectTrigger className="w-32"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="12">12-hour</SelectItem><SelectItem value="24">24-hour</SelectItem></SelectContent></Select></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Date Format</p><p className="text-sm text-gray-500">Display date format</p></div><Select defaultValue="mdy"><SelectTrigger className="w-40"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="mdy">MM/DD/YYYY</SelectItem><SelectItem value="dmy">DD/MM/YYYY</SelectItem><SelectItem value="ymd">YYYY-MM-DD</SelectItem></SelectContent></Select></div>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="h-5 w-5 text-amber-600" />
+                          Workspace Settings
+                        </CardTitle>
+                        <CardDescription>Configure your workspace preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Workspace Name</Label>
+                            <Input defaultValue="Acme Inc Workspace" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Currency</Label>
+                            <Select defaultValue="usd">
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="usd">USD - US Dollar</SelectItem>
+                                <SelectItem value="eur">EUR - Euro</SelectItem>
+                                <SelectItem value="gbp">GBP - British Pound</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Time Zone</Label>
+                            <Select defaultValue="est">
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pst">Pacific Time (PT)</SelectItem>
+                                <SelectItem value="est">Eastern Time (ET)</SelectItem>
+                                <SelectItem value="utc">UTC</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Week Starts On</Label>
+                            <Select defaultValue="monday">
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="sunday">Sunday</SelectItem>
+                                <SelectItem value="monday">Monday</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Date Format</Label>
+                            <Select defaultValue="mdy">
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="mdy">MM/DD/YYYY</SelectItem>
+                                <SelectItem value="dmy">DD/MM/YYYY</SelectItem>
+                                <SelectItem value="ymd">YYYY-MM-DD</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Time Format</Label>
+                            <Select defaultValue="12">
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="12">12-hour (AM/PM)</SelectItem>
+                                <SelectItem value="24">24-hour</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
                       </CardContent>
                     </Card>
-                    <Card className="border-gray-200 dark:border-gray-700">
-                      <CardHeader><CardTitle>Timer Behavior</CardTitle></CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Pomodoro Mode</p><p className="text-sm text-gray-500">25 min work, 5 min break</p></div><Switch /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Stop Timer on Close</p><p className="text-sm text-gray-500">Stop when browser closes</p></div><Switch defaultChecked /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Keep Timer on Top</p><p className="text-sm text-gray-500">Mini timer stays visible</p></div><Switch /></div>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <DollarSign className="h-5 w-5 text-green-600" />
+                          Default Rates
+                        </CardTitle>
+                        <CardDescription>Set default billing rates</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Default Hourly Rate</Label>
+                            <div className="flex items-center gap-2">
+                              <span className="text-gray-500">$</span>
+                              <Input type="number" defaultValue="150" />
+                              <span className="text-gray-500">/hr</span>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Overtime Multiplier</Label>
+                            <Select defaultValue="1.5">
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1.25">1.25x</SelectItem>
+                                <SelectItem value="1.5">1.5x</SelectItem>
+                                <SelectItem value="2">2x</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Default as Billable</Label><p className="text-sm text-gray-500">New entries billable by default</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Show Rates to Team</Label><p className="text-sm text-gray-500">Allow team to see rates</p></div>
+                          <Switch />
+                        </div>
                       </CardContent>
                     </Card>
                   </>
                 )}
-                {settingsTab === 'notifications' && (
-                  <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader><CardTitle>Notification Preferences</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Daily Reminder</p><p className="text-sm text-gray-500">Remind to log time at 5:00 PM</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Idle Detection</p><p className="text-sm text-gray-500">Detect when you're idle</p></div><Switch /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Weekly Summary</p><p className="text-sm text-gray-500">Email summary every Monday</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Project Budget Alerts</p><p className="text-sm text-gray-500">Alert when budget reaches 80%</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Approval Notifications</p><p className="text-sm text-gray-500">Notify when entries are approved</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Invoice Reminders</p><p className="text-sm text-gray-500">Alert for overdue invoices</p></div><Switch defaultChecked /></div>
-                    </CardContent>
-                  </Card>
-                )}
-                {settingsTab === 'integrations' && (
-                  <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Connected Integrations</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Add Integration</Button></CardHeader>
-                    <CardContent className="space-y-4">
-                      {mockIntegrations.map(integration => (
-                        <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.status === 'connected' ? 'bg-green-100 dark:bg-green-900/30' : integration.status === 'error' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
-                              {integration.type === 'calendar' && <Calendar className="h-5 w-5" />}
-                              {integration.type === 'project' && <Briefcase className="h-5 w-5" />}
-                              {integration.type === 'accounting' && <Receipt className="h-5 w-5" />}
-                              {integration.type === 'communication' && <Mail className="h-5 w-5" />}
-                              {integration.type === 'crm' && <Users className="h-5 w-5" />}
-                            </div>
-                            <div>
-                              <h4 className="font-medium">{integration.name}</h4>
-                              <p className="text-sm text-gray-500">Last sync: {integration.lastSync} • {integration.syncedItems} items</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <Badge className={getStatusColor(integration.status)}>{integration.status}</Badge>
-                            <Button variant="ghost" size="sm"><RefreshCw className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="sm" className="text-red-500"><X className="h-4 w-4" /></Button>
-                          </div>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                )}
-                {settingsTab === 'automations' && (
-                  <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Automation Rules</CardTitle><Button><Plus className="h-4 w-4 mr-2" />New Automation</Button></CardHeader>
-                    <CardContent className="space-y-4">
-                      {mockAutomations.map(automation => (
-                        <div key={automation.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div className="flex items-center gap-4">
-                            <Switch checked={automation.isActive} />
-                            <div>
-                              <h4 className="font-medium">{automation.name}</h4>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="outline" className="text-xs">{automation.trigger}</Badge>
-                                {automation.actions.map((action, i) => <Badge key={i} variant="outline" className="text-xs bg-amber-50 dark:bg-amber-900/20">{action}</Badge>)}
-                              </div>
-                              {automation.lastTriggered && <p className="text-xs text-gray-500 mt-1">Last triggered: {automation.lastTriggered}</p>}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon"><Edit2 className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" className="text-red-500"><Trash2 className="h-4 w-4" /></Button>
-                          </div>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                )}
-                {settingsTab === 'permissions' && (
-                  <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader><CardTitle>Permission Settings</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Members Can Create Projects</p><p className="text-sm text-gray-500">Allow team members to create new projects</p></div><Switch /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Members Can See Others' Time</p><p className="text-sm text-gray-500">View team member time entries</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Require Approval</p><p className="text-sm text-gray-500">Time entries require manager approval</p></div><Switch /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Lock Approved Entries</p><p className="text-sm text-gray-500">Prevent edits to approved entries</p></div><Switch defaultChecked /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Members Can Create Clients</p><p className="text-sm text-gray-500">Allow creating new clients</p></div><Switch /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Members Can View Rates</p><p className="text-sm text-gray-500">See billable rates and amounts</p></div><Switch /></div>
-                    </CardContent>
-                  </Card>
-                )}
-                {settingsTab === 'billing' && (
+
+                {/* Tracking Settings */}
+                {settingsTab === 'tracking' && (
                   <>
-                    <Card className="border-gray-200 dark:border-gray-700">
-                      <CardHeader><CardTitle>Current Plan</CardTitle></CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-700">
-                          <div>
-                            <div className="flex items-center gap-2"><h3 className="text-xl font-bold">Premium Plan</h3><Badge className="bg-amber-500">Current</Badge></div>
-                            <p className="text-gray-600 dark:text-gray-400 mt-1">Unlimited users • Unlimited projects • All integrations</p>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Clock className="h-5 w-5 text-blue-600" />
+                          Timer Settings
+                        </CardTitle>
+                        <CardDescription>Configure timer behavior</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Pomodoro Mode</Label><p className="text-sm text-gray-500">25 min work / 5 min break</p></div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Stop on Browser Close</Label><p className="text-sm text-gray-500">Auto-stop when browser closes</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Keep Timer Visible</Label><p className="text-sm text-gray-500">Show mini timer overlay</p></div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Timer Sound</Label><p className="text-sm text-gray-500">Play sound on stop</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2"><Label>Minimum Entry (minutes)</Label><Input type="number" defaultValue="1" min={0} max={60} /></div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Target className="h-5 w-5 text-purple-600" />
+                          Time Rounding
+                        </CardTitle>
+                        <CardDescription>Configure automatic rounding</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Enable Rounding</Label><p className="text-sm text-gray-500">Auto-round time entries</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Round to Nearest</Label>
+                            <Select defaultValue="15">
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1">1 minute</SelectItem>
+                                <SelectItem value="5">5 minutes</SelectItem>
+                                <SelectItem value="6">6 minutes (1/10 hr)</SelectItem>
+                                <SelectItem value="15">15 minutes (1/4 hr)</SelectItem>
+                                <SelectItem value="30">30 minutes (1/2 hr)</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
-                          <div className="text-right"><p className="text-3xl font-bold">$15<span className="text-lg text-gray-500">/user/mo</span></p><Button variant="outline" className="mt-2">Change Plan</Button></div>
+                          <div className="space-y-2">
+                            <Label>Direction</Label>
+                            <Select defaultValue="nearest">
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="up">Round Up</SelectItem>
+                                <SelectItem value="down">Round Down</SelectItem>
+                                <SelectItem value="nearest">Nearest</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
-                    <Card className="border-gray-200 dark:border-gray-700">
-                      <CardHeader><CardTitle>Billing Information</CardTitle></CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div><Label>Company Name</Label><Input defaultValue="Acme Inc" className="mt-1" /></div>
-                          <div><Label>Billing Email</Label><Input defaultValue="billing@acme.com" className="mt-1" /></div>
-                          <div><Label>Address</Label><Input defaultValue="123 Business Ave" className="mt-1" /></div>
-                          <div><Label>City, State ZIP</Label><Input defaultValue="New York, NY 10001" className="mt-1" /></div>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Coffee className="h-5 w-5 text-orange-600" />
+                          Idle Detection
+                        </CardTitle>
+                        <CardDescription>Configure idle handling</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Idle Detection</Label><p className="text-sm text-gray-500">Detect when away</p></div>
+                          <Switch defaultChecked />
                         </div>
-                        <Button>Update Billing Info</Button>
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2"><Label>Idle Timeout (min)</Label><Input type="number" defaultValue="5" min={1} max={60} /></div>
+                          <div className="space-y-2">
+                            <Label>On Idle</Label>
+                            <Select defaultValue="ask">
+                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="ask">Ask what to do</SelectItem>
+                                <SelectItem value="discard">Discard idle time</SelectItem>
+                                <SelectItem value="keep">Keep idle time</SelectItem>
+                                <SelectItem value="pause">Pause timer</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="h-5 w-5 text-green-600" />
+                          Approval Workflow
+                        </CardTitle>
+                        <CardDescription>Configure approvals</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Require Approval</Label><p className="text-sm text-gray-500">Manager approval needed</p></div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Lock Approved</Label><p className="text-sm text-gray-500">Prevent edits</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Auto-approve Own</Label><p className="text-sm text-gray-500">Managers auto-approved</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2"><Label>Deadline (days after week)</Label><Input type="number" defaultValue="3" min={1} max={14} /></div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Notifications */}
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="h-5 w-5 text-amber-600" />
+                          Email Notifications
+                        </CardTitle>
+                        <CardDescription>Configure email alerts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Daily Reminder</Label><p className="text-sm text-gray-500">Log time reminder</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Weekly Summary</Label><p className="text-sm text-gray-500">Hours summary email</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Monthly Report</Label><p className="text-sm text-gray-500">Productivity report</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Approval Updates</Label><p className="text-sm text-gray-500">Entry approved/rejected</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2"><Label>Daily Reminder Time</Label><Input type="time" defaultValue="17:00" /></div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <AlertCircle className="h-5 w-5 text-red-600" />
+                          Alert Notifications
+                        </CardTitle>
+                        <CardDescription>Budget and deadline alerts</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Budget Alerts</Label><p className="text-sm text-gray-500">Project budget threshold</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2"><Label>Budget Threshold (%)</Label><Input type="number" defaultValue="80" min={50} max={100} /></div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Invoice Alerts</Label><p className="text-sm text-gray-500">Overdue invoices</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Overtime Alerts</Label><p className="text-sm text-gray-500">Team exceeds hours</p></div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Integrations */}
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader className="flex flex-row items-center justify-between">
+                        <div><CardTitle className="flex items-center gap-2"><Network className="h-5 w-5 text-blue-600" />Connected Apps</CardTitle><CardDescription>Third-party integrations</CardDescription></div>
+                        <Button><Plus className="h-4 w-4 mr-2" />Add</Button>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockIntegrations.map(integration => (
+                          <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.status === 'connected' ? 'bg-green-100 dark:bg-green-900/30' : integration.status === 'error' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                                {integration.type === 'calendar' && <Calendar className="h-5 w-5" />}
+                                {integration.type === 'project' && <Briefcase className="h-5 w-5" />}
+                                {integration.type === 'accounting' && <Receipt className="h-5 w-5" />}
+                                {integration.type === 'communication' && <Mail className="h-5 w-5" />}
+                                {integration.type === 'crm' && <Users className="h-5 w-5" />}
+                              </div>
+                              <div><h4 className="font-medium">{integration.name}</h4><p className="text-sm text-gray-500">Last sync: {integration.lastSync}</p></div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <Badge className={getStatusColor(integration.status)}>{integration.status}</Badge>
+                              <Button variant="ghost" size="sm"><RefreshCw className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="sm" className="text-red-500"><X className="h-4 w-4" /></Button>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Key className="h-5 w-5 text-purple-600" />API Access</CardTitle>
+                        <CardDescription>Manage API keys</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <div><Label className="text-base">API Key</Label><p className="text-xs text-gray-500">For programmatic access</p></div>
+                            <Button size="sm" variant="outline"><RefreshCw className="h-4 w-4 mr-2" />Regenerate</Button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Input type="password" defaultValue="tt_api_xxxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button size="sm" variant="ghost">Copy</Button>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Webhooks</Label><p className="text-sm text-gray-500">Send to external URLs</p></div>
+                          <Switch />
+                        </div>
+                        <div className="space-y-2"><Label>Webhook URL</Label><Input placeholder="https://your-app.com/webhook" /></div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Billing */}
+                {settingsTab === 'billing' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader><CardTitle className="flex items-center gap-2"><CreditCard className="h-5 w-5 text-green-600" />Current Plan</CardTitle></CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between p-6 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg border border-amber-200 dark:border-amber-700">
+                          <div>
+                            <div className="flex items-center gap-2"><h3 className="text-2xl font-bold">Premium Plan</h3><Badge className="bg-amber-500">Current</Badge></div>
+                            <p className="text-gray-600 dark:text-gray-400 mt-2">Unlimited users • Unlimited projects • All integrations</p>
+                            <p className="text-sm text-gray-500 mt-2">Renews on January 28, 2025</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-4xl font-bold">$15<span className="text-lg text-gray-500">/user/mo</span></p>
+                            <p className="text-sm text-gray-500 mt-1">12 users × $15 = $180/mo</p>
+                            <Button variant="outline" className="mt-3">Change Plan</Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader><CardTitle className="flex items-center gap-2"><Building2 className="h-5 w-5 text-blue-600" />Billing Information</CardTitle></CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2"><Label>Company Name</Label><Input defaultValue="Acme Inc" /></div>
+                          <div className="space-y-2"><Label>Billing Email</Label><Input defaultValue="billing@acme.com" /></div>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="space-y-2"><Label>Address</Label><Input defaultValue="123 Business Ave" /></div>
+                          <div className="space-y-2"><Label>City, State ZIP</Label><Input defaultValue="New York, NY 10001" /></div>
+                        </div>
+                        <Button className="bg-amber-500 hover:bg-amber-600">Update Billing</Button>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader><CardTitle className="flex items-center gap-2"><Receipt className="h-5 w-5 text-purple-600" />Payment History</CardTitle></CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {[{date:'Dec 28, 2024',amt:'$180.00'},{date:'Nov 28, 2024',amt:'$180.00'},{date:'Oct 28, 2024',amt:'$165.00'}].map((inv,i)=>(
+                            <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div><p className="font-medium">{inv.date}</p><p className="text-sm text-gray-500">Premium Plan</p></div>
+                              <div className="flex items-center gap-4"><span className="font-medium">{inv.amt}</span><Badge className="bg-green-100 text-green-700">Paid</Badge><Button variant="ghost" size="sm"><Download className="h-4 w-4" /></Button></div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {/* Advanced */}
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5 text-green-600" />Security</CardTitle></CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Two-Factor Auth</Label><p className="text-sm text-gray-500">Require 2FA for all</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">SSO</Label><p className="text-sm text-gray-500">SAML-based SSO</p></div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">IP Restriction</Label><p className="text-sm text-gray-500">Limit to specific IPs</p></div>
+                          <Switch />
+                        </div>
+                        <div className="space-y-2"><Label>Session Timeout (min)</Label><Input type="number" defaultValue="60" min={5} max={480} /></div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                      <CardHeader><CardTitle className="flex items-center gap-2"><HardDrive className="h-5 w-5 text-blue-600" />Data Management</CardTitle></CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div><Label className="text-base">Auto Backups</Label><p className="text-sm text-gray-500">Daily data backup</p></div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="flex-1"><Download className="h-4 w-4 mr-2" />Export All</Button>
+                          <Button variant="outline" className="flex-1"><Archive className="h-4 w-4 mr-2" />Archive Projects</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur border-red-200 dark:border-red-800">
+                      <CardHeader><CardTitle className="flex items-center gap-2 text-red-600"><AlertOctagon className="h-5 w-5" />Danger Zone</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div><Label className="text-base text-red-700 dark:text-red-400">Clear Time Entries</Label><p className="text-sm text-red-600/70">Delete all tracking data</p></div>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700"><TrashIcon className="h-4 w-4 mr-2" />Clear</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                          <div><Label className="text-base text-red-700 dark:text-red-400">Delete Workspace</Label><p className="text-sm text-red-600/70">Permanently delete</p></div>
+                          <Button variant="destructive"><AlertOctagon className="h-4 w-4 mr-2" />Delete</Button>
+                        </div>
                       </CardContent>
                     </Card>
                   </>
