@@ -21,7 +21,8 @@ import {
   Search, Filter, MoreHorizontal, Download, Upload, ArrowUpRight, Timer,
   Cpu, HardDrive, Network, TrendingUp, Calendar, User, MessageSquare,
   Settings2, FileText, BarChart3, AlertCircle, Info, Webhook, Key, Hash,
-  Folder, File, Package, Gauge, MonitorPlay, CircleDot, Workflow, GitPullRequest
+  Folder, File, Package, Gauge, MonitorPlay, CircleDot, Workflow, GitPullRequest,
+  Mail, Bell, AlertOctagon, Globe2
 } from 'lucide-react'
 
 // Types
@@ -716,37 +717,136 @@ export default function DeploymentsClient() {
                 {settingsTab === 'general' && (
                   <>
                     <Card className="border-gray-200 dark:border-gray-700">
-                      <CardHeader><CardTitle>Project Settings</CardTitle></CardHeader>
+                      <CardHeader><CardTitle className="flex items-center gap-2"><Settings className="h-5 w-5 text-purple-600" />Project Settings</CardTitle></CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4"><div><Label>Project Name</Label><Input defaultValue="freeflow-app" className="mt-1" /></div><div><Label>Framework</Label><Select defaultValue="nextjs"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="nextjs">Next.js</SelectItem><SelectItem value="react">React</SelectItem><SelectItem value="vue">Vue</SelectItem></SelectContent></Select></div></div>
+                        <div className="grid grid-cols-2 gap-4"><div><Label>Project Name</Label><Input defaultValue="freeflow-app" className="mt-1" /></div><div><Label>Framework</Label><Select defaultValue="nextjs"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="nextjs">Next.js</SelectItem><SelectItem value="react">React</SelectItem><SelectItem value="vue">Vue</SelectItem><SelectItem value="nuxt">Nuxt.js</SelectItem><SelectItem value="astro">Astro</SelectItem><SelectItem value="remix">Remix</SelectItem></SelectContent></Select></div></div>
                         <div className="grid grid-cols-2 gap-4"><div><Label>Build Command</Label><Input defaultValue="npm run build" className="mt-1 font-mono" /></div><div><Label>Output Directory</Label><Input defaultValue=".next" className="mt-1 font-mono" /></div></div>
-                        <div className="grid grid-cols-2 gap-4"><div><Label>Install Command</Label><Input defaultValue="npm install" className="mt-1 font-mono" /></div><div><Label>Node.js Version</Label><Select defaultValue="20"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="18">18.x</SelectItem><SelectItem value="20">20.x</SelectItem><SelectItem value="22">22.x</SelectItem></SelectContent></Select></div></div>
+                        <div className="grid grid-cols-2 gap-4"><div><Label>Install Command</Label><Input defaultValue="npm install" className="mt-1 font-mono" /></div><div><Label>Node.js Version</Label><Select defaultValue="20"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="18">18.x</SelectItem><SelectItem value="20">20.x (LTS)</SelectItem><SelectItem value="22">22.x</SelectItem></SelectContent></Select></div></div>
+                        <div className="grid grid-cols-2 gap-4"><div><Label>Root Directory</Label><Input defaultValue="./" className="mt-1 font-mono" /></div><div><Label>Development Command</Label><Input defaultValue="npm run dev" className="mt-1 font-mono" /></div></div>
                       </CardContent>
                     </Card>
                     <Card className="border-gray-200 dark:border-gray-700">
-                      <CardHeader><CardTitle>Build & Deploy</CardTitle></CardHeader>
+                      <CardHeader><CardTitle className="flex items-center gap-2"><Rocket className="h-5 w-5 text-purple-600" />Build & Deploy</CardTitle></CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between"><div><p className="font-medium">Auto-deploy on push</p><p className="text-sm text-gray-500">Deploy when commits are pushed</p></div><Switch defaultChecked /></div>
                         <div className="flex items-center justify-between"><div><p className="font-medium">Preview Deployments</p><p className="text-sm text-gray-500">Create deployments for PRs</p></div><Switch defaultChecked /></div>
                         <div className="flex items-center justify-between"><div><p className="font-medium">Build Cache</p><p className="text-sm text-gray-500">Cache dependencies for faster builds</p></div><Switch defaultChecked /></div>
                         <div className="flex items-center justify-between"><div><p className="font-medium">Skew Protection</p><p className="text-sm text-gray-500">Ensure asset/code version consistency</p></div><Switch /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Serverless Functions</p><p className="text-sm text-gray-500">Enable serverless API routes</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Edge Functions</p><p className="text-sm text-gray-500">Enable edge runtime for routes</p></div><Switch defaultChecked /></div>
+                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                          <div><Label>Function Timeout</Label><Select defaultValue="60"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="10">10 seconds</SelectItem><SelectItem value="30">30 seconds</SelectItem><SelectItem value="60">60 seconds</SelectItem><SelectItem value="300">5 minutes</SelectItem></SelectContent></Select></div>
+                          <div><Label>Function Memory</Label><Select defaultValue="1024"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="512">512 MB</SelectItem><SelectItem value="1024">1024 MB</SelectItem><SelectItem value="2048">2048 MB</SelectItem><SelectItem value="3008">3008 MB</SelectItem></SelectContent></Select></div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle className="flex items-center gap-2"><Bell className="h-5 w-5 text-purple-600" />Notifications</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Email Notifications</p><p className="text-sm text-gray-500">Receive deployment status via email</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Failed Deployment Alerts</p><p className="text-sm text-gray-500">Immediate notification on failures</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Production Promotion Alerts</p><p className="text-sm text-gray-500">Notify when deployments go to production</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Weekly Summary</p><p className="text-sm text-gray-500">Weekly deployment statistics digest</p></div><Switch /></div>
+                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                          <div><Label>Notification Email</Label><Input type="email" placeholder="team@company.com" className="mt-1" /></div>
+                          <div><Label>Slack Channel</Label><Input placeholder="#deployments" className="mt-1" /></div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5 text-purple-600" />Security</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Force HTTPS</p><p className="text-sm text-gray-500">Redirect all HTTP to HTTPS</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">HSTS Headers</p><p className="text-sm text-gray-500">Strict Transport Security</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">XSS Protection</p><p className="text-sm text-gray-500">Enable X-XSS-Protection header</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Content Security Policy</p><p className="text-sm text-gray-500">Define allowed content sources</p></div><Switch /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">IP Allowlist</p><p className="text-sm text-gray-500">Restrict access by IP address</p></div><Switch /></div>
+                        <div><Label>Allowed IPs</Label><Input placeholder="192.168.1.0/24, 10.0.0.0/8" className="mt-1 font-mono" /></div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-gray-200 dark:border-gray-700 border-red-200 dark:border-red-800">
+                      <CardHeader><CardTitle className="flex items-center gap-2 text-red-600"><AlertOctagon className="h-5 w-5" />Danger Zone</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                          <p className="text-sm text-red-800 dark:text-red-200">These actions are irreversible. Proceed with caution.</p>
+                        </div>
+                        <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50"><Trash2 className="h-4 w-4 mr-2" />Delete All Deployments</Button>
+                        <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50"><RefreshCw className="h-4 w-4 mr-2" />Reset Project Settings</Button>
+                        <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50"><Lock className="h-4 w-4 mr-2" />Disable Deployments</Button>
+                        <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50"><Trash2 className="h-4 w-4 mr-2" />Delete Project</Button>
                       </CardContent>
                     </Card>
                   </>
                 )}
                 {settingsTab === 'git' && (
-                  <Card className="border-gray-200 dark:border-gray-700">
-                    <CardHeader><CardTitle>Git Integration</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div className="flex items-center gap-3"><GitBranch className="h-6 w-6" /><div><p className="font-medium">freeflow-app/freeflow</p><p className="text-sm text-gray-500">Connected to main</p></div></div>
-                        <Badge className="bg-green-100 text-green-700">Connected</Badge>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4"><div><Label>Production Branch</Label><Select defaultValue="main"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="main">main</SelectItem><SelectItem value="master">master</SelectItem><SelectItem value="production">production</SelectItem></SelectContent></Select></div><div><Label>Root Directory</Label><Input defaultValue="./" className="mt-1 font-mono" /></div></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Ignored Build Step</p><p className="text-sm text-gray-500">Cancel builds based on changed files</p></div><Switch /></div>
-                      <div className="flex items-center justify-between"><div><p className="font-medium">Deploy Hooks</p><p className="text-sm text-gray-500">Trigger deploys from external services</p></div><Button variant="outline" size="sm"><Plus className="h-4 w-4 mr-2" />Create Hook</Button></div>
-                    </CardContent>
-                  </Card>
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle className="flex items-center gap-2"><GitBranch className="h-5 w-5 text-purple-600" />Repository Connection</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3"><GitBranch className="h-6 w-6" /><div><p className="font-medium">freeflow-app/freeflow</p><p className="text-sm text-gray-500">Connected to main</p></div></div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><Label>Git Provider</Label><Select defaultValue="github"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="github">GitHub</SelectItem><SelectItem value="gitlab">GitLab</SelectItem><SelectItem value="bitbucket">Bitbucket</SelectItem></SelectContent></Select></div>
+                          <div><Label>Repository</Label><Input defaultValue="freeflow-app/freeflow" className="mt-1 font-mono" /></div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div><Label>Production Branch</Label><Select defaultValue="main"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="main">main</SelectItem><SelectItem value="master">master</SelectItem><SelectItem value="production">production</SelectItem><SelectItem value="release">release</SelectItem></SelectContent></Select></div>
+                          <div><Label>Root Directory</Label><Input defaultValue="./" className="mt-1 font-mono" /></div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle className="flex items-center gap-2"><GitCommit className="h-5 w-5 text-purple-600" />Branch Configuration</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Auto-deploy Branches</p><p className="text-sm text-gray-500">Automatically deploy all git branches</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Production Branch Protection</p><p className="text-sm text-gray-500">Require PR reviews before deploying</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Ignored Build Step</p><p className="text-sm text-gray-500">Cancel builds based on changed files</p></div><Switch /></div>
+                        <div><Label>Ignore Build Pattern</Label><Input placeholder="docs/**, *.md" className="mt-1 font-mono" /></div>
+                        <div><Label>Preview Branch Prefix</Label><Input placeholder="preview/, feature/" className="mt-1 font-mono" /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Enable Git Submodules</p><p className="text-sm text-gray-500">Clone submodules during build</p></div><Switch /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Git LFS</p><p className="text-sm text-gray-500">Enable Large File Storage support</p></div><Switch /></div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader className="flex flex-row items-center justify-between"><CardTitle className="flex items-center gap-2"><Webhook className="h-5 w-5 text-purple-600" />Deploy Hooks</CardTitle><Button size="sm"><Plus className="h-4 w-4 mr-2" />Create Hook</Button></CardHeader>
+                      <CardContent className="space-y-4">
+                        <p className="text-sm text-gray-500">Deploy hooks allow you to trigger deployments from external services via HTTP POST requests.</p>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">Production Hook</span>
+                            <Badge className="bg-green-100 text-green-700">Active</Badge>
+                          </div>
+                          <code className="text-xs text-gray-500 break-all">https://api.vercel.com/v1/integrations/deploy/xxxxx</code>
+                          <div className="flex gap-2 mt-2">
+                            <Button variant="outline" size="sm"><Copy className="h-3 w-3 mr-1" />Copy</Button>
+                            <Button variant="outline" size="sm" className="text-red-600"><Trash2 className="h-3 w-3 mr-1" />Delete</Button>
+                          </div>
+                        </div>
+                        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium">Staging Hook</span>
+                            <Badge className="bg-blue-100 text-blue-700">Active</Badge>
+                          </div>
+                          <code className="text-xs text-gray-500 break-all">https://api.vercel.com/v1/integrations/deploy/yyyyy</code>
+                          <div className="flex gap-2 mt-2">
+                            <Button variant="outline" size="sm"><Copy className="h-3 w-3 mr-1" />Copy</Button>
+                            <Button variant="outline" size="sm" className="text-red-600"><Trash2 className="h-3 w-3 mr-1" />Delete</Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-purple-600" />Commit Checks</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Required Status Checks</p><p className="text-sm text-gray-500">Block merge until checks pass</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Preview Comments</p><p className="text-sm text-gray-500">Comment preview URL on PRs</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">GitHub Deployments</p><p className="text-sm text-gray-500">Create GitHub deployment events</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Commit Statuses</p><p className="text-sm text-gray-500">Report build status to GitHub</p></div><Switch defaultChecked /></div>
+                      </CardContent>
+                    </Card>
+                  </>
                 )}
                 {settingsTab === 'integrations' && (
                   <Card className="border-gray-200 dark:border-gray-700">
