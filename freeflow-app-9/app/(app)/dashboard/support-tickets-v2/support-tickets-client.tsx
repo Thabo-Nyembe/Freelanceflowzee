@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
@@ -20,7 +22,9 @@ import {
   ThumbsUp, ThumbsDown, Smile, Meh, Frown, TrendingUp, TrendingDown,
   Eye, EyeOff, Lock, Unlock, RefreshCw, Download, Upload, Settings,
   Inbox, UserCheck, Hourglass, CheckCheck, AlertCircle, Calendar,
-  Bot, Sparkles, Copy, ExternalLink, History, MessageCircle
+  Bot, Sparkles, Copy, ExternalLink, History, MessageCircle,
+  Bell, Key, Webhook, Database, Shield, Cpu, AlertOctagon, Palette,
+  GitBranch, HelpCircle, Globe, Headphones, Code, Sliders
 } from 'lucide-react'
 
 type TicketStatus = 'open' | 'in-progress' | 'waiting' | 'resolved' | 'closed'
@@ -166,6 +170,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
   const [showCustomerModal, setShowCustomerModal] = useState(false)
   const [replyContent, setReplyContent] = useState('')
   const [replyType, setReplyType] = useState<'public' | 'internal'>('public')
+  const [settingsTab, setSettingsTab] = useState('general')
   const [formData, setFormData] = useState({
     subject: '', description: '', category: 'general' as TicketCategory,
     priority: 'medium' as TicketPriority, customer_name: '', customer_email: ''
@@ -389,6 +394,10 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
             <TabsTrigger value="analytics" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
               <BarChart3 className="w-4 h-4 mr-2" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">
+              <Settings className="w-4 h-4 mr-2" />
+              Settings
             </TabsTrigger>
           </TabsList>
 
@@ -862,6 +871,795 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Settings Tab - Zendesk-level configuration */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Settings className="w-5 h-5" />
+                      Settings
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', icon: Sliders, label: 'General' },
+                        { id: 'sla', icon: Timer, label: 'SLA & Routing' },
+                        { id: 'notifications', icon: Bell, label: 'Notifications' },
+                        { id: 'channels', icon: Headphones, label: 'Channels' },
+                        { id: 'automations', icon: Cpu, label: 'Automations' },
+                        { id: 'advanced', icon: Lock, label: 'Advanced' }
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+                              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.label}
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Sliders className="w-5 h-5 text-orange-500" />
+                          General Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Help Desk Name</Label>
+                            <Input defaultValue="FreeFlow Support" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Support Email</Label>
+                            <Input defaultValue="support@freeflow.io" type="email" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Ticket Status</Label>
+                            <Select defaultValue="open">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="open">Open</SelectItem>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="on-hold">On Hold</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Default Priority</Label>
+                            <Select defaultValue="medium">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="low">Low</SelectItem>
+                                <SelectItem value="medium">Medium</SelectItem>
+                                <SelectItem value="high">High</SelectItem>
+                                <SelectItem value="urgent">Urgent</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="border-t pt-4 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Auto-assign Tickets</p>
+                              <p className="text-sm text-muted-foreground">Automatically assign tickets based on agent availability</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Customer Satisfaction Surveys</p>
+                              <p className="text-sm text-muted-foreground">Send CSAT surveys after ticket resolution</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">Allow Ticket Reopening</p>
+                              <p className="text-sm text-muted-foreground">Let customers reopen closed tickets within 7 days</p>
+                            </div>
+                            <Switch defaultChecked />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Palette className="w-5 h-5 text-purple-500" />
+                          Branding
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="space-y-2">
+                            <Label>Primary Color</Label>
+                            <div className="flex gap-2">
+                              <Input defaultValue="#f97316" className="flex-1" />
+                              <div className="w-10 h-10 rounded-lg bg-orange-500 border" />
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Logo URL</Label>
+                            <Input defaultValue="https://freeflow.io/logo.png" />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Show "Powered by FreeFlow"</p>
+                            <p className="text-sm text-muted-foreground">Display branding on customer portal</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'sla' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Timer className="w-5 h-5 text-blue-500" />
+                          SLA Policies
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <p className="text-sm text-muted-foreground">Define response and resolution time targets by priority</p>
+                        <div className="space-y-4">
+                          {[
+                            { priority: 'Urgent', firstResponse: '15 min', resolution: '2 hours', color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
+                            { priority: 'High', firstResponse: '1 hour', resolution: '8 hours', color: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400' },
+                            { priority: 'Medium', firstResponse: '4 hours', resolution: '24 hours', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                            { priority: 'Low', firstResponse: '8 hours', resolution: '48 hours', color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' }
+                          ].map(sla => (
+                            <div key={sla.priority} className="flex items-center justify-between p-4 border rounded-lg">
+                              <Badge className={sla.color}>{sla.priority}</Badge>
+                              <div className="flex gap-8">
+                                <div className="text-center">
+                                  <p className="text-sm text-muted-foreground">First Response</p>
+                                  <p className="font-medium">{sla.firstResponse}</p>
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-sm text-muted-foreground">Resolution</p>
+                                  <p className="font-medium">{sla.resolution}</p>
+                                </div>
+                              </div>
+                              <button className="text-orange-600 hover:text-orange-700 text-sm font-medium">Edit</button>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="w-5 h-5 text-green-500" />
+                          Routing Rules
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Round Robin Assignment</p>
+                            <p className="text-sm text-muted-foreground">Distribute tickets evenly among agents</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Skill-based Routing</p>
+                            <p className="text-sm text-muted-foreground">Route based on agent skills and expertise</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Load Balancing</p>
+                            <p className="text-sm text-muted-foreground">Consider agent workload when assigning</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Max Tickets per Agent</Label>
+                          <Input type="number" defaultValue="25" className="w-32" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <AlertOctagon className="w-5 h-5 text-red-500" />
+                          Escalation Rules
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Auto-escalate Breached SLA</p>
+                            <p className="text-sm text-muted-foreground">Escalate tickets that breach SLA targets</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Manager Notifications</p>
+                            <p className="text-sm text-muted-foreground">Notify managers when tickets escalate</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Escalation After (minutes)</Label>
+                          <Input type="number" defaultValue="30" className="w-32" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-yellow-500" />
+                          Agent Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">New Ticket Assigned</p>
+                            <p className="text-sm text-muted-foreground">Notify when a ticket is assigned to you</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Customer Reply</p>
+                            <p className="text-sm text-muted-foreground">Notify when customer replies to ticket</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">SLA Warning</p>
+                            <p className="text-sm text-muted-foreground">Warn before SLA breach</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Ticket Escalated</p>
+                            <p className="text-sm text-muted-foreground">Notify when ticket is escalated</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Internal Note Added</p>
+                            <p className="text-sm text-muted-foreground">Notify when colleague adds internal note</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-blue-500" />
+                          Customer Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Ticket Created Confirmation</p>
+                            <p className="text-sm text-muted-foreground">Send confirmation when ticket is created</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Agent Reply Notification</p>
+                            <p className="text-sm text-muted-foreground">Notify customer when agent replies</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Ticket Resolved</p>
+                            <p className="text-sm text-muted-foreground">Notify when ticket is resolved</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Satisfaction Survey</p>
+                            <p className="text-sm text-muted-foreground">Send CSAT survey after resolution</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MessageCircle className="w-5 h-5 text-purple-500" />
+                          Email Templates
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {['Ticket Created', 'Agent Reply', 'Ticket Resolved', 'CSAT Survey', 'SLA Breach Warning'].map(template => (
+                            <div key={template} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <FileText className="w-4 h-4 text-muted-foreground" />
+                                <span>{template}</span>
+                              </div>
+                              <button className="text-orange-600 hover:text-orange-700 text-sm font-medium">Edit</button>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'channels' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-blue-500" />
+                          Email Channel
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Email Support</p>
+                            <p className="text-sm text-muted-foreground">Accept tickets via email</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Support Email Address</Label>
+                            <Input defaultValue="support@freeflow.io" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Email Forwarding</Label>
+                            <Input placeholder="Forward to..." />
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Auto-create Tickets from Email</p>
+                            <p className="text-sm text-muted-foreground">Automatically create tickets from incoming emails</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MessageCircle className="w-5 h-5 text-green-500" />
+                          Live Chat
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Enable Live Chat</p>
+                            <p className="text-sm text-muted-foreground">Allow customers to chat in real-time</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Chat Widget</p>
+                            <p className="text-sm text-muted-foreground">Show chat widget on website</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Business Hours Only</Label>
+                          <Select defaultValue="always">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="always">Always Available</SelectItem>
+                              <SelectItem value="business">Business Hours Only</SelectItem>
+                              <SelectItem value="custom">Custom Schedule</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Convert to Ticket</p>
+                            <p className="text-sm text-muted-foreground">Convert chat transcripts to tickets</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Globe className="w-5 h-5 text-purple-500" />
+                          Social Media
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Twitter/X', connected: true, handle: '@freeflow_support' },
+                            { name: 'Facebook', connected: true, handle: 'FreeFlow Support' },
+                            { name: 'Instagram', connected: false, handle: null },
+                            { name: 'LinkedIn', connected: false, handle: null }
+                          ].map(channel => (
+                            <div key={channel.name} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Globe className="w-4 h-4" />
+                                <div>
+                                  <p className="font-medium">{channel.name}</p>
+                                  {channel.handle && <p className="text-sm text-muted-foreground">{channel.handle}</p>}
+                                </div>
+                              </div>
+                              <Badge variant={channel.connected ? 'default' : 'secondary'}>
+                                {channel.connected ? 'Connected' : 'Not Connected'}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Phone className="w-5 h-5 text-orange-500" />
+                          Phone Support
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Enable Phone Support</p>
+                            <p className="text-sm text-muted-foreground">Accept calls and create tickets</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Support Phone Number</Label>
+                            <Input placeholder="+1 (555) 000-0000" disabled />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Call Recording</Label>
+                            <Select defaultValue="disabled" disabled>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="disabled">Disabled</SelectItem>
+                                <SelectItem value="optional">Optional</SelectItem>
+                                <SelectItem value="always">Always</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'automations' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bot className="w-5 h-5 text-blue-500" />
+                          AI & Automation
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">AI Auto-responses</p>
+                            <p className="text-sm text-muted-foreground">Use AI to suggest or auto-send responses</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Smart Ticket Classification</p>
+                            <p className="text-sm text-muted-foreground">AI categorizes and prioritizes tickets</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Sentiment Analysis</p>
+                            <p className="text-sm text-muted-foreground">Detect customer sentiment in messages</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Answer Bot</p>
+                            <p className="text-sm text-muted-foreground">AI bot answers common questions</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>AI Confidence Threshold</Label>
+                          <div className="flex items-center gap-4">
+                            <Input type="range" min="0" max="100" defaultValue="80" className="flex-1" />
+                            <span className="text-sm font-medium">80%</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Zap className="w-5 h-5 text-yellow-500" />
+                          Triggers & Workflows
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <p className="text-sm text-muted-foreground">Automate actions based on ticket conditions</p>
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Auto-close Resolved Tickets', description: 'Close after 3 days of no response', active: true },
+                            { name: 'Priority Escalation', description: 'Escalate high-priority after 1 hour', active: true },
+                            { name: 'Tag by Keyword', description: 'Auto-tag based on subject keywords', active: true },
+                            { name: 'VIP Customer Routing', description: 'Route VIP customers to senior agents', active: false },
+                            { name: 'Merge Duplicate Tickets', description: 'Auto-merge tickets from same customer', active: false }
+                          ].map(trigger => (
+                            <div key={trigger.name} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Cpu className="w-4 h-4 text-muted-foreground" />
+                                <div>
+                                  <p className="font-medium">{trigger.name}</p>
+                                  <p className="text-sm text-muted-foreground">{trigger.description}</p>
+                                </div>
+                              </div>
+                              <Switch checked={trigger.active} />
+                            </div>
+                          ))}
+                        </div>
+                        <button className="w-full py-2 border-2 border-dashed rounded-lg text-muted-foreground hover:text-foreground hover:border-orange-300 transition-colors">
+                          <Plus className="w-4 h-4 inline-block mr-2" />
+                          Create New Trigger
+                        </button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Zap className="w-5 h-5 text-purple-500" />
+                          Macros Management
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Enable Macros</p>
+                            <p className="text-sm text-muted-foreground">Allow agents to use quick response templates</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Personal Macros</p>
+                            <p className="text-sm text-muted-foreground">Allow agents to create personal macros</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Macro Usage Analytics</p>
+                            <p className="text-sm text-muted-foreground">Track macro usage and effectiveness</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-blue-500" />
+                          API Access
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
+                            <button className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <Copy className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Webhook URL</Label>
+                          <Input placeholder="https://your-app.com/webhooks/support" />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Rate Limiting</p>
+                            <p className="text-sm text-muted-foreground">Limit API requests per minute</p>
+                          </div>
+                          <Input type="number" defaultValue="1000" className="w-24" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-green-500" />
+                          Integrations
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Slack', description: 'Post ticket updates to Slack channels', connected: true },
+                            { name: 'Jira', description: 'Create Jira issues from tickets', connected: true },
+                            { name: 'Salesforce', description: 'Sync with Salesforce CRM', connected: false },
+                            { name: 'HubSpot', description: 'Connect with HubSpot contacts', connected: false },
+                            { name: 'Intercom', description: 'Import conversations from Intercom', connected: false }
+                          ].map(integration => (
+                            <div key={integration.name} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <Link2 className="w-4 h-4" />
+                                <div>
+                                  <p className="font-medium">{integration.name}</p>
+                                  <p className="text-sm text-muted-foreground">{integration.description}</p>
+                                </div>
+                              </div>
+                              <Badge variant={integration.connected ? 'default' : 'outline'}>
+                                {integration.connected ? 'Connected' : 'Connect'}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-purple-500" />
+                          Security & Compliance
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Two-Factor Authentication</p>
+                            <p className="text-sm text-muted-foreground">Require 2FA for all agents</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">IP Whitelisting</p>
+                            <p className="text-sm text-muted-foreground">Restrict access to specific IPs</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">Audit Logging</p>
+                            <p className="text-sm text-muted-foreground">Log all agent actions</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-medium">PII Redaction</p>
+                            <p className="text-sm text-muted-foreground">Auto-redact sensitive data in tickets</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Data Retention (days)</Label>
+                          <Input type="number" defaultValue="365" className="w-32" />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-900">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-600">Purge All Tickets</p>
+                            <p className="text-sm text-muted-foreground">Permanently delete all closed tickets</p>
+                          </div>
+                          <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2">
+                            <Trash2 className="w-4 h-4" />
+                            Purge
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-600">Reset All Settings</p>
+                            <p className="text-sm text-muted-foreground">Reset all support settings to defaults</p>
+                          </div>
+                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                            <RefreshCw className="w-4 h-4" />
+                            Reset
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-900 rounded-lg">
+                          <div>
+                            <p className="font-medium text-red-600">Export All Data</p>
+                            <p className="text-sm text-muted-foreground">Download all tickets and customer data</p>
+                          </div>
+                          <button className="px-4 py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
+                            <Download className="w-4 h-4" />
+                            Export
+                          </button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 
