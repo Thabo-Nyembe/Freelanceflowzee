@@ -121,6 +121,47 @@ interface DeploymentProtection {
   config: Record<string, any>
 }
 
+interface DeploymentWebhook {
+  id: string
+  name: string
+  url: string
+  events: string[]
+  status: 'active' | 'inactive' | 'failed'
+  lastTriggered?: string
+  successRate: number
+  secret: string
+}
+
+interface Integration {
+  id: string
+  name: string
+  type: 'ci_cd' | 'monitoring' | 'notification' | 'logging' | 'analytics'
+  status: 'connected' | 'disconnected' | 'error'
+  icon: string
+  lastSync: string
+  config: Record<string, any>
+}
+
+interface TeamMember {
+  id: string
+  name: string
+  email: string
+  role: 'owner' | 'admin' | 'developer' | 'viewer'
+  avatar: string
+  lastActive: string
+  deploymentsThisMonth: number
+}
+
+interface BuildPlugin {
+  id: string
+  name: string
+  version: string
+  enabled: boolean
+  description: string
+  author: string
+  installCount: number
+}
+
 // Mock Data
 const mockDeployments: Deployment[] = [
   { id: '1', name: 'Production', status: 'success', environment: 'production', branch: 'main', commit: 'a3b2c1d', commitMessage: 'feat: Add new dashboard components', author: 'Sarah Chen', authorAvatar: 'sarah', createdAt: '2024-01-15T14:30:00Z', duration: 45, previewUrl: 'https://app-a3b2c1d.vercel.app', productionUrl: 'https://freeflow.app', buildCache: true, isProtected: true },
@@ -188,6 +229,36 @@ const mockProtections: DeploymentProtection[] = [
   { id: '3', name: 'Trusted IPs', type: 'trusted_ips', enabled: true, config: { ips: ['192.168.1.0/24', '10.0.0.0/8'] } }
 ]
 
+const mockWebhooks: DeploymentWebhook[] = [
+  { id: '1', name: 'Slack Notifications', url: 'https://hooks.slack.com/services/xxx', events: ['deployment.created', 'deployment.succeeded', 'deployment.failed'], status: 'active', lastTriggered: '2024-01-16 09:23', successRate: 100, secret: 'whsec_xxxxxx' },
+  { id: '2', name: 'Discord Bot', url: 'https://discord.com/api/webhooks/xxx', events: ['deployment.succeeded'], status: 'active', lastTriggered: '2024-01-16 09:00', successRate: 98.5, secret: 'whsec_yyyyyy' },
+  { id: '3', name: 'CI/CD Trigger', url: 'https://api.internal.io/webhooks/deploy', events: ['deployment.promoted', 'deployment.rolled_back'], status: 'failed', lastTriggered: '2024-01-14 15:30', successRate: 78.0, secret: 'whsec_zzzzzz' }
+]
+
+const mockIntegrations: Integration[] = [
+  { id: '1', name: 'GitHub', type: 'ci_cd', status: 'connected', icon: 'github', lastSync: '2024-01-16 09:00', config: { repo: 'freeflow-app/freeflow', branch: 'main' } },
+  { id: '2', name: 'Datadog', type: 'monitoring', status: 'connected', icon: 'datadog', lastSync: '2024-01-16 08:45', config: { apiKey: '••••••' } },
+  { id: '3', name: 'Slack', type: 'notification', status: 'connected', icon: 'slack', lastSync: '2024-01-16 09:15', config: { channel: '#deployments' } },
+  { id: '4', name: 'LogDNA', type: 'logging', status: 'disconnected', icon: 'logdna', lastSync: '2024-01-10 12:00', config: {} },
+  { id: '5', name: 'Sentry', type: 'monitoring', status: 'connected', icon: 'sentry', lastSync: '2024-01-16 08:30', config: { org: 'freeflow', project: 'main' } },
+  { id: '6', name: 'Amplitude', type: 'analytics', status: 'connected', icon: 'amplitude', lastSync: '2024-01-16 08:00', config: { apiKey: '••••••' } }
+]
+
+const mockTeamMembers: TeamMember[] = [
+  { id: '1', name: 'Sarah Chen', email: 'sarah@freeflow.app', role: 'owner', avatar: 'SC', lastActive: '2024-01-16 09:23', deploymentsThisMonth: 45 },
+  { id: '2', name: 'Mike Johnson', email: 'mike@freeflow.app', role: 'admin', avatar: 'MJ', lastActive: '2024-01-16 09:15', deploymentsThisMonth: 38 },
+  { id: '3', name: 'Emily Davis', email: 'emily@freeflow.app', role: 'developer', avatar: 'ED', lastActive: '2024-01-16 08:45', deploymentsThisMonth: 32 },
+  { id: '4', name: 'Alex Kim', email: 'alex@freeflow.app', role: 'developer', avatar: 'AK', lastActive: '2024-01-15 18:30', deploymentsThisMonth: 28 },
+  { id: '5', name: 'Jordan Lee', email: 'jordan@freeflow.app', role: 'viewer', avatar: 'JL', lastActive: '2024-01-15 14:00', deploymentsThisMonth: 0 }
+]
+
+const mockBuildPlugins: BuildPlugin[] = [
+  { id: '1', name: 'Lighthouse Audit', version: '2.3.1', enabled: true, description: 'Run Lighthouse performance audits on each deployment', author: 'Vercel', installCount: 125000 },
+  { id: '2', name: 'Bundle Analyzer', version: '1.5.0', enabled: true, description: 'Analyze JavaScript bundle size', author: 'Vercel', installCount: 89000 },
+  { id: '3', name: 'Image Optimizer', version: '3.0.2', enabled: true, description: 'Automatically optimize images during build', author: 'Vercel', installCount: 156000 },
+  { id: '4', name: 'Cache Warmer', version: '1.2.0', enabled: false, description: 'Pre-populate CDN cache after deployment', author: 'Community', installCount: 34000 }
+]
+
 export default function DeploymentsClient() {
   const [activeTab, setActiveTab] = useState('deployments')
   const [searchQuery, setSearchQuery] = useState('')
@@ -197,7 +268,11 @@ export default function DeploymentsClient() {
   const [showEnvDialog, setShowEnvDialog] = useState(false)
   const [showDomainDialog, setShowDomainDialog] = useState(false)
   const [showRollbackDialog, setShowRollbackDialog] = useState(false)
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [showTeamDialog, setShowTeamDialog] = useState(false)
+  const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
   const [expandedLogs, setExpandedLogs] = useState<string[]>(['clone', 'install', 'build', 'deploy'])
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const filteredDeployments = useMemo(() => {
     return mockDeployments.filter(d => {
@@ -618,32 +693,141 @@ export default function DeploymentsClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-2 gap-6">
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle className="flex items-center gap-2"><GitBranch className="h-5 w-5" />Git Integration</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <GitBranch className="h-5 w-5" />
-                      <div><p className="font-medium">freeflow-app/freeflow</p><p className="text-sm text-gray-500">Connected to main</p></div>
-                    </div>
-                    <Badge className="bg-green-100 text-green-700">Connected</Badge>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2"><input type="checkbox" className="rounded" defaultChecked /><span className="text-sm">Auto-deploy on push</span></label>
-                    <label className="flex items-center gap-2"><input type="checkbox" className="rounded" defaultChecked /><span className="text-sm">Create preview deployments</span></label>
-                    <label className="flex items-center gap-2"><input type="checkbox" className="rounded" /><span className="text-sm">Require approval for production</span></label>
-                  </div>
+            <div className="flex gap-6">
+              <Card className="w-64 h-fit border-gray-200 dark:border-gray-700">
+                <CardContent className="p-2">
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General' },
+                      { id: 'git', icon: GitBranch, label: 'Git' },
+                      { id: 'integrations', icon: Zap, label: 'Integrations' },
+                      { id: 'webhooks', icon: Webhook, label: 'Webhooks' },
+                      { id: 'team', icon: User, label: 'Team' },
+                      { id: 'plugins', icon: Package, label: 'Plugins' }
+                    ].map(item => (
+                      <button key={item.id} onClick={() => setSettingsTab(item.id)} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${settingsTab === item.id ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                        <item.icon className="h-4 w-4" />{item.label}
+                      </button>
+                    ))}
+                  </nav>
                 </CardContent>
               </Card>
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5" />Security</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">SSL/TLS</p><p className="text-sm text-gray-500">Auto-provisioned certificates</p></div><Badge className="bg-green-100 text-green-700">Enabled</Badge></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">DDoS Protection</p><p className="text-sm text-gray-500">Edge network filtering</p></div><Badge className="bg-green-100 text-green-700">Active</Badge></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Password Protection</p><p className="text-sm text-gray-500">For preview deployments</p></div><Switch /></div>
-                </CardContent>
-              </Card>
+              <div className="flex-1 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle>Project Settings</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4"><div><Label>Project Name</Label><Input defaultValue="freeflow-app" className="mt-1" /></div><div><Label>Framework</Label><Select defaultValue="nextjs"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="nextjs">Next.js</SelectItem><SelectItem value="react">React</SelectItem><SelectItem value="vue">Vue</SelectItem></SelectContent></Select></div></div>
+                        <div className="grid grid-cols-2 gap-4"><div><Label>Build Command</Label><Input defaultValue="npm run build" className="mt-1 font-mono" /></div><div><Label>Output Directory</Label><Input defaultValue=".next" className="mt-1 font-mono" /></div></div>
+                        <div className="grid grid-cols-2 gap-4"><div><Label>Install Command</Label><Input defaultValue="npm install" className="mt-1 font-mono" /></div><div><Label>Node.js Version</Label><Select defaultValue="20"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="18">18.x</SelectItem><SelectItem value="20">20.x</SelectItem><SelectItem value="22">22.x</SelectItem></SelectContent></Select></div></div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle>Build & Deploy</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Auto-deploy on push</p><p className="text-sm text-gray-500">Deploy when commits are pushed</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Preview Deployments</p><p className="text-sm text-gray-500">Create deployments for PRs</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Build Cache</p><p className="text-sm text-gray-500">Cache dependencies for faster builds</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Skew Protection</p><p className="text-sm text-gray-500">Ensure asset/code version consistency</p></div><Switch /></div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+                {settingsTab === 'git' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Git Integration</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3"><GitBranch className="h-6 w-6" /><div><p className="font-medium">freeflow-app/freeflow</p><p className="text-sm text-gray-500">Connected to main</p></div></div>
+                        <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4"><div><Label>Production Branch</Label><Select defaultValue="main"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="main">main</SelectItem><SelectItem value="master">master</SelectItem><SelectItem value="production">production</SelectItem></SelectContent></Select></div><div><Label>Root Directory</Label><Input defaultValue="./" className="mt-1 font-mono" /></div></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Ignored Build Step</p><p className="text-sm text-gray-500">Cancel builds based on changed files</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Deploy Hooks</p><p className="text-sm text-gray-500">Trigger deploys from external services</p></div><Button variant="outline" size="sm"><Plus className="h-4 w-4 mr-2" />Create Hook</Button></div>
+                    </CardContent>
+                  </Card>
+                )}
+                {settingsTab === 'integrations' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Connected Integrations</CardTitle><Button onClick={() => setShowIntegrationDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Integration</Button></CardHeader>
+                    <CardContent className="space-y-4">
+                      {mockIntegrations.map(integration => (
+                        <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.status === 'connected' ? 'bg-green-100' : 'bg-gray-100'}`}>
+                              {integration.type === 'ci_cd' && <GitBranch className="h-5 w-5 text-purple-600" />}
+                              {integration.type === 'monitoring' && <Activity className="h-5 w-5 text-blue-600" />}
+                              {integration.type === 'notification' && <MessageSquare className="h-5 w-5 text-pink-600" />}
+                              {integration.type === 'logging' && <Terminal className="h-5 w-5 text-green-600" />}
+                              {integration.type === 'analytics' && <BarChart3 className="h-5 w-5 text-amber-600" />}
+                            </div>
+                            <div><h4 className="font-medium">{integration.name}</h4><p className="text-sm text-gray-500">Last sync: {integration.lastSync}</p></div>
+                          </div>
+                          <div className="flex items-center gap-3"><Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{integration.status}</Badge><Button variant="ghost" size="sm"><Settings className="h-4 w-4" /></Button></div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+                {settingsTab === 'webhooks' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Webhooks</CardTitle><Button onClick={() => setShowWebhookDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Webhook</Button></CardHeader>
+                    <CardContent className="space-y-4">
+                      {mockWebhooks.map(webhook => (
+                        <div key={webhook.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2"><h4 className="font-medium">{webhook.name}</h4><Badge className={webhook.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>{webhook.status}</Badge></div>
+                            <p className="font-mono text-sm text-gray-500 mt-1">{webhook.url}</p>
+                            <div className="flex items-center gap-2 mt-2">{webhook.events.map(e => <Badge key={e} variant="outline" className="text-xs">{e}</Badge>)}</div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right"><p className="text-sm"><span className={webhook.successRate >= 95 ? 'text-green-600' : 'text-amber-600'}>{webhook.successRate}%</span></p><p className="text-xs text-gray-500">success rate</p></div>
+                            <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="text-red-500"><Trash2 className="h-4 w-4" /></Button>
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+                {settingsTab === 'team' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Team Members</CardTitle><Button onClick={() => setShowTeamDialog(true)}><Plus className="h-4 w-4 mr-2" />Invite Member</Button></CardHeader>
+                    <CardContent className="space-y-4">
+                      {mockTeamMembers.map(member => (
+                        <div key={member.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <Avatar className="h-10 w-10"><AvatarFallback className="bg-purple-100 text-purple-700">{member.avatar}</AvatarFallback></Avatar>
+                            <div><h4 className="font-medium">{member.name}</h4><p className="text-sm text-gray-500">{member.email}</p></div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right"><p className="text-sm font-medium">{member.deploymentsThisMonth} deploys</p><p className="text-xs text-gray-500">this month</p></div>
+                            <Badge variant="outline" className={member.role === 'owner' ? 'bg-purple-100 text-purple-700' : member.role === 'admin' ? 'bg-blue-100 text-blue-700' : ''}>{member.role}</Badge>
+                            <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+                {settingsTab === 'plugins' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Build Plugins</CardTitle><Button variant="outline"><Search className="h-4 w-4 mr-2" />Browse Marketplace</Button></CardHeader>
+                    <CardContent className="space-y-4">
+                      {mockBuildPlugins.map(plugin => (
+                        <div key={plugin.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center"><Package className="h-5 w-5 text-indigo-600" /></div>
+                            <div><div className="flex items-center gap-2"><h4 className="font-medium">{plugin.name}</h4><Badge variant="outline" className="text-xs">v{plugin.version}</Badge></div><p className="text-sm text-gray-500">{plugin.description}</p><p className="text-xs text-gray-400 mt-1">by {plugin.author} • {(plugin.installCount / 1000).toFixed(0)}k installs</p></div>
+                          </div>
+                          <Switch checked={plugin.enabled} />
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
@@ -770,6 +954,57 @@ export default function DeploymentsClient() {
               <Button variant="outline" onClick={() => setShowRollbackDialog(false)}>Cancel</Button>
               <Button className="bg-amber-600 hover:bg-amber-700"><RotateCcw className="h-4 w-4 mr-2" />Confirm Rollback</Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Dialog */}
+        <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
+          <DialogContent><DialogHeader><DialogTitle>Add Webhook</DialogTitle><DialogDescription>Configure a webhook endpoint for deployment events</DialogDescription></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Webhook Name</Label><Input placeholder="Slack Notifications" className="mt-1" /></div>
+              <div><Label>Endpoint URL</Label><Input placeholder="https://your-api.com/webhooks" className="mt-1" /></div>
+              <div><Label>Events</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {['deployment.created', 'deployment.succeeded', 'deployment.failed', 'deployment.promoted', 'deployment.rolled_back', 'domain.added'].map(event => (
+                    <div key={event} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded"><input type="checkbox" /><span className="text-sm font-mono">{event}</span></div>
+                  ))}
+                </div>
+              </div>
+              <div><Label>Secret (Optional)</Label><Input placeholder="whsec_xxxxxxxxx" className="mt-1 font-mono" /></div>
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-purple-600 to-indigo-600">Add Webhook</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Team Member Dialog */}
+        <Dialog open={showTeamDialog} onOpenChange={setShowTeamDialog}>
+          <DialogContent><DialogHeader><DialogTitle>Invite Team Member</DialogTitle><DialogDescription>Add a new member to your deployment team</DialogDescription></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Email Address</Label><Input type="email" placeholder="colleague@company.com" className="mt-1" /></div>
+              <div><Label>Role</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger><SelectContent><SelectItem value="admin">Admin - Full access</SelectItem><SelectItem value="developer">Developer - Deploy & manage</SelectItem><SelectItem value="viewer">Viewer - Read only</SelectItem></SelectContent></Select></div>
+              <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200">
+                <p className="text-sm text-purple-700">Team members will receive an email invitation to join your project.</p>
+              </div>
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowTeamDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-purple-600 to-indigo-600">Send Invitation</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Integration Dialog */}
+        <Dialog open={showIntegrationDialog} onOpenChange={setShowIntegrationDialog}>
+          <DialogContent className="max-w-lg"><DialogHeader><DialogTitle>Add Integration</DialogTitle><DialogDescription>Connect third-party services to your deployments</DialogDescription></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-3 gap-3">
+                {[{ name: 'GitHub', icon: GitBranch, color: 'gray' }, { name: 'Datadog', icon: Activity, color: 'purple' }, { name: 'Slack', icon: MessageSquare, color: 'pink' }, { name: 'Sentry', icon: AlertCircle, color: 'red' }, { name: 'PagerDuty', icon: Webhook, color: 'green' }, { name: 'Linear', icon: Layers, color: 'blue' }].map(int => (
+                  <button key={int.name} className="p-4 border rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors text-center">
+                    <int.icon className={`h-8 w-8 mx-auto text-${int.color}-600`} />
+                    <p className="text-sm font-medium mt-2">{int.name}</p>
+                  </button>
+                ))}
+              </div>
+              <div className="text-center"><p className="text-sm text-gray-500">Select an integration to connect</p></div>
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowIntegrationDialog(false)}>Cancel</Button></DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
