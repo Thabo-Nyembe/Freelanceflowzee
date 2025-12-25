@@ -116,6 +116,19 @@ interface AuditLog {
   success: boolean
 }
 
+interface UserGroup {
+  id: string
+  name: string
+  description: string
+  memberCount: number
+  roles: string[]
+  status: 'active' | 'inactive'
+  createdAt: string
+  updatedAt: string
+  createdBy: string
+  isSystem: boolean
+}
+
 // Mock Data
 const mockRoles: Role[] = [
   {
@@ -317,6 +330,16 @@ const mockAuditLogs: AuditLog[] = [
   { id: '5', action: 'policy.updated', actor: 'john@company.com', target: 'Admin MFA Required', targetType: 'policy', details: 'Modified condition parameters', timestamp: '2024-12-22T09:30:00Z', ipAddress: '10.0.1.10', success: true }
 ]
 
+const mockUserGroups: UserGroup[] = [
+  { id: '1', name: 'Administrators', description: 'System administrators with full access', memberCount: 15, roles: ['SUPER_ADMIN', 'ADMIN'], status: 'active', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-12-20T10:00:00Z', createdBy: 'System', isSystem: true },
+  { id: '2', name: 'Staff', description: 'Regular staff members', memberCount: 245, roles: ['USER', 'MANAGER'], status: 'active', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-12-15T09:00:00Z', createdBy: 'System', isSystem: true },
+  { id: '3', name: 'Managers', description: 'Team managers with oversight permissions', memberCount: 45, roles: ['MANAGER'], status: 'active', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-12-10T14:00:00Z', createdBy: 'System', isSystem: true },
+  { id: '4', name: 'Finance Team', description: 'Finance department members', memberCount: 18, roles: ['FINANCE', 'USER'], status: 'active', createdAt: '2024-03-15T10:00:00Z', updatedAt: '2024-12-20T16:00:00Z', createdBy: 'admin@company.com', isSystem: false },
+  { id: '5', name: 'Viewers', description: 'Read-only access users', memberCount: 320, roles: ['VIEWER'], status: 'active', createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-12-05T11:00:00Z', createdBy: 'System', isSystem: true },
+  { id: '6', name: 'Guests', description: 'External guest users', memberCount: 85, roles: ['VIEWER'], status: 'active', createdAt: '2024-02-01T09:00:00Z', updatedAt: '2024-11-30T15:00:00Z', createdBy: 'admin@company.com', isSystem: false },
+  { id: '7', name: 'Service Accounts', description: 'API and integration accounts', memberCount: 8, roles: ['API_SERVICE'], status: 'active', createdAt: '2024-06-01T09:00:00Z', updatedAt: '2024-12-01T12:00:00Z', createdBy: 'admin@company.com', isSystem: false }
+]
+
 // Helper functions
 const getStatusColor = (status: RoleStatus): string => {
   const colors: Record<RoleStatus, string> = {
@@ -500,6 +523,14 @@ export default function RolesClient() {
               <TabsTrigger value="audit" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
                 <FileText className="w-4 h-4 mr-2" />
                 Audit Log
+              </TabsTrigger>
+              <TabsTrigger value="groups" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+                <UsersRound className="w-4 h-4 mr-2" />
+                Groups
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
               </TabsTrigger>
             </TabsList>
 
@@ -927,6 +958,219 @@ export default function RolesClient() {
                   </ScrollArea>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            {/* Groups Tab */}
+            <TabsContent value="groups" className="space-y-6">
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <UsersRound className="w-5 h-5 text-indigo-600" />
+                        User Groups
+                      </CardTitle>
+                      <CardDescription>Manage user groups for bulk role assignments</CardDescription>
+                    </div>
+                    <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Group
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {mockUserGroups.map((group) => (
+                      <Card key={group.id} className="bg-gray-50 dark:bg-gray-700/50 border-0">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg">
+                                <UsersRound className="w-5 h-5 text-white" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="font-semibold text-gray-900 dark:text-white">{group.name}</h4>
+                                  {group.isSystem && <Crown className="w-4 h-4 text-yellow-500" />}
+                                </div>
+                                <p className="text-xs text-gray-500">{group.memberCount} members</p>
+                              </div>
+                            </div>
+                            <Badge className={group.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                              {group.status}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{group.description}</p>
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {group.roles.map((role, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs">{role}</Badge>
+                            ))}
+                          </div>
+                          <div className="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-600">
+                            <Button size="sm" variant="outline" className="flex-1">
+                              <Eye className="w-4 h-4 mr-1" /> View
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              <UserPlus className="w-4 h-4" />
+                            </Button>
+                            {!group.isSystem && (
+                              <Button size="sm" variant="outline" className="text-red-600">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Settings Tab */}
+            <TabsContent value="settings" className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-indigo-600" />
+                      Role Settings
+                    </CardTitle>
+                    <CardDescription>Configure default role behaviors</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">Auto-assign default role</p>
+                        <p className="text-sm text-gray-500">Automatically assign default role to new users</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">Role inheritance</p>
+                        <p className="text-sm text-gray-500">Allow roles to inherit permissions from parent roles</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">Delegation enabled</p>
+                        <p className="text-sm text-gray-500">Allow roles with delegation flag to assign roles</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">Role expiration</p>
+                        <p className="text-sm text-gray-500">Enable time-limited role assignments</p>
+                      </div>
+                      <Switch />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Fingerprint className="w-5 h-5 text-indigo-600" />
+                      Security Settings
+                    </CardTitle>
+                    <CardDescription>Configure authentication and security options</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">Require MFA for admins</p>
+                        <p className="text-sm text-gray-500">Force multi-factor authentication for admin roles</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">Session timeout</p>
+                        <p className="text-sm text-gray-500">Automatically log out inactive users</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">IP restrictions</p>
+                        <p className="text-sm text-gray-500">Limit access based on IP addresses</p>
+                      </div>
+                      <Switch />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">Audit all actions</p>
+                        <p className="text-sm text-gray-500">Log all role and permission changes</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Bell className="w-5 h-5 text-indigo-600" />
+                      Notifications
+                    </CardTitle>
+                    <CardDescription>Configure notification preferences</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">Role changes</p>
+                        <p className="text-sm text-gray-500">Notify when roles are modified</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">Permission denials</p>
+                        <p className="text-sm text-gray-500">Alert on permission denial events</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">Policy violations</p>
+                        <p className="text-sm text-gray-500">Notify on access policy violations</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Download className="w-5 h-5 text-indigo-600" />
+                      Data Management
+                    </CardTitle>
+                    <CardDescription>Export and backup options</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Button variant="outline" className="w-full justify-start">
+                      <Download className="w-4 h-4 mr-2" />
+                      Export Roles & Permissions
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <FileText className="w-4 h-4 mr-2" />
+                      Export Audit Logs
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <Users className="w-4 h-4 mr-2" />
+                      Export User Assignments
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Sync with Directory
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
