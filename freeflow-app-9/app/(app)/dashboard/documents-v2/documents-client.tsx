@@ -1,758 +1,1032 @@
 'use client'
-
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useDocuments, type Document, type DocumentType, type DocumentStatus } from '@/lib/hooks/use-documents'
-import { BentoCard } from '@/components/ui/bento-grid-advanced'
-import { StatGrid, MiniKPI } from '@/components/ui/results-display'
-import { GradientButton, PillButton, ModernButton } from '@/components/ui/modern-buttons'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Switch } from '@/components/ui/switch'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   FileText, Upload, Download, Eye, Share2, CheckCircle, Clock, XCircle,
   Plus, Search, Filter, MoreHorizontal, Folder, FolderOpen, File,
   Star, StarOff, Lock, Users, Globe, History, MessageSquare, Link2,
-  Copy, Trash2, Edit3, ChevronRight, ChevronDown, Grid3X3, List, LayoutGrid,
-  Calendar, Table, Kanban, Image as ImageIcon, Code, Type, Hash, ListTodo,
-  Quote, Minus, ArrowUpRight, Settings, Bookmark, Archive, Tag, Layers,
-  Home, ChevronLeft, Sparkles, Wand2, BookOpen, FileCode, Presentation
+  Copy, Trash2, Edit3, ChevronRight, ChevronDown, Grid3X3, List,
+  Calendar, Table, Image as ImageIcon, Code, Type, Hash, ListTodo,
+  Quote, Minus, Sparkles, Wand2, BookOpen, FileCode, Presentation,
+  Settings, BarChart3, FileSpreadsheet, FilePlus, FolderPlus, Archive,
+  Tag, PenTool, Paperclip, FileUp, CloudUpload, HardDrive, CheckCircle2,
+  AlertCircle, FileCheck, FileX, FileLock, FileSearch, FolderTree,
+  FolderInput, FolderOutput, Timer, TrendingUp, Activity, Zap, Shield,
+  ExternalLink, RefreshCw, MoreVertical, Layers, Move, ArrowUpRight
 } from 'lucide-react'
 
-// Notion-style interfaces
-interface Page {
+// ============================================================================
+// TYPE DEFINITIONS - Google Docs Level Document Platform
+// ============================================================================
+
+interface DocumentFile {
   id: string
-  title: string
-  icon?: string
-  cover?: string
-  parentId?: string
-  type: 'page' | 'database'
-  properties?: Record<string, any>
-  content?: Block[]
-  createdAt: string
-  updatedAt: string
-  createdBy: string
-  shared: boolean
+  name: string
+  type: 'document' | 'spreadsheet' | 'presentation' | 'pdf' | 'image' | 'video' | 'audio' | 'archive' | 'other'
+  extension: string
+  size: number
+  folderId?: string
+  ownerId: string
+  ownerName: string
+  ownerAvatar?: string
+  status: 'draft' | 'review' | 'approved' | 'published' | 'archived'
   starred: boolean
-  archived: boolean
+  shared: boolean
+  sharingType: 'private' | 'team' | 'organization' | 'public'
+  permissions: Permission[]
+  version: number
+  createdAt: Date
+  updatedAt: Date
+  lastAccessedAt?: Date
+  tags: string[]
+  comments: number
+  thumbnail?: string
 }
 
-interface Block {
+interface DocumentFolder {
   id: string
-  type: 'heading1' | 'heading2' | 'heading3' | 'paragraph' | 'bulletList' | 'numberedList' | 'todo' | 'toggle' | 'code' | 'quote' | 'divider' | 'image' | 'callout' | 'table'
-  content: string
-  checked?: boolean
-  children?: Block[]
-  language?: string
+  name: string
+  color: string
+  parentId?: string
+  documentCount: number
+  size: number
+  createdAt: Date
+  shared: boolean
+  ownerId: string
+  ownerName: string
 }
 
-interface Template {
+interface Permission {
+  userId: string
+  userName: string
+  userEmail: string
+  userAvatar?: string
+  role: 'owner' | 'editor' | 'commenter' | 'viewer'
+  addedAt: Date
+}
+
+interface DocTemplate {
   id: string
   name: string
   description: string
-  icon: string
   category: string
-  blocks: Block[]
+  icon: string
+  type: 'document' | 'spreadsheet' | 'presentation'
+  uses: number
+  isPremium: boolean
+  thumbnail?: string
 }
 
-interface Collaborator {
+interface VersionEntry {
   id: string
-  name: string
-  email: string
-  avatar: string
-  role: 'owner' | 'editor' | 'viewer' | 'commenter'
-  addedAt: string
+  version: number
+  userId: string
+  userName: string
+  userAvatar?: string
+  changes: string
+  size: number
+  createdAt: Date
 }
 
 interface Comment {
   id: string
-  user: string
-  avatar: string
+  documentId: string
+  userId: string
+  userName: string
+  userAvatar?: string
   content: string
   resolved: boolean
-  createdAt: string
-  replies?: Comment[]
+  replies: CommentReply[]
+  createdAt: Date
+  position?: { x: number; y: number }
 }
 
-interface VersionHistory {
+interface CommentReply {
   id: string
-  version: number
-  user: string
-  avatar: string
-  changes: string
-  createdAt: string
+  userId: string
+  userName: string
+  userAvatar?: string
+  content: string
+  createdAt: Date
 }
 
-// Mock data
-const mockPages: Page[] = [
-  { id: '1', title: 'Product Roadmap 2024', icon: '🗺️', type: 'page', createdAt: '2024-03-01', updatedAt: '2024-03-15', createdBy: 'John', shared: true, starred: true, archived: false },
-  { id: '2', title: 'Team Wiki', icon: '📚', type: 'page', createdAt: '2024-02-15', updatedAt: '2024-03-14', createdBy: 'Sarah', shared: true, starred: false, archived: false },
-  { id: '3', title: 'Project Tracker', icon: '📊', type: 'database', createdAt: '2024-01-20', updatedAt: '2024-03-13', createdBy: 'Mike', shared: true, starred: true, archived: false },
-  { id: '4', title: 'Meeting Notes', icon: '📝', type: 'page', parentId: '2', createdAt: '2024-03-10', updatedAt: '2024-03-12', createdBy: 'Emily', shared: false, starred: false, archived: false },
-  { id: '5', title: 'Design System', icon: '🎨', type: 'page', createdAt: '2024-02-01', updatedAt: '2024-03-11', createdBy: 'Alex', shared: true, starred: false, archived: false },
-  { id: '6', title: 'Q1 OKRs', icon: '🎯', type: 'database', createdAt: '2024-01-01', updatedAt: '2024-03-10', createdBy: 'John', shared: true, starred: true, archived: false },
+interface StorageInfo {
+  used: number
+  total: number
+  breakdown: {
+    documents: number
+    images: number
+    videos: number
+    other: number
+  }
+}
+
+interface RecentActivity {
+  id: string
+  action: 'created' | 'edited' | 'shared' | 'commented' | 'deleted' | 'restored' | 'moved'
+  documentId: string
+  documentName: string
+  userId: string
+  userName: string
+  userAvatar?: string
+  timestamp: Date
+  details?: string
+}
+
+// ============================================================================
+// MOCK DATA
+// ============================================================================
+
+const mockDocuments: DocumentFile[] = [
+  { id: '1', name: 'Product Roadmap 2024', type: 'document', extension: 'docx', size: 245000, ownerId: '1', ownerName: 'John Developer', status: 'published', starred: true, shared: true, sharingType: 'team', permissions: [], version: 12, createdAt: new Date('2024-01-15'), updatedAt: new Date(Date.now() - 1000 * 60 * 30), tags: ['roadmap', 'product'], comments: 8 },
+  { id: '2', name: 'Q4 Financial Report', type: 'spreadsheet', extension: 'xlsx', size: 890000, ownerId: '2', ownerName: 'Sarah Finance', status: 'approved', starred: true, shared: true, sharingType: 'organization', permissions: [], version: 5, createdAt: new Date('2024-02-01'), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 2), tags: ['finance', 'quarterly'], comments: 3 },
+  { id: '3', name: 'Team Presentation', type: 'presentation', extension: 'pptx', size: 4500000, ownerId: '3', ownerName: 'Mike Designer', status: 'review', starred: false, shared: true, sharingType: 'team', permissions: [], version: 8, createdAt: new Date('2024-02-15'), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 5), tags: ['presentation', 'team'], comments: 12 },
+  { id: '4', name: 'API Documentation', type: 'document', extension: 'md', size: 125000, ownerId: '1', ownerName: 'John Developer', status: 'published', starred: false, shared: true, sharingType: 'public', permissions: [], version: 25, createdAt: new Date('2024-01-01'), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24), tags: ['api', 'docs'], comments: 0 },
+  { id: '5', name: 'Design System Guide', type: 'document', extension: 'docx', size: 1200000, ownerId: '3', ownerName: 'Mike Designer', status: 'draft', starred: false, shared: false, sharingType: 'private', permissions: [], version: 3, createdAt: new Date('2024-03-01'), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 8), tags: ['design', 'guide'], comments: 5 },
+  { id: '6', name: 'Meeting Notes - March', type: 'document', extension: 'docx', size: 45000, ownerId: '4', ownerName: 'Emily PM', status: 'published', starred: false, shared: true, sharingType: 'team', permissions: [], version: 2, createdAt: new Date('2024-03-10'), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), tags: ['meetings', 'notes'], comments: 1 },
+  { id: '7', name: 'Brand Assets', type: 'archive', extension: 'zip', size: 15000000, ownerId: '3', ownerName: 'Mike Designer', status: 'approved', starred: true, shared: true, sharingType: 'organization', permissions: [], version: 1, createdAt: new Date('2024-02-20'), updatedAt: new Date('2024-02-20'), tags: ['brand', 'assets'], comments: 0 },
+  { id: '8', name: 'User Research Results', type: 'spreadsheet', extension: 'xlsx', size: 560000, ownerId: '4', ownerName: 'Emily PM', status: 'review', starred: false, shared: true, sharingType: 'team', permissions: [], version: 4, createdAt: new Date('2024-03-05'), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 48), tags: ['research', 'ux'], comments: 7 },
 ]
 
-const mockTemplates: Template[] = [
-  { id: '1', name: 'Meeting Notes', description: 'Capture discussion points, decisions, and action items', icon: '📝', category: 'Meetings', blocks: [] },
-  { id: '2', name: 'Project Brief', description: 'Define project scope, goals, and timeline', icon: '📋', category: 'Projects', blocks: [] },
-  { id: '3', name: 'Weekly Review', description: 'Reflect on accomplishments and plan ahead', icon: '📅', category: 'Planning', blocks: [] },
-  { id: '4', name: 'Product Spec', description: 'Document product requirements and features', icon: '📦', category: 'Product', blocks: [] },
-  { id: '5', name: 'Bug Report', description: 'Track and document software issues', icon: '🐛', category: 'Engineering', blocks: [] },
-  { id: '6', name: 'Design Doc', description: 'Outline design decisions and rationale', icon: '🎨', category: 'Design', blocks: [] },
+const mockFolders: DocumentFolder[] = [
+  { id: '1', name: 'Projects', color: 'bg-blue-500', documentCount: 24, size: 45000000, createdAt: new Date('2024-01-01'), shared: true, ownerId: '1', ownerName: 'John Developer' },
+  { id: '2', name: 'Marketing', color: 'bg-pink-500', documentCount: 18, size: 32000000, createdAt: new Date('2024-01-15'), shared: true, ownerId: '2', ownerName: 'Sarah Finance' },
+  { id: '3', name: 'Engineering', color: 'bg-emerald-500', documentCount: 42, size: 78000000, createdAt: new Date('2024-02-01'), shared: true, ownerId: '1', ownerName: 'John Developer' },
+  { id: '4', name: 'Design', color: 'bg-purple-500', documentCount: 35, size: 125000000, createdAt: new Date('2024-01-20'), shared: true, ownerId: '3', ownerName: 'Mike Designer' },
+  { id: '5', name: 'Finance', color: 'bg-amber-500', documentCount: 12, size: 15000000, createdAt: new Date('2024-02-15'), shared: false, ownerId: '2', ownerName: 'Sarah Finance' },
+  { id: '6', name: 'Archive', color: 'bg-gray-500', documentCount: 156, size: 890000000, createdAt: new Date('2024-01-01'), shared: false, ownerId: '1', ownerName: 'John Developer' },
 ]
 
-const mockCollaborators: Collaborator[] = [
-  { id: '1', name: 'John Developer', email: 'john@freeflow.io', avatar: 'john', role: 'owner', addedAt: '2024-01-01' },
-  { id: '2', name: 'Sarah Designer', email: 'sarah@freeflow.io', avatar: 'sarah', role: 'editor', addedAt: '2024-01-15' },
-  { id: '3', name: 'Mike Engineer', email: 'mike@freeflow.io', avatar: 'mike', role: 'editor', addedAt: '2024-02-01' },
-  { id: '4', name: 'Emily PM', email: 'emily@freeflow.io', avatar: 'emily', role: 'commenter', addedAt: '2024-02-15' },
+const mockTemplates: DocTemplate[] = [
+  { id: '1', name: 'Meeting Notes', description: 'Capture discussion points and action items', category: 'Meetings', icon: '📝', type: 'document', uses: 12400, isPremium: false },
+  { id: '2', name: 'Project Brief', description: 'Define project scope and timeline', category: 'Projects', icon: '📋', type: 'document', uses: 8900, isPremium: false },
+  { id: '3', name: 'Budget Tracker', description: 'Track expenses and income', category: 'Finance', icon: '💰', type: 'spreadsheet', uses: 6500, isPremium: false },
+  { id: '4', name: 'Pitch Deck', description: 'Impress investors and stakeholders', category: 'Business', icon: '🎯', type: 'presentation', uses: 4200, isPremium: true },
+  { id: '5', name: 'Product Spec', description: 'Document product requirements', category: 'Product', icon: '📦', type: 'document', uses: 5600, isPremium: false },
+  { id: '6', name: 'Design Doc', description: 'Outline design decisions', category: 'Design', icon: '🎨', type: 'document', uses: 3400, isPremium: false },
+  { id: '7', name: 'Sprint Planning', description: 'Plan and track sprints', category: 'Engineering', icon: '🏃', type: 'spreadsheet', uses: 7800, isPremium: false },
+  { id: '8', name: 'OKR Template', description: 'Set and track objectives', category: 'Planning', icon: '🎯', type: 'spreadsheet', uses: 9200, isPremium: true },
+]
+
+const mockVersionHistory: VersionEntry[] = [
+  { id: '1', version: 12, userId: '1', userName: 'John Developer', changes: 'Updated timeline section', size: 245000, createdAt: new Date(Date.now() - 1000 * 60 * 30) },
+  { id: '2', version: 11, userId: '3', userName: 'Mike Designer', changes: 'Added new graphics', size: 243000, createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2) },
+  { id: '3', version: 10, userId: '4', userName: 'Emily PM', changes: 'Fixed formatting issues', size: 240000, createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24) },
+  { id: '4', version: 9, userId: '1', userName: 'John Developer', changes: 'Added Q2 milestones', size: 238000, createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48) },
 ]
 
 const mockComments: Comment[] = [
-  { id: '1', user: 'Sarah Designer', avatar: 'sarah', content: 'Can we add more details about the timeline?', resolved: false, createdAt: '2024-03-14T10:00:00Z' },
-  { id: '2', user: 'Mike Engineer', avatar: 'mike', content: 'Good point! I\'ll update this section.', resolved: true, createdAt: '2024-03-13T14:30:00Z' },
-  { id: '3', user: 'Emily PM', avatar: 'emily', content: 'This looks great, let\'s schedule a review meeting.', resolved: false, createdAt: '2024-03-12T09:15:00Z' },
+  { id: '1', documentId: '1', userId: '2', userName: 'Sarah Finance', content: 'Can we add more details about the budget allocation?', resolved: false, replies: [], createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2) },
+  { id: '2', documentId: '1', userId: '4', userName: 'Emily PM', content: 'Great progress! The timeline looks solid.', resolved: true, replies: [], createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24) },
+  { id: '3', documentId: '1', userId: '3', userName: 'Mike Designer', content: 'I\'ll update the design section by EOD', resolved: false, replies: [], createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5) },
 ]
 
-const mockVersionHistory: VersionHistory[] = [
-  { id: '1', version: 5, user: 'John Developer', avatar: 'john', changes: 'Updated roadmap timeline', createdAt: '2024-03-15T10:00:00Z' },
-  { id: '2', version: 4, user: 'Sarah Designer', avatar: 'sarah', changes: 'Added design section', createdAt: '2024-03-14T15:30:00Z' },
-  { id: '3', version: 3, user: 'Mike Engineer', avatar: 'mike', changes: 'Fixed formatting issues', createdAt: '2024-03-13T11:00:00Z' },
-  { id: '4', version: 2, user: 'Emily PM', avatar: 'emily', changes: 'Added project milestones', createdAt: '2024-03-12T09:00:00Z' },
-  { id: '5', version: 1, user: 'John Developer', avatar: 'john', changes: 'Initial creation', createdAt: '2024-03-01T10:00:00Z' },
+const mockRecentActivity: RecentActivity[] = [
+  { id: '1', action: 'edited', documentId: '1', documentName: 'Product Roadmap 2024', userId: '1', userName: 'John Developer', timestamp: new Date(Date.now() - 1000 * 60 * 30) },
+  { id: '2', action: 'shared', documentId: '2', documentName: 'Q4 Financial Report', userId: '2', userName: 'Sarah Finance', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), details: 'with Marketing team' },
+  { id: '3', action: 'commented', documentId: '3', documentName: 'Team Presentation', userId: '4', userName: 'Emily PM', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5) },
+  { id: '4', action: 'created', documentId: '5', documentName: 'Design System Guide', userId: '3', userName: 'Mike Designer', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8) },
+  { id: '5', action: 'moved', documentId: '6', documentName: 'Meeting Notes', userId: '4', userName: 'Emily PM', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), details: 'to Archive folder' },
 ]
 
-// Sample page content blocks
-const sampleBlocks: Block[] = [
-  { id: '1', type: 'heading1', content: 'Welcome to our Product Roadmap' },
-  { id: '2', type: 'paragraph', content: 'This document outlines our product strategy and planned features for 2024.' },
-  { id: '3', type: 'heading2', content: 'Q1 Goals' },
-  { id: '4', type: 'todo', content: 'Launch new dashboard', checked: true },
-  { id: '5', type: 'todo', content: 'Implement real-time collaboration', checked: true },
-  { id: '6', type: 'todo', content: 'Add analytics module', checked: false },
-  { id: '7', type: 'heading2', content: 'Key Features' },
-  { id: '8', type: 'bulletList', content: 'Block-based editor with rich formatting' },
-  { id: '9', type: 'bulletList', content: 'Real-time collaboration and comments' },
-  { id: '10', type: 'bulletList', content: 'Templates and quick actions' },
-  { id: '11', type: 'callout', content: '💡 Tip: Use / to access quick commands and create different block types.' },
-  { id: '12', type: 'divider', content: '' },
-  { id: '13', type: 'quote', content: 'Great products are built by great teams working together.' },
-]
+const storageInfo: StorageInfo = {
+  used: 2.4 * 1024 * 1024 * 1024,
+  total: 15 * 1024 * 1024 * 1024,
+  breakdown: {
+    documents: 0.8 * 1024 * 1024 * 1024,
+    images: 1.2 * 1024 * 1024 * 1024,
+    videos: 0.3 * 1024 * 1024 * 1024,
+    other: 0.1 * 1024 * 1024 * 1024,
+  }
+}
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+const getStatusColor = (status: DocumentFile['status']): string => {
+  const colors: Record<DocumentFile['status'], string> = {
+    draft: 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-700 dark:text-gray-300',
+    review: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400',
+    approved: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400',
+    published: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400',
+    archived: 'bg-gray-100 text-gray-500 border-gray-200 dark:bg-gray-700 dark:text-gray-400',
+  }
+  return colors[status]
+}
+
+const getSharingColor = (type: DocumentFile['sharingType']): string => {
+  const colors: Record<DocumentFile['sharingType'], string> = {
+    private: 'bg-gray-100 text-gray-800',
+    team: 'bg-blue-100 text-blue-800',
+    organization: 'bg-purple-100 text-purple-800',
+    public: 'bg-green-100 text-green-800',
+  }
+  return colors[type]
+}
+
+const getFileIcon = (type: DocumentFile['type']) => {
+  const icons: Record<DocumentFile['type'], React.ReactNode> = {
+    document: <FileText className="h-5 w-5 text-blue-600" />,
+    spreadsheet: <FileSpreadsheet className="h-5 w-5 text-green-600" />,
+    presentation: <Presentation className="h-5 w-5 text-orange-600" />,
+    pdf: <FileText className="h-5 w-5 text-red-600" />,
+    image: <ImageIcon className="h-5 w-5 text-purple-600" />,
+    video: <FileText className="h-5 w-5 text-pink-600" />,
+    audio: <FileText className="h-5 w-5 text-indigo-600" />,
+    archive: <Archive className="h-5 w-5 text-amber-600" />,
+    other: <File className="h-5 w-5 text-gray-600" />,
+  }
+  return icons[type]
+}
+
+const formatBytes = (bytes: number): string => {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+}
+
+const getActionIcon = (action: RecentActivity['action']) => {
+  const icons: Record<RecentActivity['action'], React.ReactNode> = {
+    created: <FilePlus className="h-4 w-4 text-green-600" />,
+    edited: <Edit3 className="h-4 w-4 text-blue-600" />,
+    shared: <Share2 className="h-4 w-4 text-purple-600" />,
+    commented: <MessageSquare className="h-4 w-4 text-amber-600" />,
+    deleted: <Trash2 className="h-4 w-4 text-red-600" />,
+    restored: <RefreshCw className="h-4 w-4 text-emerald-600" />,
+    moved: <Move className="h-4 w-4 text-cyan-600" />,
+  }
+  return icons[action]
+}
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 
 export default function DocumentsClient({ initialDocuments }: { initialDocuments: Document[] }) {
-  const [statusFilter, setStatusFilter] = useState<DocumentStatus | 'all'>('all')
-  const [typeFilter, setTypeFilter] = useState<DocumentType | 'all'>('all')
-  const [activeTab, setActiveTab] = useState('all')
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'table'>('grid')
-  const [selectedPage, setSelectedPage] = useState<Page | null>(null)
+  const [activeTab, setActiveTab] = useState('dashboard')
+  const [statusFilter, setStatusFilter] = useState<DocumentFile['status'] | 'all'>('all')
+  const [typeFilter, setTypeFilter] = useState<DocumentFile['type'] | 'all'>('all')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchQuery, setSearchQuery] = useState('')
+  const [selectedDocument, setSelectedDocument] = useState<DocumentFile | null>(null)
+  const [selectedFolder, setSelectedFolder] = useState<DocumentFolder | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
   const [showShareDialog, setShowShareDialog] = useState(false)
-  const [showHistoryDialog, setShowHistoryDialog] = useState(false)
-  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [expandedFolders, setExpandedFolders] = useState<string[]>(['1', '2'])
 
-  const { documents, loading } = useDocuments({ status: statusFilter, type: typeFilter })
-  const displayDocuments = (documents && documents.length > 0) ? documents : (initialDocuments || [])
+  const { documents, loading, error } = useDocuments({ status: statusFilter as any, type: typeFilter as any })
 
-  const filteredPages = useMemo(() => {
-    if (!searchQuery) return mockPages.filter(p => !p.archived)
-    return mockPages.filter(p =>
-      !p.archived && p.title.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  }, [searchQuery])
+  // Calculate comprehensive stats
+  const stats = useMemo(() => {
+    const totalDocs = mockDocuments.length
+    const sharedDocs = mockDocuments.filter(d => d.shared).length
+    const starredDocs = mockDocuments.filter(d => d.starred).length
+    const draftDocs = mockDocuments.filter(d => d.status === 'draft').length
+    const reviewDocs = mockDocuments.filter(d => d.status === 'review').length
+    const totalComments = mockDocuments.reduce((sum, d) => sum + d.comments, 0)
+    const totalFolders = mockFolders.length
+    const storageUsedGB = storageInfo.used / (1024 * 1024 * 1024)
 
-  const starredPages = useMemo(() => filteredPages.filter(p => p.starred), [filteredPages])
-  const recentPages = useMemo(() =>
-    [...filteredPages].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 5),
-    [filteredPages]
+    return {
+      totalDocs,
+      sharedDocs,
+      starredDocs,
+      draftDocs,
+      reviewDocs,
+      totalComments,
+      totalFolders,
+      storageUsedGB: storageUsedGB.toFixed(1),
+    }
+  }, [])
+
+  // Filter documents
+  const filteredDocuments = useMemo(() => {
+    return mockDocuments.filter(doc => {
+      const matchesSearch = !searchQuery ||
+        doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        doc.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
+      const matchesStatus = statusFilter === 'all' || doc.status === statusFilter
+      const matchesType = typeFilter === 'all' || doc.type === typeFilter
+      return matchesSearch && matchesStatus && matchesType
+    })
+  }, [searchQuery, statusFilter, typeFilter])
+
+  const starredDocuments = useMemo(() => mockDocuments.filter(d => d.starred), [])
+  const recentDocuments = useMemo(() =>
+    [...mockDocuments].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()).slice(0, 6),
+    []
   )
 
-  const stats = useMemo(() => [
-    {
-      label: 'Total Pages',
-      value: filteredPages.length.toString(),
-      change: 15.2,
-      icon: <FileText className="w-5 h-5" />
-    },
-    {
-      label: 'Shared',
-      value: filteredPages.filter(p => p.shared).length.toString(),
-      change: 8.3,
-      icon: <Users className="w-5 h-5" />
-    },
-    {
-      label: 'Templates',
-      value: mockTemplates.length.toString(),
-      change: 22.7,
-      icon: <BookOpen className="w-5 h-5" />
-    },
-    {
-      label: 'Collaborators',
-      value: mockCollaborators.length.toString(),
-      change: 12.4,
-      icon: <Users className="w-5 h-5" />
-    }
-  ], [filteredPages])
-
-  const getBlockIcon = (type: Block['type']) => {
-    switch (type) {
-      case 'heading1': return <Type className="w-4 h-4" />
-      case 'heading2': return <Type className="w-4 h-4" />
-      case 'heading3': return <Type className="w-4 h-4" />
-      case 'paragraph': return <Type className="w-4 h-4" />
-      case 'bulletList': return <List className="w-4 h-4" />
-      case 'numberedList': return <Hash className="w-4 h-4" />
-      case 'todo': return <ListTodo className="w-4 h-4" />
-      case 'code': return <Code className="w-4 h-4" />
-      case 'quote': return <Quote className="w-4 h-4" />
-      case 'divider': return <Minus className="w-4 h-4" />
-      case 'image': return <ImageIcon className="w-4 h-4" />
-      case 'callout': return <Sparkles className="w-4 h-4" />
-      case 'table': return <Table className="w-4 h-4" />
-      default: return <Type className="w-4 h-4" />
-    }
-  }
-
-  const renderBlock = (block: Block) => {
-    switch (block.type) {
-      case 'heading1':
-        return <h1 className="text-3xl font-bold mt-8 mb-4">{block.content}</h1>
-      case 'heading2':
-        return <h2 className="text-2xl font-semibold mt-6 mb-3">{block.content}</h2>
-      case 'heading3':
-        return <h3 className="text-xl font-medium mt-4 mb-2">{block.content}</h3>
-      case 'paragraph':
-        return <p className="text-muted-foreground mb-3">{block.content}</p>
-      case 'bulletList':
-        return (
-          <div className="flex items-start gap-2 mb-1 ml-4">
-            <span className="mt-2">•</span>
-            <span>{block.content}</span>
-          </div>
-        )
-      case 'todo':
-        return (
-          <div className="flex items-center gap-3 mb-2">
-            <input
-              type="checkbox"
-              checked={block.checked}
-              className="w-4 h-4 rounded border-gray-300"
-              readOnly
-            />
-            <span className={block.checked ? 'line-through text-muted-foreground' : ''}>
-              {block.content}
-            </span>
-          </div>
-        )
-      case 'quote':
-        return (
-          <blockquote className="border-l-4 border-cyan-500 pl-4 py-2 my-4 italic text-muted-foreground">
-            {block.content}
-          </blockquote>
-        )
-      case 'callout':
-        return (
-          <div className="bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800 rounded-lg p-4 my-4">
-            {block.content}
-          </div>
-        )
-      case 'divider':
-        return <hr className="my-6 border-gray-200 dark:border-gray-700" />
-      case 'code':
-        return (
-          <pre className="bg-gray-900 text-gray-100 rounded-lg p-4 my-4 overflow-x-auto font-mono text-sm">
-            <code>{block.content}</code>
-          </pre>
-        )
-      default:
-        return <p className="mb-2">{block.content}</p>
-    }
-  }
-
-  const toggleFolder = (id: string) => {
-    setExpandedFolders(prev =>
-      prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
-    )
-  }
+  if (error) return (
+    <div className="p-8">
+      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
+        Error: {error.message}
+      </div>
+    </div>
+  )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 flex">
-      {/* Sidebar */}
-      <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'} border-r bg-white dark:bg-gray-800 flex flex-col transition-all`}>
-        <div className="p-4 border-b flex items-center justify-between">
-          {!sidebarCollapsed && (
-            <h2 className="font-semibold flex items-center gap-2">
-              <FileText className="w-5 h-5 text-cyan-600" />
-              Documents
-            </h2>
-          )}
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-          >
-            {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-8">
+      <div className="max-w-[1800px] mx-auto space-y-8">
+        {/* Premium Header */}
+        <div className="relative overflow-hidden bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 rounded-2xl p-8 text-white">
+          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <FileText className="h-8 w-8" />
+                  </div>
+                  <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm">
+                    Documents Pro
+                  </Badge>
+                  <Badge className="bg-cyan-500/30 text-white border-0 backdrop-blur-sm">
+                    Google Docs Level
+                  </Badge>
+                </div>
+                <h1 className="text-4xl font-bold mb-2">Document Hub</h1>
+                <p className="text-white/80 max-w-xl">
+                  Create, collaborate, and manage documents with real-time editing, version history, and secure sharing
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-white text-cyan-600 hover:bg-white/90">
+                      <Plus className="h-4 w-4 mr-2" />
+                      New Document
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle>Create New Document</DialogTitle>
+                      <DialogDescription>Choose a document type to get started</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid grid-cols-2 gap-3 py-4">
+                      {[
+                        { icon: <FileText className="h-6 w-6" />, label: 'Document', desc: 'Word processor', color: 'blue' },
+                        { icon: <FileSpreadsheet className="h-6 w-6" />, label: 'Spreadsheet', desc: 'Data & calculations', color: 'green' },
+                        { icon: <Presentation className="h-6 w-6" />, label: 'Presentation', desc: 'Slides & visuals', color: 'orange' },
+                        { icon: <FolderPlus className="h-6 w-6" />, label: 'Folder', desc: 'Organize files', color: 'purple' },
+                      ].map((item, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setShowCreateDialog(false)}
+                          className={`p-4 border rounded-lg hover:border-${item.color}-500 hover:bg-${item.color}-50 dark:hover:bg-${item.color}-900/20 transition-colors text-left`}
+                        >
+                          <div className={`text-${item.color}-600 mb-2`}>{item.icon}</div>
+                          <h4 className="font-medium">{item.label}</h4>
+                          <p className="text-xs text-gray-500">{item.desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" className="text-white hover:bg-white/20">
+                      <Upload className="h-5 w-5" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Upload Files</DialogTitle>
+                    </DialogHeader>
+                    <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-12 text-center">
+                      <CloudUpload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                      <p className="font-medium mb-1">Drop files here or click to browse</p>
+                      <p className="text-sm text-gray-500">Supports all file types up to 100MB</p>
+                      <Button variant="outline" className="mt-4">Select Files</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+                <Button variant="ghost" className="text-white hover:bg-white/20">
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {!sidebarCollapsed && (
-          <ScrollArea className="flex-1">
-            <div className="p-4 space-y-6">
-              {/* Quick Actions */}
-              <div className="space-y-1">
+        {/* Stats Grid - 8 Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {[
+            { label: 'Documents', value: stats.totalDocs, icon: FileText, color: 'cyan', change: '+5' },
+            { label: 'Shared', value: stats.sharedDocs, icon: Share2, color: 'purple', change: '+2' },
+            { label: 'Starred', value: stats.starredDocs, icon: Star, color: 'amber', change: '' },
+            { label: 'In Review', value: stats.reviewDocs, icon: Clock, color: 'orange', change: '+1' },
+            { label: 'Drafts', value: stats.draftDocs, icon: Edit3, color: 'gray', change: '' },
+            { label: 'Comments', value: stats.totalComments, icon: MessageSquare, color: 'blue', change: '+12' },
+            { label: 'Folders', value: stats.totalFolders, icon: Folder, color: 'emerald', change: '' },
+            { label: 'Storage', value: `${stats.storageUsedGB} GB`, icon: HardDrive, color: 'pink', change: '' },
+          ].map((stat, index) => (
+            <Card key={index} className="border-0 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`p-1.5 rounded-lg bg-gradient-to-br from-${stat.color}-400 to-${stat.color}-600`}>
+                    <stat.icon className="h-3.5 w-3.5 text-white" />
+                  </div>
+                  <span className="text-xs text-gray-500 truncate">{stat.label}</span>
+                </div>
+                <div className="flex items-end justify-between">
+                  <span className="text-xl font-bold text-gray-900 dark:text-white">{stat.value}</span>
+                  {stat.change && (
+                    <span className="text-xs text-green-600">{stat.change}</span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Main Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <div className="flex items-center justify-between">
+            <TabsList className="bg-white dark:bg-gray-800 p-1 shadow-sm">
+              <TabsTrigger value="dashboard" className="gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Dashboard
+              </TabsTrigger>
+              <TabsTrigger value="documents" className="gap-2">
+                <FileText className="h-4 w-4" />
+                Documents
+              </TabsTrigger>
+              <TabsTrigger value="folders" className="gap-2">
+                <Folder className="h-4 w-4" />
+                Folders
+              </TabsTrigger>
+              <TabsTrigger value="templates" className="gap-2">
+                <BookOpen className="h-4 w-4" />
+                Templates
+              </TabsTrigger>
+              <TabsTrigger value="shared" className="gap-2">
+                <Users className="h-4 w-4" />
+                Shared
+              </TabsTrigger>
+              <TabsTrigger value="settings" className="gap-2">
+                <Settings className="h-4 w-4" />
+                Settings
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search documents..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 w-64"
+                />
+              </div>
+              <div className="flex items-center border rounded-lg bg-white dark:bg-gray-800">
                 <button
-                  onClick={() => setShowCreateDialog(true)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 ${viewMode === 'grid' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
                 >
-                  <Plus className="w-4 h-4" />
-                  New Page
+                  <Grid3X3 className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => setShowTemplatesDialog(true)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 ${viewMode === 'list' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
                 >
-                  <Wand2 className="w-4 h-4" />
-                  Templates
+                  <List className="h-4 w-4" />
                 </button>
               </div>
+            </div>
+          </div>
 
-              {/* Starred */}
-              {starredPages.length > 0 && (
-                <div>
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Starred</h3>
-                  <div className="space-y-1">
-                    {starredPages.map(page => (
-                      <button
-                        key={page.id}
-                        onClick={() => setSelectedPage(page)}
-                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
-                          selectedPage?.id === page.id
-                            ? 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400'
-                            : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
-                      >
-                        <span>{page.icon}</span>
-                        <span className="truncate">{page.title}</span>
-                      </button>
+          {/* Dashboard Tab */}
+          <TabsContent value="dashboard" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Recent Documents */}
+              <Card className="lg:col-span-2">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-lg font-semibold">Recent Documents</CardTitle>
+                  <Button variant="ghost" size="sm">View All</Button>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {recentDocuments.slice(0, 5).map(doc => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer" onClick={() => setSelectedDocument(doc)}>
+                      <div className="flex items-center gap-3">
+                        {getFileIcon(doc.type)}
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">{doc.name}</p>
+                          <p className="text-xs text-gray-500">Updated {doc.updatedAt.toLocaleDateString()} • {formatBytes(doc.size)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {doc.starred && <Star className="h-4 w-4 text-amber-500 fill-amber-500" />}
+                        <Badge className={getStatusColor(doc.status)}>{doc.status}</Badge>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Storage */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold">Storage</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{(storageInfo.used / (1024 * 1024 * 1024)).toFixed(1)} GB</p>
+                    <p className="text-sm text-gray-500">of {(storageInfo.total / (1024 * 1024 * 1024)).toFixed(0)} GB used</p>
+                  </div>
+                  <Progress value={(storageInfo.used / storageInfo.total) * 100} className="h-2" />
+                  <div className="space-y-2">
+                    {[
+                      { label: 'Documents', value: storageInfo.breakdown.documents, color: 'bg-blue-500' },
+                      { label: 'Images', value: storageInfo.breakdown.images, color: 'bg-purple-500' },
+                      { label: 'Videos', value: storageInfo.breakdown.videos, color: 'bg-pink-500' },
+                      { label: 'Other', value: storageInfo.breakdown.other, color: 'bg-gray-500' },
+                    ].map(item => (
+                      <div key={item.label} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-3 h-3 rounded ${item.color}`}></div>
+                          <span>{item.label}</span>
+                        </div>
+                        <span className="font-medium">{formatBytes(item.value)}</span>
+                      </div>
                     ))}
                   </div>
-                </div>
-              )}
+                </CardContent>
+              </Card>
 
-              {/* All Pages */}
-              <div>
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Private</h3>
-                <div className="space-y-1">
-                  {filteredPages.filter(p => !p.parentId && !p.shared).map(page => (
-                    <div key={page.id}>
-                      <button
-                        onClick={() => setSelectedPage(page)}
-                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
-                          selectedPage?.id === page.id
-                            ? 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400'
-                            : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
-                      >
-                        {page.type === 'database' ? (
-                          <button onClick={(e) => { e.stopPropagation(); toggleFolder(page.id) }}>
-                            {expandedFolders.includes(page.id) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                          </button>
-                        ) : null}
-                        <span>{page.icon}</span>
-                        <span className="truncate">{page.title}</span>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Shared */}
-              <div>
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-2">Shared</h3>
-                <div className="space-y-1">
-                  {filteredPages.filter(p => !p.parentId && p.shared).map(page => (
-                    <button
-                      key={page.id}
-                      onClick={() => setSelectedPage(page)}
-                      className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
-                        selectedPage?.id === page.id
-                          ? 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400'
-                          : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                      }`}
-                    >
-                      <span>{page.icon}</span>
-                      <span className="truncate">{page.title}</span>
-                      <Users className="w-3 h-3 ml-auto text-muted-foreground" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </ScrollArea>
-        )}
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Top Bar */}
-        <div className="p-4 border-b bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search pages..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            {selectedPage && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Home className="w-4 h-4" />
-                <ChevronRight className="w-4 h-4" />
-                <span>{selectedPage.icon} {selectedPage.title}</span>
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {selectedPage && (
-              <>
-                <button
-                  onClick={() => setShowShareDialog(true)}
-                  className="px-3 py-1.5 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400 rounded-lg text-sm flex items-center gap-1"
-                >
-                  <Share2 className="w-4 h-4" />
-                  Share
-                </button>
-                <button
-                  onClick={() => setShowHistoryDialog(true)}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                >
-                  <History className="w-4 h-4" />
-                </button>
-                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                  <MoreHorizontal className="w-4 h-4" />
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Content Area */}
-        <div className="flex-1 overflow-auto p-6">
-          {selectedPage ? (
-            /* Page View */
-            <div className="max-w-4xl mx-auto">
-              {/* Page Header */}
-              <div className="mb-8">
-                {selectedPage.cover && (
-                  <div className="h-48 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-lg mb-6" />
-                )}
-                <div className="flex items-start gap-4">
-                  <button className="text-6xl hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg p-2">
-                    {selectedPage.icon || '📄'}
-                  </button>
-                  <div className="flex-1">
-                    <h1 className="text-4xl font-bold mb-2">{selectedPage.title}</h1>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Avatar className="w-5 h-5">
-                          <AvatarImage src={`https://avatar.vercel.sh/${selectedPage.createdBy}`} />
-                          <AvatarFallback>{selectedPage.createdBy.slice(0, 2)}</AvatarFallback>
-                        </Avatar>
-                        {selectedPage.createdBy}
-                      </span>
-                      <span>Updated {new Date(selectedPage.updatedAt).toLocaleDateString()}</span>
-                      {selectedPage.shared && (
-                        <Badge className="bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400">
-                          <Users className="w-3 h-3 mr-1" />
-                          Shared
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Page Content */}
-              <div className="prose dark:prose-invert max-w-none">
-                {sampleBlocks.map(block => (
-                  <div key={block.id} className="group relative">
-                    <div className="absolute -left-8 top-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                        {getBlockIcon(block.type)}
-                      </button>
-                    </div>
-                    {renderBlock(block)}
-                  </div>
-                ))}
-              </div>
-
-              {/* Comments Section */}
-              <div className="mt-12 pt-8 border-t">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <MessageSquare className="w-5 h-5" />
-                  Comments ({mockComments.length})
-                </h3>
-                <div className="space-y-4">
-                  {mockComments.map(comment => (
-                    <div key={comment.id} className={`flex gap-3 p-4 rounded-lg ${comment.resolved ? 'bg-green-50 dark:bg-green-900/20' : 'bg-gray-50 dark:bg-gray-800/50'}`}>
-                      <Avatar>
-                        <AvatarImage src={`https://avatar.vercel.sh/${comment.avatar}`} />
-                        <AvatarFallback>{comment.user.slice(0, 2)}</AvatarFallback>
-                      </Avatar>
+              {/* Activity */}
+              <Card className="lg:col-span-2">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-lg font-semibold">Recent Activity</CardTitle>
+                  <Button variant="ghost" size="sm">View All</Button>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {mockRecentActivity.map(activity => (
+                    <div key={activity.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="p-2 rounded-full bg-white dark:bg-gray-700">
+                        {getActionIcon(activity.action)}
+                      </div>
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-sm">{comment.user}</span>
-                          {comment.resolved && (
-                            <Badge className="bg-green-100 text-green-700 text-xs">Resolved</Badge>
-                          )}
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(comment.createdAt).toLocaleDateString()}
-                          </span>
+                        <p className="text-sm">
+                          <span className="font-medium">{activity.userName}</span>
+                          {' '}{activity.action}{' '}
+                          <span className="font-medium">{activity.documentName}</span>
+                          {activity.details && <span className="text-gray-500"> {activity.details}</span>}
+                        </p>
+                        <p className="text-xs text-gray-500">{activity.timestamp.toLocaleString()}</p>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Quick Access */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold">Starred</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {starredDocuments.map(doc => (
+                    <div key={doc.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => setSelectedDocument(doc)}>
+                      {getFileIcon(doc.type)}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{doc.name}</p>
+                        <p className="text-xs text-gray-500">{formatBytes(doc.size)}</p>
+                      </div>
+                      <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Documents Tab */}
+          <TabsContent value="documents">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>All Documents</CardTitle>
+                <div className="flex items-center gap-3">
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value as any)}
+                    className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="draft">Draft</option>
+                    <option value="review">In Review</option>
+                    <option value="approved">Approved</option>
+                    <option value="published">Published</option>
+                  </select>
+                  <select
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter(e.target.value as any)}
+                    className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  >
+                    <option value="all">All Types</option>
+                    <option value="document">Documents</option>
+                    <option value="spreadsheet">Spreadsheets</option>
+                    <option value="presentation">Presentations</option>
+                  </select>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loading && (
+                  <div className="text-center py-8">
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-cyan-600 border-r-transparent"></div>
+                  </div>
+                )}
+
+                {viewMode === 'grid' ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {filteredDocuments.map(doc => (
+                      <Card key={doc.id} className="hover:shadow-md transition-all cursor-pointer" onClick={() => setSelectedDocument(doc)}>
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            {getFileIcon(doc.type)}
+                            <div className="flex items-center gap-1">
+                              {doc.starred && <Star className="h-4 w-4 text-amber-500 fill-amber-500" />}
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          <h3 className="font-medium mb-1 truncate">{doc.name}</h3>
+                          <p className="text-xs text-gray-500 mb-3">Updated {doc.updatedAt.toLocaleDateString()}</p>
+                          <div className="flex items-center justify-between">
+                            <Badge className={getStatusColor(doc.status)}>{doc.status}</Badge>
+                            <div className="flex items-center gap-1 text-xs text-gray-500">
+                              {doc.shared && <Users className="h-3 w-3" />}
+                              {doc.comments > 0 && <span className="flex items-center gap-0.5"><MessageSquare className="h-3 w-3" />{doc.comments}</span>}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {filteredDocuments.map(doc => (
+                      <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer" onClick={() => setSelectedDocument(doc)}>
+                        <div className="flex items-center gap-4">
+                          {getFileIcon(doc.type)}
+                          <div>
+                            <p className="font-medium">{doc.name}</p>
+                            <p className="text-sm text-gray-500">
+                              {doc.ownerName} • {doc.updatedAt.toLocaleDateString()} • {formatBytes(doc.size)}
+                            </p>
+                          </div>
                         </div>
-                        <p className="text-sm">{comment.content}</p>
+                        <div className="flex items-center gap-3">
+                          {doc.starred && <Star className="h-4 w-4 text-amber-500 fill-amber-500" />}
+                          <Badge className={getStatusColor(doc.status)}>{doc.status}</Badge>
+                          <Badge className={getSharingColor(doc.sharingType)}>{doc.sharingType}</Badge>
+                          <Button variant="ghost" size="sm">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Folders Tab */}
+          <TabsContent value="folders">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {mockFolders.map(folder => (
+                <Card key={folder.id} className="hover:shadow-md transition-all cursor-pointer" onClick={() => setSelectedFolder(folder)}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`p-3 rounded-xl ${folder.color}`}>
+                        <Folder className="h-6 w-6 text-white" />
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <h3 className="font-semibold text-lg mb-1">{folder.name}</h3>
+                    <p className="text-sm text-gray-500 mb-3">
+                      {folder.documentCount} items • {formatBytes(folder.size)}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500">{folder.ownerName}</span>
+                      {folder.shared && <Users className="h-4 w-4 text-gray-400" />}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              <Card className="border-2 border-dashed hover:border-cyan-500 hover:bg-cyan-50/50 dark:hover:bg-cyan-900/20 transition-all cursor-pointer">
+                <CardContent className="p-6 flex flex-col items-center justify-center h-full min-h-[180px]">
+                  <FolderPlus className="h-10 w-10 text-gray-400 mb-3" />
+                  <p className="font-medium text-gray-600">Create New Folder</p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Templates Tab */}
+          <TabsContent value="templates" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Document Templates</h2>
+                <p className="text-gray-500">Start with pre-built templates to save time</p>
+              </div>
+              <select className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                <option>All Categories</option>
+                <option>Meetings</option>
+                <option>Projects</option>
+                <option>Finance</option>
+                <option>Engineering</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {mockTemplates.map(template => (
+                <Card key={template.id} className="hover:shadow-md transition-all cursor-pointer relative">
+                  {template.isPremium && (
+                    <Badge className="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
+                      <Star className="h-3 w-3 mr-1" /> Premium
+                    </Badge>
+                  )}
+                  <CardContent className="p-6">
+                    <span className="text-4xl block mb-4">{template.icon}</span>
+                    <h3 className="font-semibold mb-1">{template.name}</h3>
+                    <p className="text-sm text-gray-500 mb-3">{template.description}</p>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline">{template.category}</Badge>
+                      <span className="text-xs text-gray-500">{template.uses.toLocaleString()} uses</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Shared Tab */}
+          <TabsContent value="shared">
+            <Card>
+              <CardHeader>
+                <CardTitle>Shared with Me</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {mockDocuments.filter(d => d.shared).map(doc => (
+                    <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer" onClick={() => setSelectedDocument(doc)}>
+                      <div className="flex items-center gap-4">
+                        {getFileIcon(doc.type)}
+                        <div>
+                          <p className="font-medium">{doc.name}</p>
+                          <p className="text-sm text-gray-500">Shared by {doc.ownerName}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge className={getSharingColor(doc.sharingType)}>{doc.sharingType}</Badge>
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={`https://avatar.vercel.sh/${doc.ownerName}`} />
+                          <AvatarFallback>{doc.ownerName.slice(0, 2)}</AvatarFallback>
+                        </Avatar>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-          ) : (
-            /* Dashboard View */
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl">
-                      <FileText className="w-8 h-8 text-white" />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Default Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[
+                    { label: 'Auto-save documents', desc: 'Save changes automatically', enabled: true },
+                    { label: 'Version history', desc: 'Keep track of all document changes', enabled: true },
+                    { label: 'Offline access', desc: 'Access documents without internet', enabled: false },
+                    { label: 'Share notifications', desc: 'Get notified when documents are shared', enabled: true },
+                  ].map((setting, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div>
+                        <p className="font-medium">{setting.label}</p>
+                        <p className="text-sm text-gray-500">{setting.desc}</p>
+                      </div>
+                      <Switch defaultChecked={setting.enabled} />
                     </div>
-                    Documents
-                  </h1>
-                  <p className="text-muted-foreground">Notion-style document management and collaboration</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center border rounded-lg">
-                    <button
-                      onClick={() => setViewMode('grid')}
-                      className={`p-2 ${viewMode === 'grid' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
-                    >
-                      <Grid3X3 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setViewMode('list')}
-                      className={`p-2 ${viewMode === 'list' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
-                    >
-                      <List className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => setViewMode('table')}
-                      className={`p-2 ${viewMode === 'table' ? 'bg-gray-100 dark:bg-gray-700' : ''}`}
-                    >
-                      <Table className="w-4 h-4" />
-                    </button>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Storage Management</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg text-white">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-semibold">Pro Plan</span>
+                      <Badge className="bg-white/20 text-white border-0">Active</Badge>
+                    </div>
+                    <p className="text-sm text-white/80">15 GB storage • Unlimited documents</p>
                   </div>
-                  <GradientButton from="cyan" to="blue" onClick={() => setShowCreateDialog(true)}>
-                    <Plus className="w-5 h-5 mr-2" />
-                    New Page
-                  </GradientButton>
-                </div>
-              </div>
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>Storage Used</span>
+                      <span>{formatBytes(storageInfo.used)} / {formatBytes(storageInfo.total)}</span>
+                    </div>
+                    <Progress value={(storageInfo.used / storageInfo.total) * 100} className="h-2" />
+                  </div>
+                  <Button variant="outline" className="w-full">
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Clear Trash
+                  </Button>
+                </CardContent>
+              </Card>
 
-              <StatGrid columns={4} stats={stats} />
-
-              {/* Recent Pages */}
-              <div>
-                <h2 className="text-lg font-semibold mb-4">Recently Updated</h2>
-                <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-2'}>
-                  {recentPages.map(page => (
-                    <Card
-                      key={page.id}
-                      className="cursor-pointer hover:shadow-lg transition-shadow"
-                      onClick={() => setSelectedPage(page)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-3">
-                          <span className="text-3xl">{page.icon}</span>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold truncate">{page.title}</h3>
-                            <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                              <span>{new Date(page.updatedAt).toLocaleDateString()}</span>
-                              {page.shared && <Users className="w-3 h-3" />}
-                              {page.starred && <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />}
-                            </div>
-                          </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Integrations</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {[
+                    { name: 'Google Drive', connected: true },
+                    { name: 'Dropbox', connected: false },
+                    { name: 'OneDrive', connected: true },
+                  ].map((integration, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.connected ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-500'}`}>
+                          <HardDrive className="h-5 w-5" />
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-
-              {/* Templates */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">Templates</h2>
-                  <button
-                    onClick={() => setShowTemplatesDialog(true)}
-                    className="text-sm text-cyan-600 hover:text-cyan-700"
-                  >
-                    View All
-                  </button>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                  {mockTemplates.map(template => (
-                    <Card key={template.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                      <CardContent className="p-4 text-center">
-                        <span className="text-3xl block mb-2">{template.icon}</span>
-                        <h4 className="font-medium text-sm">{template.name}</h4>
-                        <p className="text-xs text-muted-foreground mt-1">{template.category}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Create Page Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Create New Page</DialogTitle>
-            <DialogDescription>Choose a type or start from scratch</DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-3 py-4">
-            {[
-              { icon: <FileText className="w-6 h-6" />, label: 'Empty Page', desc: 'Start fresh' },
-              { icon: <Table className="w-6 h-6" />, label: 'Database', desc: 'Track anything' },
-              { icon: <Kanban className="w-6 h-6" />, label: 'Board', desc: 'Kanban view' },
-              { icon: <Calendar className="w-6 h-6" />, label: 'Calendar', desc: 'Schedule view' },
-            ].map((item, i) => (
-              <button
-                key={i}
-                onClick={() => setShowCreateDialog(false)}
-                className="p-4 border rounded-lg hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors text-left"
-              >
-                <div className="text-cyan-600 mb-2">{item.icon}</div>
-                <h4 className="font-medium">{item.label}</h4>
-                <p className="text-xs text-muted-foreground">{item.desc}</p>
-              </button>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Share Dialog */}
-      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Share Page</DialogTitle>
-            <DialogDescription>Invite people to collaborate on this page</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex gap-2">
-              <Input placeholder="Email address or name" className="flex-1" />
-              <ModernButton variant="primary">Invite</ModernButton>
-            </div>
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium">People with access</h4>
-              {mockCollaborators.map(collab => (
-                <div key={collab.id} className="flex items-center gap-3">
-                  <Avatar>
-                    <AvatarImage src={`https://avatar.vercel.sh/${collab.avatar}`} />
-                    <AvatarFallback>{collab.name.slice(0, 2)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{collab.name}</p>
-                    <p className="text-xs text-muted-foreground">{collab.email}</p>
-                  </div>
-                  <Badge variant="secondary">{collab.role}</Badge>
-                </div>
-              ))}
-            </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <Link2 className="w-4 h-4" />
-                <span className="text-sm">Copy link</span>
-              </div>
-              <button className="text-cyan-600 text-sm">Copy</button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* History Dialog */}
-      <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Version History</DialogTitle>
-            <DialogDescription>View and restore previous versions</DialogDescription>
-          </DialogHeader>
-          <ScrollArea className="h-[400px]">
-            <div className="space-y-3">
-              {mockVersionHistory.map((version, i) => (
-                <div
-                  key={version.id}
-                  className={`flex items-start gap-3 p-3 rounded-lg ${i === 0 ? 'bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}
-                >
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={`https://avatar.vercel.sh/${version.avatar}`} />
-                    <AvatarFallback>{version.user.slice(0, 2)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm">{version.user}</span>
-                      {i === 0 && <Badge className="bg-cyan-100 text-cyan-700 text-xs">Current</Badge>}
+                        <span className="font-medium">{integration.name}</span>
+                      </div>
+                      <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                        {integration.connected ? 'Disconnect' : 'Connect'}
+                      </Button>
                     </div>
-                    <p className="text-sm text-muted-foreground">{version.changes}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {new Date(version.createdAt).toLocaleString()}
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Export & Backup</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export All Documents
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Archive className="h-4 w-4 mr-2" />
+                    Download Backup
+                  </Button>
+                  <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                    <p className="text-sm text-amber-800 dark:text-amber-400">
+                      Last backup: {new Date().toLocaleDateString()}
                     </p>
-                  </div>
-                  {i > 0 && (
-                    <button className="text-xs text-cyan-600 hover:text-cyan-700">Restore</button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
-        </DialogContent>
-      </Dialog>
-
-      {/* Templates Dialog */}
-      <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Templates</DialogTitle>
-            <DialogDescription>Start with a pre-built template</DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-4 py-4">
-            {mockTemplates.map(template => (
-              <Card key={template.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="text-3xl">{template.icon}</span>
-                    <div>
-                      <h4 className="font-medium">{template.name}</h4>
-                      <p className="text-sm text-muted-foreground">{template.description}</p>
-                      <Badge variant="secondary" className="mt-2">{template.category}</Badge>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Document Detail Modal */}
+        {selectedDocument && (
+          <Dialog open={!!selectedDocument} onOpenChange={() => setSelectedDocument(null)}>
+            <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden">
+              <DialogHeader>
+                <div className="flex items-center gap-3">
+                  {getFileIcon(selectedDocument.type)}
+                  <div>
+                    <DialogTitle className="text-xl">{selectedDocument.name}</DialogTitle>
+                    <p className="text-sm text-gray-500">
+                      {selectedDocument.ownerName} • Last edited {selectedDocument.updatedAt.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              </DialogHeader>
+              <ScrollArea className="h-[400px] mt-4">
+                <Tabs defaultValue="details">
+                  <TabsList>
+                    <TabsTrigger value="details">Details</TabsTrigger>
+                    <TabsTrigger value="history">History</TabsTrigger>
+                    <TabsTrigger value="comments">Comments ({selectedDocument.comments})</TabsTrigger>
+                    <TabsTrigger value="sharing">Sharing</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="details" className="mt-4 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className="text-sm text-gray-500">Status</p>
+                        <Badge className={`mt-1 ${getStatusColor(selectedDocument.status)}`}>{selectedDocument.status}</Badge>
+                      </div>
+                      <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className="text-sm text-gray-500">Size</p>
+                        <p className="font-medium mt-1">{formatBytes(selectedDocument.size)}</p>
+                      </div>
+                      <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className="text-sm text-gray-500">Version</p>
+                        <p className="font-medium mt-1">v{selectedDocument.version}</p>
+                      </div>
+                      <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <p className="text-sm text-gray-500">Sharing</p>
+                        <Badge className={`mt-1 ${getSharingColor(selectedDocument.sharingType)}`}>{selectedDocument.sharingType}</Badge>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedDocument.tags.map(tag => (
+                        <Badge key={tag} variant="outline">{tag}</Badge>
+                      ))}
+                    </div>
+                  </TabsContent>
+                  <TabsContent value="history" className="mt-4 space-y-2">
+                    {mockVersionHistory.map((version, i) => (
+                      <div key={version.id} className={`flex items-start gap-3 p-3 rounded-lg ${i === 0 ? 'bg-cyan-50 dark:bg-cyan-900/20' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={`https://avatar.vercel.sh/${version.userName}`} />
+                          <AvatarFallback>{version.userName.slice(0, 2)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{version.userName}</p>
+                          <p className="text-sm text-gray-500">{version.changes}</p>
+                          <p className="text-xs text-gray-400 mt-1">{version.createdAt.toLocaleString()}</p>
+                        </div>
+                        {i > 0 && <Button variant="ghost" size="sm">Restore</Button>}
+                      </div>
+                    ))}
+                  </TabsContent>
+                  <TabsContent value="comments" className="mt-4 space-y-3">
+                    {mockComments.map(comment => (
+                      <div key={comment.id} className={`flex gap-3 p-3 rounded-lg ${comment.resolved ? 'bg-green-50 dark:bg-green-900/20' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={`https://avatar.vercel.sh/${comment.userName}`} />
+                          <AvatarFallback>{comment.userName.slice(0, 2)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-sm">{comment.userName}</span>
+                            {comment.resolved && <Badge className="bg-green-100 text-green-700 text-xs">Resolved</Badge>}
+                          </div>
+                          <p className="text-sm">{comment.content}</p>
+                          <p className="text-xs text-gray-500 mt-1">{comment.createdAt.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </TabsContent>
+                  <TabsContent value="sharing" className="mt-4 space-y-4">
+                    <div className="flex gap-2">
+                      <Input placeholder="Add people or groups" className="flex-1" />
+                      <Button>Share</Button>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Link2 className="h-4 w-4" />
+                        <span className="text-sm">Copy link</span>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </ScrollArea>
+              <div className="flex items-center gap-2 pt-4 border-t">
+                <Button className="flex-1 bg-cyan-600 hover:bg-cyan-700">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open Document
+                </Button>
+                <Button variant="outline">
+                  <Download className="h-4 w-4 mr-2" />
+                  Download
+                </Button>
+                <Button variant="outline">
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </div>
     </div>
   )
 }
