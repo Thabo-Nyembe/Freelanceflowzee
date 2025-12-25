@@ -145,6 +145,64 @@ interface SalesMetric {
   uninstalls: number
 }
 
+interface Coupon {
+  id: string
+  code: string
+  type: 'percentage' | 'fixed' | 'free_trial'
+  value: number
+  products: string[]
+  usageLimit: number
+  usedCount: number
+  minPurchase?: number
+  expiresAt: string
+  status: 'active' | 'expired' | 'disabled'
+  createdAt: string
+}
+
+interface Bundle {
+  id: string
+  name: string
+  description: string
+  products: string[]
+  discount: number
+  price: number
+  originalPrice: number
+  sales: number
+  status: 'active' | 'draft'
+  createdAt: string
+}
+
+interface PaymentProvider {
+  id: string
+  name: string
+  type: 'card' | 'bank' | 'crypto' | 'wallet'
+  status: 'active' | 'inactive' | 'pending'
+  transactions: number
+  volume: number
+  fee: number
+  logo: string
+}
+
+interface APIKey {
+  id: string
+  name: string
+  key: string
+  permissions: string[]
+  lastUsed: string
+  createdAt: string
+  status: 'active' | 'revoked'
+}
+
+interface Webhook {
+  id: string
+  url: string
+  events: string[]
+  status: 'active' | 'failed' | 'disabled'
+  lastTriggered?: string
+  successRate: number
+  createdAt: string
+}
+
 // Mock Data
 const mockVendors: Vendor[] = [
   { id: 'v1', name: 'ProTools Inc', description: 'Enterprise productivity solutions powering 10,000+ businesses worldwide', website: 'https://protools.com', email: 'contact@protools.com', phone: '+1-555-0123', status: 'verified', productCount: 12, totalSales: 4520, totalRevenue: 245000, rating: 4.8, reviewCount: 234, isVerified: true, isFeatured: true, joinedAt: '2022-01-15', location: 'San Francisco, CA', supportEmail: 'support@protools.com', responseTime: '< 2 hours' },
@@ -205,6 +263,40 @@ const mockOrders: Order[] = [
   { id: 'o5', orderNumber: 'ORD-2024-001237', product: { id: 'p6', name: 'WorkflowBot', vendor: 'AutomateHQ' }, customer: { name: 'Startup Inc', email: 'hello@startup.io' }, status: 'pending', amount: 59, currency: 'USD', paymentMethod: 'Credit Card', license: 'Pending', date: '2024-01-16' }
 ]
 
+const mockCoupons: Coupon[] = [
+  { id: 'c1', code: 'WELCOME20', type: 'percentage', value: 20, products: ['all'], usageLimit: 500, usedCount: 234, minPurchase: 29, expiresAt: '2024-03-31', status: 'active', createdAt: '2024-01-01' },
+  { id: 'c2', code: 'SUMMER50', type: 'fixed', value: 50, products: ['p1', 'p2', 'p3'], usageLimit: 100, usedCount: 67, minPurchase: 99, expiresAt: '2024-06-30', status: 'active', createdAt: '2024-01-10' },
+  { id: 'c3', code: 'FREETRIAL', type: 'free_trial', value: 14, products: ['all'], usageLimit: 1000, usedCount: 456, expiresAt: '2024-12-31', status: 'active', createdAt: '2024-01-01' },
+  { id: 'c4', code: 'NEWYEAR25', type: 'percentage', value: 25, products: ['all'], usageLimit: 200, usedCount: 200, expiresAt: '2024-01-31', status: 'expired', createdAt: '2023-12-25' }
+]
+
+const mockBundles: Bundle[] = [
+  { id: 'b1', name: 'Productivity Suite', description: 'Complete productivity toolkit including TaskMaster, FormBuilder Pro, and Email Automator', products: ['p2', 'p4', 'p5'], discount: 30, price: 59, originalPrice: 84, sales: 156, status: 'active', createdAt: '2024-01-01' },
+  { id: 'b2', name: 'Analytics Bundle', description: 'Full analytics stack with Analytics Pro and WorkflowBot', products: ['p1', 'p6'], discount: 25, price: 81, originalPrice: 108, sales: 89, status: 'active', createdAt: '2024-01-05' },
+  { id: 'b3', name: 'Enterprise Security Pack', description: 'Comprehensive security solution for enterprise customers', products: ['p3'], discount: 15, price: 84, originalPrice: 99, sales: 34, status: 'draft', createdAt: '2024-01-10' }
+]
+
+const mockPaymentProviders: PaymentProvider[] = [
+  { id: 'pp1', name: 'Stripe', type: 'card', status: 'active', transactions: 4560, volume: 342000, fee: 2.9, logo: 'stripe' },
+  { id: 'pp2', name: 'PayPal', type: 'wallet', status: 'active', transactions: 2340, volume: 186000, fee: 3.49, logo: 'paypal' },
+  { id: 'pp3', name: 'Apple Pay', type: 'wallet', status: 'active', transactions: 890, volume: 67000, fee: 2.9, logo: 'apple' },
+  { id: 'pp4', name: 'Wire Transfer', type: 'bank', status: 'active', transactions: 45, volume: 156000, fee: 0.5, logo: 'bank' },
+  { id: 'pp5', name: 'Crypto (ETH/BTC)', type: 'crypto', status: 'pending', transactions: 0, volume: 0, fee: 1.0, logo: 'crypto' }
+]
+
+const mockAPIKeys: APIKey[] = [
+  { id: 'ak1', name: 'Production API', key: 'sk_live_xxxxxxxxxxxxxxxx', permissions: ['read', 'write', 'delete'], lastUsed: '2024-01-16 09:23', createdAt: '2023-06-15', status: 'active' },
+  { id: 'ak2', name: 'Staging API', key: 'sk_test_xxxxxxxxxxxxxxxx', permissions: ['read', 'write'], lastUsed: '2024-01-15 14:45', createdAt: '2023-08-20', status: 'active' },
+  { id: 'ak3', name: 'Analytics Integration', key: 'sk_live_yyyyyyyyyyyyyyyy', permissions: ['read'], lastUsed: '2024-01-16 08:00', createdAt: '2024-01-01', status: 'active' },
+  { id: 'ak4', name: 'Old Mobile App', key: 'sk_live_zzzzzzzzzzzzzzzz', permissions: ['read'], lastUsed: '2023-11-30', createdAt: '2022-03-10', status: 'revoked' }
+]
+
+const mockWebhooks: Webhook[] = [
+  { id: 'wh1', url: 'https://api.acme.com/webhooks/marketplace', events: ['order.created', 'order.completed', 'review.created'], status: 'active', lastTriggered: '2024-01-16 09:15', successRate: 99.8, createdAt: '2023-06-01' },
+  { id: 'wh2', url: 'https://hooks.slack.com/services/xxx', events: ['order.created', 'review.flagged'], status: 'active', lastTriggered: '2024-01-16 09:23', successRate: 100, createdAt: '2023-08-15' },
+  { id: 'wh3', url: 'https://analytics.internal.io/ingest', events: ['install', 'uninstall', 'usage'], status: 'failed', lastTriggered: '2024-01-14 23:45', successRate: 78.5, createdAt: '2024-01-01' }
+]
+
 export default function MarketplaceClient() {
   const [activeTab, setActiveTab] = useState('browse')
   const [searchQuery, setSearchQuery] = useState('')
@@ -218,6 +310,12 @@ export default function MarketplaceClient() {
   const [showProductDialog, setShowProductDialog] = useState(false)
   const [showReviewDialog, setShowReviewDialog] = useState(false)
   const [showOrderDialog, setShowOrderDialog] = useState(false)
+  const [showCouponDialog, setShowCouponDialog] = useState(false)
+  const [showBundleDialog, setShowBundleDialog] = useState(false)
+  const [showAPIKeyDialog, setShowAPIKeyDialog] = useState(false)
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
+  const [analyticsTab, setAnalyticsTab] = useState('overview')
 
   const filteredProducts = useMemo(() => {
     return mockProducts.filter(product => {
@@ -651,25 +749,176 @@ export default function MarketplaceClient() {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="mt-6">
-            <div className="grid grid-cols-2 gap-6">
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle className="flex items-center gap-2"><Bell className="h-5 w-5" />Notifications</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">New App Alerts</p><p className="text-sm text-gray-500">Get notified when new apps are added</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Review Responses</p><p className="text-sm text-gray-500">Notifications when vendors respond</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Price Drops</p><p className="text-sm text-gray-500">Alert when wishlist items drop in price</p></div><Switch /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Weekly Digest</p><p className="text-sm text-gray-500">Summary of marketplace activity</p></div><Switch defaultChecked /></div>
+            <div className="flex gap-6">
+              <Card className="w-64 h-fit border-gray-200 dark:border-gray-700">
+                <CardContent className="p-2">
+                  <nav className="space-y-1">
+                    {[
+                      { id: 'general', icon: Settings, label: 'General' },
+                      { id: 'notifications', icon: Bell, label: 'Notifications' },
+                      { id: 'payments', icon: CreditCard, label: 'Payments' },
+                      { id: 'coupons', icon: Tag, label: 'Coupons' },
+                      { id: 'developers', icon: Code, label: 'Developers' },
+                      { id: 'security', icon: Shield, label: 'Security' }
+                    ].map(item => (
+                      <button key={item.id} onClick={() => setSettingsTab(item.id)} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${settingsTab === item.id ? 'bg-violet-100 dark:bg-violet-900/30 text-violet-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                        <item.icon className="h-4 w-4" />{item.label}
+                      </button>
+                    ))}
+                  </nav>
                 </CardContent>
               </Card>
-              <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5" />Privacy & Security</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Public Profile</p><p className="text-sm text-gray-500">Allow vendors to see your profile</p></div><Switch /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Review Visibility</p><p className="text-sm text-gray-500">Show your reviews publicly</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Usage Analytics</p><p className="text-sm text-gray-500">Share anonymous usage data</p></div><Switch defaultChecked /></div>
-                  <div className="flex items-center justify-between"><div><p className="font-medium">Two-Factor Auth</p><p className="text-sm text-gray-500">Require 2FA for purchases</p></div><Switch /></div>
-                </CardContent>
-              </Card>
+              <div className="flex-1 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle>Marketplace Settings</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4"><div><Label>Store Name</Label><Input defaultValue="My App Store" className="mt-1" /></div><div><Label>Default Currency</Label><Select defaultValue="usd"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="usd">USD</SelectItem><SelectItem value="eur">EUR</SelectItem><SelectItem value="gbp">GBP</SelectItem></SelectContent></Select></div></div>
+                        <div><Label>Store Description</Label><Textarea defaultValue="Enterprise app marketplace" className="mt-1" /></div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader><CardTitle>Display Options</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Show Prices</p><p className="text-sm text-gray-500">Display app prices to visitors</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Show Reviews</p><p className="text-sm text-gray-500">Display user reviews</p></div><Switch defaultChecked /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Vendor Badges</p><p className="text-sm text-gray-500">Show verified vendor badges</p></div><Switch defaultChecked /></div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+                {settingsTab === 'notifications' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Notification Preferences</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">New App Alerts</p><p className="text-sm text-gray-500">Get notified when new apps are added</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Review Responses</p><p className="text-sm text-gray-500">Notifications when vendors respond</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Price Drops</p><p className="text-sm text-gray-500">Alert when wishlist items drop in price</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Weekly Digest</p><p className="text-sm text-gray-500">Summary of marketplace activity</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Order Updates</p><p className="text-sm text-gray-500">Notifications for order status changes</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Security Alerts</p><p className="text-sm text-gray-500">Notify on suspicious activity</p></div><Switch defaultChecked /></div>
+                    </CardContent>
+                  </Card>
+                )}
+                {settingsTab === 'payments' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Payment Providers</CardTitle><Button><Plus className="h-4 w-4 mr-2" />Add Provider</Button></CardHeader>
+                    <CardContent className="space-y-4">
+                      {mockPaymentProviders.map(provider => (
+                        <div key={provider.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${provider.status === 'active' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                              <CreditCard className="h-6 w-6 text-violet-600" />
+                            </div>
+                            <div><h4 className="font-medium">{provider.name}</h4><p className="text-sm text-gray-500">{provider.type} • {provider.fee}% fee</p></div>
+                          </div>
+                          <div className="flex items-center gap-6">
+                            <div className="text-right"><p className="text-sm text-gray-500">Volume</p><p className="font-bold">${(provider.volume / 1000).toFixed(0)}K</p></div>
+                            <div className="text-right"><p className="text-sm text-gray-500">Transactions</p><p className="font-medium">{provider.transactions}</p></div>
+                            <Badge className={getStatusColor(provider.status)}>{provider.status}</Badge>
+                            <Switch checked={provider.status === 'active'} />
+                          </div>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+                {settingsTab === 'coupons' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Active Coupons</CardTitle><Button onClick={() => setShowCouponDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Coupon</Button></CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockCoupons.map(coupon => (
+                          <div key={coupon.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div className="flex items-center gap-4">
+                              <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${coupon.status === 'active' ? 'bg-green-100' : 'bg-gray-100'}`}>
+                                <Percent className="h-6 w-6 text-green-600" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2"><h4 className="font-mono font-bold">{coupon.code}</h4><Badge className={getStatusColor(coupon.status)}>{coupon.status}</Badge></div>
+                                <p className="text-sm text-gray-500">{coupon.type === 'percentage' ? `${coupon.value}% off` : coupon.type === 'fixed' ? `$${coupon.value} off` : `${coupon.value} day trial`} • Expires {coupon.expiresAt}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right"><p className="font-medium">{coupon.usedCount}/{coupon.usageLimit}</p><Progress value={(coupon.usedCount / coupon.usageLimit) * 100} className="w-20 h-2" /></div>
+                              <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Product Bundles</CardTitle><Button onClick={() => setShowBundleDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Bundle</Button></CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockBundles.map(bundle => (
+                          <div key={bundle.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div><h4 className="font-medium">{bundle.name}</h4><p className="text-sm text-gray-500">{bundle.products.length} apps • {bundle.discount}% discount</p></div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right"><p className="text-lg font-bold text-violet-600">${bundle.price}</p><p className="text-sm text-gray-400 line-through">${bundle.originalPrice}</p></div>
+                              <Badge variant="outline">{bundle.sales} sales</Badge>
+                              <Badge className={getStatusColor(bundle.status)}>{bundle.status}</Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+                {settingsTab === 'developers' && (
+                  <>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader className="flex flex-row items-center justify-between"><CardTitle>API Keys</CardTitle><Button onClick={() => setShowAPIKeyDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Key</Button></CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockAPIKeys.map(apiKey => (
+                          <div key={apiKey.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <div className="flex items-center gap-2"><h4 className="font-medium">{apiKey.name}</h4><Badge className={getStatusColor(apiKey.status)}>{apiKey.status}</Badge></div>
+                              <p className="font-mono text-sm text-gray-500">{apiKey.key}</p>
+                              <div className="flex items-center gap-2 mt-1">{apiKey.permissions.map(p => <Badge key={p} variant="outline" className="text-xs">{p}</Badge>)}</div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right text-sm text-gray-500"><p>Last used: {apiKey.lastUsed}</p><p>Created: {apiKey.createdAt}</p></div>
+                              <Button variant="ghost" size="icon"><Copy className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" className="text-red-500"><Trash2 className="h-4 w-4" /></Button>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                    <Card className="border-gray-200 dark:border-gray-700">
+                      <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Webhooks</CardTitle><Button onClick={() => setShowWebhookDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Webhook</Button></CardHeader>
+                      <CardContent className="space-y-4">
+                        {mockWebhooks.map(webhook => (
+                          <div key={webhook.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <div>
+                              <div className="flex items-center gap-2"><Code className="h-4 w-4 text-gray-400" /><span className="font-mono text-sm">{webhook.url}</span></div>
+                              <div className="flex items-center gap-2 mt-1">{webhook.events.map(e => <Badge key={e} variant="outline" className="text-xs">{e}</Badge>)}</div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right"><p className="text-sm"><span className={webhook.successRate >= 95 ? 'text-green-600' : 'text-amber-600'}>{webhook.successRate}%</span> success</p>{webhook.lastTriggered && <p className="text-xs text-gray-500">Last: {webhook.lastTriggered}</p>}</div>
+                              <Badge className={getStatusColor(webhook.status)}>{webhook.status}</Badge>
+                              <Button variant="ghost" size="icon"><RefreshCw className="h-4 w-4" /></Button>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+                {settingsTab === 'security' && (
+                  <Card className="border-gray-200 dark:border-gray-700">
+                    <CardHeader><CardTitle>Privacy & Security</CardTitle></CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Public Profile</p><p className="text-sm text-gray-500">Allow vendors to see your profile</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Review Visibility</p><p className="text-sm text-gray-500">Show your reviews publicly</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Usage Analytics</p><p className="text-sm text-gray-500">Share anonymous usage data</p></div><Switch defaultChecked /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">Two-Factor Auth</p><p className="text-sm text-gray-500">Require 2FA for purchases</p></div><Switch /></div>
+                      <div className="flex items-center justify-between"><div><p className="font-medium">API Rate Limiting</p><p className="text-sm text-gray-500">Limit API requests per minute</p></div><Select defaultValue="100"><SelectTrigger className="w-32"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="50">50/min</SelectItem><SelectItem value="100">100/min</SelectItem><SelectItem value="500">500/min</SelectItem></SelectContent></Select></div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
@@ -757,6 +1006,75 @@ export default function MarketplaceClient() {
                 </DialogFooter>
               </>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Coupon Dialog */}
+        <Dialog open={showCouponDialog} onOpenChange={setShowCouponDialog}>
+          <DialogContent><DialogHeader><DialogTitle>Create Coupon</DialogTitle><DialogDescription>Create a new discount coupon for your marketplace</DialogDescription></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Coupon Code</Label><Input placeholder="SUMMER25" className="mt-1 font-mono" /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Discount Type</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select type" /></SelectTrigger><SelectContent><SelectItem value="percentage">Percentage Off</SelectItem><SelectItem value="fixed">Fixed Amount</SelectItem><SelectItem value="free_trial">Free Trial Days</SelectItem></SelectContent></Select></div>
+                <div><Label>Value</Label><Input type="number" placeholder="25" className="mt-1" /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-4"><div><Label>Usage Limit</Label><Input type="number" placeholder="100" className="mt-1" /></div><div><Label>Min Purchase</Label><Input type="number" placeholder="0" className="mt-1" /></div></div>
+              <div><Label>Expires At</Label><Input type="date" className="mt-1" /></div>
+              <div><Label>Applicable Products</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select products" /></SelectTrigger><SelectContent><SelectItem value="all">All Products</SelectItem><SelectItem value="selected">Selected Products</SelectItem></SelectContent></Select></div>
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowCouponDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-violet-600 to-purple-600">Create Coupon</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Bundle Dialog */}
+        <Dialog open={showBundleDialog} onOpenChange={setShowBundleDialog}>
+          <DialogContent><DialogHeader><DialogTitle>Create Bundle</DialogTitle><DialogDescription>Create a product bundle with discounted pricing</DialogDescription></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Bundle Name</Label><Input placeholder="Productivity Suite" className="mt-1" /></div>
+              <div><Label>Description</Label><Textarea placeholder="Describe what's included..." className="mt-1" /></div>
+              <div><Label>Select Products</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {mockProducts.slice(0, 4).map(p => <div key={p.id} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded"><input type="checkbox" /><span className="text-sm">{p.name}</span></div>)}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4"><div><Label>Discount %</Label><Input type="number" placeholder="25" className="mt-1" /></div><div><Label>Bundle Price</Label><Input type="number" placeholder="99" className="mt-1" /></div></div>
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowBundleDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-violet-600 to-purple-600">Create Bundle</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* API Key Dialog */}
+        <Dialog open={showAPIKeyDialog} onOpenChange={setShowAPIKeyDialog}>
+          <DialogContent><DialogHeader><DialogTitle>Create API Key</DialogTitle><DialogDescription>Generate a new API key for integrations</DialogDescription></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Key Name</Label><Input placeholder="Production API" className="mt-1" /></div>
+              <div><Label>Permissions</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {['read', 'write', 'delete', 'admin'].map(perm => <Badge key={perm} variant="outline" className="cursor-pointer hover:bg-violet-50">{perm}</Badge>)}
+                </div>
+              </div>
+              <div><Label>Expiration</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select expiration" /></SelectTrigger><SelectContent><SelectItem value="never">Never</SelectItem><SelectItem value="30">30 days</SelectItem><SelectItem value="90">90 days</SelectItem><SelectItem value="365">1 year</SelectItem></SelectContent></Select></div>
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200"><p className="text-sm text-amber-700">API keys are shown only once after creation. Make sure to copy it!</p></div>
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowAPIKeyDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-violet-600 to-purple-600">Generate Key</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Webhook Dialog */}
+        <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
+          <DialogContent><DialogHeader><DialogTitle>Add Webhook</DialogTitle><DialogDescription>Configure a webhook endpoint for event notifications</DialogDescription></DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Endpoint URL</Label><Input placeholder="https://your-api.com/webhooks" className="mt-1" /></div>
+              <div><Label>Events</Label>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  {['order.created', 'order.completed', 'order.refunded', 'review.created', 'review.flagged', 'install', 'uninstall'].map(event => (
+                    <div key={event} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded"><input type="checkbox" /><span className="text-sm font-mono">{event}</span></div>
+                  ))}
+                </div>
+              </div>
+              <div><Label>Secret (Optional)</Label><Input placeholder="whsec_xxxxxxxxx" className="mt-1 font-mono" /></div>
+            </div>
+            <DialogFooter><Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-violet-600 to-purple-600">Add Webhook</Button></DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
