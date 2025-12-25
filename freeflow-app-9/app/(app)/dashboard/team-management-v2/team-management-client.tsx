@@ -5,7 +5,9 @@ import {
   TrendingUp, Star, Heart, ThumbsUp, ChevronRight, ChevronDown, Search, Plus,
   MoreHorizontal, Edit, Trash2, Filter, Download, Settings, RefreshCw, Clock,
   CheckCircle, AlertCircle, ArrowUp, ArrowDown, Minus, GitBranch, Briefcase,
-  GraduationCap, Zap, Flag, Trophy, Medal, Crown, Sparkles, Send, Eye, Lock
+  GraduationCap, Zap, Flag, Trophy, Medal, Crown, Sparkles, Send, Eye, Lock,
+  Bell, Key, Globe, Link2, Palette, Database, Server, Shield, FileText, Mail,
+  Smartphone, Slack, Video, Timer, UserCog, Languages, DollarSign
 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -13,6 +15,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useTeamManagement, type Team, type TeamType, type TeamStatus } from '@/lib/hooks/use-team-management'
 
 interface TeamMember {
@@ -74,7 +79,7 @@ interface Review {
 }
 
 export default function TeamManagementClient({ initialTeams }: { initialTeams: Team[] }) {
-  const [activeView, setActiveView] = useState<'teams' | 'people' | 'goals' | 'reviews' | 'oneOnOnes' | 'recognition'>('teams')
+  const [activeView, setActiveView] = useState<'teams' | 'people' | 'goals' | 'reviews' | 'oneOnOnes' | 'recognition' | 'settings'>('teams')
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState<TeamType | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<TeamStatus | 'all'>('all')
@@ -83,6 +88,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
   const [showNewGoalModal, setShowNewGoalModal] = useState(false)
   const [showRecognitionModal, setShowRecognitionModal] = useState(false)
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
+  const [settingsTab, setSettingsTab] = useState('organization')
 
   const { teams, loading, error } = useTeamManagement({ teamType: typeFilter, status: statusFilter })
   const displayTeams = teams.length > 0 ? teams : initialTeams
@@ -148,6 +154,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     { id: 'reviews' as const, name: 'Reviews', icon: BarChart3, count: reviews.length },
     { id: 'oneOnOnes' as const, name: '1:1s', icon: MessageSquare, count: oneOnOnes.length },
     { id: 'recognition' as const, name: 'Recognition', icon: Award, count: recognitions.length },
+    { id: 'settings' as const, name: 'Settings', icon: Settings, count: null },
   ]
 
   const valueColors: Record<string, string> = {
@@ -329,13 +336,15 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                 >
                   <view.icon className="w-4 h-4" />
                   {view.name}
-                  <span className={`px-2 py-0.5 rounded-full text-xs ${
-                    activeView === view.id
-                      ? 'bg-purple-200 dark:bg-purple-800'
-                      : 'bg-gray-200 dark:bg-gray-600'
-                  }`}>
-                    {view.count}
-                  </span>
+                  {view.count !== null && (
+                    <span className={`px-2 py-0.5 rounded-full text-xs ${
+                      activeView === view.id
+                        ? 'bg-purple-200 dark:bg-purple-800'
+                        : 'bg-gray-200 dark:bg-gray-600'
+                    }`}>
+                      {view.count}
+                    </span>
+                  )}
                 </button>
               ))}
             </nav>
@@ -907,6 +916,845 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Settings View - BambooHR Level */}
+          {activeView === 'settings' && (
+            <div className="p-6">
+              <Tabs value={settingsTab} onValueChange={setSettingsTab}>
+                <TabsList className="grid w-full grid-cols-6 mb-6">
+                  <TabsTrigger value="organization" className="gap-2">
+                    <Building2 className="w-4 h-4" />
+                    Organization
+                  </TabsTrigger>
+                  <TabsTrigger value="performance" className="gap-2">
+                    <Target className="w-4 h-4" />
+                    Performance
+                  </TabsTrigger>
+                  <TabsTrigger value="compensation" className="gap-2">
+                    <DollarSign className="w-4 h-4" />
+                    Compensation
+                  </TabsTrigger>
+                  <TabsTrigger value="notifications" className="gap-2">
+                    <Bell className="w-4 h-4" />
+                    Notifications
+                  </TabsTrigger>
+                  <TabsTrigger value="integrations" className="gap-2">
+                    <Link2 className="w-4 h-4" />
+                    Integrations
+                  </TabsTrigger>
+                  <TabsTrigger value="advanced" className="gap-2">
+                    <Shield className="w-4 h-4" />
+                    Advanced
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Organization Settings */}
+                <TabsContent value="organization" className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <Building2 className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Company Structure</h3>
+                          <p className="text-sm text-gray-500">Configure organization hierarchy</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Organization Name</Label>
+                          <Input defaultValue="FreeFlow Inc." />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Fiscal Year Start</Label>
+                          <Select defaultValue="january">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="january">January</SelectItem>
+                              <SelectItem value="april">April</SelectItem>
+                              <SelectItem value="july">July</SelectItem>
+                              <SelectItem value="october">October</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Enable Departments</Label>
+                            <p className="text-xs text-gray-500">Structure teams by department</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Show Org Chart</Label>
+                            <p className="text-xs text-gray-500">Visual hierarchy view</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <Users className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Employee Settings</h3>
+                          <p className="text-sm text-gray-500">Default employee configurations</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Default Work Schedule</Label>
+                          <Select defaultValue="full-time">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="full-time">Full-Time (40 hrs/week)</SelectItem>
+                              <SelectItem value="part-time">Part-Time (20 hrs/week)</SelectItem>
+                              <SelectItem value="contractor">Contractor</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Probation Period</Label>
+                          <Select defaultValue="90">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="30">30 days</SelectItem>
+                              <SelectItem value="60">60 days</SelectItem>
+                              <SelectItem value="90">90 days</SelectItem>
+                              <SelectItem value="180">180 days</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Enable Self-Service</Label>
+                            <p className="text-xs text-gray-500">Let employees update profiles</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Manager Approval</Label>
+                            <p className="text-xs text-gray-500">Require approval for changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 border rounded-xl dark:border-gray-700">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                        <Calendar className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Time Off Policies</h3>
+                        <p className="text-sm text-gray-500">Configure leave and time off</p>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div className="p-4 border rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium">Annual Leave</span>
+                          <Badge variant="outline">Active</Badge>
+                        </div>
+                        <div className="text-2xl font-bold text-green-600">20 days</div>
+                        <p className="text-xs text-gray-500 mt-1">Per year, accrued monthly</p>
+                      </div>
+                      <div className="p-4 border rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium">Sick Leave</span>
+                          <Badge variant="outline">Active</Badge>
+                        </div>
+                        <div className="text-2xl font-bold text-blue-600">10 days</div>
+                        <p className="text-xs text-gray-500 mt-1">Per year, no accrual</p>
+                      </div>
+                      <div className="p-4 border rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium">Personal Days</span>
+                          <Badge variant="outline">Active</Badge>
+                        </div>
+                        <div className="text-2xl font-bold text-purple-600">5 days</div>
+                        <p className="text-xs text-gray-500 mt-1">Per year, flexible use</p>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Performance Settings */}
+                <TabsContent value="performance" className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <Target className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Goal Settings</h3>
+                          <p className="text-sm text-gray-500">Configure OKR and goal framework</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Goal Framework</Label>
+                          <Select defaultValue="okr">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="okr">OKRs (Objectives & Key Results)</SelectItem>
+                              <SelectItem value="smart">SMART Goals</SelectItem>
+                              <SelectItem value="kpi">KPIs</SelectItem>
+                              <SelectItem value="custom">Custom Framework</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Goal Cycle</Label>
+                          <Select defaultValue="quarterly">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="monthly">Monthly</SelectItem>
+                              <SelectItem value="quarterly">Quarterly</SelectItem>
+                              <SelectItem value="semi-annual">Semi-Annual</SelectItem>
+                              <SelectItem value="annual">Annual</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Goal Alignment</Label>
+                            <p className="text-xs text-gray-500">Link goals to company objectives</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Public Goals</Label>
+                            <p className="text-xs text-gray-500">Allow team to see all goals</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                          <BarChart3 className="w-5 h-5 text-orange-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Review Settings</h3>
+                          <p className="text-sm text-gray-500">Performance review configuration</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Review Frequency</Label>
+                          <Select defaultValue="quarterly">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="monthly">Monthly Check-ins</SelectItem>
+                              <SelectItem value="quarterly">Quarterly Reviews</SelectItem>
+                              <SelectItem value="semi-annual">Semi-Annual</SelectItem>
+                              <SelectItem value="annual">Annual Reviews</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Review Type</Label>
+                          <Select defaultValue="360">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="360">360° Feedback</SelectItem>
+                              <SelectItem value="manager">Manager Only</SelectItem>
+                              <SelectItem value="self">Self Assessment</SelectItem>
+                              <SelectItem value="peer">Peer Reviews</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Anonymous Feedback</Label>
+                            <p className="text-xs text-gray-500">Hide reviewer identities</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Calibration Sessions</Label>
+                            <p className="text-xs text-gray-500">Enable manager calibration</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 border rounded-xl dark:border-gray-700">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <MessageSquare className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">1:1 Meeting Settings</h3>
+                        <p className="text-sm text-gray-500">Configure one-on-one meetings</p>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label>Default Frequency</Label>
+                        <Select defaultValue="weekly">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                            <SelectItem value="biweekly">Bi-Weekly</SelectItem>
+                            <SelectItem value="monthly">Monthly</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Default Duration</Label>
+                        <Select defaultValue="30">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="15">15 minutes</SelectItem>
+                            <SelectItem value="30">30 minutes</SelectItem>
+                            <SelectItem value="45">45 minutes</SelectItem>
+                            <SelectItem value="60">1 hour</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-600">
+                        <div>
+                          <Label>Require Agenda</Label>
+                          <p className="text-xs text-gray-500">Agenda before meeting</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Compensation Settings */}
+                <TabsContent value="compensation" className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                          <DollarSign className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Salary Configuration</h3>
+                          <p className="text-sm text-gray-500">Compensation structure settings</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Default Currency</Label>
+                          <Select defaultValue="usd">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="usd">USD ($)</SelectItem>
+                              <SelectItem value="eur">EUR (€)</SelectItem>
+                              <SelectItem value="gbp">GBP (£)</SelectItem>
+                              <SelectItem value="zar">ZAR (R)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Pay Frequency</Label>
+                          <Select defaultValue="monthly">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="weekly">Weekly</SelectItem>
+                              <SelectItem value="biweekly">Bi-Weekly</SelectItem>
+                              <SelectItem value="monthly">Monthly</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Salary Bands</Label>
+                            <p className="text-xs text-gray-500">Enable compensation bands</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Salary Transparency</Label>
+                            <p className="text-xs text-gray-500">Show salary ranges to employees</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <Award className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Recognition & Bonuses</h3>
+                          <p className="text-sm text-gray-500">Rewards and recognition settings</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Recognition Program</Label>
+                          <Select defaultValue="values">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="values">Values-Based Recognition</SelectItem>
+                              <SelectItem value="peer">Peer-to-Peer</SelectItem>
+                              <SelectItem value="manager">Manager Recognition</SelectItem>
+                              <SelectItem value="all">All Types</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Bonus Cycle</Label>
+                          <Select defaultValue="annual">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="quarterly">Quarterly</SelectItem>
+                              <SelectItem value="semi-annual">Semi-Annual</SelectItem>
+                              <SelectItem value="annual">Annual</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Spot Bonuses</Label>
+                            <p className="text-xs text-gray-500">Enable ad-hoc bonuses</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Public Recognition</Label>
+                            <p className="text-xs text-gray-500">Show recognition wall</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 border rounded-xl dark:border-gray-700">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <TrendingUp className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Merit Increase Settings</h3>
+                        <p className="text-sm text-gray-500">Configure salary review cycles</p>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-4 gap-4">
+                      <div className="p-4 border rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+                        <div className="text-sm text-gray-500 mb-1">Review Cycle</div>
+                        <div className="text-lg font-semibold">Annual</div>
+                      </div>
+                      <div className="p-4 border rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+                        <div className="text-sm text-gray-500 mb-1">Budget Pool</div>
+                        <div className="text-lg font-semibold text-green-600">4%</div>
+                      </div>
+                      <div className="p-4 border rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+                        <div className="text-sm text-gray-500 mb-1">Next Review</div>
+                        <div className="text-lg font-semibold text-purple-600">March 2025</div>
+                      </div>
+                      <div className="p-4 border rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+                        <div className="text-sm text-gray-500 mb-1">Approval Required</div>
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          <span className="font-semibold">Yes</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Notifications Settings */}
+                <TabsContent value="notifications" className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <Bell className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Manager Notifications</h3>
+                          <p className="text-sm text-gray-500">Alerts for people managers</p>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        {[
+                          { label: 'New Team Member Onboarding', desc: 'When new hire joins team', enabled: true },
+                          { label: 'Review Reminders', desc: 'Upcoming performance reviews', enabled: true },
+                          { label: '1:1 Scheduling', desc: 'Meeting reminders', enabled: true },
+                          { label: 'Goal Updates', desc: 'Team goal progress', enabled: true },
+                          { label: 'Time Off Requests', desc: 'Leave approvals needed', enabled: true },
+                          { label: 'Recognition Given', desc: 'When team is recognized', enabled: false },
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <div>
+                              <Label className="font-medium">{item.label}</Label>
+                              <p className="text-xs text-gray-500">{item.desc}</p>
+                            </div>
+                            <Switch defaultChecked={item.enabled} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <UserCog className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Employee Notifications</h3>
+                          <p className="text-sm text-gray-500">Alerts for all employees</p>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        {[
+                          { label: 'Goal Deadlines', desc: 'Upcoming goal due dates', enabled: true },
+                          { label: 'Review Invitations', desc: 'When assigned reviews', enabled: true },
+                          { label: '1:1 Reminders', desc: 'Upcoming meetings', enabled: true },
+                          { label: 'Recognition Received', desc: 'When you receive kudos', enabled: true },
+                          { label: 'Team Announcements', desc: 'Company updates', enabled: true },
+                          { label: 'Birthday Reminders', desc: 'Team member birthdays', enabled: false },
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <div>
+                              <Label className="font-medium">{item.label}</Label>
+                              <p className="text-xs text-gray-500">{item.desc}</p>
+                            </div>
+                            <Switch defaultChecked={item.enabled} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 border rounded-xl dark:border-gray-700">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                        <Mail className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Delivery Channels</h3>
+                        <p className="text-sm text-gray-500">How notifications are delivered</p>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-4 gap-4">
+                      {[
+                        { icon: Mail, label: 'Email', desc: 'Daily digest', enabled: true },
+                        { icon: Bell, label: 'Push', desc: 'Real-time alerts', enabled: true },
+                        { icon: Slack, label: 'Slack', desc: 'Slack integration', enabled: true },
+                        { icon: Smartphone, label: 'Mobile', desc: 'App notifications', enabled: false },
+                      ].map((channel, idx) => (
+                        <div key={idx} className="p-4 border rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+                          <div className="flex items-center justify-between mb-3">
+                            <channel.icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                            <Switch defaultChecked={channel.enabled} />
+                          </div>
+                          <div className="font-medium">{channel.label}</div>
+                          <p className="text-xs text-gray-500">{channel.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Integrations Settings */}
+                <TabsContent value="integrations" className="space-y-6">
+                  <div className="p-6 border rounded-xl dark:border-gray-700">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                        <Link2 className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white">Connected Services</h3>
+                        <p className="text-sm text-gray-500">Third-party integrations</p>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {[
+                        { name: 'Slack', desc: 'Team communication', status: 'connected', icon: '💬' },
+                        { name: 'Google Workspace', desc: 'Calendar & directory sync', status: 'connected', icon: '📅' },
+                        { name: 'Payroll System', desc: 'ADP / Gusto integration', status: 'connected', icon: '💰' },
+                        { name: 'Greenhouse', desc: 'Recruiting & ATS', status: 'available', icon: '🌱' },
+                        { name: 'Workday', desc: 'HRIS sync', status: 'available', icon: '📊' },
+                        { name: 'Okta', desc: 'SSO & identity', status: 'connected', icon: '🔐' },
+                      ].map((integration, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-700 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{integration.icon}</span>
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">{integration.name}</div>
+                              <p className="text-sm text-gray-500">{integration.desc}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge className={
+                              integration.status === 'connected'
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
+                            }>
+                              {integration.status === 'connected' ? 'Connected' : 'Available'}
+                            </Badge>
+                            <Button size="sm" variant="outline">
+                              {integration.status === 'connected' ? 'Configure' : 'Connect'}
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <Video className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Video Conferencing</h3>
+                          <p className="text-sm text-gray-500">1:1 meeting links</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Default Platform</Label>
+                        <Select defaultValue="zoom">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="zoom">Zoom</SelectItem>
+                            <SelectItem value="meet">Google Meet</SelectItem>
+                            <SelectItem value="teams">Microsoft Teams</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Auto-Generate Links</Label>
+                          <p className="text-xs text-gray-500">Add video link to 1:1s</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </div>
+
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                          <Database className="w-5 h-5 text-orange-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Data Sync</h3>
+                          <p className="text-sm text-gray-500">Sync frequency & settings</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Sync Frequency</Label>
+                        <Select defaultValue="hourly">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="realtime">Real-time</SelectItem>
+                            <SelectItem value="hourly">Hourly</SelectItem>
+                            <SelectItem value="daily">Daily</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button variant="outline" className="w-full gap-2">
+                        <RefreshCw className="w-4 h-4" />
+                        Sync Now
+                      </Button>
+                    </div>
+                  </div>
+                </TabsContent>
+
+                {/* Advanced Settings */}
+                <TabsContent value="advanced" className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <Shield className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Security & Privacy</h3>
+                          <p className="text-sm text-gray-500">Data protection settings</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Two-Factor Authentication</Label>
+                            <p className="text-xs text-gray-500">Require 2FA for managers</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>SSO Only</Label>
+                            <p className="text-xs text-gray-500">Disable password login</p>
+                          </div>
+                          <Switch />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Data Export</Label>
+                            <p className="text-xs text-gray-500">Allow GDPR data exports</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label>Audit Logs</Label>
+                            <p className="text-xs text-gray-500">Track all changes</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-6 border rounded-xl dark:border-gray-700 space-y-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <Globe className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">Localization</h3>
+                          <p className="text-sm text-gray-500">Regional settings</p>
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Default Language</Label>
+                          <Select defaultValue="en">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="en">English</SelectItem>
+                              <SelectItem value="es">Spanish</SelectItem>
+                              <SelectItem value="fr">French</SelectItem>
+                              <SelectItem value="de">German</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Date Format</Label>
+                          <Select defaultValue="mdy">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="mdy">MM/DD/YYYY</SelectItem>
+                              <SelectItem value="dmy">DD/MM/YYYY</SelectItem>
+                              <SelectItem value="ymd">YYYY-MM-DD</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Timezone</Label>
+                          <Select defaultValue="utc">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="utc">UTC</SelectItem>
+                              <SelectItem value="est">Eastern Time</SelectItem>
+                              <SelectItem value="pst">Pacific Time</SelectItem>
+                              <SelectItem value="sast">South Africa (SAST)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-6 border border-red-200 dark:border-red-800 rounded-xl bg-red-50 dark:bg-red-900/20">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                        <AlertCircle className="w-5 h-5 text-red-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-red-700 dark:text-red-400">Danger Zone</h3>
+                        <p className="text-sm text-red-600 dark:text-red-400">Irreversible actions</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-700 rounded-lg bg-white dark:bg-gray-800">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Reset All OKRs</div>
+                          <p className="text-sm text-gray-500">Clear all goals and progress</p>
+                        </div>
+                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          Reset OKRs
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-700 rounded-lg bg-white dark:bg-gray-800">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Archive Review History</div>
+                          <p className="text-sm text-gray-500">Move all reviews to archive</p>
+                        </div>
+                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                          Archive All
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-700 rounded-lg bg-white dark:bg-gray-800">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Export All Data</div>
+                          <p className="text-sm text-gray-500">Download complete HR data</p>
+                        </div>
+                        <Button variant="outline" className="gap-2">
+                          <Download className="w-4 h-4" />
+                          Export
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           )}
         </div>
