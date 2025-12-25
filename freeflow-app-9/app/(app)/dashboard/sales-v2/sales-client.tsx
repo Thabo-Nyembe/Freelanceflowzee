@@ -28,7 +28,8 @@ import {
   FileSignature, Receipt, Percent, Flag, ShieldCheck, AlertTriangle, Trophy,
   Gift, Layers, Map, Navigation, Compass, LayoutGrid, Rocket, Sparkles,
   ChevronRight, ChevronDown, Copy, Download, Upload, Share2, Eye, Heart,
-  ThumbsUp, MessageCircle, Send, Bookmark, Tag, Hash, AtSign, Link2, Loader2
+  ThumbsUp, MessageCircle, Send, Bookmark, Tag, Hash, AtSign, Link2, Loader2,
+  Webhook, Key, Shield, HardDrive, AlertOctagon, Bell, CreditCard
 } from 'lucide-react'
 
 // Salesforce Sales Cloud level types
@@ -335,6 +336,7 @@ export default function SalesClient() {
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null)
   const [stageFilter, setStageFilter] = useState<string>('all')
   const [forecastPeriod, setForecastPeriod] = useState('Q1 2025')
+  const [settingsTab, setSettingsTab] = useState('general')
 
   // Stats calculations
   const stats = useMemo(() => {
@@ -477,6 +479,9 @@ export default function SalesClient() {
             </TabsTrigger>
             <TabsTrigger value="products" className="data-[state=active]:bg-green-100 dark:data-[state=active]:bg-green-900/30">
               <Package className="w-4 h-4 mr-2" />Products
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-green-100 dark:data-[state=active]:bg-green-900/30">
+              <Settings className="w-4 h-4 mr-2" />Settings
             </TabsTrigger>
           </TabsList>
 
@@ -923,6 +928,638 @@ export default function SalesClient() {
                   </CardContent>
                 </Card>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab - Salesforce Level */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-12 gap-6">
+              {/* Settings Sidebar */}
+              <div className="col-span-3 space-y-2">
+                <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                  <CardContent className="p-2">
+                    <nav className="space-y-1">
+                      {[
+                        { id: 'general', label: 'General', icon: Settings },
+                        { id: 'pipeline', label: 'Pipeline', icon: Target },
+                        { id: 'automation', label: 'Automation', icon: Zap },
+                        { id: 'notifications', label: 'Notifications', icon: Bell },
+                        { id: 'integrations', label: 'Integrations', icon: Webhook },
+                        { id: 'advanced', label: 'Advanced', icon: Shield }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => setSettingsTab(item.id)}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                            settingsTab === item.id
+                              ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                              : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <item.icon className="w-4 h-4" />
+                          <span className="text-sm font-medium">{item.label}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  </CardContent>
+                </Card>
+
+                {/* Sales Stats Sidebar */}
+                <Card className="bg-gradient-to-br from-green-500 to-emerald-600 text-white border-0">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium opacity-90">CRM Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <div className="text-2xl font-bold">{formatCurrency(stats.totalPipeline)}</div>
+                      <div className="text-xs opacity-80">Total Pipeline</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-center">
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-semibold">{stats.winRate.toFixed(0)}%</div>
+                        <div className="text-xs opacity-80">Win Rate</div>
+                      </div>
+                      <div className="bg-white/20 rounded-lg p-2">
+                        <div className="text-lg font-semibold">{stats.wonDeals}</div>
+                        <div className="text-xs opacity-80">Won Deals</div>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span>Quota Attainment</span>
+                        <span>{((stats.wonAmount / stats.totalQuota) * 100).toFixed(0)}%</span>
+                      </div>
+                      <Progress value={(stats.wonAmount / stats.totalQuota) * 100} className="h-2 bg-white/20" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Settings Content */}
+              <div className="col-span-9 space-y-6">
+                {settingsTab === 'general' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Settings className="w-5 h-5 text-green-600" />
+                          CRM Settings
+                        </CardTitle>
+                        <CardDescription>Configure your CRM profile and preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Organization Name</Label>
+                            <Input defaultValue="FreeFlow Inc" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Fiscal Year Start</Label>
+                            <Select defaultValue="january">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="january">January</SelectItem>
+                                <SelectItem value="april">April</SelectItem>
+                                <SelectItem value="july">July</SelectItem>
+                                <SelectItem value="october">October</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Currency</Label>
+                            <Select defaultValue="usd">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="usd">USD ($)</SelectItem>
+                                <SelectItem value="eur">EUR (€)</SelectItem>
+                                <SelectItem value="gbp">GBP (£)</SelectItem>
+                                <SelectItem value="jpy">JPY (¥)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Timezone</Label>
+                            <Select defaultValue="pst">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pst">Pacific Time</SelectItem>
+                                <SelectItem value="est">Eastern Time</SelectItem>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="gmt">GMT</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Multi-Currency Support</div>
+                            <div className="text-sm text-gray-500">Enable multiple currencies for deals</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <DollarSign className="w-5 h-5 text-emerald-600" />
+                          Commission Settings
+                        </CardTitle>
+                        <CardDescription>Configure sales commission calculations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Default Commission Rate</Label>
+                            <Input defaultValue="8%" />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Commission Basis</Label>
+                            <Select defaultValue="revenue">
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="revenue">Revenue</SelectItem>
+                                <SelectItem value="profit">Profit</SelectItem>
+                                <SelectItem value="margin">Margin</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Tiered Commissions</div>
+                            <div className="text-sm text-gray-500">Apply different rates based on quota attainment</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Split Commissions</div>
+                            <div className="text-sm text-gray-500">Allow commission splits between team members</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'pipeline' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Target className="w-5 h-5 text-blue-600" />
+                          Pipeline Stages
+                        </CardTitle>
+                        <CardDescription>Configure deal stages and probabilities</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        {['Prospecting', 'Qualification', 'Needs Analysis', 'Value Proposition', 'Proposal', 'Negotiation'].map((stage, idx) => (
+                          <div key={stage} className="flex items-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                            <div className="flex-1">
+                              <Input defaultValue={stage} />
+                            </div>
+                            <div className="w-24">
+                              <Input defaultValue={`${(idx + 1) * 15}%`} className="text-center" />
+                            </div>
+                            <Button variant="ghost" size="icon">
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button variant="outline" className="w-full">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Add Stage
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <BarChart3 className="w-5 h-5 text-purple-600" />
+                          Forecasting Settings
+                        </CardTitle>
+                        <CardDescription>Configure forecast categories and quotas</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Forecast Period</Label>
+                          <Select defaultValue="quarterly">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="monthly">Monthly</SelectItem>
+                              <SelectItem value="quarterly">Quarterly</SelectItem>
+                              <SelectItem value="annually">Annually</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">AI Forecast Predictions</div>
+                            <div className="text-sm text-gray-500">Use AI to predict deal outcomes</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Weighted Pipeline</div>
+                            <div className="text-sm text-gray-500">Calculate expected value based on probability</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'automation' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Zap className="w-5 h-5 text-yellow-600" />
+                          Lead Scoring
+                        </CardTitle>
+                        <CardDescription>Configure automatic lead scoring rules</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                          <div className="flex items-center gap-3">
+                            <Sparkles className="w-5 h-5 text-yellow-600" />
+                            <div>
+                              <div className="font-medium text-yellow-800 dark:text-yellow-400">Einstein Lead Scoring</div>
+                              <div className="text-sm text-yellow-600 dark:text-yellow-500">AI-powered lead prioritization</div>
+                            </div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                            <div className="flex justify-between mb-2">
+                              <span className="text-sm font-medium">Website Visit</span>
+                              <span className="text-sm text-gray-500">+10 points</span>
+                            </div>
+                            <Progress value={40} className="h-2" />
+                          </div>
+                          <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                            <div className="flex justify-between mb-2">
+                              <span className="text-sm font-medium">Email Open</span>
+                              <span className="text-sm text-gray-500">+5 points</span>
+                            </div>
+                            <Progress value={20} className="h-2" />
+                          </div>
+                          <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                            <div className="flex justify-between mb-2">
+                              <span className="text-sm font-medium">Demo Request</span>
+                              <span className="text-sm text-gray-500">+25 points</span>
+                            </div>
+                            <Progress value={100} className="h-2" />
+                          </div>
+                          <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                            <div className="flex justify-between mb-2">
+                              <span className="text-sm font-medium">Decision Maker</span>
+                              <span className="text-sm text-gray-500">+20 points</span>
+                            </div>
+                            <Progress value={80} className="h-2" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <RefreshCw className="w-5 h-5 text-blue-600" />
+                          Workflow Automation
+                        </CardTitle>
+                        <CardDescription>Configure automated workflows</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Auto-create Follow-up Tasks</div>
+                            <div className="text-sm text-gray-500">Create tasks after deals move stages</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Deal Aging Alerts</div>
+                            <div className="text-sm text-gray-500">Alert when deals stall in a stage</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Auto-assign Leads</div>
+                            <div className="text-sm text-gray-500">Round-robin lead assignment</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Win/Loss Analysis</div>
+                            <div className="text-sm text-gray-500">Require reason when closing deals</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'notifications' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-orange-600" />
+                          Deal Notifications
+                        </CardTitle>
+                        <CardDescription>Configure notifications for deals and pipeline</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Deal Stage Changes</div>
+                            <div className="text-sm text-gray-500">Notify when deals move stages</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Deal Won/Lost</div>
+                            <div className="text-sm text-gray-500">Notify when deals are closed</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Quote Accepted</div>
+                            <div className="text-sm text-gray-500">Notify when quotes are accepted</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Close Date Approaching</div>
+                            <div className="text-sm text-gray-500">Notify before close dates</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Activity className="w-5 h-5 text-purple-600" />
+                          Activity Reminders
+                        </CardTitle>
+                        <CardDescription>Configure activity and task reminders</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Task Due Reminders</div>
+                            <div className="text-sm text-gray-500">Remind before tasks are due</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Overdue Task Alerts</div>
+                            <div className="text-sm text-gray-500">Alert when tasks become overdue</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Meeting Reminders</div>
+                            <div className="text-sm text-gray-500">Send reminders before meetings</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'integrations' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Webhook className="w-5 h-5 text-indigo-600" />
+                          Connected Services
+                        </CardTitle>
+                        <CardDescription>Manage CRM integrations</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center">
+                              <span className="text-white font-bold">S</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">Salesforce</div>
+                              <div className="text-sm text-gray-500">Bi-directional sync enabled</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center">
+                              <span className="text-white font-bold">G</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">Gmail</div>
+                              <div className="text-sm text-gray-500">Email sync active</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-blue-500 flex items-center justify-center">
+                              <span className="text-white font-bold">L</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">LinkedIn Sales Navigator</div>
+                              <div className="text-sm text-gray-500">Contact enrichment enabled</div>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-100 text-green-700">Connected</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center">
+                              <span className="text-white font-bold">H</span>
+                            </div>
+                            <div>
+                              <div className="font-medium">HubSpot</div>
+                              <div className="text-sm text-gray-500">Not connected</div>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm">Connect</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Key className="w-5 h-5 text-amber-600" />
+                          API Access
+                        </CardTitle>
+                        <CardDescription>Manage API credentials</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>API Key</Label>
+                          <div className="flex gap-2">
+                            <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
+                            <Button variant="outline">Copy</Button>
+                            <Button variant="outline">Regenerate</Button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Webhook URL</Label>
+                          <Input placeholder="https://your-server.com/webhooks/sales" />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Webhook Events</div>
+                            <div className="text-sm text-gray-500">deal.created, deal.won, deal.lost</div>
+                          </div>
+                          <Button variant="outline" size="sm">Configure</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+
+                {settingsTab === 'advanced' && (
+                  <>
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <HardDrive className="w-5 h-5 text-gray-600" />
+                          Data Management
+                        </CardTitle>
+                        <CardDescription>Configure data retention and export</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Data Retention Period</Label>
+                          <Select defaultValue="forever">
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1year">1 Year</SelectItem>
+                              <SelectItem value="3years">3 Years</SelectItem>
+                              <SelectItem value="5years">5 Years</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" className="flex-1">
+                            <Download className="w-4 h-4 mr-2" />
+                            Export All Data
+                          </Button>
+                          <Button variant="outline" className="flex-1">
+                            <Upload className="w-4 h-4 mr-2" />
+                            Import Data
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Security Settings
+                        </CardTitle>
+                        <CardDescription>Configure security and access controls</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Two-Factor Authentication</div>
+                            <div className="text-sm text-gray-500">Require 2FA for all users</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Field-Level Security</div>
+                            <div className="text-sm text-gray-500">Control field visibility by role</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                          <div>
+                            <div className="font-medium">Audit Trail</div>
+                            <div className="text-sm text-gray-500">Log all data changes</div>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-red-600">
+                          <AlertOctagon className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                        <CardDescription>Irreversible actions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-700 dark:text-red-400">Clear All Pipeline</div>
+                            <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all deals</div>
+                          </div>
+                          <Button variant="destructive" size="sm">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Clear
+                          </Button>
+                        </div>
+                        <div className="flex items-center justify-between p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                          <div>
+                            <div className="font-medium text-red-700 dark:text-red-400">Reset CRM</div>
+                            <div className="text-sm text-red-600 dark:text-red-500">Reset all CRM settings and data</div>
+                          </div>
+                          <Button variant="destructive" size="sm">
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Reset
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
