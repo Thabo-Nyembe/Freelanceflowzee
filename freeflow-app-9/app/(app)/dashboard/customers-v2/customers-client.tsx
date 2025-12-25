@@ -1,5 +1,5 @@
-// Customers V2 - Salesforce/HubSpot CRM Level
-// Upgraded with: Pipeline, Lead Scoring, Activity Timeline, Deals, Company Management
+// Customers V2 - Salesforce CRM Level
+// Complete CRM with: Pipeline, Lead Scoring, Activity Timeline, Deals, Forecasting, Campaigns
 
 'use client'
 
@@ -17,289 +17,460 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
+import { Switch } from '@/components/ui/switch'
 import {
-  Users,
-  UserPlus,
-  Search,
-  Filter,
-  Star,
-  TrendingUp,
-  TrendingDown,
-  Mail,
-  Phone,
-  MapPin,
-  DollarSign,
-  ShoppingCart,
-  Building2,
-  Calendar,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Eye,
-  MessageSquare,
-  PhoneCall,
-  FileText,
-  Target,
-  Zap,
-  ArrowRight,
-  ChevronRight,
-  Plus,
-  Download,
-  Upload,
-  RefreshCw,
-  BarChart3,
-  PieChart,
-  Activity,
-  Sparkles,
-  Globe,
-  Link,
-  Tag,
-  Layers
+  Users, UserPlus, Search, Filter, Star, TrendingUp, TrendingDown,
+  Mail, Phone, MapPin, DollarSign, ShoppingCart, Building2, Calendar,
+  Clock, CheckCircle, XCircle, AlertTriangle, MoreHorizontal, Edit,
+  Trash2, Eye, MessageSquare, PhoneCall, FileText, Target, Zap,
+  ArrowRight, ChevronRight, Plus, Download, Upload, RefreshCw,
+  BarChart3, PieChart, Activity, Sparkles, Globe, Link, Tag, Layers,
+  Briefcase, Award, Flag, Send, Copy, ExternalLink, History, ArrowUpRight,
+  ArrowDownRight, Hash, Percent, CircleDot, GitBranch, Workflow, Bot,
+  Gauge, TrendingUp as Forecast, Megaphone, UserCheck, UsersRound, Timer,
+  Receipt, Scale, Handshake, Trophy, AlertCircle, Inbox, Archive, Settings,
+  Lock, Unlock, Share2, Play, Pause, MoreVertical
 } from 'lucide-react'
 import { useCustomers, type Customer, type CustomerSegment } from '@/lib/hooks/use-customers'
 
 // ============================================================================
-// TYPES - SALESFORCE/HUBSPOT CRM LEVEL
+// TYPES - SALESFORCE CRM LEVEL
 // ============================================================================
 
-interface Deal {
-  id: string
-  name: string
-  value: number
-  stage: 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost'
-  probability: number
-  customerId: string
-  expectedCloseDate: string
-  createdAt: string
-  owner: string
-}
+type DealStage = 'lead' | 'qualified' | 'proposal' | 'negotiation' | 'closed-won' | 'closed-lost'
+type ActivityType = 'email' | 'call' | 'meeting' | 'note' | 'task' | 'linkedin' | 'sms'
+type TaskPriority = 'low' | 'medium' | 'high' | 'urgent'
+type TaskStatus = 'open' | 'in-progress' | 'completed' | 'deferred'
+type CampaignType = 'email' | 'webinar' | 'conference' | 'social' | 'content' | 'ads' | 'referral'
+type CampaignStatus = 'planned' | 'active' | 'completed' | 'paused' | 'aborted'
+type LeadSource = 'website' | 'referral' | 'cold-call' | 'email-campaign' | 'social' | 'event' | 'partner' | 'other'
+type ForecastCategory = 'pipeline' | 'best-case' | 'commit' | 'closed'
 
-interface Activity {
+interface Contact {
   id: string
-  type: 'email' | 'call' | 'meeting' | 'note' | 'task'
+  firstName: string
+  lastName: string
+  email: string
+  phone: string
+  mobile: string
   title: string
-  description: string
-  customerId: string
-  createdAt: string
-  createdBy: string
-  status?: 'completed' | 'pending' | 'overdue'
+  department: string
+  accountId: string
+  leadSource: LeadSource
+  ownerId: string
+  mailingAddress: Address
+  doNotCall: boolean
+  doNotEmail: boolean
+  hasOptedOutOfFax: boolean
+  leadScore: number
+  lastActivityDate: string
+  createdDate: string
+  lastModifiedDate: string
+  tags: string[]
+  customFields: Record<string, string>
 }
 
-interface Company {
+interface Address {
+  street: string
+  city: string
+  state: string
+  postalCode: string
+  country: string
+}
+
+interface Account {
   id: string
   name: string
+  type: 'prospect' | 'customer' | 'partner' | 'competitor' | 'other'
   industry: string
-  size: string
   website: string
-  revenue: number
-  employeeCount: number
-  customers: string[]
+  phone: string
+  annualRevenue: number
+  employees: number
+  description: string
+  billingAddress: Address
+  shippingAddress: Address
+  parentAccountId: string | null
+  ownerId: string
+  rating: 'hot' | 'warm' | 'cold'
+  sla: string | null
+  accountSource: LeadSource
+  contacts: string[]
+  opportunities: string[]
+  createdDate: string
+  lastActivityDate: string
 }
 
-interface LeadScore {
-  customerId: string
-  score: number
-  factors: ScoreFactor[]
-  lastUpdated: string
-}
-
-interface ScoreFactor {
+interface Opportunity {
+  id: string
   name: string
-  impact: number
+  accountId: string
+  contactId: string
+  amount: number
+  stage: DealStage
+  probability: number
+  closeDate: string
+  type: 'new-business' | 'existing-business' | 'renewal'
+  leadSource: LeadSource
+  nextStep: string
+  description: string
+  ownerId: string
+  ownerName: string
+  campaignId: string | null
+  forecastCategory: ForecastCategory
+  competitors: Competitor[]
+  products: OpportunityProduct[]
+  createdDate: string
+  lastStageChangeDate: string
+  stageDuration: Record<DealStage, number>
+  isClosed: boolean
+  isWon: boolean
+}
+
+interface Competitor {
+  id: string
+  name: string
+  strengths: string
+  weaknesses: string
+}
+
+interface OpportunityProduct {
+  id: string
+  productId: string
+  productName: string
+  quantity: number
+  unitPrice: number
+  totalPrice: number
+  discount: number
+}
+
+interface ActivityRecord {
+  id: string
+  type: ActivityType
+  subject: string
+  description: string
+  contactId: string
+  accountId: string
+  opportunityId: string | null
+  ownerId: string
+  ownerName: string
+  status: 'completed' | 'scheduled' | 'canceled'
+  dueDate: string | null
+  completedDate: string | null
+  duration: number | null
+  outcome: string | null
+  createdDate: string
+  priority: TaskPriority
+}
+
+interface Task {
+  id: string
+  subject: string
+  description: string
+  status: TaskStatus
+  priority: TaskPriority
+  dueDate: string
+  contactId: string | null
+  accountId: string | null
+  opportunityId: string | null
+  ownerId: string
+  ownerName: string
+  reminder: string | null
+  isRecurring: boolean
+  createdDate: string
+  completedDate: string | null
+}
+
+interface Campaign {
+  id: string
+  name: string
+  type: CampaignType
+  status: CampaignStatus
+  startDate: string
+  endDate: string
+  description: string
+  expectedRevenue: number
+  budgetedCost: number
+  actualCost: number
+  expectedResponse: number
+  actualResponses: number
+  numSent: number
+  numConverted: number
+  ownerId: string
+  parentCampaignId: string | null
+  isActive: boolean
+  members: CampaignMember[]
+}
+
+interface CampaignMember {
+  id: string
+  campaignId: string
+  contactId: string
+  leadId: string | null
+  status: 'sent' | 'responded' | 'converted' | 'bounced' | 'unsubscribed'
+  firstRespondedDate: string | null
+}
+
+interface Forecast {
+  id: string
+  ownerId: string
+  ownerName: string
+  period: string
+  quotaAmount: number
+  closedAmount: number
+  commitAmount: number
+  bestCaseAmount: number
+  pipelineAmount: number
+  percentToQuota: number
+  lastModifiedDate: string
+}
+
+interface SalesTerritory {
+  id: string
+  name: string
+  description: string
+  accounts: string[]
+  ownerId: string
+  parentTerritoryId: string | null
+}
+
+interface LeadScoreRule {
+  id: string
+  name: string
+  field: string
+  operator: 'equals' | 'contains' | 'greater-than' | 'less-than'
   value: string
+  points: number
+  isActive: boolean
+}
+
+interface EmailSequence {
+  id: string
+  name: string
+  steps: EmailStep[]
+  isActive: boolean
+  enrolledCount: number
+  completedCount: number
+  replyRate: number
+  openRate: number
+}
+
+interface EmailStep {
+  id: string
+  dayDelay: number
+  subject: string
+  body: string
+  templateId: string
 }
 
 // ============================================================================
-// MOCK DATA - CRM LEVEL
+// MOCK DATA - SALESFORCE CRM LEVEL
 // ============================================================================
 
-const DEALS: Deal[] = [
-  { id: 'd1', name: 'Enterprise License', value: 125000, stage: 'negotiation', probability: 75, customerId: 'c1', expectedCloseDate: '2024-02-15', createdAt: '2024-01-10', owner: 'Sarah J.' },
-  { id: 'd2', name: 'Pro Subscription', value: 24000, stage: 'proposal', probability: 50, customerId: 'c2', expectedCloseDate: '2024-02-28', createdAt: '2024-01-15', owner: 'Mike C.' },
-  { id: 'd3', name: 'Team Upgrade', value: 8500, stage: 'qualified', probability: 30, customerId: 'c3', expectedCloseDate: '2024-03-10', createdAt: '2024-01-20', owner: 'Sarah J.' },
-  { id: 'd4', name: 'Annual Contract', value: 45000, stage: 'won', probability: 100, customerId: 'c4', expectedCloseDate: '2024-01-25', createdAt: '2024-01-05', owner: 'Alex T.' },
-  { id: 'd5', name: 'Starter Plan', value: 2400, stage: 'lead', probability: 10, customerId: 'c5', expectedCloseDate: '2024-03-30', createdAt: '2024-01-28', owner: 'Emily W.' },
+const PIPELINE_STAGES: { id: DealStage; name: string; color: string; probability: number }[] = [
+  { id: 'lead', name: 'Lead', color: 'bg-gray-500', probability: 10 },
+  { id: 'qualified', name: 'Qualified', color: 'bg-blue-500', probability: 25 },
+  { id: 'proposal', name: 'Proposal', color: 'bg-yellow-500', probability: 50 },
+  { id: 'negotiation', name: 'Negotiation', color: 'bg-orange-500', probability: 75 },
+  { id: 'closed-won', name: 'Closed Won', color: 'bg-green-500', probability: 100 },
+  { id: 'closed-lost', name: 'Closed Lost', color: 'bg-red-500', probability: 0 },
 ]
 
-const ACTIVITIES: Activity[] = [
-  { id: 'a1', type: 'email', title: 'Sent proposal', description: 'Sent enterprise pricing proposal', customerId: 'c1', createdAt: '2024-01-28T10:30:00Z', createdBy: 'Sarah J.' },
-  { id: 'a2', type: 'call', title: 'Discovery call', description: 'Discussed requirements and timeline', customerId: 'c2', createdAt: '2024-01-28T09:00:00Z', createdBy: 'Mike C.', status: 'completed' },
-  { id: 'a3', type: 'meeting', title: 'Demo scheduled', description: 'Product demo for decision makers', customerId: 'c1', createdAt: '2024-01-29T14:00:00Z', createdBy: 'Sarah J.', status: 'pending' },
-  { id: 'a4', type: 'note', title: 'Budget confirmed', description: 'Customer confirmed Q1 budget available', customerId: 'c3', createdAt: '2024-01-27T16:00:00Z', createdBy: 'Alex T.' },
-  { id: 'a5', type: 'task', title: 'Follow up', description: 'Send case studies', customerId: 'c2', createdAt: '2024-01-30T10:00:00Z', createdBy: 'Mike C.', status: 'pending' },
+const MOCK_ACCOUNTS: Account[] = [
+  { id: 'acc1', name: 'Acme Corporation', type: 'customer', industry: 'Technology', website: 'acme.com', phone: '+1 555-0101', annualRevenue: 50000000, employees: 500, description: 'Leading tech company', billingAddress: { street: '123 Main St', city: 'San Francisco', state: 'CA', postalCode: '94105', country: 'USA' }, shippingAddress: { street: '123 Main St', city: 'San Francisco', state: 'CA', postalCode: '94105', country: 'USA' }, parentAccountId: null, ownerId: 'u1', rating: 'hot', sla: 'gold', accountSource: 'referral', contacts: ['c1', 'c4'], opportunities: ['o1', 'o4'], createdDate: '2022-01-15', lastActivityDate: '2024-01-28' },
+  { id: 'acc2', name: 'StartupXYZ', type: 'prospect', industry: 'SaaS', website: 'startupxyz.io', phone: '+1 555-0102', annualRevenue: 2000000, employees: 25, description: 'Fast-growing startup', billingAddress: { street: '456 Tech Ave', city: 'Austin', state: 'TX', postalCode: '78701', country: 'USA' }, shippingAddress: { street: '456 Tech Ave', city: 'Austin', state: 'TX', postalCode: '78701', country: 'USA' }, parentAccountId: null, ownerId: 'u2', rating: 'warm', sla: null, accountSource: 'website', contacts: ['c2'], opportunities: ['o2'], createdDate: '2023-06-01', lastActivityDate: '2024-01-27' },
+  { id: 'acc3', name: 'Global Retail Inc', type: 'customer', industry: 'Retail', website: 'globalretail.com', phone: '+1 555-0103', annualRevenue: 15000000, employees: 150, description: 'Major retail chain', billingAddress: { street: '789 Commerce Blvd', city: 'New York', state: 'NY', postalCode: '10001', country: 'USA' }, shippingAddress: { street: '789 Commerce Blvd', city: 'New York', state: 'NY', postalCode: '10001', country: 'USA' }, parentAccountId: null, ownerId: 'u3', rating: 'hot', sla: 'platinum', accountSource: 'event', contacts: ['c3'], opportunities: ['o3'], createdDate: '2022-08-20', lastActivityDate: '2024-01-26' },
+  { id: 'acc4', name: 'FinServ Partners', type: 'prospect', industry: 'Finance', website: 'finserv.com', phone: '+1 555-0104', annualRevenue: 75000000, employees: 300, description: 'Financial services firm', billingAddress: { street: '321 Wall St', city: 'New York', state: 'NY', postalCode: '10005', country: 'USA' }, shippingAddress: { street: '321 Wall St', city: 'New York', state: 'NY', postalCode: '10005', country: 'USA' }, parentAccountId: null, ownerId: 'u1', rating: 'warm', sla: null, accountSource: 'cold-call', contacts: ['c5'], opportunities: ['o5'], createdDate: '2023-11-01', lastActivityDate: '2024-01-25' }
 ]
 
-const COMPANIES: Company[] = [
-  { id: 'co1', name: 'Acme Corporation', industry: 'Technology', size: 'Enterprise', website: 'acme.com', revenue: 50000000, employeeCount: 500, customers: ['c1', 'c4'] },
-  { id: 'co2', name: 'StartupXYZ', industry: 'SaaS', size: 'Startup', website: 'startupxyz.io', revenue: 2000000, employeeCount: 25, customers: ['c2'] },
-  { id: 'co3', name: 'Global Retail', industry: 'Retail', size: 'Mid-Market', website: 'globalretail.com', revenue: 15000000, employeeCount: 150, customers: ['c3'] },
+const MOCK_CONTACTS: Contact[] = [
+  { id: 'c1', firstName: 'John', lastName: 'Smith', email: 'john.smith@acme.com', phone: '+1 555-1001', mobile: '+1 555-1002', title: 'VP of Engineering', department: 'Engineering', accountId: 'acc1', leadSource: 'referral', ownerId: 'u1', mailingAddress: { street: '123 Main St', city: 'San Francisco', state: 'CA', postalCode: '94105', country: 'USA' }, doNotCall: false, doNotEmail: false, hasOptedOutOfFax: true, leadScore: 85, lastActivityDate: '2024-01-28', createdDate: '2022-01-15', lastModifiedDate: '2024-01-28', tags: ['decision-maker', 'technical'], customFields: {} },
+  { id: 'c2', firstName: 'Sarah', lastName: 'Johnson', email: 'sarah@startupxyz.io', phone: '+1 555-2001', mobile: '+1 555-2002', title: 'CEO', department: 'Executive', accountId: 'acc2', leadSource: 'website', ownerId: 'u2', mailingAddress: { street: '456 Tech Ave', city: 'Austin', state: 'TX', postalCode: '78701', country: 'USA' }, doNotCall: false, doNotEmail: false, hasOptedOutOfFax: false, leadScore: 72, lastActivityDate: '2024-01-27', createdDate: '2023-06-01', lastModifiedDate: '2024-01-27', tags: ['decision-maker', 'budget-owner'], customFields: {} },
+  { id: 'c3', firstName: 'Mike', lastName: 'Davis', email: 'mike.davis@globalretail.com', phone: '+1 555-3001', mobile: '+1 555-3002', title: 'CTO', department: 'Technology', accountId: 'acc3', leadSource: 'event', ownerId: 'u3', mailingAddress: { street: '789 Commerce Blvd', city: 'New York', state: 'NY', postalCode: '10001', country: 'USA' }, doNotCall: false, doNotEmail: false, hasOptedOutOfFax: false, leadScore: 90, lastActivityDate: '2024-01-26', createdDate: '2022-08-20', lastModifiedDate: '2024-01-26', tags: ['decision-maker', 'champion'], customFields: {} },
+  { id: 'c4', firstName: 'Emily', lastName: 'Chen', email: 'emily.chen@acme.com', phone: '+1 555-4001', mobile: '+1 555-4002', title: 'Director of Procurement', department: 'Operations', accountId: 'acc1', leadSource: 'referral', ownerId: 'u1', mailingAddress: { street: '123 Main St', city: 'San Francisco', state: 'CA', postalCode: '94105', country: 'USA' }, doNotCall: false, doNotEmail: false, hasOptedOutOfFax: false, leadScore: 68, lastActivityDate: '2024-01-25', createdDate: '2022-03-10', lastModifiedDate: '2024-01-25', tags: ['influencer', 'procurement'], customFields: {} },
+  { id: 'c5', firstName: 'Robert', lastName: 'Williams', email: 'r.williams@finserv.com', phone: '+1 555-5001', mobile: '+1 555-5002', title: 'Head of Technology', department: 'IT', accountId: 'acc4', leadSource: 'cold-call', ownerId: 'u1', mailingAddress: { street: '321 Wall St', city: 'New York', state: 'NY', postalCode: '10005', country: 'USA' }, doNotCall: false, doNotEmail: false, hasOptedOutOfFax: false, leadScore: 55, lastActivityDate: '2024-01-24', createdDate: '2023-11-01', lastModifiedDate: '2024-01-24', tags: ['evaluator'], customFields: {} }
 ]
 
-const PIPELINE_STAGES = [
-  { id: 'lead', name: 'Lead', color: 'bg-gray-500' },
-  { id: 'qualified', name: 'Qualified', color: 'bg-blue-500' },
-  { id: 'proposal', name: 'Proposal', color: 'bg-yellow-500' },
-  { id: 'negotiation', name: 'Negotiation', color: 'bg-orange-500' },
-  { id: 'won', name: 'Won', color: 'bg-green-500' },
-  { id: 'lost', name: 'Lost', color: 'bg-red-500' },
+const MOCK_OPPORTUNITIES: Opportunity[] = [
+  { id: 'o1', name: 'Acme Enterprise License', accountId: 'acc1', contactId: 'c1', amount: 125000, stage: 'negotiation', probability: 75, closeDate: '2024-02-15', type: 'new-business', leadSource: 'referral', nextStep: 'Final contract review', description: 'Enterprise platform license with support', ownerId: 'u1', ownerName: 'Sarah Johnson', campaignId: 'camp1', forecastCategory: 'commit', competitors: [{ id: 'comp1', name: 'CompetitorA', strengths: 'Price', weaknesses: 'Support' }], products: [{ id: 'p1', productId: 'prod1', productName: 'Enterprise License', quantity: 1, unitPrice: 100000, totalPrice: 100000, discount: 0 }, { id: 'p2', productId: 'prod2', productName: 'Premium Support', quantity: 1, unitPrice: 25000, totalPrice: 25000, discount: 0 }], createdDate: '2024-01-10', lastStageChangeDate: '2024-01-25', stageDuration: { 'lead': 3, 'qualified': 5, 'proposal': 4, 'negotiation': 3, 'closed-won': 0, 'closed-lost': 0 }, isClosed: false, isWon: false },
+  { id: 'o2', name: 'StartupXYZ Pro Subscription', accountId: 'acc2', contactId: 'c2', amount: 24000, stage: 'proposal', probability: 50, closeDate: '2024-02-28', type: 'new-business', leadSource: 'website', nextStep: 'Demo scheduled', description: 'Annual Pro subscription', ownerId: 'u2', ownerName: 'Mike Chen', campaignId: null, forecastCategory: 'best-case', competitors: [], products: [{ id: 'p3', productId: 'prod3', productName: 'Pro Annual', quantity: 1, unitPrice: 24000, totalPrice: 24000, discount: 0 }], createdDate: '2024-01-15', lastStageChangeDate: '2024-01-22', stageDuration: { 'lead': 2, 'qualified': 3, 'proposal': 5, 'negotiation': 0, 'closed-won': 0, 'closed-lost': 0 }, isClosed: false, isWon: false },
+  { id: 'o3', name: 'Global Retail Expansion', accountId: 'acc3', contactId: 'c3', amount: 85000, stage: 'qualified', probability: 30, closeDate: '2024-03-15', type: 'existing-business', leadSource: 'event', nextStep: 'Requirements gathering', description: 'Expand to 50 new locations', ownerId: 'u3', ownerName: 'Alex Rivera', campaignId: 'camp2', forecastCategory: 'pipeline', competitors: [{ id: 'comp2', name: 'CompetitorB', strengths: 'Features', weaknesses: 'Integration' }], products: [], createdDate: '2024-01-20', lastStageChangeDate: '2024-01-24', stageDuration: { 'lead': 2, 'qualified': 4, 'proposal': 0, 'negotiation': 0, 'closed-won': 0, 'closed-lost': 0 }, isClosed: false, isWon: false },
+  { id: 'o4', name: 'Acme Annual Renewal', accountId: 'acc1', contactId: 'c4', amount: 45000, stage: 'closed-won', probability: 100, closeDate: '2024-01-25', type: 'renewal', leadSource: 'referral', nextStep: '', description: 'Annual contract renewal', ownerId: 'u1', ownerName: 'Sarah Johnson', campaignId: null, forecastCategory: 'closed', competitors: [], products: [{ id: 'p4', productId: 'prod4', productName: 'Annual Renewal', quantity: 1, unitPrice: 45000, totalPrice: 45000, discount: 0 }], createdDate: '2024-01-05', lastStageChangeDate: '2024-01-25', stageDuration: { 'lead': 1, 'qualified': 2, 'proposal': 3, 'negotiation': 4, 'closed-won': 0, 'closed-lost': 0 }, isClosed: true, isWon: true },
+  { id: 'o5', name: 'FinServ Initial Pilot', accountId: 'acc4', contactId: 'c5', amount: 15000, stage: 'lead', probability: 10, closeDate: '2024-04-30', type: 'new-business', leadSource: 'cold-call', nextStep: 'Intro call scheduled', description: 'Pilot program for 3 months', ownerId: 'u1', ownerName: 'Sarah Johnson', campaignId: null, forecastCategory: 'pipeline', competitors: [], products: [], createdDate: '2024-01-28', lastStageChangeDate: '2024-01-28', stageDuration: { 'lead': 0, 'qualified': 0, 'proposal': 0, 'negotiation': 0, 'closed-won': 0, 'closed-lost': 0 }, isClosed: false, isWon: false }
+]
+
+const MOCK_ACTIVITIES: ActivityRecord[] = [
+  { id: 'a1', type: 'email', subject: 'Enterprise Proposal Sent', description: 'Sent final pricing proposal with discount options', contactId: 'c1', accountId: 'acc1', opportunityId: 'o1', ownerId: 'u1', ownerName: 'Sarah Johnson', status: 'completed', dueDate: null, completedDate: '2024-01-28T10:30:00Z', duration: null, outcome: 'Positive - reviewing with CFO', createdDate: '2024-01-28T10:30:00Z', priority: 'high' },
+  { id: 'a2', type: 'call', subject: 'Discovery Call', description: 'Discussed requirements and timeline with CEO', contactId: 'c2', accountId: 'acc2', opportunityId: 'o2', ownerId: 'u2', ownerName: 'Mike Chen', status: 'completed', dueDate: '2024-01-28T09:00:00Z', completedDate: '2024-01-28T09:45:00Z', duration: 45, outcome: 'Qualified - interested in Pro plan', createdDate: '2024-01-27T16:00:00Z', priority: 'high' },
+  { id: 'a3', type: 'meeting', subject: 'Demo Presentation', description: 'Product demo for decision makers', contactId: 'c1', accountId: 'acc1', opportunityId: 'o1', ownerId: 'u1', ownerName: 'Sarah Johnson', status: 'scheduled', dueDate: '2024-01-29T14:00:00Z', completedDate: null, duration: 60, outcome: null, createdDate: '2024-01-26T11:00:00Z', priority: 'high' },
+  { id: 'a4', type: 'note', subject: 'Budget Confirmation', description: 'Customer confirmed Q1 budget is available for this project', contactId: 'c3', accountId: 'acc3', opportunityId: 'o3', ownerId: 'u3', ownerName: 'Alex Rivera', status: 'completed', dueDate: null, completedDate: '2024-01-27T16:00:00Z', duration: null, outcome: null, createdDate: '2024-01-27T16:00:00Z', priority: 'medium' },
+  { id: 'a5', type: 'task', subject: 'Send Case Studies', description: 'Send relevant case studies from similar industries', contactId: 'c2', accountId: 'acc2', opportunityId: 'o2', ownerId: 'u2', ownerName: 'Mike Chen', status: 'scheduled', dueDate: '2024-01-30T10:00:00Z', completedDate: null, duration: null, outcome: null, createdDate: '2024-01-28T08:00:00Z', priority: 'medium' }
+]
+
+const MOCK_TASKS: Task[] = [
+  { id: 't1', subject: 'Follow up on proposal', description: 'Check if they have reviewed the proposal', status: 'open', priority: 'high', dueDate: '2024-01-30', contactId: 'c1', accountId: 'acc1', opportunityId: 'o1', ownerId: 'u1', ownerName: 'Sarah Johnson', reminder: '2024-01-30T09:00:00Z', isRecurring: false, createdDate: '2024-01-28', completedDate: null },
+  { id: 't2', subject: 'Prepare demo environment', description: 'Set up sandbox with sample data', status: 'in-progress', priority: 'high', dueDate: '2024-01-29', contactId: null, accountId: 'acc2', opportunityId: 'o2', ownerId: 'u2', ownerName: 'Mike Chen', reminder: null, isRecurring: false, createdDate: '2024-01-27', completedDate: null },
+  { id: 't3', subject: 'Weekly pipeline review', description: 'Review all open opportunities', status: 'open', priority: 'medium', dueDate: '2024-01-31', contactId: null, accountId: null, opportunityId: null, ownerId: 'u1', ownerName: 'Sarah Johnson', reminder: '2024-01-31T08:00:00Z', isRecurring: true, createdDate: '2024-01-01', completedDate: null },
+  { id: 't4', subject: 'Update CRM notes', description: 'Add meeting notes from last call', status: 'completed', priority: 'low', dueDate: '2024-01-27', contactId: 'c3', accountId: 'acc3', opportunityId: 'o3', ownerId: 'u3', ownerName: 'Alex Rivera', reminder: null, isRecurring: false, createdDate: '2024-01-26', completedDate: '2024-01-27' }
+]
+
+const MOCK_CAMPAIGNS: Campaign[] = [
+  { id: 'camp1', name: 'Q1 Enterprise Push', type: 'email', status: 'active', startDate: '2024-01-01', endDate: '2024-03-31', description: 'Targeted campaign for enterprise prospects', expectedRevenue: 500000, budgetedCost: 25000, actualCost: 18000, expectedResponse: 200, actualResponses: 156, numSent: 1500, numConverted: 12, ownerId: 'u1', parentCampaignId: null, isActive: true, members: [] },
+  { id: 'camp2', name: 'Retail Industry Webinar', type: 'webinar', status: 'completed', startDate: '2024-01-15', endDate: '2024-01-15', description: 'Webinar on retail digital transformation', expectedRevenue: 200000, budgetedCost: 5000, actualCost: 4500, expectedResponse: 100, actualResponses: 87, numSent: 500, numConverted: 5, ownerId: 'u3', parentCampaignId: null, isActive: false, members: [] },
+  { id: 'camp3', name: 'Conference Sponsorship', type: 'conference', status: 'planned', startDate: '2024-02-20', endDate: '2024-02-22', description: 'Silver sponsor at TechConf 2024', expectedRevenue: 300000, budgetedCost: 50000, actualCost: 0, expectedResponse: 150, actualResponses: 0, numSent: 0, numConverted: 0, ownerId: 'u2', parentCampaignId: null, isActive: false, members: [] }
+]
+
+const MOCK_FORECASTS: Forecast[] = [
+  { id: 'f1', ownerId: 'u1', ownerName: 'Sarah Johnson', period: '2024-Q1', quotaAmount: 300000, closedAmount: 45000, commitAmount: 125000, bestCaseAmount: 0, pipelineAmount: 15000, percentToQuota: 15, lastModifiedDate: '2024-01-28' },
+  { id: 'f2', ownerId: 'u2', ownerName: 'Mike Chen', period: '2024-Q1', quotaAmount: 200000, closedAmount: 0, commitAmount: 0, bestCaseAmount: 24000, pipelineAmount: 0, percentToQuota: 0, lastModifiedDate: '2024-01-28' },
+  { id: 'f3', ownerId: 'u3', ownerName: 'Alex Rivera', period: '2024-Q1', quotaAmount: 250000, closedAmount: 0, commitAmount: 0, bestCaseAmount: 0, pipelineAmount: 85000, percentToQuota: 0, lastModifiedDate: '2024-01-27' }
 ]
 
 // ============================================================================
-// MAIN COMPONENT - SALESFORCE/HUBSPOT CRM LEVEL
+// HELPER FUNCTIONS
+// ============================================================================
+
+const formatCurrency = (amount: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount)
+
+const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+
+const formatTimeAgo = (dateString: string) => {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+  if (minutes < 60) return `${minutes}m ago`
+  if (hours < 24) return `${hours}h ago`
+  return `${days}d ago`
+}
+
+const getStageColor = (stage: DealStage) => {
+  const stageData = PIPELINE_STAGES.find(s => s.id === stage)
+  return stageData?.color || 'bg-gray-500'
+}
+
+const getPriorityColor = (priority: TaskPriority) => {
+  const colors: Record<TaskPriority, string> = {
+    low: 'bg-gray-100 text-gray-700',
+    medium: 'bg-blue-100 text-blue-700',
+    high: 'bg-orange-100 text-orange-700',
+    urgent: 'bg-red-100 text-red-700'
+  }
+  return colors[priority]
+}
+
+const getStatusColor = (status: TaskStatus) => {
+  const colors: Record<TaskStatus, string> = {
+    open: 'bg-blue-100 text-blue-700',
+    'in-progress': 'bg-yellow-100 text-yellow-700',
+    completed: 'bg-green-100 text-green-700',
+    deferred: 'bg-gray-100 text-gray-700'
+  }
+  return colors[status]
+}
+
+const getActivityIcon = (type: ActivityType) => {
+  const icons: Record<ActivityType, React.ReactNode> = {
+    email: <Mail className="h-4 w-4" />,
+    call: <PhoneCall className="h-4 w-4" />,
+    meeting: <Calendar className="h-4 w-4" />,
+    note: <FileText className="h-4 w-4" />,
+    task: <CheckCircle className="h-4 w-4" />,
+    linkedin: <ExternalLink className="h-4 w-4" />,
+    sms: <MessageSquare className="h-4 w-4" />
+  }
+  return icons[type]
+}
+
+const getLeadScoreColor = (score: number) => {
+  if (score >= 80) return 'text-green-600 bg-green-100'
+  if (score >= 60) return 'text-blue-600 bg-blue-100'
+  if (score >= 40) return 'text-yellow-600 bg-yellow-100'
+  return 'text-red-600 bg-red-100'
+}
+
+const getAccountRatingColor = (rating: 'hot' | 'warm' | 'cold') => {
+  const colors = { hot: 'bg-red-100 text-red-700', warm: 'bg-orange-100 text-orange-700', cold: 'bg-blue-100 text-blue-700' }
+  return colors[rating]
+}
+
+// ============================================================================
+// MAIN COMPONENT
 // ============================================================================
 
 export default function CustomersClient({ initialCustomers }: { initialCustomers: Customer[] }) {
-  // State
-  const [activeTab, setActiveTab] = useState('customers')
-  const [segmentFilter, setSegmentFilter] = useState<CustomerSegment | 'all'>('all')
+  const [activeTab, setActiveTab] = useState('contacts')
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
-  const [showAddCustomer, setShowAddCustomer] = useState(false)
-  const [showAddDeal, setShowAddDeal] = useState(false)
-  const [showAddActivity, setShowAddActivity] = useState(false)
-  const [viewMode, setViewMode] = useState<'list' | 'cards' | 'pipeline'>('list')
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
+  const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null)
+  const [showAddContact, setShowAddContact] = useState(false)
+  const [showAddOpportunity, setShowAddOpportunity] = useState(false)
+  const [stageFilter, setStageFilter] = useState<DealStage | 'all'>('all')
 
-  // Form state
-  const [newCustomerName, setNewCustomerName] = useState('')
-  const [newCustomerEmail, setNewCustomerEmail] = useState('')
-  const [newCustomerPhone, setNewCustomerPhone] = useState('')
-  const [newCustomerCompany, setNewCustomerCompany] = useState('')
+  const { customers, loading, error } = useCustomers({ segment: 'all' })
 
-  // Hook
-  const { customers, loading, error } = useCustomers({ segment: segmentFilter })
-  const displayCustomers = (customers && customers.length > 0) ? customers : (initialCustomers || [])
+  // Stats
+  const stats = useMemo(() => {
+    const totalPipeline = MOCK_OPPORTUNITIES.filter(o => !o.isClosed).reduce((sum, o) => sum + o.amount, 0)
+    const weightedPipeline = MOCK_OPPORTUNITIES.filter(o => !o.isClosed).reduce((sum, o) => sum + (o.amount * o.probability / 100), 0)
+    const closedWon = MOCK_OPPORTUNITIES.filter(o => o.isWon).reduce((sum, o) => sum + o.amount, 0)
+    const totalQuota = MOCK_FORECASTS.reduce((sum, f) => sum + f.quotaAmount, 0)
+    const openTasks = MOCK_TASKS.filter(t => t.status !== 'completed').length
+    const activeCampaigns = MOCK_CAMPAIGNS.filter(c => c.status === 'active').length
 
-  // Filter customers
-  const filteredCustomers = useMemo(() => {
-    return displayCustomers.filter(customer => {
-      if (segmentFilter !== 'all' && customer.segment !== segmentFilter) return false
+    return {
+      totalContacts: MOCK_CONTACTS.length,
+      totalAccounts: MOCK_ACCOUNTS.length,
+      totalOpportunities: MOCK_OPPORTUNITIES.length,
+      totalPipeline,
+      weightedPipeline,
+      closedWon,
+      winRate: MOCK_OPPORTUNITIES.filter(o => o.isClosed).length > 0
+        ? (MOCK_OPPORTUNITIES.filter(o => o.isWon).length / MOCK_OPPORTUNITIES.filter(o => o.isClosed).length * 100)
+        : 0,
+      avgDealSize: MOCK_OPPORTUNITIES.length > 0 ? totalPipeline / MOCK_OPPORTUNITIES.filter(o => !o.isClosed).length : 0,
+      quotaAttainment: totalQuota > 0 ? (closedWon / totalQuota * 100) : 0,
+      openTasks,
+      activeCampaigns,
+      avgLeadScore: MOCK_CONTACTS.reduce((sum, c) => sum + c.leadScore, 0) / MOCK_CONTACTS.length
+    }
+  }, [])
+
+  // Filtered opportunities by stage
+  const filteredOpportunities = useMemo(() => {
+    return MOCK_OPPORTUNITIES.filter(opp => {
+      if (stageFilter !== 'all' && opp.stage !== stageFilter) return false
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
-        if (!customer.customer_name.toLowerCase().includes(query) &&
-            !customer.email?.toLowerCase().includes(query) &&
-            !customer.phone?.toLowerCase().includes(query)) {
-          return false
-        }
+        const account = MOCK_ACCOUNTS.find(a => a.id === opp.accountId)
+        if (!opp.name.toLowerCase().includes(query) && !account?.name.toLowerCase().includes(query)) return false
       }
       return true
     })
-  }, [displayCustomers, segmentFilter, searchQuery])
-
-  // Calculate comprehensive stats
-  const stats = useMemo(() => {
-    const totalLTV = displayCustomers.reduce((sum, c) => sum + c.lifetime_value, 0)
-    const avgLTV = displayCustomers.length > 0 ? totalLTV / displayCustomers.length : 0
-    const totalDeals = DEALS.reduce((sum, d) => sum + d.value, 0)
-    const wonDeals = DEALS.filter(d => d.stage === 'won').reduce((sum, d) => sum + d.value, 0)
-    const pipelineValue = DEALS.filter(d => !['won', 'lost'].includes(d.stage)).reduce((sum, d) => sum + d.value, 0)
-
-    return {
-      totalCustomers: displayCustomers.length,
-      activeCustomers: displayCustomers.filter(c => c.segment === 'active').length,
-      vipCustomers: displayCustomers.filter(c => c.segment === 'vip').length,
-      atRiskCustomers: displayCustomers.filter(c => c.segment === 'at_risk').length,
-      totalLTV,
-      avgLTV,
-      totalDeals: DEALS.length,
-      pipelineValue,
-      wonDeals,
-      winRate: DEALS.length > 0 ? ((DEALS.filter(d => d.stage === 'won').length / DEALS.filter(d => ['won', 'lost'].includes(d.stage)).length) * 100) : 0,
-      avgDealSize: DEALS.length > 0 ? totalDeals / DEALS.length : 0,
-      activitiesThisWeek: ACTIVITIES.length
-    }
-  }, [displayCustomers])
+  }, [stageFilter, searchQuery])
 
   // Pipeline grouped by stage
-  const pipelineDeals = useMemo(() => {
-    const grouped: Record<string, Deal[]> = {}
-    PIPELINE_STAGES.forEach(stage => {
-      grouped[stage.id] = DEALS.filter(d => d.stage === stage.id)
+  const pipelineByStage = useMemo(() => {
+    const grouped: Record<DealStage, Opportunity[]> = { 'lead': [], 'qualified': [], 'proposal': [], 'negotiation': [], 'closed-won': [], 'closed-lost': [] }
+    MOCK_OPPORTUNITIES.filter(o => !o.isClosed).forEach(opp => {
+      grouped[opp.stage].push(opp)
     })
     return grouped
   }, [])
 
-  // Handlers
-  const handleAddCustomer = useCallback(() => {
-    if (!newCustomerName.trim() || !newCustomerEmail.trim()) {
-      toast.error('Please fill in required fields')
-      return
-    }
-
-    toast.success('Customer Added', {
-      description: `${newCustomerName} has been added to your CRM`
-    })
-
-    setShowAddCustomer(false)
-    setNewCustomerName('')
-    setNewCustomerEmail('')
-    setNewCustomerPhone('')
-    setNewCustomerCompany('')
-  }, [newCustomerName, newCustomerEmail])
-
-  const handleLogActivity = useCallback((type: string) => {
-    toast.success('Activity Logged', {
-      description: `${type} activity has been recorded`
-    })
-    setShowAddActivity(false)
-  }, [])
-
-  const getSegmentColor = (segment: CustomerSegment) => {
-    switch (segment) {
-      case 'vip': return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-      case 'active': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-      case 'new': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-      case 'inactive': return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-      case 'at_risk': return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-      case 'churned': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-      default: return 'bg-gray-100 text-gray-700'
-    }
-  }
-
-  const getLeadScore = (customer: Customer): number => {
-    let score = 50
-    if (customer.segment === 'vip') score += 30
-    if (customer.segment === 'active') score += 20
-    if (customer.lifetime_value > 10000) score += 15
-    if (customer.total_orders > 10) score += 10
-    if (customer.segment === 'at_risk') score -= 20
-    if (customer.segment === 'churned') score -= 40
-    return Math.max(0, Math.min(100, score))
-  }
-
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600'
-    if (score >= 60) return 'text-blue-600'
-    if (score >= 40) return 'text-yellow-600'
-    return 'text-red-600'
-  }
-
-  const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diff = now.getTime() - date.getTime()
-    const minutes = Math.floor(diff / 60000)
-    const hours = Math.floor(minutes / 60)
-    const days = Math.floor(hours / 24)
-
-    if (minutes < 60) return `${minutes}m ago`
-    if (hours < 24) return `${hours}h ago`
-    return `${days}d ago`
-  }
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'email': return <Mail className="h-4 w-4" />
-      case 'call': return <PhoneCall className="h-4 w-4" />
-      case 'meeting': return <Calendar className="h-4 w-4" />
-      case 'note': return <FileText className="h-4 w-4" />
-      case 'task': return <CheckCircle className="h-4 w-4" />
-      default: return <Activity className="h-4 w-4" />
-    }
-  }
+  const statCards = [
+    { label: 'Total Pipeline', value: formatCurrency(stats.totalPipeline), icon: DollarSign, color: 'from-violet-500 to-purple-600', change: '+12%' },
+    { label: 'Weighted Pipeline', value: formatCurrency(stats.weightedPipeline), icon: Scale, color: 'from-blue-500 to-cyan-600', change: '+8%' },
+    { label: 'Closed Won', value: formatCurrency(stats.closedWon), icon: Trophy, color: 'from-green-500 to-emerald-600', change: '+15%' },
+    { label: 'Win Rate', value: `${stats.winRate.toFixed(0)}%`, icon: Target, color: 'from-orange-500 to-amber-600', change: '+5%' },
+    { label: 'Contacts', value: stats.totalContacts.toString(), icon: Users, color: 'from-pink-500 to-rose-600', change: null },
+    { label: 'Accounts', value: stats.totalAccounts.toString(), icon: Building2, color: 'from-indigo-500 to-violet-600', change: null },
+    { label: 'Open Tasks', value: stats.openTasks.toString(), icon: CheckCircle, color: 'from-yellow-500 to-orange-600', change: null },
+    { label: 'Campaigns', value: stats.activeCampaigns.toString(), icon: Megaphone, color: 'from-teal-500 to-green-600', change: null }
+  ]
 
   if (error) {
     return (
@@ -307,12 +478,9 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
         <Card className="max-w-md mx-auto">
           <CardContent className="p-6 text-center">
             <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Error Loading Customers</h3>
+            <h3 className="text-lg font-semibold mb-2">Error Loading Data</h3>
             <p className="text-gray-600 dark:text-gray-400">{error.message}</p>
-            <Button className="mt-4" onClick={() => window.location.reload()}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Retry
-            </Button>
+            <Button className="mt-4" onClick={() => window.location.reload()}><RefreshCw className="h-4 w-4 mr-2" />Retry</Button>
           </CardContent>
         </Card>
       </div>
@@ -324,358 +492,311 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
       <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl">
-                <Users className="h-6 w-6 text-white" />
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400">
-                  Salesforce Level
-                </Badge>
-                <Badge variant="outline" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                  {stats.totalCustomers.toLocaleString()} Contacts
-                </Badge>
-              </div>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl shadow-lg">
+              <Users className="h-7 w-7 text-white" />
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
-              Customer CRM
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Complete customer relationship management
-            </p>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Customer CRM</h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Salesforce-level customer management</p>
+            </div>
           </div>
-
           <div className="flex items-center gap-3">
-            <Button variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-            <Button variant="outline">
-              <Upload className="h-4 w-4 mr-2" />
-              Import
-            </Button>
-            <Button
-              className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
-              onClick={() => setShowAddCustomer(true)}
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Add Customer
+            <Button variant="outline"><Download className="h-4 w-4 mr-2" />Export</Button>
+            <Button variant="outline"><Upload className="h-4 w-4 mr-2" />Import</Button>
+            <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => setShowAddContact(true)}>
+              <UserPlus className="h-4 w-4 mr-2" />Add Contact
             </Button>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-violet-600">{stats.totalCustomers}</div>
-              <div className="text-xs text-gray-500">Total Customers</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-green-600">{stats.activeCustomers}</div>
-              <div className="text-xs text-gray-500">Active</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-purple-600">{stats.vipCustomers}</div>
-              <div className="text-xs text-gray-500">VIP</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-blue-600">${(stats.pipelineValue / 1000).toFixed(0)}k</div>
-              <div className="text-xs text-gray-500">Pipeline</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-emerald-600">${(stats.wonDeals / 1000).toFixed(0)}k</div>
-              <div className="text-xs text-gray-500">Won Deals</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-            <CardContent className="p-4 text-center">
-              <div className="text-2xl font-bold text-orange-600">{stats.atRiskCustomers}</div>
-              <div className="text-xs text-gray-500">At Risk</div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {statCards.map((stat, index) => (
+            <Card key={index} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className={`p-2 rounded-lg bg-gradient-to-br ${stat.color}`}>
+                    <stat.icon className="h-4 w-4 text-white" />
+                  </div>
+                  {stat.change && (
+                    <span className="text-xs text-green-600 flex items-center gap-0.5">
+                      <ArrowUpRight className="h-3 w-3" />{stat.change}
+                    </span>
+                  )}
+                </div>
+                <div className="text-lg font-bold text-gray-900 dark:text-white">{stat.value}</div>
+                <div className="text-xs text-gray-500">{stat.label}</div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="flex items-center justify-between">
-            <TabsList className="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-1">
-              <TabsTrigger value="customers" className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Customers
-              </TabsTrigger>
-              <TabsTrigger value="deals" className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4" />
-                Deals
-              </TabsTrigger>
-              <TabsTrigger value="pipeline" className="flex items-center gap-2">
-                <Layers className="h-4 w-4" />
-                Pipeline
-              </TabsTrigger>
-              <TabsTrigger value="activities" className="flex items-center gap-2">
-                <Activity className="h-4 w-4" />
-                Activities
-              </TabsTrigger>
-              <TabsTrigger value="companies" className="flex items-center gap-2">
-                <Building2 className="h-4 w-4" />
-                Companies
-              </TabsTrigger>
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <TabsList className="bg-white/80 dark:bg-gray-800/80 backdrop-blur p-1 flex-wrap">
+              <TabsTrigger value="contacts"><Users className="h-4 w-4 mr-2" />Contacts</TabsTrigger>
+              <TabsTrigger value="accounts"><Building2 className="h-4 w-4 mr-2" />Accounts</TabsTrigger>
+              <TabsTrigger value="opportunities"><DollarSign className="h-4 w-4 mr-2" />Opportunities</TabsTrigger>
+              <TabsTrigger value="pipeline"><Layers className="h-4 w-4 mr-2" />Pipeline</TabsTrigger>
+              <TabsTrigger value="activities"><Activity className="h-4 w-4 mr-2" />Activities</TabsTrigger>
+              <TabsTrigger value="tasks"><CheckCircle className="h-4 w-4 mr-2" />Tasks</TabsTrigger>
+              <TabsTrigger value="campaigns"><Megaphone className="h-4 w-4 mr-2" />Campaigns</TabsTrigger>
+              <TabsTrigger value="forecasts"><Forecast className="h-4 w-4 mr-2" />Forecasts</TabsTrigger>
             </TabsList>
 
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search customers..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-64"
-                />
-              </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 w-64" />
             </div>
           </div>
 
-          {/* Customers Tab */}
-          <TabsContent value="customers" className="space-y-6">
-            {/* Segment Filter */}
-            <div className="flex gap-2 flex-wrap">
-              {['all', 'vip', 'active', 'new', 'at_risk', 'inactive', 'churned'].map(seg => (
-                <Button
-                  key={seg}
-                  size="sm"
-                  variant={segmentFilter === seg ? 'default' : 'outline'}
-                  onClick={() => setSegmentFilter(seg as any)}
-                  className={segmentFilter === seg ? 'bg-violet-600 hover:bg-violet-700' : ''}
-                >
-                  {seg === 'all' ? 'All' : seg.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                </Button>
-              ))}
-            </div>
-
-            {/* Customers List */}
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-600 border-r-transparent" />
-              </div>
-            ) : filteredCustomers.length === 0 ? (
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-                <CardContent className="p-12 text-center">
-                  <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Customers Found</h3>
-                  <p className="text-gray-500 mb-4">Add your first customer to get started</p>
-                  <Button onClick={() => setShowAddCustomer(true)}>
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Add Customer
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {filteredCustomers.map(customer => {
-                  const leadScore = getLeadScore(customer)
-                  return (
-                    <Card key={customer.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all">
-                      <CardContent className="p-6">
-                        <div className="flex items-start gap-4">
-                          <Avatar className="h-12 w-12">
-                            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${customer.customer_name}`} />
-                            <AvatarFallback className="bg-gradient-to-r from-violet-500 to-purple-500 text-white">
-                              {customer.customer_name.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-lg">{customer.customer_name}</h3>
-                              <Badge className={getSegmentColor(customer.segment)}>{customer.segment}</Badge>
-                              {customer.segment === 'vip' && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
-                            </div>
-
-                            <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                              {customer.email && (
-                                <span className="flex items-center gap-1">
-                                  <Mail className="h-3 w-3" />
-                                  {customer.email}
-                                </span>
-                              )}
-                              {customer.phone && (
-                                <span className="flex items-center gap-1">
-                                  <Phone className="h-3 w-3" />
-                                  {customer.phone}
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="grid grid-cols-5 gap-4 text-sm">
-                              <div>
-                                <div className="text-gray-500">Lifetime Value</div>
-                                <div className="font-semibold text-violet-600">${customer.lifetime_value.toLocaleString()}</div>
-                              </div>
-                              <div>
-                                <div className="text-gray-500">Orders</div>
-                                <div className="font-semibold">{customer.total_orders}</div>
-                              </div>
-                              <div>
-                                <div className="text-gray-500">Avg Order</div>
-                                <div className="font-semibold">${customer.avg_order_value.toFixed(0)}</div>
-                              </div>
-                              <div>
-                                <div className="text-gray-500">Last Purchase</div>
-                                <div className="font-semibold">
-                                  {customer.last_purchase_date ? new Date(customer.last_purchase_date).toLocaleDateString() : 'N/A'}
-                                </div>
-                              </div>
-                              <div>
-                                <div className="text-gray-500">Lead Score</div>
-                                <div className={`font-bold ${getScoreColor(leadScore)}`}>
-                                  {leadScore}/100
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col items-end gap-2">
-                            <div className="flex items-center gap-2">
-                              <Button size="sm" variant="ghost" onClick={() => handleLogActivity('email')}>
-                                <Mail className="h-4 w-4" />
-                              </Button>
-                              <Button size="sm" variant="ghost" onClick={() => handleLogActivity('call')}>
-                                <PhoneCall className="h-4 w-4" />
-                              </Button>
-                              <Button size="sm" variant="ghost" onClick={() => setSelectedCustomer(customer)}>
-                                <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button size="sm" variant="ghost">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </div>
-
-                            <div className="w-32">
-                              <Progress value={leadScore} className="h-2" />
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Deals Tab */}
-          <TabsContent value="deals" className="space-y-6">
-            <div className="flex justify-end">
-              <Button onClick={() => setShowAddDeal(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                New Deal
-              </Button>
-            </div>
-
-            <div className="space-y-4">
-              {DEALS.map(deal => (
-                <Card key={deal.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all">
+          {/* Contacts Tab */}
+          <TabsContent value="contacts" className="space-y-4">
+            {MOCK_CONTACTS.map(contact => {
+              const account = MOCK_ACCOUNTS.find(a => a.id === contact.accountId)
+              return (
+                <Card key={contact.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all cursor-pointer" onClick={() => setSelectedContact(contact)}>
                   <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-start gap-4">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${contact.firstName}${contact.lastName}`} />
+                        <AvatarFallback className="bg-gradient-to-r from-violet-500 to-purple-500 text-white">{contact.firstName[0]}{contact.lastName[0]}</AvatarFallback>
+                      </Avatar>
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge className={PIPELINE_STAGES.find(s => s.id === deal.stage)?.color + ' text-white'}>
-                            {deal.stage}
-                          </Badge>
-                          <span className="text-sm text-gray-500">{deal.probability}% probability</span>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-lg">{contact.firstName} {contact.lastName}</h3>
+                          <Badge className={getLeadScoreColor(contact.leadScore)}>{contact.leadScore}</Badge>
+                          {contact.tags.map(tag => <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>)}
                         </div>
-
-                        <h3 className="font-semibold text-lg mb-1">{deal.name}</h3>
-
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span>Owner: {deal.owner}</span>
-                          <span>Close: {new Date(deal.expectedCloseDate).toLocaleDateString()}</span>
+                        <p className="text-gray-600 dark:text-gray-300">{contact.title} at {account?.name}</p>
+                        <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                          <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{contact.email}</span>
+                          <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{contact.phone}</span>
+                          <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{contact.mailingAddress.city}, {contact.mailingAddress.state}</span>
                         </div>
                       </div>
-
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-green-600">${deal.value.toLocaleString()}</div>
-                        <div className="text-sm text-gray-500">Expected: ${(deal.value * deal.probability / 100).toLocaleString()}</div>
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" variant="ghost"><Mail className="h-4 w-4" /></Button>
+                          <Button size="sm" variant="ghost"><PhoneCall className="h-4 w-4" /></Button>
+                          <Button size="sm" variant="ghost"><Calendar className="h-4 w-4" /></Button>
+                        </div>
+                        <span className="text-xs text-gray-500">Last activity: {formatTimeAgo(contact.lastActivityDate)}</span>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
+              )
+            })}
+          </TabsContent>
+
+          {/* Accounts Tab */}
+          <TabsContent value="accounts" className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {MOCK_ACCOUNTS.map(account => (
+                <Card key={account.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all cursor-pointer" onClick={() => setSelectedAccount(account)}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                        <Building2 className="h-6 w-6 text-violet-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-lg">{account.name}</h3>
+                          <Badge className={getAccountRatingColor(account.rating)}>{account.rating}</Badge>
+                          <Badge variant="outline">{account.type}</Badge>
+                        </div>
+                        <p className="text-gray-600 dark:text-gray-400">{account.industry}</p>
+                        <div className="grid grid-cols-3 gap-4 mt-3 text-sm">
+                          <div>
+                            <div className="text-gray-500">Revenue</div>
+                            <div className="font-semibold">{formatCurrency(account.annualRevenue)}</div>
+                          </div>
+                          <div>
+                            <div className="text-gray-500">Employees</div>
+                            <div className="font-semibold">{account.employees.toLocaleString()}</div>
+                          </div>
+                          <div>
+                            <div className="text-gray-500">Contacts</div>
+                            <div className="font-semibold">{account.contacts.length}</div>
+                          </div>
+                        </div>
+                      </div>
+                      {account.sla && <Badge className="bg-yellow-100 text-yellow-700">{account.sla} SLA</Badge>}
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
+            </div>
+          </TabsContent>
+
+          {/* Opportunities Tab */}
+          <TabsContent value="opportunities" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex gap-2 flex-wrap">
+                <Button size="sm" variant={stageFilter === 'all' ? 'default' : 'outline'} onClick={() => setStageFilter('all')}>All</Button>
+                {PIPELINE_STAGES.filter(s => s.id !== 'closed-lost').map(stage => (
+                  <Button key={stage.id} size="sm" variant={stageFilter === stage.id ? 'default' : 'outline'} onClick={() => setStageFilter(stage.id)}>{stage.name}</Button>
+                ))}
+              </div>
+              <Button onClick={() => setShowAddOpportunity(true)}><Plus className="h-4 w-4 mr-2" />New Opportunity</Button>
+            </div>
+
+            <div className="space-y-4">
+              {filteredOpportunities.map(opp => {
+                const account = MOCK_ACCOUNTS.find(a => a.id === opp.accountId)
+                const contact = MOCK_CONTACTS.find(c => c.id === opp.contactId)
+                return (
+                  <Card key={opp.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all cursor-pointer" onClick={() => setSelectedOpportunity(opp)}>
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge className={`${getStageColor(opp.stage)} text-white`}>{PIPELINE_STAGES.find(s => s.id === opp.stage)?.name}</Badge>
+                            <Badge variant="outline">{opp.probability}%</Badge>
+                            <Badge variant="outline">{opp.type.replace('-', ' ')}</Badge>
+                          </div>
+                          <h3 className="font-semibold text-lg mb-1">{opp.name}</h3>
+                          <p className="text-gray-600 dark:text-gray-400">{account?.name} • {contact?.firstName} {contact?.lastName}</p>
+                          <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                            <span>Owner: {opp.ownerName}</span>
+                            <span>Close: {formatDate(opp.closeDate)}</span>
+                            <span>Next: {opp.nextStep || 'No next step'}</span>
+                          </div>
+                          {opp.competitors.length > 0 && (
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="text-xs text-gray-500">Competitors:</span>
+                              {opp.competitors.map(c => <Badge key={c.id} variant="outline" className="text-xs">{c.name}</Badge>)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-green-600">{formatCurrency(opp.amount)}</div>
+                          <div className="text-sm text-gray-500">Weighted: {formatCurrency(opp.amount * opp.probability / 100)}</div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
             </div>
           </TabsContent>
 
           {/* Pipeline Tab */}
           <TabsContent value="pipeline" className="space-y-6">
             <div className="flex gap-4 overflow-x-auto pb-4">
-              {PIPELINE_STAGES.filter(s => s.id !== 'lost').map(stage => (
-                <div key={stage.id} className="min-w-[280px] flex-shrink-0">
-                  <div className={`${stage.color} text-white px-4 py-2 rounded-t-lg flex items-center justify-between`}>
-                    <span className="font-medium">{stage.name}</span>
-                    <Badge className="bg-white/20 text-white">{pipelineDeals[stage.id]?.length || 0}</Badge>
+              {PIPELINE_STAGES.filter(s => !['closed-won', 'closed-lost'].includes(s.id)).map(stage => {
+                const stageOpps = pipelineByStage[stage.id] || []
+                const stageValue = stageOpps.reduce((sum, o) => sum + o.amount, 0)
+                return (
+                  <div key={stage.id} className="min-w-[300px] flex-shrink-0">
+                    <div className={`${stage.color} text-white px-4 py-3 rounded-t-lg`}>
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold">{stage.name}</span>
+                        <Badge className="bg-white/20 text-white">{stageOpps.length}</Badge>
+                      </div>
+                      <div className="text-sm opacity-90 mt-1">{formatCurrency(stageValue)}</div>
+                    </div>
+                    <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-b-lg min-h-[400px] space-y-3">
+                      {stageOpps.map(opp => {
+                        const account = MOCK_ACCOUNTS.find(a => a.id === opp.accountId)
+                        return (
+                          <Card key={opp.id} className="bg-white dark:bg-gray-700 cursor-pointer hover:shadow-md transition-shadow">
+                            <CardContent className="p-4">
+                              <h4 className="font-medium text-sm mb-1">{opp.name}</h4>
+                              <p className="text-xs text-gray-500 mb-2">{account?.name}</p>
+                              <div className="flex items-center justify-between">
+                                <span className="text-lg font-bold text-green-600">{formatCurrency(opp.amount)}</span>
+                                <span className="text-xs text-gray-500">{opp.probability}%</span>
+                              </div>
+                              <div className="text-xs text-gray-500 mt-2">{opp.ownerName} • {formatDate(opp.closeDate)}</div>
+                            </CardContent>
+                          </Card>
+                        )
+                      })}
+                    </div>
                   </div>
-                  <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded-b-lg min-h-[400px] space-y-2">
-                    {pipelineDeals[stage.id]?.map(deal => (
-                      <Card key={deal.id} className="bg-white dark:bg-gray-700 cursor-grab">
-                        <CardContent className="p-3">
-                          <h4 className="font-medium text-sm mb-1">{deal.name}</h4>
-                          <div className="text-lg font-bold text-green-600">${deal.value.toLocaleString()}</div>
-                          <div className="text-xs text-gray-500 mt-1">{deal.owner}</div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </TabsContent>
 
           {/* Activities Tab */}
-          <TabsContent value="activities" className="space-y-6">
+          <TabsContent value="activities" className="space-y-4">
             <div className="flex justify-end">
-              <Button onClick={() => setShowAddActivity(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Log Activity
-              </Button>
+              <Button><Plus className="h-4 w-4 mr-2" />Log Activity</Button>
             </div>
-
             <div className="space-y-3">
-              {ACTIVITIES.map(activity => (
-                <Card key={activity.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+              {MOCK_ACTIVITIES.map(activity => {
+                const contact = MOCK_CONTACTS.find(c => c.id === activity.contactId)
+                const account = MOCK_ACCOUNTS.find(a => a.id === activity.accountId)
+                return (
+                  <Card key={activity.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-4">
+                        <div className={`p-2 rounded-lg ${
+                          activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
+                          activity.type === 'call' ? 'bg-green-100 text-green-600' :
+                          activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
+                          activity.type === 'note' ? 'bg-yellow-100 text-yellow-600' :
+                          'bg-gray-100 text-gray-600'
+                        }`}>
+                          {getActivityIcon(activity.type)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium">{activity.subject}</span>
+                            <Badge variant="outline" className="text-xs">{activity.type}</Badge>
+                            <Badge className={activity.status === 'completed' ? 'bg-green-100 text-green-700' : activity.status === 'scheduled' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}>{activity.status}</Badge>
+                            <Badge className={getPriorityColor(activity.priority)}>{activity.priority}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{activity.description}</p>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                            <span>{contact?.firstName} {contact?.lastName}</span>
+                            <span>{account?.name}</span>
+                            <span>{activity.ownerName}</span>
+                            <span>{formatTimeAgo(activity.createdDate)}</span>
+                            {activity.duration && <span>{activity.duration} min</span>}
+                          </div>
+                          {activity.outcome && <div className="mt-2 text-sm text-green-600">Outcome: {activity.outcome}</div>}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          </TabsContent>
+
+          {/* Tasks Tab */}
+          <TabsContent value="tasks" className="space-y-4">
+            <div className="flex justify-end">
+              <Button><Plus className="h-4 w-4 mr-2" />New Task</Button>
+            </div>
+            <div className="space-y-3">
+              {MOCK_TASKS.map(task => (
+                <Card key={task.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
                   <CardContent className="p-4">
-                    <div className="flex items-start gap-4">
-                      <div className={`p-2 rounded-lg ${
-                        activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
-                        activity.type === 'call' ? 'bg-green-100 text-green-600' :
-                        activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
-                        activity.type === 'note' ? 'bg-yellow-100 text-yellow-600' :
-                        'bg-gray-100 text-gray-600'
-                      }`}>
-                        {getActivityIcon(activity.type)}
+                    <div className="flex items-center gap-4">
+                      <div className={`p-2 rounded-lg ${task.status === 'completed' ? 'bg-green-100' : 'bg-gray-100'}`}>
+                        <CheckCircle className={`h-5 w-5 ${task.status === 'completed' ? 'text-green-600' : 'text-gray-400'}`} />
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium">{activity.title}</span>
-                          <Badge variant="outline" className="text-xs">{activity.type}</Badge>
-                          {activity.status && (
-                            <Badge className={activity.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
-                              {activity.status}
-                            </Badge>
-                          )}
+                        <div className="flex items-center gap-2">
+                          <span className={`font-medium ${task.status === 'completed' ? 'line-through text-gray-400' : ''}`}>{task.subject}</span>
+                          <Badge className={getStatusColor(task.status)}>{task.status}</Badge>
+                          <Badge className={getPriorityColor(task.priority)}>{task.priority}</Badge>
+                          {task.isRecurring && <Badge variant="outline"><RefreshCw className="h-3 w-3 mr-1" />Recurring</Badge>}
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{activity.description}</p>
-                        <div className="text-xs text-gray-500 mt-2">
-                          {activity.createdBy} · {formatTimeAgo(activity.createdAt)}
+                        <p className="text-sm text-gray-500">{task.description}</p>
+                        <div className="flex items-center gap-4 mt-1 text-xs text-gray-500">
+                          <span>Due: {formatDate(task.dueDate)}</span>
+                          <span>Owner: {task.ownerName}</span>
                         </div>
                       </div>
+                      <Button size="sm" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -683,135 +804,247 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
           </TabsContent>
 
-          {/* Companies Tab */}
-          <TabsContent value="companies" className="space-y-6">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {COMPANIES.map(company => (
-                <Card key={company.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-3 mb-4">
-                      <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                        <Building2 className="h-6 w-6 text-violet-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{company.name}</h3>
-                        <Badge variant="outline" className="text-xs">{company.industry}</Badge>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-gray-400" />
-                        <span>{company.website}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-gray-400" />
-                        <span>{company.employeeCount} employees</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-gray-400" />
-                        <span>${(company.revenue / 1000000).toFixed(1)}M revenue</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 pt-4 border-t">
-                      <div className="text-xs text-gray-500">{company.customers.length} contacts</div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+          {/* Campaigns Tab */}
+          <TabsContent value="campaigns" className="space-y-4">
+            <div className="flex justify-end">
+              <Button><Plus className="h-4 w-4 mr-2" />New Campaign</Button>
             </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {MOCK_CAMPAIGNS.map(campaign => {
+                const responseRate = campaign.numSent > 0 ? (campaign.actualResponses / campaign.numSent * 100) : 0
+                const conversionRate = campaign.actualResponses > 0 ? (campaign.numConverted / campaign.actualResponses * 100) : 0
+                return (
+                  <Card key={campaign.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold">{campaign.name}</h3>
+                            <Badge className={
+                              campaign.status === 'active' ? 'bg-green-100 text-green-700' :
+                              campaign.status === 'completed' ? 'bg-blue-100 text-blue-700' :
+                              campaign.status === 'planned' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-gray-100 text-gray-600'
+                            }>{campaign.status}</Badge>
+                          </div>
+                          <Badge variant="outline">{campaign.type}</Badge>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-green-600">{formatCurrency(campaign.expectedRevenue)}</div>
+                          <div className="text-xs text-gray-500">Expected Revenue</div>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{campaign.description}</p>
+                      <div className="grid grid-cols-4 gap-4 text-center mb-4">
+                        <div>
+                          <div className="text-lg font-bold">{campaign.numSent.toLocaleString()}</div>
+                          <div className="text-xs text-gray-500">Sent</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold">{campaign.actualResponses}</div>
+                          <div className="text-xs text-gray-500">Responses</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-blue-600">{responseRate.toFixed(1)}%</div>
+                          <div className="text-xs text-gray-500">Response Rate</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-green-600">{campaign.numConverted}</div>
+                          <div className="text-xs text-gray-500">Converted</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-gray-500">
+                        <span>{formatDate(campaign.startDate)} - {formatDate(campaign.endDate)}</span>
+                        <span>Budget: {formatCurrency(campaign.actualCost)} / {formatCurrency(campaign.budgetedCost)}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+          </TabsContent>
+
+          {/* Forecasts Tab */}
+          <TabsContent value="forecasts" className="space-y-6">
+            <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+              <CardHeader>
+                <CardTitle>Q1 2024 Forecast Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-4 gap-6 mb-6">
+                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(MOCK_FORECASTS.reduce((sum, f) => sum + f.quotaAmount, 0))}</div>
+                    <div className="text-sm text-gray-500">Total Quota</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">{formatCurrency(MOCK_FORECASTS.reduce((sum, f) => sum + f.closedAmount, 0))}</div>
+                    <div className="text-sm text-gray-500">Closed</div>
+                  </div>
+                  <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">{formatCurrency(MOCK_FORECASTS.reduce((sum, f) => sum + f.commitAmount, 0))}</div>
+                    <div className="text-sm text-gray-500">Commit</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">{formatCurrency(MOCK_FORECASTS.reduce((sum, f) => sum + f.pipelineAmount, 0))}</div>
+                    <div className="text-sm text-gray-500">Pipeline</div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {MOCK_FORECASTS.map(forecast => (
+                    <div key={forecast.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${forecast.ownerName}`} />
+                        <AvatarFallback>{forecast.ownerName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="font-medium">{forecast.ownerName}</div>
+                        <div className="text-sm text-gray-500">{forecast.period}</div>
+                      </div>
+                      <div className="grid grid-cols-4 gap-8 text-center">
+                        <div>
+                          <div className="font-semibold">{formatCurrency(forecast.quotaAmount)}</div>
+                          <div className="text-xs text-gray-500">Quota</div>
+                        </div>
+                        <div>
+                          <div className="font-semibold text-green-600">{formatCurrency(forecast.closedAmount)}</div>
+                          <div className="text-xs text-gray-500">Closed</div>
+                        </div>
+                        <div>
+                          <div className="font-semibold text-blue-600">{formatCurrency(forecast.commitAmount)}</div>
+                          <div className="text-xs text-gray-500">Commit</div>
+                        </div>
+                        <div>
+                          <div className="font-semibold">{forecast.percentToQuota.toFixed(0)}%</div>
+                          <div className="text-xs text-gray-500">Attainment</div>
+                        </div>
+                      </div>
+                      <div className="w-32">
+                        <Progress value={forecast.percentToQuota} className="h-2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 
-        {/* Add Customer Dialog */}
-        <Dialog open={showAddCustomer} onOpenChange={setShowAddCustomer}>
-          <DialogContent className="max-w-lg">
+        {/* Contact Detail Dialog */}
+        <Dialog open={!!selectedContact} onOpenChange={() => setSelectedContact(null)}>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <UserPlus className="h-5 w-5 text-violet-600" />
-                Add New Customer
-              </DialogTitle>
-              <DialogDescription>
-                Add a new contact to your CRM
-              </DialogDescription>
+              <DialogTitle>Contact Details</DialogTitle>
             </DialogHeader>
+            {selectedContact && (
+              <ScrollArea className="max-h-[70vh]">
+                <div className="space-y-6 pr-4">
+                  <div className="flex items-center gap-4">
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedContact.firstName}${selectedContact.lastName}`} />
+                      <AvatarFallback className="bg-gradient-to-r from-violet-500 to-purple-500 text-white text-xl">{selectedContact.firstName[0]}{selectedContact.lastName[0]}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <h3 className="text-xl font-bold">{selectedContact.firstName} {selectedContact.lastName}</h3>
+                      <p className="text-gray-600">{selectedContact.title}</p>
+                      <Badge className={getLeadScoreColor(selectedContact.leadScore)}>Lead Score: {selectedContact.leadScore}</Badge>
+                    </div>
+                  </div>
 
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Full Name *</Label>
-                <Input
-                  placeholder="John Smith"
-                  value={newCustomerName}
-                  onChange={(e) => setNewCustomerName(e.target.value)}
-                />
-              </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-gray-500">Email</Label>
+                      <div className="flex items-center gap-2"><Mail className="h-4 w-4 text-gray-400" />{selectedContact.email}</div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-500">Phone</Label>
+                      <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-gray-400" />{selectedContact.phone}</div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-500">Mobile</Label>
+                      <div className="flex items-center gap-2"><Phone className="h-4 w-4 text-gray-400" />{selectedContact.mobile}</div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-500">Department</Label>
+                      <div>{selectedContact.department}</div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-500">Lead Source</Label>
+                      <div>{selectedContact.leadSource}</div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-500">Last Activity</Label>
+                      <div>{formatDate(selectedContact.lastActivityDate)}</div>
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                <Label>Email *</Label>
-                <Input
-                  type="email"
-                  placeholder="john@company.com"
-                  value={newCustomerEmail}
-                  onChange={(e) => setNewCustomerEmail(e.target.value)}
-                />
-              </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-500">Address</Label>
+                    <div>{selectedContact.mailingAddress.street}, {selectedContact.mailingAddress.city}, {selectedContact.mailingAddress.state} {selectedContact.mailingAddress.postalCode}</div>
+                  </div>
 
-              <div className="space-y-2">
-                <Label>Phone</Label>
-                <Input
-                  placeholder="+1 (555) 123-4567"
-                  value={newCustomerPhone}
-                  onChange={(e) => setNewCustomerPhone(e.target.value)}
-                />
-              </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-500">Tags</Label>
+                    <div className="flex gap-2">{selectedContact.tags.map(tag => <Badge key={tag} variant="outline">{tag}</Badge>)}</div>
+                  </div>
 
-              <div className="space-y-2">
-                <Label>Company</Label>
-                <Input
-                  placeholder="Company name"
-                  value={newCustomerCompany}
-                  onChange={(e) => setNewCustomerCompany(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAddCustomer(false)}>
-                Cancel
-              </Button>
-              <Button
-                className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
-                onClick={handleAddCustomer}
-              >
-                <UserPlus className="h-4 w-4 mr-2" />
-                Add Customer
-              </Button>
-            </DialogFooter>
+                  <div className="flex gap-2 pt-4 border-t">
+                    <Button className="flex-1"><Mail className="h-4 w-4 mr-2" />Send Email</Button>
+                    <Button variant="outline"><PhoneCall className="h-4 w-4 mr-2" />Log Call</Button>
+                    <Button variant="outline"><Calendar className="h-4 w-4 mr-2" />Schedule</Button>
+                  </div>
+                </div>
+              </ScrollArea>
+            )}
           </DialogContent>
         </Dialog>
 
-        {/* Add Activity Dialog */}
-        <Dialog open={showAddActivity} onOpenChange={setShowAddActivity}>
+        {/* Add Contact Dialog */}
+        <Dialog open={showAddContact} onOpenChange={setShowAddContact}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Log Activity</DialogTitle>
-              <DialogDescription>Record an interaction with a customer</DialogDescription>
+              <DialogTitle>Add New Contact</DialogTitle>
+              <DialogDescription>Create a new contact in your CRM</DialogDescription>
             </DialogHeader>
-
-            <div className="grid grid-cols-3 gap-3 py-4">
-              {['email', 'call', 'meeting', 'note', 'task'].map(type => (
-                <Button
-                  key={type}
-                  variant="outline"
-                  className="flex flex-col items-center gap-2 h-auto py-4"
-                  onClick={() => handleLogActivity(type)}
-                >
-                  {getActivityIcon(type)}
-                  <span className="capitalize">{type}</span>
-                </Button>
-              ))}
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>First Name *</Label>
+                  <Input placeholder="John" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Last Name *</Label>
+                  <Input placeholder="Smith" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Email *</Label>
+                <Input type="email" placeholder="john@company.com" />
+              </div>
+              <div className="space-y-2">
+                <Label>Phone</Label>
+                <Input placeholder="+1 (555) 123-4567" />
+              </div>
+              <div className="space-y-2">
+                <Label>Title</Label>
+                <Input placeholder="VP of Engineering" />
+              </div>
+              <div className="space-y-2">
+                <Label>Account</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
+                  <SelectContent>
+                    {MOCK_ACCOUNTS.map(acc => <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddContact(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { toast.success('Contact created'); setShowAddContact(false) }}>
+                <UserPlus className="h-4 w-4 mr-2" />Create Contact
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
