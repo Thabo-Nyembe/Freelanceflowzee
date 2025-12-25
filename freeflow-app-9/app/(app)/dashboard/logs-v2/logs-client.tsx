@@ -1,37 +1,59 @@
 'use client'
 
 import { useState, useCallback, useMemo } from 'react'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+  DialogFooter, DialogTrigger
+} from '@/components/ui/dialog'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   FileText, AlertCircle, CheckCircle, Info, AlertTriangle, XCircle, Search,
   Download, Filter, Clock, Server, Code, Database, Zap, Play, Pause, RefreshCw,
   ChevronRight, ChevronDown, Eye, Settings, BarChart3, Activity, Layers,
   Terminal, Hash, Tag, Bookmark, Share2, Copy, ExternalLink, Globe, Cpu,
   HardDrive, Wifi, TrendingUp, TrendingDown, ArrowUp, ArrowDown, MoreHorizontal,
-  Plus, Trash2, Calendar, LineChart
+  Plus, Trash2, Calendar, LineChart, Archive, Shield, Lock, Key, GitBranch,
+  GitMerge, Box, Package, Workflow, Route, Split, Combine, Funnel, Target,
+  PieChart, Gauge, Bell, BellRing, MailWarning, MessageSquare, Link2, Send,
+  CloudUpload, CloudDownload, FolderArchive, Sparkles, Wand2, Bug, Microscope
 } from 'lucide-react'
 
-// DataDog-level interfaces
+// ============== COMPREHENSIVE DATADOG-LEVEL INTERFACES ==============
+
+type LogLevel = 'emergency' | 'alert' | 'critical' | 'error' | 'warn' | 'notice' | 'info' | 'debug' | 'trace'
+type LogStatus = 'processed' | 'indexed' | 'excluded' | 'archived' | 'dropped'
+type PipelineStatus = 'active' | 'disabled' | 'error'
+type AlertSeverity = 'ok' | 'warning' | 'critical' | 'no_data'
+type ArchiveStatus = 'active' | 'suspended' | 'failed'
+
 interface LogEntry {
   id: string
   timestamp: string
-  level: 'error' | 'warn' | 'info' | 'debug' | 'trace'
+  level: LogLevel
   service: string
   host: string
+  source: string
   message: string
   attributes: Record<string, unknown>
   traceId?: string
   spanId?: string
   tags: string[]
-  status?: number
+  status: number
   duration?: number
+  env: 'production' | 'staging' | 'development'
+  version?: string
+  container?: string
+  pod?: string
+  namespace?: string
 }
 
 interface LogStream {
@@ -41,6 +63,9 @@ interface LogStream {
   color: string
   count: number
   isLive: boolean
+  createdBy: string
+  createdAt: Date
+  sharedWith: string[]
 }
 
 interface LogPattern {
@@ -48,18 +73,25 @@ interface LogPattern {
   pattern: string
   count: number
   percentage: number
-  firstSeen: string
-  lastSeen: string
+  firstSeen: Date
+  lastSeen: Date
   services: string[]
-  level: 'error' | 'warn' | 'info' | 'debug'
+  level: LogLevel
+  status: 'new' | 'acknowledged' | 'ignored'
+  anomalyScore: number
 }
 
 interface LogMetric {
+  id: string
   name: string
+  query: string
+  groupBy: string[]
+  compute: 'count' | 'avg' | 'sum' | 'min' | 'max' | 'percentile'
+  percentile?: number
   value: number
-  unit: string
   change: number
   trend: 'up' | 'down' | 'stable'
+  unit: string
 }
 
 interface SavedView {
@@ -68,21 +100,112 @@ interface SavedView {
   query: string
   filters: Record<string, string[]>
   columns: string[]
-  createdAt: string
+  sort: { field: string; order: 'asc' | 'desc' }
+  createdAt: Date
+  createdBy: string
   isDefault: boolean
+  isShared: boolean
 }
 
 interface LogAlert {
   id: string
   name: string
   query: string
-  threshold: number
-  operator: 'above' | 'below' | 'equal'
-  status: 'ok' | 'warning' | 'critical' | 'no_data'
-  lastTriggered?: string
+  threshold: { warning: number; critical: number }
+  operator: 'above' | 'below' | 'equal' | 'between'
+  aggregation: 'count' | 'avg' | 'sum' | 'min' | 'max'
+  timeWindow: string
+  status: AlertSeverity
+  lastTriggered?: Date
+  notifications: string[]
+  muteUntil?: Date
 }
 
-// Mock log entries
+interface LogPipeline {
+  id: string
+  name: string
+  filter: string
+  status: PipelineStatus
+  order: number
+  processors: LogProcessor[]
+  sampleRate: number
+  bytesProcessed: number
+  logsProcessed: number
+}
+
+interface LogProcessor {
+  id: string
+  type: 'grok' | 'date' | 'attribute' | 'category' | 'message' | 'service' | 'status' | 'trace' | 'lookup' | 'geo'
+  name: string
+  config: Record<string, unknown>
+  isEnabled: boolean
+}
+
+interface LogArchive {
+  id: string
+  name: string
+  destination: 'S3' | 'GCS' | 'Azure Blob' | 'Glacier'
+  bucket: string
+  path: string
+  status: ArchiveStatus
+  rehydrationEnabled: boolean
+  encryptionType: 'AES-256' | 'KMS' | 'none'
+  lastArchived: Date
+  totalSize: string
+  retentionDays: number
+}
+
+interface LogIndex {
+  id: string
+  name: string
+  filter: string
+  dailyLimit?: number
+  dailyUsage: number
+  retentionDays: number
+  isEnabled: boolean
+  exclusionFilters: ExclusionFilter[]
+}
+
+interface ExclusionFilter {
+  id: string
+  name: string
+  query: string
+  sampleRate: number
+  isEnabled: boolean
+}
+
+interface LogForwarder {
+  id: string
+  name: string
+  type: 'http' | 'syslog' | 'kafka' | 'splunk' | 'elasticsearch'
+  endpoint: string
+  status: 'active' | 'paused' | 'error'
+  logsForwarded: number
+  lastForwarded: Date
+}
+
+interface SensitiveDataRule {
+  id: string
+  name: string
+  pattern: string
+  type: 'credit_card' | 'ssn' | 'email' | 'ip' | 'api_key' | 'custom'
+  action: 'redact' | 'hash' | 'partial_mask'
+  matchCount: number
+  isEnabled: boolean
+}
+
+interface ServiceCatalogEntry {
+  name: string
+  team: string
+  tier: 'critical' | 'high' | 'medium' | 'low'
+  logsPerSecond: number
+  errorRate: number
+  p99Latency: number
+  dependencies: string[]
+}
+
+// ============== MOCK DATA ==============
+
 const mockLogs: LogEntry[] = [
   {
     id: 'log1',
@@ -90,13 +213,19 @@ const mockLogs: LogEntry[] = [
     level: 'error',
     service: 'api-gateway',
     host: 'prod-api-01',
+    source: 'kubernetes',
     message: 'Failed to process request: Connection timeout to database cluster',
-    attributes: { requestId: 'req-123', userId: 'usr-456', endpoint: '/api/v1/users' },
+    attributes: { requestId: 'req-123', userId: 'usr-456', endpoint: '/api/v1/users', db_host: 'db-primary-01' },
     traceId: 'trace-789',
     spanId: 'span-001',
-    tags: ['production', 'api', 'database'],
+    tags: ['production', 'api', 'database', 'timeout'],
     status: 504,
-    duration: 30250
+    duration: 30250,
+    env: 'production',
+    version: 'v2.5.1',
+    container: 'api-gateway-abc123',
+    pod: 'api-gateway-7f8d9b-xyzab',
+    namespace: 'production'
   },
   {
     id: 'log2',
@@ -104,10 +233,13 @@ const mockLogs: LogEntry[] = [
     level: 'warn',
     service: 'auth-service',
     host: 'prod-auth-02',
-    message: 'Rate limit approaching for IP 192.168.1.100',
-    attributes: { ip: '192.168.1.100', currentRate: 95, limit: 100 },
+    source: 'docker',
+    message: 'Rate limit approaching for IP 192.168.1.100 - 95/100 requests',
+    attributes: { ip: '192.168.1.100', currentRate: 95, limit: 100, windowMs: 60000 },
     tags: ['production', 'auth', 'rate-limit'],
-    status: 429
+    status: 429,
+    env: 'production',
+    version: 'v1.8.3'
   },
   {
     id: 'log3',
@@ -115,12 +247,16 @@ const mockLogs: LogEntry[] = [
     level: 'info',
     service: 'payment-processor',
     host: 'prod-payment-01',
-    message: 'Payment processed successfully',
-    attributes: { transactionId: 'txn-789', amount: 99.99, currency: 'USD' },
+    source: 'application',
+    message: 'Payment processed successfully for order #ORD-789456',
+    attributes: { transactionId: 'txn-789', amount: 99.99, currency: 'USD', orderId: 'ORD-789456', method: 'stripe' },
     traceId: 'trace-456',
+    spanId: 'span-002',
     tags: ['production', 'payment', 'success'],
     status: 200,
-    duration: 1250
+    duration: 1250,
+    env: 'production',
+    version: 'v3.2.0'
   },
   {
     id: 'log4',
@@ -128,21 +264,26 @@ const mockLogs: LogEntry[] = [
     level: 'debug',
     service: 'cache-service',
     host: 'prod-cache-01',
-    message: 'Cache miss for key: user:profile:123',
-    attributes: { key: 'user:profile:123', ttl: 3600 },
-    tags: ['production', 'cache'],
-    duration: 5
+    source: 'redis',
+    message: 'Cache miss for key: user:profile:123 - fetching from database',
+    attributes: { key: 'user:profile:123', ttl: 3600, cacheSize: '2.3GB' },
+    tags: ['production', 'cache', 'miss'],
+    status: 200,
+    duration: 5,
+    env: 'production'
   },
   {
     id: 'log5',
     timestamp: '2024-01-15T10:30:43.999Z',
-    level: 'error',
+    level: 'critical',
     service: 'notification-service',
     host: 'prod-notify-01',
-    message: 'Failed to send email: SMTP connection refused',
-    attributes: { recipient: 'user@example.com', type: 'welcome_email' },
-    tags: ['production', 'notification', 'email'],
-    status: 500
+    source: 'smtp',
+    message: 'CRITICAL: SMTP connection refused - email queue backing up (1,234 pending)',
+    attributes: { recipient: 'user@example.com', type: 'welcome_email', queueSize: 1234 },
+    tags: ['production', 'notification', 'email', 'critical'],
+    status: 500,
+    env: 'production'
   },
   {
     id: 'log6',
@@ -150,46 +291,193 @@ const mockLogs: LogEntry[] = [
     level: 'info',
     service: 'api-gateway',
     host: 'prod-api-02',
-    message: 'Request completed: GET /api/v1/products',
-    attributes: { method: 'GET', path: '/api/v1/products', responseSize: 15420 },
+    source: 'nginx',
+    message: 'Request completed: GET /api/v1/products (200) - 89ms',
+    attributes: { method: 'GET', path: '/api/v1/products', responseSize: 15420, userAgent: 'Mozilla/5.0' },
     traceId: 'trace-111',
+    spanId: 'span-003',
     tags: ['production', 'api'],
     status: 200,
-    duration: 89
+    duration: 89,
+    env: 'production'
+  },
+  {
+    id: 'log7',
+    timestamp: '2024-01-15T10:30:43.123Z',
+    level: 'error',
+    service: 'search-service',
+    host: 'prod-search-01',
+    source: 'elasticsearch',
+    message: 'Index health degraded: yellow state detected on products_v2',
+    attributes: { index: 'products_v2', shards: { active: 3, relocating: 1, initializing: 0, unassigned: 1 } },
+    tags: ['production', 'search', 'elasticsearch'],
+    status: 503,
+    env: 'production'
+  },
+  {
+    id: 'log8',
+    timestamp: '2024-01-15T10:30:42.789Z',
+    level: 'notice',
+    service: 'scheduler',
+    host: 'prod-scheduler-01',
+    source: 'cron',
+    message: 'Scheduled job completed: daily_report_generation (duration: 45s)',
+    attributes: { jobId: 'daily_report', duration: 45000, rowsProcessed: 50000 },
+    tags: ['production', 'scheduler', 'cron'],
+    status: 200,
+    duration: 45000,
+    env: 'production'
   }
 ]
 
-// Mock log streams
 const mockStreams: LogStream[] = [
-  { id: 's1', name: 'All Errors', query: 'level:error', color: 'red', count: 145, isLive: true },
-  { id: 's2', name: 'API Gateway', query: 'service:api-gateway', color: 'blue', count: 2340, isLive: true },
-  { id: 's3', name: 'High Latency', query: 'duration:>1000', color: 'yellow', count: 67, isLive: false },
-  { id: 's4', name: 'Payment Errors', query: 'service:payment-processor level:error', color: 'purple', count: 12, isLive: true },
-  { id: 's5', name: 'Auth Failures', query: 'service:auth-service status:401', color: 'orange', count: 89, isLive: false }
+  { id: 's1', name: 'All Errors', query: 'level:(error OR critical OR emergency)', color: 'red', count: 1456, isLive: true, createdBy: 'admin', createdAt: new Date('2024-01-01'), sharedWith: ['team'] },
+  { id: 's2', name: 'API Gateway', query: 'service:api-gateway', color: 'blue', count: 23400, isLive: true, createdBy: 'admin', createdAt: new Date('2024-01-01'), sharedWith: [] },
+  { id: 's3', name: 'High Latency (>1s)', query: 'duration:>1000', color: 'yellow', count: 670, isLive: false, createdBy: 'developer', createdAt: new Date('2024-01-05'), sharedWith: [] },
+  { id: 's4', name: 'Payment Errors', query: 'service:payment-processor level:error', color: 'purple', count: 123, isLive: true, createdBy: 'finance-team', createdAt: new Date('2024-01-10'), sharedWith: ['finance-team'] },
+  { id: 's5', name: 'Auth Failures', query: 'service:auth-service status:401', color: 'orange', count: 890, isLive: false, createdBy: 'security', createdAt: new Date('2024-01-08'), sharedWith: ['security'] },
+  { id: 's6', name: 'Database Queries', query: 'source:postgresql OR source:mysql', color: 'green', count: 45600, isLive: true, createdBy: 'dba', createdAt: new Date('2024-01-02'), sharedWith: ['dba-team'] }
 ]
 
-// Mock patterns
 const mockPatterns: LogPattern[] = [
-  { id: 'p1', pattern: 'Connection timeout to * cluster', count: 234, percentage: 15.2, firstSeen: '2024-01-14T08:00:00Z', lastSeen: '2024-01-15T10:30:00Z', services: ['api-gateway', 'payment-processor'], level: 'error' },
-  { id: 'p2', pattern: 'Rate limit approaching for IP *', count: 567, percentage: 8.4, firstSeen: '2024-01-15T00:00:00Z', lastSeen: '2024-01-15T10:30:00Z', services: ['auth-service'], level: 'warn' },
-  { id: 'p3', pattern: 'Cache miss for key: *', count: 12450, percentage: 45.3, firstSeen: '2024-01-10T00:00:00Z', lastSeen: '2024-01-15T10:30:00Z', services: ['cache-service'], level: 'debug' },
-  { id: 'p4', pattern: 'Request completed: * /api/*', count: 89000, percentage: 78.9, firstSeen: '2024-01-01T00:00:00Z', lastSeen: '2024-01-15T10:30:00Z', services: ['api-gateway'], level: 'info' }
+  { id: 'p1', pattern: 'Connection timeout to * cluster', count: 2340, percentage: 15.2, firstSeen: new Date('2024-01-14'), lastSeen: new Date(), services: ['api-gateway', 'payment-processor'], level: 'error', status: 'new', anomalyScore: 0.85 },
+  { id: 'p2', pattern: 'Rate limit * for IP *', count: 5670, percentage: 8.4, firstSeen: new Date('2024-01-15'), lastSeen: new Date(), services: ['auth-service'], level: 'warn', status: 'acknowledged', anomalyScore: 0.45 },
+  { id: 'p3', pattern: 'Cache miss for key: *', count: 124500, percentage: 45.3, firstSeen: new Date('2024-01-10'), lastSeen: new Date(), services: ['cache-service'], level: 'debug', status: 'ignored', anomalyScore: 0.1 },
+  { id: 'p4', pattern: 'Request completed: * /api/* (*)', count: 890000, percentage: 78.9, firstSeen: new Date('2024-01-01'), lastSeen: new Date(), services: ['api-gateway'], level: 'info', status: 'ignored', anomalyScore: 0.05 },
+  { id: 'p5', pattern: 'SMTP connection refused - email queue *', count: 45, percentage: 0.3, firstSeen: new Date('2024-01-15'), lastSeen: new Date(), services: ['notification-service'], level: 'critical', status: 'new', anomalyScore: 0.95 }
 ]
 
-// Mock saved views
 const mockSavedViews: SavedView[] = [
-  { id: 'v1', name: 'Production Errors', query: 'env:production level:error', filters: { service: ['api-gateway', 'auth-service'] }, columns: ['timestamp', 'level', 'service', 'message'], createdAt: '2024-01-10T10:00:00Z', isDefault: true },
-  { id: 'v2', name: 'Payment Transactions', query: 'service:payment-processor', filters: { level: ['info', 'error'] }, columns: ['timestamp', 'message', 'attributes.transactionId'], createdAt: '2024-01-12T14:00:00Z', isDefault: false },
-  { id: 'v3', name: 'High Latency Requests', query: 'duration:>500', filters: {}, columns: ['timestamp', 'service', 'duration', 'message'], createdAt: '2024-01-14T09:00:00Z', isDefault: false }
+  { id: 'v1', name: 'Production Errors', query: 'env:production level:(error OR critical)', filters: { service: ['api-gateway', 'auth-service'] }, columns: ['timestamp', 'level', 'service', 'message'], sort: { field: 'timestamp', order: 'desc' }, createdAt: new Date('2024-01-10'), createdBy: 'admin', isDefault: true, isShared: true },
+  { id: 'v2', name: 'Payment Transactions', query: 'service:payment-processor', filters: { level: ['info', 'error'] }, columns: ['timestamp', 'message', 'attributes.transactionId'], sort: { field: 'timestamp', order: 'desc' }, createdAt: new Date('2024-01-12'), createdBy: 'finance', isDefault: false, isShared: true },
+  { id: 'v3', name: 'High Latency Requests', query: 'duration:>500', filters: {}, columns: ['timestamp', 'service', 'duration', 'message'], sort: { field: 'duration', order: 'desc' }, createdAt: new Date('2024-01-14'), createdBy: 'sre', isDefault: false, isShared: false },
+  { id: 'v4', name: 'Security Events', query: 'tags:security OR service:auth-service', filters: { level: ['warn', 'error'] }, columns: ['timestamp', 'level', 'service', 'host', 'message'], sort: { field: 'timestamp', order: 'desc' }, createdAt: new Date('2024-01-13'), createdBy: 'security', isDefault: false, isShared: true }
 ]
 
-// Mock alerts
 const mockAlerts: LogAlert[] = [
-  { id: 'a1', name: 'Error Rate Spike', query: 'level:error', threshold: 50, operator: 'above', status: 'ok', lastTriggered: '2024-01-14T15:30:00Z' },
-  { id: 'a2', name: 'Payment Failures', query: 'service:payment-processor level:error', threshold: 5, operator: 'above', status: 'critical', lastTriggered: '2024-01-15T10:25:00Z' },
-  { id: 'a3', name: 'API Latency', query: 'service:api-gateway duration:>2000', threshold: 10, operator: 'above', status: 'warning' },
-  { id: 'a4', name: 'No Auth Logs', query: 'service:auth-service', threshold: 0, operator: 'equal', status: 'no_data' }
+  { id: 'a1', name: 'Error Rate Spike', query: 'level:error', threshold: { warning: 50, critical: 100 }, operator: 'above', aggregation: 'count', timeWindow: '5m', status: 'ok', lastTriggered: new Date('2024-01-14T15:30:00'), notifications: ['#alerts-channel', 'oncall@company.com'] },
+  { id: 'a2', name: 'Payment Failures', query: 'service:payment-processor level:error', threshold: { warning: 3, critical: 5 }, operator: 'above', aggregation: 'count', timeWindow: '15m', status: 'critical', lastTriggered: new Date('2024-01-15T10:25:00'), notifications: ['#payments-alerts', 'payments-team@company.com'] },
+  { id: 'a3', name: 'API P99 Latency', query: 'service:api-gateway', threshold: { warning: 2000, critical: 5000 }, operator: 'above', aggregation: 'max', timeWindow: '5m', status: 'warning', notifications: ['#api-alerts'] },
+  { id: 'a4', name: 'No Auth Logs', query: 'service:auth-service', threshold: { warning: 0, critical: 0 }, operator: 'equal', aggregation: 'count', timeWindow: '10m', status: 'no_data', notifications: ['#auth-alerts'] },
+  { id: 'a5', name: 'Email Queue Backlog', query: 'service:notification-service message:*queue*', threshold: { warning: 500, critical: 1000 }, operator: 'above', aggregation: 'count', timeWindow: '30m', status: 'critical', lastTriggered: new Date(), notifications: ['#notifications-team'] }
 ]
+
+const mockPipelines: LogPipeline[] = [
+  { id: 'pipe1', name: 'API Gateway Parsing', filter: 'service:api-gateway', status: 'active', order: 1, processors: [
+    { id: 'proc1', type: 'grok', name: 'Parse access logs', config: { pattern: '%{HTTPDATE:timestamp} %{WORD:method} %{URIPATH:path}' }, isEnabled: true },
+    { id: 'proc2', type: 'status', name: 'Remap status codes', config: { mappings: { '2xx': 'ok', '4xx': 'warn', '5xx': 'error' } }, isEnabled: true }
+  ], sampleRate: 100, bytesProcessed: 15400000000, logsProcessed: 45600000 },
+  { id: 'pipe2', name: 'Payment Processing', filter: 'service:payment-*', status: 'active', order: 2, processors: [
+    { id: 'proc3', type: 'attribute', name: 'Extract transaction ID', config: { path: 'message', target: 'transaction_id' }, isEnabled: true },
+    { id: 'proc4', type: 'category', name: 'Categorize by amount', config: { rules: [{ min: 0, max: 100, category: 'small' }, { min: 100, max: 1000, category: 'medium' }] }, isEnabled: true }
+  ], sampleRate: 100, bytesProcessed: 2300000000, logsProcessed: 12300000 },
+  { id: 'pipe3', name: 'Database Logs', filter: 'source:(postgresql OR mysql)', status: 'active', order: 3, processors: [
+    { id: 'proc5', type: 'grok', name: 'Parse SQL queries', config: { pattern: '%{WORD:operation} %{WORD:table}' }, isEnabled: true }
+  ], sampleRate: 50, bytesProcessed: 8900000000, logsProcessed: 23400000 }
+]
+
+const mockArchives: LogArchive[] = [
+  { id: 'arch1', name: 'Production Logs', destination: 'S3', bucket: 'company-logs-prod', path: '/logs/production/', status: 'active', rehydrationEnabled: true, encryptionType: 'KMS', lastArchived: new Date(), totalSize: '2.4 TB', retentionDays: 365 },
+  { id: 'arch2', name: 'Staging Logs', destination: 'S3', bucket: 'company-logs-staging', path: '/logs/staging/', status: 'active', rehydrationEnabled: false, encryptionType: 'AES-256', lastArchived: new Date(), totalSize: '456 GB', retentionDays: 90 },
+  { id: 'arch3', name: 'Compliance Archive', destination: 'Glacier', bucket: 'company-compliance-archive', path: '/compliance/', status: 'active', rehydrationEnabled: true, encryptionType: 'KMS', lastArchived: new Date(), totalSize: '12.8 TB', retentionDays: 2555 }
+]
+
+const mockIndexes: LogIndex[] = [
+  { id: 'idx1', name: 'main', filter: '*', dailyLimit: 50000000, dailyUsage: 34500000, retentionDays: 15, isEnabled: true, exclusionFilters: [
+    { id: 'exc1', name: 'Exclude debug logs', query: 'level:debug', sampleRate: 0, isEnabled: true },
+    { id: 'exc2', name: 'Sample trace logs', query: 'level:trace', sampleRate: 10, isEnabled: true }
+  ] },
+  { id: 'idx2', name: 'errors', filter: 'level:(error OR critical)', dailyLimit: 10000000, dailyUsage: 890000, retentionDays: 30, isEnabled: true, exclusionFilters: [] },
+  { id: 'idx3', name: 'security', filter: 'tags:security', dailyLimit: 5000000, dailyUsage: 230000, retentionDays: 90, isEnabled: true, exclusionFilters: [] }
+]
+
+const mockForwarders: LogForwarder[] = [
+  { id: 'fwd1', name: 'SIEM Integration', type: 'splunk', endpoint: 'https://splunk.company.com:8088', status: 'active', logsForwarded: 12340000, lastForwarded: new Date() },
+  { id: 'fwd2', name: 'Analytics Pipeline', type: 'kafka', endpoint: 'kafka://analytics.company.com:9092', status: 'active', logsForwarded: 45600000, lastForwarded: new Date() },
+  { id: 'fwd3', name: 'Cold Storage', type: 'elasticsearch', endpoint: 'https://es-archive.company.com:9200', status: 'paused', logsForwarded: 8900000, lastForwarded: new Date('2024-01-14') }
+]
+
+const mockSensitiveRules: SensitiveDataRule[] = [
+  { id: 'sr1', name: 'Credit Cards', pattern: '\\b(?:\\d{4}[- ]?){3}\\d{4}\\b', type: 'credit_card', action: 'redact', matchCount: 1234, isEnabled: true },
+  { id: 'sr2', name: 'API Keys', pattern: 'sk_[a-zA-Z0-9]{32}', type: 'api_key', action: 'hash', matchCount: 567, isEnabled: true },
+  { id: 'sr3', name: 'Email Addresses', pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}', type: 'email', action: 'partial_mask', matchCount: 45600, isEnabled: false },
+  { id: 'sr4', name: 'SSN', pattern: '\\b\\d{3}-\\d{2}-\\d{4}\\b', type: 'ssn', action: 'redact', matchCount: 23, isEnabled: true }
+]
+
+const mockServiceCatalog: ServiceCatalogEntry[] = [
+  { name: 'api-gateway', team: 'Platform', tier: 'critical', logsPerSecond: 1250, errorRate: 0.5, p99Latency: 245, dependencies: ['auth-service', 'cache-service'] },
+  { name: 'auth-service', team: 'Security', tier: 'critical', logsPerSecond: 890, errorRate: 0.2, p99Latency: 89, dependencies: ['user-db'] },
+  { name: 'payment-processor', team: 'Payments', tier: 'critical', logsPerSecond: 450, errorRate: 0.8, p99Latency: 1250, dependencies: ['stripe-api', 'transaction-db'] },
+  { name: 'notification-service', team: 'Communications', tier: 'high', logsPerSecond: 234, errorRate: 2.5, p99Latency: 456, dependencies: ['smtp', 'sms-gateway'] },
+  { name: 'cache-service', team: 'Platform', tier: 'high', logsPerSecond: 3400, errorRate: 0.1, p99Latency: 5, dependencies: ['redis-cluster'] }
+]
+
+// ============== HELPER FUNCTIONS ==============
+
+const getLevelColor = (level: LogLevel): string => {
+  const colors: Record<LogLevel, string> = {
+    emergency: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400',
+    alert: 'bg-pink-100 text-pink-800 border-pink-200 dark:bg-pink-900/30 dark:text-pink-400',
+    critical: 'bg-red-200 text-red-900 border-red-300 dark:bg-red-900/40 dark:text-red-300',
+    error: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400',
+    warn: 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400',
+    notice: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400',
+    info: 'bg-sky-100 text-sky-700 border-sky-200 dark:bg-sky-900/30 dark:text-sky-400',
+    debug: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400',
+    trace: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-400'
+  }
+  return colors[level] || colors.info
+}
+
+const getLevelIcon = (level: LogLevel) => {
+  const icons: Record<LogLevel, React.ReactNode> = {
+    emergency: <AlertCircle className="w-4 h-4" />,
+    alert: <BellRing className="w-4 h-4" />,
+    critical: <XCircle className="w-4 h-4" />,
+    error: <XCircle className="w-4 h-4" />,
+    warn: <AlertTriangle className="w-4 h-4" />,
+    notice: <Info className="w-4 h-4" />,
+    info: <Info className="w-4 h-4" />,
+    debug: <Code className="w-4 h-4" />,
+    trace: <Terminal className="w-4 h-4" />
+  }
+  return icons[level] || icons.info
+}
+
+const getAlertStatusColor = (status: AlertSeverity): string => {
+  const colors: Record<AlertSeverity, string> = {
+    ok: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    warning: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+    critical: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    no_data: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
+  }
+  return colors[status] || colors.ok
+}
+
+const getPipelineStatusColor = (status: PipelineStatus): string => {
+  const colors: Record<PipelineStatus, string> = {
+    active: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+    disabled: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400',
+    error: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+  }
+  return colors[status] || colors.disabled
+}
+
+const formatDuration = (ms?: number): string => {
+  if (!ms) return '-'
+  if (ms < 1000) return `${ms}ms`
+  if (ms < 60000) return `${(ms / 1000).toFixed(2)}s`
+  return `${(ms / 60000).toFixed(2)}m`
+}
+
+const formatBytes = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
+}
+
+// ============== MAIN COMPONENT ==============
 
 export default function LogsClient() {
   const [activeTab, setActiveTab] = useState('explorer')
@@ -200,35 +488,11 @@ export default function LogsClient() {
   const [showLogDialog, setShowLogDialog] = useState(false)
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null)
   const [expandedLogs, setExpandedLogs] = useState<string[]>([])
-
-  const getLevelColor = (level: LogEntry['level']) => {
-    switch (level) {
-      case 'error': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-      case 'warn': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-      case 'info': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-      case 'debug': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-      case 'trace': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
-    }
-  }
-
-  const getLevelIcon = (level: LogEntry['level']) => {
-    switch (level) {
-      case 'error': return <XCircle className="w-4 h-4" />
-      case 'warn': return <AlertTriangle className="w-4 h-4" />
-      case 'info': return <Info className="w-4 h-4" />
-      case 'debug': return <Code className="w-4 h-4" />
-      case 'trace': return <Terminal className="w-4 h-4" />
-    }
-  }
-
-  const getAlertStatusColor = (status: LogAlert['status']) => {
-    switch (status) {
-      case 'ok': return 'bg-green-100 text-green-700'
-      case 'warning': return 'bg-yellow-100 text-yellow-700'
-      case 'critical': return 'bg-red-100 text-red-700'
-      case 'no_data': return 'bg-gray-100 text-gray-700'
-    }
-  }
+  const [showPipelineDialog, setShowPipelineDialog] = useState(false)
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false)
+  const [showAlertDialog, setShowAlertDialog] = useState(false)
+  const [showForwarderDialog, setShowForwarderDialog] = useState(false)
+  const [showSensitiveDialog, setShowSensitiveDialog] = useState(false)
 
   const toggleLogExpand = (logId: string) => {
     setExpandedLogs(prev =>
@@ -236,21 +500,19 @@ export default function LogsClient() {
     )
   }
 
-  const formatDuration = (ms?: number) => {
-    if (!ms) return '-'
-    if (ms < 1000) return `${ms}ms`
-    if (ms < 60000) return `${(ms / 1000).toFixed(2)}s`
-    return `${(ms / 60000).toFixed(2)}m`
-  }
-
   const stats = useMemo(() => ({
-    totalLogs: mockLogs.length * 1000,
-    errorRate: ((mockLogs.filter(l => l.level === 'error').length / mockLogs.length) * 100),
+    totalLogs: mockLogs.length * 1000000,
+    errorRate: ((mockLogs.filter(l => l.level === 'error' || l.level === 'critical').length / mockLogs.length) * 100),
     avgLatency: mockLogs.reduce((sum, l) => sum + (l.duration || 0), 0) / mockLogs.filter(l => l.duration).length,
-    activeServices: [...new Set(mockLogs.map(l => l.service))].length
+    activeServices: [...new Set(mockLogs.map(l => l.service))].length,
+    logsPerSecond: 1245,
+    bytesIngested: 15400000000,
+    alertsActive: mockAlerts.filter(a => a.status === 'critical' || a.status === 'warning').length,
+    pipelinesActive: mockPipelines.filter(p => p.status === 'active').length
   }), [])
 
   const logsByLevel = useMemo(() => ({
+    critical: mockLogs.filter(l => l.level === 'critical').length,
     error: mockLogs.filter(l => l.level === 'error').length,
     warn: mockLogs.filter(l => l.level === 'warn').length,
     info: mockLogs.filter(l => l.level === 'info').length,
@@ -268,12 +530,12 @@ export default function LogsClient() {
         <div className="max-w-[1800px] mx-auto px-6 py-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-white/10 rounded-xl">
+              <div className="p-3 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl shadow-lg">
                 <Terminal className="w-8 h-8" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold">Log Explorer</h1>
-                <p className="text-gray-300">DataDog-level Observability Platform</p>
+                <h1 className="text-3xl font-bold">Log Management</h1>
+                <p className="text-gray-300">DataDog-Level Observability Platform</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -282,14 +544,15 @@ export default function LogsClient() {
                 <select
                   value={selectedTimeRange}
                   onChange={(e) => setSelectedTimeRange(e.target.value)}
-                  className="bg-transparent text-sm focus:outline-none"
+                  className="bg-transparent text-sm focus:outline-none cursor-pointer"
                 >
-                  <option value="5m">Last 5 minutes</option>
-                  <option value="15m">Last 15 minutes</option>
-                  <option value="1h">Last 1 hour</option>
-                  <option value="4h">Last 4 hours</option>
-                  <option value="24h">Last 24 hours</option>
-                  <option value="7d">Last 7 days</option>
+                  <option value="5m" className="text-gray-900">Last 5 minutes</option>
+                  <option value="15m" className="text-gray-900">Last 15 minutes</option>
+                  <option value="1h" className="text-gray-900">Last 1 hour</option>
+                  <option value="4h" className="text-gray-900">Last 4 hours</option>
+                  <option value="24h" className="text-gray-900">Last 24 hours</option>
+                  <option value="7d" className="text-gray-900">Last 7 days</option>
+                  <option value="30d" className="text-gray-900">Last 30 days</option>
                 </select>
               </div>
               <Button
@@ -312,7 +575,7 @@ export default function LogsClient() {
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <Input
-                placeholder="Search logs... (e.g., service:api-gateway level:error status:>400)"
+                placeholder="Search logs... (e.g., service:api-gateway level:error status:>400 @duration:>1000)"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-12 h-12 bg-white/10 border-white/20 text-white placeholder:text-gray-400 text-lg"
@@ -322,52 +585,99 @@ export default function LogsClient() {
               <Filter className="w-4 h-4 mr-2" />
               Facets
             </Button>
+            <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20 h-12">
+              <Sparkles className="w-4 h-4 mr-2" />
+              AI Assist
+            </Button>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-5 gap-4">
-            <Card className="bg-white/10 border-white/20 p-4">
-              <div className="flex items-center gap-3">
-                <FileText className="w-5 h-5 text-gray-300" />
+          <div className="grid grid-cols-8 gap-3">
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg">
+                  <FileText className="w-4 h-4 text-white" />
+                </div>
                 <div>
-                  <p className="text-sm text-gray-300">Total Logs</p>
-                  <p className="text-2xl font-bold">{(stats.totalLogs / 1000).toFixed(0)}K</p>
+                  <p className="text-xs text-gray-300">Logs Today</p>
+                  <p className="text-xl font-bold">{(stats.totalLogs / 1000000).toFixed(1)}M</p>
                 </div>
               </div>
             </Card>
-            <Card className="bg-white/10 border-white/20 p-4">
-              <div className="flex items-center gap-3">
-                <XCircle className="w-5 h-5 text-red-400" />
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-red-400 to-red-600 rounded-lg">
+                  <XCircle className="w-4 h-4 text-white" />
+                </div>
                 <div>
-                  <p className="text-sm text-gray-300">Error Rate</p>
-                  <p className="text-2xl font-bold">{stats.errorRate.toFixed(1)}%</p>
+                  <p className="text-xs text-gray-300">Error Rate</p>
+                  <p className="text-xl font-bold">{stats.errorRate.toFixed(1)}%</p>
                 </div>
               </div>
             </Card>
-            <Card className="bg-white/10 border-white/20 p-4">
-              <div className="flex items-center gap-3">
-                <Clock className="w-5 h-5 text-yellow-400" />
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg">
+                  <Clock className="w-4 h-4 text-white" />
+                </div>
                 <div>
-                  <p className="text-sm text-gray-300">Avg Latency</p>
-                  <p className="text-2xl font-bold">{formatDuration(stats.avgLatency)}</p>
+                  <p className="text-xs text-gray-300">Avg Latency</p>
+                  <p className="text-xl font-bold">{formatDuration(stats.avgLatency)}</p>
                 </div>
               </div>
             </Card>
-            <Card className="bg-white/10 border-white/20 p-4">
-              <div className="flex items-center gap-3">
-                <Server className="w-5 h-5 text-blue-400" />
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-green-400 to-emerald-600 rounded-lg">
+                  <Server className="w-4 h-4 text-white" />
+                </div>
                 <div>
-                  <p className="text-sm text-gray-300">Services</p>
-                  <p className="text-2xl font-bold">{stats.activeServices}</p>
+                  <p className="text-xs text-gray-300">Services</p>
+                  <p className="text-xl font-bold">{stats.activeServices}</p>
                 </div>
               </div>
             </Card>
-            <Card className="bg-white/10 border-white/20 p-4">
-              <div className="flex items-center gap-3">
-                <Activity className="w-5 h-5 text-green-400" />
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-purple-400 to-purple-600 rounded-lg">
+                  <Activity className="w-4 h-4 text-white" />
+                </div>
                 <div>
-                  <p className="text-sm text-gray-300">Logs/sec</p>
-                  <p className="text-2xl font-bold">1.2K</p>
+                  <p className="text-xs text-gray-300">Logs/sec</p>
+                  <p className="text-xl font-bold">{stats.logsPerSecond.toLocaleString()}</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-lg">
+                  <HardDrive className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-300">Ingested</p>
+                  <p className="text-xl font-bold">{formatBytes(stats.bytesIngested)}</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-rose-400 to-pink-600 rounded-lg">
+                  <Bell className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-300">Active Alerts</p>
+                  <p className="text-xl font-bold">{stats.alertsActive}</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="bg-white/10 border-white/20 p-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-indigo-400 to-violet-600 rounded-lg">
+                  <Workflow className="w-4 h-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-300">Pipelines</p>
+                  <p className="text-xl font-bold">{stats.pipelinesActive}</p>
                 </div>
               </div>
             </Card>
@@ -376,106 +686,123 @@ export default function LogsClient() {
       </div>
 
       <div className="max-w-[1800px] mx-auto px-6 py-6">
-        <div className="grid grid-cols-5 gap-6">
-          {/* Left Sidebar - Facets */}
-          <div className="space-y-4">
-            <Card className="p-4">
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <Layers className="w-4 h-4" />
-                Log Level
-              </h3>
-              <div className="space-y-2">
-                {Object.entries(logsByLevel).map(([level, count]) => (
-                  <div
-                    key={level}
-                    className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
-                      selectedLevel === level ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                    }`}
-                    onClick={() => setSelectedLevel(selectedLevel === level ? null : level)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Badge className={getLevelColor(level as LogEntry['level'])}>{level}</Badge>
-                    </div>
-                    <span className="text-sm text-gray-500">{count}</span>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-6 bg-white dark:bg-gray-800 p-1">
+            <TabsTrigger value="explorer" className="flex items-center gap-2">
+              <Search className="w-4 h-4" />
+              Explorer
+            </TabsTrigger>
+            <TabsTrigger value="streams" className="flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              Live Tail
+            </TabsTrigger>
+            <TabsTrigger value="patterns" className="flex items-center gap-2">
+              <Layers className="w-4 h-4" />
+              Patterns
+            </TabsTrigger>
+            <TabsTrigger value="pipelines" className="flex items-center gap-2">
+              <Workflow className="w-4 h-4" />
+              Pipelines
+            </TabsTrigger>
+            <TabsTrigger value="indexes" className="flex items-center gap-2">
+              <Database className="w-4 h-4" />
+              Indexes
+            </TabsTrigger>
+            <TabsTrigger value="archives" className="flex items-center gap-2">
+              <Archive className="w-4 h-4" />
+              Archives
+            </TabsTrigger>
+            <TabsTrigger value="alerts" className="flex items-center gap-2">
+              <Bell className="w-4 h-4" />
+              Alerts
+            </TabsTrigger>
+            <TabsTrigger value="metrics" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Metrics
+            </TabsTrigger>
+            <TabsTrigger value="sensitive" className="flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              Sensitive Data
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Explorer Tab */}
+          <TabsContent value="explorer">
+            <div className="grid grid-cols-5 gap-6">
+              {/* Left Sidebar - Facets */}
+              <div className="space-y-4">
+                <Card className="p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Layers className="w-4 h-4" />
+                    Log Level
+                  </h3>
+                  <div className="space-y-2">
+                    {Object.entries(logsByLevel).map(([level, count]) => (
+                      <div
+                        key={level}
+                        className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
+                          selectedLevel === level ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                        }`}
+                        onClick={() => setSelectedLevel(selectedLevel === level ? null : level)}
+                      >
+                        <Badge className={getLevelColor(level as LogLevel)}>{level}</Badge>
+                        <span className="text-sm text-gray-500">{count}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </Card>
+                </Card>
 
-            <Card className="p-4">
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <Server className="w-4 h-4" />
-                Service
-              </h3>
-              <div className="space-y-2">
-                {[...new Set(mockLogs.map(l => l.service))].map(service => (
-                  <div key={service} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer">
-                    <span className="text-sm">{service}</span>
-                    <span className="text-xs text-gray-500">{mockLogs.filter(l => l.service === service).length}</span>
+                <Card className="p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Server className="w-4 h-4" />
+                    Service
+                  </h3>
+                  <div className="space-y-1">
+                    {mockServiceCatalog.map(service => (
+                      <div key={service.name} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${service.tier === 'critical' ? 'bg-red-500' : service.tier === 'high' ? 'bg-yellow-500' : 'bg-green-500'}`} />
+                          <span className="text-sm">{service.name}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">{service.logsPerSecond}/s</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </Card>
+                </Card>
 
-            <Card className="p-4">
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <Bookmark className="w-4 h-4" />
-                Saved Views
-              </h3>
-              <div className="space-y-2">
-                {mockSavedViews.map(view => (
-                  <div key={view.id} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">{view.name}</span>
-                      {view.isDefault && <Badge variant="outline" className="text-xs">Default</Badge>}
-                    </div>
+                <Card className="p-4">
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <Bookmark className="w-4 h-4" />
+                    Saved Views
+                  </h3>
+                  <div className="space-y-2">
+                    {mockSavedViews.slice(0, 4).map(view => (
+                      <div key={view.id} className="flex items-center justify-between p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">{view.name}</span>
+                          {view.isDefault && <Badge variant="outline" className="text-xs">Default</Badge>}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                  <Button variant="outline" className="w-full mt-3" size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Save View
+                  </Button>
+                </Card>
               </div>
-              <Button variant="outline" className="w-full mt-3" size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Save View
-              </Button>
-            </Card>
-          </div>
 
-          {/* Main Content */}
-          <div className="col-span-4">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="mb-4">
-                <TabsTrigger value="explorer" className="flex items-center gap-2">
-                  <Search className="w-4 h-4" />
-                  Log Explorer
-                </TabsTrigger>
-                <TabsTrigger value="streams" className="flex items-center gap-2">
-                  <Activity className="w-4 h-4" />
-                  Live Streams
-                </TabsTrigger>
-                <TabsTrigger value="patterns" className="flex items-center gap-2">
-                  <Layers className="w-4 h-4" />
-                  Patterns
-                </TabsTrigger>
-                <TabsTrigger value="analytics" className="flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4" />
-                  Analytics
-                </TabsTrigger>
-                <TabsTrigger value="alerts" className="flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4" />
-                  Alerts
-                </TabsTrigger>
-              </TabsList>
-
-              {/* Log Explorer Tab */}
-              <TabsContent value="explorer" className="space-y-4">
-                {/* Log Distribution Chart */}
+              {/* Main Content */}
+              <div className="col-span-4 space-y-4">
+                {/* Log Volume Chart */}
                 <Card className="p-4">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold">Log Volume Over Time</h3>
                     <div className="flex items-center gap-4">
-                      {Object.entries(logsByLevel).map(([level, count]) => (
+                      {Object.entries(logsByLevel).map(([level]) => (
                         <div key={level} className="flex items-center gap-2 text-sm">
                           <div className={`w-3 h-3 rounded ${
-                            level === 'error' ? 'bg-red-500' :
+                            level === 'critical' || level === 'error' ? 'bg-red-500' :
                             level === 'warn' ? 'bg-yellow-500' :
                             level === 'info' ? 'bg-blue-500' : 'bg-green-500'
                           }`} />
@@ -488,8 +815,8 @@ export default function LogsClient() {
                     {Array.from({ length: 60 }).map((_, i) => (
                       <div
                         key={i}
-                        className="flex-1 bg-gradient-to-t from-blue-500 to-blue-300 rounded-t"
-                        style={{ height: `${Math.random() * 100}%` }}
+                        className="flex-1 bg-gradient-to-t from-blue-500 to-blue-300 dark:from-blue-600 dark:to-blue-400 rounded-t"
+                        style={{ height: `${20 + Math.random() * 80}%` }}
                       />
                     ))}
                   </div>
@@ -498,14 +825,10 @@ export default function LogsClient() {
                 {/* Log Entries */}
                 <Card>
                   <div className="p-3 border-b bg-gray-50 dark:bg-gray-800 flex items-center justify-between">
-                    <span className="text-sm text-gray-500">{filteredLogs.length} logs found</span>
+                    <span className="text-sm text-gray-500">{filteredLogs.length} logs found (showing latest 100)</span>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm">
-                        <RefreshCw className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Settings className="w-4 h-4" />
-                      </Button>
+                      <Button variant="ghost" size="sm"><RefreshCw className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="sm"><Settings className="w-4 h-4" /></Button>
                     </div>
                   </div>
                   <ScrollArea className="h-[600px]">
@@ -521,7 +844,7 @@ export default function LogsClient() {
                             className="p-3 flex items-start gap-3 cursor-pointer"
                             onClick={() => toggleLogExpand(log.id)}
                           >
-                            <Button variant="ghost" size="icon" className="h-5 w-5 p-0">
+                            <Button variant="ghost" size="icon" className="h-5 w-5 p-0 flex-shrink-0">
                               {expandedLogs.includes(log.id) ? (
                                 <ChevronDown className="w-4 h-4" />
                               ) : (
@@ -531,18 +854,18 @@ export default function LogsClient() {
                             <span className="text-gray-400 text-xs w-44 flex-shrink-0">
                               {new Date(log.timestamp).toLocaleString()}
                             </span>
-                            <Badge className={`${getLevelColor(log.level)} flex-shrink-0`}>
+                            <Badge className={`${getLevelColor(log.level)} flex-shrink-0 gap-1`}>
                               {getLevelIcon(log.level)}
-                              <span className="ml-1 uppercase">{log.level}</span>
+                              <span className="uppercase">{log.level}</span>
                             </Badge>
-                            <span className="text-purple-600 dark:text-purple-400 flex-shrink-0">
+                            <span className="text-purple-600 dark:text-purple-400 flex-shrink-0 font-medium">
                               {log.service}
                             </span>
                             <span className="text-gray-600 dark:text-gray-300 flex-1 truncate">
                               {log.message}
                             </span>
                             {log.duration && (
-                              <span className="text-xs text-gray-400 flex-shrink-0">
+                              <span className="text-xs text-gray-400 flex-shrink-0 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
                                 {formatDuration(log.duration)}
                               </span>
                             )}
@@ -550,7 +873,7 @@ export default function LogsClient() {
 
                           {expandedLogs.includes(log.id) && (
                             <div className="px-10 pb-4 space-y-3">
-                              <div className="grid grid-cols-4 gap-4 text-xs">
+                              <div className="grid grid-cols-5 gap-4 text-xs">
                                 <div>
                                   <span className="text-gray-500">Host</span>
                                   <p className="font-medium">{log.host}</p>
@@ -561,11 +884,15 @@ export default function LogsClient() {
                                 </div>
                                 <div>
                                   <span className="text-gray-500">Trace ID</span>
-                                  <p className="font-medium text-blue-600">{log.traceId || '-'}</p>
+                                  <p className="font-medium text-blue-600 cursor-pointer hover:underline">{log.traceId || '-'}</p>
                                 </div>
                                 <div>
-                                  <span className="text-gray-500">Duration</span>
-                                  <p className="font-medium">{formatDuration(log.duration)}</p>
+                                  <span className="text-gray-500">Environment</span>
+                                  <p className="font-medium">{log.env}</p>
+                                </div>
+                                <div>
+                                  <span className="text-gray-500">Version</span>
+                                  <p className="font-medium">{log.version || '-'}</p>
                                 </div>
                               </div>
 
@@ -580,6 +907,13 @@ export default function LogsClient() {
 
                               {Object.keys(log.attributes).length > 0 && (
                                 <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-xs font-medium text-gray-500">Attributes</span>
+                                    <Button variant="ghost" size="sm" className="h-6 text-xs">
+                                      <Copy className="w-3 h-3 mr-1" />
+                                      Copy JSON
+                                    </Button>
+                                  </div>
                                   <pre className="text-xs overflow-x-auto">
                                     {JSON.stringify(log.attributes, null, 2)}
                                   </pre>
@@ -601,6 +935,10 @@ export default function LogsClient() {
                                     View Trace
                                   </Button>
                                 )}
+                                <Button variant="ghost" size="sm">
+                                  <Bug className="w-4 h-4 mr-1" />
+                                  Create Issue
+                                </Button>
                               </div>
                             </div>
                           )}
@@ -609,173 +947,491 @@ export default function LogsClient() {
                     </div>
                   </ScrollArea>
                 </Card>
-              </TabsContent>
+              </div>
+            </div>
+          </TabsContent>
 
-              {/* Streams Tab */}
-              <TabsContent value="streams" className="space-y-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">Live Log Streams</h2>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Stream
-                  </Button>
-                </div>
+          {/* Live Tail Tab */}
+          <TabsContent value="streams">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Live Log Streams</h2>
+                <Button><Plus className="w-4 h-4 mr-2" />Create Stream</Button>
+              </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  {mockStreams.map(stream => (
-                    <Card key={stream.id} className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-3 h-3 rounded-full ${stream.isLive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
-                          <div>
-                            <h3 className="font-semibold">{stream.name}</h3>
-                            <code className="text-xs text-gray-500">{stream.query}</code>
-                          </div>
+              <div className="grid grid-cols-3 gap-4">
+                {mockStreams.map(stream => (
+                  <Card key={stream.id} className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-3 h-3 rounded-full ${stream.isLive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+                        <div>
+                          <h3 className="font-semibold">{stream.name}</h3>
+                          <code className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-700 px-1 rounded">{stream.query}</code>
                         </div>
-                        <Button variant="ghost" size="icon">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-2xl font-bold">{stream.count.toLocaleString()}</span>
+                      <Button variant="ghost" size="icon"><MoreHorizontal className="w-4 h-4" /></Button>
+                    </div>
+                    <div className="flex items-center justify-between mt-4">
+                      <span className="text-2xl font-bold">{stream.count.toLocaleString()}</span>
+                      <div className="flex items-center gap-2">
                         <Badge variant={stream.isLive ? 'default' : 'outline'}>
                           {stream.isLive ? 'Live' : 'Paused'}
                         </Badge>
+                        <Button variant="ghost" size="sm">
+                          {stream.isLive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                        </Button>
                       </div>
-                    </Card>
-                  ))}
-                </div>
-              </TabsContent>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-2">
+                      Created by {stream.createdBy} • {stream.sharedWith.length > 0 ? `Shared with ${stream.sharedWith.length}` : 'Private'}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
 
-              {/* Patterns Tab */}
-              <TabsContent value="patterns" className="space-y-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">Log Patterns</h2>
-                  <Button variant="outline">
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Analyze
-                  </Button>
+          {/* Patterns Tab */}
+          <TabsContent value="patterns">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Log Patterns</h2>
+                  <p className="text-gray-500">AI-detected patterns across your logs</p>
                 </div>
+                <Button variant="outline"><Wand2 className="w-4 h-4 mr-2" />Re-analyze</Button>
+              </div>
 
-                <Card>
-                  <ScrollArea className="h-[500px]">
-                    {mockPatterns.map(pattern => (
-                      <div key={pattern.id} className="p-4 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1">
-                            <code className="text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
-                              {pattern.pattern}
-                            </code>
-                            <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                              <span>First seen: {new Date(pattern.firstSeen).toLocaleDateString()}</span>
-                              <span>Last seen: {new Date(pattern.lastSeen).toLocaleString()}</span>
-                            </div>
+              <Card>
+                <ScrollArea className="h-[600px]">
+                  {mockPatterns.map(pattern => (
+                    <div key={pattern.id} className="p-4 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge className={getLevelColor(pattern.level)}>{pattern.level}</Badge>
+                            {pattern.anomalyScore > 0.8 && (
+                              <Badge className="bg-red-100 text-red-700"><AlertCircle className="w-3 h-3 mr-1" />Anomaly</Badge>
+                            )}
+                            <Badge variant="outline">{pattern.status}</Badge>
                           </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold">{pattern.count.toLocaleString()}</p>
-                            <p className="text-sm text-gray-500">{pattern.percentage}%</p>
+                          <code className="text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded block">
+                            {pattern.pattern}
+                          </code>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                            <span>First seen: {pattern.firstSeen.toLocaleDateString()}</span>
+                            <span>Last seen: {pattern.lastSeen.toLocaleString()}</span>
+                            <span>Anomaly score: {(pattern.anomalyScore * 100).toFixed(0)}%</span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 mt-2">
-                          <Badge className={getLevelColor(pattern.level)}>{pattern.level}</Badge>
-                          {pattern.services.map(s => (
-                            <Badge key={s} variant="outline">{s}</Badge>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold">{pattern.count.toLocaleString()}</p>
+                          <p className="text-sm text-gray-500">{pattern.percentage}% of logs</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        {pattern.services.map(s => (
+                          <Badge key={s} variant="outline">{s}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </ScrollArea>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Pipelines Tab */}
+          <TabsContent value="pipelines">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Log Pipelines</h2>
+                  <p className="text-gray-500">Configure log parsing and enrichment</p>
+                </div>
+                <Button onClick={() => setShowPipelineDialog(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Pipeline
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {mockPipelines.map((pipeline, index) => (
+                  <Card key={pipeline.id} className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 text-gray-400">
+                          <span className="text-lg font-mono">#{index + 1}</span>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold">{pipeline.name}</h3>
+                            <Badge className={getPipelineStatusColor(pipeline.status)}>{pipeline.status}</Badge>
+                          </div>
+                          <code className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-700 px-1 rounded">{pipeline.filter}</code>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right text-sm">
+                          <p>{pipeline.logsProcessed.toLocaleString()} logs</p>
+                          <p className="text-gray-500">{formatBytes(pipeline.bytesProcessed)}</p>
+                        </div>
+                        <Switch checked={pipeline.status === 'active'} />
+                      </div>
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {pipeline.processors.map(proc => (
+                        <Badge key={proc.id} variant="outline" className="gap-1">
+                          <Code className="w-3 h-3" />
+                          {proc.type}: {proc.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Indexes Tab */}
+          <TabsContent value="indexes">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Log Indexes</h2>
+                  <p className="text-gray-500">Manage log retention and filtering</p>
+                </div>
+                <Button><Plus className="w-4 h-4 mr-2" />Create Index</Button>
+              </div>
+
+              <div className="space-y-4">
+                {mockIndexes.map(index => (
+                  <Card key={index.id} className="p-4">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold text-lg">{index.name}</h3>
+                          <Badge variant={index.isEnabled ? 'default' : 'outline'}>
+                            {index.isEnabled ? 'Enabled' : 'Disabled'}
+                          </Badge>
+                        </div>
+                        <code className="text-xs text-gray-500">{index.filter}</code>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm">Retention: {index.retentionDays} days</p>
+                        <Switch checked={index.isEnabled} />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Daily Usage</span>
+                        <span>{(index.dailyUsage / 1000000).toFixed(1)}M / {index.dailyLimit ? `${(index.dailyLimit / 1000000).toFixed(0)}M` : 'Unlimited'}</span>
+                      </div>
+                      <Progress value={index.dailyLimit ? (index.dailyUsage / index.dailyLimit) * 100 : 50} />
+                    </div>
+                    {index.exclusionFilters.length > 0 && (
+                      <div className="mt-4 pt-4 border-t">
+                        <p className="text-sm font-medium mb-2">Exclusion Filters</p>
+                        <div className="space-y-2">
+                          {index.exclusionFilters.map(filter => (
+                            <div key={filter.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                              <div className="flex items-center gap-2">
+                                <Switch checked={filter.isEnabled} className="scale-75" />
+                                <span className="text-sm">{filter.name}</span>
+                                <code className="text-xs text-gray-500">{filter.query}</code>
+                              </div>
+                              <Badge variant="outline">{filter.sampleRate}% sampled</Badge>
+                            </div>
                           ))}
                         </div>
                       </div>
-                    ))}
-                  </ScrollArea>
-                </Card>
-              </TabsContent>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
 
-              {/* Analytics Tab */}
-              <TabsContent value="analytics" className="space-y-4">
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  <Card className="p-6">
-                    <h3 className="text-sm text-gray-500 mb-2">Error Trend</h3>
-                    <div className="flex items-center gap-2">
-                      <span className="text-3xl font-bold">-23%</span>
-                      <TrendingDown className="w-5 h-5 text-green-500" />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">vs last period</p>
-                  </Card>
-                  <Card className="p-6">
-                    <h3 className="text-sm text-gray-500 mb-2">Log Volume</h3>
-                    <div className="flex items-center gap-2">
-                      <span className="text-3xl font-bold">+45%</span>
-                      <TrendingUp className="w-5 h-5 text-blue-500" />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">vs last period</p>
-                  </Card>
-                  <Card className="p-6">
-                    <h3 className="text-sm text-gray-500 mb-2">P99 Latency</h3>
-                    <div className="flex items-center gap-2">
-                      <span className="text-3xl font-bold">245ms</span>
-                      <TrendingDown className="w-5 h-5 text-green-500" />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">-12% vs last period</p>
-                  </Card>
+          {/* Archives Tab */}
+          <TabsContent value="archives">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Log Archives</h2>
+                  <p className="text-gray-500">Long-term storage and compliance</p>
                 </div>
+                <Button onClick={() => setShowArchiveDialog(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Archive
+                </Button>
+              </div>
 
-                <Card className="p-6">
-                  <h3 className="font-semibold mb-4">Log Level Distribution Over Time</h3>
-                  <div className="h-64 flex items-center justify-center text-gray-400">
-                    <LineChart className="w-16 h-16" />
-                    <span className="ml-4">Time series chart placeholder</span>
-                  </div>
-                </Card>
-              </TabsContent>
-
-              {/* Alerts Tab */}
-              <TabsContent value="alerts" className="space-y-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold">Log Alerts</h2>
-                  <Button>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create Alert
-                  </Button>
-                </div>
-
-                <div className="grid gap-4">
-                  {mockAlerts.map(alert => (
-                    <Card key={alert.id} className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className={`w-3 h-3 rounded-full ${
-                            alert.status === 'ok' ? 'bg-green-500' :
-                            alert.status === 'warning' ? 'bg-yellow-500' :
-                            alert.status === 'critical' ? 'bg-red-500 animate-pulse' : 'bg-gray-400'
-                          }`} />
-                          <div>
-                            <h3 className="font-semibold">{alert.name}</h3>
-                            <code className="text-xs text-gray-500">{alert.query}</code>
-                          </div>
+              <div className="grid grid-cols-3 gap-4">
+                {mockArchives.map(archive => (
+                  <Card key={archive.id} className="p-4">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                          <CloudUpload className="w-5 h-5 text-blue-600" />
                         </div>
-                        <div className="flex items-center gap-4">
-                          <div className="text-right">
-                            <p className="text-sm">Threshold: {alert.threshold} ({alert.operator})</p>
-                            {alert.lastTriggered && (
-                              <p className="text-xs text-gray-500">
-                                Last triggered: {new Date(alert.lastTriggered).toLocaleString()}
-                              </p>
-                            )}
-                          </div>
-                          <Badge className={getAlertStatusColor(alert.status)}>
-                            {alert.status}
-                          </Badge>
-                          <Button variant="ghost" size="icon">
-                            <Settings className="w-4 h-4" />
-                          </Button>
+                        <div>
+                          <h3 className="font-semibold">{archive.name}</h3>
+                          <p className="text-xs text-gray-500">{archive.destination}</p>
                         </div>
                       </div>
-                    </Card>
+                      <Badge className={archive.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                        {archive.status}
+                      </Badge>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Bucket</span>
+                        <span>{archive.bucket}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Total Size</span>
+                        <span>{archive.totalSize}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Retention</span>
+                        <span>{archive.retentionDays} days</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Encryption</span>
+                        <span className="flex items-center gap-1"><Lock className="w-3 h-3" />{archive.encryptionType}</span>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-4 border-t flex items-center justify-between">
+                      <span className="text-xs text-gray-500">Last archived: {archive.lastArchived.toLocaleString()}</span>
+                      {archive.rehydrationEnabled && (
+                        <Button variant="outline" size="sm"><CloudDownload className="w-4 h-4 mr-1" />Rehydrate</Button>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Alerts Tab */}
+          <TabsContent value="alerts">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Log Alerts</h2>
+                  <p className="text-gray-500">Monitor patterns and anomalies</p>
+                </div>
+                <Button onClick={() => setShowAlertDialog(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Alert
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {mockAlerts.map(alert => (
+                  <Card key={alert.id} className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-3 h-3 rounded-full ${
+                          alert.status === 'ok' ? 'bg-green-500' :
+                          alert.status === 'warning' ? 'bg-yellow-500 animate-pulse' :
+                          alert.status === 'critical' ? 'bg-red-500 animate-pulse' : 'bg-gray-400'
+                        }`} />
+                        <div>
+                          <h3 className="font-semibold">{alert.name}</h3>
+                          <code className="text-xs text-gray-500">{alert.query}</code>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right text-sm">
+                          <p>Threshold: {alert.aggregation} {alert.operator} {alert.threshold.critical}</p>
+                          <p className="text-gray-500">Window: {alert.timeWindow}</p>
+                        </div>
+                        <Badge className={getAlertStatusColor(alert.status)}>{alert.status}</Badge>
+                        <Button variant="ghost" size="icon"><Settings className="w-4 h-4" /></Button>
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+                      <span>Notifications: {alert.notifications.join(', ')}</span>
+                      {alert.lastTriggered && <span>Last triggered: {alert.lastTriggered.toLocaleString()}</span>}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Metrics Tab */}
+          <TabsContent value="metrics">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Log-Based Metrics</h2>
+                  <p className="text-gray-500">Generate metrics from log data</p>
+                </div>
+                <Button><Plus className="w-4 h-4 mr-2" />Create Metric</Button>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <Card className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm text-gray-500">Error Trend (24h)</h3>
+                    <TrendingDown className="w-5 h-5 text-green-500" />
+                  </div>
+                  <p className="text-3xl font-bold">-23%</p>
+                  <p className="text-xs text-gray-500 mt-1">vs previous 24h</p>
+                </Card>
+                <Card className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm text-gray-500">Log Volume</h3>
+                    <TrendingUp className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <p className="text-3xl font-bold">+45%</p>
+                  <p className="text-xs text-gray-500 mt-1">vs previous 24h</p>
+                </Card>
+                <Card className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm text-gray-500">P99 Latency</h3>
+                    <TrendingDown className="w-5 h-5 text-green-500" />
+                  </div>
+                  <p className="text-3xl font-bold">245ms</p>
+                  <p className="text-xs text-gray-500 mt-1">-12% vs previous</p>
+                </Card>
+              </div>
+
+              <Card className="p-6">
+                <h3 className="font-semibold mb-4">Log Level Distribution Over Time</h3>
+                <div className="h-64 flex items-center justify-center text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <LineChart className="w-16 h-16 opacity-50" />
+                  <span className="ml-4">Time series visualization</span>
+                </div>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Sensitive Data Tab */}
+          <TabsContent value="sensitive">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Sensitive Data Scanner</h2>
+                  <p className="text-gray-500">Detect and protect sensitive information</p>
+                </div>
+                <Button onClick={() => setShowSensitiveDialog(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Rule
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                <Card className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
+                  <div className="flex items-center gap-3">
+                    <Shield className="w-8 h-8 text-green-600" />
+                    <div>
+                      <p className="text-2xl font-bold text-green-700">47.4K</p>
+                      <p className="text-sm text-green-600">Matches Redacted</p>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center gap-3">
+                    <Lock className="w-8 h-8 text-blue-600" />
+                    <div>
+                      <p className="text-2xl font-bold">{mockSensitiveRules.filter(r => r.isEnabled).length}</p>
+                      <p className="text-sm text-gray-500">Active Rules</p>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center gap-3">
+                    <Key className="w-8 h-8 text-purple-600" />
+                    <div>
+                      <p className="text-2xl font-bold">567</p>
+                      <p className="text-sm text-gray-500">API Keys Protected</p>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center gap-3">
+                    <Microscope className="w-8 h-8 text-orange-600" />
+                    <div>
+                      <p className="text-2xl font-bold">99.9%</p>
+                      <p className="text-sm text-gray-500">Scan Coverage</p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              <Card>
+                <div className="p-4 border-b bg-gray-50 dark:bg-gray-800">
+                  <h3 className="font-semibold">Scanning Rules</h3>
+                </div>
+                <div className="divide-y">
+                  {mockSensitiveRules.map(rule => (
+                    <div key={rule.id} className="p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <Switch checked={rule.isEnabled} />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium">{rule.name}</h4>
+                            <Badge variant="outline">{rule.type.replace('_', ' ')}</Badge>
+                            <Badge className={
+                              rule.action === 'redact' ? 'bg-red-100 text-red-700' :
+                              rule.action === 'hash' ? 'bg-blue-100 text-blue-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }>{rule.action}</Badge>
+                          </div>
+                          <code className="text-xs text-gray-500">{rule.pattern}</code>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className="font-semibold">{rule.matchCount.toLocaleString()}</p>
+                          <p className="text-xs text-gray-500">matches</p>
+                        </div>
+                        <Button variant="ghost" size="icon"><Settings className="w-4 h-4" /></Button>
+                      </div>
+                    </div>
                   ))}
                 </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
+
+      {/* Log Detail Dialog */}
+      <Dialog open={showLogDialog} onOpenChange={setShowLogDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Log Details</DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="h-[60vh]">
+            {selectedLog && (
+              <div className="space-y-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="font-mono text-sm">{selectedLog.message}</p>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label className="text-gray-500">Service</Label>
+                    <p className="font-medium">{selectedLog.service}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-500">Host</Label>
+                    <p className="font-medium">{selectedLog.host}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-500">Level</Label>
+                    <Badge className={getLevelColor(selectedLog.level)}>{selectedLog.level}</Badge>
+                  </div>
+                </div>
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
