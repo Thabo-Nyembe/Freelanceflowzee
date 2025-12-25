@@ -9,13 +9,18 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   MessageSquare, Phone, Mail, Video, Search, Filter, Clock,
   User, Users, Star, TrendingUp, AlertTriangle, CheckCircle,
   XCircle, MoreVertical, Send, Paperclip, Smile, ArrowRight,
   BarChart3, Target, Zap, Shield, Globe, Tag, Inbox,
-  Archive, Trash2, RefreshCw, ChevronRight, FileText, Bot
+  Archive, Trash2, RefreshCw, ChevronRight, FileText, Bot,
+  Settings, Bell, Lock, Key, Link2, Database, Palette, Headphones,
+  Languages, Volume2, Calendar, Timer
 } from 'lucide-react'
 
 // Types
@@ -181,6 +186,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const [isInternalNote, setIsInternalNote] = useState(false)
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
   const [showAgentDialog, setShowAgentDialog] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
 
   const tickets = mockTickets
   const agents = mockAgents
@@ -693,100 +699,595 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings">
-            <div className="grid grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>SLA Policies</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {slas.map(sla => (
-                      <div key={sla.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <h4 className="font-medium">{sla.name} Priority</h4>
-                          <p className="text-sm text-gray-500">
-                            First Response: {sla.firstResponseTarget}m • Resolution: {sla.resolutionTarget}m
-                          </p>
-                        </div>
-                        <Button variant="outline" size="sm">Edit</Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+          <TabsContent value="settings" className="space-y-6">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+              {/* Settings Sub-tabs */}
+              <div className="border-b border-gray-200 dark:border-gray-700">
+                <div className="flex gap-1 p-2 overflow-x-auto">
+                  {[
+                    { id: 'general', label: 'General', icon: Settings },
+                    { id: 'channels', label: 'Channels', icon: Headphones },
+                    { id: 'sla', label: 'SLA & Routing', icon: Timer },
+                    { id: 'automations', label: 'Automations', icon: Zap },
+                    { id: 'integrations', label: 'Integrations', icon: Link2 },
+                    { id: 'advanced', label: 'Advanced', icon: Database }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setSettingsTab(tab.id)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
+                        settingsTab === tab.id
+                          ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      <tab.icon className="w-4 h-4" />
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Canned Responses</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {cannedResponses.map(response => (
-                      <div key={response.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div>
-                          <h4 className="font-medium text-sm">{response.title}</h4>
-                          <p className="text-xs text-gray-500">{response.category} • Used {response.usageCount} times</p>
+              <div className="p-6">
+                {/* General Settings */}
+                {settingsTab === 'general' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">General Settings</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <MessageSquare className="w-5 h-5 text-emerald-600" />
+                          Support Identity
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Support Team Name</Label>
+                            <Input defaultValue="Kazi Support" className="mt-1" />
+                          </div>
+                          <div>
+                            <Label>Support Email</Label>
+                            <Input defaultValue="support@kazi.io" className="mt-1" />
+                          </div>
                         </div>
-                        <Button variant="ghost" size="sm">
-                          <MoreVertical className="h-4 w-4" />
+                        <div>
+                          <Label>Default Signature</Label>
+                          <textarea
+                            className="w-full mt-1 p-3 border rounded-lg text-sm resize-none h-20"
+                            defaultValue="Best regards,&#10;The Kazi Support Team"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Clock className="w-5 h-5 text-blue-600" />
+                          Business Hours
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Time Zone</Label>
+                            <Select defaultValue="utc-5">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="utc-8">Pacific Time (UTC-8)</SelectItem>
+                                <SelectItem value="utc-5">Eastern Time (UTC-5)</SelectItem>
+                                <SelectItem value="utc">UTC</SelectItem>
+                                <SelectItem value="utc+1">Central European (UTC+1)</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label>Business Hours</Label>
+                            <Select defaultValue="9-17">
+                              <SelectTrigger className="mt-1">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="24-7">24/7</SelectItem>
+                                <SelectItem value="9-17">9 AM - 5 PM</SelectItem>
+                                <SelectItem value="8-20">8 AM - 8 PM</SelectItem>
+                                <SelectItem value="custom">Custom</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Weekend Support</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable support during weekends</p>
+                          </div>
+                          <Switch />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Languages className="w-5 h-5 text-purple-600" />
+                          Language & Localization
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Default Language</Label>
+                          <Select defaultValue="en">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="en">English</SelectItem>
+                              <SelectItem value="es">Spanish</SelectItem>
+                              <SelectItem value="fr">French</SelectItem>
+                              <SelectItem value="de">German</SelectItem>
+                              <SelectItem value="ja">Japanese</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Auto-translate Messages</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Translate incoming messages</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Channels Settings */}
+                {settingsTab === 'channels' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Support Channels</h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[
+                        { name: 'Live Chat', description: 'Real-time website chat', icon: MessageSquare, enabled: true, color: 'emerald' },
+                        { name: 'Email', description: 'support@kazi.io', icon: Mail, enabled: true, color: 'blue' },
+                        { name: 'Phone', description: '+1-800-KAZI', icon: Phone, enabled: true, color: 'purple' },
+                        { name: 'Social Media', description: 'Twitter, Facebook', icon: Globe, enabled: false, color: 'pink' },
+                        { name: 'Help Widget', description: 'Embedded support', icon: Headphones, enabled: true, color: 'amber' },
+                        { name: 'API', description: 'Programmatic tickets', icon: Zap, enabled: true, color: 'cyan' }
+                      ].map(channel => (
+                        <Card key={channel.name}>
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-3">
+                                <div className={`w-10 h-10 rounded-lg bg-${channel.color}-100 dark:bg-${channel.color}-900/40 flex items-center justify-center`}>
+                                  <channel.icon className={`w-5 h-5 text-${channel.color}-600`} />
+                                </div>
+                                <div>
+                                  <h4 className="font-medium text-gray-900 dark:text-white">{channel.name}</h4>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">{channel.description}</p>
+                                </div>
+                              </div>
+                              <Switch defaultChecked={channel.enabled} />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Bot className="w-5 h-5 text-purple-600" />
+                          AI & Chatbot Settings
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>AI Auto-responses</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically suggest responses</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Chatbot First Response</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Let chatbot handle initial contact</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Smart Ticket Categorization</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">AI categorizes and tags tickets</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* SLA & Routing Settings */}
+                {settingsTab === 'sla' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">SLA Policies & Routing</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Target className="w-5 h-5 text-emerald-600" />
+                          SLA Policies
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {slas.map(sla => (
+                            <div key={sla.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div className="flex items-center gap-4">
+                                <div className={`w-3 h-3 rounded-full ${
+                                  sla.priority === 'urgent' ? 'bg-red-500' :
+                                  sla.priority === 'high' ? 'bg-orange-500' :
+                                  sla.priority === 'normal' ? 'bg-blue-500' : 'bg-gray-400'
+                                }`} />
+                                <div>
+                                  <h4 className="font-medium">{sla.name} Priority</h4>
+                                  <p className="text-sm text-gray-500">
+                                    First Response: {sla.firstResponseTarget}m • Resolution: {sla.resolutionTarget}m
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <Badge className={sla.complianceRate >= 95 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}>
+                                  {sla.complianceRate}% compliance
+                                </Badge>
+                                <Button variant="outline" size="sm">Edit</Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline" className="mt-4 w-full">
+                          <Target className="w-4 h-4 mr-2" />
+                          Add SLA Policy
                         </Button>
-                      </div>
-                    ))}
-                    <Button className="w-full">Add Response</Button>
-                  </div>
-                </CardContent>
-              </Card>
+                      </CardContent>
+                    </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Automation Rules</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {[
-                      { name: 'Auto-assign urgent tickets', status: 'active' },
-                      { name: 'Send CSAT survey after resolution', status: 'active' },
-                      { name: 'Escalate unresponded tickets', status: 'active' },
-                      { name: 'Close inactive tickets', status: 'paused' },
-                    ].map((rule, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Zap className={`h-4 w-4 ${rule.status === 'active' ? 'text-emerald-500' : 'text-gray-400'}`} />
-                          <span className="text-sm">{rule.name}</span>
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Users className="w-5 h-5 text-blue-600" />
+                          Ticket Routing
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          <Label>Routing Method</Label>
+                          <Select defaultValue="round-robin">
+                            <SelectTrigger className="mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="round-robin">Round Robin</SelectItem>
+                              <SelectItem value="load-balanced">Load Balanced</SelectItem>
+                              <SelectItem value="skills-based">Skills Based</SelectItem>
+                              <SelectItem value="manual">Manual Assignment</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
-                        <Badge variant={rule.status === 'active' ? 'default' : 'secondary'}>{rule.status}</Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Auto-assign New Tickets</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Automatically assign to available agents</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Priority Routing</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Route urgent tickets to senior agents</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div>
+                          <Label>Max Tickets per Agent</Label>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Input type="number" defaultValue="10" className="w-20" />
+                            <span className="text-sm text-gray-500">tickets</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Integrations</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {[
-                      { name: 'Slack', status: 'connected', icon: '💬' },
-                      { name: 'Salesforce', status: 'connected', icon: '☁️' },
-                      { name: 'Jira', status: 'connected', icon: '📋' },
-                      { name: 'Intercom', status: 'not connected', icon: '💭' },
-                    ].map((int, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xl">{int.icon}</span>
-                          <span className="font-medium text-sm">{int.name}</span>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <AlertTriangle className="w-5 h-5 text-amber-600" />
+                          Escalation Rules
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Auto-escalate SLA Breaches</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify supervisors on SLA breach</p>
+                          </div>
+                          <Switch defaultChecked />
                         </div>
-                        <Badge variant={int.status === 'connected' ? 'default' : 'outline'}>
-                          {int.status === 'connected' ? 'Connected' : 'Connect'}
-                        </Badge>
-                      </div>
-                    ))}
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Escalate Negative Sentiment</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Flag angry customer messages</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
                   </div>
-                </CardContent>
-              </Card>
+                )}
+
+                {/* Automations Settings */}
+                {settingsTab === 'automations' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Automation Rules</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Zap className="w-5 h-5 text-amber-600" />
+                          Active Automations
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {[
+                            { name: 'Auto-assign urgent tickets', trigger: 'When priority = urgent', actions: ['Assign to senior agent', 'Send Slack alert'], status: 'active' },
+                            { name: 'Send CSAT survey after resolution', trigger: 'When status = solved', actions: ['Wait 24h', 'Send survey email'], status: 'active' },
+                            { name: 'Escalate unresponded tickets', trigger: 'No response for 2 hours', actions: ['Notify supervisor', 'Increase priority'], status: 'active' },
+                            { name: 'Close inactive tickets', trigger: 'No activity for 7 days', actions: ['Send reminder', 'Close if no reply'], status: 'paused' },
+                            { name: 'VIP customer routing', trigger: 'Customer tier = enterprise', actions: ['Route to VIP team', 'Set high priority'], status: 'active' }
+                          ].map((rule, i) => (
+                            <div key={i} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-3">
+                                  <Zap className={`h-4 w-4 ${rule.status === 'active' ? 'text-emerald-500' : 'text-gray-400'}`} />
+                                  <span className="font-medium">{rule.name}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant={rule.status === 'active' ? 'default' : 'secondary'}>{rule.status}</Badge>
+                                  <Button variant="ghost" size="sm">Edit</Button>
+                                </div>
+                              </div>
+                              <p className="text-sm text-gray-500 ml-7">
+                                <span className="text-gray-600 dark:text-gray-300">Trigger:</span> {rule.trigger}
+                              </p>
+                              <p className="text-sm text-gray-500 ml-7">
+                                <span className="text-gray-600 dark:text-gray-300">Actions:</span> {rule.actions.join(' → ')}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline" className="mt-4 w-full">
+                          <Zap className="w-4 h-4 mr-2" />
+                          Create Automation
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <FileText className="w-5 h-5 text-blue-600" />
+                          Canned Responses
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {cannedResponses.map(response => (
+                            <div key={response.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                              <div>
+                                <h4 className="font-medium text-sm">{response.title}</h4>
+                                <p className="text-xs text-gray-500">{response.category} • Used {response.usageCount} times</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm">Preview</Button>
+                                <Button variant="ghost" size="sm">Edit</Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline" className="mt-4 w-full">
+                          <FileText className="w-4 h-4 mr-2" />
+                          Add Canned Response
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Integrations Settings */}
+                {settingsTab === 'integrations' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Integrations</h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {[
+                        { name: 'Slack', description: 'Team notifications', icon: MessageSquare, connected: true, color: 'purple' },
+                        { name: 'Salesforce', description: 'CRM sync', icon: Database, connected: true, color: 'blue' },
+                        { name: 'Jira', description: 'Issue tracking', icon: Target, connected: true, color: 'blue' },
+                        { name: 'Intercom', description: 'Chat integration', icon: MessageSquare, connected: false, color: 'blue' },
+                        { name: 'Zendesk', description: 'Migrate tickets', icon: Headphones, connected: false, color: 'green' },
+                        { name: 'HubSpot', description: 'Marketing automation', icon: TrendingUp, connected: false, color: 'orange' }
+                      ].map(integration => (
+                        <Card key={integration.name}>
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-start gap-3">
+                                <div className={`w-10 h-10 rounded-lg bg-${integration.color}-100 dark:bg-${integration.color}-900/40 flex items-center justify-center`}>
+                                  <integration.icon className={`w-5 h-5 text-${integration.color}-600`} />
+                                </div>
+                                <div>
+                                  <h4 className="font-medium text-gray-900 dark:text-white">{integration.name}</h4>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">{integration.description}</p>
+                                </div>
+                              </div>
+                              {integration.connected ? (
+                                <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400">Connected</Badge>
+                              ) : (
+                                <Button size="sm" variant="outline">Connect</Button>
+                              )}
+                            </div>
+                            {integration.connected && (
+                              <div className="mt-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                <RefreshCw className="w-3 h-3" />
+                                Last synced 10 minutes ago
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Key className="w-5 h-5 text-amber-600" />
+                          API Access
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <Label>API Key</Label>
+                            <Button variant="ghost" size="sm">Regenerate</Button>
+                          </div>
+                          <Input type="password" value="cs_live_••••••••••••••••" readOnly className="font-mono" />
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <Button variant="outline" className="flex items-center gap-2">
+                            <FileText className="w-4 h-4" />
+                            API Docs
+                          </Button>
+                          <Button variant="outline" className="flex items-center gap-2">
+                            <Globe className="w-4 h-4" />
+                            Webhooks
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Advanced Settings */}
+                {settingsTab === 'advanced' && (
+                  <div className="space-y-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Advanced Settings</h3>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Bell className="w-5 h-5 text-blue-600" />
+                          Notifications
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>New Ticket Notifications</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Alert agents on new tickets</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>SLA Warning Notifications</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Warn before SLA breach</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>CSAT Response Notifications</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Notify on survey responses</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="mb-6">
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Shield className="w-5 h-5 text-green-600" />
+                          Security & Privacy
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Data Retention</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Keep closed tickets for</p>
+                          </div>
+                          <Select defaultValue="2years">
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1year">1 Year</SelectItem>
+                              <SelectItem value="2years">2 Years</SelectItem>
+                              <SelectItem value="5years">5 Years</SelectItem>
+                              <SelectItem value="forever">Forever</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>Mask Sensitive Data</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Hide credit cards, SSN in tickets</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                          <div>
+                            <Label>GDPR Compliance Mode</Label>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Enable GDPR data handling</p>
+                          </div>
+                          <Switch defaultChecked />
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-800">
+                      <CardHeader>
+                        <CardTitle className="text-base text-red-600 dark:text-red-400 flex items-center gap-2">
+                          <AlertTriangle className="w-5 h-5" />
+                          Danger Zone
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <Label className="text-red-700 dark:text-red-400">Delete All Closed Tickets</Label>
+                            <p className="text-sm text-red-600 dark:text-red-500">Permanently remove closed tickets</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Delete</Button>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div>
+                            <Label className="text-red-700 dark:text-red-400">Reset All Settings</Label>
+                            <p className="text-sm text-red-600 dark:text-red-500">Reset to factory defaults</p>
+                          </div>
+                          <Button variant="destructive" size="sm">Reset</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
             </div>
           </TabsContent>
         </Tabs>
