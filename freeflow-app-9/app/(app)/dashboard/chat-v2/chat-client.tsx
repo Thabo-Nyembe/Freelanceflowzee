@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import {
   MessageSquare,
   Send,
@@ -270,6 +271,10 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
   const [isTyping, setIsTyping] = useState(false)
   const [showNoteDialog, setShowNoteDialog] = useState(false)
   const [newNote, setNewNote] = useState('')
+  const [showSettingsPanel, setShowSettingsPanel] = useState(false)
+  const [settingsTab, setSettingsTab] = useState('general')
+  const [showQuickReplyDialog, setShowQuickReplyDialog] = useState(false)
+  const [showChannelDialog, setShowChannelDialog] = useState(false)
 
   const messageInputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -433,7 +438,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                   </Badge>
                 </div>
               </div>
-              <Button size="sm" variant="ghost">
+              <Button size="sm" variant="ghost" onClick={() => setShowSettingsPanel(true)}>
                 <Settings className="h-4 w-4" />
               </Button>
             </div>
@@ -952,6 +957,176 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowNoteDialog(false)}>Cancel</Button>
             <Button onClick={handleAddNote}>Save Note</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Panel Dialog */}
+      <Dialog open={showSettingsPanel} onOpenChange={setShowSettingsPanel}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Settings className="h-5 w-5" />Chat Settings</DialogTitle>
+            <DialogDescription>Configure your chat experience</DialogDescription>
+          </DialogHeader>
+          <Tabs value={settingsTab} onValueChange={setSettingsTab} className="mt-4">
+            <TabsList className="grid grid-cols-6 w-full">
+              <TabsTrigger value="general">General</TabsTrigger>
+              <TabsTrigger value="notifications">Notifications</TabsTrigger>
+              <TabsTrigger value="quick-replies">Quick Replies</TabsTrigger>
+              <TabsTrigger value="channels">Channels</TabsTrigger>
+              <TabsTrigger value="team">Team</TabsTrigger>
+              <TabsTrigger value="ai">AI & Automation</TabsTrigger>
+            </TabsList>
+
+            <ScrollArea className="h-[500px] mt-4">
+              {/* General Settings */}
+              <TabsContent value="general" className="space-y-4">
+                <Card><CardHeader><CardTitle>Inbox Preferences</CardTitle></CardHeader><CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Show Unread Count</p><p className="text-sm text-gray-500">Display unread badge in sidebar</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Auto-archive Resolved</p><p className="text-sm text-gray-500">Move closed chats to archive</p></div><Switch /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Show Customer Panel</p><p className="text-sm text-gray-500">Always show customer info sidebar</p></div><Switch defaultChecked /></div>
+                  <div><Label>Default Inbox View</Label><Select defaultValue="all"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">All Conversations</SelectItem><SelectItem value="mine">My Conversations</SelectItem><SelectItem value="unassigned">Unassigned</SelectItem></SelectContent></Select></div>
+                </CardContent></Card>
+                <Card><CardHeader><CardTitle>Message Settings</CardTitle></CardHeader><CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Show Typing Indicator</p><p className="text-sm text-gray-500">Show when you're typing</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Read Receipts</p><p className="text-sm text-gray-500">Show when messages are read</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Message Previews</p><p className="text-sm text-gray-500">Show message content in list</p></div><Switch defaultChecked /></div>
+                  <div><Label>Send on Enter</Label><Select defaultValue="enter"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="enter">Enter to send</SelectItem><SelectItem value="shift-enter">Shift+Enter to send</SelectItem></SelectContent></Select></div>
+                </CardContent></Card>
+              </TabsContent>
+
+              {/* Notifications Settings */}
+              <TabsContent value="notifications" className="space-y-4">
+                <Card><CardHeader><CardTitle>Desktop Notifications</CardTitle></CardHeader><CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Enable Notifications</p><p className="text-sm text-gray-500">Show desktop notifications</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">New Messages</p><p className="text-sm text-gray-500">Notify on new messages</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Mentions Only</p><p className="text-sm text-gray-500">Only when @mentioned</p></div><Switch /></div>
+                </CardContent></Card>
+                <Card><CardHeader><CardTitle>Sound Settings</CardTitle></CardHeader><CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Sound Alerts</p><p className="text-sm text-gray-500">Play sound for messages</p></div><Switch defaultChecked /></div>
+                  <div><Label>Notification Sound</Label><Select defaultValue="chime"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="chime">Chime</SelectItem><SelectItem value="pop">Pop</SelectItem><SelectItem value="ding">Ding</SelectItem><SelectItem value="none">None</SelectItem></SelectContent></Select></div>
+                </CardContent></Card>
+                <Card><CardHeader><CardTitle>Do Not Disturb</CardTitle></CardHeader><CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Enable DND</p><p className="text-sm text-gray-500">Pause all notifications</p></div><Switch /></div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div><Label>Start Time</Label><Input type="time" defaultValue="18:00" className="mt-1" /></div>
+                    <div><Label>End Time</Label><Input type="time" defaultValue="09:00" className="mt-1" /></div>
+                  </div>
+                </CardContent></Card>
+              </TabsContent>
+
+              {/* Quick Replies Settings */}
+              <TabsContent value="quick-replies" className="space-y-4">
+                <div className="flex justify-end"><Button onClick={() => setShowQuickReplyDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Reply</Button></div>
+                <Card><CardContent className="p-0 divide-y">
+                  {SAVED_REPLIES.map(reply => (
+                    <div key={reply.id} className="flex items-center justify-between p-4 hover:bg-gray-50">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1"><h4 className="font-medium">{reply.name}</h4><Badge variant="outline">{reply.shortcut}</Badge></div>
+                        <p className="text-sm text-gray-500 line-clamp-1">{reply.content}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">{reply.category}</Badge>
+                        <span className="text-xs text-gray-400">{reply.usageCount} uses</span>
+                        <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent></Card>
+              </TabsContent>
+
+              {/* Channels Settings */}
+              <TabsContent value="channels" className="space-y-4">
+                <Card><CardHeader><CardTitle>Chat Widget</CardTitle></CardHeader><CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Enable Chat Widget</p><p className="text-sm text-gray-500">Show widget on website</p></div><Switch defaultChecked /></div>
+                  <div><Label>Widget Position</Label><Select defaultValue="right"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="left">Bottom Left</SelectItem><SelectItem value="right">Bottom Right</SelectItem></SelectContent></Select></div>
+                  <div><Label>Widget Color</Label><div className="flex gap-2 mt-2">{['#06B6D4', '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'].map(c => (<button key={c} className="w-8 h-8 rounded-full border-2" style={{ backgroundColor: c }} />))}</div></div>
+                </CardContent></Card>
+                <Card><CardHeader><CardTitle>Email Channel</CardTitle></CardHeader><CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Forward to Chat</p><p className="text-sm text-gray-500">Convert emails to conversations</p></div><Switch defaultChecked /></div>
+                  <div><Label>Email Address</Label><Input defaultValue="support@company.com" className="mt-1" /></div>
+                </CardContent></Card>
+                <Card><CardHeader><CardTitle>Social Channels</CardTitle></CardHeader><CardContent className="space-y-4">
+                  {['Facebook Messenger', 'WhatsApp', 'Twitter DM', 'Instagram DM'].map(channel => (
+                    <div key={channel} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center gap-3"><Globe className="h-5 w-5 text-gray-400" /><span>{channel}</span></div>
+                      <Button variant="outline" size="sm">Connect</Button>
+                    </div>
+                  ))}
+                </CardContent></Card>
+              </TabsContent>
+
+              {/* Team Settings */}
+              <TabsContent value="team" className="space-y-4">
+                <Card><CardHeader><div className="flex items-center justify-between"><CardTitle>Team Members</CardTitle><Button size="sm"><UserPlus className="h-4 w-4 mr-2" />Invite</Button></div></CardHeader><CardContent className="p-0 divide-y">
+                  {TEAM_MEMBERS.map(member => (
+                    <div key={member.id} className="flex items-center justify-between p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="relative">
+                          <Avatar><AvatarImage src={member.avatar} /><AvatarFallback>{member.name[0]}</AvatarFallback></Avatar>
+                          <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-white rounded-full ${member.status === 'online' ? 'bg-green-500' : member.status === 'away' ? 'bg-yellow-500' : 'bg-gray-400'}`} />
+                        </div>
+                        <div><p className="font-medium">{member.name}</p><p className="text-sm text-gray-500">{member.email}</p></div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="outline" className="capitalize">{member.role}</Badge>
+                        <div className="text-right text-xs text-gray-500"><div>{member.assignedConversations} active</div><div>{member.resolvedToday} resolved today</div></div>
+                        <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent></Card>
+                <Card><CardHeader><CardTitle>Assignment Rules</CardTitle></CardHeader><CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Auto-assign</p><p className="text-sm text-gray-500">Automatically assign new chats</p></div><Switch defaultChecked /></div>
+                  <div><Label>Assignment Method</Label><Select defaultValue="round-robin"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="round-robin">Round Robin</SelectItem><SelectItem value="load-balanced">Load Balanced</SelectItem><SelectItem value="random">Random</SelectItem></SelectContent></Select></div>
+                </CardContent></Card>
+              </TabsContent>
+
+              {/* AI & Automation Settings */}
+              <TabsContent value="ai" className="space-y-4">
+                <Card><CardHeader><CardTitle>AI Assistant</CardTitle></CardHeader><CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Enable AI Suggestions</p><p className="text-sm text-gray-500">Show AI-powered response suggestions</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Auto-tag Conversations</p><p className="text-sm text-gray-500">AI automatically adds relevant tags</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Sentiment Analysis</p><p className="text-sm text-gray-500">Analyze customer sentiment</p></div><Switch defaultChecked /></div>
+                  <div><Label>Confidence Threshold</Label><Select defaultValue="80"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="60">60% - Show more suggestions</SelectItem><SelectItem value="80">80% - Balanced</SelectItem><SelectItem value="95">95% - High confidence only</SelectItem></SelectContent></Select></div>
+                </CardContent></Card>
+                <Card><CardHeader><CardTitle>Automations</CardTitle></CardHeader><CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Welcome Message</p><p className="text-sm text-gray-500">Send greeting to new visitors</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Away Message</p><p className="text-sm text-gray-500">Auto-reply when offline</p></div><Switch defaultChecked /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Business Hours</p><p className="text-sm text-gray-500">Show availability status</p></div><Switch defaultChecked /></div>
+                </CardContent></Card>
+                <Card><CardHeader><CardTitle>Chatbot</CardTitle></CardHeader><CardContent className="space-y-4">
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Enable Chatbot</p><p className="text-sm text-gray-500">Handle common questions automatically</p></div><Switch /></div>
+                  <div className="flex items-center justify-between"><div><p className="font-medium">Human Handoff</p><p className="text-sm text-gray-500">Transfer to agent when needed</p></div><Switch defaultChecked /></div>
+                  <div><Label>Bot Personality</Label><Select defaultValue="friendly"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="friendly">Friendly & Casual</SelectItem><SelectItem value="professional">Professional</SelectItem><SelectItem value="formal">Formal</SelectItem></SelectContent></Select></div>
+                </CardContent></Card>
+              </TabsContent>
+            </ScrollArea>
+          </Tabs>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowSettingsPanel(false)}>Cancel</Button>
+            <Button className="bg-cyan-600 hover:bg-cyan-700">Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Quick Reply Dialog */}
+      <Dialog open={showQuickReplyDialog} onOpenChange={setShowQuickReplyDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Quick Reply</DialogTitle>
+            <DialogDescription>Add a new saved response</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div><Label>Name</Label><Input placeholder="e.g., Pricing Info" className="mt-1" /></div>
+            <div><Label>Shortcut</Label><Input placeholder="e.g., /pricing" className="mt-1" /></div>
+            <div><Label>Category</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select category" /></SelectTrigger><SelectContent><SelectItem value="general">General</SelectItem><SelectItem value="sales">Sales</SelectItem><SelectItem value="support">Support</SelectItem><SelectItem value="product">Product</SelectItem></SelectContent></Select></div>
+            <div><Label>Message</Label><Textarea placeholder="Enter your quick reply..." rows={4} className="mt-1" /></div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowQuickReplyDialog(false)}>Cancel</Button>
+            <Button className="bg-cyan-600">Create Reply</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
