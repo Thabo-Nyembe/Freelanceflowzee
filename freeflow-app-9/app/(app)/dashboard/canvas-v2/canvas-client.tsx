@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo} from 'react'
+import { useState, useMemo } from 'react'
 import { useCanvas, type Canvas, type CanvasType, type CanvasStatus } from '@/lib/hooks/use-canvas'
 import {
   Layout, Square, Circle, Triangle, Minus, Type, Image, Sticky,
@@ -12,71 +12,258 @@ import {
   AlignLeft, AlignCenter, AlignRight, AlignStartVertical,
   AlignCenterVertical, AlignEndVertical, Sparkles, FileText,
   BarChart3, Workflow, GitBranch, Shapes, Frame, Component,
-  Table2, Calendar, Map, Code, Database, Monitor, Smartphone
+  Table2, Calendar, Map, Code, Database, Monitor, Smartphone,
+  History, Bell, Shield, Paintbrush, MousePointer2, Layers3,
+  FolderOpen, FileImage, Figma, PaintBucket, RotateCcw,
+  FlipHorizontal, FlipVertical, Group, Ungroup, BringToFront,
+  SendToBack, AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter,
+  Crown, Wand2, Merge, Split, Slice, Scissors, Droplet
 } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Progress } from '@/components/ui/progress'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Switch } from '@/components/ui/switch'
 
-type ViewMode = 'canvases' | 'templates' | 'components' | 'recent'
-type ToolType = 'select' | 'hand' | 'rectangle' | 'ellipse' | 'line' | 'text' | 'sticky' | 'pen' | 'frame' | 'comment'
+type ToolType = 'select' | 'hand' | 'rectangle' | 'ellipse' | 'line' | 'text' | 'sticky' | 'pen' | 'frame' | 'comment' | 'image' | 'component'
 
-interface CanvasTemplate {
+interface CanvasBoard {
+  id: string
+  name: string
+  description: string
+  type: 'whiteboard' | 'wireframe' | 'diagram' | 'prototype' | 'presentation'
+  status: 'draft' | 'in_progress' | 'review' | 'approved' | 'archived'
+  thumbnail: string
+  owner: { name: string; avatar: string }
+  collaborators: { name: string; avatar: string; role: string; online: boolean }[]
+  elements_count: number
+  frames_count: number
+  comments_count: number
+  version: string
+  last_edited: string
+  created_at: string
+  is_public: boolean
+  is_starred: boolean
+  tags: string[]
+  project_id: string
+}
+
+interface DesignTemplate {
   id: string
   name: string
   category: string
+  subcategory: string
   thumbnail: string
   description: string
-  popular: boolean
+  elements_count: number
+  downloads: number
+  rating: number
+  is_premium: boolean
+  author: string
+  tags: string[]
 }
 
-interface ShapeComponent {
+interface DesignComponent {
   id: string
   name: string
   category: string
   icon: any
   description: string
+  variants: number
+  instances: number
+  is_published: boolean
+  last_updated: string
+}
+
+interface VersionHistory {
+  id: string
+  version: string
+  description: string
+  author: { name: string; avatar: string }
+  timestamp: string
+  changes: number
+  is_current: boolean
+  is_milestone: boolean
+}
+
+interface CanvasComment {
+  id: string
+  author: { name: string; avatar: string }
+  content: string
+  position: { x: number; y: number }
+  timestamp: string
+  resolved: boolean
+  replies: number
+  thread_id: string
+}
+
+interface TeamMember {
+  id: string
+  name: string
+  email: string
+  avatar: string
+  role: 'owner' | 'editor' | 'viewer' | 'commenter'
+  status: 'active' | 'pending' | 'inactive'
+  last_active: string
+  boards_access: number
 }
 
 export default function CanvasClient({ initialCanvases }: { initialCanvases: Canvas[] }) {
-  const [canvasTypeFilter, setCanvasTypeFilter] = useState<CanvasType | 'all'>('all')
-  const [statusFilter, setStatusFilter] = useState<CanvasStatus | 'all'>('all')
-  const [viewMode, setViewMode] = useState<ViewMode>('canvases')
+  const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCanvas, setSelectedCanvas] = useState<Canvas | null>(null)
-  const [showNewCanvas, setShowNewCanvas] = useState(false)
+  const [selectedBoard, setSelectedBoard] = useState<CanvasBoard | null>(null)
+  const [showNewBoard, setShowNewBoard] = useState(false)
+  const [showEditor, setShowEditor] = useState(false)
   const [selectedTool, setSelectedTool] = useState<ToolType>('select')
   const [zoom, setZoom] = useState(100)
-  const [showEditor, setShowEditor] = useState(false)
-  const { canvases, loading, error } = useCanvas({ canvasType: canvasTypeFilter, status: statusFilter })
+
+  const { canvases, loading, error } = useCanvas({ canvasType: 'all', status: 'all' })
   const displayCanvases = canvases.length > 0 ? canvases : initialCanvases
 
-  // Mock templates
-  const templates: CanvasTemplate[] = [
-    { id: '1', name: 'Brainstorming Session', category: 'Workshop', thumbnail: '💡', description: 'Collaborative idea generation', popular: true },
-    { id: '2', name: 'User Journey Map', category: 'UX', thumbnail: '🗺️', description: 'Map user experience flows', popular: true },
-    { id: '3', name: 'Sprint Retrospective', category: 'Agile', thumbnail: '🔄', description: 'Team reflection template', popular: false },
-    { id: '4', name: 'Mind Map', category: 'Planning', thumbnail: '🧠', description: 'Visual thinking canvas', popular: true },
-    { id: '5', name: 'Kanban Board', category: 'Project', thumbnail: '📋', description: 'Task management board', popular: true },
-    { id: '6', name: 'Wireframe Kit', category: 'Design', thumbnail: '🖼️', description: 'UI wireframing components', popular: false },
-    { id: '7', name: 'Flowchart', category: 'Process', thumbnail: '📊', description: 'Process flow diagrams', popular: true },
-    { id: '8', name: 'Org Chart', category: 'Team', thumbnail: '👥', description: 'Organization structure', popular: false }
+  // Mock canvas boards
+  const boards: CanvasBoard[] = [
+    {
+      id: '1', name: 'App Redesign v2.0', description: 'Complete mobile app redesign with new design system',
+      type: 'wireframe', status: 'in_progress', thumbnail: '📱',
+      owner: { name: 'Sarah Chen', avatar: '' },
+      collaborators: [
+        { name: 'Mike Ross', avatar: '', role: 'Editor', online: true },
+        { name: 'Emily Davis', avatar: '', role: 'Viewer', online: false },
+        { name: 'John Smith', avatar: '', role: 'Commenter', online: true }
+      ],
+      elements_count: 847, frames_count: 24, comments_count: 56, version: '2.4.1',
+      last_edited: '5 min ago', created_at: '2024-01-15', is_public: false, is_starred: true,
+      tags: ['mobile', 'redesign', 'ios'], project_id: 'proj-1'
+    },
+    {
+      id: '2', name: 'User Flow Diagrams', description: 'Complete user journey mapping for checkout flow',
+      type: 'diagram', status: 'review', thumbnail: '🔄',
+      owner: { name: 'Mike Ross', avatar: '' },
+      collaborators: [
+        { name: 'Sarah Chen', avatar: '', role: 'Editor', online: true }
+      ],
+      elements_count: 156, frames_count: 8, comments_count: 23, version: '1.2.0',
+      last_edited: '2 hours ago', created_at: '2024-02-01', is_public: true, is_starred: true,
+      tags: ['ux', 'flow', 'checkout'], project_id: 'proj-1'
+    },
+    {
+      id: '3', name: 'Brand Guidelines', description: 'Company brand identity and style guide',
+      type: 'presentation', status: 'approved', thumbnail: '🎨',
+      owner: { name: 'Emily Davis', avatar: '' },
+      collaborators: [
+        { name: 'Sarah Chen', avatar: '', role: 'Viewer', online: false }
+      ],
+      elements_count: 234, frames_count: 16, comments_count: 8, version: '3.0.0',
+      last_edited: '1 day ago', created_at: '2024-01-01', is_public: true, is_starred: false,
+      tags: ['brand', 'guidelines', 'identity'], project_id: 'proj-2'
+    },
+    {
+      id: '4', name: 'Sprint Brainstorm', description: 'Team ideation session for Q2 features',
+      type: 'whiteboard', status: 'in_progress', thumbnail: '💡',
+      owner: { name: 'John Smith', avatar: '' },
+      collaborators: [
+        { name: 'Sarah Chen', avatar: '', role: 'Editor', online: true },
+        { name: 'Mike Ross', avatar: '', role: 'Editor', online: true },
+        { name: 'Emily Davis', avatar: '', role: 'Editor', online: false }
+      ],
+      elements_count: 423, frames_count: 4, comments_count: 89, version: '1.0.5',
+      last_edited: '10 min ago', created_at: '2024-02-15', is_public: false, is_starred: false,
+      tags: ['brainstorm', 'q2', 'features'], project_id: 'proj-3'
+    },
+    {
+      id: '5', name: 'Interactive Prototype', description: 'Clickable prototype for user testing',
+      type: 'prototype', status: 'draft', thumbnail: '🖱️',
+      owner: { name: 'Sarah Chen', avatar: '' },
+      collaborators: [],
+      elements_count: 567, frames_count: 32, comments_count: 0, version: '0.1.0',
+      last_edited: '3 hours ago', created_at: '2024-02-20', is_public: false, is_starred: false,
+      tags: ['prototype', 'testing', 'interactive'], project_id: 'proj-1'
+    }
   ]
 
-  // Shape components
-  const components: ShapeComponent[] = [
-    { id: '1', name: 'Rectangle', category: 'Shapes', icon: Square, description: 'Basic rectangle shape' },
-    { id: '2', name: 'Ellipse', category: 'Shapes', icon: Circle, description: 'Circle and oval shapes' },
-    { id: '3', name: 'Line', category: 'Shapes', icon: Minus, description: 'Lines and arrows' },
-    { id: '4', name: 'Triangle', category: 'Shapes', icon: Triangle, description: 'Triangle shape' },
-    { id: '5', name: 'Frame', category: 'Layout', icon: Frame, description: 'Container frame' },
-    { id: '6', name: 'Text', category: 'Content', icon: Type, description: 'Text element' },
-    { id: '7', name: 'Sticky Note', category: 'Content', icon: Sticky, description: 'Sticky note' },
-    { id: '8', name: 'Image', category: 'Media', icon: Image, description: 'Image placeholder' },
-    { id: '9', name: 'Table', category: 'Data', icon: Table2, description: 'Data table' },
-    { id: '10', name: 'Flowchart Node', category: 'Diagram', icon: Workflow, description: 'Process node' },
-    { id: '11', name: 'Connector', category: 'Diagram', icon: GitBranch, description: 'Connection line' },
-    { id: '12', name: 'Code Block', category: 'Dev', icon: Code, description: 'Code snippet' }
+  // Mock templates
+  const templates: DesignTemplate[] = [
+    { id: '1', name: 'iOS App Template', category: 'Mobile', subcategory: 'iOS', thumbnail: '📱',
+      description: 'Complete iOS app design kit with 100+ screens', elements_count: 450, downloads: 12500,
+      rating: 4.8, is_premium: false, author: 'Design Systems', tags: ['ios', 'mobile', 'app'] },
+    { id: '2', name: 'Web Dashboard', category: 'Web', subcategory: 'Dashboard', thumbnail: '📊',
+      description: 'Admin dashboard with charts and data visualization', elements_count: 280, downloads: 8900,
+      rating: 4.7, is_premium: true, author: 'UI Masters', tags: ['dashboard', 'admin', 'charts'] },
+    { id: '3', name: 'User Journey Map', category: 'UX', subcategory: 'Research', thumbnail: '🗺️',
+      description: 'User experience journey mapping template', elements_count: 45, downloads: 15600,
+      rating: 4.9, is_premium: false, author: 'UX Toolkit', tags: ['ux', 'journey', 'research'] },
+    { id: '4', name: 'Sprint Retro Board', category: 'Agile', subcategory: 'Retrospective', thumbnail: '🔄',
+      description: 'Team retrospective with voting and actions', elements_count: 32, downloads: 23400,
+      rating: 4.6, is_premium: false, author: 'Agile Templates', tags: ['agile', 'retro', 'team'] },
+    { id: '5', name: 'Wireframe Kit Pro', category: 'UI', subcategory: 'Wireframes', thumbnail: '🖼️',
+      description: 'Low-fidelity wireframe components library', elements_count: 380, downloads: 19200,
+      rating: 4.8, is_premium: true, author: 'Wireframe Pro', tags: ['wireframe', 'ui', 'lofi'] },
+    { id: '6', name: 'Mind Map Bundle', category: 'Planning', subcategory: 'Ideation', thumbnail: '🧠',
+      description: 'Mind mapping and brainstorming templates', elements_count: 56, downloads: 11300,
+      rating: 4.5, is_premium: false, author: 'Think Visual', tags: ['mindmap', 'brainstorm', 'planning'] }
+  ]
+
+  // Design components
+  const components: DesignComponent[] = [
+    { id: '1', name: 'Button', category: 'Interactive', icon: Square, description: 'Button component with states',
+      variants: 12, instances: 234, is_published: true, last_updated: '2 days ago' },
+    { id: '2', name: 'Input Field', category: 'Forms', icon: Type, description: 'Text input with validation',
+      variants: 8, instances: 189, is_published: true, last_updated: '1 week ago' },
+    { id: '3', name: 'Card', category: 'Layout', icon: Square, description: 'Content card container',
+      variants: 6, instances: 156, is_published: true, last_updated: '3 days ago' },
+    { id: '4', name: 'Avatar', category: 'Media', icon: Circle, description: 'User avatar with sizes',
+      variants: 4, instances: 98, is_published: true, last_updated: '5 days ago' },
+    { id: '5', name: 'Navigation', category: 'Layout', icon: Minus, description: 'Navigation bar component',
+      variants: 3, instances: 45, is_published: true, last_updated: '1 day ago' },
+    { id: '6', name: 'Modal', category: 'Overlay', icon: Frame, description: 'Modal dialog component',
+      variants: 5, instances: 67, is_published: true, last_updated: '4 days ago' },
+    { id: '7', name: 'Table', category: 'Data', icon: Table2, description: 'Data table with sorting',
+      variants: 4, instances: 34, is_published: false, last_updated: '6 days ago' },
+    { id: '8', name: 'Chart', category: 'Data', icon: BarChart3, description: 'Chart visualizations',
+      variants: 8, instances: 56, is_published: true, last_updated: '2 days ago' }
+  ]
+
+  // Version history
+  const versions: VersionHistory[] = [
+    { id: '1', version: '2.4.1', description: 'Updated button styles and fixed navigation',
+      author: { name: 'Sarah Chen', avatar: '' }, timestamp: '5 min ago', changes: 12, is_current: true, is_milestone: false },
+    { id: '2', version: '2.4.0', description: 'Added new checkout flow screens',
+      author: { name: 'Mike Ross', avatar: '' }, timestamp: '2 hours ago', changes: 45, is_current: false, is_milestone: true },
+    { id: '3', version: '2.3.2', description: 'Fixed responsive layouts',
+      author: { name: 'Sarah Chen', avatar: '' }, timestamp: '1 day ago', changes: 8, is_current: false, is_milestone: false },
+    { id: '4', version: '2.3.0', description: 'Major redesign of home screen',
+      author: { name: 'Emily Davis', avatar: '' }, timestamp: '3 days ago', changes: 67, is_current: false, is_milestone: true },
+    { id: '5', version: '2.2.0', description: 'Added dark mode support',
+      author: { name: 'Sarah Chen', avatar: '' }, timestamp: '1 week ago', changes: 89, is_current: false, is_milestone: true }
+  ]
+
+  // Comments
+  const comments: CanvasComment[] = [
+    { id: '1', author: { name: 'Mike Ross', avatar: '' }, content: 'Should we increase the button size for mobile?',
+      position: { x: 450, y: 320 }, timestamp: '10 min ago', resolved: false, replies: 3, thread_id: 't1' },
+    { id: '2', author: { name: 'Emily Davis', avatar: '' }, content: 'Love the new color scheme!',
+      position: { x: 200, y: 150 }, timestamp: '1 hour ago', resolved: true, replies: 1, thread_id: 't2' },
+    { id: '3', author: { name: 'John Smith', avatar: '' }, content: 'Can we add a loading state here?',
+      position: { x: 600, y: 400 }, timestamp: '2 hours ago', resolved: false, replies: 5, thread_id: 't3' }
+  ]
+
+  // Team members
+  const teamMembers: TeamMember[] = [
+    { id: '1', name: 'Sarah Chen', email: 'sarah@company.com', avatar: '', role: 'owner', status: 'active',
+      last_active: 'Now', boards_access: 12 },
+    { id: '2', name: 'Mike Ross', email: 'mike@company.com', avatar: '', role: 'editor', status: 'active',
+      last_active: '5 min ago', boards_access: 8 },
+    { id: '3', name: 'Emily Davis', email: 'emily@company.com', avatar: '', role: 'editor', status: 'active',
+      last_active: '2 hours ago', boards_access: 6 },
+    { id: '4', name: 'John Smith', email: 'john@company.com', avatar: '', role: 'commenter', status: 'active',
+      last_active: '1 day ago', boards_access: 4 },
+    { id: '5', name: 'Lisa Wang', email: 'lisa@company.com', avatar: '', role: 'viewer', status: 'pending',
+      last_active: 'Never', boards_access: 0 }
   ]
 
   const tools = [
@@ -89,33 +276,53 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     { id: 'text' as ToolType, name: 'Text', icon: Type, shortcut: 'T' },
     { id: 'sticky' as ToolType, name: 'Sticky', icon: Sticky, shortcut: 'S' },
     { id: 'pen' as ToolType, name: 'Pen', icon: PenTool, shortcut: 'P' },
+    { id: 'image' as ToolType, name: 'Image', icon: Image, shortcut: 'I' },
+    { id: 'component' as ToolType, name: 'Component', icon: Component, shortcut: 'A' },
     { id: 'comment' as ToolType, name: 'Comment', icon: MessageSquare, shortcut: 'C' }
   ]
 
   const stats = useMemo(() => ({
-    total: displayCanvases.length,
-    active: displayCanvases.filter(c => c.status === 'active').length,
-    shared: displayCanvases.filter(c => c.is_shared).length,
-    collaborative: displayCanvases.filter(c => c.collaborators_count > 1).length,
-    totalElements: displayCanvases.reduce((sum, c) => sum + c.object_count, 0),
-    totalCollaborators: displayCanvases.reduce((sum, c) => sum + (c.collaborators_count || 0), 0)
-  }), [displayCanvases])
+    totalBoards: boards.length,
+    totalElements: boards.reduce((sum, b) => sum + b.elements_count, 0),
+    totalFrames: boards.reduce((sum, b) => sum + b.frames_count, 0),
+    activeCollaborators: new Set(boards.flatMap(b => b.collaborators.filter(c => c.online).map(c => c.name))).size,
+    totalComments: boards.reduce((sum, b) => sum + b.comments_count, 0),
+    unresolvedComments: comments.filter(c => !c.resolved).length,
+    publishedComponents: components.filter(c => c.is_published).length,
+    totalInstances: components.reduce((sum, c) => sum + c.instances, 0)
+  }), [boards, comments, components])
 
-  const filteredCanvases = useMemo(() => {
-    let filtered = displayCanvases
-    if (canvasTypeFilter !== 'all') {
-      filtered = filtered.filter(c => c.canvas_type === canvasTypeFilter)
+  const getStatusColor = (status: CanvasBoard['status']): string => {
+    const colors: Record<CanvasBoard['status'], string> = {
+      draft: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+      in_progress: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      review: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+      approved: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      archived: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-400'
     }
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(c => c.status === statusFilter)
+    return colors[status]
+  }
+
+  const getTypeColor = (type: CanvasBoard['type']): string => {
+    const colors: Record<CanvasBoard['type'], string> = {
+      whiteboard: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+      wireframe: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      diagram: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      prototype: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+      presentation: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400'
     }
-    if (searchQuery) {
-      filtered = filtered.filter(c =>
-        c.canvas_name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+    return colors[type]
+  }
+
+  const getRoleColor = (role: TeamMember['role']): string => {
+    const colors: Record<TeamMember['role'], string> = {
+      owner: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+      editor: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      viewer: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+      commenter: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
     }
-    return filtered
-  }, [displayCanvases, canvasTypeFilter, statusFilter, searchQuery])
+    return colors[role]
+  }
 
   const handleZoom = (direction: 'in' | 'out') => {
     setZoom(prev => direction === 'in' ? Math.min(prev + 10, 200) : Math.max(prev - 10, 25))
@@ -124,71 +331,88 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
   if (error) return <div className="p-8"><div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
 
   // Full Editor View
-  if (showEditor && selectedCanvas) {
+  if (showEditor && selectedBoard) {
     return (
       <div className="h-screen flex flex-col bg-gray-900">
         {/* Editor Toolbar */}
-        <div className="h-12 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4">
+        <div className="h-14 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setShowEditor(false)}
-              className="text-gray-400 hover:text-white"
-            >
+            <Button variant="ghost" onClick={() => setShowEditor(false)} className="text-gray-400 hover:text-white">
               ← Back
-            </button>
-            <div className="text-white font-medium">{selectedCanvas.canvas_name}</div>
-            <div className="flex items-center gap-1 text-xs text-gray-400 bg-gray-700 rounded px-2 py-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            </Button>
+            <div className="text-white font-medium">{selectedBoard.name}</div>
+            <Badge variant="outline" className="text-green-400 border-green-400">
+              <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
               Live
-            </div>
+            </Badge>
+            <Badge className={getStatusColor(selectedBoard.status)}>{selectedBoard.status}</Badge>
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded">
+            <div className="flex -space-x-2 mr-4">
+              {selectedBoard.collaborators.filter(c => c.online).slice(0, 3).map((collab, i) => (
+                <Avatar key={i} className="h-8 w-8 border-2 border-gray-800">
+                  <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-xs">
+                    {collab.name.split(' ').map(n => n[0]).join('')}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+              {selectedBoard.collaborators.filter(c => c.online).length > 3 && (
+                <div className="h-8 w-8 rounded-full bg-gray-700 border-2 border-gray-800 flex items-center justify-center text-xs text-gray-300">
+                  +{selectedBoard.collaborators.filter(c => c.online).length - 3}
+                </div>
+              )}
+            </div>
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
               <Undo className="h-4 w-4" />
-            </button>
-            <button className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded">
+            </Button>
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
               <Redo className="h-4 w-4" />
-            </button>
+            </Button>
             <div className="w-px h-6 bg-gray-700 mx-2"></div>
-            <div className="flex items-center gap-1 bg-gray-700 rounded px-2 py-1">
-              <button onClick={() => handleZoom('out')} className="p-1 text-gray-400 hover:text-white">
+            <div className="flex items-center gap-1 bg-gray-700 rounded-lg px-2 py-1">
+              <Button variant="ghost" size="sm" onClick={() => handleZoom('out')} className="p-1 h-auto text-gray-400 hover:text-white">
                 <ZoomOut className="h-4 w-4" />
-              </button>
+              </Button>
               <span className="text-white text-sm w-12 text-center">{zoom}%</span>
-              <button onClick={() => handleZoom('in')} className="p-1 text-gray-400 hover:text-white">
+              <Button variant="ghost" size="sm" onClick={() => handleZoom('in')} className="p-1 h-auto text-gray-400 hover:text-white">
                 <ZoomIn className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
             <div className="w-px h-6 bg-gray-700 mx-2"></div>
-            <button className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700">
-              <Share2 className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
+              <Play className="h-4 w-4" />
+            </Button>
+            <Button className="bg-indigo-600 hover:bg-indigo-700">
+              <Share2 className="h-4 w-4 mr-2" />
               Share
-            </button>
+            </Button>
           </div>
         </div>
 
         <div className="flex-1 flex">
           {/* Left Toolbar */}
-          <div className="w-12 bg-gray-800 border-r border-gray-700 flex flex-col items-center py-2 gap-1">
+          <div className="w-14 bg-gray-800 border-r border-gray-700 flex flex-col items-center py-2 gap-1">
             {tools.map(tool => (
-              <button
+              <Button
                 key={tool.id}
+                variant="ghost"
+                size="icon"
                 onClick={() => setSelectedTool(tool.id)}
-                className={`p-2 rounded-lg transition-colors group relative ${
+                className={`relative ${
                   selectedTool === tool.id
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-indigo-600 text-white hover:bg-indigo-700'
                     : 'text-gray-400 hover:text-white hover:bg-gray-700'
                 }`}
                 title={`${tool.name} (${tool.shortcut})`}
               >
                 <tool.icon className="h-5 w-5" />
-              </button>
+              </Button>
             ))}
             <div className="flex-1"></div>
-            <button className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg">
+            <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white hover:bg-gray-700">
               <Settings className="h-5 w-5" />
-            </button>
+            </Button>
           </div>
 
           {/* Canvas Area */}
@@ -203,7 +427,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
             <div className="absolute inset-0 flex items-center justify-center">
               <div
-                className="bg-white rounded-lg shadow-2xl"
+                className="bg-white rounded-lg shadow-2xl relative"
                 style={{
                   width: `${800 * zoom / 100}px`,
                   height: `${600 * zoom / 100}px`
@@ -218,62 +442,149 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                 </div>
               </div>
             </div>
+
+            {/* Comments overlay */}
+            {comments.slice(0, 2).map((comment, i) => (
+              <div
+                key={comment.id}
+                className="absolute"
+                style={{ left: `${comment.position.x * zoom / 100}px`, top: `${comment.position.y * zoom / 100}px` }}
+              >
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg cursor-pointer ${
+                  comment.resolved ? 'bg-green-500' : 'bg-indigo-500'
+                }`}>
+                  {comment.replies}
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Right Panel */}
-          <div className="w-64 bg-gray-800 border-l border-gray-700">
+          <div className="w-72 bg-gray-800 border-l border-gray-700">
             <Tabs defaultValue="properties" className="h-full flex flex-col">
-              <TabsList className="grid grid-cols-3 m-2 bg-gray-700">
+              <TabsList className="grid grid-cols-4 m-2 bg-gray-700">
                 <TabsTrigger value="properties" className="text-xs">Props</TabsTrigger>
                 <TabsTrigger value="layers" className="text-xs">Layers</TabsTrigger>
-                <TabsTrigger value="components" className="text-xs">Assets</TabsTrigger>
+                <TabsTrigger value="assets" className="text-xs">Assets</TabsTrigger>
+                <TabsTrigger value="comments" className="text-xs">Chat</TabsTrigger>
               </TabsList>
 
               <ScrollArea className="flex-1 p-4">
                 <TabsContent value="properties" className="mt-0 space-y-4">
                   <div>
-                    <h4 className="text-xs font-medium text-gray-400 mb-2">Position</h4>
+                    <h4 className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Position</h4>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
                         <label className="text-xs text-gray-500">X</label>
-                        <input type="number" className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm" defaultValue="0" />
+                        <Input type="number" className="bg-gray-700 border-gray-600 text-white h-8" defaultValue="0" />
                       </div>
                       <div>
                         <label className="text-xs text-gray-500">Y</label>
-                        <input type="number" className="w-full px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm" defaultValue="0" />
+                        <Input type="number" className="bg-gray-700 border-gray-600 text-white h-8" defaultValue="0" />
                       </div>
                     </div>
                   </div>
                   <div>
-                    <h4 className="text-xs font-medium text-gray-400 mb-2">Fill</h4>
+                    <h4 className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Size</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-xs text-gray-500">W</label>
+                        <Input type="number" className="bg-gray-700 border-gray-600 text-white h-8" defaultValue="100" />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">H</label>
+                        <Input type="number" className="bg-gray-700 border-gray-600 text-white h-8" defaultValue="100" />
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Fill</h4>
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-blue-500 rounded cursor-pointer"></div>
-                      <input type="text" className="flex-1 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-sm" defaultValue="#3B82F6" />
+                      <div className="w-8 h-8 bg-indigo-500 rounded cursor-pointer border-2 border-gray-600"></div>
+                      <Input className="flex-1 bg-gray-700 border-gray-600 text-white h-8" defaultValue="#6366F1" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Stroke</h4>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-transparent border-2 border-gray-400 rounded cursor-pointer"></div>
+                      <Input className="flex-1 bg-gray-700 border-gray-600 text-white h-8" defaultValue="1px" />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Effects</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-300">Drop Shadow</span>
+                        <Switch />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-300">Blur</span>
+                        <Switch />
+                      </div>
                     </div>
                   </div>
                 </TabsContent>
 
                 <TabsContent value="layers" className="mt-0 space-y-2">
                   <div className="space-y-1">
-                    {['Frame 1', 'Rectangle 1', 'Text 1'].map((layer, i) => (
-                      <div key={i} className="flex items-center gap-2 p-2 hover:bg-gray-700 rounded cursor-pointer">
+                    {['Frame: Home Screen', 'Rectangle: Header', 'Text: Title', 'Button: CTA', 'Image: Hero'].map((layer, i) => (
+                      <div key={i} className="flex items-center gap-2 p-2 hover:bg-gray-700 rounded cursor-pointer group">
                         <Layers className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-300 flex-1">{layer}</span>
-                        <Eye className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm text-gray-300 flex-1 truncate">{layer}</span>
+                        <Eye className="h-4 w-4 text-gray-500 opacity-0 group-hover:opacity-100" />
+                        <Lock className="h-4 w-4 text-gray-500 opacity-0 group-hover:opacity-100" />
                       </div>
                     ))}
                   </div>
                 </TabsContent>
 
-                <TabsContent value="components" className="mt-0">
-                  <div className="grid grid-cols-2 gap-2">
-                    {components.slice(0, 6).map(comp => (
-                      <button key={comp.id} className="flex flex-col items-center gap-1 p-3 bg-gray-700 hover:bg-gray-600 rounded-lg">
-                        <comp.icon className="h-6 w-6 text-gray-300" />
-                        <span className="text-xs text-gray-400">{comp.name}</span>
-                      </button>
-                    ))}
+                <TabsContent value="assets" className="mt-0">
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Components</h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        {components.slice(0, 6).map(comp => (
+                          <button key={comp.id} className="flex flex-col items-center gap-1 p-3 bg-gray-700 hover:bg-gray-600 rounded-lg">
+                            <comp.icon className="h-6 w-6 text-gray-300" />
+                            <span className="text-xs text-gray-400">{comp.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wider">Colors</h4>
+                      <div className="flex gap-2 flex-wrap">
+                        {['#6366F1', '#8B5CF6', '#EC4899', '#F43F5E', '#F97316', '#EAB308', '#22C55E', '#06B6D4'].map(color => (
+                          <div key={color} className="w-8 h-8 rounded cursor-pointer border border-gray-600" style={{ backgroundColor: color }}></div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
+                </TabsContent>
+
+                <TabsContent value="comments" className="mt-0 space-y-4">
+                  {comments.map(comment => (
+                    <div key={comment.id} className={`p-3 rounded-lg ${comment.resolved ? 'bg-gray-700/50' : 'bg-gray-700'}`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-xs">
+                            {comment.author.name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm text-gray-300 font-medium">{comment.author.name}</span>
+                        <span className="text-xs text-gray-500">{comment.timestamp}</span>
+                      </div>
+                      <p className="text-sm text-gray-400">{comment.content}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge variant="outline" className="text-xs">
+                          {comment.replies} replies
+                        </Badge>
+                        {comment.resolved && <Badge className="bg-green-600 text-xs">Resolved</Badge>}
+                      </div>
+                    </div>
+                  ))}
+                  <Input placeholder="Add a comment..." className="bg-gray-700 border-gray-600 text-white" />
                 </TabsContent>
               </ScrollArea>
             </Tabs>
@@ -289,274 +600,548 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
       <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white">
         <div className="max-w-7xl mx-auto px-8 py-8">
           <div className="flex items-center justify-between mb-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/10 backdrop-blur-sm rounded-xl">
                 <Layout className="h-8 w-8" />
-                <h1 className="text-3xl font-bold">Canvas</h1>
               </div>
-              <p className="text-indigo-100">Infinite canvas for visual collaboration</p>
+              <div>
+                <h1 className="text-3xl font-bold">Canvas Studio</h1>
+                <p className="text-indigo-100">Collaborative design platform for visual creation</p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-lg px-3 py-1.5">
-                <Users className="h-4 w-4" />
-                <span className="text-sm">Real-time Collab</span>
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-sm">{stats.activeCollaborators} online</span>
               </div>
-              <button
-                onClick={() => setShowNewCanvas(true)}
-                className="flex items-center gap-2 bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-indigo-50 transition-colors"
-              >
-                <Plus className="h-4 w-4" />
+              <Button onClick={() => setShowNewBoard(true)} className="bg-white text-indigo-600 hover:bg-indigo-50">
+                <Plus className="h-4 w-4 mr-2" />
                 New Canvas
-              </button>
+              </Button>
             </div>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Folder className="h-4 w-4 text-indigo-200" />
-                <span className="text-indigo-200 text-sm">Canvases</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+            {[
+              { label: 'Boards', value: stats.totalBoards, icon: Layout, color: 'from-indigo-500 to-purple-500' },
+              { label: 'Elements', value: stats.totalElements.toLocaleString(), icon: Shapes, color: 'from-purple-500 to-pink-500' },
+              { label: 'Frames', value: stats.totalFrames, icon: Frame, color: 'from-pink-500 to-red-500' },
+              { label: 'Online', value: stats.activeCollaborators, icon: Users, color: 'from-green-500 to-emerald-500' },
+              { label: 'Comments', value: stats.totalComments, icon: MessageSquare, color: 'from-orange-500 to-yellow-500' },
+              { label: 'Open', value: stats.unresolvedComments, icon: CheckCircle2, color: 'from-yellow-500 to-amber-500' },
+              { label: 'Components', value: stats.publishedComponents, icon: Component, color: 'from-teal-500 to-cyan-500' },
+              { label: 'Instances', value: stats.totalInstances, icon: Copy, color: 'from-cyan-500 to-blue-500' }
+            ].map((stat, i) => (
+              <div key={i} className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <div className={`p-1.5 rounded-lg bg-gradient-to-br ${stat.color}`}>
+                    <stat.icon className="h-3 w-3 text-white" />
+                  </div>
+                  <span className="text-indigo-200 text-xs">{stat.label}</span>
+                </div>
+                <div className="text-2xl font-bold">{stat.value}</div>
               </div>
-              <div className="text-2xl font-bold">{stats.total}</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <CheckCircle2 className="h-4 w-4 text-indigo-200" />
-                <span className="text-indigo-200 text-sm">Active</span>
-              </div>
-              <div className="text-2xl font-bold">{stats.active}</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Share2 className="h-4 w-4 text-indigo-200" />
-                <span className="text-indigo-200 text-sm">Shared</span>
-              </div>
-              <div className="text-2xl font-bold">{stats.shared}</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Users className="h-4 w-4 text-indigo-200" />
-                <span className="text-indigo-200 text-sm">Live Collab</span>
-              </div>
-              <div className="text-2xl font-bold">{stats.collaborative}</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Shapes className="h-4 w-4 text-indigo-200" />
-                <span className="text-indigo-200 text-sm">Elements</span>
-              </div>
-              <div className="text-2xl font-bold">{stats.totalElements}</div>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Users className="h-4 w-4 text-indigo-200" />
-                <span className="text-indigo-200 text-sm">Collaborators</span>
-              </div>
-              <div className="text-2xl font-bold">{stats.totalCollaborators}</div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-8 py-8">
-        {/* View Tabs */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2 bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm">
-            {([
-              { key: 'canvases', label: 'My Canvases', icon: Folder },
-              { key: 'templates', label: 'Templates', icon: Layout },
-              { key: 'components', label: 'Components', icon: Component },
-              { key: 'recent', label: 'Recent', icon: Clock }
-            ] as { key: ViewMode, label: string, icon: any }[]).map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                onClick={() => setViewMode(key)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  viewMode === key
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </button>
-            ))}
-          </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="flex items-center justify-between mb-6">
+            <TabsList className="bg-white dark:bg-gray-800 shadow-sm">
+              <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="boards">Boards</TabsTrigger>
+              <TabsTrigger value="templates">Templates</TabsTrigger>
+              <TabsTrigger value="components">Components</TabsTrigger>
+              <TabsTrigger value="team">Team</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
 
-          <div className="flex items-center gap-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search canvases..."
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white w-64"
+                className="pl-10 w-64"
               />
             </div>
           </div>
-        </div>
 
-        {loading && (
-          <div className="text-center py-8">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent"></div>
-          </div>
-        )}
+          {loading && (
+            <div className="text-center py-8">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent"></div>
+            </div>
+          )}
 
-        {/* Canvases View */}
-        {viewMode === 'canvases' && !loading && (
-          <>
-            <div className="flex items-center gap-4 mb-6">
-              <select value={canvasTypeFilter} onChange={(e) => setCanvasTypeFilter(e.target.value as any)} className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                <option value="all">All Types</option>
-                <option value="whiteboard">Whiteboard</option>
-                <option value="diagram">Diagram</option>
-                <option value="wireframe">Wireframe</option>
-              </select>
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as any)} className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="archived">Archived</option>
-              </select>
+          {/* Dashboard Tab */}
+          <TabsContent value="dashboard" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Recent Boards */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-indigo-600" />
+                    Recent Boards
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {boards.slice(0, 4).map(board => (
+                      <div
+                        key={board.id}
+                        onClick={() => { setSelectedBoard(board); setShowEditor(true) }}
+                        className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer"
+                      >
+                        <div className="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg flex items-center justify-center text-2xl">
+                          {board.thumbnail}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium text-gray-900 dark:text-white truncate">{board.name}</h4>
+                            {board.is_starred && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <Badge className={getTypeColor(board.type)} variant="secondary">{board.type}</Badge>
+                            <span>{board.last_edited}</span>
+                          </div>
+                        </div>
+                        <div className="flex -space-x-2">
+                          {board.collaborators.filter(c => c.online).slice(0, 2).map((collab, i) => (
+                            <Avatar key={i} className="h-8 w-8 border-2 border-white dark:border-gray-900">
+                              <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-xs">
+                                {collab.name.split(' ').map(n => n[0]).join('')}
+                              </AvatarFallback>
+                            </Avatar>
+                          ))}
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-gray-400" />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Activity Feed */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Bell className="h-5 w-5 text-indigo-600" />
+                    Activity
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-64">
+                    <div className="space-y-4">
+                      {versions.map(version => (
+                        <div key={version.id} className="flex items-start gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-xs">
+                              {version.author.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-900 dark:text-white">
+                              <span className="font-medium">{version.author.name}</span> saved <span className="font-medium">v{version.version}</span>
+                            </p>
+                            <p className="text-xs text-gray-500">{version.timestamp}</p>
+                          </div>
+                          {version.is_milestone && <Star className="h-4 w-4 text-yellow-500" />}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
             </div>
 
-            {filteredCanvases.length === 0 ? (
-              <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700">
-                <Layout className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 dark:text-gray-400">No canvases found</p>
-                <button onClick={() => setShowNewCanvas(true)} className="mt-4 inline-flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
-                  <Plus className="h-4 w-4" />
-                  Create your first canvas
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredCanvases.map(canvas => (
-                  <div key={canvas.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all cursor-pointer group">
-                    <div className="h-40 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 relative">
-                      <div className="absolute inset-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center">
-                        <div className="text-4xl">
-                          {canvas.canvas_type === 'diagram' ? '📊' : canvas.canvas_type === 'wireframe' ? '🖼️' : '📝'}
-                        </div>
-                      </div>
-                      <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                        <button onClick={(e) => { e.stopPropagation(); setSelectedCanvas(canvas); setShowEditor(true); }} className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:bg-gray-50">
-                          <Edit2 className="h-4 w-4 text-gray-600" />
-                        </button>
-                        <button className="p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:bg-gray-50">
-                          <Share2 className="h-4 w-4 text-gray-600" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="p-4" onClick={() => setSelectedCanvas(canvas)}>
+            {/* Comments Overview */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-indigo-600" />
+                  Open Comments
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {comments.filter(c => !c.resolved).map(comment => (
+                    <div key={comment.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className={`px-2 py-0.5 rounded-full text-xs ${canvas.is_shared ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
-                          {canvas.is_shared ? 'Shared' : 'Private'}
-                        </span>
-                        <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 rounded-full text-xs">
-                          {canvas.canvas_type}
-                        </span>
+                        <Avatar className="h-6 w-6">
+                          <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-xs">
+                            {comment.author.name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">{comment.author.name}</span>
+                        <span className="text-xs text-gray-500">{comment.timestamp}</span>
                       </div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white truncate">{canvas.canvas_name}</h3>
-                      <div className="flex items-center justify-between mt-3 text-sm text-gray-500 dark:text-gray-500">
-                        <span className="flex items-center gap-1"><Shapes className="h-3 w-3" />{canvas.object_count} elements</span>
-                        <span className="flex items-center gap-1"><Users className="h-3 w-3" />{canvas.collaborators_count || 0}</span>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{comment.content}</p>
+                      <div className="flex items-center gap-2 mt-3">
+                        <Button size="sm" variant="outline">Reply</Button>
+                        <Button size="sm" variant="ghost">Resolve</Button>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Boards Tab */}
+          <TabsContent value="boards" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {boards.map(board => (
+                <Card key={board.id} className="overflow-hidden hover:shadow-lg transition-all cursor-pointer group">
+                  <div className="h-40 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 relative">
+                    <div className="absolute inset-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center">
+                      <span className="text-4xl">{board.thumbnail}</span>
+                    </div>
+                    {board.is_starred && (
+                      <div className="absolute top-2 left-2">
+                        <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                      </div>
+                    )}
+                    <div className="absolute top-2 right-2 flex gap-1">
+                      <Badge className={getStatusColor(board.status)}>{board.status}</Badge>
+                    </div>
+                    <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                      <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); setSelectedBoard(board); setShowEditor(true) }}>
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="secondary">
+                        <Share2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
+                  <CardContent className="p-4" onClick={() => setSelectedBoard(board)}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge className={getTypeColor(board.type)} variant="secondary">{board.type}</Badge>
+                      {board.is_public && <Badge variant="outline">Public</Badge>}
+                    </div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{board.name}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{board.description}</p>
+                    <div className="flex items-center justify-between mt-4 text-sm text-gray-500">
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center gap-1"><Shapes className="h-3 w-3" />{board.elements_count}</span>
+                        <span className="flex items-center gap-1"><Frame className="h-3 w-3" />{board.frames_count}</span>
+                        <span className="flex items-center gap-1"><MessageSquare className="h-3 w-3" />{board.comments_count}</span>
+                      </div>
+                      <div className="flex -space-x-2">
+                        {board.collaborators.slice(0, 3).map((collab, i) => (
+                          <Avatar key={i} className="h-6 w-6 border-2 border-white dark:border-gray-900">
+                            <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-[10px]">
+                              {collab.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                        ))}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
 
-        {/* Templates View */}
-        {viewMode === 'templates' && !loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {templates.map(template => (
-              <div key={template.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all cursor-pointer group">
-                <div className="h-40 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 flex items-center justify-center relative">
-                  <span className="text-5xl">{template.thumbnail}</span>
-                  {template.popular && <div className="absolute top-2 right-2 px-2 py-1 bg-indigo-600 text-white rounded text-xs">Popular</div>}
-                </div>
-                <div className="p-4">
-                  <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs text-gray-600 dark:text-gray-400">{template.category}</span>
-                  <h3 className="font-semibold text-gray-900 dark:text-white mt-2">{template.name}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{template.description}</p>
-                  <button className="w-full mt-3 flex items-center justify-center gap-2 px-4 py-2 border border-indigo-600 text-indigo-600 dark:text-indigo-400 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 opacity-0 group-hover:opacity-100 transition-all">
-                    Use Template
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Components View */}
-        {viewMode === 'components' && !loading && (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {components.map(comp => (
-              <div key={comp.id} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border dark:border-gray-700 hover:shadow-md hover:border-indigo-400 transition-all cursor-pointer text-center group">
-                <div className="w-12 h-12 mx-auto mb-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <comp.icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-                </div>
-                <h4 className="font-medium text-gray-900 dark:text-white text-sm">{comp.name}</h4>
-                <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{comp.category}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Recent View */}
-        {viewMode === 'recent' && !loading && (
-          <div className="space-y-3">
-            {filteredCanvases.slice(0, 10).map(canvas => (
-              <div key={canvas.id} onClick={() => setSelectedCanvas(canvas)} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border dark:border-gray-700 hover:shadow-md transition-all cursor-pointer flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg flex items-center justify-center">
-                  <Layout className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{canvas.canvas_name}</h3>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 rounded-full text-xs">{canvas.canvas_type}</span>
-                    <span className="text-sm text-gray-500 dark:text-gray-500">{canvas.object_count} elements</span>
+          {/* Templates Tab */}
+          <TabsContent value="templates" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {templates.map(template => (
+                <Card key={template.id} className="overflow-hidden hover:shadow-lg transition-all cursor-pointer group">
+                  <div className="h-40 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 flex items-center justify-center relative">
+                    <span className="text-5xl">{template.thumbnail}</span>
+                    {template.is_premium && (
+                      <div className="absolute top-2 right-2">
+                        <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+                          <Crown className="h-3 w-3 mr-1" />
+                          Premium
+                        </Badge>
+                      </div>
+                    )}
                   </div>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline">{template.category}</Badge>
+                      <Badge variant="outline">{template.subcategory}</Badge>
+                    </div>
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{template.name}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{template.description}</p>
+                    <div className="flex items-center justify-between mt-4 text-sm text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                        <span>{template.rating}</span>
+                      </div>
+                      <span>{template.downloads.toLocaleString()} uses</span>
+                    </div>
+                    <Button className="w-full mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                      Use Template
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Components Tab */}
+          <TabsContent value="components" className="space-y-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {components.map(comp => (
+                <Card key={comp.id} className="p-4 hover:shadow-md hover:border-indigo-400 transition-all cursor-pointer text-center group">
+                  <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <comp.icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <h4 className="font-medium text-gray-900 dark:text-white text-sm">{comp.name}</h4>
+                  <p className="text-xs text-gray-500 mt-1">{comp.category}</p>
+                  <div className="flex items-center justify-center gap-2 mt-2">
+                    <Badge variant="outline" className="text-xs">{comp.variants} variants</Badge>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">{comp.instances} instances</p>
+                </Card>
+              ))}
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Component Usage</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {components.slice(0, 4).map(comp => (
+                    <div key={comp.id} className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg flex items-center justify-center">
+                        <comp.icon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium text-gray-900 dark:text-white">{comp.name}</span>
+                          <span className="text-sm text-gray-500">{comp.instances} uses</span>
+                        </div>
+                        <Progress value={(comp.instances / 250) * 100} className="h-2" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <button onClick={(e) => { e.stopPropagation(); setSelectedCanvas(canvas); setShowEditor(true); }} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                  <ChevronRight className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Team Tab */}
+          <TabsContent value="team" className="space-y-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Team Members</CardTitle>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Invite
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {teamMembers.map(member => (
+                    <div key={member.id} className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg">
+                      <div className="relative">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white">
+                            {member.name.split(' ').map(n => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        {member.status === 'active' && member.last_active === 'Now' && (
+                          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900"></div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium text-gray-900 dark:text-white">{member.name}</h4>
+                          <Badge className={getRoleColor(member.role)}>{member.role}</Badge>
+                          {member.status === 'pending' && <Badge variant="outline">Pending</Badge>}
+                        </div>
+                        <p className="text-sm text-gray-500">{member.email}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-gray-500">Last active: {member.last_active}</p>
+                        <p className="text-xs text-gray-400">{member.boards_access} boards</p>
+                      </div>
+                      <Button variant="ghost" size="icon">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Workspace Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Workspace Name</label>
+                    <Input defaultValue="Design Team Workspace" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Default Board Type</label>
+                    <select className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                      <option>Whiteboard</option>
+                      <option>Wireframe</option>
+                      <option>Diagram</option>
+                      <option>Prototype</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Auto-save</p>
+                      <p className="text-sm text-gray-500">Automatically save changes</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Version History</p>
+                      <p className="text-sm text-gray-500">Keep history for 30 days</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Editor Preferences</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Snap to Grid</p>
+                      <p className="text-sm text-gray-500">Align elements to grid</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Show Guides</p>
+                      <p className="text-sm text-gray-500">Display alignment guides</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Keyboard Shortcuts</p>
+                      <p className="text-sm text-gray-500">Enable keyboard shortcuts</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Real-time Cursors</p>
+                      <p className="text-sm text-gray-500">Show collaborator cursors</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Sharing & Permissions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Public Sharing</p>
+                      <p className="text-sm text-gray-500">Allow public board links</p>
+                    </div>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Comment Access</p>
+                      <p className="text-sm text-gray-500">Anyone can comment on shared boards</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Export Access</p>
+                      <p className="text-sm text-gray-500">Allow viewers to export</p>
+                    </div>
+                    <Switch />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notifications</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">New Comments</p>
+                      <p className="text-sm text-gray-500">Notify when someone comments</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Mentions</p>
+                      <p className="text-sm text-gray-500">Notify when mentioned</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">Board Updates</p>
+                      <p className="text-sm text-gray-500">Notify on board changes</p>
+                    </div>
+                    <Switch />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
-      {/* New Canvas Modal */}
-      <Dialog open={showNewCanvas} onOpenChange={setShowNewCanvas}>
+      {/* New Board Modal */}
+      <Dialog open={showNewBoard} onOpenChange={setShowNewBoard}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
-              <Plus className="h-6 w-6 text-indigo-600" />
+              <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg">
+                <Plus className="h-5 w-5 text-white" />
+              </div>
               Create New Canvas
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-6 py-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Canvas Name</label>
-              <input type="text" placeholder="Untitled canvas" className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white" />
+              <Input placeholder="Untitled canvas" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+              <Input placeholder="What's this canvas for?" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Canvas Type</label>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { id: 'whiteboard', name: 'Whiteboard', icon: Sticky, desc: 'Free-form collaboration' },
-                  { id: 'diagram', name: 'Diagram', icon: Workflow, desc: 'Flowcharts & processes' },
                   { id: 'wireframe', name: 'Wireframe', icon: Monitor, desc: 'UI/UX mockups' },
-                  { id: 'mindmap', name: 'Mind Map', icon: GitBranch, desc: 'Visual thinking' }
+                  { id: 'diagram', name: 'Diagram', icon: Workflow, desc: 'Flowcharts & processes' },
+                  { id: 'prototype', name: 'Prototype', icon: Smartphone, desc: 'Interactive designs' }
                 ].map(type => (
                   <button key={type.id} className="flex items-center gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-indigo-400 transition-colors text-left">
-                    <type.icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                    <div className="p-2 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg">
+                      <type.icon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                    </div>
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white">{type.name}</p>
                       <p className="text-xs text-gray-500">{type.desc}</p>
@@ -566,55 +1151,92 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
               </div>
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setShowNewCanvas(false)} className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Cancel</button>
-              <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">Create Canvas</button>
+              <Button variant="outline" onClick={() => setShowNewBoard(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
+                Create Canvas
+              </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Canvas Detail Modal */}
-      <Dialog open={!!selectedCanvas && !showEditor} onOpenChange={() => setSelectedCanvas(null)}>
+      {/* Board Detail Modal */}
+      <Dialog open={!!selectedBoard && !showEditor} onOpenChange={() => setSelectedBoard(null)}>
         <DialogContent className="max-w-4xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
-              <Layout className="h-6 w-6 text-indigo-600" />
-              {selectedCanvas?.canvas_name}
+              <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg">
+                <Layout className="h-5 w-5 text-white" />
+              </div>
+              {selectedBoard?.name}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="h-64 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl flex items-center justify-center">
-              <div className="text-center">
-                <Layout className="h-16 w-16 mx-auto mb-4 text-indigo-400" />
-                <p className="text-gray-600 dark:text-gray-400">Canvas Preview</p>
+          <ScrollArea className="max-h-[70vh]">
+            <div className="space-y-6 py-4">
+              <div className="h-64 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl flex items-center justify-center">
+                <div className="text-center">
+                  <span className="text-6xl">{selectedBoard?.thumbnail}</span>
+                  <p className="text-gray-600 dark:text-gray-400 mt-4">Canvas Preview</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-4">
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-center">
+                  <Shapes className="h-6 w-6 mx-auto mb-2 text-indigo-600" />
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedBoard?.elements_count}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Elements</div>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-center">
+                  <Frame className="h-6 w-6 mx-auto mb-2 text-purple-600" />
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedBoard?.frames_count}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Frames</div>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-center">
+                  <MessageSquare className="h-6 w-6 mx-auto mb-2 text-pink-600" />
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedBoard?.comments_count}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Comments</div>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-center">
+                  <Users className="h-6 w-6 mx-auto mb-2 text-green-600" />
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedBoard?.collaborators.length}</div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">Team</div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white mb-3">Collaborators</h4>
+                <div className="flex flex-wrap gap-2">
+                  {selectedBoard?.collaborators.map((collab, i) => (
+                    <div key={i} className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-full">
+                      <Avatar className="h-6 w-6">
+                        <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-xs">
+                          {collab.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{collab.name}</span>
+                      <Badge variant="outline" className="text-xs">{collab.role}</Badge>
+                      {collab.online && <div className="w-2 h-2 bg-green-500 rounded-full"></div>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Button onClick={() => setShowEditor(true)} className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
+                  <Edit2 className="h-4 w-4 mr-2" />
+                  Open Editor
+                </Button>
+                <Button variant="outline">
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share
+                </Button>
+                <Button variant="outline">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedCanvas?.object_count}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Elements</div>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedCanvas?.collaborators_count || 0}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Collaborators</div>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-center">
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">{selectedCanvas?.layer_count}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Layers</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <button onClick={() => setShowEditor(true)} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                <Edit2 className="h-4 w-4" />Open Editor
-              </button>
-              <button className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-                <Share2 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-              </button>
-              <button className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
-                <Download className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-              </button>
-            </div>
-          </div>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>
